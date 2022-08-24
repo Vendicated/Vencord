@@ -38,4 +38,15 @@ electron.app.whenReady().then(() => {
     installExtension(REACT_DEVELOPER_TOOLS)
         .then((name) => console.log("Installed React DevTools"))
         .catch((err) => console.error("Failed to install React DevTools", err));
+
+    electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders }, cb) => {
+        delete responseHeaders["content-security-policy-report-only"];
+        delete responseHeaders["content-security-policy"];
+        cb({ cancel: false, responseHeaders: responseHeaders });
+    });
+
+    electron.session.defaultSession.webRequest.onBeforeRequest(
+        { urls: ["https://*/api/v*/science", "https://sentry.io/*"] },
+        (_, callback) => callback({ cancel: true })
+    );
 });
