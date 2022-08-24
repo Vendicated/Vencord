@@ -7,7 +7,12 @@ module.exports.plugins = [];
 for (const file of fs.readdirSync(__dirname)) {
     if (file !== "index.js") {
         const mod = require(path.join(__dirname, file));
-        if (mod.patches) module.exports.patches.push(...mod.patches);
+        if (mod.patches) {
+            for (const patch of mod.patches) {
+                patch.plugin = mod.name;
+                module.exports.patches.push(patch);
+            }
+        }
         if (mod.start) module.exports.plugins.push(mod);
     }
 }

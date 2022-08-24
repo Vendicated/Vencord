@@ -33,7 +33,7 @@ function patchPush(instance) {
     });
 }
 
-function handlePush(chunk, o) {
+function handlePush(chunk, noIdeaWhatThisIs) {
     const modules = chunk[1];
     try {
         for (const id in modules) {
@@ -46,7 +46,7 @@ function handlePush(chunk, o) {
                     try {
                         const newCode = code.replace(patch.replacement.match, patch.replacement.replace);
                         // Todo make this less cursed
-                        const newMod = eval(`/*Patched*/(window)=>{return ${newCode}}`)(electron.webFrame.top.context);
+                        const newMod = eval(`// Webpack Module ${id} - Patched by ${patch.plugin}\n(window)=>{return ${newCode}}\n//# sourceURL=WebpackModule${id}`)(electron.webFrame.top.context);
                         modules[id] = function () {
                             try {
                                 return newMod(...arguments);
@@ -67,5 +67,5 @@ function handlePush(chunk, o) {
         console.error("oopsie", err);
     }
 
-    return originalPush.call(window[WEBPACK_CHUNK], chunk, o);
+    return originalPush.call(window[WEBPACK_CHUNK], chunk, noIdeaWhatThisIs);
 }
