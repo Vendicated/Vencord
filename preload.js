@@ -15,14 +15,13 @@ Object.defineProperty(window, "__SENTRY__", {
 });
 
 global.Vencord = new Api();
-
 Object.defineProperty(context, "Vencord", {
     value: Vencord
 });
 
-require("./patchWebpack");
-
 require(process.env.DISCORD_PRELOAD);
+
+window.onload = () => require("./utils/quickCss");
 
 // Make app.asar npms such as request work. Not needed tbh
 // Module.globalPaths.push(

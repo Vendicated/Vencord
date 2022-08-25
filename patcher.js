@@ -2,6 +2,7 @@ console.log("Bruhhhh Vencord moment");
 
 const electron = require("electron");
 const { default: installExtension, REACT_DEVELOPER_TOOLS } = require("electron-devtools-installer");
+const { join } = require("path");
 
 class BrowserWindow extends electron.BrowserWindow {
     constructor(options) {
@@ -13,6 +14,12 @@ class BrowserWindow extends electron.BrowserWindow {
         process.env.DISCORD_PRELOAD = original;
 
         super(options);
+
+        this.init();
+    }
+
+    init() {
+
     }
 }
 Object.assign(BrowserWindow, electron.BrowserWindow);
@@ -50,3 +57,5 @@ electron.app.whenReady().then(() => {
         (_, callback) => callback({ cancel: true })
     );
 });
+
+process.env.DATA_DIR = join(electron.app.getPath("userData"), "..", "Vencord");

@@ -1,6 +1,7 @@
 {
 	"dependencies": {
-		"electron-devtools-installer": "^3.2.0"
+		"electron-devtools-installer": "^3.2.0",
+		"jsposed": "^1.0.2"
 	},
 	"devDependencies": {
 		"@types/node": "^18.7.13",
