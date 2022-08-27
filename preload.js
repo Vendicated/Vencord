@@ -19,6 +19,8 @@ Object.defineProperty(context, "Vencord", {
     value: Vencord
 });
 
+require("./patchWebpack");
+
 require(process.env.DISCORD_PRELOAD);
 
 window.onload = () => require("./utils/quickCss");
