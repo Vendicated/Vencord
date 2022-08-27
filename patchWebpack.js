@@ -38,8 +38,9 @@ function handlePush(chunk, noIdeaWhatThisIs) {
     try {
         for (const id in modules) {
             let mod = modules[id];
-            const originalMod = mod;
             let code = mod.toString();
+            const originalMod = mod;
+            const patchedBy = new Set();
 
             modules[id] = function (module, exports, require) {
                 try {
@@ -70,14 +71,20 @@ function handlePush(chunk, noIdeaWhatThisIs) {
             for (let i = 0; i < patches.length; i++) {
                 const patch = patches[i];
                 if (code.includes(patch.find)) {
+                    patchedBy.add(patch.plugin);
+                    const lastMod = mod;
+                    const lastCode = code;
                     try {
                         const newCode = code.replace(patch.replacement.match, patch.replacement.replace);
-                        const newMod = eval(`// Webpack Module ${id} - Patched by ${patch.plugin}\n(window)=>{return ${newCode}}\n//# sourceURL=WebpackModule${id}`)(electron.webFrame.top.context);
+                        const newMod = eval(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n(window)=>{return ${newCode}}\n//# sourceURL=WebpackModule${id}`)(electron.webFrame.top.context);
                         code = newCode;
                         mod = newMod;
                         patches.splice(i--, 1);
                     } catch (err) {
-                        console.error("Failed to apply patch", err);
+                        console.error("[Webpack] Failed to apply patch of", patch.plugin, err);
+                        code = lastCode;
+                        mod = lastMod;
+                        patchedBy.delete(patch.plugin);
                     }
                 }
             }
