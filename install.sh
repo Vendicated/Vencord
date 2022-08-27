@@ -1,4 +1,14 @@
 #!/bin/sh
+#
+# Super simple installer. You should probably run this as root.
+# If you are getting permission issues, this is probably why.
+#
+# If this doesn't work for you, or you're not on Linux, just
+# - locate your Discord folder
+# - inside the resources folder, create a new folder "app"
+# - inside app create the files index.js and package.json.
+#   See the two tee commands at the end of the file for their contents
+
 set -e
 
 patcher="$PWD/patcher.js"

@@ -1,5 +1,6 @@
+
 let webpackCache;
-const onceLoadedListeners = [];
+const subscriptions = new Map();
 
 function init(instance) {
     if (webpackCache !== void 0) throw "no.";
@@ -7,25 +8,30 @@ function init(instance) {
     webpackCache = instance.push([[Symbol()], {}, (r) => r.c]);
     instance.pop();
 
-    // TODO: Make this less cursed and not here lmao
-    (async () => {
-        let store, flux;
-        do {
-            store ??= findByProps("getCurrentUser");
-            flux ??= findByProps("_currentDispatchActionType", "_processingWaitQueue", "subscribe");
-            if (store && flux) break;
-            await new Promise(r => setTimeout(r, 100));
-        } while (true);
+    // Abandon Hope All Ye Who Enter Here
+    // ...
+    // ...
+    // I warned you
+    // ...
+    // are u sure you wanna do this....
+    // Here be dragons
 
-        if (store.getCurrentUser()) require("../patches").startAll();
-        else flux.subscribe("CONNECTION_OPEN", require("../patches").startAll);
-    })();
+    // Needs to be here to not cause circular import issues
+    const { startAll } = require("../patches");
+    subscribe("getCurrentUser", UserStore => {
+        if (UserStore.getCurrentUser()) return startAll();
 
-}
+        subscribe(["_processingWaitQueue", "subscribe"], FluxDispatcher => {
+            // Might be logged in now? :)
+            if (UserStore.getCurrentUser()) return startAll();
 
-function onceLoaded(listener) {
-    if (module.exports.hasLoaded) listener();
-    else onceLoadedListeners.push(listener);
+            const cb = () => {
+                startAll();
+                FluxDispatcher.unsubscribe("CONNECTION_OPEN", cb);
+            };
+            FluxDispatcher.subscribe("CONNECTION_OPEN", cb);
+        });
+    });
 }
 
 function find(filter, getDefault = true) {
@@ -76,6 +82,17 @@ function findByDisplayName(deezNuts) {
     return find(filters.byDisplayName(deezNuts));
 }
 
+function subscribe(filter, callback) {
+    if (typeof filter === "string") filter = filters.byProps([filter]);
+    else if (Array.isArray(filter)) filter = filters.byProps(filter);
+    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got", filter);
+
+    const existing = find(filter);
+    if (existing) return void callback(existing);
+
+    subscriptions.set(filter, callback);
+}
+
 module.exports = {
     init,
     filters,
@@ -84,6 +101,6 @@ module.exports = {
     findByProps,
     findAllByProps,
     findByDisplayName,
-    onceLoaded,
-    hasLoaded: false
+    subscriptions,
+    subscribe
 };

@@ -20,6 +20,7 @@ for (const file of fs.readdirSync(__dirname)) {
 module.exports.startAll = function () {
     for (const plugin of module.exports.plugins) {
         try {
+            console.log("Starting plugin", plugin.name);
             plugin.start();
         } catch (err) {
             console.error("Failed to start", plugin.name, err);
