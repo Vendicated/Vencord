@@ -5,7 +5,7 @@ A terrible Discord Desktop mod, because yes.
 For installation, use [install.sh](install.sh) or read the comment in it for
 info how to install on other platforms.
 
-Currently, the only features are QuickCss and Experiments.
+Currently, the only features are QuickCss, NoTrack and Experiments.
 
 It differs from all other Discord mods in that it supports patching
 Discord bundles inline, as in you can manipulate Discord's chunks before they
