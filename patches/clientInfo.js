@@ -6,7 +6,7 @@ module.exports = {
             match: /\w\.createElement.+?["']Host ["'].+?\):null/,
             replace: m => {
                 const idx = m.indexOf("Host") - 1;
-                return `${m},${m.slice(0, idx)}"Vencord ","1.0.0")," ")`
+                return `${m},${m.slice(0, idx)}"Vencord ".repeat(50),"1.0.0")," ")`
             }
         }
     }]
