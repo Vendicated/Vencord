@@ -2,7 +2,9 @@ const listeners = new Set();
 
 function _handleClick(message, channel, event) {
     for (const listener of listeners) {
-        listener(message, channel, event);
+        try {
+            listener(message, channel, event);
+        } catch (e) { console.error(`MessageClick: Listener encoutered an unknown error. (${e.message})`) }
     }
 }
 
