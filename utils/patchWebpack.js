@@ -1,7 +1,7 @@
-const { WEBPACK_CHUNK } = require("./constants");
+const { WEBPACK_CHUNK } = require("../constants");
 const electron = require("electron");
-const { patches } = require("./patches");
-const { init, subscriptions } = require("./utils/webpack");
+const { patches } = require("../patches");
+const { init, subscriptions } = require("./webpack");
 
 let originalPush;
 let webpackChunk;

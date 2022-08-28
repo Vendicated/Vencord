@@ -5,10 +5,12 @@ specifiers:
   electron: ^20.0.3
   electron-devtools-installer: ^3.2.0
   jsposed: ^1.0.2
+  prettier: ^2.7.1
 
 dependencies:
   electron-devtools-installer: 3.2.0
   jsposed: 1.0.2
+  prettier: 2.7.1
 
 devDependencies:
   '@types/node': 18.7.13
@@ -532,6 +534,12 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
     dev: true
+
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: false
 
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
