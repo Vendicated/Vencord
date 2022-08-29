@@ -4,16 +4,19 @@ import { readdirSync } from "fs";
 import { performance } from "perf_hooks";
 
 /**
- * @type {esbuild.WatchMode}
+ * @type {esbuild.WatchMode|false}
  */
-const watch = {
+const watch = process.argv.includes("--watch") ? {
     onRebuild: (err) => {
         if (err) console.error("Build Error", err.message);
         else console.log("Rebuilt!");
     }
-};
+} : false;
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
+/**
+ * @type {esbuild.Plugin}
+ */
 const makeAllPackagesExternalPlugin = {
     name: 'make-all-packages-external',
     setup(build) {
@@ -22,6 +25,9 @@ const makeAllPackagesExternalPlugin = {
     },
 };
 
+/**
+ * @type {esbuild.Plugin}
+ */
 const globPlugins = {
     name: "glob-plugins",
     setup: build => {
