@@ -7,7 +7,10 @@
         "moduleResolution": "node",
         "strict": true,
         "noImplicitAny": false,
-        "target": "ESNEXT"
+        "target": "ESNEXT",
+        // https://esbuild.github.io/api/#jsx-factory
+        "jsxFactory": "Vencord.React.createElement",
+        "jsx": "react"
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*"]
 }
