@@ -1,7 +1,5 @@
-import TVencordNative from "./VencordNative";
-
 declare global {
-    export var VencordNative: typeof TVencordNative;
+    export var VencordNative: typeof import("./VencordNative").default;
     export var appSettings: {
         set(setting: string, v: any): void;
     };
@@ -12,3 +10,5 @@ declare global {
         };
     }
 }
+
+export { };
