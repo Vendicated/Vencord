@@ -1,4 +1,5 @@
 #!/usr/bin/node
+import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { readdirSync } from "fs";
 import { performance } from "perf_hooks";
@@ -59,6 +60,23 @@ const globPlugins = {
     }
 };
 
+const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+/**
+ * @type {esbuild.Plugin}
+ */
+const gitHashPlugin = {
+    name: "git-hash-plugin",
+    setup: build => {
+        const filter = /^git-hash$/;
+        build.onResolve({ filter }, args => ({
+            namespace: "git-hash", path: args.path
+        }));
+        build.onLoad({ filter, namespace: "git-hash" }, () => ({
+            contents: `export default "${gitHash}"`
+        }));
+    }
+};
+
 const begin = performance.now();
 await Promise.all([
     esbuild.build({
@@ -92,9 +110,10 @@ await Promise.all([
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer" },
         globalName: "Vencord",
-        external: ["plugins"],
+        external: ["plugins", "git-hash"],
         plugins: [
-            globPlugins
+            globPlugins,
+            gitHashPlugin
         ],
         sourcemap: "inline",
         watch,
