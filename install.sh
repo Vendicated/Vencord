@@ -11,7 +11,7 @@
 
 set -e
 
-patcher="$PWD/patcher.js"
+patcher="$PWD/dist/patcher.js"
 
 dicksword="$(dirname "$(readlink "$(which discord)")")"
 resources="$dicksword/resources"
