@@ -8,5 +8,9 @@
 		"electron-devtools-installer": "^3.2.0",
 		"jsposed": "^1.0.2",
 		"prettier": "^2.7.1"
+	},
+	"scripts": {
+		"build": "node build.mjs",
+		"watch": "node build.mjs --watch"
 	}
 }

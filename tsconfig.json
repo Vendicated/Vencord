@@ -9,5 +9,5 @@
         "noImplicitAny": false,
         "target": "ESNEXT"
     },
-    "include": ["src/*"]
+    "include": ["src/**/*.ts"]
 }
