@@ -1,3 +1,5 @@
+import type { Message, Channel } from 'discord-types/general';
+
 type Emoji = {
     require_colons: boolean,
     originalName: string,
@@ -41,7 +43,7 @@ export function removeSendListener(listener: SendListener) { sendListeners.delet
 export function removeEditListener(listener: EditListener) { editListeners.delete(listener) }
 
 // Message clicks
-import { Message, Channel } from "./MessageEventTypes"
+
 
 type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
 
