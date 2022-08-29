@@ -7,5 +7,6 @@ export default {
             cb(css);
         });
     },
-    getQuickCss: () => ipcRenderer.invoke(IPC_GET_QUICK_CSS) as Promise<string>
+    getQuickCss: () => ipcRenderer.invoke(IPC_GET_QUICK_CSS) as Promise<string>,
+    getVersions: () => process.versions
 };
