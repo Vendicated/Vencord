@@ -1,4 +1,4 @@
-import { addSendListener, addEditListener } from "../api/MessageEvents";
+import { addPreSendListener, addPreEditListener } from "../api/MessageEvents";
 import { findByProps } from "../utils/webpack";
 import definePlugin from "../utils/types"
 
@@ -32,7 +32,7 @@ export default definePlugin({
             delete x.guildPremiumTier
         });
 
-        addSendListener((_, messageObj) => {
+        addPreSendListener((_, messageObj) => {
             const guildId = window.location.href.split("channels/")[1].split("/")[0];
             for (const emoji of messageObj.validNonShortcutEmojis) {
                 if (!emoji.require_colons) continue;
@@ -43,7 +43,7 @@ export default definePlugin({
                 messageObj.content = messageObj.content.replace(emojiString, ` ${url} `);
             }
         })
-        addEditListener((_, __, messageObj) => {
+        addPreEditListener((_, __, messageObj) => {
             const guildId = window.location.href.split("channels/")[1].split("/")[0];
 
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {

@@ -24,7 +24,7 @@ type EditListener = (channelId: string, messageId: string, messageObj: MessageOb
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export function _handleSend(channelId: string, messageObj: MessageObject, extra: any) {
+export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: any) {
     for (const listener of sendListeners) {
         try {
             listener(channelId, messageObj, extra);
@@ -32,7 +32,7 @@ export function _handleSend(channelId: string, messageObj: MessageObject, extra:
     }
 }
 
-export function _handleEdit(channeld: string, messageId: string, messageObj: MessageObject) {
+export function _handlePreEdit(channeld: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
             listener(channeld, messageId, messageObj);
@@ -40,14 +40,18 @@ export function _handleEdit(channeld: string, messageId: string, messageObj: Mes
     }
 }
 
-export function addSendListener(listener: SendListener) { sendListeners.add(listener) }
-export function addEditListener(listener: EditListener) { editListeners.add(listener) }
-export function removeSendListener(listener: SendListener) { sendListeners.delete(listener) }
-export function removeEditListener(listener: EditListener) { editListeners.delete(listener) }
+/**
+ * Note: This event fires off before a message is sent, allowing you to edit the message.
+ */
+export function addPreSendListener(listener: SendListener) { sendListeners.add(listener) }
+/**
+ * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
+ */
+export function addPreEditListener(listener: EditListener) { editListeners.add(listener) }
+export function removePreSendListener(listener: SendListener) { sendListeners.delete(listener) }
+export function removePreEditListener(listener: EditListener) { editListeners.delete(listener) }
 
 // Message clicks
-
-
 type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
 
 const listeners = new Set<ClickListener>();
