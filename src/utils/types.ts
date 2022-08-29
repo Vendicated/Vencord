@@ -1,5 +1,5 @@
 // exists to export default definePlugin({...})
-export default function definePlugin(p: Plugin) {
+export default function definePlugin(p: PluginDef) {
     return p;
 }
 
@@ -17,7 +17,12 @@ export interface Patch {
 export interface Plugin {
     name: string;
     description: string;
-    author: string[];
+    author: string;
     start?(): void;
     patches?: Patch[];
 }
+
+// @ts-ignore lole
+interface PluginDef extends Plugin {
+    patches?: Omit<Patch, "plugin">[];
+} 
