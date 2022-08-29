@@ -49,7 +49,9 @@ const listeners = new Set<ClickListener>();
 
 export function _handleClick(message, channel, event) {
     for (const listener of listeners) {
-        listener(message, channel, event);
+        try {
+            listener(message, channel, event);
+        } catch (e) { console.error(`MessageClickHandler: Listener encoutered an unknown error. (${e})`) }
     }
 }
 
