@@ -1,6 +1,4 @@
 import { startAll } from "../plugins";
-import Logger from "./logger";
-
 let webpackCache: typeof window.webpackChunkdiscord_app;
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();

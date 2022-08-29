@@ -1,6 +1,9 @@
 import type { Message, Channel } from 'discord-types/general';
+import Logger from '../utils/logger';
 
-type Emoji = {
+const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
+
+interface Emoji {
     require_colons: boolean,
     originalName: string,
     animated: boolean
@@ -10,7 +13,7 @@ type Emoji = {
     id: string,
 }
 
-type MessageObject = {
+interface MessageObject {
     content: string,
     validNonShortcutEmojis: Emoji[]
 }
@@ -25,7 +28,7 @@ export function _handleSend(channelId: string, messageObj: MessageObject, extra:
     for (const listener of sendListeners) {
         try {
             listener(channelId, messageObj, extra);
-        } catch (e) { console.error(`MessageSendHandler: Listener encoutered an unknown error. (${e})`) }
+        } catch (e) { MessageEventsLogger.error(`MessageSendHandler: Listener encoutered an unknown error. (${e})`) }
     }
 }
 
@@ -33,7 +36,7 @@ export function _handleEdit(channeld: string, messageId: string, messageObj: Mes
     for (const listener of editListeners) {
         try {
             listener(channeld, messageId, messageObj);
-        } catch (e) { console.error(`MessageEditHandler: Listener encoutered an unknown error. (${e})`) }
+        } catch (e) { MessageEventsLogger.error(`MessageEditHandler: Listener encoutered an unknown error. (${e})`) }
     }
 }
 
@@ -53,7 +56,7 @@ export function _handleClick(message, channel, event) {
     for (const listener of listeners) {
         try {
             listener(message, channel, event);
-        } catch (e) { console.error(`MessageClickHandler: Listener encoutered an unknown error. (${e})`) }
+        } catch (e) { MessageEventsLogger.error(`MessageClickHandler: Listener encoutered an unknown error. (${e})`) }
     }
 }
 
