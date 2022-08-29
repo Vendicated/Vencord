@@ -68,6 +68,7 @@ await Promise.all([
         bundle: true,
         platform: "node",
         target: ["esnext"],
+        sourcemap: "linked",
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
@@ -79,6 +80,7 @@ await Promise.all([
         target: ["esnext"],
         external: ["electron"],
         platform: "node",
+        sourcemap: "linked",
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
@@ -94,6 +96,7 @@ await Promise.all([
         plugins: [
             globPlugins
         ],
+        sourcemap: "inline",
         watch
     })
 ]).then(res => {

@@ -1,4 +1,4 @@
 declare module "plugins" {
-    var plugins: Record<string, any>[];
+    const plugins: import("./utils/types").Plugin[];
     export default plugins;
 }
