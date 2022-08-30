@@ -7,19 +7,19 @@ export default definePlugin({
     author: "ArjixWasTaken",
     description: "Allows you to stream in nitro quality and send fake emojis.",
     patches: [
-        ...[
-            "canUseAnimatedEmojis",
-            "canUseEmojisEverywhere",
-            "canUseHigherFramerate"
-        ].map(func => {
-            return {
-                find: `${func}:function`,
-                replacement: {
+        {
+            find: `canUseAnimatedEmojis:function`,
+            replacement: [
+                "canUseAnimatedEmojis",
+                "canUseEmojisEverywhere",
+                "canUseHigherFramerate"
+            ].map(func => {
+                return {
                     match: new RegExp(`${func}:function\\(.+?}`),
                     replace: `${func}:function (e) { return true; }`
                 }
-            }
-        }),
+            })
+        },
     ],
     start() {
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");

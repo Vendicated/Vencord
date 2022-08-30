@@ -7,17 +7,13 @@ export default definePlugin({
     patches: [
         {
             find: "sendMessage:function",
-            replacement: {
+            replacement: [{
                 match: /(?<=sendMessage:function\(.{1,2},.{1,2},.{1,2},.{1,2}\)){/,
                 replace: "{Vencord.Api.MessageEvents._handlePreSend(...arguments);"
-            }
-        },
-        {
-            find: "editMessage:function",
-            replacement: {
+            }, {
                 match: /(?<=editMessage:function\(.{1,2},.{1,2},.{1,2}\)){/,
                 replace: "{Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
-            }
+            }]
         },
         {
             find: "if(e.altKey){",
