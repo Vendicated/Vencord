@@ -3,8 +3,10 @@ import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import installExt, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import { join } from "path";
 import { initIpc } from './ipcMain';
+import Logger from "./utils/logger";
 
-console.log("[Vencord] Starting up...");
+const logger = new Logger("Patcher", "#700b90")
+logger.log("[Vencord] Starting up...");
 
 class BrowserWindow extends electron.BrowserWindow {
     constructor(options: BrowserWindowConstructorOptions) {
@@ -48,8 +50,8 @@ process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
 electron.app.whenReady().then(() => {
     installExt(REACT_DEVELOPER_TOOLS)
-        .then(() => console.log("Installed React DevTools"))
-        .catch((err) => console.error("Failed to install React DevTools", err));
+        .then(() => logger.log("Installed React DevTools"))
+        .catch((err) => logger.error("Failed to install React DevTools", err));
 
     // Remove CSP
     electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, url }, cb) => {
