@@ -1,15 +1,19 @@
 import { startAll } from "../plugins";
 import { waitFor, filters } from './webpack';
+import type Components from "discord-types/components";
+import type Stores from "discord-types/stores";
+import type Other from "discord-types/other";
 
-export let FluxDispatcher: any;
+export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");
-export let UserStore: any;
+export let UserStore: Stores.UserStore;
 export let Forms: any;
 export let Button: any;
 export let ButtonProps: any;
 export let Switch: any;
-export let Flex: any;
-export let Card: any;
+export let Flex: Components.Flex;
+export let Card: Components.Card;
+export let Tooltip: Components.Tooltip;
 
 waitFor("useState", m => React = m);
 waitFor(["dispatch", "subscribe"], m => {
@@ -29,3 +33,4 @@ waitFor(["ButtonLooks", "default"], m => {
 waitFor(filters.byDisplayName("SwitchItem"), m => Switch = m.default);
 waitFor(filters.byDisplayName("Flex"), m => Flex = m.default);
 waitFor(filters.byDisplayName("Card"), m => Card = m.default);
+waitFor(filters.byDisplayName("Tooltip"), m => Tooltip = m.default);

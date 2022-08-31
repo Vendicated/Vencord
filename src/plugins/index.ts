@@ -1,7 +1,7 @@
 import Plugins from "plugins";
 import { Settings } from "../api/settings";
 import Logger from "../utils/logger";
-import { Patch } from "../utils/types";
+import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -17,12 +17,43 @@ for (const plugin of Plugins) if (plugin.patches && Settings.plugins[plugin.name
 }
 
 export function startAll() {
-    for (const plugin of plugins) if (plugin.start && Settings.plugins[plugin.name].enabled) {
+    for (const plugin of plugins) if (Settings.plugins[plugin.name].enabled) {
+        startPlugin(plugin);
+    }
+}
+
+export function startPlugin(p: Plugin) {
+    if (p.start) {
+        logger.info("Starting plugin", p.name);
+        if (p.started) {
+            logger.warn(`${p.name} already started`);
+            return false;
+        }
         try {
-            logger.info("Starting plugin", plugin.name);
-            plugin.start();
-        } catch (err) {
-            logger.error("Failed to start plugin", plugin.name, err);
+            p.start();
+            p.started = true;
+            return true;
+        } catch (err: any) {
+            logger.error(`Failed to start ${p.name}\n`, err);
+            return false;
+        }
+    }
+}
+
+export function stopPlugin(p: Plugin) {
+    if (p.stop) {
+        logger.info("Stopping plugin", p.name);
+        if (!p.started) {
+            logger.warn(`${p.name} already stopped / never started`);
+            return false;
+        }
+        try {
+            p.stop();
+            p.started = false;
+            return true;
+        } catch (err: any) {
+            logger.error(`Failed to stop ${p.name}\n`, err);
+            return false;
         }
     }
 }
