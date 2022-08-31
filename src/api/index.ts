@@ -1,1 +1,1 @@
-export * as MessageClicks from "./MessageClicks";
+export * as MessageEvents from "./MessageEvents";
