@@ -6,7 +6,7 @@ export default definePlugin({
     name: "MessageQuickActions",
     description: "Quick Delete, Quick edit",
     author: "Vendicated",
-    dependencies: ["MessageClicksApi"],
+    dependencies: ["MessageEventsAPI"],
     start() {
         const { deleteMessage, startEditMessage } = findByProps("deleteMessage");
         const { can } = findByProps("can", "initialize");
