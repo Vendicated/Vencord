@@ -6,6 +6,7 @@ export default definePlugin({
     name: "Nitro Bypass",
     author: "ArjixWasTaken",
     description: "Allows you to stream in nitro quality and send fake emojis.",
+    dependencies: ["MessageEventsAPI"],
     patches: [
         {
             find: `canUseAnimatedEmojis:function`,
