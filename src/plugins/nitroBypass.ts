@@ -1,6 +1,6 @@
 import { addPreSendListener, addPreEditListener } from "../api/MessageEvents";
-import { findByProps } from "../utils/webpack";
-import definePlugin from "../utils/types"
+import { findByProps } from "../webpack";
+import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "Nitro Bypass",
@@ -17,7 +17,7 @@ export default definePlugin({
                 return {
                     match: new RegExp(`${func}:function\\(.+?}`),
                     replace: `${func}:function (e) { return true; }`
-                }
+                };
             })
         },
     ],
@@ -26,11 +26,11 @@ export default definePlugin({
 
         // Remove any nitro requirements for any of the streaming settings.
         findByProps("ApplicationStreamPresets")
-          .ApplicationStreamSettingRequirements
-          .forEach(x => {
-            delete x.userPremiumType;
-            delete x.guildPremiumTier
-        });
+            .ApplicationStreamSettingRequirements
+            .forEach(x => {
+                delete x.userPremiumType;
+                delete x.guildPremiumTier;
+            });
 
         addPreSendListener((_, messageObj) => {
             const guildId = window.location.href.split("channels/")[1].split("/")[0];
@@ -42,7 +42,7 @@ export default definePlugin({
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
                 messageObj.content = messageObj.content.replace(emojiString, ` ${url} `);
             }
-        })
+        });
         addPreEditListener((_, __, messageObj) => {
             const guildId = window.location.href.split("channels/")[1].split("/")[0];
 
@@ -53,6 +53,6 @@ export default definePlugin({
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
                 messageObj.content = messageObj.content.replace(emojiStr, ` ${url} `);
             }
-        })
+        });
     },
-})
+});
