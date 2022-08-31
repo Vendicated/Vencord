@@ -13,7 +13,7 @@ export interface Emoji {
     id: string,
 }
 
-interface MessageObject {
+export interface MessageObject {
     content: string,
     validNonShortcutEmojis: Emoji[];
 }

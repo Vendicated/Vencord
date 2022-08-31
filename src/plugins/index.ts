@@ -8,7 +8,7 @@ const logger = new Logger("PluginManager", "#a6d189");
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
-for (const plugin of Plugins) if (plugin.patches && Settings.plugins[plugin.name].enabled) {
+for (const plugin of Object.values(Plugins)) if (plugin.patches && Settings.plugins[plugin.name].enabled) {
     for (const patch of plugin.patches) {
         patch.plugin = plugin.name;
         if (!Array.isArray(patch.replacement)) patch.replacement = [patch.replacement];
@@ -17,8 +17,8 @@ for (const plugin of Plugins) if (plugin.patches && Settings.plugins[plugin.name
 }
 
 export function startAll() {
-    for (const plugin of plugins) if (Settings.plugins[plugin.name].enabled) {
-        startPlugin(plugin);
+    for (const plugin in Plugins) if (Settings.plugins[plugin].enabled) {
+        startPlugin(Plugins[plugin]);
     }
 }
 

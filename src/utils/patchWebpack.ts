@@ -85,6 +85,7 @@ function patchPush() {
                                 const newCode = code.replace(replacement.match, replacement.replace);
                                 if (newCode === code) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect: ${replacement.match}`);
+                                    logger.debug("Function Source:\n", code);
                                 } else {
                                     const newMod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                                     code = newCode;
