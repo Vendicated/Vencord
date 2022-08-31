@@ -1,4 +1,4 @@
-import { React } from "../webpack";
+import { React } from "../webpack/common";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
@@ -16,17 +16,28 @@ export function lazy<T>(factory: () => T): () => T {
  * Await a promise
  * @param factory Factory
  * @param fallbackValue The fallback value that will be used until the promise resolved
- * @returns A state that will either be null or the result of the promise
+ * @returns [value, error, isPending]
  */
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null): T | null {
-    const [res, setRes] = React.useState<T | null>(fallbackValue);
+export function useAwaiter<T>(factory: () => Promise<T>): [T | null, any, boolean];
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): [T, any, boolean];
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null): [T | null, any, boolean] {
+    const [state, setState] = React.useState({
+        value: fallbackValue,
+        error: null as any,
+        pending: true
+    });
 
     React.useEffect(() => {
-        factory().then(setRes);
+        let isAlive = true;
+        factory()
+            .then(value => isAlive && setState({ value, error: null, pending: false }))
+            .catch(error => isAlive && setState({ value: null, error, pending: false }));
+
+        return () => void (isAlive = false);
     }, []);
 
-    return res;
-}
+    return [state.value, state.error, state.pending];
+};
 
 /**
  * A lazy component. The factory method is called on first render. For example useful
