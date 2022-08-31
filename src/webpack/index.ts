@@ -1,5 +1,4 @@
 import { startAll } from "../plugins";
-import Logger from "./logger";
 
 let webpackCache: typeof window.webpackChunkdiscord_app;
 
@@ -9,11 +8,10 @@ export const listeners = new Set<CallbackFn>();
 type FilterFn = (mod: any) => boolean;
 type CallbackFn = (mod: any) => void;
 
-export let Common: {
-    React: typeof import("react"),
-    FluxDispatcher: any;
-    UserStore: any;
-} = {} as any;
+export let React: typeof import("react");
+export let FluxDispatcher: any;
+export let Forms: any;
+export let UserStore: any;
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (webpackCache !== void 0) throw "no.";
@@ -24,9 +22,9 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     // Abandon Hope All Ye Who Enter Here
 
     let started = false;
-    waitFor("getCurrentUser", x => Common.UserStore = x);
+    waitFor("getCurrentUser", x => UserStore = x);
     waitFor(["dispatch", "subscribe"], x => {
-        Common.FluxDispatcher = x;
+        FluxDispatcher = x;
         const cb = () => {
             console.info("Connection open");
             x.unsubscribe("CONNECTION_OPEN", cb);
@@ -34,7 +32,8 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
         };
         x.subscribe("CONNECTION_OPEN", cb);
     });
-    waitFor("useState", x => Common.React = x);
+    waitFor("useState", x => (React = x));
+    waitFor("FormSection", x => Forms = x);
 }
 
 export function find(filter: FilterFn, getDefault = true) {

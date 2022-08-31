@@ -5,6 +5,7 @@ export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
     author: "Vendicated",
+    required: true,
     patches: [{
         find: "default.versionHash",
         replacement: [
@@ -28,7 +29,7 @@ export default definePlugin({
     }, {
         find: "Messages.ACTIVITY_SETTINGS",
         replacement: {
-            match: /\{section:(.{1,2})\.SectionTypes\.HEADER,label:(.{1,2})\.default\.Messages\.ACTIVITY_SETTINGS\}/,
+            match: /\{section:(.{1,2})\.SectionTypes\.HEADER,\s*label:(.{1,2})\.default\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) =>
                 `{section:${mod}.SectionTypes.HEADER,label:"Vencord"},` +
                 `{section:"Vencord",label:"Vencord",element:Vencord.Components.Settings},` +

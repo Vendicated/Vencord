@@ -20,6 +20,8 @@ export interface Plugin {
     author: string;
     start?(): void;
     patches?: Patch[];
+    dependencies?: string[],
+    required?: boolean;
 }
 
 // @ts-ignore lole

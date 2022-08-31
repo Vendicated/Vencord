@@ -1,6 +1,6 @@
 import { WEBPACK_CHUNK } from './constants';
 import Logger from "./logger";
-import { _initWebpack } from "./webpack";
+import { _initWebpack } from "../webpack";
 
 let webpackChunk: any[];
 
@@ -83,9 +83,13 @@ function patchPush() {
                             const lastCode = code;
                             try {
                                 const newCode = code.replace(replacement.match, replacement.replace);
-                                const newMod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
-                                code = newCode;
-                                mod = newMod;
+                                if (newCode === code) {
+                                    logger.warn(`Patch by ${patch.plugin} had no effect: ${replacement.match}`);
+                                } else {
+                                    const newMod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+                                    code = newCode;
+                                    mod = newMod;
+                                }
                             } catch (err) {
                                 logger.error("Failed to apply patch of", patch.plugin, err);
                                 code = lastCode;

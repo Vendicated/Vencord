@@ -117,7 +117,7 @@ await Promise.all([
         ],
         sourcemap: "inline",
         watch,
-        minify: true
+        minify: false,
     })
 ]).then(res => {
     const took = performance.now() - begin;
