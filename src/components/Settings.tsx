@@ -5,6 +5,8 @@ import IpcEvents from "../utils/IpcEvents";
 
 import { Button, ButtonProps, Flex, Switch, Forms } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
+import { startPlugin } from "../plugins";
+import { stopPlugin } from '../plugins/index';
 
 export default ErrorBoundary.wrap(function Settings(props) {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -52,8 +54,19 @@ export default ErrorBoundary.wrap(function Settings(props) {
                         settings.plugins[p.name].enabled = v;
                         if (v) {
                             p.dependencies?.forEach(d => {
+                                // TODO: start every dependency
                                 settings.plugins[d].enabled = true;
                             });
+                            if (!p.started && !startPlugin(p)) {
+                                // TODO show notification
+                            }
+                        } else {
+                            if (p.started && !stopPlugin(p)) {
+                                // TODO show notification
+                            }
+                        }
+                        if (p.patches) {
+                            // TODO show notification
                         }
                     }}
                     note={p.description}
