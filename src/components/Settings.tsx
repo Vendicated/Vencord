@@ -45,7 +45,7 @@ export default ErrorBoundary.wrap(function Settings(props) {
             </Switch>
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5">Plugins</Forms.FormTitle>
-            {Plugins.map(p => (
+            {Object.values(Plugins).map(p => (
                 <Switch
                     disabled={p.required === true}
                     key={p.name}
@@ -54,8 +54,11 @@ export default ErrorBoundary.wrap(function Settings(props) {
                         settings.plugins[p.name].enabled = v;
                         if (v) {
                             p.dependencies?.forEach(d => {
-                                // TODO: start every dependency
                                 settings.plugins[d].enabled = true;
+                                if (!Plugins[d].started && !stopPlugin) {
+                                    // TODO show notification
+                                    settings.plugins[p.name].enabled = false;
+                                }
                             });
                             if (!p.started && !startPlugin(p)) {
                                 // TODO show notification

@@ -18,9 +18,9 @@ const DefaultSettings: Settings = {
     plugins: {}
 };
 
-for (const plugin of plugins) {
-    DefaultSettings.plugins[plugin.name] = {
-        enabled: plugin.required ?? false
+for (const plugin in plugins) {
+    DefaultSettings.plugins[plugin] = {
+        enabled: plugins[plugin].required ?? false
     };
 }
 
@@ -51,7 +51,7 @@ function makeProxy(settings: Settings, root = settings): Settings {
             for (const subscription of subscriptions) {
                 subscription();
             }
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root));
+            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }
     });

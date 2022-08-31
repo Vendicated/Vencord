@@ -1,5 +1,5 @@
 declare module "plugins" {
-    const plugins: import("./utils/types").Plugin[];
+    const plugins: Record<string, import("./utils/types").Plugin>;
     export default plugins;
 }
 
