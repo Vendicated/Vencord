@@ -1,5 +1,5 @@
 import definePlugin from "../utils/types";
-import { findByProps } from "../utils/webpack";
+import { findByProps } from "../webpack";
 
 const DO_NOTHING = () => void 0;
 
@@ -7,6 +7,7 @@ export default definePlugin({
     name: "NoTrack",
     description: "Disable Discord's tracking and crash reporting",
     author: "Vendicated",
+    required: true,
     start() {
         findByProps("getSuperPropertiesBase64", "track").track = DO_NOTHING;
         findByProps("submitLiveCrashReport").submitLiveCrashReport = DO_NOTHING;

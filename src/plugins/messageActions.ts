@@ -1,11 +1,12 @@
 import { MessageClicks } from "../api";
 import definePlugin from "../utils/types";
-import { find, findByProps } from "../utils/webpack";
+import { find, findByProps } from "../webpack";
 
 export default definePlugin({
     name: "MessageQuickActions",
     description: "Quick Delete, Quick edit",
     author: "Vendicated",
+    dependencies: ["MessageClicksApi"],
     start() {
         const { deleteMessage, startEditMessage } = findByProps("deleteMessage");
         const { can } = findByProps("can", "initialize");
