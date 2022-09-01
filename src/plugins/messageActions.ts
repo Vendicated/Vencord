@@ -18,7 +18,6 @@ export default definePlugin({
         const { Permissions: { MANAGE_MESSAGES } } = find(m => m.Permissions?.MANAGE_MESSAGES);
         const { getCurrentUser } = findByProps("getCurrentUser");
 
-        let isDeletePressed = false;
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
