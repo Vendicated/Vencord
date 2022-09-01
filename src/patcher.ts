@@ -11,6 +11,7 @@ class BrowserWindow extends electron.BrowserWindow {
         if (options?.webPreferences?.preload && options.title) {
             const original = options.webPreferences.preload;
             options.webPreferences.preload = join(__dirname, "preload.js");
+            options.webPreferences.sandbox = false;
 
             process.env.DISCORD_PRELOAD = original;
 
