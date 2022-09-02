@@ -3,7 +3,7 @@ import definePlugin from "../utils/types";
 export default definePlugin({
     name: "NoTrack",
     description: "Disable Discord's tracking and crash reporting",
-    author: "Vendicated",
+    author: "Cynosphere",
     required: true,
     patches: [
         {

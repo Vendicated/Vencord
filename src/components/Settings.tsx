@@ -43,7 +43,7 @@ export default ErrorBoundary.wrap(function Settings(props) {
                 </Flex.Child>
                 <Flex.Child>
                     <Button
-                        onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir + "/quickCss.css")}
+                        onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir, "quickCss.css")}
                         size={ButtonProps.ButtonSizes.SMALL}
                         disabled={settingsDir === "Loading..."}
                     >
@@ -98,7 +98,7 @@ export default ErrorBoundary.wrap(function Settings(props) {
                                 "This plugin is required. Thus you cannot disable it."
                                 : dependency ?
                                     `${humanFriendlyJoin(enabledDependants)} ${enabledDependants.length === 1 ? "depends" : "depend"} on this plugin. Thus you cannot disable it.`
-                                    : ""
+                                    : null
                         }
                     >
                         {p.name}

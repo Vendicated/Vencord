@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from 'path';
+import { debounce } from "./utils/debounce";
 import IpcEvents from './utils/IpcEvents';
 
 const DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
@@ -25,7 +26,7 @@ function readSettings() {
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
-ipcMain.handle(IpcEvents.OPEN_PATH, (_, path) => shell.openPath(path));
+ipcMain.handle(IpcEvents.OPEN_PATH, (_, ...pathElements) => shell.openPath(join(...pathElements)));
 ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => shell.openExternal(url));
 
 // .on because we need Settings synchronously (ipcRenderer.sendSync)
@@ -40,8 +41,8 @@ ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
 export function initIpc(mainWindow: BrowserWindow) {
     open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
-        watch(QUICKCSS_PATH, async () => {
+        watch(QUICKCSS_PATH, debounce(async () => {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
-        });
+        }, 50));
     });
 }
