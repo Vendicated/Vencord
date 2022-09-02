@@ -6,7 +6,7 @@ const OPEN_URL = `VencordNative.ipc.invoke("${IpcEvents.OPEN_EXTERNAL}",`;
 export default definePlugin({
     name: "ViewIcons",
     author: "Vendicated",
-    description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon",
+    description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon. Crashes if you don't have Developer Mode enabled, will fix in the future.",
     patches: [
         {
             find: "UserProfileModalHeader",
@@ -18,7 +18,7 @@ export default definePlugin({
             find: "default.popoutNoBannerPremium",
             replacement: {
                 match: /style:.{1,2}\(\{\},(.{1,2}),/,
-                replace: (m, bannerObj) => `onClick:()=>${OPEN_URL}${bannerObj}.backgroundImage.replace("url(", "").replace(/(\\?size=.+)?\\)/, "?size=2048")),${m}`
+                replace: (m, bannerObj) => `onClick:${bannerObj}.backgroundImage&&(()=>${OPEN_URL}${bannerObj}.backgroundImage.replace("url(", "").replace(/(\\?size=.+)?\\)/, "?size=2048"))),${m}`
             }
         }, {
             find: "GuildContextMenuWrapper",
