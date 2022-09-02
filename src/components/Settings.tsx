@@ -26,8 +26,6 @@ export default ErrorBoundary.wrap(function Settings(props) {
         return o;
     }, []);
 
-    console.log(depMap);
-
     return (
         <Forms.FormSection tag="h1" title="Vencord">
             <Forms.FormText>SettingsDir: {settingsDir}</Forms.FormText>
