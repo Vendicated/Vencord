@@ -1,7 +1,4 @@
 import definePlugin from "../utils/types";
-import { findByProps } from "../webpack";
-
-const DO_NOTHING = () => void 0;
 
 export default definePlugin({
     name: "NoTrack",
