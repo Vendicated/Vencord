@@ -6,7 +6,6 @@ let webpackChunk: any[];
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
-
 Object.defineProperty(window, WEBPACK_CHUNK, {
     get: () => webpackChunk,
     set: (v) => {
@@ -87,12 +86,16 @@ function patchPush() {
                                     logger.warn(`Patch by ${patch.plugin} had no effect: ${replacement.match}`);
                                     logger.debug("Function Source:\n", code);
                                 } else {
-                                    const newMod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                                     code = newCode;
-                                    mod = newMod;
+                                    mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                                 }
                             } catch (err) {
+                                // TODO - More meaningful errors. This probably means moving away from string.replace
+                                // in favour of manual matching. Then cut out the context and log some sort of
+                                // diff
                                 logger.error("Failed to apply patch of", patch.plugin, err);
+                                logger.debug("Original Source\n", lastCode);
+                                logger.debug("Patched Source\n", code);
                                 code = lastCode;
                                 mod = lastMod;
                                 patchedBy.delete(patch.plugin);
