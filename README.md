@@ -13,7 +13,18 @@ My own Discord Desktop mod :)
 ```sh
 pnpm install
 pnpm build
+```
+
+### Linux
+
+```sh
 ./install.sh
+```
+
+### Windows
+
+```cmd
+.\install.bat
 ```
 
 ## Join
