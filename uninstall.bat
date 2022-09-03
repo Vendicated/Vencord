@@ -1,6 +1,6 @@
 @echo off
 
-set dicksword=%localappdata%\Discord\app-*
+set dicksword=%localappdata%\Discord*\app-*
 cd %dicksword%
 
 set app=%cd%\resources\app

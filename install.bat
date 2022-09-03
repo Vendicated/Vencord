@@ -4,7 +4,7 @@
 cd %~dp0
 set patcher=%cd%\dist\patcher.js
 
-set dicksword=%localappdata%\Discord\app-*
+set dicksword=%localappdata%\Discord*\app-*
 cd %dicksword%
 
 set app=%cd%\resources\app
