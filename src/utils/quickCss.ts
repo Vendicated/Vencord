@@ -1,8 +1,21 @@
+import { addSettingsListener, Settings } from "../api/settings";
 import IpcEvents from "./IpcEvents";
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const style = document.createElement("style");
-    document.head.appendChild(style);
-    VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.innerText = css);
-    style.innerText = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+let style: HTMLStyleElement;
+
+export async function toggle(isEnabled: boolean) {
+    if (!style) {
+        if (isEnabled) {
+            style = document.createElement("style");
+            style.id = "vencord-custom-css";
+            document.head.appendChild(style);
+            VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.innerText = css);
+            style.innerText = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+        }
+    } else style.disabled = !isEnabled;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    toggle(Settings.useQuickCss);
+    addSettingsListener("useQuickCss", toggle);
 });

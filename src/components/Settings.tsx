@@ -26,6 +26,8 @@ export default ErrorBoundary.wrap(function Settings(props) {
         return o;
     }, []);
 
+    const sortedPlugins = React.useMemo(() => Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)), []);
+
     return (
         <Forms.FormSection tag="h1" title="Vencord">
             <Forms.FormText>SettingsDir: {settingsDir}</Forms.FormText>
@@ -51,15 +53,22 @@ export default ErrorBoundary.wrap(function Settings(props) {
             </Flex>
             <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
+                value={settings.useQuickCss}
+                onChange={v => settings.useQuickCss = v}
+                note="Enable QuickCss"
+            >
+                Use QuickCss
+            </Switch>
+            <Switch
                 value={settings.unsafeRequire}
                 onChange={v => settings.unsafeRequire = v}
                 note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
             >
-                Enable Ensafe Require
+                Enable Unsafe Require
             </Switch>
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5">Plugins</Forms.FormTitle>
-            {Object.values(Plugins).map(p => {
+            {sortedPlugins.map(p => {
                 const enabledDependants = depMap[p.name]?.filter(d => settings.plugins[d].enabled);
                 const dependency = enabledDependants?.length;
 
