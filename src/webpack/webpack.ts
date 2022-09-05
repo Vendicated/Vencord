@@ -1,4 +1,7 @@
-let webpackCache: typeof window.webpackChunkdiscord_app;
+import type { WebpackInstance } from "discord-types/other";
+
+export let wreq: WebpackInstance;
+export let cache: WebpackInstance["c"];
 
 export type FilterFn = (mod: any) => boolean;
 
@@ -16,9 +19,10 @@ export const listeners = new Set<CallbackFn>();
 export type CallbackFn = (mod: any) => void;
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
-    if (webpackCache !== void 0) throw "no.";
+    if (cache !== void 0) throw "no.";
 
-    webpackCache = instance.push([[Symbol()], {}, (r) => r.c]);
+    wreq = instance.push([[Symbol()], {}, (r) => r]);
+    cache = wreq.c;
     instance.pop();
 }
 
@@ -26,8 +30,8 @@ export function find(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got", filter);
 
-    for (const key in webpackCache) {
-        const mod = webpackCache[key];
+    for (const key in cache) {
+        const mod = cache[key];
         if (mod?.exports && filter(mod.exports))
             return mod.exports;
         if (mod?.exports?.default && filter(mod.exports.default))
@@ -41,8 +45,8 @@ export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got", filter);
 
     const ret = [] as any[];
-    for (const key in webpackCache) {
-        const mod = webpackCache[key];
+    for (const key in cache) {
+        const mod = cache[key];
         if (mod?.exports && filter(mod.exports)) ret.push(mod.exports);
         if (mod?.exports?.default && filter(mod.exports.default)) ret.push(getDefault ? mod.exports.default : mod.exports);
     }
