@@ -2,9 +2,13 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "STFU",
-    description: "Disabled the fat warning in the DevTools console",
+    description: "Disables the 'HOLD UP' banner in the console",
     author: "Vendicated",
-    start() {
-        window.DiscordNative.window.setDevtoolsCallbacks(null, null);
-    }
+    patches: [{
+        find: "setDevtoolsCallbacks",
+        replacement: {
+            match: /\.default=function.+$/s,
+            replace: ".default=function(){}}"
+        }
+    }]
 });
