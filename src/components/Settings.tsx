@@ -7,6 +7,7 @@ import { Button, ButtonProps, Flex, Switch, Forms, React } from "../webpack/comm
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
+import { openModal, closeModal } from '../utils/modal';
 
 export default ErrorBoundary.wrap(function Settings(props) {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
