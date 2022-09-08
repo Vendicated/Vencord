@@ -1,8 +1,8 @@
 import Components from "discord-types/components";
 import { waitFor } from "../webpack";
 
-let Modal: Components.Modal;
-let modals: any;
+export let Modal: Components.Modal;
+export let modals: any;
 
 waitFor("openModalLazy", m => modals = m);
 waitFor("ModalRoot", m => Modal = m);
@@ -14,10 +14,10 @@ let modalId = 1337;
  * @param Component The component to render in the modal
  * @returns The key of this modal. This can be used to close the modal later with closeModal
  */
-export function openModal(Component: React.ComponentType) {
+export function openModal(Component: React.ComponentType, modalProps: Record<string, any>) {
     let key = `Vencord${modalId++}`;
     modals.openModal(props =>
-        <Modal.ModalRoot {...props}>
+        <Modal.ModalRoot {...props} {...modalProps}>
             <Component />
         </Modal.ModalRoot>
         , { modalKey: key });
