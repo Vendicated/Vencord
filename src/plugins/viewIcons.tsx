@@ -47,11 +47,11 @@ export default definePlugin({
                     replace: (m, guild) => `_guild=${guild},${m}`
                 },
                 {
-                    match: /,(.{1,2})\((.{1,2}\.MenuGroup),\{\},void 0,(.{1,2})\)(?=\)\}.{1,2}\.displayName)/,
-                    replace: (_, factory, menuGroup, copyIdElement) => `,${factory}(${menuGroup},{},void 0,[` +
-                        `_guild.icon&&${REACT_GLOBAL}.cloneElement(${copyIdElement},` +
+                    match: /,(.{1,2})\((.{1,2})\.MenuGroup,\{\},void 0,(.{1,2})\)(?=\)\}.{1,2}\.displayName)/,
+                    replace: (_, factory, menu, copyIdElement) => `,${factory}(${menu}.MenuGroup,{},void 0,[` +
+                        `_guild.icon&&${REACT_GLOBAL}.createElement(${menu}.MenuItem,` +
                         `{key:"viewicons-copy-icon",id:"viewicons-copy-icon",action:()=>${OPEN_URL}_guild.getIconURL(undefined,true)+"size=2048"),label:"View Icon",icon:null}),` +
-                        `_guild.banner&&${REACT_GLOBAL}.cloneElement(${copyIdElement},` +
+                        `_guild.banner&&${REACT_GLOBAL}.createElement(${menu}.MenuItem,` +
                         `{key:"viewicons-copy-banner",id:"viewicons-copy-banner",action:()=>${OPEN_URL}Vencord.Webpack.findByProps("getGuildBannerURL").getGuildBannerURL(_guild).replace(/\\?size=.+/, "?size=2048")),label:"View Banner",icon:null}),${copyIdElement}])`
                 }
             ]
