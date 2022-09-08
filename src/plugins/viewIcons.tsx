@@ -1,12 +1,31 @@
 import { REACT_GLOBAL } from "../utils/constants";
-import IpcEvents from "../utils/IpcEvents";
+import { Modal, openModal } from "../utils/modal";
 import definePlugin from '../utils/types';
+import { filters, waitFor } from "../webpack";
 
-const OPEN_URL = `VencordNative.ipc.invoke("${IpcEvents.OPEN_EXTERNAL}",`;
+let ImageModal: any;
+let renderMaskedLink: any;
+
+waitFor(filters.byDisplayName("ImageModal"), m => ImageModal = m.default);
+waitFor("renderMaskedLinkComponent", m => renderMaskedLink = m.renderMaskedLinkComponent);
+
+const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default definePlugin({
     name: "ViewIcons",
     author: "Vendicated",
     description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon. Crashes if you don't have Developer Mode enabled, will fix in the future.",
+
+    openImage(url: string) {
+        openModal(() => (
+            <ImageModal
+                shouldAnimate={true}
+                original={url}
+                src={url}
+                renderLinkComponent={renderMaskedLink}
+            />
+        ), { size: Modal.ModalSize.DYNAMIC });
+    },
+
     patches: [
         {
             find: "UserProfileModalHeader",

@@ -48,7 +48,7 @@ const globPlugins = {
                     continue;
                 }
                 const mod = `__pluginMod${i}`;
-                code += `import ${mod} from "./${files[i].replace(".ts", "")}";\n`;
+                code += `import ${mod} from "./${files[i].replace(/.tsx?$/, "")}";\n`;
                 obj += `[${mod}.name]: ${mod},`;
             }
             code += `export default {${obj}}`;
