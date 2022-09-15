@@ -9,11 +9,7 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 Object.defineProperty(window, WEBPACK_CHUNK, {
     get: () => webpackChunk,
     set: (v) => {
-        // There are two possible values for push.
-        // - Native push with toString result of function push() { [native code] }
-        // - Webpack's push with toString result of function() { [native code] }
-        // We don't want to override the native one, so check for "push"
-        if (v && !v.push.toString().includes("push")) {
+        if (v?.push !== Array.prototype.push) {
             logger.info(`Patching ${WEBPACK_CHUNK}.push`);
             _initWebpack(v);
             patchPush();
@@ -35,7 +31,14 @@ function patchPush() {
 
             for (const id in modules) {
                 let mod = modules[id];
-                let code = mod.toString();
+                // Discords Webpack chunks for some ungodly reason contain random
+                // newlines. Cyn recommended this workaround and it seems to work fine,
+                // however this could potentially break code, so if anything goes weird,
+                // this is probably why.
+                // Additionally, `[actual newline]` is one less char than "\n", so if Discord
+                // ever targets newer browsers, the minifier could potentially use this trick and
+                // cause issues.
+                let code = mod.toString().replaceAll("\n", "");
                 const originalMod = mod;
                 const patchedBy = new Set();
 
