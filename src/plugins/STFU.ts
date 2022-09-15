@@ -7,7 +7,7 @@ export default definePlugin({
     patches: [{
         find: "setDevtoolsCallbacks",
         replacement: {
-            match: /\.default=function.+$/s,
+            match: /\.default=function.+$/,
             replace: ".default=function(){}}"
         }
     }]
