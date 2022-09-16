@@ -74,6 +74,8 @@ function patchPush() {
                         }
                     }
                 };
+                modules[id].toString = () => mod.toString();
+                modules[id].original = originalMod;
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
