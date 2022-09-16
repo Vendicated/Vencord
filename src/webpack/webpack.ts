@@ -109,7 +109,7 @@ export function search(...filters: Array<string | RegExp>) {
 }
 
 /**
- * Extract a specific module by id into its own webpack chunk. This has no effect on
+ * Extract a specific module by id into its own Source File. This has no effect on
  * the code, it is only useful to be able to look at a specific module without having
  * to view a massive file. extract then returns the extracted module so you can jump to it.
  * As mentioned above, note that this extracted module is not actually used, 

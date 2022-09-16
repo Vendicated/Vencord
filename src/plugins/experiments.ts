@@ -2,7 +2,7 @@ import definePlugin from '../utils/types';
 
 export default definePlugin({
     name: "Experiments",
-    author: "Vendicated",
+    author: "Vendicated, Megumin",
     description: "Enable Experiments",
     patches: [{
         find: "Object.defineProperties(this,{isDeveloper",
