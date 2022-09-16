@@ -15,7 +15,48 @@ $PACKAGE_JSON = @"
 }
 "@
 
-$discord_root = "$env:LOCALAPPDATA\Discord"
+$branch_paths = Get-ChildItem -Directory -Path $env:LOCALAPPDATA |
+	Select-String -Pattern "Discord\w*" -AllMatches |
+	Select-String -Pattern "DiscordGames" -NotMatch # Ignore DiscordGames folder
+
+$branches = @()
+
+foreach ($branch in $branch_paths) {
+	$branch = $branch.Line.Split("\")[-1]
+
+	if ($branch -eq "Discord") {
+		$branch = "Discord Stable"
+	} else {
+		$branch = $branch.Replace("Discord", "Discord ")
+	}
+
+	$branches = $branches + $branch
+}
+
+$branch_count = $branches.Count
+
+Write-Output "Found $branch_count Branches"
+Write-Output "====================================="
+Write-Output "===== Select a Branch to patch ======"
+
+$i = 0
+foreach ($branch in $branches) {
+	Write-Output "=== $i. $branch"
+	$i++
+}
+
+Write-Output "====================================="
+$pos = Read-Host "Enter a number"
+
+if ($null -eq $branches[$pos]) {
+	Write-Output "Invalid branch selection"
+	exit
+}
+
+$branch = $branches.Get($pos)
+$discord_root = $branch_paths.Get($pos)
+
+Write-Output "`nPatching $branch"
 
 $app_folders = Get-ChildItem -Directory -Path $discord_root |
 	Select-String -Pattern "app-"
@@ -26,6 +67,10 @@ foreach ($folder in $app_folders)
 	Write-Output "Patching Version $version"
 
 	$resources = "$folder\resources"
+	if (-not(Test-Path -Path "$resources")) {
+		Write-Error "Resources folder does not exist. Outdated version?`n"
+		continue
+	}
 	if (-not(Test-Path -Path "$resources\app.asar")) {
 		Write-Error "Failed to find app.asar in $folder`n"
 		continue
@@ -41,5 +86,5 @@ foreach ($folder in $app_folders)
 	$null = Tee-Object -InputObject $APP_PATCH -FilePath "$app\index.js"
 	$null = Tee-Object -InputObject $PACKAGE_JSON -FilePath "$app\package.json"
 
-	Write-Output "Patched Discord (version $version) successfully"
+	Write-Output "Patched $branch (version $version) successfully"
 }
