@@ -19,16 +19,19 @@ if [ -z "$discord_actual" ]; then
     # has shebang?
     \#!/*)
       # Wrapper script, assume 2nd line has exec electron call and try to match asar path
-      path="$(head -n2 "$discord_bin" | tail -1 | grep -Eo "/.+?/app.asar")"
-      if [ -e "$path" ]; then
+      path="$(tail -1 "$discord_bin" | grep -Eo "\S+/app.asar" | sed 's/${name}/discord/')"
+      if [ -z "$path" ]; then
+        echo "Unsupported Install. $discord_bin is wrapper script but last line isn't exec call?"
+        exit
+      elif [ -e "$path" ]; then
         discord="$(dirname "$path")"
       else
-        echo "Unsupported Install at $path"
+        echo "Unsupported Install. $path not found"
         exit 1
       fi
       ;;
     *) 
-      echo "Unsupported Install.";
+      echo "Unsupported Install. $discord_bin is neither symlink nor a wrapper script.";
       exit 1
       ;;
   esac
@@ -48,7 +51,7 @@ if [ ! -e "$resources" ]; then
     app="$discord/app.asar"
     app_asar="_app.asar"
   else
-    echo "Unsupported Install"
+    echo "Unsupported Install. $discord has no resources folder but also isn't system electron install"
     exit
   fi
 fi
