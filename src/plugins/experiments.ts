@@ -10,5 +10,11 @@ export default definePlugin({
             match: /(?<={isDeveloper:\{[^}]+,get:function\(\)\{return )\w/,
             replace: "true"
         }
+    }, {
+        find: "canUseOverrides",
+        replacement: {
+            match: /(\w)\|\|"CONNECTION_OPEN".+?;/g,
+            replace: "$1=!0;"
+        }
     }]
 });
