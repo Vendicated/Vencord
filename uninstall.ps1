@@ -1,3 +1,4 @@
+# Vencord Uninstaller
 
 $discord_root = "$env:LOCALAPPDATA\Discord"
 
