@@ -54,8 +54,6 @@ export function findAll(filter: FilterFn, getDefault = true) {
     return ret;
 }
 
-
-
 export function findByProps(...props: string[]) {
     return find(filters.byProps(props));
 }
@@ -85,4 +83,51 @@ export function addListener(callback: CallbackFn) {
 
 export function removeListener(callback: CallbackFn) {
     listeners.delete(callback);
+}
+
+/**
+ * Search modules by keyword. This searches the factory methods,
+ * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
+ * @param filters One or more strings or regexes
+ * @returns Mapping of found modules
+ */
+export function search(...filters: Array<string | RegExp>) {
+    const results = {} as Record<number, Function>;
+    const factories = wreq.m;
+    outer:
+    for (const id in factories) {
+        const factory = factories[id];
+        const str: string = factory.toString();
+        for (const filter of filters) {
+            if (typeof filter === "string" && !str.includes(filter)) continue outer;
+            if (filter instanceof RegExp && !filter.test(str)) continue outer;
+        }
+        results[id] = factory;
+    }
+
+    return results;
+}
+
+/**
+ * Extract a specific module by id into its own webpack chunk. This has no effect on
+ * the code, it is only useful to be able to look at a specific module without having
+ * to view a massive file. extract then returns the extracted module so you can jump to it.
+ * As mentioned above, note that this extracted module is not actually used, 
+ * so putting breakpoints or similar will have no effect.
+ * @param id The id of the module to extract
+ */
+export function extract(id: number) {
+    const mod = wreq.m[id] as Function;
+    if (!mod) return null;
+
+    const code = `
+// [EXTRACTED] WebpackModule${id}
+// WARNING: This module was extracted to be more easily readable.
+//          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
+
+${mod.toString()}
+//# sourceURL=ExtractedWebpackModule${id}
+`;
+    const extracted = (0, eval)(code);
+    return extracted as Function;
 }
