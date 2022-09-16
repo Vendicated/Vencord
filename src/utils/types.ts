@@ -28,4 +28,4 @@ interface PluginDef {
     patches?: Omit<Patch, "plugin">[];
     dependencies?: string[],
     required?: boolean;
-} 
+}

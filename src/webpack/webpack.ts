@@ -112,7 +112,7 @@ export function search(...filters: Array<string | RegExp>) {
  * Extract a specific module by id into its own Source File. This has no effect on
  * the code, it is only useful to be able to look at a specific module without having
  * to view a massive file. extract then returns the extracted module so you can jump to it.
- * As mentioned above, note that this extracted module is not actually used, 
+ * As mentioned above, note that this extracted module is not actually used,
  * so putting breakpoints or similar will have no effect.
  * @param id The id of the module to extract
  */
