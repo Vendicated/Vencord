@@ -53,7 +53,7 @@ export function LazyComponent<T = any>(factory: () => React.ComponentType<T>) {
 }
 
 /**
- * Recursively merges defaults into an object and returns the same object 
+ * Recursively merges defaults into an object and returns the same object
  * @param obj Object
  * @param defaults Defaults
  * @returns obj

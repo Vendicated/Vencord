@@ -98,7 +98,7 @@ type ResolvePropDeep<T, P> = P extends "" ? T :
  *             whenever Unindent is toggled. Pass an empty string to get notified for all changes
  * @param onUpdate Callback function whenever a setting matching path is updated. It gets passed the new value and the path
  *                 to the updated setting. This path will be the same as your path argument, unless it was an empty string.
- * 
+ *
  * @example addSettingsListener("", (newValue, path) => console.log(`${path} is now ${newValue}`))
  *          addSettingsListener("plugins.Unindent.enabled", v => console.log("Unindent is now", v ? "enabled" : "disabled"))
  */
