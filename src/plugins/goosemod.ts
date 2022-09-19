@@ -5,8 +5,9 @@ export default definePlugin({
     description: "Loads goosemod. Quack.",
     author: "Vendicated, botato",
     async start() {
-        const quack = await fetch("https://github.com/GooseMod/GooseMod/releases/download/dev/index.js");
-        (0, eval)(await quack.text());
+        await fetch("https://github.com/GooseMod/GooseMod/releases/download/dev/index.js")
+            .then((res) => res.text())
+            .then((0, eval));
     },
     async stop() {
         await window.goosemod?.remove();
