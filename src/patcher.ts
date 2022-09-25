@@ -57,6 +57,11 @@ electron.app.whenReady().then(() => {
         if (responseHeaders) {
             delete responseHeaders["content-security-policy-report-only"];
             delete responseHeaders["content-security-policy"];
+
+            // Fix hosts that don't properly set the content type, such as
+            // raw.githubusercontent.com
+            if (url.endsWith(".css"))
+                responseHeaders["content-type"] = ["text/css"];
         }
         cb({ cancel: false, responseHeaders });
     });
