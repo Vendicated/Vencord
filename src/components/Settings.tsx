@@ -3,10 +3,11 @@ import Plugins from 'plugins';
 import { useSettings } from "../api/settings";
 import IpcEvents from "../utils/IpcEvents";
 
-import { Button, ButtonProps, Flex, Switch, Forms, React } from "../webpack/common";
+import { Button, Switch, Forms, React } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
+import { Flex } from './Flex';
 
 export default ErrorBoundary.wrap(function Settings(props) {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -32,24 +33,20 @@ export default ErrorBoundary.wrap(function Settings(props) {
         <Forms.FormSection tag="h1" title="Vencord">
             <Forms.FormText>SettingsDir: {settingsDir}</Forms.FormText>
             <Flex style={{ marginTop: "8px", marginBottom: "8px" }}>
-                <Flex.Child>
-                    <Button
-                        onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir)}
-                        size={ButtonProps.ButtonSizes.SMALL}
-                        disabled={settingsDirPending}
-                    >
-                        Launch Directory
-                    </Button>
-                </Flex.Child>
-                <Flex.Child>
-                    <Button
-                        onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir, "quickCss.css")}
-                        size={ButtonProps.ButtonSizes.SMALL}
-                        disabled={settingsDir === "Loading..."}
-                    >
-                        Open QuickCSS File
-                    </Button>
-                </Flex.Child>
+                <Button
+                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir)}
+                    size={Button.Sizes.SMALL}
+                    disabled={settingsDirPending}
+                >
+                    Launch Directory
+                </Button>
+                <Button
+                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir, "quickCss.css")}
+                    size={Button.Sizes.SMALL}
+                    disabled={settingsDir === "Loading..."}
+                >
+                    Open QuickCSS File
+                </Button>
             </Flex>
             <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
