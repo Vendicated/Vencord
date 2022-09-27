@@ -13,11 +13,15 @@ My own Discord Desktop mod :)
 
 ## Installing
 
+Make sure you have NodeJs and git installed. I will be using pnpm, you can use npm instead
 ```sh
-pnpm install
+git clone https://github.com/Vendicated/Vencord
+cd Vencord
+pnpm i
 pnpm build
-./install.sh
 ```
+The builds are now in the dist/ folder (Vencord/dist).
+Now install with either the powershell/bash script or use [X1nto's installer](https://github.com/X1nto/VencordInstaller/releases/latest)
 
 ## Join
 [join]: https://discord.gg/D9uwnFnqmd
