@@ -65,9 +65,11 @@ function patchPush() {
                             if (filter(exports)) {
                                 subscriptions.delete(filter);
                                 callback(exports);
-                            } else if (exports.default && filter(exports.default)) {
-                                subscriptions.delete(filter);
-                                callback(exports.default);
+                            } else for (const nested in exports) {
+                                if (exports[nested] && filter(exports[nested])) {
+                                    subscriptions.delete(filter);
+                                    callback(exports[nested]);
+                                }
                             }
                         } catch (err) {
                             logger.error("Error while firing callback for webpack chunk", err);

@@ -9,14 +9,14 @@ export default definePlugin({
         {
             find: "TRACKING_URL:",
             replacement: {
-                match: /=\(0,.\.analyticsTrackingStoreMaker\)/,
-                replace: "=(function(){})",
+                match: /^.+$/,
+                replace: "()=>{}",
             },
         },
         {
             find: "window.DiscordSentry=",
             replacement: {
-                match: /window\.DiscordSentry=\(0,.\.initSentry\)\(\)/,
+                match: /window\.DiscordSentry=function.+\}\(\)/,
                 replace: "",
             }
         }
