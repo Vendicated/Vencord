@@ -7,33 +7,27 @@ export default definePlugin({
     author: "Vendicated",
     required: true,
     patches: [{
-        find: "default.versionHash",
+        find: "().versionHash",
         replacement: [
             {
-                match: /return .{1,2}\("div"/,
-                replace: (m) => {
-                    return `var versions=VencordNative.getVersions();${m}`;
-                }
-            },
-            {
-                match: /\w\.createElement.+?["']Host ["'].+?\):null/,
+                match: /\w\.createElement\(.{1,2}.Fragment,.{0,30}\{[^}]+\},"Host ".+?\):null/,
                 replace: m => {
                     const idx = m.indexOf("Host") - 1;
                     const template = m.slice(0, idx);
                     return `${m}, ${template}"Vencord ", "${gitHash}"), " "), ` +
-                        `${template} "Electron ", versions.electron), " "), ` +
-                        `${template} "Chrome ", versions.chrome), " ")`;
+                        `${template} "Electron ",VencordNative.getVersions().electron)," "), ` +
+                        `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
                 }
             }
         ]
     }, {
         find: "Messages.ACTIVITY_SETTINGS",
         replacement: {
-            match: /\{section:(.{1,2})\.SectionTypes\.HEADER,\s*label:(.{1,2})\.default\.Messages\.ACTIVITY_SETTINGS\}/,
+            match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) =>
-                `{section:${mod}.SectionTypes.HEADER,label:"Vencord"},` +
+                `{section:${mod}.ID.HEADER,label:"Vencord"},` +
                 `{section:"Vencord",label:"Vencord",element:Vencord.Components.Settings},` +
-                `{section:${mod}.SectionTypes.DIVIDER},${m}`
+                `{section:${mod}.ID.DIVIDER},${m}`
 
         }
     }]

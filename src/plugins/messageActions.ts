@@ -16,7 +16,7 @@ export default definePlugin({
     start() {
         const { deleteMessage, startEditMessage } = findByProps("deleteMessage");
         const { can } = findByProps("can", "initialize");
-        const { Permissions: { MANAGE_MESSAGES } } = find(m => m.Permissions?.MANAGE_MESSAGES);
+        const { MANAGE_MESSAGES } = find(m => typeof m.MANAGE_MESSAGES === "bigint");
         const { isEditing } = findByProps("isEditing");
 
         document.addEventListener("keydown", keydown);

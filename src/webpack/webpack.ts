@@ -32,15 +32,22 @@ export function find(filter: FilterFn, getDefault = true) {
 
     for (const key in cache) {
         const mod = cache[key];
-        if (mod?.exports && filter(mod.exports))
+        if (!mod?.exports) continue;
+
+        if (filter(mod.exports))
             return mod.exports;
-        if (mod?.exports?.default && filter(mod.exports.default))
+        if (mod.exports.default && filter(mod.exports.default))
             return getDefault ? mod.exports.default : mod.exports;
+        for (const nestedMod in mod.exports) {
+            const nested = mod.exports[nestedMod];
+            if (nested && filter(nested)) return nested;
+        }
     }
 
     return null;
 }
 
+// TODO fix
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got", filter);
 
