@@ -1,5 +1,5 @@
 import { startAll } from "../plugins";
-import { waitFor, filters } from './webpack';
+import { waitFor, filters, findByProps } from './webpack';
 import type Components from "discord-types/components";
 import type Stores from "discord-types/stores";
 import type Other from "discord-types/other";
@@ -7,12 +7,9 @@ import type Other from "discord-types/other";
 export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");
 export let UserStore: Stores.UserStore;
-export let Forms: any;
+export let Forms: any = {};
 export let Button: any;
-export let ButtonProps: any;
 export let Switch: any;
-export let Flex: Components.Flex;
-export let Card: Components.Card;
 export let Tooltip: Components.Tooltip;
 
 waitFor("useState", m => React = m);
@@ -25,12 +22,16 @@ waitFor(["dispatch", "subscribe"], m => {
     m.subscribe("CONNECTION_OPEN", cb);
 });
 waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
-waitFor("FormSection", m => Forms = m);
-waitFor(["ButtonLooks", "default"], m => {
-    Button = m.default;
-    ButtonProps = m;
-});
-waitFor(filters.byDisplayName("SwitchItem"), m => Switch = m.default);
-waitFor(filters.byDisplayName("Flex"), m => Flex = m.default);
-waitFor(filters.byDisplayName("Card"), m => Card = m.default);
-waitFor(filters.byDisplayName("Tooltip"), m => Tooltip = m.default);
+waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
+waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
+waitFor(["Positions", "Colors"], m => Tooltip = m);
+
+waitFor(m => m.Tags && filters.byCode("errorSeparator")(m), m => Forms.FormTitle = m);
+waitFor(m => m.Tags && filters.byCode("titleClassName", "sectionTitle")(m), m => Forms.FormSection = m);
+waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
+
+waitFor(m => {
+    if (typeof m !== "function") return false;
+    const s = m.toString();
+    return s.length < 200 && s.includes("divider");
+}, m => Forms.FormDivider = m);
