@@ -11,7 +11,7 @@ export default definePlugin({
             replace: "true"
         }
     }, {
-        find: "canUseOverrides",
+        find: 'type:"user",revision',
         replacement: {
             match: /(\w)\|\|"CONNECTION_OPEN".+?;/g,
             replace: "$1=!0;"
