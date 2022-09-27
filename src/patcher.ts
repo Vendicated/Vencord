@@ -55,7 +55,7 @@ electron.app.whenReady().then(() => {
     // Remove CSP
     electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, url }, cb) => {
         if (responseHeaders) {
-            delete responseHeaders["content-security-policy-reportgnly"];
+            delete responseHeaders["content-security-policy-report-only"];
             delete responseHeaders["content-security-policy"];
 
             // Fix hosts that don't properly set the content type, such as
