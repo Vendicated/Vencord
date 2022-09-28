@@ -18,7 +18,7 @@ export const filters = {
             if (!s.includes(c)) return false;
         }
         return true;
-    }
+    },
 };
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
