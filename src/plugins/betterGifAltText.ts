@@ -27,14 +27,19 @@ export default definePlugin({
     altify(props: any) {
         if (props.alt !== "GIF") return;
 
-        const url = props.original || props.src;
-        const name = url
+        const url: string = props.original || props.src;
+        let name = url
             .slice(url.lastIndexOf("/") + 1)
             .replace(/\d/g, "") // strip numbers
             .replace(/.gif$/, "") // strip extension
-            .replace(/[,-_ ]+/g, " "); // Replace common delimiters with space
+            .split(/[,\-_ ]+/g)
+            .slice(0, 20)
+            .join(" ");
+        if (name.length > 300) {
+            name = name.slice(0, 300) + "...";
+        }
 
-        if (name.length) props.alt += ` - ${name}`;
+        if (name) props.alt += ` - ${name}`;
 
         return props.alt;
     },
