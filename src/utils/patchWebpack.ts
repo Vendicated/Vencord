@@ -53,6 +53,18 @@ function patchPush() {
                         return originalMod(module, exports, require);
                     }
 
+                    // There are (at the time of writing) 11 modules exporting the window
+                    // Make these non enumerable to improve webpack search performance
+                    if (module.exports === window) {
+                        Object.defineProperty(require.c, id, {
+                            value: require.c[id],
+                            enumerable: false,
+                            configurable: true,
+                            writable: true
+                        });
+                        return;
+                    }
+
                     for (const callback of listeners) {
                         try {
                             callback(exports);
@@ -65,10 +77,17 @@ function patchPush() {
                             if (filter(exports)) {
                                 subscriptions.delete(filter);
                                 callback(exports);
-                            } else for (const nested in exports) {
-                                if (exports[nested] && filter(exports[nested])) {
+                            } else if (typeof exports === "object") {
+                                if (exports.default && filter(exports.default)) {
                                     subscriptions.delete(filter);
-                                    callback(exports[nested]);
+                                    callback(exports.default);
+                                }
+
+                                for (const nested in exports) if (nested.length < 3) {
+                                    if (exports[nested] && filter(exports[nested])) {
+                                        subscriptions.delete(filter);
+                                        callback(exports[nested]);
+                                    }
                                 }
                             }
                         } catch (err) {
