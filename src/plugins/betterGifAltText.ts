@@ -27,7 +27,11 @@ export default definePlugin({
     altify(props: any) {
         if (props.alt !== "GIF") return;
 
-        const url: string = props.original || props.src;
+        let url: string = props.original || props.src;
+        try {
+            url = decodeURI(url);
+        } catch {}
+
         let name = url
             .slice(url.lastIndexOf("/") + 1)
             .replace(/\d/g, "") // strip numbers
