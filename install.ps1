@@ -1,7 +1,7 @@
 # Vencord Windows Installer
 
 $patcher = "$PWD\dist\patcher.js"
-$patcher_safe = $patcher -replace '\\', '\\'
+$patcher_safe = $patcher -replace '\\', '/'
 
 $APP_PATCH = @"
 require("$patcher_safe");
