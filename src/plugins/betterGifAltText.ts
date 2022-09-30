@@ -35,7 +35,7 @@ export default definePlugin({
         let name = url
             .slice(url.lastIndexOf("/") + 1)
             .replace(/\d/g, "") // strip numbers
-            .replace(/.gif$/, "") // strip extension
+            .replaceAll(/.gif/g, "") // strip extension
             .split(/[,\-_ ]+/g)
             .slice(0, 20)
             .join(" ");
