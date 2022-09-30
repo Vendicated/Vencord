@@ -10,6 +10,7 @@
         "target": "ESNEXT",
         // https://esbuild.github.io/api/#jsx-factory
         "jsxFactory": "Vencord.Webpack.Common.React.createElement",
+        "jsxFragmentFactory": "Vencord.Webpack.Common.React.Fragment",
         "jsx": "react"
     },
     "include": ["src/**/*"]

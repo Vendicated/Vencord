@@ -19,4 +19,9 @@ export default strEnum({
     SET_SETTINGS: "VencordSetSettings",
     OPEN_EXTERNAL: "VencordOpenExternal",
     OPEN_PATH: "VencordOpenPath",
+    GET_UPDATES: "VencordGetUpdates",
+    GET_REPO: "VencordGetRepo",
+    GET_HASHES: "VencordGetHashes",
+    UPDATE: "VencordUpdate",
+    BUILD: "VencordBuild"
 } as const);

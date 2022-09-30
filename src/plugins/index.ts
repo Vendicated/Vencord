@@ -16,7 +16,7 @@ for (const plugin of Object.values(Plugins)) if (plugin.patches && Settings.plug
     }
 }
 
-export function startAll() {
+export function startAllPlugins() {
     for (const plugin in Plugins) if (Settings.plugins[plugin].enabled) {
         startPlugin(Plugins[plugin]);
     }
