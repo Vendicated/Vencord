@@ -4,6 +4,7 @@ import type { React } from '../webpack/common';
 export function Flex(props: React.PropsWithChildren<{
     flexDirection?: React.CSSProperties["flexDirection"];
     style?: React.CSSProperties;
+    className?: string;
 }>) {
     props.style ??= {};
     props.style.flexDirection ||= props.flexDirection;
