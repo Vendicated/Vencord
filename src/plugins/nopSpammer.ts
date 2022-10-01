@@ -1,13 +1,11 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "Nop Spammer",
     description: "makes the hidden from likely spammer tag explode",
     authors: [
-        {
-            name: "botato",
-            id: 440990343899643943n,
-        },
+        Devs.botato,
         {
             name: "Iryis",
             id: 118437263754395652n,
