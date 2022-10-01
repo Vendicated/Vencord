@@ -69,10 +69,17 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
 
             <Forms.FormText>
-                SettingsDir: {settingsDir}
+                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
             </Forms.FormText>
 
             <Flex className={classes(Margins.marginBottom20)}>
+                <Button
+                    onClick={() => location.reload()}
+                    size={Button.Sizes.SMALL}
+                    color={Button.Colors.GREEN}
+                >
+                    Reload
+                </Button>
                 <Button
                     onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir)}
                     size={Button.Sizes.SMALL}
@@ -88,24 +95,25 @@ export default ErrorBoundary.wrap(function Settings() {
                     Open QuickCSS File
                 </Button>
             </Flex>
-
+            <Forms.FormDivider />
+            <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
                 value={settings.useQuickCss}
-                onChange={v => settings.useQuickCss = v}
-                note="Enable QuickCss"
+                onChange={(v: boolean) => settings.useQuickCss = v}
+                note="Enable QuickCSS"
             >
                 Use QuickCss
             </Switch>
             <Switch
                 value={settings.notifyAboutUpdates}
-                onChange={v => settings.notifyAboutUpdates = v}
+                onChange={(v: boolean) => settings.notifyAboutUpdates = v}
                 note="Shows a Toast on StartUp"
             >
                 Get notified about new Updates
             </Switch>
             <Switch
                 value={settings.unsafeRequire}
-                onChange={v => settings.unsafeRequire = v}
+                onChange={(v: boolean) => settings.unsafeRequire = v}
                 note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
             >
                 Enable Unsafe Require
