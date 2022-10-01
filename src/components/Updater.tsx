@@ -1,13 +1,11 @@
 import gitHash from "git-hash";
 import { changes, checkForUpdates, getRepo, rebuild, update, UpdateLogger } from "../utils/updater";
-import { React, Forms, Button, Margins, Alerts, Card, Parser } from '../webpack/common';
+import { React, Forms, Button, Margins, Alerts, Card, Parser, Toasts } from '../webpack/common';
 import { Flex } from "./Flex";
 import { useAwaiter } from '../utils/misc';
 import { Link } from "./Link";
+import ErrorBoundary from "./ErrorBoundary";
 
-interface Props {
-    setIsOutdated(b: boolean): void;
-}
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -42,7 +40,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
     };
 };
 
-export function Updater(p: Props) {
+export default ErrorBoundary.wrap(function Updater() {
     const [repo, err, repoPending] = useAwaiter(getRepo, "Loading...");
     const [isChecking, setIsChecking] = React.useState(false);
     const [isUpdating, setIsUpdating] = React.useState(false);
@@ -53,39 +51,48 @@ export function Updater(p: Props) {
             UpdateLogger.error("Failed to retrieve repo", err);
     }, [err]);
 
+    const isOutdated = updates.length > 0;
+
     return (
-        <>
-            <Forms.FormText>Repo: {repoPending ? repo : err ? "Failed to retrieve - check console" : (
+        <Forms.FormSection tag="h1" title="Vencord Updater">
+            <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
+
+            <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
                 <Link href={repo}>
                     {repo.split("/").slice(-2).join("/")}
                 </Link>
             )} ({gitHash})</Forms.FormText>
 
+            <Forms.FormDivider />
+
+            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+
             <Forms.FormText className={Margins.marginBottom8}>
-                There are {updates.length} Updates
+                {updates.length ? `There are ${updates.length} Updates` : "Up to Date!"}
             </Forms.FormText>
 
-            <Card style={{ padding: ".5em" }}>
-                {updates.map(({ hash, author, message }) => (
-                    <div>
-                        <Link href={`${repo}/commit/${hash}`} disabled={repoPending}>
-                            <code>{hash}</code>
-                        </Link>
-                        <span style={{
-                            marginLeft: "0.5em",
-                            color: "var(--text-normal)"
-                        }}>{message} - {author}</span>
-                    </div>
-                ))}
-            </Card>
+            {updates.length > 0 && (
+                <Card style={{ padding: ".5em" }}>
+                    {updates.map(({ hash, author, message }) => (
+                        <div>
+                            <Link href={`${repo}/commit/${hash}`} disabled={repoPending}>
+                                <code>{hash}</code>
+                            </Link>
+                            <span style={{
+                                marginLeft: "0.5em",
+                                color: "var(--text-normal)"
+                            }}>{message} - {author}</span>
+                        </div>
+                    ))}
+                </Card>
+            )}
 
             <Flex className={`${Margins.marginBottom8} ${Margins.marginTop8}`}>
-                <Button
+                {isOutdated && <Button
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
-                            p.setIsOutdated(false);
                             const needFullRestart = await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
@@ -106,23 +113,30 @@ export function Updater(p: Props) {
                         }
                     })}
                 >
-                    Update
-                </Button>
+                    Update Now
+                </Button>}
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsChecking, async () => {
-                        const res = await checkForUpdates();
-                        if (res) {
+                        const outdated = await checkForUpdates();
+                        if (outdated) {
                             setUpdates(changes);
                         } else {
-                            p.setIsOutdated(false);
+                            Toasts.show({
+                                message: "No updates found!",
+                                id: Toasts.genId(),
+                                type: Toasts.Type.MESSAGE,
+                                options: {
+                                    position: Toasts.Position.BOTTOM
+                                }
+                            });
                         }
                     })}
                 >
-                    Refresh
+                    Check for Updates
                 </Button>
             </Flex>
-        </>
+        </Forms.FormSection>
     );
-}
+});

@@ -32,7 +32,7 @@ async function init() {
                     "View Update",
                     () => {
                         popNotice();
-                        Router.open("Vencord");
+                        Router.open("VencordUpdater");
                     }
                 );
             }, 10000);
