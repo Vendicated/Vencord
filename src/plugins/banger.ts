@@ -3,7 +3,10 @@ import definePlugin from "../utils/types";
 export default definePlugin({
     name: "BANger",
     description: "Replaces the GIF in the ban dialogue with a custom one.",
-    author: "Xinto",
+    authors: [{
+        name: "Xinto",
+        id: 423915768191647755n
+    }],
     patches: [
         {
             find: "BanConfirm",

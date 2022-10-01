@@ -1,9 +1,10 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "MessageEventsAPI",
     description: "Api required by anything using message events.",
-    author: "ArjixWasTaken",
+    authors: [Devs.Arjix],
     patches: [
         {
             find: "sendMessage:function",

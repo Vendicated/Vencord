@@ -1,8 +1,9 @@
+import { Devs } from "../utils/constants";
 import definePlugin from '../utils/types';
 
 export default definePlugin({
     name: "Experiments",
-    author: "Vendicated, Megumin",
+    authors: [Devs.Ven, Devs.Megu],
     description: "Enable Experiments",
     patches: [{
         find: "Object.defineProperties(this,{isDeveloper",

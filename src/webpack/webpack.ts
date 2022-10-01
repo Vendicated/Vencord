@@ -43,7 +43,7 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
 
 export function find(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got", filter);
+        throw new Error("Invalid filter. Expected a function got" + typeof filter);
 
     for (const key in cache) {
         const mod = cache[key];
@@ -70,7 +70,7 @@ export function find(filter: FilterFn, getDefault = true) {
 
 // TODO fix
 export function findAll(filter: FilterFn, getDefault = true) {
-    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got", filter);
+    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     const ret = [] as any[];
     for (const key in cache) {
@@ -108,7 +108,7 @@ export function findByDisplayName(deezNuts: string) {
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
     if (typeof filter === "string") filter = filters.byProps([filter]);
     else if (Array.isArray(filter)) filter = filters.byProps(filter);
-    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got", filter);
+    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
     const existing = find(filter!);
     if (existing) return void callback(existing);
