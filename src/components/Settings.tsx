@@ -34,24 +34,16 @@ export default ErrorBoundary.wrap(function Settings(props) {
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
-            <Forms.FormText>
-                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
-            </Forms.FormText>
             {outdated && (
                 <>
                     <Forms.FormTitle tag="h5">Updater</Forms.FormTitle>
                     <Updater setIsOutdated={setOutdated} />
+                    <Forums.FormDivider />
                 </>
             )}
 
-            <Forms.FormDivider />
-
-            <Forms.FormTitle tag="h5" className={outdated ? `${Margins.marginTop20} ${Margins.marginBottom8}` : ""}>
-                Settings
-            </Forms.FormTitle>
-
             <Forms.FormText>
-                SettingsDir: {settingsDir}
+                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
             </Forms.FormText>
 
             <Flex className={classes(Margins.marginBottom20)}>
@@ -88,7 +80,7 @@ export default ErrorBoundary.wrap(function Settings(props) {
             </Switch>
             <Switch
                 value={settings.notifyAboutUpdates}
-                onChange={v => settings.notifyAboutUpdates = v}
+                onChange={(v: boolean) => settings.notifyAboutUpdates = v}
                 note="Shows a Toast on StartUp"
             >
                 Get notified about new Updates
