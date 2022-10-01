@@ -18,5 +18,9 @@ export const Devs = Object.freeze({
     Megu: {
         name: "Megumin",
         id: 545581357812678656n
+    },
+    botato: {
+        name: "botato",
+        id: 440990343899643943n
     }
 });
