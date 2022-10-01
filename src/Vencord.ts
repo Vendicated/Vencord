@@ -1,6 +1,9 @@
 export * as Plugins from "./plugins";
 export * as Webpack from "./webpack";
 export * as Api from "./api";
+export * as Updater from "./utils/updater";
+export * as QuickCss from "./utils/quickCss";
+
 import { popNotice, showNotice } from "./api/Notices";
 import { Settings } from "./api/settings";
 import { startAllPlugins } from "./plugins";
