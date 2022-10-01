@@ -1,9 +1,10 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { Toasts } from '../webpack/common';
 
 export default definePlugin({
     name: "ClickableRoleDot",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     description:
         "Makes RoleDots (Accessibility Feature) copy colour to clipboard on click",
     patches: [

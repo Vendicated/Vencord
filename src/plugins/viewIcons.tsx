@@ -1,10 +1,11 @@
+import { Devs } from "../utils/constants";
 import IpcEvents from "../utils/IpcEvents";
 import definePlugin from '../utils/types';
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default definePlugin({
     name: "ViewIcons",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon.",
 
     openImage(url: string) {
