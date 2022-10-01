@@ -93,6 +93,7 @@ export default ErrorBoundary.wrap(function Updater() {
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
+                            setUpdates([]);
                             const needFullRestart = await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
@@ -123,6 +124,7 @@ export default ErrorBoundary.wrap(function Updater() {
                         if (outdated) {
                             setUpdates(changes);
                         } else {
+                            setUpdates([]);
                             Toasts.show({
                                 message: "No updates found!",
                                 id: Toasts.genId(),
