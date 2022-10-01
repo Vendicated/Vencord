@@ -2,9 +2,10 @@ import { addPreSendListener, addPreEditListener, SendListener, removePreSendList
 import { findByProps } from "../webpack";
 import definePlugin from "../utils/types";
 import { Devs } from '../utils/constants';
+import { UserStore } from '../webpack/common';
 
 export default definePlugin({
-    name: "Nitro Bypass",
+    name: "NitroBypass",
     authors: [Devs.Arjix],
     description: "Allows you to stream in nitro quality and send fake emojis.",
     dependencies: ["MessageEventsAPI"],
@@ -22,21 +23,33 @@ export default definePlugin({
                 };
             })
         },
+        {
+            find: "STREAM_FPS_OPTION.format",
+            replacement: {
+                match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
+                replace: ""
+            }
+        }
     ],
 
+    get guildId() {
+        return window.location.href.split("channels/")[1].split("/")[0];
+    },
+
+    get canUseEmotes() {
+        return Boolean(UserStore.getCurrentUser().premiumType);
+    },
+
     start() {
+        if (this.canUseEmotes) {
+            console.info("[NitroBypass] Skipping start because you have nitro");
+            return;
+        }
+
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
 
-        // Remove any nitro requirements for any of the streaming settings.
-        findByProps("ApplicationStreamPresets")
-            .ApplicationStreamSettingRequirements
-            .forEach(x => {
-                delete x.userPremiumType;
-                delete x.guildPremiumTier;
-            });
-
         this.preSend = addPreSendListener((_, messageObj) => {
-            const guildId = window.location.href.split("channels/")[1].split("/")[0];
+            const guildId = this.guildId;
             for (const emoji of messageObj.validNonShortcutEmojis) {
                 if (!emoji.require_colons) continue;
                 if (emoji.guildId === guildId && !emoji.animated) continue;
@@ -46,8 +59,9 @@ export default definePlugin({
                 messageObj.content = messageObj.content.replace(emojiString, ` ${url} `);
             }
         });
+
         this.preEdit = addPreEditListener((_, __, messageObj) => {
-            const guildId = window.location.href.split("channels/")[1].split("/")[0];
+            const guildId = this.guildId;
 
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
                 const emoji = getCustomEmojiById(emojiId);
