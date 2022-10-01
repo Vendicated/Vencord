@@ -2,8 +2,8 @@ import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
-    name: "Nop Spammer",
-    description: "makes the hidden from likely spammer tag explode",
+    name: "iLoveSpam",
+    description: "Do not hide messages from 'likely spammers'",
     authors: [
         Devs.botato,
         {
