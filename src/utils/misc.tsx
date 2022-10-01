@@ -1,3 +1,4 @@
+import { FilterFn, find } from "../webpack";
 import { React } from "../webpack/common";
 
 /**
@@ -7,9 +8,22 @@ import { React } from "../webpack/common";
  */
 export function lazy<T>(factory: () => T): () => T {
     let cache: T;
-    return () => {
-        return cache ?? (cache = factory());
-    };
+    return () => cache ?? (cache = factory());
+}
+
+/**
+ * Do a lazy webpack search. Searches the module on first property access
+ * @param filter Filter function
+ * @returns Proxy. Note that only get and set are implemented, all other operations will have unexpected
+ *          results.
+ */
+export function lazyWebpack<T = any>(filter: FilterFn): T {
+    const getMod = lazy(() => find(filter));
+
+    return new Proxy({}, {
+        get: (_, prop) => getMod()[prop],
+        set: (_, prop, v) => getMod()[prop] = v
+    }) as T;
 }
 
 /**
@@ -48,7 +62,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
 export function LazyComponent<T = any>(factory: () => React.ComponentType<T>) {
     return (props: T) => {
         const Component = React.useMemo(factory, []);
-        return <Component {...props} />;
+        return <Component {...props as any /* I hate react typings ??? */} />;
     };
 }
 
@@ -97,4 +111,12 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
     }
 
     return s;
+}
+
+/**
+ * Calls .join(" ") on the arguments
+ * classes("one", "two") => "one two"
+ */
+export function classes(...classes: string[]) {
+    return classes.join(" ");
 }

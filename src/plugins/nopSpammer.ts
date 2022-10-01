@@ -5,10 +5,10 @@ export default definePlugin({
     description: "makes the hidden from likely spammer tag explode",
     author: "Animal",
     patches: [{
-        find: "isSpam=",
+        find: "),{hasFlag:",
         replacement: {
-            match: /\.isSpam=.;/,
-            replace: ".isSpam=false;",
+            match: "(if\(e<=1<<30\)return)",
+            replace: "if(e===(1<<20)){return false};$1",
         }
     }]
 });

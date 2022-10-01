@@ -17,7 +17,7 @@ export default definePlugin({
     ],
 
     copyToClipBoard(color: string) {
-        DiscordNative.clipboard.copy(color);
+        window.DiscordNative.clipboard.copy(color);
         Toasts.show({
             message: "Copied to Clipboard!",
             type: Toasts.Type.SUCCESS,
