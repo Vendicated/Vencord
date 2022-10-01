@@ -1,12 +1,44 @@
 export * as Plugins from "./plugins";
 export * as Webpack from "./webpack";
 export * as Api from "./api";
-export { Settings } from "./api/settings";
+export * as Updater from "./utils/updater";
+export * as QuickCss from "./utils/quickCss";
 
-import "./utils/patchWebpack";
+import { popNotice, showNotice } from "./api/Notices";
+import { Settings } from "./api/settings";
+import { startAllPlugins } from "./plugins";
+
+export { Settings };
+
+import "./webpack/patchWebpack";
 import "./utils/quickCss";
-import { waitFor } from "./webpack";
+import { checkForUpdates, UpdateLogger } from './utils/updater';
+import { onceReady } from "./webpack";
+import { Router } from "./webpack/common";
 
 export let Components;
 
-waitFor("useState", () => setTimeout(() => import("./components").then(mod => Components = mod), 0));
+async function init() {
+    await onceReady;
+    startAllPlugins();
+    Components = await import("./components");
+
+    try {
+        const isOutdated = await checkForUpdates();
+        if (isOutdated && Settings.notifyAboutUpdates)
+            setTimeout(() => {
+                showNotice(
+                    "A Vencord update is available!",
+                    "View Update",
+                    () => {
+                        popNotice();
+                        Router.open("Vencord");
+                    }
+                );
+            }, 10000);
+    } catch (err) {
+        UpdateLogger.error("Failed to check for updates", err);
+    }
+}
+
+init();

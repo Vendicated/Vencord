@@ -1,9 +1,10 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { Toasts } from '../webpack/common';
 
 export default definePlugin({
     name: "ClickableRoleDot",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     description:
         "Makes RoleDots (Accessibility Feature) copy colour to clipboard on click",
     patches: [
@@ -17,7 +18,7 @@ export default definePlugin({
     ],
 
     copyToClipBoard(color: string) {
-        DiscordNative.clipboard.copy(color);
+        window.DiscordNative.clipboard.copy(color);
         Toasts.show({
             message: "Copied to Clipboard!",
             type: Toasts.Type.SUCCESS,

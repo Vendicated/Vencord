@@ -1,5 +1,12 @@
 import type { WebpackInstance } from "discord-types/other";
 
+export let _resolveReady: () => void;
+/**
+ * Fired once a gateway connection to Discord has been established.
+ * This indicates that the core webpack modules have been initialised
+ */
+export const onceReady = new Promise<void>(r => _resolveReady = r);
+
 export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
 
@@ -36,7 +43,7 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
 
 export function find(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got", filter);
+        throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     for (const key in cache) {
         const mod = cache[key];
@@ -63,13 +70,24 @@ export function find(filter: FilterFn, getDefault = true) {
 
 // TODO fix
 export function findAll(filter: FilterFn, getDefault = true) {
-    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got", filter);
+    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     const ret = [] as any[];
     for (const key in cache) {
         const mod = cache[key];
-        if (mod?.exports && filter(mod.exports)) ret.push(mod.exports);
-        if (mod?.exports?.default && filter(mod.exports.default)) ret.push(getDefault ? mod.exports.default : mod.exports);
+        if (!mod?.exports) continue;
+
+        if (filter(mod.exports))
+            ret.push(mod.exports);
+        else if (typeof mod.exports !== "object")
+            continue;
+
+        if (mod.exports.default && filter(mod.exports.default))
+            ret.push(getDefault ? mod.exports.default : mod.exports);
+        else for (const nestedMod in mod.exports) if (nestedMod.length < 3) {
+            const nested = mod.exports[nestedMod];
+            if (nested && filter(nested)) ret.push(nested);
+        }
     }
 
     return ret;
@@ -90,7 +108,7 @@ export function findByDisplayName(deezNuts: string) {
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
     if (typeof filter === "string") filter = filters.byProps([filter]);
     else if (Array.isArray(filter)) filter = filters.byProps(filter);
-    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got", filter);
+    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
     const existing = find(filter!);
     if (existing) return void callback(existing);

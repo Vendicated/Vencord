@@ -1,16 +1,19 @@
-import { humanFriendlyJoin, useAwaiter } from "../utils/misc";
+import { classes, humanFriendlyJoin, lazy, useAwaiter } from "../utils/misc";
 import Plugins from 'plugins';
 import { useSettings } from "../api/settings";
 import IpcEvents from "../utils/IpcEvents";
 
-import { Button, Switch, Forms, React } from "../webpack/common";
+import { Button, Switch, Forms, React, Margins } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
 import { Flex } from './Flex';
+import { isOutdated } from "../utils/updater";
+import { Updater } from "./Updater";
 
 export default ErrorBoundary.wrap(function Settings(props) {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
+    const [outdated, setOutdated] = React.useState(isOutdated);
     const settings = useSettings();
 
     const depMap = React.useMemo(() => {
@@ -34,7 +37,24 @@ export default ErrorBoundary.wrap(function Settings(props) {
             <Forms.FormText>
                 SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
             </Forms.FormText>
-            <Flex style={{ marginTop: "8px", marginBottom: "8px" }}>
+            {outdated && (
+                <>
+                    <Forms.FormTitle tag="h5">Updater</Forms.FormTitle>
+                    <Updater setIsOutdated={setOutdated} />
+                </>
+            )}
+
+            <Forms.FormDivider />
+
+            <Forms.FormTitle tag="h5" className={outdated ? `${Margins.marginTop20} ${Margins.marginBottom8}` : ""}>
+                Settings
+            </Forms.FormTitle>
+
+            <Forms.FormText>
+                SettingsDir: {settingsDir}
+            </Forms.FormText>
+
+            <Flex className={classes(Margins.marginBottom20)}>
                 <Button
                     onClick={() => location.reload()}
                     size={Button.Sizes.SMALL}
@@ -67,14 +87,26 @@ export default ErrorBoundary.wrap(function Settings(props) {
                 Use QuickCss
             </Switch>
             <Switch
+                value={settings.notifyAboutUpdates}
+                onChange={v => settings.notifyAboutUpdates = v}
+                note="Shows a Toast on StartUp"
+            >
+                Get notified about new Updates
+            </Switch>
+            <Switch
                 value={settings.unsafeRequire}
                 onChange={(v: boolean) => settings.unsafeRequire = v}
                 note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
             >
                 Enable Unsafe Require
             </Switch>
+
             <Forms.FormDivider />
-            <Forms.FormTitle tag="h5">Plugins</Forms.FormTitle>
+
+            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+                Plugins
+            </Forms.FormTitle>
+
             {sortedPlugins.map(p => {
                 const enabledDependants = depMap[p.name]?.filter(d => settings.plugins[d].enabled);
                 const dependency = enabledDependants?.length;

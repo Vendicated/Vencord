@@ -8,7 +8,7 @@ function strEnum<T extends Record<string, string>>(obj: T): T {
         o[key] = obj[key] as any;
         o[obj[key]] = key as any;
     };
-    return o;
+    return Object.freeze(o);
 }
 
 export default strEnum({
@@ -19,4 +19,9 @@ export default strEnum({
     SET_SETTINGS: "VencordSetSettings",
     OPEN_EXTERNAL: "VencordOpenExternal",
     OPEN_PATH: "VencordOpenPath",
+    GET_UPDATES: "VencordGetUpdates",
+    GET_REPO: "VencordGetRepo",
+    GET_HASHES: "VencordGetHashes",
+    UPDATE: "VencordUpdate",
+    BUILD: "VencordBuild"
 } as const);
