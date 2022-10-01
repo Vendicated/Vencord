@@ -1,9 +1,10 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "Ify",
     description: "Disabes Spotify auto-pausing and premium checks",
-    author: "Cynosphere",
+    authors: [Devs.Cyn],
     patches: [
         {
             find: '.displayName="SpotifyStore"',

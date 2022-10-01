@@ -8,7 +8,7 @@ function strEnum<T extends Record<string, string>>(obj: T): T {
         o[key] = obj[key] as any;
         o[obj[key]] = key as any;
     };
-    return o;
+    return Object.freeze(o);
 }
 
 export default strEnum({

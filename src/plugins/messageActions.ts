@@ -1,4 +1,5 @@
 import { addClickListener, removeClickListener } from '../api/MessageEvents';
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { find, findByProps } from "../webpack";
 import { UserStore } from "../webpack/common";
@@ -10,7 +11,7 @@ const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = 
 export default definePlugin({
     name: "MessageQuickActions",
     description: "Quick Delete, Quick edit",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
     start() {
