@@ -1,10 +1,11 @@
 import definePlugin from "../utils/types";
 import gitHash from "git-hash";
+import { Devs } from '../utils/constants';
 
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     required: true,
     patches: [{
         find: "().versionHash",

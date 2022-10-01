@@ -1,10 +1,11 @@
 import { addPreSendListener, addPreEditListener, SendListener, removePreSendListener, removePreEditListener } from '../api/MessageEvents';
 import { findByProps } from "../webpack";
 import definePlugin from "../utils/types";
+import { Devs } from '../utils/constants';
 
 export default definePlugin({
     name: "Nitro Bypass",
-    author: "ArjixWasTaken",
+    authors: [Devs.Arjix],
     description: "Allows you to stream in nitro quality and send fake emojis.",
     dependencies: ["MessageEventsAPI"],
     patches: [

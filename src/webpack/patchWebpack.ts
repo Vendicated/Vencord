@@ -1,6 +1,6 @@
-import { WEBPACK_CHUNK } from './constants';
-import Logger from "./logger";
-import { _initWebpack } from "../webpack";
+import { WEBPACK_CHUNK } from '../utils/constants';
+import Logger from "../utils/logger";
+import { _initWebpack } from ".";
 
 let webpackChunk: any[];
 

@@ -7,7 +7,7 @@ import { startAllPlugins } from "./plugins";
 
 export { Settings };
 
-import "./utils/patchWebpack";
+import "./webpack/patchWebpack";
 import "./utils/quickCss";
 import { checkForUpdates, UpdateLogger } from './utils/updater';
 import { onceReady } from "./webpack";

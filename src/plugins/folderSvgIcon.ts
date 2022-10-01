@@ -3,7 +3,10 @@ import definePlugin from "../utils/types";
 export default definePlugin({
     name: "Folder SVG Icon",
     description: "Doesn't show the small guild icons in folders",
-    author: "botato",
+    authors: [{
+        name: "botato",
+        id: 440990343899643943n
+    }],
     patches: [{
         find: "().expandedFolderIconWrapper",
         replacement: [{

@@ -1,8 +1,9 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "BetterGifAltText",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     description:
         "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
     patches: [
@@ -30,7 +31,7 @@ export default definePlugin({
         let url: string = props.original || props.src;
         try {
             url = decodeURI(url);
-        } catch {}
+        } catch { }
 
         let name = url
             .slice(url.lastIndexOf("/") + 1)

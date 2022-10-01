@@ -1,9 +1,10 @@
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "ApiNotices",
     description: "Fixes notices being automatically dismissed",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     required: true,
     patches: [
         {

@@ -1,8 +1,9 @@
 import definePlugin from '../utils/types';
+import { Devs } from '../utils/constants';
 
 export default definePlugin({
     name: "SilentTyping",
-    author: "Vendicated",
+    authors: [Devs.Ven],
     description: "Hide that you are typing",
     patches: [{
         find: "startTyping:",
