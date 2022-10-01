@@ -23,6 +23,11 @@ pnpm build
 The builds are now in the dist/ folder (Vencord/dist).
 Now install with either the powershell/bash script or use [X1nto's installer](https://github.com/X1nto/VencordInstaller/releases/latest)
 
+## Contributing
+[contribute]: CONTRIBUTING.md
+
+[contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute]   
+
 ## Join
 [join]: https://discord.gg/D9uwnFnqmd
 
