@@ -34,6 +34,9 @@ export default ErrorBoundary.wrap(function Settings(props) {
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
+            <Forms.FormText>
+                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
+            </Forms.FormText>
             {outdated && (
                 <>
                     <Forms.FormTitle tag="h5">Updater</Forms.FormTitle>
@@ -45,10 +48,6 @@ export default ErrorBoundary.wrap(function Settings(props) {
             <Forms.FormTitle tag="h5" className={outdated ? `${Margins.marginTop20} ${Margins.marginBottom8}` : ""}>
                 Settings
             </Forms.FormTitle>
-
-            <Forms.FormText>
-                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
-            </Forms.FormText>
 
             <Flex className={classes(Margins.marginBottom20)}>
                 <Button
