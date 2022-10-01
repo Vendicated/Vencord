@@ -3,7 +3,10 @@ import definePlugin from "../utils/types";
 export default definePlugin({
     name: "MuteNewGuild",
     description: "Mutes newly joined guilds",
-    author: "Glitchy",
+    authors: [{
+        name:"Glitchy",
+        id: 269567451199569920n
+    }],
     patches: [
         {
             find: "acceptInvite:function",
