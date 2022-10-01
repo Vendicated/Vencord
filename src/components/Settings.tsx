@@ -41,6 +41,10 @@ export default ErrorBoundary.wrap(function Settings(props) {
                     <Forums.FormDivider />
                 </>
             )}
+            
+            <Forms.FormTitle tag="h5" className={outdated ? `${Margins.marginTop20} ${Margins.marginBottom8}` : ""}>
+                Settings
+            </Forms.FormTitle>
 
             <Forms.FormText>
                 SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
