@@ -23,37 +23,38 @@ export function startAllPlugins() {
 }
 
 export function startPlugin(p: Plugin) {
-    if (p.start) {
-        logger.info("Starting plugin", p.name);
-        if (p.started) {
-            logger.warn(`${p.name} already started`);
-            return false;
-        }
-        try {
-            p.start();
-            p.started = true;
-            return true;
-        } catch (err: any) {
-            logger.error(`Failed to start ${p.name}\n`, err);
-            return false;
-        }
+    if (!p.start) return true;
+
+    logger.info("Starting plugin", p.name);
+    if (p.started) {
+        logger.warn(`${p.name} already started`);
+        return false;
+    }
+
+    try {
+        p.start();
+        p.started = true;
+        return true;
+    } catch (err: any) {
+        logger.error(`Failed to start ${p.name}\n`, err);
+        return false;
     }
 }
 
 export function stopPlugin(p: Plugin) {
-    if (p.stop) {
-        logger.info("Stopping plugin", p.name);
-        if (!p.started) {
-            logger.warn(`${p.name} already stopped / never started`);
-            return false;
-        }
-        try {
-            p.stop();
-            p.started = false;
-            return true;
-        } catch (err: any) {
-            logger.error(`Failed to stop ${p.name}\n`, err);
-            return false;
-        }
+    if (!p.stop) return true;
+
+    logger.info("Stopping plugin", p.name);
+    if (!p.started) {
+        logger.warn(`${p.name} already stopped / never started`);
+        return false;
+    }
+    try {
+        p.stop();
+        p.started = false;
+        return true;
+    } catch (err: any) {
+        logger.error(`Failed to stop ${p.name}\n`, err);
+        return false;
     }
 }

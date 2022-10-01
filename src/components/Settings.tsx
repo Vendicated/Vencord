@@ -1,20 +1,50 @@
-import { classes, humanFriendlyJoin, lazy, useAwaiter } from "../utils/misc";
+import { classes, humanFriendlyJoin, useAwaiter } from "../utils/misc";
 import Plugins from 'plugins';
 import { useSettings } from "../api/settings";
 import IpcEvents from "../utils/IpcEvents";
 
-import { Button, Switch, Forms, React, Margins } from "../webpack/common";
+import { Button, Switch, Forms, React, Margins, Toasts, Alerts, Parser } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
 import { Flex } from './Flex';
-import { isOutdated } from "../utils/updater";
-import { Updater } from "./Updater";
+import { ChangeList } from '../utils/ChangeList';
 
-export default ErrorBoundary.wrap(function Settings(props) {
+function showErrorToast(message: string) {
+    Toasts.show({
+        message,
+        type: Toasts.Type.FAILURE,
+        id: Toasts.genId(),
+        options: {
+            position: Toasts.Position.BOTTOM
+        }
+    });
+}
+
+export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
-    const [outdated, setOutdated] = React.useState(isOutdated);
     const settings = useSettings();
+    const changes = React.useMemo(() => new ChangeList<string>, []);
+
+    React.useEffect(() => {
+        return () => void (changes.hasChanges && Alerts.show({
+            title: "Restart required",
+            body: (
+                <>
+                    <p>The following plugins require a restart:</p>
+                    <div>{changes.map((s, i) => (
+                        <>
+                            {i > 0 && ", "}
+                            {Parser.parse('`' + s + '`')}
+                        </>
+                    ))}</div>
+                </>
+            ),
+            confirmText: "Restart now",
+            cancelText: "Later!",
+            onConfirm: () => location.reload()
+        }));
+    }, []);
 
     const depMap = React.useMemo(() => {
         const o = {} as Record<string, string[]>;
@@ -34,15 +64,7 @@ export default ErrorBoundary.wrap(function Settings(props) {
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
-            {outdated && (
-                <>
-                    <Forms.FormTitle tag="h5">Updater</Forms.FormTitle>
-                    <Updater setIsOutdated={setOutdated} />
-                    <Forums.FormDivider />
-                </>
-            )}
-            
-            <Forms.FormTitle tag="h5" className={outdated ? `${Margins.marginTop20} ${Margins.marginBottom8}` : ""}>
+            <Forms.FormTitle tag="h5">
                 Settings
             </Forms.FormTitle>
 
@@ -118,21 +140,19 @@ export default ErrorBoundary.wrap(function Settings(props) {
                                 p.dependencies?.forEach(d => {
                                     settings.plugins[d].enabled = true;
                                     if (!Plugins[d].started && !stopPlugin) {
-                                        // TODO show notification
                                         settings.plugins[p.name].enabled = false;
+                                        showErrorToast(`Failed to start dependency ${d}. Check the console for more info.`);
                                     }
                                 });
                                 if (!p.started && !startPlugin(p)) {
-                                    // TODO show notification
+                                    showErrorToast(`Failed to start plugin ${p.name}. Check the console for more info.`);
                                 }
                             } else {
                                 if (p.started && !stopPlugin(p)) {
-                                    // TODO show notification
+                                    showErrorToast(`Failed to stop plugin ${p.name}. Check the console for more info.`);
                                 }
                             }
-                            if (p.patches) {
-                                // TODO show notification
-                            }
+                            if (p.patches) changes.handleChange(p.name);
                         }}
                         note={p.description}
                         tooltipNote={

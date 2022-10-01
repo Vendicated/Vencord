@@ -27,7 +27,8 @@ export default definePlugin({
             match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) =>
                 `{section:${mod}.ID.HEADER,label:"Vencord"},` +
-                `{section:"Vencord",label:"Vencord",element:Vencord.Components.Settings},` +
+                `{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},` +
+                `{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater},` +
                 `{section:${mod}.ID.DIVIDER},${m}`
 
         }
