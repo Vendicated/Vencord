@@ -2,7 +2,7 @@
 
 import { execFile as cpExecFile } from 'child_process';
 import { createHash } from "crypto";
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { createReadStream, mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from 'path';
@@ -76,6 +76,7 @@ function serializeErrors(func: (...args: any[]) => any) {
     };
 }
 
+ipcMain.handle(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, (_, opts) => desktopCapturer.getSources(opts));
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.OPEN_PATH, (_, ...pathElements) => shell.openPath(join(...pathElements)));
