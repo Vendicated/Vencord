@@ -43,7 +43,7 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
 
 export function find(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got" + typeof filter);
+        throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     for (const key in cache) {
         const mod = cache[key];
