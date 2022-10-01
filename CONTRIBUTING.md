@@ -24,7 +24,7 @@ This way we can ensure compatibility and high quality patches.
 Follow the below guide to make your first plugin!
 
 
-#### Finding the right module to patch
+### Finding the right module to patch
 
 If the thing you want to patch is an action performed when interacting with a part of the UI, use React DevTools.
 They come preinstalled and can be found as the "Components" tab in DevTools.
@@ -35,7 +35,7 @@ If it is anything else, or you're too lazy to use React DevTools, hit `CTRL + Sh
 enter a search term, for example "getUser" to search all source files.
 Look at the results until you find something promising. Set a breakpoint and trigger the execution of that part of Code to inspect arguments, locals, etc...
 
-#### Writing a robust patch
+### Writing a robust patch
 
 ##### "find"
 
