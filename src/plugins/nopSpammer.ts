@@ -15,8 +15,8 @@ export default definePlugin({
         {
             find: "),{hasFlag:",
             replacement: {
-                match: /(if\(e<=1<<30\)return)/,
-                replace: "if(e===(1<<20)){return false};$1",
+                match: /(if\((.{1,2})<=1<<30\)return)/,
+                replace: "if($2===(1<<20)){return false};$1",
             },
         },
     ],
