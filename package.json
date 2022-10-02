@@ -15,5 +15,6 @@
 	"scripts": {
 		"build": "node build.mjs",
 		"watch": "node build.mjs --watch"
-	}
+	},
+	"packageManager": "pnpm@7.12.2"
 }
