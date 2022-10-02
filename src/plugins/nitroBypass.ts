@@ -49,7 +49,7 @@ export default definePlugin({
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
 
         function whitespaceCheck(origStr, offset) {
-            return !origStr[offset] || /\s/.test(origStr[offset]);
+            return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
 
         this.preSend = addPreSendListener((_, messageObj) => {
@@ -61,7 +61,7 @@ export default definePlugin({
                 const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
                 messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                    return `${whitespaceCheck(origStr, offset-1) ? "" : " "}${url}${whitespaceCheck(origStr, offset+match.length) ? "" : " "}`;
+                    return `${whitespaceCheck(origStr, offset-1)}${url}${whitespaceCheck(origStr, offset+match.length)}`;
                 });
             }
         });
@@ -76,7 +76,7 @@ export default definePlugin({
 
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
                 messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                    return `${whitespaceCheck(origStr, offset-1) ? "" : " "}${url}${whitespaceCheck(origStr, offset+match.length) ? "" : " "}`;
+                    return `${whitespaceCheck(origStr, offset-1)}${url}${whitespaceCheck(origStr, offset+match.length)}`;
                 });
             }
         });
