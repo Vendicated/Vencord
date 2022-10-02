@@ -48,6 +48,10 @@ export default definePlugin({
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
 
+        function whitespaceCheck(origStr, offset) {
+            return !origStr[offset] || /\s/.test(origStr[offset]);
+        }
+
         this.preSend = addPreSendListener((_, messageObj) => {
             const guildId = this.guildId;
             for (const emoji of messageObj.validNonShortcutEmojis) {
@@ -56,8 +60,8 @@ export default definePlugin({
 
                 const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiString, (match, offset, string) => {
-                    return `${string[offset-1] === " " ? "" : " "}${url}${string[offset+length] === " " ? "" : " "}`
+                messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
+                    return `${whitespaceCheck(origStr, offset-1) ? "" : " "}${url}${whitespaceCheck(origStr, offset+match.length) ? "" : " "}`;
                 });
             }
         });
@@ -68,10 +72,11 @@ export default definePlugin({
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
                 const emoji = getCustomEmojiById(emojiId);
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
+                if (!emoji.require_colons) continue;
 
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, string) => {
-                    return `${(!string[offset-1]?.match(/\s/)) ? "" : " "}${url}${!string[offset+length]?.match(/\s/) ? "" : " "}`
+                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
+                    return `${whitespaceCheck(origStr, offset-1) ? "" : " "}${url}${whitespaceCheck(origStr, offset+match.length) ? "" : " "}`;
                 });
             }
         });
