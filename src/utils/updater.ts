@@ -4,12 +4,15 @@ import { IpcRes } from './types';
 
 export const UpdateLogger = new Logger("Updater", "white");
 export let isOutdated = false;
+export let updateError: any;
 export let changes: Record<"hash" | "author" | "message", string>[];
 
 async function Unwrap<T>(p: Promise<IpcRes<T>>) {
     const res = await p;
 
     if (res.ok) return res.value;
+
+    updateError = res.error;
     throw res.error;
 }
 

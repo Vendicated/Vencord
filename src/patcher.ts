@@ -1,4 +1,3 @@
-
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import installExt, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import { join } from "path";

@@ -1,10 +1,11 @@
 import gitHash from "git-hash";
-import { changes, checkForUpdates, getRepo, rebuild, update, UpdateLogger } from "../utils/updater";
+import { changes, checkForUpdates, getRepo, rebuild, update, UpdateLogger, updateError } from '../utils/updater';
 import { React, Forms, Button, Margins, Alerts, Card, Parser, Toasts } from '../webpack/common';
 import { Flex } from "./Flex";
 import { useAwaiter } from '../utils/misc';
 import { Link } from "./Link";
 import ErrorBoundary from "./ErrorBoundary";
+import { ErrorCard } from "./ErrorCard";
 
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
@@ -31,7 +32,11 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
             }
             Alerts.show({
                 title: "Oops!",
-                body: err.split("\n").map(line => <div>{Parser.parse(line)}</div>)
+                body: (
+                    <ErrorCard>
+                        {err.split("\n").map(line => <div>{Parser.parse(line)}</div>)}
+                    </ErrorCard>
+                )
             });
         }
         finally {
@@ -51,7 +56,7 @@ export default ErrorBoundary.wrap(function Updater() {
             UpdateLogger.error("Failed to retrieve repo", err);
     }, [err]);
 
-    const isOutdated = updates.length > 0;
+    const isOutdated = updates?.length > 0;
 
     return (
         <Forms.FormSection tag="h1" title="Vencord Updater">
@@ -67,11 +72,22 @@ export default ErrorBoundary.wrap(function Updater() {
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
-            <Forms.FormText className={Margins.marginBottom8}>
-                {updates.length ? `There are ${updates.length} Updates` : "Up to Date!"}
-            </Forms.FormText>
+            {!updates && updateError ? (
+                <>
+                    <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
+                    <ErrorCard style={{ padding: "1em" }}>
+                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
+                    </ErrorCard>
+                </>
+            ) :
+                (
+                    <Forms.FormText className={Margins.marginBottom8}>
+                        {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
+                    </Forms.FormText>
+                )
+            }
 
-            {updates.length > 0 && (
+            {isOutdated && (
                 <Card style={{ padding: ".5em" }}>
                     {updates.map(({ hash, author, message }) => (
                         <div>
@@ -139,6 +155,6 @@ export default ErrorBoundary.wrap(function Updater() {
                     Check for Updates
                 </Button>
             </Flex>
-        </Forms.FormSection>
+        </Forms.FormSection >
     );
 });
