@@ -13,21 +13,21 @@ export default definePlugin({
         {
             find: "instantBatchUpload:function",
             replacement: {
-                match: /uploadFiles:(.)/,
+                match: /uploadFiles:(.{1,2}),/,
                 replace:
-                    "uploadFiles: (...args) => (args[0].uploads.forEach((f) => {f.filename = Vencord.Plugins.plugins.randomizeUpload.rand(f.filename)}), $1(...args))",
+                    "uploadFiles: (...args) => (args[0].uploads.forEach((f) => {f.filename = Vencord.Plugins.plugins.randomizeUpload.rand(f.filename)}), $1(...args)),",
             },
         },
     ],
 
     rand(file) {
-        let res = "";
         const chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for (var i = 0; i < 7; i++) {
-            res += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        res += window.DiscordNative.fileManager.extname(file);
+        const rand = Array.from(
+            { length: 7 },
+            () => chars[Math.floor(Math.random() * chars.length)]
+        ).join("");
+        let res = rand + window.DiscordNative.fileManager.extname(file);
         return res;
     },
 });
