@@ -74,7 +74,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <Flex className={classes(Margins.marginBottom20)}>
                 <Button
-                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir)}
+                    onClick={() => window.DiscordNative.fileManager.showItemInFolder(settingsDir)}
                     size={Button.Sizes.SMALL}
                     disabled={settingsDirPending}
                 >
