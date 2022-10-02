@@ -56,7 +56,9 @@ export default definePlugin({
 
                 const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiString, ` ${url} `);
+                messageObj.content = messageObj.content.replace(emojiString, (match, offset, string) => {
+                    return `${string[offset-1] === " " ? "" : " "}${url}${string[offset+length] === " " ? "" : " "}`
+                });
             }
         });
 
@@ -68,7 +70,9 @@ export default definePlugin({
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
 
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiStr, ` ${url} `);
+                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, string) => {
+                    return `${string[offset-1] === " " ? "" : " "}${url}${string[offset+length] === " " ? "" : " "}`
+                });
             }
         });
     },
