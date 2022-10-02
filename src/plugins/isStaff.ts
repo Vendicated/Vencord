@@ -3,20 +3,26 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "isStaff",
-    description: "Gives access to client devtools & other things locked behind isStaff",
-    authors: [
-        Devs.Megu
-    ],
+    description:
+        "Gives access to client devtools & other things locked behind isStaff",
+    authors: [Devs.Megu],
     patches: [
         {
             find: ".isStaff=function(){",
-            replacement: [{
-                match: /(\w+)\.isStaff=function\(\){return\s*!1};/,
-                replace: "$1.isStaff=function(){return true};",
-            }, {
-                match: /return\s\w+\.hasFlag.+?}/,
-                replace: "return true}",
-            }],
+            replacement: [
+                {
+                    match: /(\w+)\.isStaff=function\(\){return\s*!1};/,
+                    replace: "$1.isStaff=function(){return true};",
+                },
+                {
+                    match: /return\s*\w+\.hasFlag\(.+?STAFF\)}/,
+                    replace: "return true}",
+                },
+                {
+                    match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*\|\|/,
+                    replace: "hasFreePremium=function(){return ",
+                },
+            ],
         },
     ],
 });
