@@ -48,6 +48,10 @@ export default definePlugin({
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
 
+        function getWordBoundary(origStr, offset) {
+            return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
+        }
+
         this.preSend = addPreSendListener((_, messageObj) => {
             const guildId = this.guildId;
             for (const emoji of messageObj.validNonShortcutEmojis) {
@@ -56,7 +60,9 @@ export default definePlugin({
 
                 const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiString, ` ${url} `);
+                messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
+                    return `${getWordBoundary(origStr, offset-1)}${url}${getWordBoundary(origStr, offset+match.length)}`;
+                });
             }
         });
 
@@ -66,9 +72,12 @@ export default definePlugin({
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
                 const emoji = getCustomEmojiById(emojiId);
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
+                if (!emoji.require_colons) continue;
 
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
-                messageObj.content = messageObj.content.replace(emojiStr, ` ${url} `);
+                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
+                    return `${getWordBoundary(origStr, offset-1)}${url}${getWordBoundary(origStr, offset+match.length)}`;
+                });
             }
         });
     },
