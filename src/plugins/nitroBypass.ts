@@ -71,7 +71,7 @@ export default definePlugin({
 
                 const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
                 messageObj.content = messageObj.content.replace(emojiStr, (match, offset, string) => {
-                    return `${string[offset-1] === " " ? "" : " "}${url}${string[offset+length] === " " ? "" : " "}`
+                    return `${(!string[offset-1]?.match(/\s/)) ? "" : " "}${url}${!string[offset+length]?.match(/\s/) ? "" : " "}`
                 });
             }
         });
