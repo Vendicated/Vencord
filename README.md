@@ -5,6 +5,7 @@ A Discord client mod that does things differently
 ## Features
 
 - Works on Discord's latest update that breaks all other mods
+- Browser Support (experimental): Run Vencord in your Browser instead of the desktop app
 - Custom Css and Themes: Manually edit `%appdata%/Vencord/settings/quickCss.css` / `~/.config/Vencord/settings/quickCss.css` with your favourite editor and the client will automatically apply your changes. To import BetterDiscord themes, just add `@import url(theUrl)` on the top of this file. (Make sure the url is a github raw URL or similar and only contains plain text, and NOT a nice looking website)
 - Many Useful™ plugins - [List](https://github.com/Vendicated/Vencord/tree/main/src/plugins)
 - Experiments
@@ -42,6 +43,15 @@ Now fully close Discord. Start and confirm Vencord successfully installed by che
 If you ever need to get back to the Vencord folder, just open a new terminal and type `cd Vencord`
 
 All plugins are disabled by default, so your first step should be opening Settings and enabling the plugins you want.
+
+
+## Installing on Browser
+
+Run the same commands as in the regular install method. Now run
+```sh
+pnpm buildWeb
+```
+You will find the built extension at dist/extension.zip. Now just install this extension in your Browser
 
 ## Contributing
 [contribute]: CONTRIBUTING.md
