@@ -14,6 +14,8 @@ A Discord client mod that does things differently
 
 ## Installing
 
+If you can't follow the following instructions, please just use BetterDiscord. This was never meant to be a noob friendly mod.
+
 Install [Node.js](https://nodejs.org/en/download/) and [git](https://git-scm.com/downloads)
 
 Open a Terminal and run the following commands. If any of them failed, you didn't properly install Node.js and git (see above).
