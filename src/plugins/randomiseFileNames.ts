@@ -1,13 +1,9 @@
 import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "RandomiseFileNames",
-    authors: [
-        {
-            name: "obscurity",
-            id: 336678828233588736n,
-        },
-    ],
+    authors: [Devs.obscurity],
     description: "Randomise uploaded file names",
     patches: [
         {
