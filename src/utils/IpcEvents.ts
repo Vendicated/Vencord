@@ -18,7 +18,7 @@ export default strEnum({
     GET_SETTINGS: "VencordGetSettings",
     SET_SETTINGS: "VencordSetSettings",
     OPEN_EXTERNAL: "VencordOpenExternal",
-    OPEN_PATH: "VencordOpenPath",
+    OPEN_QUICKCSS: "VencordOpenQuickCss",
     GET_UPDATES: "VencordGetUpdates",
     GET_REPO: "VencordGetRepo",
     GET_HASHES: "VencordGetHashes",

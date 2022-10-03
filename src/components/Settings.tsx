@@ -88,7 +88,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     Launch Directory
                 </Button>
                 <Button
-                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir, "quickCss.css")}
+                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_QUICKCSS)}
                     size={Button.Sizes.SMALL}
                     disabled={settingsDir === "Loading..."}
                 >
