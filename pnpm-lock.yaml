@@ -1,28 +1,26 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 specifiers:
-  '@types/flux': ^3.1.11
   '@types/node': ^18.7.13
   '@types/react': ^18.0.17
+  '@types/yazl': ^2.4.2
   discord-types: ^1.3.26
   electron: ^20.1.0
   electron-devtools-installer: ^3.2.0
   esbuild: ^0.15.5
-  jsposed: ^1.0.2
-  prettier: ^2.7.1
+  yazl: ^2.5.1
 
 dependencies:
   discord-types: 1.3.26
   electron-devtools-installer: 3.2.0
-  jsposed: 1.0.2
-  prettier: 2.7.1
 
 devDependencies:
-  '@types/flux': 3.1.11
   '@types/node': 18.7.13
   '@types/react': 18.0.17
+  '@types/yazl': 2.4.2
   electron: 20.1.0
   esbuild: 0.15.5
+  yazl: 2.5.1
 
 packages:
 
@@ -63,17 +61,6 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       defer-to-connect: 1.1.3
-    dev: true
-
-  /@types/fbemitter/2.0.32:
-    resolution: {integrity: sha512-Hwq28bBlbmfCgLnNJvjl5ssTrbZCTSblI4vqPpqZrbbEL8vn5l2UivxhlMYfUY7a4SR8UB6RKoLjOZfljqAa6g==}
-    dev: true
-
-  /@types/flux/3.1.11:
-    resolution: {integrity: sha512-Aq4UB1ZqAKcPbhB0GpgMw2sntvOh71he9tjz53TLKrI7rw3Y3LxCW5pTYY9IV455hQapm4pmxFjpqlWOs308Yg==}
-    dependencies:
-      '@types/fbemitter': 2.0.32
-      '@types/react': 18.0.17
     dev: true
 
   /@types/keyv/3.1.4:
@@ -125,6 +112,12 @@ packages:
       '@types/node': 18.7.13
     dev: true
     optional: true
+
+  /@types/yazl/2.4.2:
+    resolution: {integrity: sha512-T+9JH8O2guEjXNxqmybzQ92mJUh2oCwDDMSSimZSe1P+pceZiFROZLYmcbqkzV5EUwz6VwcKXCO2S2yUpra6XQ==}
+    dependencies:
+      '@types/node': 18.7.13
+    dev: true
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -684,10 +677,6 @@ packages:
       graceful-fs: 4.2.10
     dev: true
 
-  /jsposed/1.0.2:
-    resolution: {integrity: sha512-t1vQsxnH65kOBRc4swue6EFm/WmPZwLLJ/84IV3aP93f2F724tHK5HIWwrRUKYYqJb9BJEewBsVh/jHQssJfbw==}
-    dev: false
-
   /jszip/3.10.1:
     resolution: {integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==}
     dependencies:
@@ -821,12 +810,6 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
     dev: true
-
-  /prettier/2.7.1:
-    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
-    engines: {node: '>=10.13.0'}
-    hasBin: true
-    dev: false
 
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -1000,4 +983,10 @@ packages:
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
+    dev: true
+
+  /yazl/2.5.1:
+    resolution: {integrity: sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==}
+    dependencies:
+      buffer-crc32: 0.2.13
     dev: true

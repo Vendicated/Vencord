@@ -2,7 +2,6 @@
 import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { readdirSync } from "fs";
-import { performance } from "perf_hooks";
 
 /**
  * @type {esbuild.WatchMode|false}
@@ -115,7 +114,7 @@ await Promise.all([
         sourcemap: false,
         watch,
         minify: true,
-    })
+    }),
 ]).catch(err => {
     console.error("Build failed");
     console.error(err.message);
