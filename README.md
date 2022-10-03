@@ -14,11 +14,11 @@ A Discord client mod that does things differently
 
 ## Installing
 
-If you can't follow the following instructions, please just use BetterDiscord. This was never meant to be a noob friendly mod.
-
 Install [Node.js](https://nodejs.org/en/download/) and [git](https://git-scm.com/downloads)
 
 Open a Terminal and run the following commands. If any of them failed, you didn't properly install Node.js and git (see above).
+> :warning: On Windows, Open a CMD (command line interface), not a PowerShell. It won't work using PS. On Windows 11 Terminal app, it automatically chooses PS and you have to type `cmd` or open a new `Command Prompt` tab.
+
 > :warning: On Windows, DO NOT run the terminal as Administrator. If you open it and the path says system32, you opened it as Administrator.
 
 ```sh
