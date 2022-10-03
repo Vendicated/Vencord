@@ -9,6 +9,7 @@ import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
 import { Flex } from './Flex';
 import { ChangeList } from '../utils/ChangeList';
+import { IS_WEB } from '../utils/isWeb';
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -72,7 +73,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
             </Forms.FormText>
 
-            <Flex className={classes(Margins.marginBottom20)}>
+            {!IS_WEB && <Flex className={classes(Margins.marginBottom20)}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -94,7 +95,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 >
                     Open QuickCSS File
                 </Button>
-            </Flex>
+            </Flex>}
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
@@ -104,20 +105,20 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Use QuickCss
             </Switch>
-            <Switch
+            {!IS_WEB && <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
                 note="Shows a Toast on StartUp"
             >
                 Get notified about new Updates
-            </Switch>
-            <Switch
+            </Switch>}
+            {!IS_WEB && <Switch
                 value={settings.unsafeRequire}
                 onChange={(v: boolean) => settings.unsafeRequire = v}
                 note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
             >
                 Enable Unsafe Require
-            </Switch>
+            </Switch>}
 
             <Forms.FormDivider />
 

@@ -6,6 +6,7 @@ let webpackChunk: any[];
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
+console.log("prepatch is", window[WEBPACK_CHUNK]);
 Object.defineProperty(window, WEBPACK_CHUNK, {
     get: () => webpackChunk,
     set: (v) => {
