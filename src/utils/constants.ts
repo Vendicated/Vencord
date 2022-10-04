@@ -30,5 +30,9 @@ export const Devs = Object.freeze({
     rushii: {
         name: "rushii",
         id: 295190422244950017n
+    },
+    Glitch: {
+        name: "Glitchy",
+        id: 269567451199569920n
     }
 });
