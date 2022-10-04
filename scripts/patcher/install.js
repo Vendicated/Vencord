@@ -56,7 +56,7 @@ async function install(installations) {
             console.log("Failed to give write perms to Discord Flatpak.");
             console.log(
                 "Try running this script as an administrator:",
-                "sudo pnpm patch"
+                "sudo pnpm run patch"
             );
             process.exit(1);
         }
@@ -71,7 +71,7 @@ async function install(installations) {
             console.error("No write access to", selected.location);
             console.error(
                 "Try running this script as an administrator:",
-                "sudo pnpm patch"
+                "sudo pnpm run patch"
             );
             process.exit(1);
         }
