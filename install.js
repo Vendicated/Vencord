@@ -62,7 +62,7 @@ switch (platform) {
         install(getWindowsDirs());
         break;
     case "darwin":
-        installDarwin();
+        install(getDarwinDirs());
         break;
     case "linux":
         install(getLinuxDirs());
@@ -252,22 +252,20 @@ function getDarwinDirs() {
     for (const dir of fs.readdirSync("/Applications")) {
         if (!MACOS_DISCORD_DIRS.includes(dir)) continue;
 
-        const location = path.join("/Applications", dir);
+        const location = path.join("/Applications", dir, "Contents");
+        if (!fs.existsSync(location)) continue;
         if (!fs.statSync(location).isDirectory()) continue;
 
         const appDirs = fs
             .readdirSync(location, { withFileTypes: true })
             .filter((file) => file.isDirectory())
-            .filter((file) => file.name.startsWith("app-"))
-            .map((file) => file.name);
-
-        const fqAppDirs = appDirs.map((dir) => path.join(location, dir));
+            .filter((file) => file.name.startsWith("Resources"))
+            .map((file) => path.join(location, file.name));
 
         let versions = [];
         let patched = false;
 
-        for (const fqAppDir of fqAppDirs) {
-            const resourceDir = path.join(fqAppDir, "resources");
+        for (const resourceDir of appDirs) {
             if (!fs.existsSync(path.join(resourceDir, "app.asar"))) {
                 continue;
             }
@@ -275,10 +273,14 @@ function getDarwinDirs() {
             if (fs.existsSync(appDir)) {
                 patched = true;
             }
-            versions.push(appDir);
+
+            versions.push({
+                path: appDir,
+                name: null, // MacOS installs have no version number
+            });
         }
 
-        if (fqAppDirs.length) {
+        if (appDirs.length) {
             dirs.push({
                 branch: dir,
                 patched,
