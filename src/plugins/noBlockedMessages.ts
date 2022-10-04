@@ -10,7 +10,7 @@ export default definePlugin({
             find: "safety_prompt:\"DMSpamExperiment\",response:\"show_redacted_messages\"",
             replacement: [
                 {
-                    match: /collapsedReason;return \w{1,2}.createElement/,
+                    match: /collapsedReason;return (?=\w{1,2}.createElement)/,
                     replace: "collapsedReason; return null; null.createElement"
                 }
             ]
