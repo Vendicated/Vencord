@@ -33,9 +33,7 @@ pnpm build
 ```
 Don't close your terminal just yet!
 
-The builds are now in the dist/ folder (Vencord/dist). Most importantly, you will need `dist/patcher.js`
-
-Now to install vencord into your Discord client, run the following command and follow the interactive prompt.
+Now to patch vencord into your Discord client, run the following command and follow the interactive prompt.
 
 ```sh
 pnpm patch
@@ -47,7 +45,7 @@ If you ever need to get back to the Vencord folder, just open a new terminal and
 
 All plugins are disabled by default, so your first step should be opening Settings and enabling the plugins you want.
 
-You can uninstall Vencord using `pnpm unpatch`
+You can unpatch Vencord using `pnpm unpatch`
 
 
 ## Installing on Browser
