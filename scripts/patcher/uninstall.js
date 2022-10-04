@@ -1,3 +1,4 @@
+const path = require("path");
 const fs = require("fs");
 
 console.log("\nVencord Uninstaller\n");
