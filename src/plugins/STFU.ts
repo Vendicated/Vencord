@@ -8,8 +8,8 @@ export default definePlugin({
     patches: [{
         find: "setDevtoolsCallbacks",
         replacement: {
-            match: /\.setDevtoolsCallbacks\(.+?else/,
-            replace: ".setDevtoolsCallbacks(null,null);else"
+            match: /if\(.{0,10}\|\|"0.0.0"!==.{0,2}\.remoteApp\.getVersion\(\)\)/,
+            replace: "if(false)"
         }
     }]
 });
