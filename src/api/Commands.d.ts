@@ -84,8 +84,7 @@ export interface Channel {
     appliedTags: any[];
 }
 
-export interface Nicks {
-}
+export interface Nicks { }
 
 export interface RawRecipient {
     avatar: string;
@@ -116,46 +115,46 @@ export enum ApplicationCommandInputType {
     BUILT_IN_TEXT = 1,
     BUILT_IN_INTEGRATION = 2,
     BOT = 3,
-    PLACEHOLDER = 4
+    PLACEHOLDER = 4,
 }
 
 export interface Option {
-    name: string,
-    type: ApplicationCommandOptionType,
-    description: string,
-    required: boolean,
-    options: Option[] | void
+    name: string;
+    displayName?: string;
+    type: ApplicationCommandOptionType;
+    description: string;
+    displayDescription?: string;
+    required: boolean;
+    options: Option[] | void;
 }
 
 export enum ApplicationCommandType {
     CHAT_INPUT = 1,
     USER = 2,
-    MESSAGE = 3
+    MESSAGE = 3,
 }
 
 export type CommandReturnValue = {
-    content: string
-}
+    content: string;
+};
 
 export type Parameter = {
-    type: number,
-    name: string,
-    value: string,
-    focused: undefined
-}
+    type: number;
+    name: string;
+    value: string;
+    focused: undefined;
+};
 
 export interface Command {
-    name: string,
-    type: ApplicationCommandType,
-    inputType: ApplicationCommandInputType,
-    description: string,
+    name: string;
+    displayName?: string;
+    type: ApplicationCommandType;
+    inputType: ApplicationCommandInputType;
+    description: string;
+    displayDescription?: string;
     options?: Option[];
-    execute: (parameters: Parameter[], msgContext: CommandContext) => (CommandReturnValue | void);
+    execute: (
+        parameters: Parameter[],
+        msgContext: CommandContext
+    ) => CommandReturnValue | void;
 }
-
-
-// export interface Category {
-//     id: string;
-//     name: string;
-//     type: number;
-// }
