@@ -108,7 +108,7 @@ async function getMenuItem(installations) {
 
     if (result.info.patched) {
         const answer = await question(
-            "This installation has already been modified. Overwrite? [Y/n]: "
+            "Are you sure you want to unpatch this installation? [Y/n]: "
         );
 
         if (!["y", "yes", "yeah", ""].includes(answer.toLowerCase())) {

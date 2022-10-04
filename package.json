@@ -15,6 +15,8 @@
     "scripts": {
         "buildWeb": "node buildWeb.mjs",
         "build": "node build.mjs",
-        "watch": "node build.mjs --watch"
+        "watch": "node build.mjs --watch",
+        "patch": "node install.js",
+        "unpatch": "node uninstall.js"
     }
 }

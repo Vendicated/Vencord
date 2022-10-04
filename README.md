@@ -15,11 +15,13 @@ A Discord client mod that does things differently
 
 ## Installing
 
-If you can't follow the following instructions, please just use BetterDiscord. This was never meant to be a noob friendly mod.
+If you can't follow the following instructions, please just use BetterDiscord.
+This was never meant to be a noob friendly mod.
 
 Install [Node.js](https://nodejs.org/en/download/) and [git](https://git-scm.com/downloads)
 
-Open a Terminal and run the following commands. If any of them failed, you didn't properly install Node.js and git (see above).
+Open a Terminal and run the following commands.
+If any of them failed, you didn't properly install Node.js and git (see above).
 > :warning: On Windows, DO NOT run the terminal as Administrator. If you open it and the path says system32, you opened it as Administrator.
 
 ```sh
@@ -33,16 +35,19 @@ Don't close your terminal just yet!
 
 The builds are now in the dist/ folder (Vencord/dist). Most importantly, you will need `dist/patcher.js`
 
-Now download [X1nto's installer](https://github.com/X1nto/VencordInstaller/releases/latest) for your platform. Download it to the Vencord folder.
-Run it via terminal: `VencordInstaller.exe` on Windows or `chmod +x vencord_installer && ./vencord_installer` on Mac.
+Now to install vencord into your Discord client, run the following command and follow the interactive prompt.
 
-Follow along with the prompts. Once you are prompted for the patcher, enter `dist/patcher.js`.
+```sh
+pnpm patch
+```
 
 Now fully close Discord. Start and confirm Vencord successfully installed by checking if you have a new Vencord section in Settings.
 
 If you ever need to get back to the Vencord folder, just open a new terminal and type `cd Vencord`
 
 All plugins are disabled by default, so your first step should be opening Settings and enabling the plugins you want.
+
+You can uninstall Vencord using `pnpm unpatch`
 
 
 ## Installing on Browser
