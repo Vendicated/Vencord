@@ -134,16 +134,16 @@ export enum ApplicationCommandType {
     MESSAGE = 3,
 }
 
-export type CommandReturnValue = {
+export interface CommandReturnValue {
     content: string;
-};
+}
 
-export type Parameter = {
-    type: number;
+export interface Parameter {
+    type: ApplicationCommandOptionType;
     name: string;
     value: string;
     focused: undefined;
-};
+}
 
 export interface Command {
     name: string;

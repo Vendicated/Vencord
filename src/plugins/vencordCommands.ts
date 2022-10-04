@@ -12,18 +12,18 @@ export default definePlugin({
     description: "Built-in vencord commands",
     authors: [Devs.Arjix],
     dependencies: ["CommandsAPI"],
-    helloWorld: {
-        name: "hello world",
-        description: "Sends 'Hello world!'",
+    lennyFace: {
+        name: "lenny",
+        description: "Sends a lenny face.",
         type: ApplicationCommandType.CHAT_INPUT,
         inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-        execute: () => ({ content: "Hello world!" }),
+        execute: () => ({ content: "( ͡° ͜ʖ ͡°)" }),
     } as Command,
     start() {
-        registerCommand(this.helloWorld);
+        registerCommand(this.lennyFace);
     },
 
     stop() {
-        unregisterCommand(this.helloWorld);
+        unregisterCommand(this.lennyFace);
     },
 });
