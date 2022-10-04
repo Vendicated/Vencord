@@ -1,7 +1,6 @@
 import definePlugin from "../utils/types";
 import gitHash from "git-hash";
 import { Devs } from '../utils/constants';
-import { IS_WEB } from "../utils/isWeb";
 
 export default definePlugin({
     name: "Settings",

@@ -16,6 +16,12 @@ import { checkForUpdates, UpdateLogger } from './utils/updater';
 import { onceReady } from "./webpack";
 import { Router } from "./webpack/common";
 
+Object.defineProperty(window, "IS_WEB", {
+    get: () => !window.DiscordNative,
+    configurable: true,
+    enumerable: true
+});
+
 export let Components;
 
 async function init() {
