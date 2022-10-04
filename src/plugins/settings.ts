@@ -15,9 +15,12 @@ export default definePlugin({
                 replace: m => {
                     const idx = m.indexOf("Host") - 1;
                     const template = m.slice(0, idx);
-                    return `${m}, ${template}"Vencord ", "${gitHash}"), " "), ` +
-                        `${template} "Electron ",VencordNative.getVersions().electron)," "), ` +
-                        `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
+                    let r = `${m}, ${template}"Vencord ", "${gitHash}${IS_WEB ? " (Web)" : ""}"), " ")`;
+                    if (!IS_WEB) {
+                        r += `,${template} "Electron ",VencordNative.getVersions().electron)," "),`;
+                        r += `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
+                    }
+                    return r;
                 }
             }
         ]
@@ -28,7 +31,7 @@ export default definePlugin({
             replace: (m, mod) =>
                 `{section:${mod}.ID.HEADER,label:"Vencord"},` +
                 `{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},` +
-                `{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater},` +
+                `{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater,predicate:()=>!IS_WEB},` +
                 `{section:${mod}.ID.DIVIDER},${m}`
 
         }

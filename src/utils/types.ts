@@ -33,6 +33,10 @@ interface PluginDef {
     patches?: Omit<Patch, "plugin">[];
     dependencies?: string[],
     required?: boolean;
+    /**
+     * Set this if your plugin only works on Browser or Desktop, not both
+     */
+    target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };

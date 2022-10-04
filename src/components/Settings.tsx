@@ -24,7 +24,7 @@ function showErrorToast(message: string) {
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>, []);
+    const changes = React.useMemo(() => new ChangeList<string>(), []);
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
@@ -72,7 +72,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
             </Forms.FormText>
 
-            <Flex className={classes(Margins.marginBottom20)}>
+            {!IS_WEB && <Flex className={classes(Margins.marginBottom20)}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -94,7 +94,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 >
                     Open QuickCSS File
                 </Button>
-            </Flex>
+            </Flex>}
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
@@ -104,20 +104,20 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Use QuickCss
             </Switch>
-            <Switch
+            {!IS_WEB && <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
                 note="Shows a Toast on StartUp"
             >
                 Get notified about new Updates
-            </Switch>
-            <Switch
+            </Switch>}
+            {!IS_WEB && <Switch
                 value={settings.unsafeRequire}
                 onChange={(v: boolean) => settings.unsafeRequire = v}
                 note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
             >
                 Enable Unsafe Require
-            </Switch>
+            </Switch>}
 
             <Forms.FormDivider />
 
