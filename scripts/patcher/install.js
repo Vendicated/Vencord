@@ -1,7 +1,5 @@
-const os = require("os");
 const path = require("path");
 const fs = require("fs");
-const platform = os.platform();
 const { execSync } = require("child_process");
 const {
     getMenuItem,
@@ -13,7 +11,7 @@ const {
 
 console.log("\nVencord Installer\n");
 
-switch (platform) {
+switch (process.platform) {
     case "win32":
         install(getWindowsDirs());
         break;

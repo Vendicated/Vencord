@@ -1,6 +1,4 @@
-const os = require("os");
 const fs = require("fs");
-const platform = os.platform();
 
 const {
     getMenuItem,
@@ -11,7 +9,7 @@ const {
 
 console.log("\nVencord Uninstaller\n");
 
-switch (platform) {
+switch (process.platform) {
     case "win32":
         uninstall(getWindowsDirs());
         break;

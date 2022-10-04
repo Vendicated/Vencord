@@ -2,7 +2,6 @@ const path = require("path");
 const readline = require("readline");
 const fs = require("fs");
 const menu = require("console-menu");
-const { platform } = require("os");
 
 const BRANCH_NAMES = [
     "Discord",
@@ -30,7 +29,7 @@ const MACOS_DISCORD_DIRS = [
     "Discord Development.app",
 ];
 
-if (platform() === "linux" && process.env.SUDO_USER) {
+if (process.platform === "linux" && process.env.SUDO_USER) {
     process.env.HOME = fs
         .readFileSync("/etc/passwd", "utf-8")
         .match(new RegExp(`^${process.env.SUDO_USER}.+$`, "m"))[0]
