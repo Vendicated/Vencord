@@ -1,13 +1,18 @@
 const fs = require("fs");
 
+console.log("\nVencord Uninstaller\n");
+
+if (!fs.existsSync(path.join(process.cwd(), "node_modules"))) {
+    console.log("You need to install dependencies first. Run:", "pnpm install");
+    process.exit(1);
+}
+
 const {
     getMenuItem,
     getWindowsDirs,
     getDarwinDirs,
     getLinuxDirs,
 } = require("./common");
-
-console.log("\nVencord Uninstaller\n");
 
 switch (process.platform) {
     case "win32":
@@ -36,7 +41,7 @@ async function uninstall(installations) {
             console.error("No write access to", selected.location);
             console.error(
                 "Try running this script as an administrator:",
-                "sudo node install.js"
+                "sudo pnpm patch"
             );
             process.exit(1);
         }

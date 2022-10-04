@@ -1,6 +1,19 @@
 const path = require("path");
 const fs = require("fs");
 const { execSync } = require("child_process");
+
+console.log("\nVencord Installer\n");
+
+if (!fs.existsSync(path.join(process.cwd(), "node_modules"))) {
+    console.log("You need to install dependencies first. Run:", "pnpm install");
+    process.exit(1);
+}
+
+if (!fs.existsSync(path.join(process.cwd(), "dist", "patcher.js"))) {
+    console.log("You need to build the project first. Run:", "pnpm build");
+    process.exit(1);
+}
+
 const {
     getMenuItem,
     getWindowsDirs,
@@ -8,8 +21,6 @@ const {
     getLinuxDirs,
     ENTRYPOINT,
 } = require("./common");
-
-console.log("\nVencord Installer\n");
 
 switch (process.platform) {
     case "win32":
@@ -45,7 +56,7 @@ async function install(installations) {
             console.log("Failed to give write perms to Discord Flatpak.");
             console.log(
                 "Try running this script as an administrator:",
-                "sudo node install.js"
+                "sudo pnpm patch"
             );
             process.exit(1);
         }
@@ -60,7 +71,7 @@ async function install(installations) {
             console.error("No write access to", selected.location);
             console.error(
                 "Try running this script as an administrator:",
-                "sudo node install.js"
+                "sudo pnpm patch"
             );
             process.exit(1);
         }
