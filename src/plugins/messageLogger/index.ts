@@ -1,10 +1,18 @@
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { Devs } from "../../utils/constants";
+import definePlugin from "../../utils/types";
 
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii],
+
+    start() {
+        const style = document.createElement("style");
+        const styleText = document.createTextNode(".messageLogger-deleted { background-color: rgba(240, 71, 71, 0.15) }");
+        style.appendChild(styleText);
+        document.body.appendChild(style);
+    },
+
     patches: [
         {
             // MessageStore
@@ -15,28 +23,6 @@ export default definePlugin({
                     match: /MESSAGE_DELETE:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
                     replace: "MESSAGE_DELETE:function($1){$2commit($2getOrCreate($1.channelId).update($1.id,m=>m.set('deleted', true)))},"
                 }
-            ]
-        },
-
-        {
-            // DEBUG: log getOrCreate return values from MessageStore caching internals
-            find: "e.getOrCreate=function(t)",
-            replacement: [
-                {
-                    match: /getOrCreate=function(.+?)return/,
-                    replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
-                }
-            ]
-        },
-
-        {
-            // MessageStore message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null===",
-            replacement: [
-                // {
-                //     match: /function R\(e\){/,
-                //     replace: "function R(e){console.log(e);"
-                // }
             ]
         },
 
@@ -53,7 +39,6 @@ export default definePlugin({
                     // Append messageLogger-deleted to classNames if deleted
                     match: /createElement\("li",{(.+?),className:/,
                     replace: "createElement(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
-                    // replace: "createElement(\"li\",{$1,className:\"messageLogger-deleted \"+"
                 }
             ]
         },
@@ -68,17 +53,6 @@ export default definePlugin({
                 }
             ]
         },
-
-        // {
-        //     // ReferencedMessageStore
-        //     find: "displayName=\"ReferencedMessageStore\"",
-        //     replacement: [
-        //         // {
-        //         //     match: /MESSAGE_DELETE:function.+?},/,
-        //         //     replace: "MESSAGE_DELETE:function(){},"
-        //         // }
-        //     ]
-        // },
 
         // Reply header renderer
         {
@@ -99,12 +73,38 @@ export default definePlugin({
                 // }
             ]
         }
-    ],
 
-    start() {
-        const style = document.createElement("style");
-        const styleText = document.createTextNode(".messageLogger-deleted { background-color: rgba(240, 71, 71, 0.15) }");
-        style.appendChild(styleText);
-        document.body.appendChild(style);
-    }
+        // {
+        //     // DEBUG: log getOrCreate return values from MessageStore caching internals
+        //     find: "e.getOrCreate=function(t)",
+        //     replacement: [
+        //         {
+        //             match: /getOrCreate=function(.+?)return/,
+        //             replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
+        //         }
+        //     ]
+        // },
+
+        // {
+        //     // ReferencedMessageStore
+        //     find: "displayName=\"ReferencedMessageStore\"",
+        //     replacement: [
+        //         // {
+        //         //     match: /MESSAGE_DELETE:function.+?},/,
+        //         //     replace: "MESSAGE_DELETE:function(){},"
+        //         // }
+        //     ]
+        // },
+
+        // {
+        //     // MessageStore message transformer(?)
+        //     find: "THREAD_STARTER_MESSAGE?null===",
+        //     replacement: [
+        //         {
+        //             match: /function R\(e\){/,
+        //             replace: "function R(e){console.log(e);"
+        //         }
+        //     ]
+        // },
+    ]
 });
