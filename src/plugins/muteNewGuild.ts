@@ -1,12 +1,10 @@
 import definePlugin from "../utils/types";
+import {Devs} from "../utils/constants";
 
 export default definePlugin({
     name: "MuteNewGuild",
     description: "Mutes newly joined guilds",
-    authors: [{
-        name:"Glitchy",
-        id: 269567451199569920n
-    }],
+    authors: [Devs.Glitch],
     patches: [
         {
             find: ",acceptInvite:function",
