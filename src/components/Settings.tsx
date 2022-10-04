@@ -9,7 +9,6 @@ import { startPlugin } from "../plugins";
 import { stopPlugin } from '../plugins/index';
 import { Flex } from './Flex';
 import { ChangeList } from '../utils/ChangeList';
-import { IS_WEB } from '../utils/isWeb';
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -25,7 +24,7 @@ function showErrorToast(message: string) {
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>, []);
+    const changes = React.useMemo(() => new ChangeList<string>(), []);
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
