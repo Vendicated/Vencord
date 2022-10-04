@@ -15,7 +15,7 @@ function modifyOpt(opt: Option) {
 
 export const commands = new Map<string, Command>()
 export function registerCommand(command: Command) {
-    if ((command as any).id == undefined) (command as any).id = getUniqueId();
+    (command as any).id = getUniqueId();
     (command as any).applicationId = "-1";
     (command as any).displayName = command.name;
     (command as any).displayDescription = command.description;
