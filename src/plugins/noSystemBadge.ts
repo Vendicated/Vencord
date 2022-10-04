@@ -10,12 +10,12 @@ export default definePlugin({
             find: "setSystemTrayApplications:function",
             replacement: [
                 {
-                    match: /setBadge:function\(\w{1,2}\){(?:{.*?}|[^{])*?}/,
-                    replace: "setBadge:function(){}"
+                    match: /setBadge:function.+?},/,
+                    replace: "setBadge:function(){},"
                 },
                 {
-                    match: /setSystemTrayIcon:function\(\w{1,2}\){(?:{.*?}|[^{])*?}/,
-                    replace: "setSystemTrayIcon:function(){}"
+                    match: /setSystemTrayIcon:function.+?},/,
+                    replace: "setSystemTrayIcon:function(){},"
                 }
             ]
         }
