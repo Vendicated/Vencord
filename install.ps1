@@ -66,7 +66,7 @@ foreach ($folder in $app_folders)
 	$version = [regex]::match($folder, 'app-([\d\.]+)').Groups[1].Value
 	Write-Output "Patching Version $version"
 
-	$resources = "$folder\resources"
+	$resources = "$discord_root/$folder\resources"
 	if (-not(Test-Path -Path "$resources")) {
 		Write-Error "Resources folder does not exist. Outdated version?`n"
 		continue
