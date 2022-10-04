@@ -1,4 +1,5 @@
 import definePlugin from "../utils/types";
+import {Devs} from "../utils/constants";
 
 export default definePlugin({
     name: "BANger",
@@ -8,10 +9,7 @@ export default definePlugin({
             name: "Xinto",
             id: 423915768191647755n
         },
-        {
-            name:"Glitchy",
-            id: 269567451199569920n
-        }
+        Devs.Glitch
     ],
     patches: [
         {
