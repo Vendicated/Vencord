@@ -11,7 +11,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /collapsedReason;return (?=\w{1,2}.createElement)/,
-                    replace: "collapsedReason; return null; null.createElement"
+                    replace: "collapsedReason; return null;"
                 }
             ]
         }
