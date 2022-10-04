@@ -23,6 +23,6 @@ export default definePlugin({
             { length: 7 },
             () => chars[Math.floor(Math.random() * chars.length)]
         ).join("");
-        return rand + window.DiscordNative.fileManager.extname(file);
+        return rand + file.slice(file.lastIndexOf("."))
     },
 });
