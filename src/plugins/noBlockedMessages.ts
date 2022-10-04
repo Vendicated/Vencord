@@ -7,7 +7,7 @@ export default definePlugin({
     authors: [Devs.rushii],
     patches: [
         {
-            find: "safety_prompt:\"DMSpamExperiment\",response:\"show_redacted_messages\"",
+            find: 'safety_prompt:"DMSpamExperiment",response:"show_redacted_messages"',
             replacement: [
                 {
                     match: /collapsedReason;return (?=\w{1,2}.createElement)/,
