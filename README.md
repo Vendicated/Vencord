@@ -36,7 +36,7 @@ Don't close your terminal just yet!
 Now to patch vencord into your Discord client, run the following command and follow the interactive prompt.
 
 ```sh
-pnpm patch
+pnpm run patch
 ```
 
 Now fully close Discord. Start and confirm Vencord successfully installed by checking if you have a new Vencord section in Settings.
@@ -45,7 +45,7 @@ If you ever need to get back to the Vencord folder, just open a new terminal and
 
 All plugins are disabled by default, so your first step should be opening Settings and enabling the plugins you want.
 
-You can unpatch Vencord using `pnpm unpatch`
+You can unpatch Vencord using `pnpm run unpatch`
 
 
 ## Installing on Browser
