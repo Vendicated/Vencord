@@ -11,6 +11,7 @@ export default definePlugin({
     name: "VencordCommands",
     description: "Built-in vencord commands",
     authors: [Devs.Arjix],
+    dependencies: ["CommandsAPI"],
     helloWorld: {
         name: "hello world",
         description: "Sends 'Hello world!'",
