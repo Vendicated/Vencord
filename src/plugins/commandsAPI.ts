@@ -10,7 +10,7 @@ export default definePlugin({
             find: `"giphy","tenor"`,
             replacement: [
                 {
-                    match: /(?<=\w=)([A-Za-z])(\.filter\(\(function\(\w\){return\[(?:(?:"\w+?")|,)+\]\.includes)/,
+                    match: /(?<=\w=)(\w)(\.filter\(\(function\(\w\){return\[(?:(?:"\w+?")|,)+\]\.includes)/,
                     replace: (m, v, rest) =>
                         `((()=>Vencord.Api.Commands._BuiltIn=${v})())${rest}`,
                 }, // I repeat, this is not exposed in the module
