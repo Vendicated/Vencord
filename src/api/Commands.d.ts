@@ -152,3 +152,10 @@ export interface Command {
     options?: Option[];
     execute: (parameters: Parameter[], msgContext: CommandContext) => (CommandReturnValue | void);
 }
+
+
+// export interface Category {
+//     id: string;
+//     name: string;
+//     type: number;
+// }
