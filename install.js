@@ -48,9 +48,6 @@ const FLATPAK_NAME_MAPPING = {
     Discord: "discord",
 };
 
-// const LINUX_FLATPAK_DIRS = [
-// ];
-
 const ENTRYPOINT = path
     .join(process.cwd(), "dist", "patcher.js")
     .replace(/\\/g, "\\\\");

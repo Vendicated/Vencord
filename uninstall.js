@@ -47,7 +47,7 @@ const FLATPAK_NAME_MAPPING = {
     Discord: "discord",
 };
 
-console.log("\nVencord Installer\n");
+console.log("\nVencord Uninstaller\n");
 
 switch (platform) {
     case "win32":
