@@ -30,18 +30,9 @@ export let OptionalMessageOption: Option = OptPlaceholder;
  * @see {@link OptionalMessageOption}
  */
 export let RequiredMessageOption: Option = ReqPlaceholder;
-export let VencordSection = {
-    id: "-1337",
-    type: 1,
-    name: "Vencord",
-    icon: "https://github.com/Vendicated.png" // TODO
-};
 
 let SnowflakeUtils: any;
-waitFor("fromTimestamp", m => {
-    SnowflakeUtils = m;
-    VencordSection.id = generateId();
-});
+waitFor("fromTimestamp", m => SnowflakeUtils = m);
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
@@ -74,7 +65,7 @@ export function registerCommand(command: Command, plugin: string) {
         throw new Error(`Command '${command.name}' already exists.`);
 
     command.id ||= generateId();
-    command.applicationId ||= VencordSection.id;
+    command.applicationId ||= "-1"; // BUILT_IN;
     command.type ||= ApplicationCommandType.CHAT_INPUT;
     command.inputType ||= ApplicationCommandInputType.BUILT_IN_TEXT;
     command.plugin ||= plugin;
