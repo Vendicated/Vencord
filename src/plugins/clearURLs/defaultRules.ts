@@ -130,4 +130,5 @@ export const defaultRules = [
     "utm_medium",
     "utm_campaign",
     "utm_term",
+    "si@open.spotify.com",
 ];
