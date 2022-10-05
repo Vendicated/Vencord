@@ -8,19 +8,18 @@ export default definePlugin({
     patches: [
         {
             find: '.BOT=0]="BOT"',
-            replacement: {
-                match: /(.)\[.\.BOT=0\]="BOT";/,
-                replace: (orig, types) =>
-                    `${types}[${types}.WEBHOOK=99]="WEBHOOK";${orig}`,
-            },
-        },
-        {
-            find: '.BOT=0]="BOT"',
-            replacement: {
-                match: /case (.)\.BOT:default:(.)=/,
-                replace: (orig, types, text) =>
-                    `case ${types}.WEBHOOK:${text}="WEBHOOK";break;${orig}`,
-            },
+            replacement: [
+                {
+                    match: /(.)\[.\.BOT=0\]="BOT";/,
+                    replace: (orig, types) =>
+                        `${types}[${types}.WEBHOOK=99]="WEBHOOK";${orig}`,
+                },
+                {
+                    match: /case (.)\.BOT:default:(.)=/,
+                    replace: (orig, types, text) =>
+                        `case ${types}.WEBHOOK:${text}="WEBHOOK";break;${orig}`,
+                },
+            ],
         },
         {
             find: ".Types.ORIGINAL_POSTER",
