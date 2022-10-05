@@ -9,8 +9,8 @@ import {
 import definePlugin from "../../utils/types";
 
 // From lodash
-const reRegExpChar = /[\\^$.*+?()[\]{}|]/g
-const reHasRegExpChar = RegExp(reRegExpChar.source)
+const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+const reHasRegExpChar = RegExp(reRegExpChar.source);
 
 export default definePlugin({
     name: "clearURLs",
@@ -25,8 +25,8 @@ export default definePlugin({
 
     escapeRegExp(str: string) {
         return (str && reHasRegExpChar.test(str))
-        ? str.replace(reRegExpChar, '\\$&')
-        : (str || '')
+            ? str.replace(reRegExpChar, "\\$&")
+            : (str || "");
     },
 
     createRules() {
@@ -39,32 +39,26 @@ export default definePlugin({
         this.hostRules = new Map();
 
         for (const rule of rules) {
-            let paramRule;
-            let hostRule;
             const splitRule = rule.split("@");
-            paramRule = splitRule[0];
-
-            paramRule = new RegExp(
+            const paramRule = new RegExp(
                 "^" +
-                this.escapeRegExp(paramRule).replace(/\\\*/, ".+?") +
+                this.escapeRegExp(splitRule[0]).replace(/\\\*/, ".+?") +
                 "$"
             );
 
-            if (splitRule[1]) {
-                hostRule = new RegExp(
-                    "^(www\\.)?" +
-                    this.escapeRegExp(splitRule[1])
-                        .replace(/\\\./, "\\.")
-                        .replace(/^\\\*\\\./, "(.+?\\.)?")
-                        .replace(/\\\*/, ".+?") +
-                    "$"
-                );
-            } else {
+            if (!splitRule[1]) {
                 this.universalRules.add(paramRule);
                 continue;
             }
-
-            let hostRuleIndex = hostRule.toString();
+            const hostRule = new RegExp(
+                "^(www\\.)?" +
+                this.escapeRegExp(splitRule[1])
+                    .replace(/\\\./, "\\.")
+                    .replace(/^\\\*\\\./, "(.+?\\.)?")
+                    .replace(/\\\*/, ".+?") +
+                "$"
+            );
+            const hostRuleIndex = hostRule.toString();
 
             this.hostRules.set(hostRuleIndex, hostRule);
             if (this.rulesByHost.get(hostRuleIndex) == null) {
@@ -74,18 +68,16 @@ export default definePlugin({
         }
     },
 
-    removeParam(rule, param, parent) {
-        if (param == rule || (rule.test && rule.test(param))) {
+    removeParam(rule: string | RegExp, param: string, parent: URLSearchParams) {
+        if (param === rule || rule instanceof RegExp && rule.test(param)) {
             parent.delete(param);
         }
     },
 
     replacer(match: string) {
-        let url;
-
         // Parse URL without throwing errors
         try {
-            url = new URL(match);
+            var url = new URL(match);
         } catch (error) {
             // Don't modify anything if we can't parse the URL
             return match;
