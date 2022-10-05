@@ -6,6 +6,7 @@ export default definePlugin({
     name: "Unindent",
     description: "Trims leading indentation from codeblocks",
     authors: [Devs.Ven],
+    dependencies: ["MessageEventsAPI"],
     patches: [
         {
             find: "inQuote:",

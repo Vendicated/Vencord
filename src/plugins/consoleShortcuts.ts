@@ -1,6 +1,10 @@
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
+const WEB_ONLY = (f: string) => () => {
+    throw new Error(`'${f}' is Discord Desktop only.`);
+};
+
 export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
@@ -8,8 +12,8 @@ export default definePlugin({
 
     getShortcuts() {
         return {
-            toClip: window.DiscordNative.clipboard.copy,
-            fromClip: window.DiscordNative.clipboard.read,
+            toClip: IS_WEB ? WEB_ONLY("toClip") : window.DiscordNative.clipboard.copy,
+            fromClip: IS_WEB ? WEB_ONLY("fromClip") : window.DiscordNative.clipboard.read,
             wp: Vencord.Webpack,
             wpc: Vencord.Webpack.wreq.c,
             wreq: Vencord.Webpack.wreq,
@@ -22,7 +26,7 @@ export default definePlugin({
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
-            restart: () => window.DiscordNative.app.relaunch()
+            restart: IS_WEB ? WEB_ONLY("restart") : window.DiscordNative.app.relaunch
         };
     },
 
