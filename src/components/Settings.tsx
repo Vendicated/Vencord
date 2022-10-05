@@ -136,23 +136,25 @@ export default ErrorBoundary.wrap(function Settings() {
                         value={settings.plugins[p.name].enabled || p.required || dependency}
                         onChange={v => {
                             settings.plugins[p.name].enabled = v;
+                            let needsRestart = Boolean(p.patches?.length);
                             if (v) {
                                 p.dependencies?.forEach(d => {
+                                    const dep = Plugins[d];
+                                    needsRestart ||= Boolean(dep.patches?.length && !settings.plugins[d].enabled);
                                     settings.plugins[d].enabled = true;
-                                    if (!Plugins[d].started && !stopPlugin) {
-                                        settings.plugins[p.name].enabled = false;
+                                    if (!needsRestart && !dep.started && !startPlugin(dep)) {
                                         showErrorToast(`Failed to start dependency ${d}. Check the console for more info.`);
                                     }
                                 });
-                                if (!p.started && !startPlugin(p)) {
+                                if (!needsRestart && !p.started && !startPlugin(p)) {
                                     showErrorToast(`Failed to start plugin ${p.name}. Check the console for more info.`);
                                 }
                             } else {
-                                if (p.started && !stopPlugin(p)) {
+                                if ((p.started || !p.start && p.commands?.length) && !stopPlugin(p)) {
                                     showErrorToast(`Failed to stop plugin ${p.name}. Check the console for more info.`);
                                 }
                             }
-                            if (p.patches) changes.handleChange(p.name);
+                            if (needsRestart) changes.handleChange(p.name);
                         }}
                         note={p.description}
                         tooltipNote={

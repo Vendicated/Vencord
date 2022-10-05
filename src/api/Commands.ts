@@ -47,6 +47,17 @@ export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
 }
 
+/**
+ * Get the value of an option by name
+ * @param args Arguments array (first argument passed to execute)
+ * @param name Name of the argument
+ * @param fallbackValue Fallback value in case this option wasn't passed
+ * @returns Value
+ */
+export function findOption<T extends string | undefined>(args: Argument[], name: string, fallbackValue?: T): T extends undefined ? T : string {
+    return (args.find(a => a.name === name)?.value || fallbackValue) as any;
+}
+
 function modifyOpt(opt: Option | Command) {
     opt.displayName ||= opt.name;
     opt.displayDescription ||= opt.description;
@@ -65,7 +76,7 @@ export function registerCommand(command: Command, plugin: string) {
     command.id ||= generateId();
     command.applicationId ||= VencordSection.id;
     command.type ||= ApplicationCommandType.CHAT_INPUT;
-    command.inputType ||= ApplicationCommandInputType.BUILT_IN;;
+    command.inputType ||= ApplicationCommandInputType.BUILT_IN_TEXT;
     command.plugin ||= plugin;
 
     modifyOpt(command);
@@ -129,7 +140,7 @@ export interface CommandReturnValue {
     content: string;
 }
 
-export interface Parameter {
+export interface Argument {
     type: ApplicationCommandOptionType;
     name: string;
     value: string;
@@ -151,5 +162,5 @@ export interface Command {
     options?: Option[];
     predicate?(ctx: CommandContext): boolean;
 
-    execute(parameters: Parameter[], msgContext: CommandContext): CommandReturnValue | void;
+    execute(args: Argument[], ctx: CommandContext): CommandReturnValue | void;
 }
