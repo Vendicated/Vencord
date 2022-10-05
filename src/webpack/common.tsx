@@ -1,8 +1,8 @@
-import { waitFor, filters, _resolveReady } from './webpack';
+import { waitFor, filters, _resolveReady } from "./webpack";
 import type Components from "discord-types/components";
 import type Stores from "discord-types/stores";
 import type Other from "discord-types/other";
-import { lazyWebpack } from '../utils/misc';
+import { lazyWebpack } from "../utils/misc";
 
 export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 

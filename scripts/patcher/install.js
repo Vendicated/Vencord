@@ -96,7 +96,7 @@ async function install(installations) {
 
         const requiredFiles = ["index.js", "package.json"];
 
-        if (requiredFiles.every((f) => fs.existsSync(path.join(dir, f)))) {
+        if (requiredFiles.every(f => fs.existsSync(path.join(dir, f)))) {
             console.log(
                 "Successfully patched",
                 version.name

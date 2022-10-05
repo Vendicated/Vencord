@@ -1,5 +1,5 @@
 import { Channel, Guild } from "discord-types/general";
-import { waitFor } from '../webpack';
+import { waitFor } from "../webpack";
 
 export function _init(cmds: Command[]) {
     try {

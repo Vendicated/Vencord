@@ -90,7 +90,7 @@ export default definePlugin({
         }
 
         // Check all universal rules
-        this.universalRules.forEach((rule) => {
+        this.universalRules.forEach(rule => {
             url.searchParams.forEach((_value, param, parent) => {
                 this.removeParam(rule, param, parent);
             });
@@ -99,7 +99,7 @@ export default definePlugin({
         // Check rules for each hosts that match
         this.hostRules.forEach((regex, hostRuleName) => {
             if (!regex.test(url.hostname)) return;
-            this.rulesByHost.get(hostRuleName).forEach((rule) => {
+            this.rulesByHost.get(hostRuleName).forEach(rule => {
                 url.searchParams.forEach((_value, param, parent) => {
                     this.removeParam(rule, param, parent);
                 });
@@ -114,7 +114,7 @@ export default definePlugin({
         if (msg.content.match(/http(s)?:\/\//)) {
             msg.content = msg.content.replace(
                 /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/g,
-                (match) => this.replacer(match)
+                match => this.replacer(match)
             );
         }
     },

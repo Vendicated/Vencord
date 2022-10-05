@@ -18,11 +18,11 @@ let modalId = 1337;
  */
 export function openModal(Component: React.ComponentType, modalProps: Record<string, any>) {
     let key = `Vencord${modalId++}`;
-    modals.openModal(props =>
+    modals.openModal(props => (
         <Modal.ModalRoot {...props} {...modalProps}>
             <Component />
         </Modal.ModalRoot>
-        , { modalKey: key });
+    ), { modalKey: key });
 
     return key;
 };

@@ -1,6 +1,6 @@
 import { Devs } from "../utils/constants";
 import IpcEvents from "../utils/IpcEvents";
-import definePlugin from '../utils/types';
+import definePlugin from "../utils/types";
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default definePlugin({
