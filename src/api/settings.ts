@@ -5,7 +5,6 @@ import { mergeDefaults } from '../utils/misc';
 
 interface Settings {
     notifyAboutUpdates: boolean;
-    unsafeRequire: boolean;
     useQuickCss: boolean;
     plugins: {
         [plugin: string]: {
@@ -17,7 +16,6 @@ interface Settings {
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
-    unsafeRequire: false,
     useQuickCss: true,
     plugins: {}
 };

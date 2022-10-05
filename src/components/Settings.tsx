@@ -111,13 +111,6 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Get notified about new Updates
             </Switch>}
-            {!IS_WEB && <Switch
-                value={settings.unsafeRequire}
-                onChange={(v: boolean) => settings.unsafeRequire = v}
-                note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
-            >
-                Enable Unsafe Require
-            </Switch>}
 
             <Forms.FormDivider />
 
