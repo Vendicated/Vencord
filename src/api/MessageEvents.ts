@@ -1,5 +1,5 @@
-import type { Message, Channel } from 'discord-types/general';
-import Logger from '../utils/logger';
+import type { Message, Channel } from "discord-types/general";
+import Logger from "../utils/logger";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 

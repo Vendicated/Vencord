@@ -1,6 +1,6 @@
 import definePlugin from "../utils/types";
-import { addPreSendListener, addPreEditListener, MessageObject, removePreSendListener, removePreEditListener } from '../api/MessageEvents';
-import { Devs } from '../utils/constants';
+import { addPreSendListener, addPreEditListener, MessageObject, removePreSendListener, removePreEditListener } from "../api/MessageEvents";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "Unindent",

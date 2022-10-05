@@ -1,8 +1,8 @@
 import gitHash from "git-hash";
-import { changes, checkForUpdates, getRepo, rebuild, update, UpdateLogger, updateError, isOutdated, isNewer } from '../utils/updater';
-import { React, Forms, Button, Margins, Alerts, Card, Parser, Toasts } from '../webpack/common';
+import { changes, checkForUpdates, getRepo, rebuild, update, UpdateLogger, updateError, isOutdated, isNewer } from "../utils/updater";
+import { React, Forms, Button, Margins, Alerts, Card, Parser, Toasts } from "../webpack/common";
 import { Flex } from "./Flex";
-import { classes, useAwaiter } from '../utils/misc';
+import { classes, useAwaiter } from "../utils/misc";
 import { Link } from "./Link";
 import ErrorBoundary from "./ErrorBoundary";
 import { ErrorCard } from "./ErrorCard";

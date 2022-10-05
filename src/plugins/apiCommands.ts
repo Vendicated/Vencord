@@ -7,7 +7,7 @@ export default definePlugin({
     description: "Api required by anything that uses commands",
     patches: [
         {
-            find: `"giphy","tenor"`,
+            find: '"giphy","tenor"',
             replacement: [
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is

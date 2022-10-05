@@ -1,6 +1,6 @@
 import definePlugin from "../utils/types";
 import gitHash from "git-hash";
-import { Devs } from '../utils/constants';
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "Settings",
@@ -30,8 +30,8 @@ export default definePlugin({
             match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) =>
                 `{section:${mod}.ID.HEADER,label:"Vencord"},` +
-                `{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},` +
-                `{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater,predicate:()=>!IS_WEB},` +
+                '{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},' +
+                '{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater,predicate:()=>!IS_WEB},' +
                 `{section:${mod}.ID.DIVIDER},${m}`
 
         }

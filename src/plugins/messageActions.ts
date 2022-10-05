@@ -1,4 +1,4 @@
-import { addClickListener, removeClickListener } from '../api/MessageEvents';
+import { addClickListener, removeClickListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { find, findByProps } from "../webpack";

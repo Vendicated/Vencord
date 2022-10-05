@@ -12,7 +12,7 @@ export default definePlugin({
             name: "lenny",
             description: "Sends a lenny face",
             options: [OptionalMessageOption],
-            execute: (opts) => ({
+            execute: opts => ({
                 content: findOption(opts, "message", "") + " ( ͡° ͜ʖ ͡°)"
             }),
         },

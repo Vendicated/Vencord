@@ -1,14 +1,14 @@
 import { classes, humanFriendlyJoin, useAwaiter } from "../utils/misc";
-import Plugins from 'plugins';
+import Plugins from "plugins";
 import { useSettings } from "../api/settings";
 import IpcEvents from "../utils/IpcEvents";
 
 import { Button, Switch, Forms, React, Margins, Toasts, Alerts, Parser } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
-import { stopPlugin } from '../plugins/index';
-import { Flex } from './Flex';
-import { ChangeList } from '../utils/ChangeList';
+import { stopPlugin } from "../plugins/index";
+import { Flex } from "./Flex";
+import { ChangeList } from "../utils/ChangeList";
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -35,7 +35,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     <div>{changes.map((s, i) => (
                         <>
                             {i > 0 && ", "}
-                            {Parser.parse('`' + s + '`')}
+                            {Parser.parse("`" + s + "`")}
                         </>
                     ))}</div>
                 </>
@@ -69,7 +69,7 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
 
             <Forms.FormText>
-                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
+                SettingsDir: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
             </Forms.FormText>
 
             {!IS_WEB && <Flex className={classes(Margins.marginBottom20)}>
