@@ -27,14 +27,5 @@ export default {
             assertEventAllowed(event);
             return ipcRenderer.invoke(event, ...args);
         }
-    },
-    require(mod: string) {
-        const settings = ipcRenderer.sendSync(IPC_EVENTS.GET_SETTINGS);
-        try {
-            if (!JSON.parse(settings).unsafeRequire) throw "no";
-        } catch {
-            throw new Error("Unsafe require is not allowed. Enable it in settings and try again.");
-        }
-        return require(mod);
     }
 };
