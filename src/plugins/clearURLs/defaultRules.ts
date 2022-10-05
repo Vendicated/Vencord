@@ -9,7 +9,7 @@
  * `tag@amazon.*`
  *
  * Parameter wildcards
- * `utm_*`
+ * `utm_*`>
  *
  */
 

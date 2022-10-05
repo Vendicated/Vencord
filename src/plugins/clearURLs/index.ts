@@ -1,4 +1,4 @@
-import {defaultRules} from "./defaultRules";
+import { defaultRules } from "./defaultRules";
 import {
     addPreSendListener,
     addPreEditListener,
@@ -7,6 +7,10 @@ import {
     removePreEditListener,
 } from "../../api/MessageEvents";
 import definePlugin from "../../utils/types";
+
+// From lodash
+const reRegExpChar = /[\\^$.*+?()[\]{}|]/g
+const reHasRegExpChar = RegExp(reRegExpChar.source)
 
 export default definePlugin({
     name: "clearURLs",
@@ -18,6 +22,12 @@ export default definePlugin({
         },
     ],
     dependencies: ["MessageEventsAPI"],
+
+    escapeRegExp(str: string) {
+        return (str && reHasRegExpChar.test(str))
+        ? str.replace(reRegExpChar, '\\$&')
+        : (str || '')
+    },
 
     createRules() {
         // Can be extended upon once user configs are available
@@ -34,17 +44,20 @@ export default definePlugin({
             const splitRule = rule.split("@");
             paramRule = splitRule[0];
 
-            paramRule = new RegExp("^" + paramRule.replace(/[#-}]/g, '\\$&').replace(/\\\*/, ".+?") + "$");
+            paramRule = new RegExp(
+                "^" +
+                this.escapeRegExp(paramRule).replace(/\\\*/, ".+?") +
+                "$"
+            );
 
             if (splitRule[1]) {
                 hostRule = new RegExp(
                     "^(www\\.)?" +
-                        splitRule[1]
-                            .replace(/[#-}]/g, '\\$&')
-                            .replace(/\\\./, "\\.")
-                            .replace(/^\\\*\\\./, "(.+?\\.)?")
-                            .replace(/\\\*/, ".+?") +
-                        "$"
+                    this.escapeRegExp(splitRule[1])
+                        .replace(/\\\./, "\\.")
+                        .replace(/^\\\*\\\./, "(.+?\\.)?")
+                        .replace(/\\\*/, ".+?") +
+                    "$"
                 );
             } else {
                 this.universalRules.add(paramRule);
