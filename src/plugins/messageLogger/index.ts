@@ -60,7 +60,7 @@ export default definePlugin({
                 {
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
-                        ".update($3,m=>e.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$2.message.edited_timestamp,content:m.content}]) : m)" +
+                        ".update($3,m=>$2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$2.message.edited_timestamp,content:m.content}]) : m)" +
                         ".update($3"
                 }
             ]
