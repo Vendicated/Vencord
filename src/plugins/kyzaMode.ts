@@ -18,6 +18,7 @@ export default definePlugin({
         name: "DustyAngel47",
         id: 714583473804935238n
     }],
+	dependencies: ["MessageEventsAPI"],
 
     getPunctuation(msg) {
         const endingChar = msg.slice(-1);
