@@ -16,7 +16,7 @@
         "buildWeb": "node buildWeb.mjs",
         "build": "node build.mjs",
         "watch": "node build.mjs --watch",
-        "patch": "node scripts/patcher/install.js",
-        "unpatch": "node scripts/patcher/uninstall.js"
+        "inject": "node scripts/patcher/install.js",
+        "uninject": "node scripts/patcher/uninstall.js"
     }
 }
