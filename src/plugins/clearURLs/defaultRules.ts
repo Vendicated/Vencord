@@ -1,3 +1,18 @@
+/* 
+ * Global Parameter
+ * `utm_source`
+ * 
+ * Parameter restricted to domain
+ * `feature@youtube.com`
+ * 
+ * Domains wildcards
+ * `tag@amazon.*`
+ * 
+ * Parameter wildcards
+ * `utm_*`
+ * 
+ */ 
+
 export const defaultRules = [
   "action_object_map",
   "action_type_map",
@@ -65,7 +80,6 @@ export const defaultRules = [
   "sc_outcome",
   "sc_geo",
   "sc_country",
-  "utm_*",
   "nr_email_referer",
   "vero_conv",
   "vero_id",
