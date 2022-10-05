@@ -1,6 +1,7 @@
 import IpcEvents from "./IpcEvents";
 import Logger from "./logger";
 import { IpcRes } from './types';
+import gitHash from 'git-hash';
 
 export const UpdateLogger = new Logger("Updater", "white");
 export let isOutdated = false;
@@ -18,6 +19,10 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 
 export async function checkForUpdates() {
     changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    if (changes.some(c => c.hash === gitHash)) {
+        // git log NEWER...OLDER works as well. This means it will return the more recent local commits if the
+        changes = [];
+    }
     return (isOutdated = changes.length > 0);
 }
 
