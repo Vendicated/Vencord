@@ -1,5 +1,5 @@
 import definePlugin from "../utils/types";
-import {Devs} from "../utils/constants";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "Webhook Tags",
