@@ -1,6 +1,6 @@
 import definePlugin from "../utils/types";
 import { Devs } from "../utils/constants";
-import { findOption, OptionalMessageOption } from '../api/Commands';
+import { findOption, OptionalMessageOption } from "../api/Commands";
 
 export default definePlugin({
     name: "lenny",

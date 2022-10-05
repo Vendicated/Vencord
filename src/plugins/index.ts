@@ -1,8 +1,8 @@
 import Plugins from "plugins";
-import { registerCommand, unregisterCommand } from '../api/Commands';
+import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
 import Logger from "../utils/logger";
-import { Patch, Plugin } from '../utils/types';
+import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
