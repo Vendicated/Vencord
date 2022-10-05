@@ -7,6 +7,7 @@ export default definePlugin({
     description: "",
     authors: [Devs.Arjix],
     getIcon: () => (
+        // source: https://www.flaticon.com/free-icon-font/eye_3917052?related_id=3917052
         <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
