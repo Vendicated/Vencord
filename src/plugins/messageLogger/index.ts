@@ -8,8 +8,33 @@ export default definePlugin({
 
     start() {
         // TODO: move to separate css file when supported
+        const css = `
+            .messageLogger-deleted {
+                background-color: rgba(240, 71, 71, 0.15)
+            }
+
+            .theme-dark .messageLogger-edited {
+                filter: brightness(85%);
+            }
+
+            .theme-light .messageLogger-edited {
+                opacity: 0.5;
+            }
+
+            .messageLogger-editedTimestamp {
+                color: var(--text-muted);
+                margin-left: 0.25rem;
+                font-size: 0.75rem;
+                line-height: 1.375rem;
+                height: 1.25rem
+                vertical-align: baseline;
+                font-weight: 500;
+                pointer-events: none;
+            }
+        `;
+
         const style = document.createElement("style");
-        const styleText = document.createTextNode(".messageLogger-deleted { background-color: rgba(240, 71, 71, 0.15) }");
+        const styleText = document.createTextNode(css);
         style.appendChild(styleText);
         document.body.appendChild(style);
     },
@@ -35,7 +60,7 @@ export default definePlugin({
                 {
                     match: /MESSAGE_UPDATE:function\((\w)\){(.+?);(?=(?:\w{1,2}\.){2}commit)/,
                     replace: "MESSAGE_UPDATE:function($1){$2" +
-                        ".update($1.message.id,m=>{console.log('prev msg',m);return e.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[{timestamp:$1.message.edited_timestamp,content:m.content},...(m.editHistory||[])]) : m});"
+                        ".update($1.message.id,m=>console.log(m)||e.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$1.message.edited_timestamp,content:m.content}]) : m);"
                 }
             ]
         },
@@ -100,6 +125,20 @@ export default definePlugin({
                     // Append messageLogger-deleted to classNames if deleted
                     match: /createElement\("li",{(.+?),className:/,
                     replace: "createElement(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
+                }
+            ]
+        },
+
+        {
+            // Message content renderer
+            // Module 43016
+            find: "Messages.MESSAGE_EDITED,\")\"))))",
+            replacement: [
+                {
+                    // Render editHistory in the deepest div for message content
+                    match: /((\w)\.createElement\("div",{id.+?},)(null!=.+?)(\)}function)/,
+                    // FIXME: absolute time not showing when hovering timestamp
+                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit=>$2.createElement('div',{className: 'messageLogger-edited'},[edit.content,$2.createElement('time',{datetime: edit.timestamp,className:'messageLogger-editedTimestamp'},'(edited)')])) : null), $3]$4"
                 }
             ]
         },
