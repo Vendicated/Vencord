@@ -21,7 +21,7 @@
         "watch": "node build.mjs --watch",
         "inject": "node scripts/patcher/install.js",
         "uninject": "node scripts/patcher/uninstall.js",
-        "lint": "eslint src/**/*.{ts,tsx}",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix"
     }
 }
