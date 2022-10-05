@@ -58,9 +58,10 @@ export default definePlugin({
                 //     replace: ""
                 // },
                 {
-                    match: /MESSAGE_UPDATE:function\((\w)\){(.+?);(?=(?:\w{1,2}\.){2}commit)/,
-                    replace: "MESSAGE_UPDATE:function($1){$2" +
-                        ".update($1.message.id,m=>console.log(m)||e.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$1.message.edited_timestamp,content:m.content}]) : m);"
+                    match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
+                    replace: "$1" +
+                        ".update($3,m=>e.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$2.message.edited_timestamp,content:m.content}]) : m)" +
+                        ".update($3"
                 }
             ]
         },
