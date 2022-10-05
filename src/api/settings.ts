@@ -1,7 +1,7 @@
 import plugins from "plugins";
 import IpcEvents from "../utils/IpcEvents";
 import { React } from "../webpack/common";
-import { mergeDefaults } from '../utils/misc';
+import { mergeDefaults } from "../utils/misc";
 
 interface Settings {
     notifyAboutUpdates: boolean;

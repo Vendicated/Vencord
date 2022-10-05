@@ -1,4 +1,4 @@
-import { WEBPACK_CHUNK } from '../utils/constants';
+import { WEBPACK_CHUNK } from "../utils/constants";
 import Logger from "../utils/logger";
 import { _initWebpack } from ".";
 
@@ -8,7 +8,7 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 
 Object.defineProperty(window, WEBPACK_CHUNK, {
     get: () => webpackChunk,
-    set: (v) => {
+    set: v => {
         if (v?.push !== Array.prototype.push) {
             logger.info(`Patching ${WEBPACK_CHUNK}.push`);
             _initWebpack(v);
@@ -141,7 +141,7 @@ function patchPush() {
     handlePush.original = window[WEBPACK_CHUNK].push;
     Object.defineProperty(window[WEBPACK_CHUNK], "push", {
         get: () => handlePush,
-        set: (v) => (handlePush.original = v),
+        set: v => (handlePush.original = v),
         configurable: true
     });
 }

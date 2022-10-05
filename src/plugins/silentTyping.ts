@@ -1,5 +1,5 @@
-import definePlugin from '../utils/types';
-import { Devs } from '../utils/constants';
+import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "SilentTyping",

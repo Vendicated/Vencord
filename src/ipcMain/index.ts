@@ -1,9 +1,9 @@
 import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
-import { join } from 'path';
+import { join } from "path";
 import { debounce } from "../utils/debounce";
-import IpcEvents from '../utils/IpcEvents';
+import IpcEvents from "../utils/IpcEvents";
 
 import "./updater";
 
@@ -47,7 +47,7 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
-ipcMain.on(IpcEvents.GET_SETTINGS, (e) => e.returnValue = readSettings());
+ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
 
 let settingsWriteQueue = Promise.resolve();
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {

@@ -1,5 +1,5 @@
-import IPC_EVENTS from './utils/IpcEvents';
-import { IpcRenderer, ipcRenderer } from 'electron';
+import IPC_EVENTS from "./utils/IpcEvents";
+import { IpcRenderer, ipcRenderer } from "electron";
 
 function assertEventAllowed(event: string) {
     if (!(event in IPC_EVENTS)) throw new Error(`Event ${event} not allowed.`);
