@@ -49,7 +49,7 @@ function uwuify(message: string): string {
                 return element;
             }
             for (let [find, replace] of words) {
-                if (element == find) {
+                if (element.includes(find)) {
                     element = element.replace(find, replace);
                     isowo = true;
                 }
