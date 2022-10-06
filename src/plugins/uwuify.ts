@@ -54,6 +54,7 @@ function uwuify(message: string): string {
             for (let [find, replace] of words) {
                 if (element == find) {
                     element = element.replace(find, replace);
+                    isowo = true;
                 }
             }
             if (
