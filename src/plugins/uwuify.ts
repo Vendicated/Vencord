@@ -45,9 +45,7 @@ export default definePlugin({
                         element = element.replace("u", "UwU")
                         isowo = true
                     }
-                    if (!isowo){
-                        element = element.replace("r", "w").replace("l", "w")
-                    }
+                    
                     if (!element.toLowerCase().endsWith("n")){
                         element = element.replace("n", "ny")
                     }
@@ -57,6 +55,7 @@ export default definePlugin({
                     if (Math.floor(Math.random() * 5) == 3){
                         element = element + " " + endings[Math.floor(Math.random()*endings.length)];
                     }
+                    element = element.replace("r", "w").replace("l", "w")
                     final += element + " "
                 });
                 return{
