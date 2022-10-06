@@ -55,37 +55,40 @@ function uwuify(message: string): string {
                 }
             }
             if (
+                !element.toLowerCase().includes("uwu") &&
+                Math.floor(Math.random() * 2) == 1
+            ) {
+                element = element.replace("u", "UwU");
+                isowo = true;
+            }
+            if (element.toLowerCase().endsWith("y") && element.length < 7) {
+                element = element + " " + "w" + element.slice(1);
+                isowo = true;
+            }
+            if (
                 !element.toLowerCase().includes("owo") &&
                 Math.floor(Math.random() * 2) == 1
             ) {
                 element = element.replace("o", "OwO");
                 isowo = true;
             }
-            if (
-                !element.toLowerCase().includes("uwu") &&
-                !isowo &&
-                Math.floor(Math.random() * 2) == 1
-            ) {
-                element = element.replace("u", "UwU");
-                isowo = true;
+            if (isowo) {
+                return element;
             }
-            if (!element.toLowerCase().endsWith("n") && !isowo) {
+            if (!element.toLowerCase().endsWith("n")) {
                 element = element.replace("n", "ny");
             }
-            if (Math.floor(Math.random() * 2) == 1 && !isowo) {
+            if (Math.floor(Math.random() * 2) == 1) {
                 element.replace("s", "sh");
             }
-            if (Math.floor(Math.random() * 9) == 3) {
+            if (Math.floor(Math.random() * 5) == 3 && !isowo) {
+                element = element[0] + "-" + element[0] + "-" + element;
+            }
+            if (Math.floor(Math.random() * 5) == 3) {
                 element =
                     element +
                     " " +
                     endings[Math.floor(Math.random() * endings.length)];
-            }
-            if (element.toLowerCase().endsWith("y") && element.length < 7) {
-                element = element + " " + "w" + element.slice(1);
-            }
-            if (Math.floor(Math.random() * 5) == 3 && !isowo) {
-                element = element[0] + "-" + element[0] + "-" + element;
             }
             element = element.replace("r", "w").replace("l", "w");
             return element;
