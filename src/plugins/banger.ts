@@ -5,10 +5,7 @@ export default definePlugin({
     name: "BANger",
     description: "Replaces the GIF in the ban dialogue with a custom one.",
     authors: [
-        {
-            name: "Xinto",
-            id: 423915768191647755n
-        },
+        Devs.Xinto,
         Devs.Glitch
     ],
     patches: [
