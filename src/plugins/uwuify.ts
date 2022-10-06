@@ -69,10 +69,10 @@ function uwuify(message: string): string {
                 element = element.replace("u", "UwU");
                 isowo = true;
             }
-            if (!element.toLowerCase().endsWith("n")) {
+            if (!element.toLowerCase().endsWith("n") && !isowo) {
                 element = element.replace("n", "ny");
             }
-            if (Math.floor(Math.random() * 2) == 1) {
+            if (Math.floor(Math.random() * 2) == 1 && !isowo) {
                 element.replace("s", "sh");
             }
             if (Math.floor(Math.random() * 9) == 3) {
@@ -84,7 +84,7 @@ function uwuify(message: string): string {
             if (element.toLowerCase().endsWith("y") && element.length < 7) {
                 element = element + " " + "w" + element.slice(1);
             }
-            if (Math.floor(Math.random() * 5) == 3) {
+            if (Math.floor(Math.random() * 5) == 3 && !isowo) {
                 element = element[0] + "-" + element[0] + "-" + element;
             }
             element = element.replace("r", "w").replace("l", "w");
