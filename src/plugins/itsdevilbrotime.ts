@@ -8,11 +8,14 @@ export default definePlugin({
     authors: [
         Devs.Xinto
     ],
+    dependencies: [
+        "CommandsAPI"
+    ],
     start() {
         registerCommand({
             name: "memoryleak",
             description: "Generate a memory leak",
-            execute(args, ctx) {
+            execute(_args, ctx) {
                 const channelId = parseInt(ctx.channel.id);
                 let arr: string[] = [];
                 for (let i = 0; i < channelId; i++) {
