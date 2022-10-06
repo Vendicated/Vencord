@@ -8,8 +8,8 @@ import {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [{name: "ECHO",
-    id: 712639419785412668n}],
+    authors: [ {name: "ECHO",
+        id: 712639419785412668n }],
     start() {
         registerCommand({
             name: "uwuify",
@@ -17,9 +17,9 @@ export default definePlugin({
             type: ApplicationCommandType.CHAT_INPUT,
             inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
             execute (args, ctx) {
-                let uwuifying = args[0].value.split(" ")
+                let uwuifying = args[0].value.split(" ");
                 let final = "";
-                let isowo = false
+                let isowo = false;
                 const endings = [
                     "owo",
                     "UwU",
@@ -39,29 +39,27 @@ export default definePlugin({
                 uwuifying.forEach(element => {
                     if (!element.toLowerCase().includes("owo")){
                         element = element.replace("o", "OwO")
-                        isowo = true
+                        isowo = true;
                     }
                     if (!element.toLowerCase().includes("uwu") && !isowo){
-                        element = element.replace("u", "UwU")
-                        isowo = true
-                    }
-                    if (!isowo){
-                        element = element.replace("r", "w").replace("l", "w")
+                        element = element.replace("u", "UwU");
+                        isowo = true;
                     }
                     if (!element.toLowerCase().endsWith("n")){
-                        element = element.replace("n", "ny")
+                        element = element.replace("n", "ny");
                     }
                     if (Math.floor(Math.random() * 2) == 1){
-                        element.replace("s", "sh")
+                        element.replace("s", "sh");
                     }
                     if (Math.floor(Math.random() * 5) == 3){
                         element = element + " " + endings[Math.floor(Math.random()*endings.length)];
                     }
-                    final += element + " "
+                    element = element.replace("r", "w").replace("l", "w");
+                    final += element + " ";
                 });
                 return{
                     content: final
-                }
+                };
             },
             options:[
                 {
