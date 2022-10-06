@@ -55,21 +55,21 @@ function uwuify(message: string): string {
                 }
             }
             if (
-                !element.toLowerCase().includes("uwu") &&
-                Math.floor(Math.random() * 2) == 1
+                element.toLowerCase().includes("u") &&
+                !element.toLowerCase().includes("uwu")
             ) {
                 element = element.replace("u", "UwU");
                 isowo = true;
             }
-            if (element.toLowerCase().endsWith("y") && element.length < 7) {
-                element = element + " " + "w" + element.slice(1);
-                isowo = true;
-            }
             if (
-                !element.toLowerCase().includes("owo") &&
-                Math.floor(Math.random() * 2) == 1
+                element.toLowerCase().includes("o") &&
+                !element.toLowerCase().includes("owo")
             ) {
                 element = element.replace("o", "OwO");
+                isowo = true;
+            }
+            if (element.toLowerCase().endsWith("y") && element.length < 7) {
+                element = element + " " + "w" + element.slice(1);
                 isowo = true;
             }
             if (isowo) {
