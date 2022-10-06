@@ -3,7 +3,7 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "It's DevilBro Time!",
-    description: "Simulates DevilBro's plugins' memory leaks",
+    description: "Lets you simulate DevilBro's plugins' memory leaks",
     authors: [
         Devs.Xinto
     ],
