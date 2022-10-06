@@ -13,18 +13,18 @@ export default definePlugin({
             name: "memoryleak",
             description: "Generate a memory leak",
             execute(args, ctx) {
-                const channelId = parseInt(ctx.channel.id)
-                let arr: string[] = []
+                const channelId = parseInt(ctx.channel.id);
+                let arr: string[] = [];
                 for (let i = 0; i < channelId; i++) {
-                    arr[i] = (i * channelId).toString()
+                    arr[i] = (i * channelId).toString();
                 }
                 return {
                     content: "You did indeed generate a memory leak"
-                }
+                };
             },
-        }, "itsdevilbrotime")
+        }, "itsdevilbrotime");
     },
     stop() {
-        unregisterCommand("memoryleak")
+        unregisterCommand("memoryleak");
     },
-})
+});
