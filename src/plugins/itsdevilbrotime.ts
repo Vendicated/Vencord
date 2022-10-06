@@ -1,4 +1,3 @@
-import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
@@ -11,8 +10,8 @@ export default definePlugin({
     dependencies: [
         "CommandsAPI"
     ],
-    start() {
-        registerCommand({
+    commands: [
+        {
             name: "memoryleak",
             description: "Generate a memory leak",
             execute(_args, ctx) {
@@ -25,9 +24,6 @@ export default definePlugin({
                     content: "You did indeed generate a memory leak"
                 };
             },
-        }, "itsdevilbrotime");
-    },
-    stop() {
-        unregisterCommand("memoryleak");
-    },
+        }
+    ]
 });
