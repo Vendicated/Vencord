@@ -8,26 +8,66 @@ const endings = [
     "●w●",
     "☆w☆",
     "𝗨𝘄𝗨",
-    "(´꒳`)",
+    "(ᗒᗨᗕ)",
+    "(▰˘v˘▰)",
+    "( ´ ▽ ` ).｡ｏ♡",
+    "*unbuttons shirt*",
+    ">3<",
+    ">:3",
+    ":3",
+    "murr~",
     "♥(。U ω U。)",
     "(˘ε˘)",
     "*screams*",
     "*twerks*",
     "*sweats*",
 ];
+const words = [
+    ["love", "wuv"],
+    ["mr", "mistuh"],
+    ["dog", "doggo"],
+    ["cat", "kitteh"],
+    ["hello", "henwo"],
+    ["hell", "heck"],
+    ["fuck", "fwick"],
+    ["fuk", "fwick"],
+    ["shit", "shoot"],
+    ["friend", "fwend"],
+    ["stop", "stawp"],
+    ["god", "gosh"],
+    ["dick", "peepee"],
+    ["penis", "bulge"],
+    ["damn", "darn"],
+];
 function uwuify(message: string): string {
+    let isowo = false;
     return message
         .split(" ")
         .map((element) => {
-            if (element.length < 2) {
+            isowo = false;
+            if (element.length < 4) {
                 return element;
             }
-            let isowo = false;
-            if (!element.toLowerCase().includes("owo")) {
+            if (element == "god") {
+                console.log();
+            }
+            for (let [find, replace] of words) {
+                if (element == find) {
+                    element = element.replace(find, replace);
+                }
+            }
+            if (
+                !element.toLowerCase().includes("owo") &&
+                Math.floor(Math.random() * 2) == 1
+            ) {
                 element = element.replace("o", "OwO");
                 isowo = true;
             }
-            if (!element.toLowerCase().includes("uwu") && !isowo) {
+            if (
+                !element.toLowerCase().includes("uwu") &&
+                !isowo &&
+                Math.floor(Math.random() * 2) == 1
+            ) {
                 element = element.replace("u", "UwU");
                 isowo = true;
             }
@@ -37,11 +77,17 @@ function uwuify(message: string): string {
             if (Math.floor(Math.random() * 2) == 1) {
                 element.replace("s", "sh");
             }
-            if (Math.floor(Math.random() * 5) == 3) {
+            if (Math.floor(Math.random() * 9) == 3) {
                 element =
                     element +
                     " " +
                     endings[Math.floor(Math.random() * endings.length)];
+            }
+            if (element.toLowerCase().endsWith("y") && element.length < 7) {
+                element = element + " " + "w" + element.slice(1);
+            }
+            if (Math.floor(Math.random() * 5) == 3) {
+                element = element[0] + "-" + element[0] + "-" + element;
             }
             element = element.replace("r", "w").replace("l", "w");
             return element;
