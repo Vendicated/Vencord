@@ -48,9 +48,6 @@ function uwuify(message: string): string {
             if (element.length < 4) {
                 return element;
             }
-            if (element == "god") {
-                console.log();
-            }
             for (let [find, replace] of words) {
                 if (element == find) {
                     element = element.replace(find, replace);
