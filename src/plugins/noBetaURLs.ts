@@ -2,16 +2,16 @@ import definePlugin from "../utils/types";
 import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
 
 export default definePlugin({
-    name: "NoCanaryURL",
-    description: "Removes the canary subdomain from urls",
+    name: "NoBetaURLs",
+    description: "Removes the canary and ptb subdomains from urls",
     authors: [{ name: "ICodeInAssembly", id: 702973430449832038n }],
     dependencies: ["MessageEventsAPI"],
-    removeCanary(msg: MessageObject) {
-        msg.content = msg.content.replace(/(?<=https:\/\/)canary./, "");
+    removeBetas(msg: MessageObject) {
+        msg.content = msg.content.replace(/(?<=https:\/\/)(canary.|ptb.)((?=discord.)|(?=discordapp.))/, "");
     },
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => this.removeCanary(msg));
+        this.preSend = addPreSendListener((_, msg) => this.removeBetas(msg));
     },
 
     stop() {
