@@ -22,5 +22,17 @@ export const Devs = Object.freeze({
     botato: {
         name: "botato",
         id: 440990343899643943n
+    },
+    obscurity: {
+        name: "obscurity",
+        id: 336678828233588736n,
+    },
+    rushii: {
+        name: "rushii",
+        id: 295190422244950017n
+    },
+    Glitch: {
+        name: "Glitchy",
+        id: 269567451199569920n
     }
 });

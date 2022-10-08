@@ -1,8 +1,8 @@
-import { addPreSendListener, addPreEditListener, SendListener, removePreSendListener, removePreEditListener } from '../api/MessageEvents';
+import { addPreSendListener, addPreEditListener, removePreSendListener, removePreEditListener } from "../api/MessageEvents";
 import { findByProps } from "../webpack";
 import definePlugin from "../utils/types";
-import { Devs } from '../utils/constants';
-import { UserStore } from '../webpack/common';
+import { Devs } from "../utils/constants";
+import { UserStore } from "../webpack/common";
 
 export default definePlugin({
     name: "NitroBypass",
@@ -11,11 +11,13 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
     patches: [
         {
-            find: `canUseAnimatedEmojis:function`,
+            find: "canUseAnimatedEmojis:function",
             replacement: [
                 "canUseAnimatedEmojis",
                 "canUseEmojisEverywhere",
-                "canUseHigherFramerate"
+                "canUseHighVideoQuality",
+                "canStreamHighQuality",
+                "canStreamMidQuality"
             ].map(func => {
                 return {
                     match: new RegExp(`${func}:function\\(.+?}`),
@@ -53,30 +55,30 @@ export default definePlugin({
         }
 
         this.preSend = addPreSendListener((_, messageObj) => {
-            const guildId = this.guildId;
+            const { guildId } = this;
             for (const emoji of messageObj.validNonShortcutEmojis) {
                 if (!emoji.require_colons) continue;
                 if (emoji.guildId === guildId && !emoji.animated) continue;
 
-                const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
+                const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
+                const url = emoji.url.replace(/\?size=[0-9]+/, "?size=48");
                 messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset-1)}${url}${getWordBoundary(origStr, offset+match.length)}`;
+                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                 });
             }
         });
 
         this.preEdit = addPreEditListener((_, __, messageObj) => {
-            const guildId = this.guildId;
+            const { guildId } = this;
 
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
                 const emoji = getCustomEmojiById(emojiId);
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
                 if (!emoji.require_colons) continue;
 
-                const url = emoji.url.replace(/\?size=[0-9]+/, `?size=48`);
+                const url = emoji.url.replace(/\?size=[0-9]+/, "?size=48");
                 messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset-1)}${url}${getWordBoundary(origStr, offset+match.length)}`;
+                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                 });
             }
         });

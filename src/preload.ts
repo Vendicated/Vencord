@@ -1,8 +1,7 @@
-import electron, { contextBridge, webFrame } from "electron";
+import electron, { contextBridge, webFrame, ipcRenderer } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
 import VencordNative from "./VencordNative";
-import { ipcRenderer } from 'electron';
 import IpcEvents from "./utils/IpcEvents";
 
 if (electron.desktopCapturer === void 0) {
@@ -15,7 +14,7 @@ if (electron.desktopCapturer === void 0) {
     require.cache[electronPath]!.exports = {
         ...electron,
         desktopCapturer: {
-            getSources: (opts) => ipcRenderer.invoke(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, opts)
+            getSources: opts => ipcRenderer.invoke(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, opts)
         }
     };
 }

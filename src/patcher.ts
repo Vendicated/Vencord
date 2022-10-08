@@ -1,7 +1,7 @@
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import installExt, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import { join } from "path";
-import { initIpc } from './ipcMain';
+import { initIpc } from "./ipcMain";
 
 console.log("[Vencord] Starting up...");
 
@@ -49,7 +49,7 @@ process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 electron.app.whenReady().then(() => {
     installExt(REACT_DEVELOPER_TOOLS)
         .then(() => console.info("Installed React DevTools"))
-        .catch((err) => console.error("Failed to install React DevTools", err));
+        .catch(err => console.error("Failed to install React DevTools", err));
 
     // Remove CSP
     electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, url }, cb) => {
@@ -64,10 +64,4 @@ electron.app.whenReady().then(() => {
         }
         cb({ cancel: false, responseHeaders });
     });
-
-    // Drop science and sentry requests
-    electron.session.defaultSession.webRequest.onBeforeRequest(
-        { urls: ["https://*/api/v*/science", "https://sentry.io/*"] },
-        (_, callback) => callback({ cancel: true })
-    );
 });
