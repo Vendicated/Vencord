@@ -1,5 +1,7 @@
 import definePlugin from "../utils/types";
 import { findOption, RequiredMessageOption } from "../api/Commands";
+
+//words have a chance of ending with these
 const endings = [
     "owo",
     "UwU",
@@ -22,6 +24,8 @@ const endings = [
     "*twerks*",
     "*sweats*",
 ];
+
+//replacement words
 const words = [
     ["love", "wuv"],
     ["mr", "mistuh"],
@@ -39,32 +43,35 @@ const words = [
     ["penis", "bulge"],
     ["damn", "darn"],
 ];
+
+
+//uwuify command
 function uwuify(message: string): string {
     let isowo = false;
     return message
         .split(" ")
-        .map((element) => {
+        .map(element => {
             isowo = false;
+            //return if the word is too short - uwuifying short words makes them unreadable
             if (element.length < 4) {
                 return element;
             }
+
+            //replacing the words based on the array on line 29
             for (let [find, replace] of words) {
                 if (element.includes(find)) {
                     element = element.replace(find, replace);
                     isowo = true;
                 }
             }
-            if (
-                element.toLowerCase().includes("u") &&
-                !element.toLowerCase().includes("uwu")
-            ) {
+
+            //these are the biggest word changes. if any of these are done we dont do the
+            //ones after the isowo check. to keep the words somewhat readable
+            if (element.toLowerCase().includes("u") && !element.toLowerCase().includes("uwu")) {
                 element = element.replace("u", "UwU");
                 isowo = true;
             }
-            if (
-                element.toLowerCase().includes("o") &&
-                !element.toLowerCase().includes("owo")
-            ) {
+            if (element.toLowerCase().includes("o") && !element.toLowerCase().includes("owo")) {
                 element = element.replace("o", "OwO");
                 isowo = true;
             }
@@ -72,9 +79,13 @@ function uwuify(message: string): string {
                 element = element + " " + "w" + element.slice(1);
                 isowo = true;
             }
+
+            //returning if word has been already uwuified - to prevent over-uwuifying
             if (isowo) {
                 return element;
             }
+
+            //more tiny changes - to keep the words that passed through the latter changes uwuified
             if (!element.toLowerCase().endsWith("n")) {
                 element = element.replace("n", "ny");
             }
@@ -92,10 +103,12 @@ function uwuify(message: string): string {
             }
             element = element.replace("r", "w").replace("l", "w");
             return element;
-        })
-        .join(" ");
+        }).join(" ");
 }
 
+
+
+//actual command declaration
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
@@ -108,7 +121,7 @@ export default definePlugin({
             description: "uwuifies your messages",
             options: [RequiredMessageOption],
 
-            execute: (opts) => ({
+            execute: opts => ({
                 content: uwuify(findOption(opts, "message", "")),
             }),
         },
