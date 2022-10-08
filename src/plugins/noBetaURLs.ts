@@ -7,7 +7,7 @@ export default definePlugin({
     authors: [{ name: "ICodeInAssembly", id: 702973430449832038n }],
     dependencies: ["MessageEventsAPI"],
     removeBetas(msg: MessageObject) {
-        msg.content = msg.content.replace(/(?<=https:\/\/)(canary.|ptb.)((?=discord.)|(?=discordapp.))/, "");
+        msg.content = msg.content.replace(/(?<=https:\/\/)(canary.|ptb.)((?=discord.[a-z]{1,3}\/channels\/)|(?=discordapp.[a-z]{1,3}\/channels\/))/g, "");
     },
 
     start() {
