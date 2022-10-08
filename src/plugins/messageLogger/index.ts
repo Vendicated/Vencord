@@ -1,49 +1,34 @@
 import { Devs } from "../../utils/constants";
 import definePlugin, { PluginDef } from "../../utils/types";
 import { React } from "../../webpack/common";
+import { lazyWebpack } from "../../utils/misc";
+import { filters } from "../../webpack";
+import css from "./index.css";
 
 interface MessageLoggerDef extends PluginDef {
-    editedTimestampComponent: any;
-    momentJs: any;
+    timestampModule: any;
+    momentJsModule: any;
 }
 
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii],
+    css: css,
 
-    editedTimestampComponent: null,
-    momentJs: null,
+    timestampModule: null,
+    momentJsModule: null,
 
     start() {
-        // TODO: move to separate css file when supported
-        const css = `
-            .messageLogger-deleted {
-                background-color: rgba(240, 71, 71, 0.15)
-            }
-
-            .theme-dark .messageLogger-edited {
-                filter: brightness(80%);
-            }
-
-            .theme-light .messageLogger-edited {
-                opacity: 0.5;
-            }
-        `;
-
-        const style = document.createElement("style");
-        const styleText = document.createTextNode(css);
-        style.appendChild(styleText);
-        document.body.appendChild(style);
-
-        this.editedTimestampComponent = Vencord.Webpack.findByProps("messageLogger_EditedTimestamp").messageLogger_EditedTimestamp;
-        this.momentJs = Vencord.Webpack.findByProps("relativeTimeRounding", "relativeTimeThreshold");
+        // FIXME: for some reason proxy doesn't execute in lazy
+        this.momentJsModule = Vencord.Webpack.findByProps("relativeTimeRounding", "relativeTimeThreshold");
+        this.timestampModule = lazyWebpack(filters.byProps(["messageLogger_TimestampComponent"]));
     },
 
     renderEdit(edit: { timestamp: any, content: string }): any {
         return React.createElement("div", { className: "messageLogger-edited" }, [
             edit.content,
-            React.createElement(this.editedTimestampComponent, {
+            React.createElement(this.timestampModule.messageLogger_TimestampComponent, {
                 timestamp: edit.timestamp,
                 isEdited: true,
                 isInline: false
@@ -51,6 +36,13 @@ export default definePlugin({
                 React.createElement("span", {}, " (edited)")
             ])
         ]);
+    },
+
+    makeEdit(newMessage: any, oldMessage: any): any {
+        return {
+            timestamp: this.momentJsModule(newMessage.edited_timestamp),
+            content: oldMessage.content
+        };
     },
 
     // Based on canary 56c8103413aa1add076201dbf622f8d26b48df9c
@@ -84,7 +76,7 @@ export default definePlugin({
                     // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
-                        ".update($3,m=>$2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:Vencord.Plugins.plugins.MessageLogger.momentJs($2.message.edited_timestamp),content:m.content}]) : m)" +
+                        ".update($3,m => $2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) : m)" +
                         ".update($3"
                 }
             ]
@@ -162,7 +154,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /((\w)\.createElement\("div",{id.+?},)(null!=.+?)(\)}function)/,
-                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit=>Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), $3]$4"
+                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), $3]$4"
                 }
             ]
         },
@@ -189,7 +181,7 @@ export default definePlugin({
             replacement: {
                 // Mark the timestamp component clearly so that it won't
                 match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
-                replace: "{$1,messageLogger_EditedTimestamp:()=>$2}"
+                replace: "{$1,messageLogger_TimestampComponent:()=>$2}"
             }
         }
 
