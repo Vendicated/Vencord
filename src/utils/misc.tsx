@@ -14,15 +14,20 @@ export function lazy<T>(factory: () => T): () => T {
 /**
  * Do a lazy webpack search. Searches the module on first property access
  * @param filter Filter function
- * @returns Proxy. Note that only get and set are implemented, all other operations will have unexpected
- *          results.
+ * @returns A proxy to the webpack module. Not all traps are implemented, may produce unexpected results.
  */
 export function lazyWebpack<T = any>(filter: FilterFn): T {
     const getMod = lazy(() => find(filter));
 
-    return new Proxy({}, {
+    return new Proxy(() => null, {
         get: (_, prop) => getMod()[prop],
-        set: (_, prop, v) => getMod()[prop] = v
+        set: (_, prop, value) => getMod()[prop] = value,
+        has: (_, prop) => prop in getMod(),
+        apply: (_, $this, args) => (getMod() as Function).apply($this, args),
+        ownKeys: () => Reflect.ownKeys(getMod()),
+        construct: (_, args, newTarget) => new newTarget(...args),
+        deleteProperty: (_, prop) => delete getMod()[prop],
+        defineProperty: (_, property, attributes) => !!Object.defineProperty(getMod(), property, attributes)
     }) as T;
 }
 
