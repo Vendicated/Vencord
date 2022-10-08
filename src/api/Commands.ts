@@ -75,6 +75,14 @@ export function registerCommand(command: Command, plugin: string) {
     BUILT_IN.push(command);
 }
 
+/**
+ * Send a message as Clyde
+ * @param channelId ID of channel to send message to
+ * @param message Message to send
+ * @param embed Array of embeds to send (can be blank)
+ * @param loggingName Frankly no fucking clue what this does, if not set will be replaced with "Cumbot"
+ * @returns null
+ */
 export function sendBotMessage(channelId, message, embed, loggingName) {
     const clyde = findByProps("sendBotMessage");
 
