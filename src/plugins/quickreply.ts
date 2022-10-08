@@ -12,6 +12,7 @@ export default definePlugin({
     name: "Quickreply",
     authors: [Devs.obscurity],
     description: "Reply to messages faster (ctrl + direction)",
+
     start() {
         Dispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
         document.addEventListener("keydown", keydown);
