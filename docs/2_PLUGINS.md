@@ -86,7 +86,8 @@ The replacement string we used is:
 
 Which, using the above example, would replace the code with:
 
-> :exclamation: In this example, `$1` becomes `abc`
+> **Note**
+> In this example, `$1` becomes `abc`
 
 ```js
 abc.isStaff = function () {
@@ -98,6 +99,7 @@ The match value _can_ be a string, rather than regex, however usually regex will
 
 Once you've made your plugin, make sure you run `pnpm lint` and make sure your code is nice and clean, and then open a PR on github :)
 
-> :exclamation: Make sure you've read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a PR
+> **Warning**
+> Make sure you've read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a PR
 
 If you need more help, ask in the support channel in our [Discord Server](https://discord.gg/D9uwnFnqmd).
