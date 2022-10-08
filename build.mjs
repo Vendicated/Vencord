@@ -1,15 +1,13 @@
 #!/usr/bin/node
-import { execSync } from "child_process";
 import esbuild from "esbuild";
-import { readdirSync } from "fs";
+import { gitHashPlugin, globPlugins } from "./buildCommon.mjs";
+import { sassPlugin } from "esbuild-sass-plugin";
 
-/**
- * @type {esbuild.WatchMode|false}
- */
+/** @type {esbuild.WatchMode|false} */
 const watch = process.argv.includes("--watch");
 
-// https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
+ * Ref: https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
  * @type {esbuild.Plugin}
  */
 const makeAllPackagesExternalPlugin = {
@@ -17,57 +15,6 @@ const makeAllPackagesExternalPlugin = {
     setup(build) {
         let filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/; // Must not start with "/" or "./" or "../"
         build.onResolve({ filter }, args => ({ path: args.path, external: true }));
-    },
-};
-
-/**
- * @type {esbuild.Plugin}
- */
-const globPlugins = {
-    name: "glob-plugins",
-    setup: build => {
-        build.onResolve({ filter: /^plugins$/ }, args => {
-            return {
-                namespace: "import-plugins",
-                path: args.path
-            };
-        });
-
-        build.onLoad({ filter: /^plugins$/, namespace: "import-plugins" }, () => {
-            const files = readdirSync("./src/plugins");
-            let code = "";
-            let obj = "";
-            for (let i = 0; i < files.length; i++) {
-                if (files[i] === "index.ts") {
-                    continue;
-                }
-                const mod = `__pluginMod${i}`;
-                code += `import ${mod} from "./${files[i].replace(/.tsx?$/, "")}";\n`;
-                obj += `[${mod}.name]: ${mod},`;
-            }
-            code += `export default {${obj}}`;
-            return {
-                contents: code,
-                resolveDir: "./src/plugins"
-            };
-        });
-    }
-};
-
-const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
-/**
- * @type {esbuild.Plugin}
- */
-const gitHashPlugin = {
-    name: "git-hash-plugin",
-    setup: build => {
-        const filter = /^git-hash$/;
-        build.onResolve({ filter }, args => ({
-            namespace: "git-hash", path: args.path
-        }));
-        build.onLoad({ filter, namespace: "git-hash" }, () => ({
-            contents: `export default "${gitHash}"`
-        }));
     }
 };
 
@@ -80,7 +27,7 @@ await Promise.all([
         bundle: true,
         platform: "node",
         target: ["esnext"],
-        sourcemap: "linked",
+        sourcemap: false,
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
@@ -93,7 +40,7 @@ await Promise.all([
         target: ["esnext"],
         external: ["electron"],
         platform: "node",
-        sourcemap: "linked",
+        sourcemap: false,
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
@@ -109,12 +56,13 @@ await Promise.all([
         external: ["plugins", "git-hash"],
         plugins: [
             globPlugins,
-            gitHashPlugin
+            gitHashPlugin,
+            sassPlugin({ type: "css-text" })
         ],
         sourcemap: false,
         watch,
-        minify: true,
-    }),
+        minify: true
+    })
 ]).catch(err => {
     console.error("Build failed");
     console.error(err.message);
