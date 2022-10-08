@@ -22,7 +22,11 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
 
     return new Proxy({}, {
         get: (_, prop) => getMod()[prop],
-        set: (_, prop, v) => getMod()[prop] = v
+        set: (_, prop, v) => getMod()[prop] = v,
+        apply: (target, $this, args) => (getMod() as Function).bind($this, args)(),
+        construct: (target, args, newTarget) => newTarget.bind(target, args),
+        defineProperty: (target, property, attributes) => !!Object.defineProperty(target, property, attributes),
+        has: (target, p) => p in target
     }) as T;
 }
 
