@@ -13,14 +13,14 @@ export default definePlugin({
         replacement: {
             match: /var (.{1,2})=(.{1,2})\.channel,(.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.renderSuppressEmbeds/,
             replace: "const msgLink=$2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex) &&\
-            $2.message.content.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)[3];\
+            $2.message.content.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)[1];\
             if(msgLink)$2.message.embeds=[...$2.message.embeds,\
             Vencord.Plugins.plugins.MessageLinkEmbeds.generateEmbed(msgLink, $2.message.embeds)].filter(item=>item);\
             var $1=$2.channel,$3=$2.message,$4=$2.renderSuppressEmbeds"
         }
     }],
 
-    messageLinkRegex: /https?:\/\/(canary\.|ptb\.)?discord(app)?\.com\/channels\/(\d{17,20}\/\d{17,20}\/\d{17,20})/,
+    messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19})/,
 
     generateEmbed(messageURL: string, existingEmbeds: any[]) {
         const [guildID, channelID, messageID] = messageURL.split("/");
