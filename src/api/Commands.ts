@@ -1,5 +1,5 @@
 import { Channel, Guild } from "discord-types/general";
-import { waitFor } from "../webpack";
+import { waitFor, findByProps } from "../webpack";
 
 export function _init(cmds: Command[]) {
     try {
@@ -73,6 +73,12 @@ export function registerCommand(command: Command, plugin: string) {
     modifyOpt(command);
     commands[command.name] = command;
     BUILT_IN.push(command);
+}
+
+export function sendBotMessage(channelId, message, embed, loggingName) {
+    const clyde = findByProps("sendBotMessage");
+
+    clyde.sendBotMessage(channelId, message, (embed || []), (loggingName || "Cumbot"));
 }
 
 export function unregisterCommand(name: string) {
