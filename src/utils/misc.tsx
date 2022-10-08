@@ -25,7 +25,7 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
         has: (_, prop) => prop in getMod(),
         apply: (_, $this, args) => (getMod() as Function).apply($this, args),
         ownKeys: () => Reflect.ownKeys(getMod()),
-        construct: (_, args, newTarget) => new newTarget(...args),
+        construct: (_, args, newTarget) => Reflect.construct(getMod(), args, newTarget),
         deleteProperty: (_, prop) => delete getMod()[prop],
         defineProperty: (_, property, attributes) => !!Object.defineProperty(getMod(), property, attributes)
     }) as T;
