@@ -24,7 +24,7 @@ export interface Plugin extends PluginDef {
     started: boolean;
 }
 
-interface PluginDef {
+export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];

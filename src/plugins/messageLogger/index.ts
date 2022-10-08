@@ -1,10 +1,19 @@
 import { Devs } from "../../utils/constants";
-import definePlugin from "../../utils/types";
+import definePlugin, { PluginDef } from "../../utils/types";
+import { React } from "../../webpack/common";
+
+interface MessageLoggerDef extends PluginDef {
+    editedTimestampComponent: any;
+    momentJs: any;
+}
 
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii],
+
+    editedTimestampComponent: null,
+    momentJs: null,
 
     start() {
         // TODO: move to separate css file when supported
@@ -14,7 +23,7 @@ export default definePlugin({
             }
 
             .theme-dark .messageLogger-edited {
-                filter: brightness(85%);
+                filter: brightness(80%);
             }
 
             .theme-light .messageLogger-edited {
@@ -37,6 +46,26 @@ export default definePlugin({
         const styleText = document.createTextNode(css);
         style.appendChild(styleText);
         document.body.appendChild(style);
+
+        this.editedTimestampComponent = Vencord.Webpack.findByProps("messageLogger_EditedTimestamp").messageLogger_EditedTimestamp;
+        this.momentJs = Vencord.Webpack.findByProps("relativeTimeRounding", "relativeTimeThreshold");
+    },
+
+    renderEdit(edit: { timestamp: any, content: string }): any {
+        return React.createElement("div", { className: "messageLogger-edited" }, [
+            edit.content,
+            React.createElement(this.editedTimestampComponent, {
+                timestamp: edit.timestamp,
+                isEdited: true,
+                isInline: false
+            }, [
+                React.createElement(
+                    "span",
+                    { className: "" },
+                    " (edited)"
+                )
+            ])
+        ]);
     },
 
     // Based on canary 56c8103413aa1add076201dbf622f8d26b48df9c
@@ -70,7 +99,7 @@ export default definePlugin({
                     // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
-                        ".update($3,m=>$2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$2.message.edited_timestamp,content:m.content}]) : m)" +
+                        ".update($3,m=>$2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:Vencord.Plugins.plugins.MessageLogger.momentJs($2.message.edited_timestamp),content:m.content}]) : m)" +
                         ".update($3"
                 }
             ]
@@ -148,8 +177,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /((\w)\.createElement\("div",{id.+?},)(null!=.+?)(\)}function)/,
-                    // FIXME: absolute time not showing when hovering timestamp
-                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit=>$2.createElement('div',{className: 'messageLogger-edited'},[edit.content,$2.createElement('time',{datetime: edit.timestamp,className:'messageLogger-editedTimestamp'},'(edited)')])) : null), $3]$4"
+                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit=>Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), $3]$4"
                 }
             ]
         },
@@ -166,9 +194,19 @@ export default definePlugin({
                 {
                     match: /MESSAGE_DELETE_BULK:function.+?},/,
                     replace: "MESSAGE_DELETE_BULK:function(){},"
-                },
+                }
             ]
         },
+
+        {
+            // Message "(edited)" timestamp component
+            find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
+            replacement: {
+                // Mark the timestamp component clearly so that it won't
+                match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
+                replace: "{$1,messageLogger_EditedTimestamp:()=>$2}"
+            }
+        }
 
         // {
         //     // MessageStore caching internals
@@ -183,4 +221,4 @@ export default definePlugin({
         //     ]
         // }
     ]
-});
+} as MessageLoggerDef);
