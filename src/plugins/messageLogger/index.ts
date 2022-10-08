@@ -67,6 +67,7 @@ export default definePlugin({
                         "},"
                 },
                 {
+                    // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m=>$2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), {timestamp:$2.message.edited_timestamp,content:m.content}]) : m)" +
@@ -155,46 +156,31 @@ export default definePlugin({
 
         {
             // ReferencedMessageStore
+            // Module 778667
             find: "displayName=\"ReferencedMessageStore\"",
             replacement: [
-                // {
-                //     match: /MESSAGE_DELETE:function.+?},/,
-                //     replace: "MESSAGE_DELETE:function(){},"
-                // }
+                {
+                    match: /MESSAGE_DELETE:function.+?},/,
+                    replace: "MESSAGE_DELETE:function(){},"
+                },
+                {
+                    match: /MESSAGE_DELETE_BULK:function.+?},/,
+                    replace: "MESSAGE_DELETE_BULK:function(){},"
+                },
             ]
         },
 
-        {
-            // Message header controller(?)
-            // Module 352297
-            find: "M0.809739 3.59646L5.12565 0.468433C5.17446 0.431163 5.23323 0.408043 5.2951",
-            replacement: [
-                // {
-                //     // Prevent rendering replied-to message preview as deleted
-                //     // FIXME: could not read stickerItems of undefined
-                //     // error at: 673973 w = func
-                //     match: /case ((?:\w{1,2}\.){2})LOADED:/,
-                //     replace: "case $1LOADED: case $1DELETED:"
-                // },
-                // {
-                //     // Fix jump button on deleted message preview
-                //     match: /state!==(?:\w{1,2}\.){2}DELETED\?(\w{1,2}\.onClickReply):void 0/,
-                //     replace: "$1"
-                // }
-            ]
-        },
-
-        {
-            // MessageStore caching internals
-            // Module 819525
-            find: "e.getOrCreate=function(t)",
-            replacement: [
-                // {
-                //     // DEBUG: log getOrCreate return values from MessageStore caching internals
-                //     match: /getOrCreate=function(.+?)return/,
-                //     replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
-                // }
-            ]
-        }
+        // {
+        //     // MessageStore caching internals
+        //     // Module 819525
+        //     find: "e.getOrCreate=function(t)",
+        //     replacement: [
+        //         // {
+        //         //     // DEBUG: log getOrCreate return values from MessageStore caching internals
+        //         //     match: /getOrCreate=function(.+?)return/,
+        //         //     replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
+        //         // }
+        //     ]
+        // }
     ]
 });
