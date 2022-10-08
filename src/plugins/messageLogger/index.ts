@@ -20,8 +20,7 @@ export default definePlugin({
     momentJsModule: null,
 
     start() {
-        // FIXME: for some reason proxy doesn't execute in lazy
-        this.momentJsModule = Vencord.Webpack.findByProps("relativeTimeRounding", "relativeTimeThreshold");
+        this.momentJsModule = lazyWebpack(filters.byProps(["relativeTimeRounding", "relativeTimeThreshold"]));
         this.timestampModule = lazyWebpack(filters.byProps(["messageLogger_TimestampComponent"]));
     },
 
