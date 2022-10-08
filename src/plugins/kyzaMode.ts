@@ -1,5 +1,5 @@
 import definePlugin from "../utils/types";
-import { addPreSendListener, addPreEditListener, MessageObject, SendListener, EditListener, removePreSendListener, removePreEditListener } from '../api/MessageEvents';
+import { addPreSendListener, addPreEditListener, MessageObject, removePreSendListener, removePreEditListener } from "../api/MessageEvents";
 
 const dictionary = {
     " i ": " I ",
@@ -9,7 +9,7 @@ const dictionary = {
     "i'll": "I'll",
     "i'd": "I'd",
     "Https://": "https://",
-}; //dictionary of words and replacements
+}; // dictionary of words and replacements
 
 export default definePlugin({
     name: "KyzaMode",
@@ -18,7 +18,7 @@ export default definePlugin({
         name: "DustyAngel47",
         id: 714583473804935238n
     }],
-	dependencies: ["MessageEventsAPI"],
+    dependencies: ["MessageEventsAPI"],
 
     getPunctuation(msg) {
         const endingChar = msg.slice(-1);
@@ -27,16 +27,16 @@ export default definePlugin({
             endingChar === "?" ||
             endingChar === "!" ||
             endingChar === "‽"
-        ) ? "" : "."
+        ) ? "" : ".";
     },
 
     correct(msg: string) {
-        msg = msg[0].toUpperCase() + msg.slice(1); //make first character uppercase
-        msg += this.getPunctuation(msg); //append period to string if punctuation doesn't exist already
+        msg = msg[0].toUpperCase() + msg.slice(1); // make first character uppercase
+        msg += this.getPunctuation(msg); // append period to string if punctuation doesn't exist already
         Object.keys(dictionary).forEach(v => {
-            msg = msg.replaceAll(v, dictionary[v])
+            msg = msg.replaceAll(v, dictionary[v]);
         });
-        msg = msg.replaceAll(/(?<=[\.\?\!\‽] )./gm, m => m.toUpperCase()); //handle having multiple sentences (such an advancement of technology!)
+        msg = msg.replaceAll(/(?<=[\.\?\!\‽] )./gm, m => m.toUpperCase()); // handle having multiple sentences (such an advancement of technology!)
         return msg;
     },
 
@@ -53,4 +53,4 @@ export default definePlugin({
         removePreSendListener(this.preSend);
         removePreEditListener(this.preEdit);
     }
-})
+});
