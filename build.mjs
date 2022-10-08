@@ -27,7 +27,7 @@ await Promise.all([
         bundle: true,
         platform: "node",
         target: ["esnext"],
-        sourcemap: false,
+        sourcemap: "linked",
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
@@ -40,7 +40,7 @@ await Promise.all([
         target: ["esnext"],
         external: ["electron"],
         platform: "node",
-        sourcemap: false,
+        sourcemap: "linked",
         plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
