@@ -16,7 +16,7 @@ const ALLOWED_PROTOCOLS = [
     "http:",
     "steam:",
     "spotify:"
-]
+];
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
@@ -43,7 +43,7 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     } catch {
         throw "Malformed URL";
     }
-    if (protocol in ALLOWED_PROTOCOLS === false)
+    if (!ALLOWED_PROTOCOLS.includes(protocol))
         throw "Disallowed protocol.";
 
     shell.openExternal(url);
