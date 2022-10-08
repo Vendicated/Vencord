@@ -8,17 +8,17 @@ declare module "git-hash" {
     export default hash;
 }
 
-declare module '*.css' {
+declare module "*.css" {
     const content: string;
     export default content;
 }
 
-declare module '*.sass' {
+declare module "*.sass" {
     const content: string;
     export default content;
 }
 
-declare module '*.scss' {
+declare module "*.scss" {
     const content: string;
     export default content;
 }
