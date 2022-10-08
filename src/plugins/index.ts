@@ -52,18 +52,6 @@ export function startPlugin(p: Plugin) {
 
     }
 
-    if (p.css) {
-        try {
-            const style = document.createElement("style");
-            style.textContent = p.css;
-            style.id = `${p.name}-css`;
-
-            document.head.appendChild(style);
-        } catch (e) {
-            logger.error(`Failed to add css from ${p.name}\n`, e);
-        }
-    }
-
     return true;
 }
 
@@ -92,14 +80,6 @@ export function stopPlugin(p: Plugin) {
                 logger.error(`Failed to unregister command ${cmd.name}\n`, e);
                 return false;
             }
-        }
-    }
-
-    if (p.css) {
-        try {
-            document.head.querySelector(`#${p.name}-css`)?.remove();
-        } catch (e) {
-            logger.error(`Failed to remove css from ${p.name}\n`, e);
         }
     }
 

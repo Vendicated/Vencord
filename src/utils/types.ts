@@ -36,7 +36,6 @@ export interface PluginDef {
     commands?: Command[];
     dependencies?: string[],
     required?: boolean;
-    css?: string;
     /**
      * Set this if your plugin only works on Browser or Desktop, not both
      */
