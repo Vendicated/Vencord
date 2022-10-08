@@ -29,17 +29,6 @@ export default definePlugin({
             .theme-light .messageLogger-edited {
                 opacity: 0.5;
             }
-
-            .messageLogger-editedTimestamp {
-                color: var(--text-muted);
-                margin-left: 0.25rem;
-                font-size: 0.75rem;
-                line-height: 1.375rem;
-                height: 1.25rem
-                vertical-align: baseline;
-                font-weight: 500;
-                pointer-events: none;
-            }
         `;
 
         const style = document.createElement("style");
@@ -59,11 +48,7 @@ export default definePlugin({
                 isEdited: true,
                 isInline: false
             }, [
-                React.createElement(
-                    "span",
-                    { className: "" },
-                    " (edited)"
-                )
+                React.createElement("span", {}, " (edited)")
             ])
         ]);
     },
