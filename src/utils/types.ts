@@ -1,7 +1,7 @@
 import { Command } from "../api/Commands";
 
 // exists to export default definePlugin({...})
-export default function definePlugin(p: PluginDef & Record<string, any>) {
+export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
 }
 
