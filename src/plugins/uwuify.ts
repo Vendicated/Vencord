@@ -52,6 +52,7 @@ function uwuify(message: string): string {
         .split(" ")
         .map(element => {
             isowo = false;
+            let lowerCase = element.toLowerCase();
             //return if the word is too short - uwuifying short words makes them unreadable
             if (element.length < 4) {
                 return element;
@@ -64,18 +65,17 @@ function uwuify(message: string): string {
                     isowo = true;
                 }
             }
-
             //these are the biggest word changes. if any of these are done we dont do the
             //ones after the isowo check. to keep the words somewhat readable
-            if (element.toLowerCase().includes("u") && !element.toLowerCase().includes("uwu")) {
+            if (lowerCase.includes("u") && !lowerCase.includes("uwu")) {
                 element = element.replace("u", "UwU");
                 isowo = true;
             }
-            if (element.toLowerCase().includes("o") && !element.toLowerCase().includes("owo")) {
+            if (lowerCase.includes("o") && !lowerCase.includes("owo")) {
                 element = element.replace("o", "OwO");
                 isowo = true;
             }
-            if (element.toLowerCase().endsWith("y") && element.length < 7) {
+            if (lowerCase.endsWith("y") && element.length < 7) {
                 element = element + " " + "w" + element.slice(1);
                 isowo = true;
             }
@@ -86,7 +86,7 @@ function uwuify(message: string): string {
             }
 
             //more tiny changes - to keep the words that passed through the latter changes uwuified
-            if (!element.toLowerCase().endsWith("n")) {
+            if (!lowerCase.endsWith("n")) {
                 element = element.replace("n", "ny");
             }
             if (Math.floor(Math.random() * 2) == 1) {
