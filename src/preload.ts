@@ -1,8 +1,7 @@
-import electron, { contextBridge, webFrame } from "electron";
+import electron, { contextBridge, webFrame, ipcRenderer } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
 import VencordNative from "./VencordNative";
-import { ipcRenderer } from "electron";
 import IpcEvents from "./utils/IpcEvents";
 
 if (electron.desktopCapturer === void 0) {

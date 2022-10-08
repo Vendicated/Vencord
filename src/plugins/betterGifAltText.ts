@@ -26,7 +26,7 @@ export default definePlugin({
     ],
 
     altify(props: any) {
-        if (props.alt !== "GIF") return;
+        if (props.alt !== "GIF") return props.alt;
 
         let url: string = props.original || props.src;
         try {

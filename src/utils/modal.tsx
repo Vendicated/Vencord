@@ -25,7 +25,7 @@ export function openModal(Component: React.ComponentType, modalProps: Record<str
     ), { modalKey: key });
 
     return key;
-};
+}
 
 /**
  * Close a modal by key. The id you need for this is returned by openModal.

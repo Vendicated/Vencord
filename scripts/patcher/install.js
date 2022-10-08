@@ -43,7 +43,7 @@ async function install(installations) {
     // Attempt to give flatpak perms
     if (selected.isFlatpak) {
         try {
-            const branch = selected.branch;
+            const { branch } = selected;
             const cwd = process.cwd();
             const globalCmd = `flatpak override ${branch} --filesystem=${cwd}`;
             const userCmd = `flatpak override --user ${branch} --filesystem=${cwd}`;

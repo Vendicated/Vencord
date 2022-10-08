@@ -82,6 +82,8 @@ export function unregisterCommand(name: string) {
 
     BUILT_IN.splice(idx, 1);
     delete commands[name];
+
+    return true;
 }
 
 export interface CommandContext {

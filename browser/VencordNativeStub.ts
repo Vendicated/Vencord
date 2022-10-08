@@ -1,7 +1,7 @@
 import IpcEvents from "../src/utils/IpcEvents";
 
 // Discord deletes this so need to store in variable
-var localStorage = window.localStorage;
+var { localStorage } = window;
 
 const handlers = {
     [IpcEvents.GET_REPO]: () => "", // TODO

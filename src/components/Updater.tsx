@@ -42,7 +42,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
             dispatcher(false);
         }
     };
-};
+}
 
 interface CommonProps {
     repo: string;
