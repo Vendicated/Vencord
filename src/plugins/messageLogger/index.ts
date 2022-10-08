@@ -49,14 +49,23 @@ export default definePlugin({
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
                     match: /MESSAGE_DELETE:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
-                    replace: "MESSAGE_DELETE:function($1){$2commit($2getOrCreate($1.channelId).update($1.id,m=>m.set('deleted', true)))},"
+                    replace:
+                        "MESSAGE_DELETE:function($1){" +
+                        "   var cache = $2getOrCreate($1.channelId);" +
+                        "   cache = cache.update($1.id,m=>m.set('deleted', true));" +
+                        "   $2commit(cache);" +
+                        "},"
                 },
-                // {
-                //     // TODO: add MESSAGE_DELETE_BULK
-                //     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                //     match: /a/,
-                //     replace: ""
-                // },
+                {
+                    // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
+                    match: /MESSAGE_DELETE_BULK:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
+                    replace:
+                        "MESSAGE_DELETE_BULK:function($1){" +
+                        "   var cache = $2getOrCreate($1.channelId);" +
+                        "   cache = $1.ids.reduce((pv,cv) => pv.update(cv, msg => msg.set('deleted', true)), cache);" +
+                        "   $2commit(cache);" +
+                        "},"
+                },
                 {
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
