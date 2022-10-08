@@ -4,15 +4,16 @@ First of all, thank you for contributing! :3
 
 To ensure your contribution is robust, please follow the below guide!
 
+For a friendly introduction to plugins, see [Megu's Plugin Guide!](docs/2_PLUGINS.md)
+
 ## Style Guide
 
-- This project has a very minimal .editorconfig. Make sure your editor supports this!
-  If you are using VSCode, it should automatically recommend you the extension; If not,
-  please install the Editorconfig extension
-- Try to follow the formatting in the rest of the project and stay consistent
-- Follow the file naming convention. File names should usually be camelCase, unless they export a Class
-  or React Component, in which case they should be PascalCase
-
+-   This project has a very minimal .editorconfig. Make sure your editor supports this!
+    If you are using VSCode, it should automatically recommend you the extension; If not,
+    please install the Editorconfig extension
+-   Try to follow the formatting in the rest of the project and stay consistent
+-   Follow the file naming convention. File names should usually be camelCase, unless they export a Class
+    or React Component, in which case they should be PascalCase
 
 ## Contributing a Plugin
 
@@ -22,7 +23,6 @@ Thus, 3rd party plugins are not supported, instead all plugins are part of Venco
 This way we can ensure compatibility and high quality patches.
 
 Follow the below guide to make your first plugin!
-
 
 ### Finding the right module to patch
 
@@ -50,20 +50,22 @@ This is the regex that will operate on the module found with "find". Just like i
 this only matches exactly the part you want to patch and no other parts in the file.
 
 The easiest way to write and test your regex is the following:
-- Get the ID of the module you want to patch. To do this, go to it in the sources tab and scroll up until you
-  see something like `447887: (e,t,n)=>{` (Obviously the number will differ).
-- Now paste the following into the console: `Vencord.Webpack.wreq.m[447887].toString()` (Changing the number to your ID)
-- Now either test regexes on this string in the console or use a tool like https://regex101.com
+
+-   Get the ID of the module you want to patch. To do this, go to it in the sources tab and scroll up until you
+    see something like `447887: (e,t,n)=>{` (Obviously the number will differ).
+-   Now paste the following into the console: `Vencord.Webpack.wreq.m[447887].toString()` (Changing the number to your ID)
+-   Now either test regexes on this string in the console or use a tool like https://regex101.com
 
 Also pay attention to the following:
-- Never hardcode variable or parameter names or any other minified names. They will change in the future. The only Exception to this rule
-  are the react props parameter which seems to always be `e`, but even then only rely on this if it is necessary.
-  Instead, use one of the following approaches where applicable:
-  - Match 1 or 2 of any character: `.{1,2}`, for example to match the variable name in `var a=b`, `var (.{1,2})=`
-  - Match any but a guaranteed terminating character: `[^;]+`, for example to match the entire assigned value in `var a=b||c||func();`,
-    `var .{1,2}=([^;]+);`
-  - If you don't care about that part, just match a bunch of chars: `.{0,50}`, for example to extract the variable "b" in `createElement("div",{a:"foo",c:"bar"},b)`, `createElement\("div".{0,30},(.{1,2})\),`. Note the `.{0,30}`, this is essentially the same as `.+`, but safer as you can't end up accidently eating thousands of characters
-- Additionally, as you might have noticed, all of the appove approaches use regex groups (`(...)`) to capture the variable name. You can then use those groups in your replacement to access those variables dynamically
+
+-   Never hardcode variable or parameter names or any other minified names. They will change in the future. The only Exception to this rule
+    are the react props parameter which seems to always be `e`, but even then only rely on this if it is necessary.
+    Instead, use one of the following approaches where applicable:
+    -   Match 1 or 2 of any character: `.{1,2}`, for example to match the variable name in `var a=b`, `var (.{1,2})=`
+    -   Match any but a guaranteed terminating character: `[^;]+`, for example to match the entire assigned value in `var a=b||c||func();`,
+        `var .{1,2}=([^;]+);`
+    -   If you don't care about that part, just match a bunch of chars: `.{0,50}`, for example to extract the variable "b" in `createElement("div",{a:"foo",c:"bar"},b)`, `createElement\("div".{0,30},(.{1,2})\),`. Note the `.{0,30}`, this is essentially the same as `.+`, but safer as you can't end up accidently eating thousands of characters
+-   Additionally, as you might have noticed, all of the appove approaches use regex groups (`(...)`) to capture the variable name. You can then use those groups in your replacement to access those variables dynamically
 
 #### "replace"
 
@@ -75,6 +77,6 @@ and use those in your replacement
 Make sure your replacement does not introduce any whitespace. While this might seem weird, random whitespace may mess up other patches.
 This includes spaces, tabs and especially newlines
 
-___
+---
 
 And that's it! Now open a Pull Request with your Plugin

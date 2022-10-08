@@ -1,9 +1,11 @@
 import IpcEvents from "./IpcEvents";
 import Logger from "./logger";
-import { IpcRes } from './types';
+import { IpcRes } from "./types";
+import gitHash from "git-hash";
 
 export const UpdateLogger = new Logger("Updater", "white");
 export let isOutdated = false;
+export let isNewer = false;
 export let updateError: any;
 export let changes: Record<"hash" | "author" | "message", string>[];
 
@@ -18,6 +20,10 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 
 export async function checkForUpdates() {
     changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    if (changes.some(c => c.hash === gitHash)) {
+        isNewer = true;
+        return (isOutdated = false);
+    }
     return (isOutdated = changes.length > 0);
 }
 

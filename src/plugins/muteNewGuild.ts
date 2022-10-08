@@ -1,5 +1,5 @@
 import definePlugin from "../utils/types";
-import {Devs} from "../utils/constants";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "MuteNewGuild",
@@ -14,4 +14,4 @@ export default definePlugin({
             }
         }
     ],
-})
+});

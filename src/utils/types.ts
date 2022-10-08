@@ -1,3 +1,5 @@
+import { Command } from "../api/Commands";
+
 // exists to export default definePlugin({...})
 export default function definePlugin(p: PluginDef & Record<string, any>) {
     return p;
@@ -31,6 +33,7 @@ export interface PluginDef {
     start?(): void;
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
+    commands?: Command[];
     dependencies?: string[],
     required?: boolean;
     /**

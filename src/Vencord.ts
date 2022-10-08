@@ -12,7 +12,7 @@ export { Settings };
 
 import "./webpack/patchWebpack";
 import "./utils/quickCss";
-import { checkForUpdates, UpdateLogger } from './utils/updater';
+import { checkForUpdates, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { Router } from "./webpack/common";
 

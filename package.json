@@ -3,8 +3,11 @@
         "@types/node": "^18.7.13",
         "@types/react": "^18.0.17",
         "@types/yazl": "^2.4.2",
+        "@typescript-eslint/parser": "^5.39.0",
         "electron": "^20.1.0",
         "esbuild": "^0.15.5",
+        "eslint": "^8.24.0",
+        "typescript": "^4.8.4",
         "yazl": "^2.5.1"
     },
     "dependencies": {
@@ -16,7 +19,9 @@
         "buildWeb": "node buildWeb.mjs",
         "build": "node build.mjs",
         "watch": "node build.mjs --watch",
-        "patch": "node scripts/patcher/install.js",
-        "unpatch": "node scripts/patcher/uninstall.js"
+        "inject": "node scripts/patcher/install.js",
+        "uninject": "node scripts/patcher/uninstall.js",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint:fix": "pnpm lint --fix"
     }
 }

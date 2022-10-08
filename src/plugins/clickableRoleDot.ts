@@ -1,6 +1,6 @@
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
-import { Toasts } from '../webpack/common';
+import { Toasts } from "../webpack/common";
 
 export default definePlugin({
     name: "ClickableRoleDot",

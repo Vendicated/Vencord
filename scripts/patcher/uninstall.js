@@ -42,7 +42,7 @@ async function uninstall(installations) {
             console.error("No write access to", selected.location);
             console.error(
                 "Try running this script as an administrator:",
-                "sudo pnpm run unpatch"
+                "sudo pnpm uninject"
             );
             process.exit(1);
         }

@@ -36,7 +36,7 @@ export type CallbackFn = (mod: any) => void;
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol()], {}, (r) => r]);
+    wreq = instance.push([[Symbol()], {}, r => r]);
     cache = wreq.c;
     instance.pop();
 }
