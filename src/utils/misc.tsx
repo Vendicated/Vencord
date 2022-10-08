@@ -56,7 +56,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
     }, []);
 
     return [state.value, state.error, state.pending];
-};
+}
 
 /**
  * A lazy component. The factory method is called on first render. For example useful
