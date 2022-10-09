@@ -7,16 +7,21 @@ on:
         branches:
             - main
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
+  Build:
+    runs-on: ubuntu-latest
 
-            - name: Install pnpm
-              run: npm i -g pnpm
-
-            - name: Install deps
-              run: pnpm i
-
-            - name: Run ESLint
-              run: pnpm run lint
+    steps:
+    - uses: actions/checkout@v3
+    - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+    
+    - name: Use Node.js 18
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
+        cache: 'pnpm'
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Build aliucord
+      run: pnpm lint && pnpm build
