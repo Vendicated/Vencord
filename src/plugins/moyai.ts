@@ -1,5 +1,5 @@
-import definePlugin from "../../utils/types";
-import { Devs } from "../../utils/constants";
+import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 import { Message } from "discord-types/general";
 
 interface IMessageCreate {
