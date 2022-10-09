@@ -6,8 +6,6 @@ vencord_installer
 
 .idea
 
-# These are absolute pain causing merge conflicts
-pnpm-lock.yaml
 yarn.lock
 package-lock.json
 

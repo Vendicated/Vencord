@@ -4,12 +4,18 @@ Welcome to Megu's Installation Guide! In this file, you will learn about how to 
 
 ## Sections
 
--   [Dependencies](#dependencies)
--   [Installing Vencord](#installing-vencord)
--   [Updating Vencord](#updating-vencord)
--   [Uninstalling Vencord](#uninstalling-vencord)
--   [Manually Installing Vencord](#manually-installing-vencord)
--   [Manually Uninstalling Vencord](#manually-uninstalling-vencord)
+- [Installation Guide](#installation-guide)
+  - [Sections](#sections)
+  - [Dependencies](#dependencies)
+  - [Installing Vencord](#installing-vencord)
+  - [Updating Vencord](#updating-vencord)
+  - [Uninstalling Vencord](#uninstalling-vencord)
+  - [Manually Installing Vencord](#manually-installing-vencord)
+    - [On Windows](#on-windows)
+    - [On Linux](#on-linux)
+    - [On MacOS](#on-macos)
+    - [Manual Patching](#manual-patching)
+    - [Manually Uninstalling Vencord](#manually-uninstalling-vencord)
 
 ## Dependencies
 
@@ -38,7 +44,7 @@ cd Vencord
 Install dependencies:
 
 ```shell
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 Build Vencord:
@@ -95,7 +101,7 @@ pnpm uninject
 The above command may ask you to also run:
 
 ```shell
-pnpm install
+pnpm install --frozen-lockfile
 pnpm uninject
 ```
 

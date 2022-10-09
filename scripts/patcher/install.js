@@ -5,7 +5,7 @@ const { execSync } = require("child_process");
 console.log("\nVencord Installer\n");
 
 if (!fs.existsSync(path.join(process.cwd(), "node_modules"))) {
-    console.log("You need to install dependencies first. Run:", "pnpm install");
+    console.log("You need to install dependencies first. Run:", "pnpm install --frozen-lockfile");
     process.exit(1);
 }
 

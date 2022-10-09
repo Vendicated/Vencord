@@ -7,21 +7,21 @@ on:
         branches:
             - main
 jobs:
-  Build:
-    runs-on: ubuntu-latest
+    Build:
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
-    
-    - name: Use Node.js 18
-      uses: actions/setup-node@v2
-      with:
-        node-version: 18
-        cache: 'pnpm'
-        
-    - name: Install dependencies
-      run: pnpm install
-      
-    - name: Build aliucord
-      run: pnpm lint && pnpm build
+        steps:
+            - uses: actions/checkout@v3
+            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+
+            - name: Use Node.js 18
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 18
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build aliucord
+              run: pnpm lint && pnpm build
