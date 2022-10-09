@@ -23,5 +23,6 @@
         "uninject": "node scripts/patcher/uninstall.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix"
-    }
+    },
+    "packageManager": "pnpm@7.12.2"
 }
