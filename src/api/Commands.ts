@@ -1,4 +1,4 @@
-import { Channel, Guild } from "discord-types/general";
+import { Channel, Guild, Embed } from "discord-types/general";
 import { waitFor, findByProps } from "../webpack";
 
 export function _init(cmds: Command[]) {
@@ -77,16 +77,16 @@ export function registerCommand(command: Command, plugin: string) {
 
 /**
  * Send a message as Clyde
- * @param channelId ID of channel to send message to
- * @param message Message to send
- * @param embed Array of embeds to send (can be blank)
- * @param loggingName Frankly no fucking clue what this does, if not set will be replaced with "Cumbot"
+ * @param {string} channelId ID of channel to send message to
+ * @param {string} message Message to send
+ * @param {Embed[]} embed Array of embeds to send (can be blank)
+ * @param loggingName Frankly no fucking clue what this does, if not set will be replaced with "Vencord"
  * @returns null
  */
-export function sendBotMessage(channelId, message, embed, loggingName) {
+export function sendBotMessage(channelId: string, message: string, embeds: Embed[], loggingName = "Vencord") {
     const clyde = findByProps("sendBotMessage");
 
-    clyde.sendBotMessage(channelId, message, (embed || []), (loggingName || "Cumbot"));
+    clyde.sendBotMessage(channelId, message, (embeds || []), loggingName);
 }
 
 export function unregisterCommand(name: string) {
