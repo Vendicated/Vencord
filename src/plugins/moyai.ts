@@ -1,6 +1,7 @@
 import definePlugin from "../utils/types";
 import { Devs } from "../utils/constants";
 import { Message } from "discord-types/general";
+import { FluxDispatcher } from "../webpack/common";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -23,9 +24,9 @@ export default definePlugin({
         if (event.message.state === "SENDING") return;
         if (event.optimistic) return;
 
-        const isInGuildChannel =
+        const isInChannel =
             window.location.pathname.startsWith("/channels/");
-        if (!isInGuildChannel) return;
+        if (!isInChannel) return;
 
         const channelId = window.location.pathname.split("/")[3];
         if (!channelId || channelId !== event.channelId) return;
@@ -40,18 +41,12 @@ export default definePlugin({
             await new Promise(resolve => setTimeout(resolve, 300));
         }
     },
-    patches: [
-        {
-            find: "MESSAGE_CREATE:function(",
-            replacement: [
-                {
-                    match: /MESSAGE_CREATE:function\((\w+)\){/,
-                    replace:
-                        "MESSAGE_CREATE:function($1){Vencord.Plugins.plugins.Moyai.execute($1);",
-                },
-            ],
-        },
-    ],
+    start() {
+        FluxDispatcher.subscribe("MESSAGE_CREATE", this.execute);
+    },
+    stop() {
+        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.execute);
+    }
 });
 
 const EMOJI_NAME_REGEX = /<a?:(\w+):\d+>/g;
@@ -76,7 +71,5 @@ function messageContainsMoyai(message: string): number {
     }
 
     // Maximum moyai...
-    if (moyaiCount > 10) moyaiCount = 10;
-
-    return moyaiCount;
+    return Math.min(moyaiCount, 10);
 }
