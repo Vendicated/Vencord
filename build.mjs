@@ -118,4 +118,7 @@ await Promise.all([
 ]).catch(err => {
     console.error("Build failed");
     console.error(err.message);
+    // make ci fail
+    if (!watch)
+        process.exitCode = 1;
 });
