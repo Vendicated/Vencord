@@ -1,75 +1,105 @@
 import definePlugin from "../utils/types";
 import { Devs } from "../utils/constants";
-import { Message } from "discord-types/general";
-import { FluxDispatcher } from "../webpack/common";
+import { Message, ReactionEmoji } from "discord-types/general";
+import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
+import { sleep } from "../utils/misc";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
-    channelId: string;
-    isPushNotification: boolean;
     optimistic: boolean;
+    isPushNotification: boolean;
+    channelId: string;
     message: Message;
 }
 
+interface IReactionAdd {
+    type: "MESSAGE_REACTION_ADD";
+    optimistic: boolean;
+    channelId: string;
+    messageId: string;
+    userId: "195136840355807232";
+    emoji: ReactionEmoji;
+}
+
+const MOYAI = "🗿";
 const MOYAI_URL =
     "https://github.com/MeguminSama/VencordPlugins/raw/main/plugins/moyai/moyai.mp3";
+
+// Implement once Settings are a thing
+const ignoreBots = true;
 
 export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
-    execute: async (event: IMessageCreate) => {
-        if (event?.type !== "MESSAGE_CREATE") return;
-        if (!event.message?.content) return;
-        if (event.message.state === "SENDING") return;
-        if (event.optimistic) return;
 
-        const isInChannel =
-            window.location.pathname.startsWith("/channels/");
-        if (!isInChannel) return;
+    async onMessage(e: IMessageCreate) {
+        if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
+        if (e.message.state === "SENDING") return;
+        if (ignoreBots && e.message.author?.bot) return;
+        if (!e.message.content) return;
+        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
-        const channelId = window.location.pathname.split("/")[3];
-        if (!channelId || channelId !== event.channelId) return;
-
-        const moyaiCount = messageContainsMoyai(event.message.content);
-        if (!moyaiCount) return;
+        const moyaiCount = getMoyaiCount(e.message.content);
 
         for (let i = 0; i < moyaiCount; i++) {
-            const audioElement = document.createElement("audio");
-            audioElement.src = MOYAI_URL;
-            audioElement.play();
-            await new Promise(resolve => setTimeout(resolve, 300));
+            boom();
+            await sleep(300);
         }
     },
-    start() {
-        FluxDispatcher.subscribe("MESSAGE_CREATE", this.execute);
+
+    onReaction(e: IReactionAdd) {
+        if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
+        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
+
+        const name = e.emoji.name.toLowerCase();
+        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
+        boom();
     },
+
+    start() {
+        FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
+        FluxDispatcher.subscribe("MESSAGE_REACTION_ADD", this.onReaction);
+    },
+
     stop() {
-        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.execute);
-    }
+        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
+        FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
+    },
 });
 
-const EMOJI_NAME_REGEX = /<a?:(\w+):\d+>/g;
+function countOccurrences(sourceString: string, subString: string) {
+    let i = 0;
+    let lastIdx = 0;
+    while ((lastIdx = sourceString.indexOf(subString, lastIdx) + 1) !== 0)
+        i++;
 
-function messageContainsMoyai(message: string): number {
-    // get number of 🗿 in a string
-    let moyaiCount = (message.match(/🗿/g) || []).length;
+    return i;
+}
 
-    // get number of emojis in message that are called "moyai" or "moai"
-    const emojiNames = message.matchAll(EMOJI_NAME_REGEX);
+function countMatches(sourceString: string, pattern: RegExp) {
+    if (!pattern.global)
+        throw new Error("pattern must be global");
 
-    if (emojiNames) {
-        for (const emojiName of emojiNames) {
-            if (!emojiName[1]) continue;
-            let name = emojiName[1];
+    let i = 0;
+    while (pattern.test(sourceString))
+        i++;
 
-            // If emoji starts  or ends with (moyai|moai)
-            if (/^(moyai|moai)/i.test(name) || /(moyai|moai)$/i.test(name)) {
-                moyaiCount++;
-            }
-        }
-    }
+    return i;
+}
 
-    // Maximum moyai...
-    return Math.min(moyaiCount, 10);
+const customMoyaiRe = /<a?:\w*moy?ai\w*:\d{17,20}>/gi;
+
+function getMoyaiCount(message: string) {
+    let count = countOccurrences(message, MOYAI)
+        + countMatches(message, customMoyaiRe);
+
+    return Math.min(count, 10);
+}
+
+function boom() {
+    const audioElement = document.createElement("audio");
+    audioElement.src = MOYAI_URL;
+    audioElement.play();
 }
