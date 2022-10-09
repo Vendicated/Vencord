@@ -1,12 +1,5 @@
-import { Stores } from "discord-types";
-import { lazyWebpack } from "../utils/misc";
-import { filters } from "../webpack";
+import { MessageStore, GuildMemberStore, ChannelStore, GuildStore } from "../webpack/common";
 import definePlugin from "../utils/types";
-
-const GuildStore: Stores.GuildStore = lazyWebpack(filters.byProps(["getGuildCount", "initialize"]));
-const ChannelStore: Stores.ChannelStore = lazyWebpack(filters.byProps(["getChannel", "initialize"]));
-const GuildMemberStore: Stores.GuildMemberStore = lazyWebpack(filters.byProps(["getMember", "initialize"]));
-const MessageStore: Stores.MessageStore = lazyWebpack(filters.byProps(["getMessage", "initialize"]));
 
 const replacement = `
 const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)?.[1];

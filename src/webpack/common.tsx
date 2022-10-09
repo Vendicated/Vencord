@@ -8,7 +8,11 @@ export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");
-export let UserStore: Stores.UserStore;
+export const UserStore: Stores.UserStore = lazyWebpack(filters.byProps(["getCurrentUser", "initialize"]));
+export const GuildStore: Stores.GuildStore = lazyWebpack(filters.byProps(["getGuildCount", "initialize"]));
+export const ChannelStore: Stores.ChannelStore = lazyWebpack(filters.byProps(["getChannel", "initialize"]));
+export const GuildMemberStore: Stores.GuildMemberStore = lazyWebpack(filters.byProps(["getMember", "initialize"]));
+export const MessageStore: Stores.MessageStore = lazyWebpack(filters.byProps(["getMessage", "initialize"]));
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
     FormSection: any;
@@ -86,7 +90,6 @@ waitFor(["dispatch", "subscribe"], m => {
     };
     m.subscribe("CONNECTION_OPEN", cb);
 });
-waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
 waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
