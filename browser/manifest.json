@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
-    "name": "Vencord Web",
-    "description": "Yeee",
+    "name": "Vencord",
+    "description": "A Discord Desktop Clientmod",
     "version": "1.0.0",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
