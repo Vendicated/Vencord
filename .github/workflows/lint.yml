@@ -23,5 +23,5 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Build aliucord
+            - name: Lint & Test if it compiles
               run: pnpm lint && pnpm build
