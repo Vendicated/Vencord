@@ -15,7 +15,7 @@ const NO_ERROR = {};
 
 export default class ErrorBoundary extends React.Component<React.PropsWithChildren<Props>> {
     static wrap<T = any>(Component: React.ComponentType<T>): (props: T) => React.ReactElement {
-        return (props) => (
+        return props => (
             <ErrorBoundary>
                 <Component {...props as any/* I hate react typings ??? */} />
             </ErrorBoundary>

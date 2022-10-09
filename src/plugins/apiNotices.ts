@@ -13,7 +13,7 @@ export default definePlugin({
                 {
                     match: /;(.{1,2}=null;)(?=.{0,50}updateNotice)/g,
                     replace:
-                        ';if(Vencord.Api.Notices.currentNotice)return !1;$1'
+                        ";if(Vencord.Api.Notices.currentNotice)return !1;$1"
                 },
                 {
                     match: /(?<=NOTICE_DISMISS:function.+?){(?=if\(null==(.+?)\))/,

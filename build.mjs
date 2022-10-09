@@ -2,7 +2,6 @@
 import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { readdirSync } from "fs";
-import { performance } from "perf_hooks";
 
 /**
  * @type {esbuild.WatchMode|false}
@@ -14,7 +13,7 @@ const watch = process.argv.includes("--watch");
  * @type {esbuild.Plugin}
  */
 const makeAllPackagesExternalPlugin = {
-    name: 'make-all-packages-external',
+    name: "make-all-packages-external",
     setup(build) {
         let filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/; // Must not start with "/" or "./" or "../"
         build.onResolve({ filter }, args => ({ path: args.path, external: true }));
@@ -115,7 +114,7 @@ await Promise.all([
         sourcemap: false,
         watch,
         minify: true,
-    })
+    }),
 ]).catch(err => {
     console.error("Build failed");
     console.error(err.message);

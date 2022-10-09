@@ -1,10 +1,10 @@
-import { ipcMain } from 'electron';
+import { ipcMain } from "electron";
 import { promisify } from "util";
 import IpcEvents from "../utils/IpcEvents";
-import { execFile as cpExecFile } from 'child_process';
-import { join } from 'path';
-import { createReadStream } from 'fs';
-import { createHash } from 'crypto';
+import { execFile as cpExecFile } from "child_process";
+import { join } from "path";
+import { createReadStream } from "fs";
+import { createHash } from "crypto";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
 
@@ -64,7 +64,7 @@ async function getRepo() {
 async function calculateGitChanges() {
     await git("fetch");
 
-    const res = await git("log", `HEAD...origin/main`, "--pretty=format:%an/%h/%s");
+    const res = await git("log", "HEAD...origin/main", "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {

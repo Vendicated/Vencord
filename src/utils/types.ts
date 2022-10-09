@@ -1,5 +1,7 @@
+import { Command } from "../api/Commands";
+
 // exists to export default definePlugin({...})
-export default function definePlugin(p: PluginDef & Record<string, any>) {
+export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
 }
 
@@ -31,8 +33,13 @@ interface PluginDef {
     start?(): void;
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
+    commands?: Command[];
     dependencies?: string[],
     required?: boolean;
+    /**
+     * Set this if your plugin only works on Browser or Desktop, not both
+     */
+    target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };

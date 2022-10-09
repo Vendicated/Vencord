@@ -1,14 +1,14 @@
 import { classes, humanFriendlyJoin, useAwaiter } from "../utils/misc";
-import Plugins from 'plugins';
+import Plugins from "plugins";
 import { useSettings } from "../api/settings";
 import IpcEvents from "../utils/IpcEvents";
 
 import { Button, Switch, Forms, React, Margins, Toasts, Alerts, Parser } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { startPlugin } from "../plugins";
-import { stopPlugin } from '../plugins/index';
-import { Flex } from './Flex';
-import { ChangeList } from '../utils/ChangeList';
+import { stopPlugin } from "../plugins/index";
+import { Flex } from "./Flex";
+import { ChangeList } from "../utils/ChangeList";
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -24,7 +24,7 @@ function showErrorToast(message: string) {
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>, []);
+    const changes = React.useMemo(() => new ChangeList<string>(), []);
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
@@ -35,7 +35,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     <div>{changes.map((s, i) => (
                         <>
                             {i > 0 && ", "}
-                            {Parser.parse('`' + s + '`')}
+                            {Parser.parse("`" + s + "`")}
                         </>
                     ))}</div>
                 </>
@@ -69,10 +69,10 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
 
             <Forms.FormText>
-                SettingsDir: <code style={{ userSelect: 'text', cursor: 'text' }}>{settingsDir}</code>
+                SettingsDir: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
             </Forms.FormText>
 
-            <Flex className={classes(Margins.marginBottom20)}>
+            {!IS_WEB && <Flex className={classes(Margins.marginBottom20)}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -88,13 +88,13 @@ export default ErrorBoundary.wrap(function Settings() {
                     Launch Directory
                 </Button>
                 <Button
-                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_PATH, settingsDir, "quickCss.css")}
+                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_QUICKCSS)}
                     size={Button.Sizes.SMALL}
                     disabled={settingsDir === "Loading..."}
                 >
                     Open QuickCSS File
                 </Button>
-            </Flex>
+            </Flex>}
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
@@ -104,20 +104,13 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Use QuickCss
             </Switch>
-            <Switch
+            {!IS_WEB && <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
                 note="Shows a Toast on StartUp"
             >
                 Get notified about new Updates
-            </Switch>
-            <Switch
-                value={settings.unsafeRequire}
-                onChange={(v: boolean) => settings.unsafeRequire = v}
-                note="Enables VencordNative.require. Useful for testing, very bad for security. Leave this off unless you need it."
-            >
-                Enable Unsafe Require
-            </Switch>
+            </Switch>}
 
             <Forms.FormDivider />
 
@@ -136,23 +129,25 @@ export default ErrorBoundary.wrap(function Settings() {
                         value={settings.plugins[p.name].enabled || p.required || dependency}
                         onChange={v => {
                             settings.plugins[p.name].enabled = v;
+                            let needsRestart = Boolean(p.patches?.length);
                             if (v) {
                                 p.dependencies?.forEach(d => {
+                                    const dep = Plugins[d];
+                                    needsRestart ||= Boolean(dep.patches?.length && !settings.plugins[d].enabled);
                                     settings.plugins[d].enabled = true;
-                                    if (!Plugins[d].started && !stopPlugin) {
-                                        settings.plugins[p.name].enabled = false;
+                                    if (!needsRestart && !dep.started && !startPlugin(dep)) {
                                         showErrorToast(`Failed to start dependency ${d}. Check the console for more info.`);
                                     }
                                 });
-                                if (!p.started && !startPlugin(p)) {
+                                if (!needsRestart && !p.started && !startPlugin(p)) {
                                     showErrorToast(`Failed to start plugin ${p.name}. Check the console for more info.`);
                                 }
                             } else {
-                                if (p.started && !stopPlugin(p)) {
+                                if ((p.started || !p.start && p.commands?.length) && !stopPlugin(p)) {
                                     showErrorToast(`Failed to stop plugin ${p.name}. Check the console for more info.`);
                                 }
                             }
-                            if (p.patches) changes.handleChange(p.name);
+                            if (needsRestart) changes.handleChange(p.name);
                         }}
                         note={p.description}
                         tooltipNote={

@@ -1,13 +1,9 @@
 import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "RandomiseFileNames",
-    authors: [
-        {
-            name: "obscurity",
-            id: 336678828233588736n,
-        },
-    ],
+    authors: [Devs.obscurity],
     description: "Randomise uploaded file names",
     patches: [
         {
@@ -27,6 +23,6 @@ export default definePlugin({
             { length: 7 },
             () => chars[Math.floor(Math.random() * chars.length)]
         ).join("");
-        return rand + window.DiscordNative.fileManager.extname(file);
+        return rand + (file.lastIndexOf(".") > -1 ? file.slice(file.lastIndexOf(".")) : "");
     },
 });
