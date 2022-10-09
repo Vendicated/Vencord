@@ -2,47 +2,7 @@ import definePlugin from "../utils/types";
 import { findOption, RequiredMessageOption } from "../api/Commands";
 
 // words have a chance of ending with these
-const endings = [
-    "owo",
-    "UwU",
-    ">w<",
-    "^w^",
-    "●w●",
-    "☆w☆",
-    "𝗨𝘄𝗨",
-    "(ᗒᗨᗕ)",
-    "(▰˘v˘▰)",
-    "( ´ ▽ ` ).｡ｏ♡",
-    "*unbuttons shirt*",
-    ">3<",
-    ">:3",
-    ":3",
-    "murr~",
-    "♥(。U ω U。)",
-    "(˘ε˘)",
-    "*screams*",
-    "*twerks*",
-    "*sweats*",
-];
 
-// replacement words
-const words = [
-    ["love", "wuv"],
-    ["mr", "mistuh"],
-    ["dog", "doggo"],
-    ["cat", "kitteh"],
-    ["hello", "henwo"],
-    ["hell", "heck"],
-    ["fuck", "fwick"],
-    ["fuk", "fwick"],
-    ["shit", "shoot"],
-    ["friend", "fwend"],
-    ["stop", "stawp"],
-    ["god", "gosh"],
-    ["dick", "peepee"],
-    ["penis", "bulge"],
-    ["damn", "darn"],
-];
 
 
 // uwuify command
@@ -111,18 +71,9 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [{ name: "ECHO", id: 712639419785412668n }],
+    authors: [],
     dependencies: ["CommandsAPI"],
 
     commands: [
-        {
-            name: "uwuify",
-            description: "uwuifies your messages",
-            options: [RequiredMessageOption],
-
-            execute: opts => ({
-                content: uwuify(findOption(opts, "message", "")),
-            }),
-        },
     ],
 });
