@@ -43,21 +43,21 @@ export default definePlugin({
     messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19})/,
 
     getImage(message: any) {
-        if (message.attachments.length != 0 && !message.attachments[0].content_type.startsWith("video/")) return {
+        if (message.attachments.length !== 0 && !message.attachments[0].content_type.startsWith("video/")) return {
             height: message.attachments[0].height,
             width: message.attachments[0].width,
             url: message.attachments[0].url,
             proxyURL: message.attachments[0].proxy_url!!
         };
         const firstEmbed = message.embeds[0];
-        if (!firstEmbed) return undefined;
+        if (!firstEmbed) return null;
         if (firstEmbed.type === "image") return { ...firstEmbed.image };
         if (firstEmbed.type === "gifv" && !firstEmbed.url.match(/https:\/\/(?:www.)?tenor\.com/)) return {
             height: firstEmbed.thumbnail.height,
             width: firstEmbed.thumbnail.width,
             url: firstEmbed.url
         };
-        return undefined;
+        return null;
     },
 
     generateEmbed(messageURL: string, existingEmbeds: any[]) {
