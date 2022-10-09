@@ -59,7 +59,7 @@ export function find(filter: FilterFn, getDefault = true) {
 
         // is 3 is the longest obfuscated export?
         // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length < 3) {
+        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) return nested;
         }
@@ -68,7 +68,6 @@ export function find(filter: FilterFn, getDefault = true) {
     return null;
 }
 
-// TODO fix
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -84,7 +83,7 @@ export function findAll(filter: FilterFn, getDefault = true) {
 
         if (mod.exports.default && filter(mod.exports.default))
             ret.push(getDefault ? mod.exports.default : mod.exports);
-        else for (const nestedMod in mod.exports) if (nestedMod.length < 3) {
+        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
         }
