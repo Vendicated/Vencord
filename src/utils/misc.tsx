@@ -125,3 +125,7 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
 export function classes(...classes: string[]) {
     return classes.join(" ");
 }
+
+export function sleep(ms: number): Promise<void> {
+    return new Promise(r => setTimeout(r, ms));
+}
