@@ -83,7 +83,7 @@ async function getMenuItem(installations) {
     }
 
     const result = await menu(
-        [...menuItems, { title: "Exit without patching", exit: true }],
+        [...menuItems, { title: "Specify custom path", info: "custom" }, { title: "Exit without patching", exit: true }],
         {
             header: "Select a Discord installation to patch:",
             border: true,
@@ -96,6 +96,33 @@ async function getMenuItem(installations) {
     if (!result || !result.info || result.exit) {
         console.log("No installation selected.");
         process.exit(0);
+    }
+
+    if (result.info === "custom") {
+        const customPath = await question("Please enter the path: ");
+        if (!customPath || !fs.existsSync(customPath)) {
+            console.log("No such Path or not specifed.");
+            process.exit();
+        }
+
+        const resourceDir = path.join(customPath, "resources");
+        if (!fs.existsSync(path.join(resourceDir, "app.asar"))) {
+            console.log("Unsupported Install. resources/app.asar not found");
+            process.exit();
+        }
+
+        const appDir = path.join(resourceDir, "app");
+        result.info = {
+            branch: "unknown",
+            patched: fs.existsSync(appDir),
+            location: customPath,
+            versions: [{
+                path: appDir,
+                name: null
+            }],
+            arch: process.platform === "linux" ? "linux" : "win32",
+            isFlatpak: false,
+        };
     }
 
     if (result.info.patched) {
