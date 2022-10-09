@@ -26,5 +26,10 @@
     ],
     "web_accessible_resources": [
         "dist/Vencord.js"
-    ]
+    ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "support@discordapp.com"
+    }
+  }
 }
