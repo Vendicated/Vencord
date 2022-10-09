@@ -28,7 +28,7 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
         construct: (_, args, newTarget) => Reflect.construct(getMod(), args, newTarget),
         deleteProperty: (_, prop) => delete getMod()[prop],
         defineProperty: (_, property, attributes) => !!Object.defineProperty(getMod(), property, attributes)
-    }) as T;
+    }) as any as T;
 }
 
 /**

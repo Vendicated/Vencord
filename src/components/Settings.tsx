@@ -127,7 +127,7 @@ export default ErrorBoundary.wrap(function Settings() {
                         disabled={p.required || dependency}
                         key={p.name}
                         value={settings.plugins[p.name].enabled || p.required || dependency}
-                        onChange={v => {
+                        onChange={(v: boolean) => {
                             settings.plugins[p.name].enabled = v;
                             let needsRestart = Boolean(p.patches?.length);
                             if (v) {
