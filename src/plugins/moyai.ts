@@ -47,7 +47,7 @@ export default definePlugin({
                 {
                     match: /MESSAGE_CREATE:function\((\w+)\){/,
                     replace:
-                        "MESSAGE_CREATE:function($1){Vencord.Plugins.plugins.Moyai.execute($1);",
+                        "MESSAGE_CREATE:function($1){Vencord.Plugins.plugins.Moyai.this.execute($1);",
                 },
             ],
         },
