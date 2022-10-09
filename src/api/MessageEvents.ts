@@ -67,7 +67,7 @@ type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => 
 
 const listeners = new Set<ClickListener>();
 
-export function _handleClick(message, channel, event) {
+export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
     for (const listener of listeners) {
         try {
             listener(message, channel, event);

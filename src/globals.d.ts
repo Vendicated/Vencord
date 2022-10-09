@@ -12,7 +12,7 @@ declare global {
             push(chunk: any): any;
             pop(): any;
         };
-        [k: PropertyKey]: any;
+        [k: string]: any;
     }
 }
 

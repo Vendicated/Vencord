@@ -16,7 +16,7 @@ export default definePlugin({
         },
     ],
 
-    rand(file) {
+    rand(file: string) {
         const chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const rand = Array.from(

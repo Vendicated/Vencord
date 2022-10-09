@@ -12,7 +12,8 @@ export async function toggle(isEnabled: boolean) {
             VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.innerText = css);
             style.innerText = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
         }
-    } else style.disabled = !isEnabled;
+    } else // @ts-ignore yes typescript, property 'disabled' does exist on type 'HTMLStyleElement' u should try reading the docs some time
+        style.disabled = !isEnabled;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

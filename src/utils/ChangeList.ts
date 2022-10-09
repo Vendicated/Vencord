@@ -1,5 +1,5 @@
 export class ChangeList<T>{
-    private set = new Set<T>;
+    private set = new Set<T>();
 
     public get changeCount() {
         return this.set.size;
