@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    pnpm2nix = {
+      url = "github:nix-community/pnpm2nix";
+      flake = false;
+    };
   };
 
   outputs = {
