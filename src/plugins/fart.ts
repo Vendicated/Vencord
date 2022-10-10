@@ -5,7 +5,7 @@ import definePlugin from "../utils/types";
 const sound = { fart: new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3") };
 
 export default definePlugin({
-    name: "Fart 2",
+    name: "Fart2",
     authors: [Devs.Animal],
     description: "Enable farting v2, a slash command that allows you to perform or request that someone perform a little toot.",
     dependencies: ["CommandsAPI"],
@@ -21,7 +21,7 @@ export default definePlugin({
             }
         ],
 
-        execute(args, _) {
+        execute(args) {
             sound.fart.volume = 0.3;
             sound.fart.play();
             return {
