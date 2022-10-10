@@ -13,7 +13,7 @@ export default definePlugin({
     },
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => this.addSuffix(msg));
+        this.preSend = addPreSendListener((_, msg) => this.addPrefix(msg));
     },
 
     stop() {
