@@ -1,4 +1,5 @@
 import { MessageStore, GuildMemberStore, ChannelStore, GuildStore } from "../webpack/common";
+import { waitFor } from "../webpack";
 import definePlugin from "../utils/types";
 
 const replacement = `
@@ -17,6 +18,33 @@ var
   $3 = $2.message,
   $4 = $2.renderSuppressEmbeds /* Don't add a semicolon here, there are more definitions after this. */
 `.trim().replace(/(?<=[^(?:const)|(?:var)])\s+/gm, "");
+
+let fetchMessages;
+waitFor(["fetchMessages", "editMessage"], _ => ({ fetchMessages } = _));
+let hasJustStarted = true;
+const messagesFetched: string[] = [];
+function fetchMessage(channelId: string, messageId: string) {
+    if (messagesFetched.includes(messageId)) return;
+    // function can be called immediately after load, meaning that without a timeout it would be fetching messages that should be cached
+    if (hasJustStarted) {
+        setTimeout(() => {
+            if (MessageStore.getMessage(channelId, messageId)) return;
+            fetchMessages({
+                channelId,
+                // "jump" means to fetch messages around it
+                jump: messageId,
+                limit: 1
+            });
+        }, 300);
+        hasJustStarted = false;
+    }
+    else fetchMessages({
+        channelId,
+        jump: messageId,
+        limit: 1
+    });
+    messagesFetched.push(messageId);
+}
 
 export default definePlugin({
     name: "MessageLinkEmbeds",
@@ -57,7 +85,11 @@ export default definePlugin({
         const [guildID, channelID, messageID] = messageURL.split("/");
         if (existingEmbeds.find(i => i.id === `messageLinkEmbeds-${messageID}`)) return [];
         const message = MessageStore.getMessage(channelID, messageID);
-        if (!message) return [];
+        if (!message) {
+            fetchMessage(channelID, messageID);
+            // think its fine to return no embed instead of awaiting here considering the function is called every render
+            return [];
+        }
 
         const embeds = [{
             author: {
