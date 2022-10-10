@@ -4,12 +4,12 @@ import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "FxTwitter",
-    description: "Uses FxTwitter to fix embeds from twitter on send",
+    description: "Uses FxTwitter to improve embeds from twitter on send",
     authors: [Devs.Samu],
     dependencies: ["MessageEventsAPI"],
 
     addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(/(?<=https:\/\/)(twitter\.com)(?=\/.*?\/)/g, "fxtwitter.com");
+        msg.content = msg.content.replace(/https?:\/\/twitter\.com(?=\/.*?\/)/g, "https://fxtwitter.com");
     },
 
     start() {
