@@ -15,10 +15,10 @@ export default definePlugin({
                 replace: m => {
                     const idx = m.indexOf("Host") - 1;
                     const template = m.slice(0, idx);
-                    let r = `${m}, ${template}"Vencord ", "${gitHash}${IS_WEB ? " (Web)" : ""}"), " ")`;
+                    let r = `${m}, ${template}"Bencord ", "${gitHash}${IS_WEB ? " (Web)" : ""}"), " ")`;
                     if (!IS_WEB) {
-                        r += `,${template} "Electron ",VencordNative.getVersions().electron)," "),`;
-                        r += `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
+                        r += `,${template} "Electron ",BencordNative.getVersions().electron)," "),`;
+                        r += `${template} "Chrome ",BencordNative.getVersions().chrome)," ")`;
                     }
                     return r;
                 }
@@ -29,9 +29,9 @@ export default definePlugin({
         replacement: {
             match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) =>
-                `{section:${mod}.ID.HEADER,label:"Vencord"},` +
-                '{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},' +
-                '{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater,predicate:()=>!IS_WEB},' +
+                `{section:${mod}.ID.HEADER,label:"Bencord"},` +
+                '{section:"BencordSetting",label:"Bencord",element:Bencord.Components.Settings},' +
+                '{section:"BencordUpdater",label:"Updater",element:Bencord.Components.Updater,predicate:()=>!IS_WEB},' +
                 `{section:${mod}.ID.DIVIDER},${m}`
 
         }

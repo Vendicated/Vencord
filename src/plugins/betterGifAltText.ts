@@ -12,7 +12,7 @@ export default definePlugin({
             replacement: {
                 match: /(return .{1,2}\.createElement.{0,50}isWindowFocused)/,
                 replace:
-                    "Vencord.Plugins.plugins.BetterGifAltText.altify(e);$1",
+                    "Bencord.Plugins.plugins.BetterGifAltText.altify(e);$1",
             },
         },
         {
@@ -20,7 +20,7 @@ export default definePlugin({
             replacement: {
                 match: /\?.{0,5}\.Messages\.GIF/,
                 replace:
-                    "?(e.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify(e))",
+                    "?(e.alt='GIF',Bencord.Plugins.plugins.BetterGifAltText.altify(e))",
             },
         },
     ],

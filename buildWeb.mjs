@@ -58,13 +58,13 @@ const gitHashPlugin = {
 
 await esbuild.build({
     logLevel: "info",
-    entryPoints: ["browser/Vencord.ts"],
+    entryPoints: ["browser/Bencord.ts"],
     outfile: "dist/browser.js",
     format: "iife",
     bundle: true,
-    globalName: "Vencord",
+    globalName: "Bencord",
     target: ["esnext"],
-    footer: { js: "//# sourceURL=VencordWeb" },
+    footer: { js: "//# sourceURL=BencordWeb" },
     external: ["plugins", "git-hash"],
     plugins: [
         globPlugins,
@@ -79,7 +79,7 @@ zip.outputStream.pipe(createWriteStream("dist/extension.zip")).on("close", () =>
     console.info("Extension written to dist/extension.zip");
 });
 
-zip.addFile("dist/browser.js", "dist/Vencord.js");
+zip.addFile("dist/browser.js", "dist/Bencord.js");
 ["background.js", "content.js", "manifest.json"].forEach(f => {
     zip.addFile(`browser/${f}`, `${f}`);
 });

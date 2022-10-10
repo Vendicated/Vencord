@@ -2,7 +2,7 @@ dist
 node_modules
 
 *.exe
-vencord_installer
+bencord_installer
 
 .idea
 

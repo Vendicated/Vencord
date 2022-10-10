@@ -1,7 +1,7 @@
 declare global {
     export var IS_WEB: boolean;
-    export var VencordNative: typeof import("./VencordNative").default;
-    export var Vencord: typeof import("./Vencord");
+    export var BencordNative: typeof import("./BencordNative").default;
+    export var Bencord: typeof import("./Bencord");
     export var appSettings: {
         set(setting: string, v: any): void;
     };

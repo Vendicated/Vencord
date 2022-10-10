@@ -1,30 +1,30 @@
 # Installation Guide
 
-Welcome to Megu's Installation Guide! In this file, you will learn about how to download, install, and uninstall Vencord!
+Welcome to Megu's Installation Guide! In this file, you will learn about how to download, install, and uninstall Bencord!
 
 ## Sections
 
 - [Installation Guide](#installation-guide)
   - [Sections](#sections)
   - [Dependencies](#dependencies)
-  - [Installing Vencord](#installing-vencord)
-  - [Updating Vencord](#updating-vencord)
-  - [Uninstalling Vencord](#uninstalling-vencord)
-  - [Manually Installing Vencord](#manually-installing-vencord)
+  - [Installing Bencord](#installing-bencord)
+  - [Updating Bencord](#updating-bencord)
+  - [Uninstalling Bencord](#uninstalling-bencord)
+  - [Manually Installing Bencord](#manually-installing-bencord)
     - [On Windows](#on-windows)
     - [On Linux](#on-linux)
     - [On MacOS](#on-macos)
     - [Manual Patching](#manual-patching)
-    - [Manually Uninstalling Vencord](#manually-uninstalling-vencord)
+    - [Manually Uninstalling Bencord](#manually-uninstalling-bencord)
 
 ## Dependencies
 
 -   Install Git from https://git-scm.com/download
 -   Install Node.JS LTS from here: https://nodejs.dev/en/
 
-## Installing Vencord
+## Installing Bencord
 
-> :exclamation: If this doesn't work, see [Manually Installing Vencord](#manually-installing-vencord)
+> :exclamation: If this doesn't work, see [Manually Installing Bencord](#manually-installing-bencord)
 
 Install `pnpm`:
 
@@ -34,11 +34,11 @@ Install `pnpm`:
 npm i -g pnpm
 ```
 
-Clone Vencord:
+Clone Bencord:
 
 ```shell
-git clone https://github.com/Vendicated/Vencord
-cd Vencord
+git clone https://github.com/Vendicated/Bencord
+cd Bencord
 ```
 
 Install dependencies:
@@ -47,21 +47,21 @@ Install dependencies:
 pnpm install --frozen-lockfile
 ```
 
-Build Vencord:
+Build Bencord:
 
 ```shell
 pnpm build
 ```
 
-Inject vencord into your client:
+Inject bencord into your client:
 
 ```shell
 pnpm inject
 ```
 
-Then fully close Discord from your taskbar or task manager, and restart it. Vencord should be injected - you can check this by looking for the Vencord section in Discord settings.
+Then fully close Discord from your taskbar or task manager, and restart it. Bencord should be injected - you can check this by looking for the Bencord section in Discord settings.
 
-## Updating Vencord
+## Updating Bencord
 
 If you're using Discord already, go into the `Updater` tab in settings.
 
@@ -73,9 +73,9 @@ To pull latest changes:
 git pull
 ```
 
-If this fails, you likely need to reset your local changes to vencord to resolve merge errors:
+If this fails, you likely need to reset your local changes to bencord to resolve merge errors:
 
-> :exclamation: This command will remove any local changes you've made to vencord. Make sure you back up if you made any code changes you don't want to lose!
+> :exclamation: This command will remove any local changes you've made to bencord. Make sure you back up if you made any code changes you don't want to lose!
 
 ```shell
 git reset --hard
@@ -90,7 +90,7 @@ pnpm build
 
 Then just refresh your client
 
-## Uninstalling Vencord
+## Uninstalling Bencord
 
 Simply run:
 
@@ -105,7 +105,7 @@ pnpm install --frozen-lockfile
 pnpm uninject
 ```
 
-## Manually Installing Vencord
+## Manually Installing Bencord
 
 -   [Windows](#on-windows)
 -   [Linux](#on-linux)
@@ -131,22 +131,22 @@ If you use flatpak, it will usually be in one of the following paths:
 -   /var/lib/flatpak/app/com.discordapp.Discord/current/active/files
 -   /home/$USER/.local/share/flatpak/app/com.discordapp.Discord/current/active/files
 
-You will need to give flatpak access to vencord with one of the following commands:
+You will need to give flatpak access to bencord with one of the following commands:
 
 > :exclamation: If not on stable, replace `com.discordapp.Discord` with your branch name, e.g., `com.discordapp.DiscordCanary`
 
-> :exclamation: Replace `/path/to/vencord/` with the path to your vencord folder (NOT the dist folder)
+> :exclamation: Replace `/path/to/bencord/` with the path to your bencord folder (NOT the dist folder)
 
 If Discord flatpak install is in /home/:
 
 ```shell
-flatpak override --user com.discordapp.Discord --filesystem="/path/to/vencord/"
+flatpak override --user com.discordapp.Discord --filesystem="/path/to/bencord/"
 ```
 
 If Discord flatpak install not in /home/:
 
 ```shell
-sudo flatpak override com.discordapp.Discord --filesystem="/path/to/vencord"
+sudo flatpak override com.discordapp.Discord --filesystem="/path/to/bencord"
 ```
 
 Now follow the instructions at [Manual Patching](#manual-patching)
@@ -175,11 +175,11 @@ Make a new folder in `resources` called `app`. In here, we will make two files:
 
 In `index.js`:
 
-> :exclamation: Replace the path in the first line with the path to `patcher.js` in your vencord dist folder.
+> :exclamation: Replace the path in the first line with the path to `patcher.js` in your bencord dist folder.
 > On Windows, you can get this by shift-rightclicking the patcher.js file and selecting "copy as path"
 
 ```js
-require("C:/Users/<your user>/path/to/vencord/dist/patcher.js");
+require("C:/Users/<your user>/path/to/bencord/dist/patcher.js");
 require("../app.asar");
 ```
 
@@ -189,9 +189,9 @@ And in `package.json`:
 { "name": "discord", "main": "index.js" }
 ```
 
-Finally, fully close & reopen your Discord client and check to see that `Vencord` appears in settings!
+Finally, fully close & reopen your Discord client and check to see that `Bencord` appears in settings!
 
-### Manually Uninstalling Vencord
+### Manually Uninstalling Bencord
 
 > :exclamation: Do not delete `app.asar` - Only delete the `app` folder we created.
 

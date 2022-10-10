@@ -22,7 +22,7 @@ function showErrorToast(message: string) {
 }
 
 export default ErrorBoundary.wrap(function Settings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
+    const [settingsDir, , settingsDirPending] = useAwaiter(() => BencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -63,7 +63,7 @@ export default ErrorBoundary.wrap(function Settings() {
     const sortedPlugins = React.useMemo(() => Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)), []);
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord">
+        <Forms.FormSection tag="h1" title="Bencord">
             <Forms.FormTitle tag="h5">
                 Settings
             </Forms.FormTitle>
@@ -88,7 +88,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     Launch Directory
                 </Button>
                 <Button
-                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_QUICKCSS)}
+                    onClick={() => BencordNative.ipc.invoke(IpcEvents.OPEN_QUICKCSS)}
                     size={Button.Sizes.SMALL}
                     disabled={settingsDir === "Loading..."}
                 >

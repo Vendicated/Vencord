@@ -19,7 +19,7 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    changes = await Unwrap(BencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
     if (changes.some(c => c.hash === gitHash)) {
         isNewer = true;
         return (isOutdated = false);
@@ -30,7 +30,7 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE));
+    const res = await Unwrap(BencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE));
 
     if (res)
         isOutdated = false;
@@ -39,7 +39,7 @@ export async function update() {
 }
 
 export function getRepo() {
-    return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
+    return Unwrap(BencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
 }
 
 type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js", string>;
@@ -48,12 +48,12 @@ type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js", string>;
  * @returns true if hard restart is required
  */
 export async function rebuild() {
-    const oldHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
+    const oldHashes = await Unwrap(BencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
 
-    if (!await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.BUILD)))
+    if (!await Unwrap(BencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.BUILD)))
         throw new Error("The Build failed. Please try manually building the new update");
 
-    const newHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
+    const newHashes = await Unwrap(BencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
 
     return oldHashes["patcher.js"] !== newHashes["patcher.js"] ||
         oldHashes["preload.js"] !== newHashes["preload.js"];

@@ -2,7 +2,7 @@
 
 Welcome to Megu's Plugin Guide! In this file, you will learn about how to write your own plugin!
 
-You don't need to run `pnpm build` every time you make a change. Instead, use `pnpm watch` - this will auto-compile Vencord whenever you make a change. If using code patches (recommended), you will need to CTRL+R to load the changes.
+You don't need to run `pnpm build` every time you make a change. Instead, use `pnpm watch` - this will auto-compile Bencord whenever you make a change. If using code patches (recommended), you will need to CTRL+R to load the changes.
 
 ## Plugin Entrypoint
 
@@ -33,9 +33,9 @@ export default definePlugin({
 
 Change the name, description, and authors to your own information.
 
-## How Plugins Work In Vencord
+## How Plugins Work In Bencord
 
-Vencord uses a different way of making mods than you're used to.
+Bencord uses a different way of making mods than you're used to.
 Instead of monkeypatching webpack, we directly modify the code before Discord loads it.
 
 This is _significantly_ more efficient than monkeypatching webpack, and is surprisingly easy, but it may be confusing at first.

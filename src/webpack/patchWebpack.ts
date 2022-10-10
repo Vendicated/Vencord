@@ -26,8 +26,8 @@ function patchPush() {
     function handlePush(chunk) {
         try {
             const modules = chunk[1];
-            const { subscriptions, listeners } = Vencord.Webpack;
-            const { patches } = Vencord.Plugins;
+            const { subscriptions, listeners } = Bencord.Webpack;
+            const { patches } = Bencord.Plugins;
 
             for (const id in modules) {
                 let mod = modules[id];

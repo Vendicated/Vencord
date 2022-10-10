@@ -10,7 +10,7 @@ export default definePlugin({
             find: ",acceptInvite:function",
             replacement: {
                 match: /(\w=null!==[^;]+)/,
-                replace: "$1;Vencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings($1,{'muted':true,'suppress_everyone':true,'suppress_roles':true})"
+                replace: "$1;Bencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings($1,{'muted':true,'suppress_everyone':true,'suppress_roles':true})"
             }
         }
     ],

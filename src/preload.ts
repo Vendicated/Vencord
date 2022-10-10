@@ -1,7 +1,7 @@
 import electron, { contextBridge, webFrame, ipcRenderer } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
-import VencordNative from "./VencordNative";
+import BencordNative from "./BencordNative";
 import IpcEvents from "./utils/IpcEvents";
 
 if (electron.desktopCapturer === void 0) {
@@ -19,7 +19,7 @@ if (electron.desktopCapturer === void 0) {
     };
 }
 
-contextBridge.exposeInMainWorld("VencordNative", VencordNative);
+contextBridge.exposeInMainWorld("BencordNative", BencordNative);
 
 webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
 

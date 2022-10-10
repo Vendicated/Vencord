@@ -34,11 +34,11 @@ async function init() {
         if (isOutdated && Settings.notifyAboutUpdates)
             setTimeout(() => {
                 showNotice(
-                    "A Vencord update is available!",
+                    "A Bencord update is available!",
                     "View Update",
                     () => {
                         popNotice();
-                        Router.open("VencordUpdater");
+                        Router.open("BencordUpdater");
                     }
                 );
             }, 10000);

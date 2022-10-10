@@ -19,7 +19,7 @@ For a friendly introduction to plugins, see [Megu's Plugin Guide!](docs/2_PLUGIN
 
 Because plugins modify code directly, incompatibilities are a problem.
 
-Thus, 3rd party plugins are not supported, instead all plugins are part of Vencord itself.
+Thus, 3rd party plugins are not supported, instead all plugins are part of Bencord itself.
 This way we can ensure compatibility and high quality patches.
 
 Follow the below guide to make your first plugin!
@@ -53,7 +53,7 @@ The easiest way to write and test your regex is the following:
 
 -   Get the ID of the module you want to patch. To do this, go to it in the sources tab and scroll up until you
     see something like `447887: (e,t,n)=>{` (Obviously the number will differ).
--   Now paste the following into the console: `Vencord.Webpack.wreq.m[447887].toString()` (Changing the number to your ID)
+-   Now paste the following into the console: `Bencord.Webpack.wreq.m[447887].toString()` (Changing the number to your ID)
 -   Now either test regexes on this string in the console or use a tool like https://regex101.com
 
 Also pay attention to the following:

@@ -1,3 +1,3 @@
-import "./VencordNativeStub";
+import "./BencordNativeStub";
 
-export * from "../src/Vencord";
+export * from "../src/Bencord";

@@ -3,7 +3,7 @@ export default class Logger {
 
     private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[]) {
         console[level](
-            `%c Vencord %c %c ${this.name} `,
+            `%c Bencord %c %c ${this.name} `,
             `background: ${levelColor}; color: black; font-weight: bold; border-radius: 5px;`,
             "",
             `background: ${this.color}; color: black; font-weight: bold; border-radius: 5px;`

@@ -1,5 +1,5 @@
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
-export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+export const REACT_GLOBAL = "Bencord.Webpack.Common.React";
 
 // Add yourself here if you made more than one plugin
 export const Devs = Object.freeze({

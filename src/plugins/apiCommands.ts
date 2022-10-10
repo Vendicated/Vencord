@@ -12,9 +12,9 @@ export default definePlugin({
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is
                     // the only way. _init() just returns the same object to make the
-                    // patch simpler, the resulting code is x=Vencord.Api.Commands._init(y).filter(...)
+                    // patch simpler, the resulting code is x=Bencord.Api.Commands._init(y).filter(...)
                     match: /(?<=\w=)(\w)(\.filter\(.{0,30}giphy)/,
-                    replace: "Vencord.Api.Commands._init($1)$2",
+                    replace: "Bencord.Api.Commands._init($1)$2",
                 }
             ],
         }

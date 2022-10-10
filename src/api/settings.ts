@@ -27,7 +27,7 @@ for (const plugin in plugins) {
 }
 
 try {
-    var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
+    var settings = JSON.parse(BencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
     for (const key in DefaultSettings) {
         settings[key] ??= DefaultSettings[key];
     }
@@ -58,7 +58,7 @@ function makeProxy(settings: Settings, root = settings, path = ""): Settings {
                     subscription(v, setPath);
                 }
             }
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            BencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }
     });

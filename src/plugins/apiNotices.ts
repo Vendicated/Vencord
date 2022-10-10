@@ -13,11 +13,11 @@ export default definePlugin({
                 {
                     match: /;(.{1,2}=null;)(?=.{0,50}updateNotice)/g,
                     replace:
-                        ";if(Vencord.Api.Notices.currentNotice)return !1;$1"
+                        ";if(Bencord.Api.Notices.currentNotice)return !1;$1"
                 },
                 {
                     match: /(?<=NOTICE_DISMISS:function.+?){(?=if\(null==(.+?)\))/,
-                    replace: '{if($1?.id=="VencordNotice")return ($1=null,Vencord.Api.Notices.nextNotice(),true);'
+                    replace: '{if($1?.id=="BencordNotice")return ($1=null,Bencord.Api.Notices.nextNotice(),true);'
                 }
             ]
         }

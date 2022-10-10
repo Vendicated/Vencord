@@ -12,7 +12,7 @@ export default definePlugin({
             find: "M0 4C0 1.79086 1.79086 0 4 0H16C18.2091 0 20 1.79086 20 4V16C20 18.2091 18.2091 20 16 20H4C1.79086 20 0 18.2091 0 16V4Z",
             replacement: {
                 match: /(viewBox:"0 0 20 20")/,
-                replace: "$1,onClick:()=>Vencord.Plugins.plugins.ClickableRoleDot.copyToClipBoard(e.color)",
+                replace: "$1,onClick:()=>Bencord.Plugins.plugins.ClickableRoleDot.copyToClipBoard(e.color)",
             },
         },
     ],

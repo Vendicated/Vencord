@@ -11,7 +11,7 @@ export default definePlugin({
             replacement: {
                 match: /uploadFiles:(.{1,2}),/,
                 replace:
-                    "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=Vencord.Plugins.plugins.RandomiseFileNames.rand(f.filename)),$1(...args)),",
+                    "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=Bencord.Plugins.plugins.RandomiseFileNames.rand(f.filename)),$1(...args)),",
             },
         },
     ],

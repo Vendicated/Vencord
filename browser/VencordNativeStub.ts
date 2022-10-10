@@ -7,9 +7,9 @@ const handlers = {
     [IpcEvents.GET_REPO]: () => "", // TODO
     [IpcEvents.GET_SETTINGS_DIR]: () => "LocalStorage",
 
-    [IpcEvents.GET_QUICK_CSS]: () => localStorage.getItem("VencordQuickCss"),
-    [IpcEvents.GET_SETTINGS]: () => localStorage.getItem("VencordSettings") || "{}",
-    [IpcEvents.SET_SETTINGS]: (s: string) => localStorage.setItem("VencordSettings", s),
+    [IpcEvents.GET_QUICK_CSS]: () => localStorage.getItem("BencordQuickCss"),
+    [IpcEvents.GET_SETTINGS]: () => localStorage.getItem("BencordSettings") || "{}",
+    [IpcEvents.SET_SETTINGS]: (s: string) => localStorage.setItem("BencordSettings", s),
 
     [IpcEvents.GET_UPDATES]: () => ({ ok: true, value: [] }),
 
@@ -23,7 +23,7 @@ function onEvent(event: string, ...args: any[]) {
     return handler(...args);
 }
 
-window.VencordNative = {
+window.BencordNative = {
     getVersions: () => ({}),
     ipc: {
         send: (event: string, ...args: any[]) => void onEvent(event, ...args),

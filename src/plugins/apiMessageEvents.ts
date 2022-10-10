@@ -10,10 +10,10 @@ export default definePlugin({
             find: "sendMessage:function",
             replacement: [{
                 match: /(?<=_sendMessage:function\([^)]+\)){/,
-                replace: "{Vencord.Api.MessageEvents._handlePreSend(...arguments);"
+                replace: "{Bencord.Api.MessageEvents._handlePreSend(...arguments);"
             }, {
                 match: /(?<=\beditMessage:function\([^)]+\)){/,
-                replace: "{Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
+                replace: "{Bencord.Api.MessageEvents._handlePreEdit(...arguments);"
             }]
         },
         {
@@ -22,7 +22,7 @@ export default definePlugin({
                 match: /var \w=(\w)\.id,\w=(\w)\.id;return .{1,2}\.useCallback\(\(?function\((.{1,2})\){/,
                 replace: (m, message, channel, event) =>
                     // the message param is shadowed by the event param, so need to alias them
-                    `var _msg=${message},_chan=${channel};${m}Vencord.Api.MessageEvents._handleClick(_msg, _chan, ${event});`
+                    `var _msg=${message},_chan=${channel};${m}Bencord.Api.MessageEvents._handleClick(_msg, _chan, ${event});`
             }
         }
     ]

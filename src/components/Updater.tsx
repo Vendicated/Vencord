@@ -172,7 +172,7 @@ export default ErrorBoundary.wrap(function Updater() {
     };
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord Updater">
+        <Forms.FormSection tag="h1" title="Bencord Updater">
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
             <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (

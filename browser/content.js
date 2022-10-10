@@ -5,6 +5,6 @@ if (typeof browser === "undefined") {
 }
 
 var script = document.createElement("script");
-script.src = browser.runtime.getURL("dist/Vencord.js");
+script.src = browser.runtime.getURL("dist/Bencord.js");
 // documentElement because we load before body/head are ready
 document.documentElement.appendChild(script);

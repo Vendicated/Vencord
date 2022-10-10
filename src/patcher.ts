@@ -3,7 +3,7 @@ import installExt, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import { join } from "path";
 import { initIpc } from "./ipcMain";
 
-console.log("[Vencord] Starting up...");
+console.log("[Bencord] Starting up...");
 
 class BrowserWindow extends electron.BrowserWindow {
     constructor(options: BrowserWindowConstructorOptions) {
@@ -44,7 +44,7 @@ Object.defineProperty(global, "appSettings", {
     configurable: true
 });
 
-process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+process.env.DATA_DIR = join(app.getPath("userData"), "..", "Bencord");
 
 electron.app.whenReady().then(() => {
     installExt(REACT_DEVELOPER_TOOLS)

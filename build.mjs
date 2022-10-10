@@ -99,13 +99,13 @@ await Promise.all([
     }),
     esbuild.build({
         logLevel: "info",
-        entryPoints: ["src/Vencord.ts"],
+        entryPoints: ["src/Bencord.ts"],
         outfile: "dist/renderer.js",
         format: "iife",
         bundle: true,
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer" },
-        globalName: "Vencord",
+        footer: { js: "//# sourceURL=BencordRenderer" },
+        globalName: "Bencord",
         external: ["plugins", "git-hash"],
         plugins: [
             globPlugins,

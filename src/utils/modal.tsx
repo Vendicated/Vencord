@@ -17,7 +17,7 @@ let modalId = 1337;
  * @returns The key of this modal. This can be used to close the modal later with closeModal
  */
 export function openModal(Component: React.ComponentType, modalProps: Record<string, any>) {
-    let key = `Vencord${modalId++}`;
+    let key = `Bencord${modalId++}`;
     modals.openModal(props => (
         <Modal.ModalRoot {...props} {...modalProps}>
             <Component />

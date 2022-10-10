@@ -23,7 +23,7 @@ interface IReactionAdd {
 
 const MOYAI = "🗿";
 const MOYAI_URL =
-    "https://github.com/MeguminSama/VencordPlugins/raw/main/plugins/moyai/moyai.mp3";
+    "https://github.com/MeguminSama/BencordPlugins/raw/main/plugins/moyai/moyai.mp3";
 
 // Implement once Settings are a thing
 const ignoreBots = true;
