@@ -21,7 +21,7 @@ export default definePlugin({
             find: ".isStaff=function(){",
             replacement: [
                 {
-                    match: /return\s*(\w)+\.hasFlag\((.+?)\.STAFF\)}/,
+                    match: /return\s*(\w+)\.hasFlag\((.+?)\.STAFF\)}/,
                     replace: "return Vencord.Webpack.Common.UserStore.getCurrentUser().id===$1.id||$1.hasFlag($2.STAFF)}"
                 },
                 {
