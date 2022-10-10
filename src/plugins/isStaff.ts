@@ -12,11 +12,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\w+)\.isStaff=function\(\){return\s*!1};/,
-                    replace: "$1.isStaff=function(){return true};",
+                    replace: "$1.isStaff=function(){return $1.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id};",
                 },
                 {
-                    match: /return\s*\w+\.hasFlag\(.+?STAFF\)}/,
-                    replace: "return true}",
+                    match: /return\s*(\w+)\.hasFlag\(.+?STAFF\)}/,
+                    replace: "if($1.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id){return true};return $1.hasFlag.STAFF}",
                 },
                 {
                     match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*\|\|/,
