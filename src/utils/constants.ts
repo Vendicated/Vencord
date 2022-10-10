@@ -37,6 +37,10 @@ export const Devs = Object.freeze({
     },
     Samu: {
         name: "Samu",
-        id: 702973430449832038n
+        id: 702973430449832038n,
+    },
+    Animal: {
+        name: "Animal",
+        id: 118437263754395652n
     }
 });
