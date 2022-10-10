@@ -6,10 +6,7 @@ export default definePlugin({
     description: "Do not hide messages from 'likely spammers'",
     authors: [
         Devs.botato,
-        {
-            name: "Iryis",
-            id: 118437263754395652n,
-        },
+        Devs.Animal,
     ],
     patches: [
         {
