@@ -1,4 +1,6 @@
+dist
 node_modules
+!scripts/nix/dist
 
 *.exe
 vencord_installer

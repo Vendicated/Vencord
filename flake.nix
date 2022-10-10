@@ -18,7 +18,7 @@
         config.allowUnfree = true;
       };
     in {
-      vencord = pkgs.callPackage ./vencord.nix {};
+      vencord = pkgs.callPackage ./scripts/nix/vencord.nix {};
     });
   };
 }

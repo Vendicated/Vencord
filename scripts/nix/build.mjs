@@ -94,7 +94,6 @@ await Promise.all([
         external: ["electron"],
         platform: "node",
         sourcemap: "linked",
-        plugins: [makeAllPackagesExternalPlugin],
         watch
     }),
     esbuild.build({
