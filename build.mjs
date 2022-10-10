@@ -54,7 +54,7 @@ const globPlugins = {
     }
 };
 
-const gitHash = process.argv[2] === "nix" ? process.argv[3] : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+const gitHash = process.argv[2] === "nix" ? process.argv[3].substring(0, 7) : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */

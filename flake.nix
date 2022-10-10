@@ -19,7 +19,12 @@
       };
     in rec {
       discord-patched = pkgs.callPackage ./scripts/nix/discord-patched.nix {inherit vencord;};
-      vencord = pkgs.callPackage ./scripts/nix/vencord.nix {revision = self.rev;};
+      vencord = pkgs.callPackage ./scripts/nix/vencord.nix {
+        revision =
+          if self.rev == null
+          then "dev"
+          else self.rev;
+      };
     });
   };
 }
