@@ -1,23 +1,22 @@
 {
   pkgs,
-  mkYarnPackage,
+  mkPnpmPackage,
   revision,
 }: rec {
   vencord =
-    mkYarnPackage
+    mkPnpmPackage
     {
       name = "vencord";
 
       src = ../../.;
 
       packageJSON = ../../package.json;
-      yarnLock = ./yarn.lock;
-      yarnNix = ./yarn.nix;
+      pnpmLock = ../../pnpm-lock.yaml;
 
       nativeBuildInputs = [pkgs.git];
 
       buildPhase = ''
-        yarn build nix ${revision}
+        ${pkgs.nodePackages.pnpm}/bin/pnpm build nix ${revision}
       '';
     };
 }

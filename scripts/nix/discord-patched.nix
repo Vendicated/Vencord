@@ -6,7 +6,6 @@
   makeBinaryWrapper,
   writeShellScript,
   vencord,
-  extraElectronArgs ? "",
 }: let
   extractCmd =
     makeBinaryWrapper.extractCmd
@@ -34,11 +33,10 @@ in
             oldWrapperArgs=("$@")
         }
         eval "parseMakeCWrapperCall ''${wrapperCmd//"${discord-canary.out}"/"$out"}"
-        makeWrapper $oldExe $out/opt/DiscordCanary/DiscordCanary "''${oldWrapperArgs[@]}" --add-flags "${extraElectronArgs}"
+        makeWrapper $oldExe $out/opt/DiscordCanary/DiscordCanary "''${oldWrapperArgs[@]}"
       else
         substituteInPlace $out/opt/DiscordCanary/DiscordCanary \
-        --replace '${discord-canary.out}' "$out" \
-        --replace '"$@"' '${extraElectronArgs} "$@"'
+        --replace '${discord-canary.out}' "$out"
       fi
 
       substituteInPlace $out/opt/DiscordCanary/DiscordCanary --replace '${discord-canary.out}' "$out"
