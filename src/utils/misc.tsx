@@ -28,7 +28,7 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
         construct: (_, args, newTarget) => Reflect.construct(getMod(), args, newTarget),
         deleteProperty: (_, prop) => delete getMod()[prop],
         defineProperty: (_, property, attributes) => !!Object.defineProperty(getMod(), property, attributes)
-    }) as T;
+    }) as any as T;
 }
 
 /**
@@ -124,4 +124,8 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
  */
 export function classes(...classes: string[]) {
     return classes.join(" ");
+}
+
+export function sleep(ms: number): Promise<void> {
+    return new Promise(r => setTimeout(r, ms));
 }
