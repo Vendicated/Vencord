@@ -18,6 +18,7 @@
         config.allowUnfree = true;
       };
     in {
+      discord-patched = pkgs.callPackage ./scripts/nix/discord-patched.nix {};
       vencord = pkgs.callPackage ./scripts/nix/vencord.nix {};
     });
   };
