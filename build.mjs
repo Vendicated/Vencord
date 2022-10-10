@@ -54,7 +54,7 @@ const globPlugins = {
     }
 };
 
-const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+const gitHash = process.argv[2] === "nix" ? process.argv[3] : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */
@@ -94,7 +94,7 @@ await Promise.all([
         external: ["electron"],
         platform: "node",
         sourcemap: "linked",
-        plugins: [makeAllPackagesExternalPlugin],
+        plugins: process.argv[2] === "nix" ? [] : [makeAllPackagesExternalPlugin],
         watch
     }),
     esbuild.build({

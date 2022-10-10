@@ -17,9 +17,9 @@
         inherit system;
         config.allowUnfree = true;
       };
-    in {
-      discord-patched = pkgs.callPackage ./scripts/nix/discord-patched.nix {};
-      vencord = pkgs.callPackage ./scripts/nix/vencord.nix {};
+    in rec {
+      discord-patched = pkgs.callPackage ./scripts/nix/discord-patched.nix {inherit vencord;};
+      vencord = pkgs.callPackage ./scripts/nix/vencord.nix {revision = self.rev;};
     });
   };
 }

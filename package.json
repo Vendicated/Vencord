@@ -3,7 +3,6 @@
     "version": "0.0.1",
     "scripts": {
         "build": "node build.mjs",
-        "build:nix": "node scripts/nix/build-nix.mjs",
         "buildWeb": "node buildWeb.mjs",
         "inject": "node scripts/patcher/install.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

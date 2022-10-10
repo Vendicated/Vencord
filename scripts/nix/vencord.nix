@@ -1,6 +1,7 @@
 {
   pkgs,
   mkYarnPackage,
+  revision,
 }: rec {
   vencord =
     mkYarnPackage
@@ -16,7 +17,7 @@
       nativeBuildInputs = [pkgs.git];
 
       buildPhase = ''
-        yarn run build:nix
+        yarn build nix ${revision}
       '';
     };
 }

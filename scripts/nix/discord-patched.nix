@@ -5,6 +5,7 @@
   discord-canary,
   makeBinaryWrapper,
   writeShellScript,
+  vencord,
   extraElectronArgs ? "",
 }: let
   extractCmd =
@@ -12,7 +13,6 @@
     or (writeShellScript "extract-binary-wrapper-cmd" ''
       strings -dw "$1" | sed -n '/^makeCWrapper/,/^$/ p'
     '');
-  vencord = pkgs.callPackage ./vencord.nix {};
 in
   symlinkJoin {
     name = "vencord";
