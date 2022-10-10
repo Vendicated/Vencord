@@ -21,9 +21,9 @@
       discord-patched = pkgs.callPackage ./scripts/nix/discord-patched.nix {inherit vencord;};
       vencord = pkgs.callPackage ./scripts/nix/vencord.nix {
         revision =
-          if self.rev == null
-          then "dev"
-          else self.rev;
+          if self ? rev
+          then self.rev
+          else "dev";
       };
     });
   };
