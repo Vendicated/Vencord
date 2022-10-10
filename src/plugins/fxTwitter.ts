@@ -3,13 +3,13 @@ import { addPreSendListener, MessageObject, removePreSendListener } from "../api
 import { Devs } from "../utils/constants";
 
 export default definePlugin({
-    name: "VxTwitter",
-    description: "Uses VxTwitter to fix embeds from twitter on send",
+    name: "FxTwitter",
+    description: "Uses FxTwitter to fix embeds from twitter on send",
     authors: [Devs.Samu],
     dependencies: ["MessageEventsAPI"],
 
     addSuffix(msg: MessageObject) {
-        msg.content = msg.content.replace(/(?<=https:\/\/)(twitter\.com)(?=\/.*?\/)/g, "vxtwitter.com");
+        msg.content = msg.content.replace(/(?<=https:\/\/)(twitter\.com)(?=\/.*?\/)/g, "fxtwitter.com");
     },
 
     start() {
