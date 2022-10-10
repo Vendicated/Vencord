@@ -1,4 +1,5 @@
 {
+  pkgs,
   lib,
   symlinkJoin,
   discord-canary,
@@ -11,10 +12,19 @@
     or (writeShellScript "extract-binary-wrapper-cmd" ''
       strings -dw "$1" | sed -n '/^makeCWrapper/,/^$/ p'
     '');
+  discord-canary =
+    pkgs.discord-canary.override
+    {
+      nss = pkgs.nss_latest;
+      openasar = pkgs.callPackage ./openasar.nix {};
+      withOpenASAR = true;
+    };
 in
   symlinkJoin {
     name = "vencord";
-    paths = [discord-canary.out];
+    paths = [
+      discord-canary.out
+    ];
 
     postBuild = ''
       cp -r '${./patches}' $out/opt/DiscordCanary/resources/app
