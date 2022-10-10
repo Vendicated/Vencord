@@ -1,10 +1,11 @@
 import definePlugin from "../utils/types";
 import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "NoCanaryMessageLinks",
     description: "Removes the canary and ptb prefix from message links",
-    authors: [{ name: "ICodeInAssembly", id: 702973430449832038n }],
+    authors: [Devs.Samu],
     dependencies: ["MessageEventsAPI"],
 
     removeBetas(msg: MessageObject) {
