@@ -8,7 +8,7 @@ export default definePlugin({
     authors: [Devs.Samu],
     dependencies: ["MessageEventsAPI"],
 
-    addSuffix(msg: MessageObject) {
+    addPrefix(msg: MessageObject) {
         msg.content = msg.content.replace(/(?<=https:\/\/)(twitter\.com)(?=\/.*?\/)/g, "fxtwitter.com");
     },
 
