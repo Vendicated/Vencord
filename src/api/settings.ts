@@ -3,9 +3,10 @@ import IpcEvents from "../utils/IpcEvents";
 import { React } from "../webpack/common";
 import { mergeDefaults } from "../utils/misc";
 
-interface Settings {
+export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
+    enableReactDevtools: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -17,6 +18,7 @@ interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     useQuickCss: true,
+    enableReactDevtools: false,
     plugins: {}
 };
 
