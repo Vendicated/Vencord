@@ -22,7 +22,7 @@ jobs:
                   cache: "pnpm"
 
             - name: Install dependencies
-              run: pnpm install --frozen-lockfile && sudo apt install -y wget
+              run: pnpm install --frozen-lockfile
 
             - name: Build web
               run: pnpm buildWeb
