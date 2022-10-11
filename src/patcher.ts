@@ -1,7 +1,7 @@
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
-import installExt, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import { join } from "path";
 import { initIpc } from "./ipcMain";
+import { readSettings } from "./ipcMain/index";
 
 console.log("[Vencord] Starting up...");
 
@@ -47,9 +47,17 @@ Object.defineProperty(global, "appSettings", {
 process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
 electron.app.whenReady().then(() => {
-    installExt(REACT_DEVELOPER_TOOLS)
-        .then(() => console.info("Installed React DevTools"))
-        .catch(err => console.error("Failed to install React DevTools", err));
+    try {
+        const settings = JSON.parse(readSettings());
+        if (settings.enableReactDevtools)
+            import("electron-devtools-installer")
+                .then(({ default: inst, REACT_DEVELOPER_TOOLS }) =>
+                    // @ts-ignore: cursed fake esm turns it into exports.default.default
+                    (inst.default ?? inst)(REACT_DEVELOPER_TOOLS)
+                )
+                .then(() => console.info("[Vencord] Installed React Developer Tools"))
+                .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
+    } catch { }
 
     // Remove CSP
     electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, url }, cb) => {
