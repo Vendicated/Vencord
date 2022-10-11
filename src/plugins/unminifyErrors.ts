@@ -1,6 +1,9 @@
-import definePlugin from "../../utils/types";
-import { Devs } from "../../utils/constants";
-import ERROR_CODES from "./codes.json";
+import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
+
+let ERROR_CODES;
+const CODES_URL =
+    "https://raw.githubusercontent.com/facebook/react/17.0.2/scripts/error-codes/codes.json";
 
 export default definePlugin({
     name: "UnminifyErrors",
@@ -16,6 +19,9 @@ export default definePlugin({
             },
         },
     ],
+    async start() {
+        ERROR_CODES = await fetch(CODES_URL).then(res => res.json());
+    },
     decodeError(code: number, ...args: any) {
         let index = 0;
         return ERROR_CODES[code].replace(/%s/g, () => {
