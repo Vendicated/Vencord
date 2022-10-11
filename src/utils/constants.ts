@@ -42,5 +42,9 @@ export const Devs = Object.freeze({
     Animal: {
         name: "Animal",
         id: 118437263754395652n
+    },
+    Empty: {
+        name: "EMPTY",
+        id: 382960284135849984
     }
 });

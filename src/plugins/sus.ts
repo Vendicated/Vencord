@@ -2,17 +2,13 @@
 
 import { ApplicationCommandOptionType } from "../api/Commands";
 import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 
 const sound = { sus: new Audio("https://www.myinstants.com/media/sounds/untitled_hG6mBU5.mp3") };
 
 export default definePlugin({
     name: "SUS",
-    authors: [
-    {
-      id:"382960284135849984",
-      name:"EMPTY"
-    }
-  ],
+    authors: [Devs.Empty],
     description: "Provides a simple way to tell everyone that someone is SUS",
     dependencies: ["CommandsAPI"],
     commands: [{

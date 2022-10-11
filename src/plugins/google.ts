@@ -1,14 +1,10 @@
 import { ApplicationCommandOptionType } from "../api/Commands";
 import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
 
 export default definePlugin({
     name: "Just google bro",
-    authors: [
-    {
-      id:"382960284135849984",
-      name:"EMPTY"
-    }
-  ],
+    authors: [Devs.Empty],
     description: "Someone asking a stupid question ? Just forward them to google.",
     dependencies: ["CommandsAPI"],
     commands: [{
