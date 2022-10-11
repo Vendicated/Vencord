@@ -1,0 +1,60 @@
+name: Build latest
+on:
+    push:
+        branches:
+            - main
+env:
+  FORCE_COLOR: true
+
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+
+            - name: Use Node.js 18
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 18
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build web
+              run: pnpm buildWeb
+              
+            - name: Build
+              run: pnpm build
+              
+            - name: Get some values needed for the release
+              id: vars
+              shell: bash
+              run: |
+                echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+            - uses: dev-drprasad/delete-tag-and-release@085c6969f18bad0de1b9f3fe6692a3cd01f64fe5 # v0.2.0
+              with:
+                delete_release: true
+                tag_name: devbuild
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create the release
+              uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: devbuild
+                  name: Dev Build ${{ steps.vars.outputs.sha_short }}
+                  draft: false
+                  prerelease: false
+                  files: |
+                      dist/browser.js
+                      dist/extension.zip
+                      dist/renderer.js
+                      dist/patcher.js
+                      dist/preload.js
