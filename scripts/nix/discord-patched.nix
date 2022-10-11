@@ -6,7 +6,6 @@
   makeBinaryWrapper,
   writeShellScript,
   vencord,
-  withOpenAsar ? false,
 }: let
   extractCmd =
     makeBinaryWrapper.extractCmd
