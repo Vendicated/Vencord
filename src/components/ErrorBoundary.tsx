@@ -1,9 +1,9 @@
 import Logger from "../utils/logger";
-import { Card, React } from "../webpack/common";
+import { Margins, React } from "../webpack/common";
 import { ErrorCard } from "./ErrorCard";
 
 interface Props {
-    fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; }>>;
+    fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; }>>;
     onError?(error: Error, errorInfo: React.ErrorInfo): void;
 }
 
@@ -24,14 +24,23 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
 
     state = {
         error: NO_ERROR as any,
+        stack: "",
         message: ""
     };
 
     static getDerivedStateFromError(error: any) {
+        let stack = error?.stack ?? "";
+        let message = error?.message || String(error);
 
-        return {
-            error: error?.stack?.replace(/https:\/\/\S+\/assets\//g, "") || error?.message || String(error)
-        };
+        if (error instanceof Error && stack) {
+            const eolIdx = stack.indexOf("\n");
+            if (eolIdx !== -1) {
+                message = stack.slice(0, eolIdx);
+                stack = stack.slice(eolIdx + 1).replace(/https:\/\/\S+\/assets\//g, "");
+            }
+        }
+
+        return { error, stack, message };
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -46,7 +55,7 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
         if (this.props.fallback)
             return <this.props.fallback
                 children={this.props.children}
-                error={this.state.error}
+                {...this.state}
             />;
 
         return (
@@ -59,9 +68,12 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
                     and in your console.
                 </p>
                 <code>
-                    <pre>
-                        {this.state.error}
-                    </pre>
+                    {this.state.message}
+                    {!!this.state.stack && (
+                        <pre className={Margins.marginTop8}>
+                            {this.state.stack}
+                        </pre>
+                    )}
                 </code>
             </ErrorCard>
         );
