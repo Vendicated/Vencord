@@ -7,7 +7,7 @@ function strEnum<T extends Record<string, string>>(obj: T): T {
     for (const key in obj) {
         o[key] = obj[key] as any;
         o[obj[key]] = key as any;
-    };
+    }
     return Object.freeze(o);
 }
 

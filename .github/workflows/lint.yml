@@ -7,16 +7,21 @@ on:
         branches:
             - main
 jobs:
-    build:
+    Build:
         runs-on: ubuntu-latest
+
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
+            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
-            - name: Install pnpm
-              run: npm i -g pnpm
+            - name: Use Node.js 18
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 18
+                  cache: "pnpm"
 
-            - name: Install deps
-              run: pnpm i
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-            - name: Run ESLint
-              run: pnpm run lint
+            - name: Lint & Test if it compiles
+              run: pnpm test

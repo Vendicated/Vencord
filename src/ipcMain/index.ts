@@ -11,6 +11,12 @@ const DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 const SETTINGS_DIR = join(DATA_DIR, "settings");
 const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
 const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
+const ALLOWED_PROTOCOLS = [
+    "https:",
+    "http:",
+    "steam:",
+    "spotify:"
+];
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
@@ -37,7 +43,7 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     } catch {
         throw "Malformed URL";
     }
-    if (protocol !== "https:" && protocol !== "http:")
+    if (!ALLOWED_PROTOCOLS.includes(protocol))
         throw "Disallowed protocol.";
 
     shell.openExternal(url);

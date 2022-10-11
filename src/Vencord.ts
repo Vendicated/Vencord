@@ -22,7 +22,7 @@ Object.defineProperty(window, "IS_WEB", {
     enumerable: true
 });
 
-export let Components;
+export let Components: any;
 
 async function init() {
     await onceReady;

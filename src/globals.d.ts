@@ -5,13 +5,14 @@ declare global {
     export var appSettings: {
         set(setting: string, v: any): void;
     };
+    export var DiscordNative: any;
 
     interface Window {
         webpackChunkdiscord_app: {
             push(chunk: any): any;
             pop(): any;
         };
-        [k: PropertyKey]: any;
+        [k: string]: any;
     }
 }
 

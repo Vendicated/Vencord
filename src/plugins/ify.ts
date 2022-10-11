@@ -3,7 +3,7 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "Ify",
-    description: "Disabes Spotify auto-pausing and premium checks",
+    description: "Disables Spotify auto-pausing and Premium checks, allowing you to listen along with others.",
     authors: [Devs.Cyn],
     patches: [{
         find: '.displayName="SpotifyStore"',
