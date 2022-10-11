@@ -1,6 +1,6 @@
 import definePlugin from "../../utils/types";
 import { Devs } from "../../utils/constants";
-import ERROR_CODES from "./codes";
+import ERROR_CODES from "./codes.json";
 
 export default definePlugin({
     name: "UnminifyErrors",
