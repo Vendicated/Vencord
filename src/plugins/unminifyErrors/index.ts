@@ -16,7 +16,7 @@ export default definePlugin({
             },
         },
     ],
-    decodeError(code: Number, ...args: any) {
+    decodeError(code: number, ...args: any) {
         let index = 0;
         return ERROR_CODES[code].replace(/%s/g, () => {
             const arg = args[index];
