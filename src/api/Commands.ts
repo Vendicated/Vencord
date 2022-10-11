@@ -1,5 +1,6 @@
 import { Channel, Guild, Embed } from "discord-types/general";
-import { waitFor, findByProps } from "../webpack";
+import internal from "stream";
+import { waitFor, findByProps, find, filters } from "../webpack";
 
 export function _init(cmds: Command[]) {
     try {
@@ -80,13 +81,24 @@ export function registerCommand(command: Command, plugin: string) {
  * @param {string} channelId ID of channel to send message to
  * @param {string} message Message to send
  * @param {Embed[]} embed Array of embeds to send (can be blank)
- * @param loggingName Frankly no fucking clue what this does, if not set will be replaced with "Vencord"
  * @returns null
  */
-export function sendBotMessage(channelId: string, message: string, embeds: Embed[], loggingName = "Vencord") {
-    const clyde = findByProps("sendBotMessage");
+export function sendBotMessage(channelId: string, content: string, embeds?: Embed[], author?: { id?: string, username?: string, discriminator?: Number, avatar?: string }) {
+    const clyde = find(filters.byCode('username:"Clyde"'));
+    const _receiveMessage = findByProps("receiveMessage");
 
-    clyde.sendBotMessage(channelId, message, (embeds || []), loggingName);
+    let message = clyde({ channelId, content: content, embeds: embeds });
+
+    if(author) {
+        message.author = {
+            id: author.id || message.author.id, // 702973430449832038
+            username: author.username || message.author.username, // "ICodeInAssembly"
+            discriminator: author.discriminator || message.author.discriminator, // "7117"
+            avatar: author.avatar || message.author.avatar // This is fucked, because you can only specify profile pictures from a specific userID.
+        };
+    }
+
+    _receiveMessage.receiveMessage(channelId, message);
 }
 
 export function unregisterCommand(name: string) {
