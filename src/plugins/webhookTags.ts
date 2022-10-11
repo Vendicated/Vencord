@@ -26,7 +26,7 @@ export default definePlugin({
             replacement: {
                 match: /return null==(.)\?null:.\.createElement\((.)\.Z/,
                 replace: (orig, type, BotTag) =>
-                    `if(${type}==${BotTag}.Z.Types.BOT&&arguments[0].user.isNonUserBot()){${type}=${BotTag}.Z.Types.WEBHOOK}${orig}`,
+                    `if(arguments[0].message.webhookId){${type}=${BotTag}.Z.Types.WEBHOOK}${orig}`,
             },
         },
     ],
