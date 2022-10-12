@@ -1,5 +1,10 @@
-import { Channel, Guild } from "discord-types/general";
-import { waitFor } from "../webpack";
+import { Channel, Guild, Embed, Message } from "discord-types/general";
+import { lazyWebpack, mergeDefaults } from "../utils/misc";
+import { waitFor, findByProps, find, filters } from "../webpack";
+import type { PartialDeep } from "type-fest";
+
+const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));
+const MessageSender = lazyWebpack(filters.byProps([ "receiveMessage" ]));
 
 export function _init(cmds: Command[]) {
     try {
@@ -45,7 +50,9 @@ export function generateId() {
  * @param fallbackValue Fallback value in case this option wasn't passed
  * @returns Value
  */
-export function findOption<T extends string | undefined>(args: Argument[], name: string, fallbackValue?: T): T extends undefined ? T : string {
+export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
+export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
+export function findOption(args: Argument[], name: string, fallbackValue?: any) {
     return (args.find(a => a.name === name)?.value || fallbackValue) as any;
 }
 
@@ -64,10 +71,10 @@ export function registerCommand(command: Command, plugin: string) {
     if (BUILT_IN.some(c => c.name === command.name))
         throw new Error(`Command '${command.name}' already exists.`);
 
-    command.id ||= generateId();
-    command.applicationId ||= "-1"; // BUILT_IN;
-    command.type ||= ApplicationCommandType.CHAT_INPUT;
-    command.inputType ||= ApplicationCommandInputType.BUILT_IN_TEXT;
+    command.id ??= generateId();
+    command.applicationId ??= "-1"; // BUILT_IN;
+    command.type ??= ApplicationCommandType.CHAT_INPUT;
+    command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
     command.plugin ||= plugin;
 
     modifyOpt(command);
@@ -75,7 +82,21 @@ export function registerCommand(command: Command, plugin: string) {
     BUILT_IN.push(command);
 }
 
-export function unregisterCommand(name: string) {
+/**
+ * Send a message as Clyde
+ * @param {string} channelId ID of channel to send message to
+ * @param {Message} message Message to send
+ * @returns {Message}
+ */
+export function sendBotMessage(channelId: string, message: PartialDeep<Message>) {
+    const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
+
+    MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
+
+    return message;
+}
+
+export function unregisterCommand(name: string) { 1;
     const idx = BUILT_IN.findIndex(c => c.name === name);
     if (idx === -1)
         return false;
@@ -155,5 +176,5 @@ export interface Command {
     options?: Option[];
     predicate?(ctx: CommandContext): boolean;
 
-    execute(args: Argument[], ctx: CommandContext): CommandReturnValue | void;
+    execute(args: Argument[], ctx: CommandContext): CommandReturnValue | void | Promise<CommandReturnValue | void>;
 }

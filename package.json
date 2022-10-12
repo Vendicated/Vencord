@@ -25,6 +25,7 @@
         "esbuild": "^0.15.5",
         "eslint": "^8.24.0",
         "standalone-electron-types": "^1.0.0",
+        "type-fest": "^3.1.0",
         "typescript": "^4.8.4",
         "yazl": "^2.5.1"
     },
