@@ -16,7 +16,7 @@ export default definePlugin({
             execute: (opts, ctx) => {
                 const message = findOption(opts, "message", "");
 
-                sendBotMessage(ctx.channel.id, { content: "hi" });
+                sendBotMessage(ctx.channel.id, { content: message });
             },
         },
     ]

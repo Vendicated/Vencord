@@ -1,9 +1,10 @@
 import { Channel, Guild, Embed, Message } from "discord-types/general";
 import { lazyWebpack, mergeDefaults } from "../utils/misc";
 import { waitFor, findByProps, find, filters } from "../webpack";
+import type { PartialDeep } from "type-fest";
 
 const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));
-const _receiveMessage = lazyWebpack(filters.byProps([ "receiveMessage" ]));
+const MessageSender = lazyWebpack(filters.byProps([ "receiveMessage" ]));
 
 export function _init(cmds: Command[]) {
     try {
@@ -85,13 +86,13 @@ export function registerCommand(command: Command, plugin: string) {
  * @param {Message} message Message to send
  * @returns null
  */
-export function sendBotMessage(channelId: string, message: object) {
+export function sendBotMessage(channelId: string, message: PartialDeep<Message>) {
     let botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
-    _receiveMessage.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
 }
 
-export function unregisterCommand(name: string) {
+export function unregisterCommand(name: string) { 1;
     const idx = BUILT_IN.findIndex(c => c.name === name);
     if (idx === -1)
         return false;
