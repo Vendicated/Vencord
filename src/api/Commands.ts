@@ -93,7 +93,7 @@ export function sendBotMessage(channelId: string, message: PartialDeep<Message>)
 
     MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
-    return botMessage;
+    return message;
 }
 
 export function unregisterCommand(name: string) { 1;
