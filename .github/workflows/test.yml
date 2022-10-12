@@ -1,4 +1,4 @@
-name: lint
+name: test
 on:
     push:
         branches:
@@ -7,7 +7,7 @@ on:
         branches:
             - main
 jobs:
-    Build:
+    test:
         runs-on: ubuntu-latest
 
         steps:
