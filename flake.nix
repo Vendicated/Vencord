@@ -19,7 +19,8 @@
   in {
     packages = forAllSystems (system: let
       pkgs =
-        import nixpkgs {
+        import nixpkgs
+        {
           inherit system;
           config.allowUnfree = true;
         }
