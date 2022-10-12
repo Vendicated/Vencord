@@ -1,23 +1,38 @@
 {
   pkgs,
-  mkYarnPackage,
   revision,
+  mkPnpmPackage,
 }: rec {
   vencord =
-    mkYarnPackage
+    mkPnpmPackage
     {
       name = "vencord";
 
       src = ../../.;
 
       packageJSON = ../../package.json;
-      yarnLock = ./yarn.lock;
-      yarnNix = ./yarn.nix;
+      pnpmLock = ../../pnpm-lock.yaml;
 
-      nativeBuildInputs = [pkgs.git];
+      overrides = {
+        electron = drv:
+          drv.overrideAttrs (old: {
+            ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+          });
+      };
+
+      linkDevDependencies = true;
+      outputs = ["out"];
+
+      nativeBuildInputs = with pkgs; [git];
 
       buildPhase = ''
-        yarn build nix ${revision}
+        cp -r $PWD/node_modules/vencord/* $PWD
+        ${pkgs.nodePackages.pnpm}/bin/pnpm build nix ${revision}
+      '';
+
+      installPhase = ''
+        mkdir -p $out
+        cp -r $PWD/dist/* $out
       '';
     };
 }

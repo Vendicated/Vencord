@@ -16,9 +16,26 @@
         "type": "github"
       }
     },
+    "pnpm2nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1665536101,
+        "narHash": "sha256-XkCpp7jmeP2jhlrBWtPe9/C3nTHbgVENPMqCL56r6I4=",
+        "owner": "pupbrained",
+        "repo": "pnpm2nix",
+        "rev": "d83de7d4c76b358e12a0e8a908dc956efed7f034",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pupbrained",
+        "repo": "pnpm2nix",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "pnpm2nix": "pnpm2nix"
       }
     }
   },
