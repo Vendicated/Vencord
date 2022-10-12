@@ -42,7 +42,7 @@ function loadImage(source: File | string) {
     });
 }
 
-async function resolveImage(options: Argument[], ctx: CommandContext): Promise<File | string | null> {
+async function resolveImage(options: Argument[], ctx: CommandContext, noServerPfp: boolean): Promise<File | string | null> {
     for (const opt of options) {
         switch (opt.name) {
             case "image":
@@ -57,7 +57,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext): Promise<F
             case "user":
                 try {
                     const user = await fetchUser(opt.value);
-                    return user.getAvatarURL(ctx.guild, 2048).replace(/\?size=\d+$/, "?size=2048");
+                    return user.getAvatarURL(noServerPfp ? void 0 : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
                 } catch (err) {
                     console.error("[petpet] Failed to fetch user\n", err);
                     throw "Failed to fetch user. Check the console for more info.";
@@ -102,14 +102,20 @@ export default definePlugin({
                     name: "user",
                     description: "User whose avatar to use as image",
                     type: ApplicationCommandOptionType.USER
+                },
+                {
+                    name: "no-server-pfp",
+                    description: "Use the normal avatar instead of the server specific one when using the 'user' option",
+                    type: ApplicationCommandOptionType.BOOLEAN
                 }
             ],
             execute: suppressErrors("petpetExecute", async (opts, cmdCtx) => {
                 const { GIFEncoder, quantize, applyPalette } = await getGifEncoder();
                 const frames = await getFrames();
 
+                const noServerPfp = findOption(opts, "no-server-pfp", false);
                 try {
-                    var url = await resolveImage(opts, cmdCtx);
+                    var url = await resolveImage(opts, cmdCtx, noServerPfp);
                     if (!url) throw "No Image specified!";
                 } catch (err) {
                     // Todo make this send a clyde message once that PR is done
