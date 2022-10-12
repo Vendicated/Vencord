@@ -86,12 +86,14 @@ export function registerCommand(command: Command, plugin: string) {
  * Send a message as Clyde
  * @param {string} channelId ID of channel to send message to
  * @param {Message} message Message to send
- * @returns null
+ * @returns {Message}
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>) {
     const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
     MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
+
+    return botMessage;
 }
 
 export function unregisterCommand(name: string) { 1;
