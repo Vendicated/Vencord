@@ -1,5 +1,6 @@
 import definePlugin from "../utils/types";
 import { ApplicationCommandInputType, sendBotMessage, findOption, OptionalMessageOption } from "../api/Commands";
+import { ReactionEmoji, Message, MessageReaction, JSMessage } from "discord-types/general";
 
 export default definePlugin({
     name: "Echo",
@@ -15,7 +16,7 @@ export default definePlugin({
             execute: (opts, ctx) => {
                 const message = findOption(opts, "message", "");
 
-                sendBotMessage(ctx.channel.id, message); // 970775660673007696, "testing testicles", [], "test"
+                sendBotMessage(ctx.channel.id, { content: "hi" });
             },
         },
     ]

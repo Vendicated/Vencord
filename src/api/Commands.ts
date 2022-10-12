@@ -1,6 +1,9 @@
-import { Channel, Guild, Embed } from "discord-types/general";
-import internal from "stream";
+import { Channel, Guild, Embed, Message } from "discord-types/general";
+import { lazyWebpack, mergeDefaults } from "../utils/misc";
 import { waitFor, findByProps, find, filters } from "../webpack";
+
+const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));
+const _receiveMessage = lazyWebpack(filters.byProps([ "receiveMessage" ]));
 
 export function _init(cmds: Command[]) {
     try {
@@ -79,26 +82,13 @@ export function registerCommand(command: Command, plugin: string) {
 /**
  * Send a message as Clyde
  * @param {string} channelId ID of channel to send message to
- * @param {string} message Message to send
- * @param {Embed[]} embed Array of embeds to send (can be blank)
+ * @param {Message} message Message to send
  * @returns null
  */
-export function sendBotMessage(channelId: string, content: string, embeds?: Embed[], author?: { id?: string, username?: string, discriminator?: Number, avatar?: string }) {
-    const clyde = find(filters.byCode('username:"Clyde"'));
-    const _receiveMessage = findByProps("receiveMessage");
+export function sendBotMessage(channelId: string, message: object) {
+    let botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
-    let message = clyde({ channelId, content: content, embeds: embeds });
-
-    if(author) {
-        message.author = {
-            id: author.id || message.author.id, // 702973430449832038
-            username: author.username || message.author.username, // "ICodeInAssembly"
-            discriminator: author.discriminator || message.author.discriminator, // "7117"
-            avatar: author.avatar || message.author.avatar // This is fucked, because you can only specify profile pictures from a specific userID.
-        };
-    }
-
-    _receiveMessage.receiveMessage(channelId, message);
+    _receiveMessage.receiveMessage(channelId, mergeDefaults(message, botMessage));
 }
 
 export function unregisterCommand(name: string) {
