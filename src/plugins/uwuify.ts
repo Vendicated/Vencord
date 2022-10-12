@@ -1,32 +1,13 @@
 import definePlugin from "../utils/types";
 import { findOption, RequiredMessageOption } from "../api/Commands";
 
-// words have a chance of ending with these
 const endings = [
-    "owo",
-    "UwU",
-    ">w<",
-    "^w^",
-    "●w●",
-    "☆w☆",
-    "𝗨𝘄𝗨",
-    "(ᗒᗨᗕ)",
-    "(▰˘v˘▰)",
-    "( ´ ▽ ` ).｡ｏ♡",
-    "*unbuttons shirt*",
-    ">3<",
-    ">:3",
-    ":3",
-    "murr~",
-    "♥(。U ω U。)",
-    "(˘ε˘)",
-    "*screams*",
-    "*twerks*",
-    "*sweats*",
+    "owo", "UwU", ">w<", "^w^", "●w●", "☆w☆", "𝗨𝘄𝗨", "(ᗒᗨᗕ)", "(▰˘v˘▰)",
+    "( ´ ▽ ` ).｡ｏ♡", "*unbuttons shirt*", ">3<", ">:3", ":3", "murr~",
+    "♥(。U ω U。)", "(˘ε˘)", "*screams*", "*twerks*", "*sweats*",
 ];
 
-// replacement words
-const words = [
+const replacements = [
     ["love", "wuv"],
     ["mr", "mistuh"],
     ["dog", "doggo"],
@@ -45,7 +26,6 @@ const words = [
 ];
 
 
-// uwuify command
 function uwuify(message: string): string {
     return message
         .split(" ")
@@ -58,7 +38,7 @@ function uwuify(message: string): string {
             }
 
             // replacing the words based on the array on line 29
-            for (let [find, replace] of words) {
+            for (let [find, replace] of replacements) {
                 if (w.includes(find)) {
                     w = w.replace(find, replace);
                     owofied = true;
@@ -111,7 +91,10 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [{ name: "ECHO", id: 712639419785412668n }],
+    authors: [{
+        name: "ECHO",
+        id: 712639419785412668n
+    }],
     dependencies: ["CommandsAPI"],
 
     commands: [

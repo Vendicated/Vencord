@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, findOption, ApplicationCommandInputType, Argument, CommandContext } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
-import { lazy, lazyWebpack, suppressErrors } from "../utils/misc";
+import { lazy, lazyWebpack } from "../utils/misc";
 import { filters } from "../webpack";
 
 const DRAFT_TYPE = 0;
@@ -36,7 +36,7 @@ function loadImage(source: File | string) {
                 URL.revokeObjectURL(url);
             resolve(img);
         };
-        img.onerror = reject;
+        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
         img.crossOrigin = "Anonymous";
         img.src = url;
     });
@@ -109,7 +109,7 @@ export default definePlugin({
                     type: ApplicationCommandOptionType.BOOLEAN
                 }
             ],
-            execute: suppressErrors("petpetExecute", async (opts, cmdCtx) => {
+            execute: async (opts, cmdCtx) => {
                 const { GIFEncoder, quantize, applyPalette } = await getGifEncoder();
                 const frames = await getFrames();
 
@@ -162,7 +162,7 @@ export default definePlugin({
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setImmediate is needed to make this execute after Discord cleared the input
                 setImmediate(() => promptToUpload([file], cmdCtx.channel, DRAFT_TYPE));
-            }),
+            },
         },
     ]
 });
