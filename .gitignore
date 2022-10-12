@@ -8,7 +8,6 @@ vencord_installer
 .idea
 
 yarn.lock
-!scripts/nix/yarn.lock
 package-lock.json
 
 *.log
