@@ -89,7 +89,7 @@ export function registerCommand(command: Command, plugin: string) {
  * @returns null
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>) {
-    let botMessage = createBotMessage({ channelId, content: "", embeds: [] });
+    const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
     MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
 }
