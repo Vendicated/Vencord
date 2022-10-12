@@ -1,7 +1,7 @@
 {
   pkgs,
-  mkPnpmPackage,
   revision,
+  mkPnpmPackage,
 }: rec {
   vencord =
     mkPnpmPackage
@@ -20,13 +20,19 @@
           });
       };
 
+      linkDevDependencies = true;
+      outputs = ["out"];
+
       nativeBuildInputs = with pkgs; [git];
 
       buildPhase = ''
-        cp -r $PWD/node_modules/vencord/package.json $PWD
-        cp -r $PWD/node_modules/vencord/pnpm-lock.yaml $PWD
-        cp -r $PWD/node_modules/vencord/build.mjs $PWD
+        cp -r $PWD/node_modules/vencord/* $PWD
         ${pkgs.nodePackages.pnpm}/bin/pnpm build nix ${revision}
+      '';
+
+      installPhase = ''
+        mkdir -p $out
+        cp -r $PWD/dist/* $out
       '';
     };
 }
