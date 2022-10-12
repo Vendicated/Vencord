@@ -50,7 +50,9 @@ export function generateId() {
  * @param fallbackValue Fallback value in case this option wasn't passed
  * @returns Value
  */
-export function findOption<T extends string | undefined>(args: Argument[], name: string, fallbackValue?: T): T extends undefined ? T : string {
+export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
+export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
+export function findOption(args: Argument[], name: string, fallbackValue?: any) {
     return (args.find(a => a.name === name)?.value || fallbackValue) as any;
 }
 
@@ -69,10 +71,10 @@ export function registerCommand(command: Command, plugin: string) {
     if (BUILT_IN.some(c => c.name === command.name))
         throw new Error(`Command '${command.name}' already exists.`);
 
-    command.id ||= generateId();
-    command.applicationId ||= "-1"; // BUILT_IN;
-    command.type ||= ApplicationCommandType.CHAT_INPUT;
-    command.inputType ||= ApplicationCommandInputType.BUILT_IN_TEXT;
+    command.id ??= generateId();
+    command.applicationId ??= "-1"; // BUILT_IN;
+    command.type ??= ApplicationCommandType.CHAT_INPUT;
+    command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
     command.plugin ||= plugin;
 
     modifyOpt(command);
@@ -172,5 +174,5 @@ export interface Command {
     options?: Option[];
     predicate?(ctx: CommandContext): boolean;
 
-    execute(args: Argument[], ctx: CommandContext): CommandReturnValue | void;
+    execute(args: Argument[], ctx: CommandContext): CommandReturnValue | void | Promise<CommandReturnValue | void>;
 }
