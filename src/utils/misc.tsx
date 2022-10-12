@@ -157,3 +157,11 @@ export function suppressErrors<F extends Function>(name: string, func: F, thisOb
             }
         }) as any as F;
 }
+
+/**
+ * Wrap the text in ``` with an optional language
+ */
+export function makeCodeblock(text: string, language?: string) {
+    const chars = "```";
+    return `${chars}${language || ""}\n${text}\n${chars}`;
+}
