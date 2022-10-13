@@ -89,7 +89,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     else
         editIdx = i = mutate(editIdx);
 
-    return i === - 1 ? undefined : messages.at(-i - 1);
+    return i === - 1 ? undefined : messages[messages.length - i - 1];
 }
 
 // handle next/prev reply
