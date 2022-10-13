@@ -119,7 +119,8 @@ export default definePlugin({
                 message.content.length ? message.content :
                     `[no content, ${message.attachments.length} attachment${message.attachments.length !== 1 ? "s" : ""}]`,
             footer: {
-                text: "#" + ChannelStore.getChannel(channelID).name +
+                text: guildID === "@me" ? "Direct Message" :
+                    "#" + ChannelStore.getChannel(channelID).name +
                     ` (${GuildStore.getGuild(guildID).name})${hasActualEmbed ?
                         // apparently embeds don't have footers?
                         // @ts-expect-error
