@@ -33,15 +33,15 @@ export default definePlugin({
     },
 });
 
+const onDeletePendingReply = () => replyIdx = -1;
+const onEndEdit = () => editIdx = -1;
+
 function calculateIdx(messages: Message[], id: string) {
     const idx = messages.findIndex(m => m.id === id);
     return idx === -1
         ? idx
         : messages.length - idx - 1;
 }
-
-const onDeletePendingReply = () => replyIdx = -1;
-const onEndEdit = () => editIdx = -1;
 
 function onStartEdit({ channelId, messageId, _isQuickEdit }: any) {
     if (_isQuickEdit) return;
@@ -59,17 +59,17 @@ function onCreatePendingReply({ message, _isQuickReply }: { message: Message; _i
 }
 
 const isCtrl = (e: KeyboardEvent) => isMac ? e.metaKey : e.ctrlKey;
-const isExactlyCtrl = (e: KeyboardEvent) => isCtrl(e) && !e.shiftKey && !e.altKey && (isMac || !e.metaKey);
-const isExactlyCtrlShift = (e: KeyboardEvent) => isCtrl(e) && e.shiftKey && !e.altKey && (isMac || !e.metaKey);
+const isAltOrMeta = (e: KeyboardEvent) => e.altKey || (!isMac && e.metaKey);
 
 function onKeydown(e: KeyboardEvent) {
     const isUp = e.key === "ArrowUp";
     if (!isUp && e.key !== "ArrowDown") return;
+    if (!isCtrl(e) || isAltOrMeta(e)) return;
 
-    if (isExactlyCtrl(e))
-        nextReply(isUp);
-    else if (isExactlyCtrlShift(e))
+    if (e.shiftKey)
         nextEdit(isUp);
+    else
+        nextReply(isUp);
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
