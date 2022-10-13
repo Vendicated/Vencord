@@ -4,7 +4,7 @@ on:
         branches:
             - main
 env:
-  FORCE_COLOR: true
+    FORCE_COLOR: true
 
 jobs:
     Build:
@@ -26,22 +26,22 @@ jobs:
 
             - name: Build web
               run: pnpm buildWeb
-              
+
             - name: Build
               run: pnpm build
-              
+
             - name: Get some values needed for the release
               id: vars
               shell: bash
               run: |
-                echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+                  echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
             - uses: dev-drprasad/delete-tag-and-release@085c6969f18bad0de1b9f3fe6692a3cd01f64fe5 # v0.2.0
               with:
-                delete_release: true
-                tag_name: devbuild
+                  delete_release: true
+                  tag_name: devbuild
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Create the release
               uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v1
@@ -53,6 +53,7 @@ jobs:
                   draft: false
                   prerelease: false
                   files: |
+                      dist/Vencord.user.js
                       dist/browser.js
                       dist/extension.zip
                       dist/renderer.js
