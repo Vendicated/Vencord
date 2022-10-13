@@ -12,8 +12,9 @@ export interface PatchReplacement {
 
 export interface Patch {
     plugin: string;
-    find: string,
+    find: string;
     replacement: PatchReplacement | PatchReplacement[];
+    all?: boolean;
 }
 
 export interface PluginAuthor {
