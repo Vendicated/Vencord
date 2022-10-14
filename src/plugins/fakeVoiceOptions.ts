@@ -1,10 +1,23 @@
 import definePlugin from "../utils/types";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage, Argument } from "../api/Commands";
+import { Toasts } from "../webpack/common";
 
 const config = {
     fake_mute: false,
     fake_deafen: false,
 };
+
+const optionChanged = (option: string, value: boolean) => {
+    Toasts.show({
+        message: option,
+        id: Toasts.genId(),
+        type: value ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE,
+        options: {
+            position: Toasts.Position.BOTTOM,
+            duration: 1000
+        }
+    });
+}
 
 export default definePlugin({
     dependencies: ["CommandsAPI"],
@@ -47,19 +60,18 @@ export default definePlugin({
                 }
             ],
             execute: (opts: Argument[], ctx): void => {
-
                 opts.forEach(opt => {
                     switch (opt.name) {
                         case "fake-mute":
                             config.fake_mute = (opt.value as unknown as boolean);
+                            optionChanged("Fake mute", config.fake_mute);
                             break;
                         case "fake-deaf":
                             config.fake_deafen = (opt.value as unknown as boolean);
+                            optionChanged("Fake Deafen", config.fake_deafen);
                             break;
                     }
                 });
-
-                sendBotMessage(ctx.channel.id, { content: Object.entries(config).map(([k, v]) => `[${k}] : ${v}`).join(" - ") });
             },
         },
     ],
