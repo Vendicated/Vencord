@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, findOption, ApplicationCommandInputType, Argument, CommandContext } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
-import { lazy, lazyWebpack } from "../utils/misc";
+import { makeLazy, lazyWebpack } from "../utils/misc";
 import { filters } from "../webpack";
 
 const DRAFT_TYPE = 0;
@@ -12,9 +12,9 @@ const FRAMES = 10;
 // https://github.com/mattdesl/gifenc
 // this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
 // @ts-ignore ts mad
-const getGifEncoder = lazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
+const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
 
-const getFrames = lazy(() => Promise.all(
+const getFrames = makeLazy(() => Promise.all(
     Array.from(
         { length: FRAMES },
         (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)

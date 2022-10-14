@@ -1,13 +1,12 @@
-// TODO: fix
+import { filters } from "../webpack";
+import { lazyWebpack } from "./misc";
+import { mapMangledModuleLazy } from "../webpack/webpack";
 
-import Components from "discord-types/components";
-import { waitFor } from "../webpack";
-
-export let Modal: Components.Modal;
-export let modals: any;
-
-waitFor("openModalLazy", m => modals = m);
-waitFor("ModalRoot", m => Modal = m);
+const ModalRoot = lazyWebpack(filters.byCode("headerIdIsManaged:"));
+const Modals = mapMangledModuleLazy("onCloseRequest:null!=", {
+    openModal: filters.byCode("onCloseRequest:null!="),
+    closeModal: filters.byCode("onCloseCallback&&")
+});
 
 let modalId = 1337;
 
@@ -18,10 +17,10 @@ let modalId = 1337;
  */
 export function openModal(Component: React.ComponentType, modalProps: Record<string, any>) {
     let key = `Vencord${modalId++}`;
-    modals.openModal(props => (
-        <Modal.ModalRoot {...props} {...modalProps}>
+    Modals.openModal(props => (
+        <ModalRoot {...props} {...modalProps}>
             <Component />
-        </Modal.ModalRoot>
+        </ModalRoot>
     ), { modalKey: key });
 
     return key;
@@ -32,5 +31,5 @@ export function openModal(Component: React.ComponentType, modalProps: Record<str
  * @param key The key of the modal to close
  */
 export function closeModal(key: string) {
-    modals.closeModal(key);
+    Modals.closeModal(key);
 }
