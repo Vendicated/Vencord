@@ -20,6 +20,8 @@ import { addPreSendListener, MessageObject, removePreSendListener } from "@api/M
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+const re = /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g;
+
 export default definePlugin({
     name: "FxTwitter",
     description: "Uses FxTwitter to improve embeds from twitter on send",
@@ -27,7 +29,7 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(/https?:\/\/twitter\.com(?=\/.*?\/)/g, "https://fxtwitter.com");
+        msg.content = msg.content.replace(re, "https://fxtwitter.com");
     },
 
     start() {
