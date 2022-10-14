@@ -10,6 +10,13 @@ const Modals = mapMangledModuleLazy("onCloseRequest:null!=", {
 
 let modalId = 1337;
 
+export enum ModalSize {
+    SMALL = "small",
+    MEDIUM = "medium",
+    LARGE = "large",
+    DYNAMIC = "dynamic",
+}
+
 /**
  * Open a modal
  * @param Component The component to render in the modal
