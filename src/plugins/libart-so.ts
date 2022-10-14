@@ -23,7 +23,7 @@ async function call_libart(): Promise<string> {
     // There might be a better RegEX but too dumb to write/test.
 
     let text = await fetch("https://libart.so").then(r => r.text());
-    if (!/<a *?href=("?.*?src=")/g.test(text)) call_libart();
+    if (!/<a *?href=("?.*?src=")/g.test(text)) call_libart(); // Check if it's the correct response, becuz sometime it shows AliPay image :husk:
     text = text.replace(/<a *?href=("?.*?src=")/g, ""); // First Replace removing the top.
     text = text.replace(/ *?"(.*?a>)/g, ""); // Second Replace Removing the bottom
 

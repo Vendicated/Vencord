@@ -68,6 +68,8 @@ function modifyOpt(opt: Option | Command) {
         // See comment above Placeholders
         if (opt === OptPlaceholder) opts[i] = OptionalMessageOption;
         else if (opt === ReqPlaceholder) opts[i] = RequiredMessageOption;
+        opt.choices?.forEach(x => x.displayName ||= x.name);
+
         modifyOpt(opts[i]);
     });
 }
@@ -85,6 +87,7 @@ export function registerCommand(command: Command, plugin: string) {
 
     modifyOpt(command);
     commands[command.name] = command;
+    // console.log(command)
     BUILT_IN.push(command);
 }
 
