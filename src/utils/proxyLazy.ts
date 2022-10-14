@@ -7,7 +7,7 @@ import { makeLazy } from "./misc";
  * @returns Proxy
  *
  * Note that the example below exists already as an api, see {@link lazyWebpack}
- * @example const mod = proxyLazy(makeLazy(() => findByProps("blah"))); console.log(mod.blah);
+ * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazy<T>(factory: () => T): T {
     const lazy = makeLazy(factory);
