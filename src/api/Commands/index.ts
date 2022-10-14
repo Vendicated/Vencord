@@ -87,7 +87,6 @@ export function registerCommand(command: Command, plugin: string) {
 
     modifyOpt(command);
     commands[command.name] = command;
-    // console.log(command)
     BUILT_IN.push(command);
 }
 
