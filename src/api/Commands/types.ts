@@ -36,6 +36,14 @@ export interface Option {
     displayDescription?: string;
     required?: boolean;
     options?: Option[];
+    choices?: Array<ChoicesOption>;
+}
+
+export interface ChoicesOption {
+    label: string;
+    value: string;
+    name: string;
+    displayName?: string;
 }
 
 export enum ApplicationCommandType {
