@@ -9,7 +9,7 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(/https?:\/\/twitter\.com(?=\/.*?\/)/g, "https://fxtwitter.com");
+        msg.content = msg.content.replace(/https?:\/\/twitter\.com(?=\/.*?\/status)/g, "https://fxtwitter.com");
     },
 
     start() {
