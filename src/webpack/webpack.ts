@@ -1,4 +1,5 @@
 import type { WebpackInstance } from "discord-types/other";
+import { proxyLazy } from "../utils/proxyLazy";
 
 export let _resolveReady: () => void;
 /**
@@ -90,6 +91,51 @@ export function findAll(filter: FilterFn, getDefault = true) {
     }
 
     return ret;
+}
+
+/**
+ * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
+ * then maps it into an easily usable module via the specified mappers
+ * @param code Code snippet
+ * @param mappers Mappers to create the non mangled exports
+ * @returns Unmangled exports as specified in mappers
+ *
+ * @example mapMangledModule("headerIdIsManaged:", {
+ *             openModal: filters.byCode("headerIdIsManaged:"),
+ *             closeModal: filters.byCode("key==")
+ *          })
+ */
+export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    const exports = {} as Record<S, any>;
+
+    // search every factory function
+    for (const id in wreq.m) {
+        const src = wreq.m[id].toString() as string;
+        if (src.includes(code)) {
+            const mod = wreq(id as any as number);
+            outer:
+            for (const key in mod) {
+                const member = mod[key];
+                for (const newName in mappers) {
+                    // if the current mapper matches this module
+                    if (mappers[newName](member)) {
+                        exports[newName] = member;
+                        continue outer;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    return exports;
+}
+
+/**
+ * Same as {@link mapMangledModule} but lazy
+ */
+export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    return proxyLazy(() => mapMangledModule(code, mappers));
 }
 
 export function findByProps(...props: string[]) {
