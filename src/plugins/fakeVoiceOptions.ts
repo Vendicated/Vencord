@@ -4,7 +4,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessa
 const config = {
     fake_mute: false,
     fake_deafen: false,
-}
+};
 
 export default definePlugin({
     dependencies: ["CommandsAPI"],
@@ -16,7 +16,7 @@ export default definePlugin({
     }],
     patches: [
         {
-            find:'e.setSelfMute(n);',
+            find:"e.setSelfMute(n);",
             replacement: [{
                 // prevent client-side mute
                 match: /e\.setSelfMute\(n\);/g,
@@ -36,9 +36,9 @@ export default definePlugin({
             description: "Set fake voice options",
             options: [
                 {
-                name: "fake-mute",
-                description: "Make it look like you're muted (you can still speak)",
-                type: ApplicationCommandOptionType.BOOLEAN
+                    name: "fake-mute",
+                    description: "Make it look like you're muted (you can still speak)",
+                    type: ApplicationCommandOptionType.BOOLEAN
                 },
                 {
                     name: "fake-deaf",
@@ -48,7 +48,7 @@ export default definePlugin({
             ],
             execute: (opts: Argument[], ctx): void => {
 
-                opts.forEach((opt) => {
+                opts.forEach(opt => {
                     switch (opt.name) {
                         case "fake-mute":
                             config.fake_mute = (opt.value as unknown as boolean);
@@ -59,7 +59,7 @@ export default definePlugin({
                     }
                 });
 
-                sendBotMessage(ctx.channel.id, {content: Object.entries(config).map(([k, v]) => `[${k}] : ${v}`).join(" - ")});
+                sendBotMessage(ctx.channel.id, { content: Object.entries(config).map(([k, v]) => `[${k}] : ${v}`).join(" - ") });
             },
         },
     ],

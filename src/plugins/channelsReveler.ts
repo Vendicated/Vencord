@@ -1,11 +1,15 @@
 import definePlugin from "../utils/types";
 import { Devs } from "../utils/constants";
+import { Channel } from "discord-types/general";
 
 
 // Just remove VIEW_CHANNEL from the permission overrides of the channel
 // There are probably better ways to do it but idk
 
-const VIEW_CHANNEL = 1024n
+
+
+
+const VIEW_CHANNEL = 1024n;
 
 export default definePlugin({
     name: "Channels Reveler",
@@ -14,7 +18,7 @@ export default definePlugin({
         {
             name: "BigDuck",
             id: 1024588272623681609n
-        }  
+        }
     ],
     patches: [
         {
@@ -26,10 +30,8 @@ export default definePlugin({
             }
         },
     ],
-    replacePermissions: (t) => {
-        // TODO: Get member and individually check if permission override applies to me.
-        // (And add something like a lock icon to the name or something cause right now you can't differentiate)
-        Object.values(t.permissionOverwrites).forEach((e) => {
+    replacePermissions: (t: Channel) => {
+        Object.values(t.permissionOverwrites).forEach(e => {
             if (e.deny & VIEW_CHANNEL)
             {
                 e.deny -= VIEW_CHANNEL;
