@@ -1,9 +1,11 @@
 // TODO: Modularise these plugins since both build scripts use them
 
 import { execSync } from "child_process";
-import { createWriteStream, readdirSync } from "fs";
+import { createWriteStream, readdirSync, readFileSync } from "fs";
 import yazl from "yazl";
 import esbuild from "esbuild";
+// wtf is this assert syntax
+import PackageJSON from "./package.json" assert { type: "json" };
 
 /**
  * @type {esbuild.Plugin}
@@ -56,23 +58,45 @@ const gitHashPlugin = {
     }
 };
 
-await esbuild.build({
+/**
+ * @type {esbuild.BuildOptions}
+ */
+const commonOptions = {
     logLevel: "info",
     entryPoints: ["browser/Vencord.ts"],
-    outfile: "dist/browser.js",
+    globalName: "Vencord",
     format: "iife",
     bundle: true,
-    globalName: "Vencord",
-    target: ["esnext"],
-    footer: { js: "//# sourceURL=VencordWeb" },
+    minify: true,
+    sourcemap: false,
     external: ["plugins", "git-hash"],
     plugins: [
         globPlugins,
         gitHashPlugin
     ],
-    sourcemap: false,
-    minify: true,
-});
+    target: ["esnext"],
+};
+
+await Promise.all(
+    [
+        esbuild.build({
+            ...commonOptions,
+            outfile: "dist/browser.js",
+            footer: { js: "//# sourceURL=VencordWeb" },
+        }),
+        esbuild.build({
+            ...commonOptions,
+            outfile: "dist/Vencord.user.js",
+            banner: {
+                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", PackageJSON.version)
+            },
+            footer: {
+                // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
+                js: "Object.defineProperty(window,'Vencord',{get:()=>Vencord});"
+            },
+        })
+    ]
+);
 
 const zip = new yazl.ZipFile();
 zip.outputStream.pipe(createWriteStream("dist/extension.zip")).on("close", () => {

@@ -1,6 +1,12 @@
 import { Devs } from "../utils/constants";
-import IpcEvents from "../utils/IpcEvents";
 import definePlugin from "../utils/types";
+import { lazyWebpack, makeLazy } from "../utils/misc";
+import { ModalSize, openModal } from "../utils/modal";
+import { find } from "../webpack";
+import { React } from "../webpack/common";
+
+const ImageModal = lazyWebpack(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE"));
+const getMaskedLink = makeLazy(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default definePlugin({
@@ -9,16 +15,14 @@ export default definePlugin({
     description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon.",
 
     openImage(url: string) {
-        VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
-        // husk
-        /* openModal(() => (
+        openModal(() => (
             <ImageModal
                 shouldAnimate={true}
                 original={url}
                 src={url}
-                renderLinkComponent={renderMaskedLink}
+                renderLinkComponent={props => React.createElement(getMaskedLink(), props)}
             />
-        ), { size: Modal.ModalSize.DYNAMIC }); */
+        ), { size: ModalSize.DYNAMIC });
     },
 
     patches: [

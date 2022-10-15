@@ -127,7 +127,7 @@ function patchPush() {
                                 patchedBy.delete(patch.plugin);
                             }
                         }
-                        patches.splice(i--, 1);
+                        if (!patch.all) patches.splice(i--, 1);
                     }
                 }
             }

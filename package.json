@@ -1,6 +1,22 @@
 {
     "name": "vencord",
-    "version": "0.0.1",
+    "private": "true",
+    "version": "1.0.0",
+    "description": "A Discord client mod that does things differently",
+    "keywords": [],
+    "homepage": "https://github.com/Vendicated/Vencord#readme",
+    "bugs": {
+        "url": "https://github.com/Vendicated/Vencord/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Vendicated/Vencord.git"
+    },
+    "license": "GPL-3.0",
+    "author": "Vendicated",
+    "directories": {
+        "doc": "docs"
+    },
     "scripts": {
         "build": "node build.mjs",
         "buildWeb": "node buildWeb.mjs",
