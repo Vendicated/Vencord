@@ -89,8 +89,8 @@ function uwuify(message: string): string {
 
 // actual command declaration
 export default definePlugin({
-    name: "UwUifier",
-    description: "Simply uwuify commands",
+    name: "UwUify command",
+    description: "A command that uwuifies your message",
     authors: [{
         name: "ECHO",
         id: 712639419785412668n

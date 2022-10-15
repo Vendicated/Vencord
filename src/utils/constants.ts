@@ -46,5 +46,9 @@ export const Devs = Object.freeze({
     MaiKokain: {
         name: "Mai",
         id: 722647978577363026n
+    },
+    BanTheNons: {
+        name: "BanTheNons",
+        id: 460478012794863637n
     }
 });
