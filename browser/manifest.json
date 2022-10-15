@@ -22,7 +22,9 @@
         }
     ],
     "permissions": [
-        "*://*.discord.com/*"
+        "*://*.discord.com/*",
+        "webRequest",
+        "webRequestBlocking"
     ],
     "web_accessible_resources": [
         "dist/Vencord.js"
