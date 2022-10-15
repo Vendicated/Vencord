@@ -3,16 +3,16 @@ import { ApplicationCommandInputType, OptionalMessageOption, sendBotMessage, fin
 import { Devs } from "../utils/constants";
 
 
-function mock(input): string{
-    let output = ""
-    for (const i of input.toLowerCase()){
-        if (i.match(/^[A-Z]+$/i) && Math.random() < 0.4){
-            output += i.toUpperCase()
+function mock(input): string {
+    let output = "";
+    for (const i of input.toLowerCase()) {
+        if (i.match(/^[A-Z]+$/i) && Math.random() < 0.4) {
+            output += i.toUpperCase();
         } else {
-            output += i
+            output += i;
         }
     }
-return output
+    return output;
 }
 export default definePlugin({
     name: "MoreCommands",
