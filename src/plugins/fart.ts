@@ -1,8 +1,7 @@
 import { ApplicationCommandOptionType } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
-
-const sound = { fart: new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3") };
+import { makeLazy } from "../utils/misc";
 
 export default definePlugin({
     name: "Fart2",
@@ -22,8 +21,10 @@ export default definePlugin({
         ],
 
         execute(args) {
-            sound.fart.volume = 0.3;
-            sound.fart.play();
+            const fart = new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3");
+            fart.volume = 0.3;
+            fart.play();
+
             return {
                 content: (args[0]) ? `<@${args[0].value}> fart` : "fart"
             };
