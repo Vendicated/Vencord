@@ -1,4 +1,4 @@
-// TODO: Modularise these plugins since both build scripts use them
+// TODO: Modularise the plugins since both build scripts use them
 
 import { execSync } from "child_process";
 import { createWriteStream, readdirSync, readFileSync } from "fs";
