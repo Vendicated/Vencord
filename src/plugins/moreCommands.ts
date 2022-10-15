@@ -5,13 +5,10 @@ import { Devs } from "../utils/constants";
 
 function mock(input): string {
     let output = "";
-    for (const i of input.toLowerCase()) {
-        if (i.match(/^[A-Z]+$/i) && Math.random() < 0.4) {
-            output += i.toUpperCase();
-        } else {
-            output += i;
-        }
+    for (let i = 0; i < input.length; i++) {
+        output += i % 2 ? input[i].toUpperCase() : input[i].toLowerCase();
     }
+
     return output;
 }
 export default definePlugin({
@@ -48,7 +45,7 @@ export default definePlugin({
         },
         {
             name: "mock",
-            description: "mOcK peOpLE",
+            description: "mOcK PeOpLe",
             options: [RequiredMessageOption],
             execute: opts => ({
                 content: mock(findOption(opts, "message", ""))
