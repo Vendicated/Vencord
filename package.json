@@ -19,7 +19,7 @@
     },
     "scripts": {
         "build": "node build.mjs",
-        "buildWeb": "node buildWeb.mjs",
+        "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js buildWeb.mjs",
         "inject": "node scripts/patcher/install.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix",
