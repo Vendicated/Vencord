@@ -74,7 +74,7 @@ export default definePlugin({
                             }
                             duplicate += `${item[1]}:${item[2]},`;
                         }
-                        duplicate = duplicate.replace(/,$/, "") + "}";
+                        duplicate = duplicate.replace(/,$/, "}");
 
                         return `${Zn}(${duplicate}),${m}`;
                     },
