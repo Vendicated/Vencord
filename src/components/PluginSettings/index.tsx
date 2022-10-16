@@ -4,8 +4,7 @@ import { useSettings } from "../../api/settings";
 import { startPlugin, stopPlugin } from "../../plugins";
 import { Modals } from "../../utils";
 import { ChangeList } from "../../utils/ChangeList";
-import IpcEvents from "../../utils/IpcEvents";
-import { classes, lazyWebpack, useAwaiter } from "../../utils/misc";
+import { classes, lazyWebpack } from "../../utils/misc";
 import { Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts } from "../../webpack/common";
@@ -79,7 +78,6 @@ function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(
 }
 
 export default ErrorBoundary.wrap(function Settings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
