@@ -10,6 +10,7 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
+    minify: true,
     sourcemap: "linked",
     plugins: [makeAllPackagesExternalPlugin],
 };
@@ -38,8 +39,6 @@ await Promise.all([
             globPlugins,
             gitHashPlugin
         ],
-        sourcemap: "inline",
-        minify: true,
         define: {
             IS_WEB: "false"
         }

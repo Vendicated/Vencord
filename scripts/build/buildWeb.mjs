@@ -15,8 +15,6 @@ const commonOptions = {
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
     format: "iife",
-    minify: true,
-    sourcemap: false,
     external: ["plugins", "git-hash"],
     plugins: [
         globPlugins,
