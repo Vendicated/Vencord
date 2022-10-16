@@ -172,7 +172,6 @@ export default ErrorBoundary.wrap(function Settings() {
                         const dependency = enabledDependants?.length;
                         return <PluginCard
                             onRestartNeeded={() => {
-                                console.log("Restart needed!");
                                 changes.handleChange(plugin.name);
                             }}
                             disabled={plugin.required || !!dependency}
@@ -194,7 +193,6 @@ export default ErrorBoundary.wrap(function Settings() {
                         const dependency = enabledDependants?.length;
                         return <PluginCard
                             onRestartNeeded={() => {
-                                console.log("Restart needed!");
                                 changes.handleChange(plugin.name);
                             }}
                             disabled={plugin.required || !!dependency}

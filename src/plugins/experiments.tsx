@@ -1,6 +1,6 @@
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import definePlugin, { PluginSettingType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
@@ -42,15 +42,14 @@ export default definePlugin({
             },
         ],
     }],
-    settings: [
-        {
-            key: "enableIsStaff",
+    settings: {
+        enableIsStaff: {
             name: "Enable isStaff (requires restart)",
-            type: "boolean",
+            type: PluginSettingType.BOOLEAN,
             default: false,
             restartNeeded: true,
-        },
-    ],
+        }
+    },
     aboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");
         const modKey = isMacOS ? "cmd" : "ctrl";

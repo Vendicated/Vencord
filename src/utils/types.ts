@@ -42,25 +42,56 @@ interface PluginDef {
      * Set this if your plugin only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
-    settings?: PluginSettingsItem[];
+    settings?: Record<string, PluginSettingsItem>;
     aboutComponent?(): React.ReactNode;
 }
 
-export interface PluginSettingsItem {
-    /** Unique key of the setting. Try not to change this. */
-    key: string;
+export enum PluginSettingType {
+    STRING,
+    NUMBER,
+    BOOLEAN,
+    SELECT,
+}
+
+
+export type PluginSettingsItem =
+    | PluginSettingsString
+    | PluginSettingsNumber
+    | PluginSettingsBoolean
+    | PluginSettingsSelect;
+
+export interface PluginSettingsBase {
     name: string;
-    type: "string" | "number" | "boolean" | "select";
-    /** On selects, use default key in .options instead of this */
-    default?: string | number | boolean;
     placeholder?: string;
-    options?: PluginSettingsItemOption[];
     onChange?(newValue: any): void;
     disabled?(): boolean;
     restartNeeded?: boolean;
     componentProps?: Record<string, any>;
+    /**
+     * Set this if the setting only works on Browser or Desktop, not both
+     */
+    target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
+export interface PluginSettingsString extends PluginSettingsBase {
+    type: PluginSettingType.STRING;
+    default?: string;
+}
+
+export interface PluginSettingsNumber extends PluginSettingsBase {
+    type: PluginSettingType.NUMBER;
+    default?: number;
+}
+
+export interface PluginSettingsBoolean extends PluginSettingsBase {
+    type: PluginSettingType.BOOLEAN;
+    default?: boolean;
+}
+
+export interface PluginSettingsSelect extends PluginSettingsBase {
+    type: PluginSettingType.SELECT;
+    options: PluginSettingsItemOption[];
+}
 export interface PluginSettingsItemOption {
     label: string;
     value: string | number | boolean;

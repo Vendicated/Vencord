@@ -1,29 +1,46 @@
 import { User } from "discord-types/general";
 
+import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
-import { lazyWebpack } from "../../utils";
+import { lazyWebpack, proxyLazy } from "../../utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { Plugin, PluginSettingsItem } from "../../utils/types";
+import { Plugin, PluginSettingType } from "../../utils/types";
 import { filters } from "../../webpack";
-import { Button, Forms, React, Text, Tooltip } from "../../webpack/common";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
 import { Flex } from "../Flex";
+import {
+    SettingBooleanComponent,
+    SettingInputComponent,
+    SettingNumericComponent,
+    SettingSelectComponent,
+} from "./components";
 
 const { FormSection, FormText, FormTitle } = Forms;
 
-const getUser = lazyWebpack(filters.byCode(".USER(", "getUser"));
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-const TextInput = lazyWebpack(filters.byCode("defaultDirty", "getIsUnderFlowing", "getIsOverFlowing"));
 const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));
+const UserRecord: (new (user: Partial<User>) => User) = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
     onRestartNeeded(): void;
 }
 
-export default function PluginModal(props: PluginModalProps) {
-    const { plugin, onRestartNeeded, onClose } = props;
+/** To stop discord making unwanted requests... */
+function makeDummyUser(user: { name: string, id: BigInt; }) {
+    const newUser = new UserRecord({
+        username: user.name,
+        id: generateId(),
+        bot: true,
+    });
+    FluxDispatcher.dispatch({
+        type: "USER_UPDATE",
+        user: newUser,
+    });
+    return newUser;
+}
 
+export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
     const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
 
     const pluginSettings = useSettings().plugins[plugin.name];
@@ -33,8 +50,8 @@ export default function PluginModal(props: PluginModalProps) {
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
-                const author = await getUser(user.id);
-                setAuthors(a => [...a, author]);
+                const author = user.id ? await UserUtils.getUser(user.id).catch(() => null) : makeDummyUser(user);
+                setAuthors(a => [...a, author || makeDummyUser(user)]);
             }
         })();
     }, []);
@@ -44,12 +61,14 @@ export default function PluginModal(props: PluginModalProps) {
             onClose();
             return;
         }
+        let restartNeeded = false;
         for (const [key, value] of Object.entries(tempSettings)) {
-            const setting = plugin.settings.find(s => s.key === key);
+            const setting = plugin.settings[key];
             pluginSettings[key] = value;
             setting?.onChange?.(value);
-            if (setting?.restartNeeded) onRestartNeeded();
+            if (setting?.restartNeeded) restartNeeded = true;
         }
+        if (restartNeeded) onRestartNeeded();
         onClose();
     }
 
@@ -59,33 +78,33 @@ export default function PluginModal(props: PluginModalProps) {
         }
 
         let options: JSX.Element[] = [];
-        for (const setting of plugin.settings) {
+        for (const [key, setting] of Object.entries(plugin.settings)) {
             function onChange(newValue) {
-                setTempSettings(s => ({ ...s, [setting.key]: newValue }));
+                setTempSettings(s => ({ ...s, [key]: newValue }));
             }
 
             switch (setting.type) {
-                case "select": {
-                    options.push(<SettingSelectElement key={setting.key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                case PluginSettingType.SELECT: {
+                    options.push(<SettingSelectComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
                     break;
                 }
-                case "string": {
-                    options.push(<SettingInputElement key={setting.key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                case PluginSettingType.STRING: {
+                    options.push(<SettingInputComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
                     break;
                 }
-                case "number": {
-                    options.push(<SettingNumericElement key={setting.key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                case PluginSettingType.NUMBER: {
+                    options.push(<SettingNumericComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
                     break;
                 }
-                case "boolean": {
-                    options.push(<SettingBooleanElement key={setting.key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                case PluginSettingType.BOOLEAN: {
+                    options.push(<SettingBooleanComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
                 }
             }
         }
         return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
     }
 
-    function renderMoreUsers(label: string, count: number) {
+    function renderMoreUsers(_label: string, count: number) {
         const sliceCount = plugin.authors.length - count;
         const sliceStart = plugin.authors.length - sliceCount;
         const sliceEnd = sliceStart + plugin.authors.length - count;
@@ -106,7 +125,7 @@ export default function PluginModal(props: PluginModalProps) {
     }
 
     return (
-        <ModalRoot transitionState={props.transitionState} size={ModalSize.MEDIUM}>
+        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader>
                 <Text variant="heading-md/bold">{plugin.name}</Text>
             </ModalHeader>
@@ -142,7 +161,7 @@ export default function PluginModal(props: PluginModalProps) {
             <ModalFooter>
                 <Flex>
                     <Button
-                        onClick={props.onClose}
+                        onClick={onClose}
                         size={Button.Sizes.SMALL}
                         color={Button.Colors.RED}
                     >
@@ -160,123 +179,3 @@ export default function PluginModal(props: PluginModalProps) {
         </ModalRoot>
     );
 }
-
-interface ISettingElementProps {
-    setting: PluginSettingsItem;
-    onChange(newValue: any): void;
-    pluginSettings: {
-        [setting: string]: any;
-        enabled: boolean;
-    };
-}
-
-function SettingSelectElement(props: ISettingElementProps) {
-    const { setting, pluginSettings } = props;
-    const def = pluginSettings[setting.key] ?? setting.options?.find(o => o.default)?.value;
-    const [state, setState] = React.useState<any>(def ?? null);
-
-    function onChange(newValue) {
-        setState(newValue);
-        props.onChange(newValue);
-    }
-
-    return (
-        <FormSection>
-            <FormTitle>{setting.name}</FormTitle>
-            <Select
-                isDisabled={setting.disabled?.() ?? false}
-                options={setting.options}
-                placeholder={setting.placeholder ?? "Select an option"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                select={onChange}
-                isSelected={v => v === state}
-                serialize={v => String(v)}
-                {...setting.componentProps}
-            />
-        </FormSection>
-    );
-}
-
-function SettingInputElement(props: ISettingElementProps) {
-    const { setting, pluginSettings } = props;
-    const [state, setState] = React.useState<any>(pluginSettings[setting.key] ?? setting.default ?? null);
-
-    function onChange(newValue) {
-        setState(newValue);
-        props.onChange(newValue);
-    }
-
-    return (
-        <FormSection>
-            <FormTitle>{setting.name}</FormTitle>
-            <TextInput
-                type="text"
-                value={state}
-                onChange={onChange}
-                placeholder={setting.placeholder ?? "Enter a value"}
-                disabled={setting.disabled?.() ?? false}
-                {...setting.componentProps}
-            />
-        </FormSection>
-    );
-}
-
-function SettingNumericElement(props: ISettingElementProps) {
-    const { setting, pluginSettings } = props;
-    const [state, setState] = React.useState<any>(pluginSettings[setting.key] ?? BigInt(setting.default ?? 0));
-
-    function onChange(newValue) {
-        setState(newValue);
-        props.onChange(BigInt(newValue));
-    }
-
-    return (
-        <FormSection>
-            <FormTitle>{setting.name}</FormTitle>
-            <TextInput
-                type="number"
-                pattern="[0-9]+"
-                value={state}
-                onChange={onChange}
-                placeholder={setting.placeholder ?? "Enter a number"}
-                disabled={setting.disabled?.() ?? false}
-                {...setting.componentProps}
-            />
-        </FormSection>
-    );
-}
-
-function SettingBooleanElement(props: ISettingElementProps) {
-    const { setting, pluginSettings } = props;
-    const def = pluginSettings[setting.key] ?? setting.options?.find(o => o.default)?.value;
-    const [state, setState] = React.useState<any>(def ?? false);
-
-    const options = [
-        { label: "Enabled", value: true, default: def === true },
-        { label: "Disabled", value: false, default: typeof def === "undefined" || def === false },
-    ];
-
-    function onChange(newValue) {
-        setState(newValue);
-        props.onChange(newValue);
-    }
-
-    return (
-        <FormSection>
-            <FormTitle>{setting.name}</FormTitle>
-            <Select
-                isDisabled={setting.disabled?.() ?? false}
-                options={options}
-                placeholder={setting.placeholder ?? "Select an option"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                select={onChange}
-                isSelected={v => v === state}
-                serialize={v => String(v)}
-                {...setting.componentProps}
-            />
-        </FormSection>
-    );
-}
-

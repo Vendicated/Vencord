@@ -28,6 +28,8 @@ export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 
+export const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+
 export let Parser: any;
 export let Alerts: {
     show(alert: {
@@ -82,6 +84,10 @@ export const Toasts = {
         }): void;
         pop(): void;
     }
+};
+
+export const UserUtils = {
+    getUser: lazyWebpack(filters.byCode(".USER(", "getUser")),
 };
 
 waitFor("useState", m => React = m);
