@@ -31,9 +31,9 @@ export default definePlugin({
             replace: (m, mod) =>
                 `{section:${mod}.ID.HEADER,label:"Vencord"},` +
                 '{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},' +
+                '{section:"VencordPlugins",label:"Plugins",element:Vencord.Components.PluginSettings},' +
                 '{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater,predicate:()=>!IS_WEB},' +
                 `{section:${mod}.ID.DIVIDER},${m}`
-
         }
     }]
 });

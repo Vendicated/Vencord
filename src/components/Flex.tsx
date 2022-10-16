@@ -4,7 +4,7 @@ export function Flex(props: React.PropsWithChildren<{
     flexDirection?: React.CSSProperties["flexDirection"];
     style?: React.CSSProperties;
     className?: string;
-}>) {
+} & React.HTMLProps<HTMLDivElement>>) {
     props.style ??= {};
     props.style.flexDirection ||= props.flexDirection;
     props.style.gap ??= "1em";
