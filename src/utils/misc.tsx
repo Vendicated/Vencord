@@ -30,10 +30,11 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
  */
 export function useAwaiter<T>(factory: () => Promise<T>): [T | null, any, boolean];
 export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): [T, any, boolean];
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null): [T | null, any, boolean] {
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: null, onError: (e: unknown) => unknown): [T, any, boolean];
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null, onError?: (e: unknown) => unknown): [T | null, any, boolean] {
     const [state, setState] = React.useState({
         value: fallbackValue,
-        error: null as any,
+        error: null,
         pending: true
     });
 
@@ -41,7 +42,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
         let isAlive = true;
         factory()
             .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && setState({ value: null, error, pending: false }));
+            .catch(error => isAlive && setState({ value: null, error, pending: false }) || onError?.(error));
 
         return () => void (isAlive = false);
     }, []);

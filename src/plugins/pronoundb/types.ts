@@ -1,14 +1,3 @@
-// Not the full props, only what is necessary for pronoundb plugin to work
-export interface MessageHeaderProps {
-    message: {
-        author: {
-            id: string;
-            bot: boolean;
-            system: boolean;
-        },
-    };
-}
-
 export interface PronounsResponse {
     [id: string]: PronounCode;
 }

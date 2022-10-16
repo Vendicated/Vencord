@@ -1,23 +1,27 @@
 import { fetchPronouns } from "./utils";
-import { useAwaiter } from "../../utils/misc";
-import { MessageHeaderProps, PronounMapping } from "./types";
-import { findByProps } from "../../webpack";
-import { proxyLazy } from "../../utils";
+import { classes, lazyWebpack, useAwaiter } from "../../utils/misc";
+import { PronounMapping } from "./types";
+import { filters } from "../../webpack";
+import { Message } from "discord-types/general";
 
-const styles: Record<string, string> = proxyLazy(() => findByProps("timestampInline"));
+const styles: Record<string, string> = lazyWebpack(filters.byProps(["timestampInline"]));
 
-export default function PronounComponent({ message }: MessageHeaderProps) {
+export default function PronounComponent({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
     if (message.author.bot && message.author.system) return null;
 
-    const [result, error, isPending] = useAwaiter(() => fetchPronouns(message.author.id));
-
-    // If the fetching completed successfully and the result was not "unspecified", then return a span with the pronouns
-    if (!isPending && result && result !== "unspecified") return (
-        <span className={`${styles.timestampInline} ${styles.timestamp}`}>• {PronounMapping[result]}</span>
+    const [result, , isPending] = useAwaiter(
+        () => fetchPronouns(message.author.id),
+        null,
+        e => console.error("Fetching pronouns failed: ", e)
     );
-    // If there was an error, log it
-    if (error) console.error("Error fetching pronouns: ", error);
-    // Return null so nothing else is rendered
-    return null;
+
+    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return a span with the pronouns
+    if (!isPending && result && result !== "unspecified" && PronounMapping[result]) return (
+        <span
+            className={classes(styles.timestampInline, styles.timestamp)}
+        >• {PronounMapping[result]}</span>
+    );
+    // Otherwise, return null so nothing else is rendered
+    else return null;
 }

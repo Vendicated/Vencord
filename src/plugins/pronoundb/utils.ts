@@ -35,22 +35,25 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     const params = new URLSearchParams();
     params.append("platform", "discord");
     params.append("ids", ids.join(","));
-    const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params, {
-        method: "GET",
-        headers: {
-            "Accept": "application/json"
-        }
-    });
-    return await req.json()
-        .then((res: PronounsResponse) => {
-            for (const [id, pronouns] of Object.entries(res)) {
-                cache[id] = pronouns;
+
+    try {
+        const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
             }
-            return res;
-        })
-        .catch(e => {
-            // If the request errors, treat it as if no pronouns were found for all ids
-            for (const id of ids) cache[id] = "unspecified";
-            return Object.fromEntries(ids.map(id => [id, "unspecified"]));
         });
+        return await req.json()
+            .then((res: PronounsResponse) => {
+                for (const [id, pronouns] of Object.entries(res)) {
+                    cache[id] = pronouns;
+                }
+                return res;
+            });
+    } catch (e) {
+        // If the request errors, treat it as if no pronouns were found for all ids, and log it
+        console.error("PronounDB fetching failed: ", e);
+        for (const id of ids) cache[id] = "unspecified";
+        return Object.fromEntries(ids.map(id => [id, "unspecified"]));
+    }
 }
