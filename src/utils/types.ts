@@ -43,6 +43,7 @@ interface PluginDef {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
     settings?: PluginSettingsItem[];
+    aboutComponent?(): React.ReactNode;
 }
 
 export interface PluginSettingsItem {

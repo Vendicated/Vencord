@@ -1,20 +1,18 @@
-import { classes, humanFriendlyJoin, lazyWebpack, useAwaiter } from "../../utils/misc";
 import Plugins from "plugins";
-import { useSettings } from "../../api/settings";
-import IpcEvents from "../../utils/IpcEvents";
 
-import { Button, Switch, Forms, React, Margins, Toasts, Alerts, Parser, TextInput, Text, TextVariant } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { startPlugin } from "../../plugins";
-import { stopPlugin } from "../../plugins/index";
-import { Flex } from "../Flex";
-import { ChangeList } from "../../utils/ChangeList";
-import * as styles from "./styles";
+import { useSettings } from "../../api/settings";
+import { startPlugin, stopPlugin } from "../../plugins";
 import { Modals } from "../../utils";
-import PluginModal from "./PluginModal";
+import { ChangeList } from "../../utils/ChangeList";
+import IpcEvents from "../../utils/IpcEvents";
+import { classes, lazyWebpack, useAwaiter } from "../../utils/misc";
 import { Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
-import { ModalSize } from "../../utils/modal";
+import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts } from "../../webpack/common";
+import ErrorBoundary from "../ErrorBoundary";
+import { Flex } from "../Flex";
+import PluginModal from "./PluginModal";
+import * as styles from "./styles";
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
@@ -31,7 +29,7 @@ function showErrorToast(message: string) {
 }
 
 function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(): void; }) {
-    const { plugin, disabled, onRestartNeeded } = props;
+    const { plugin, disabled } = props;
     const settings = useSettings().plugins[plugin.name];
 
     function isEnabled() {
@@ -41,7 +39,7 @@ function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(
     function openModal() {
         Modals.openModalLazy(async () => {
             return modalProps => {
-                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={onRestartNeeded} />;
+                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={props.onRestartNeeded} />;
             };
         });
     }
@@ -173,7 +171,8 @@ export default ErrorBoundary.wrap(function Settings() {
 
                         return <PluginCard
                             onRestartNeeded={() => {
-                                if (plugin.patches) changes.handleChange(plugin.name);
+                                console.log("Restart needed!");
+                                changes.handleChange(plugin.name);
                             }}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
