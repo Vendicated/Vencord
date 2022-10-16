@@ -7,7 +7,7 @@ import IpcEvents from "../utils/IpcEvents";
 
 import "./updater";
 
-const DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? join(app.getPath("userData"), "..", "Vencord");
 const SETTINGS_DIR = join(DATA_DIR, "settings");
 const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
 const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
