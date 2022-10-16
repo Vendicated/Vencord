@@ -1,7 +1,7 @@
 import { useSettings } from "../api/settings";
 import { ChangeList } from "../utils/ChangeList";
 import IpcEvents from "../utils/IpcEvents";
-import { classes, useAwaiter } from "../utils/misc";
+import { useAwaiter } from "../utils/misc";
 import { Alerts, Button, Forms, Margins, Parser, React, Switch } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { Flex } from "./Flex";
@@ -39,10 +39,10 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
 
             <Forms.FormText>
-                Settings Directory: <code style={{ userSelect: "text", cursor: "text", marginBottom: 8 }}>{settingsDir}</code>
+                Settings Directory: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
             </Forms.FormText>
 
-            {!IS_WEB && <Flex className={Margins.marginBottom20}>
+            {!IS_WEB && <Flex className={Margins.marginBottom20} style={{ marginTop: 8 }}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
