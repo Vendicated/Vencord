@@ -1,10 +1,16 @@
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
 import type { Channel, Message } from "discord-types/general";
+import { ModalSize, openModal } from "../utils/modal";
+import definePlugin from "../utils/types";
+import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils";
+import { filters } from "../webpack";
+
+const highlightJs = lazyWebpack(filters.byProps(["highlight"]));
+const highlightJsHelperFuncs = lazyWebpack(filters.byProps(["codeBlock"]));
 
 export default definePlugin({
     name: "ViewRaw",
-    description: "",
+    description: "When shift-hovering over a message, it adds an icon to view the raw json of that message.",
     authors: [Devs.Arjix],
     getIcon: () => (
         // source: https://www.flaticon.com/free-icon-font/eye_3917052?related_id=3917052
@@ -26,12 +32,26 @@ export default definePlugin({
         message: Message,
         clickEvent: MouseEvent
     ) {
-        // TODO: After the modals have been fixed, show a modal with the json (in a code block) and a button to copy it.
-        console.log(JSON.stringify(message, null, 2));
+        openModal(() => {
+            return (
+                <div style={{ overflow: "scroll" }}>
+                    {
+                        highlightJsHelperFuncs.codeBlock.react(
+                            { lang: "json", content: JSON.stringify(message, null, 2) },
+                            highlightJs,
+                            { key: "viewRawMarkdown" }
+                        )
+                    }
+                </div>
+            );
+        }, { size: ModalSize.LARGE });
+
+        // i don't fucking know why discord does this, but oh well, it's easy to fix.
+        document.body.style.userSelect = "auto";
     },
     patches: [
         {
-            find: `key:"configure",`,
+            find: "key:\"configure\",",
             replacement: [
                 {
                     match: /(\w{1,2})\((\{key:"copy-link",.+?})\)/,
@@ -40,15 +60,15 @@ export default definePlugin({
                             /(\w+):((?:["'].+?["'])|(?:[^,}]+))/g
                         );
 
-                        let duplicate = `{`;
+                        let duplicate = "{";
 
                         for (const item of items) {
-                            if (item[1] == "key") item[2] = `"view-raw"`;
-                            if (item[1] == "label") item[2] = `"View Raw"`;
-                            if (item[1] == "onClick") {
-                                item[2] = `Vencord.Plugins.plugins.ViewRaw.viewRaw`;
+                            if (item[1] === "key") item[2] = "\"view-raw\"";
+                            if (item[1] === "label") item[2] = "\"View Raw\"";
+                            if (item[1] === "onClick") {
+                                item[2] = "Vencord.Plugins.plugins.ViewRaw.viewRaw";
                             }
-                            if (item[1] == "icon") {
+                            if (item[1] === "icon") {
                                 item[2] =
                                     "Vencord.Plugins.plugins.ViewRaw.getIcon";
                             }
