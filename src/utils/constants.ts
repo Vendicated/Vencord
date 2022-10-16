@@ -46,5 +46,10 @@ export const Devs = Object.freeze({
     MaiKokain: {
         name: "Mai",
         id: 722647978577363026n
-    }
+    },
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
+    },
+
 });
