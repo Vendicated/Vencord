@@ -18,15 +18,15 @@
         "doc": "docs"
     },
     "scripts": {
-        "build": "node build.mjs",
-        "buildWeb": "node buildWeb.mjs",
+        "build": "node scripts/build/build.mjs",
+        "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
         "inject": "node scripts/patcher/install.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm lint && pnpm build && pnpm testTsc",
         "testTsc": "tsc --noEmit",
         "uninject": "node scripts/patcher/uninstall.js",
-        "watch": "node build.mjs --watch"
+        "watch": "node scripts/build/build.mjs --watch"
     },
     "dependencies": {
         "console-menu": "^0.1.0",

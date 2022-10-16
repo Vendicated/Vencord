@@ -42,7 +42,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 Settings Directory: <code style={{ userSelect: "text", cursor: "text", marginBottom: 8 }}>{settingsDir}</code>
             </Forms.FormText>
 
-            {!IS_WEB && <Flex className={classes(Margins.marginBottom20)}>
+            {!IS_WEB && <Flex className={Margins.marginBottom20}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -65,8 +65,8 @@ export default ErrorBoundary.wrap(function Settings() {
                     Open QuickCSS File
                 </Button>
             </Flex>}
+
             <Forms.FormDivider />
-            <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
             <Switch
                 value={settings.useQuickCss}
                 onChange={(v: boolean) => settings.useQuickCss = v}
