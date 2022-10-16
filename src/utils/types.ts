@@ -99,7 +99,3 @@ export interface PluginSettingsItemOption {
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
-
-export enum PluginCategory {
-    Utility = "Utility",
-}
