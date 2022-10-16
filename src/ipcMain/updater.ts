@@ -81,7 +81,7 @@ async function pull() {
 }
 
 async function build() {
-    const res = await execFile("node", ["build.mjs"], {
+    const res = await execFile("node", ["scripts/build/build.mjs"], {
         cwd: VENCORD_SRC_DIR
     });
     return !res.stderr.includes("Build failed");
