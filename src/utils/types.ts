@@ -49,6 +49,7 @@ interface PluginDef {
 export enum PluginSettingType {
     STRING,
     NUMBER,
+    BIGINT,
     BOOLEAN,
     SELECT,
 }
@@ -79,7 +80,7 @@ export interface PluginSettingsString extends PluginSettingsBase {
 }
 
 export interface PluginSettingsNumber extends PluginSettingsBase {
-    type: PluginSettingType.NUMBER;
+    type: PluginSettingType.NUMBER | PluginSettingType.BIGINT;
     default?: number;
 }
 

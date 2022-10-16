@@ -1,4 +1,5 @@
 import { User } from "discord-types/general";
+import { Constructor } from "type-fest";
 
 import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
@@ -19,7 +20,7 @@ const { FormSection, FormText, FormTitle } = Forms;
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));
-const UserRecord: (new (user: Partial<User>) => User) = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
@@ -83,21 +84,23 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 setTempSettings(s => ({ ...s, [key]: newValue }));
             }
 
+            const props = { onChange, pluginSettings, id: key };
             switch (setting.type) {
                 case PluginSettingType.SELECT: {
-                    options.push(<SettingSelectComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                    options.push(<SettingSelectComponent key={key} setting={setting} {...props} />);
                     break;
                 }
                 case PluginSettingType.STRING: {
-                    options.push(<SettingInputComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                    options.push(<SettingInputComponent key={key} setting={setting} {...props} />);
                     break;
                 }
-                case PluginSettingType.NUMBER: {
-                    options.push(<SettingNumericComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                case PluginSettingType.NUMBER:
+                case PluginSettingType.BIGINT: {
+                    options.push(<SettingNumericComponent key={key} setting={setting} {...props} />);
                     break;
                 }
                 case PluginSettingType.BOOLEAN: {
-                    options.push(<SettingBooleanComponent key={key} id={key} setting={setting} onChange={onChange} pluginSettings={pluginSettings} />);
+                    options.push(<SettingBooleanComponent key={key} setting={setting} {...props} />);
                 }
             }
         }
