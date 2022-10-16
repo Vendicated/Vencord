@@ -5,25 +5,26 @@ import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils";
 import { filters } from "../webpack";
 
-const highlightJs = lazyWebpack(filters.byProps(["highlight"]));
-const highlightJsHelperFuncs = lazyWebpack(filters.byProps(["codeBlock"]));
+const parser = lazyWebpack(filters.byProps(["codeBlock"]));
 
 export default definePlugin({
     name: "ViewRaw",
-    description: "When shift-hovering over a message, it adds an icon to view the raw json of that message.",
+    description: "",
     authors: [Devs.Arjix],
     getIcon: () => (
-        // source: https://www.flaticon.com/free-icon-font/eye_3917052?related_id=3917052
+        // source: "Gregor Cresnar" https://www.flaticon.com/free-icon/eye_159604
         <svg
+            version="1.0"
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="512"
-            height="512"
+            width="512pt"
+            height="512pt"
+            viewBox="0 0 512 512"
+            preserveAspectRatio="xMidYMid meet"
             fill="currentColor"
         >
-            <g id="_01_align_center" data-name="01 align center">
-                <path d="M23.821,11.181v0C22.943,9.261,19.5,3,12,3S1.057,9.261.179,11.181a1.969,1.969,0,0,0,0,1.64C1.057,14.739,4.5,21,12,21s10.943-6.261,11.821-8.181A1.968,1.968,0,0,0,23.821,11.181ZM12,19c-6.307,0-9.25-5.366-10-6.989C2.75,10.366,5.693,5,12,5c6.292,0,9.236,5.343,10,7C21.236,13.657,18.292,19,12,19Z" />
-                <path d="M12,7a5,5,0,1,0,5,5A5.006,5.006,0,0,0,12,7Zm0,8a3,3,0,1,1,3-3A3,3,0,0,1,12,15Z" />
+            <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                <path d="M2404 4080 c-846 -49 -1644 -502 -2280 -1294 -166 -207 -166 -244 1 -453 635 -793 1436 -1245 2286 -1292 961 -52 1870 402 2585 1293 166 207 166 244 -1 453 -464 579 -1016 977 -1626 1172 -190 61 -419 105 -599 116 -196 11 -238 12 -366 5z m368 -466 c287 -54 563 -250 713 -505 180 -308 199 -680 51 -995 -58 -123 -114 -203 -209 -301 -535 -551 -1446 -383 -1756 324 -112 255 -114 567 -5 833 105 259 334 485 595 588 198 78 396 96 611 56z" />
+                <path d="M2455 3130 c-163 -35 -307 -136 -389 -274 -61 -101 -81 -176 -80 -296 0 -116 11 -163 57 -260 43 -89 167 -213 258 -257 321 -155 694 3 810 342 33 97 34 249 2 350 -73 231 -285 392 -528 401 -49 2 -108 -1 -130 -6z" />
             </g>
         </svg>
     ),
@@ -32,54 +33,63 @@ export default definePlugin({
         message: Message,
         clickEvent: MouseEvent
     ) {
-        openModal(() => {
-            return (
-                <div style={{ overflow: "scroll" }}>
-                    {
-                        highlightJsHelperFuncs.codeBlock.react(
-                            { lang: "json", content: JSON.stringify(message, null, 2) },
-                            highlightJs,
+        openModal(
+            () => {
+                return (
+                    <div style={{ overflow: "scroll" }}>
+                        {parser.codeBlock.react(
+                            {
+                                lang: "json",
+                                content: JSON.stringify(message, null, 3),
+                            },
+                            null,
                             { key: "viewRawMarkdown" }
-                        )
-                    }
-                </div>
-            );
-        }, { size: ModalSize.LARGE });
+                        )}
+                    </div>
+                );
+            },
+            { size: ModalSize.LARGE }
+        );
 
         // i don't fucking know why discord does this, but oh well, it's easy to fix.
         document.body.style.userSelect = "auto";
     },
     patches: [
+        // prettier-ignore
         {
-            find: "key:\"configure\",",
-            replacement: [
-                {
-                    match: /(\w{1,2})\((\{key:"copy-link",.+?})\)/,
-                    replace: (m, Zn, menuItem) => {
-                        const items = menuItem.matchAll(
-                            /(\w+):((?:["'].+?["'])|(?:[^,}]+))/g
-                        );
+            find: 'key:"configure",',
+            replacement: [{
+                match: /(\w{1,2})\((\{key:"copy-link",.+?})\)/,
+                replace: (m, Zn, menuItem) => {
+                    const items = menuItem.matchAll(
+                        /(\w+):((?:["'].+?["'])|(?:[^,}]+))/g
+                    );
 
-                        let duplicate = "{";
+                    let duplicate = "{";
 
-                        for (const item of items) {
-                            if (item[1] === "key") item[2] = "\"view-raw\"";
-                            if (item[1] === "label") item[2] = "\"View Raw\"";
-                            if (item[1] === "onClick") {
+                    for (const item of items) {
+                        switch (item[1]) {
+                            case "key":
+                                item[2] = '"view-raw"';
+                                break;
+                            case "label":
+                                item[2] = '"View Raw"';
+                                break;
+                            case "onClick":
                                 item[2] = "Vencord.Plugins.plugins.ViewRaw.viewRaw";
-                            }
-                            if (item[1] === "icon") {
-                                item[2] =
-                                    "Vencord.Plugins.plugins.ViewRaw.getIcon";
-                            }
-                            duplicate += `${item[1]}:${item[2]},`;
+                                break;
+                            case "icon":
+                                item[2] = "Vencord.Plugins.plugins.ViewRaw.getIcon";
+                                break;
                         }
-                        duplicate = duplicate.replace(/,$/, "}");
 
-                        return `${Zn}(${duplicate}),${m}`;
-                    },
+                        duplicate += `${item[1]}:${item[2]},`;
+                    }
+                    duplicate = duplicate.replace(/,$/, "}");
+
+                    return `${Zn}(${duplicate}),${m}`;
                 },
-            ],
+            }],
         },
     ],
 });
