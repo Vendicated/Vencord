@@ -13,7 +13,7 @@ export default definePlugin({
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(?<=return\s+\w{1,3}\.createElement\(\w{1,3}\.Fragment.+\w{1,3}&&!\w{1,3}&&)(\w{1,3}.createElement\((?:\w{1,3}|\.)+,\{.+?\}\))/,
+                match: /(?<=return\s+\w{1,3}\.createElement\(.+!\w{1,3}&&)(\w{1,3}.createElement\(.+?\{.+?\}\))/,
                 replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounComponent(e)]"
             }
         }
