@@ -9,7 +9,7 @@ import "./updater";
 
 const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
     process.env.DISCORD_USER_DATA_DIR ?
-        join(process.env.DISCORD_USER_DATA_DIR, "..", "Vencord") :
+        join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData") :
         join(app.getPath("userData"), "..", "Vencord")
 );
 const SETTINGS_DIR = join(DATA_DIR, "settings");
