@@ -2,10 +2,7 @@ import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 
-/**
- * @type {esbuild.WatchMode|false}
- */
-export const watch = process.argv.includes("--watch");
+const watch = process.argv.includes("--watch");
 
 /**
  * @type {esbuild.BuildOptions}
@@ -13,7 +10,9 @@ export const watch = process.argv.includes("--watch");
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
-    watch
+    watch,
+    minify: !watch,
+    sourcemap: watch ? "inline" : ""
 };
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
