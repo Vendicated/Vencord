@@ -5,6 +5,7 @@ export default definePlugin({
     name: "No RPC",
     description: "Disables Discord's RPC server.",
     authors: [Devs.Cyn],
+    target: "DESKTOP",
     patches: [
         {
             find: '.ensureModule("discord_rpc")',

@@ -158,7 +158,7 @@ function Newer(props: CommonProps) {
     );
 }
 
-export default ErrorBoundary.wrap(function Updater() {
+function Updater() {
     const [repo, err, repoPending] = useAwaiter(getRepo, "Loading...");
 
     React.useEffect(() => {
@@ -188,4 +188,6 @@ export default ErrorBoundary.wrap(function Updater() {
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
         </Forms.FormSection >
     );
-});
+}
+
+export default IS_WEB ? null : ErrorBoundary.wrap(Updater);

@@ -18,7 +18,16 @@ export default definePlugin({
     ],
 
     copyToClipBoard(color: string) {
-        window.DiscordNative.clipboard.copy(color);
+        if (IS_WEB) {
+            navigator.clipboard.writeText(color)
+                .then(() => this.notifySuccess);
+        } else {
+            DiscordNative.clipboard.copy(color);
+            this.notifySuccess();
+        }
+    },
+
+    notifySuccess() {
         Toasts.show({
             message: "Copied to Clipboard!",
             type: Toasts.Type.SUCCESS,
