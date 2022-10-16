@@ -3,14 +3,14 @@ import { ApplicationCommandInputType, OptionalMessageOption, sendBotMessage, fin
 import { Devs } from "../utils/constants";
 
 
-function mock(input): string {
+function mock(input: string): string {
     let output = "";
     for (let i = 0; i < input.length; i++) {
         output += i % 2 ? input[i].toUpperCase() : input[i].toLowerCase();
     }
-
     return output;
 }
+
 export default definePlugin({
     name: "MoreCommands",
     description: "echo, lenny, mock",
