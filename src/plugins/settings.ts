@@ -6,7 +6,7 @@ import definePlugin from "../utils/types";
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Megu],
     required: true,
     patches: [{
         find: "().versionHash",
