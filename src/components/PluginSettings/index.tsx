@@ -115,9 +115,13 @@ export default ErrorBoundary.wrap(function Settings() {
         return o;
     }, []);
 
+    function hasDependents(plugin: Plugin) {
+        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
+        return !!enabledDependants?.length;
+    }
+
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .sort((a, b) => a.required === b.required ? 0 : b.required ? -1 : 1), []);
+        .sort((a, b) => a.name.localeCompare(b.name)), []);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: "all" });
 
@@ -161,12 +165,11 @@ export default ErrorBoundary.wrap(function Settings() {
             </div>
 
             <div style={styles.PluginsGrid}>
-                {sortedPlugins
-                    .filter(pluginFilter)
+                {sortedPlugins?.length ? sortedPlugins
+                    .filter(a => !a.required && !hasDependents(a) && pluginFilter(a))
                     .map(plugin => {
                         const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
                         const dependency = enabledDependants?.length;
-
                         return <PluginCard
                             onRestartNeeded={() => {
                                 console.log("Restart needed!");
@@ -176,6 +179,29 @@ export default ErrorBoundary.wrap(function Settings() {
                             plugin={plugin}
                         />;
                     })
+                    : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
+                }
+            </div>
+            <Forms.FormDivider />
+            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+                Required Plugins
+            </Forms.FormTitle>
+            <div style={styles.PluginsGrid}>
+                {sortedPlugins?.length ? sortedPlugins
+                    .filter(a => a.required || hasDependents(a) && pluginFilter(a))
+                    .map(plugin => {
+                        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
+                        const dependency = enabledDependants?.length;
+                        return <PluginCard
+                            onRestartNeeded={() => {
+                                console.log("Restart needed!");
+                                changes.handleChange(plugin.name);
+                            }}
+                            disabled={plugin.required || !!dependency}
+                            plugin={plugin}
+                        />;
+                    })
+                    : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
                 }
             </div>
         </Forms.FormSection >
