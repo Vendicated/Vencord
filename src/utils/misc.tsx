@@ -42,7 +42,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
         let isAlive = true;
         factory()
             .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && setState({ value: null, error, pending: false }) || onError?.(error));
+            .catch(error => isAlive && (setState({ value: null, error, pending: false }), onError?.(error)));
 
         return () => void (isAlive = false);
     }, []);

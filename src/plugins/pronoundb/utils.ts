@@ -10,9 +10,10 @@ const requestQueue: Record<string, ((pronouns: PronounCode) => void)[]> = {};
 const bulkFetch = debounce(async () => {
     const ids = Object.keys(requestQueue);
     const pronouns = await bulkFetchPronouns(ids);
-    for (const [id, callbacks] of Object.entries(requestQueue)) {
+    for (const id of ids) {
         // Call all callbacks for the id
-        callbacks.forEach(c => c(pronouns[id]));
+        requestQueue[id].forEach(c => c(pronouns[id]));
+        delete requestQueue[id];
     }
 });
 
@@ -45,15 +46,14 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
         });
         return await req.json()
             .then((res: PronounsResponse) => {
-                for (const [id, pronouns] of Object.entries(res)) {
-                    cache[id] = pronouns;
-                }
+                Object.assign(cache, res);
                 return res;
             });
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
         console.error("PronounDB fetching failed: ", e);
-        for (const id of ids) cache[id] = "unspecified";
-        return Object.fromEntries(ids.map(id => [id, "unspecified"]));
+        const dummyPronouns = Object.fromEntries(ids.map(id => [id, "unspecified"] as const));
+        Object.assign(cache, dummyPronouns);
+        return dummyPronouns;
     }
 }
