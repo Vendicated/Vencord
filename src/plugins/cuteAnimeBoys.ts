@@ -5,9 +5,9 @@ function rand(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function fetchReddit() {
+async function fetchReddit(sub: string) {
     const r = rand(1, 100);
-    const res = await fetch(`https://www.reddit.com/r/cuteanimeboys/top.json?limit=${r}&t=all`);
+    const res = await fetch(`https://www.reddit.com/r/${sub}/top.json?limit=${r}&t=all`);
     const resp = await res.json();
     let url = "";
     try {
@@ -31,10 +31,27 @@ export default definePlugin({
     commands: [{
         name: "anime-boys",
         description: "Send cute anime boys",
+        options: [
+            {
+                name: "cat",
+                description: "If set, this will send exclusively cute anime cat boys",
+                type: ApplicationCommandOptionType.BOOLEAN,
+                required: false,
+            },
+        ],
 
-        async execute() {
+        async execute(args) {
+            let sub = "cuteanimeboys";
+
+            if (args.length > 0) {
+                const v = args[0].value as any as boolean;
+                if (v) {
+                    sub = "animecatboys";
+                }
+            }
+
             return {
-                content: await fetchReddit(),
+                content: await fetchReddit(sub),
             };
         },
     }]
