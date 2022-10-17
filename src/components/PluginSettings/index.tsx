@@ -230,5 +230,6 @@ function makeDependencyList(deps: string[]) {
 }
 
 function dependencyCheck(pluginName: string, depMap: Record<string, string[]>): string[] {
-    return depMap[pluginName] || [];
+    const settings = useSettings();
+    return depMap[pluginName]?.filter(d => settings.plugins[d].enabled) || [];
 }
