@@ -15,6 +15,7 @@ export interface Patch {
     find: string;
     replacement: PatchReplacement | PatchReplacement[];
     all?: boolean;
+    predicate?(): boolean;
 }
 
 export interface PluginAuthor {
@@ -34,13 +35,101 @@ interface PluginDef {
     start?(): void;
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
+    /**
+     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     */
     commands?: Command[];
+    /**
+     * A list of other plugins that your plugin depends on.
+     * These will automatically be enabled and loaded before your plugin
+     * Common examples are CommandsAPI, MessageEventsAPI...
+     */
     dependencies?: string[],
+    /**
+     * Whether this plugin is required and forcefully enabled
+     */
     required?: boolean;
     /**
      * Set this if your plugin only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
+    /**
+     * Optionally provide settings that the user can configure in the Plugins tab of settings.
+     */
+    options?: Record<string, PluginOptionsItem>;
+    /**
+     * Allows you to specify a custom Component that will be rendered in your
+     * plugin's settings page
+     */
+    settingsAboutComponent?: React.ComponentType;
+}
+
+export enum OptionType {
+    STRING,
+    NUMBER,
+    BIGINT,
+    BOOLEAN,
+    SELECT,
+}
+
+export type PluginOptionsItem =
+    | PluginOptionString
+    | PluginOptionNumber
+    | PluginOptionBoolean
+    | PluginOptionSelect;
+
+export interface PluginOptionBase {
+    description: string;
+    placeholder?: string;
+    onChange?(newValue: any): void;
+    disabled?(): boolean;
+    restartNeeded?: boolean;
+    componentProps?: Record<string, any>;
+    /**
+     * Set this if the setting only works on Browser or Desktop, not both
+     */
+    target?: "WEB" | "DESKTOP" | "BOTH";
+}
+
+export interface PluginOptionString extends PluginOptionBase {
+    type: OptionType.STRING;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: string): boolean | string;
+    default?: string;
+}
+
+export interface PluginOptionNumber extends PluginOptionBase {
+    type: OptionType.NUMBER | OptionType.BIGINT;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: number | BigInt): boolean | string;
+    default?: number;
+}
+
+export interface PluginOptionBoolean extends PluginOptionBase {
+    type: OptionType.BOOLEAN;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: boolean): boolean | string;
+    default?: boolean;
+}
+
+export interface PluginOptionSelect extends PluginOptionBase {
+    type: OptionType.SELECT;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: PluginOptionSelectOption): boolean | string;
+    options: PluginOptionSelectOption[];
+}
+export interface PluginOptionSelectOption {
+    label: string;
+    value: string | number | boolean;
+    default?: boolean;
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };

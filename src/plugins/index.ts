@@ -1,4 +1,5 @@
 import Plugins from "plugins";
+
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
 import Logger from "../utils/logger";
