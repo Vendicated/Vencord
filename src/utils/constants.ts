@@ -42,5 +42,14 @@ export const Devs = Object.freeze({
     Animal: {
         name: "Animal",
         id: 118437263754395652n
-    }
+    },
+    MaiKokain: {
+        name: "Mai",
+        id: 722647978577363026n
+    },
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
+    },
+
 });

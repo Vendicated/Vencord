@@ -1,15 +1,17 @@
 import { FilterFn, find } from "../webpack";
 import { React } from "../webpack/common";
+import { proxyLazy } from "./proxyLazy";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
  * On subsequent calls, the same computed value will be returned
  * @param factory Factory function
  */
-export function lazy<T>(factory: () => T): () => T {
+export function makeLazy<T>(factory: () => T): () => T {
     let cache: T;
     return () => cache ?? (cache = factory());
 }
+export const lazy = makeLazy;
 
 /**
  * Do a lazy webpack search. Searches the module on first property access
@@ -17,18 +19,7 @@ export function lazy<T>(factory: () => T): () => T {
  * @returns A proxy to the webpack module. Not all traps are implemented, may produce unexpected results.
  */
 export function lazyWebpack<T = any>(filter: FilterFn): T {
-    const getMod = lazy(() => find(filter));
-
-    return new Proxy(() => null, {
-        get: (_, prop) => getMod()[prop],
-        set: (_, prop, value) => getMod()[prop] = value,
-        has: (_, prop) => prop in getMod(),
-        apply: (_, $this, args) => (getMod() as Function).apply($this, args),
-        ownKeys: () => Reflect.ownKeys(getMod()),
-        construct: (_, args, newTarget) => Reflect.construct(getMod(), args, newTarget),
-        deleteProperty: (_, prop) => delete getMod()[prop],
-        defineProperty: (_, property, attributes) => !!Object.defineProperty(getMod(), property, attributes)
-    }) as any as T;
+    return proxyLazy(() => find(filter));
 }
 
 /**
@@ -39,10 +30,11 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
  */
 export function useAwaiter<T>(factory: () => Promise<T>): [T | null, any, boolean];
 export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): [T, any, boolean];
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null): [T | null, any, boolean] {
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: null, onError: (e: unknown) => unknown): [T, any, boolean];
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null, onError?: (e: unknown) => unknown): [T | null, any, boolean] {
     const [state, setState] = React.useState({
         value: fallbackValue,
-        error: null as any,
+        error: null,
         pending: true
     });
 
@@ -50,7 +42,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
         let isAlive = true;
         factory()
             .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && setState({ value: null, error, pending: false }));
+            .catch(error => isAlive && (setState({ value: null, error, pending: false }), onError?.(error)));
 
         return () => void (isAlive = false);
     }, []);

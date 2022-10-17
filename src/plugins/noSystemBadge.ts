@@ -5,6 +5,7 @@ export default definePlugin({
     name: "NoSystemBadge",
     description: "Disables the taskbar and system tray unread count badge.",
     authors: [Devs.rushii],
+    target: "DESKTOP",
     patches: [
         {
             find: "setSystemTrayApplications:function",

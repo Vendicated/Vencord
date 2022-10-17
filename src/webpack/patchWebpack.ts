@@ -100,6 +100,7 @@ function patchPush() {
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
+                    if (patch.predicate && !patch.predicate()) continue;
                     if (code.includes(patch.find)) {
                         patchedBy.add(patch.plugin);
                         // @ts-ignore we change all patch.replacement to array in plugins/index
@@ -127,7 +128,7 @@ function patchPush() {
                                 patchedBy.delete(patch.plugin);
                             }
                         }
-                        patches.splice(i--, 1);
+                        if (!patch.all) patches.splice(i--, 1);
                     }
                 }
             }
