@@ -12,7 +12,7 @@ const nodeCommonOpts = {
     target: ["esnext"],
     minify: true,
     sourcemap: "linked",
-    plugins: process.argv[2] === "nix" ? [] : [makeAllPackagesExternalPlugin],
+    plugins: [makeAllPackagesExternalPlugin],
 };
 
 await Promise.all([
@@ -25,6 +25,7 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/patcher.ts"],
         outfile: "dist/patcher.js",
+        plugins: process.argv[2] === "nix" ? [] : [makeAllPackagesExternalPlugin],
     }),
     esbuild.build({
         ...commonOpts,
