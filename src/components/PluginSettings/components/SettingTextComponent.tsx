@@ -24,7 +24,7 @@ export function SettingInputComponent({ option, pluginSettings, id, onChange, on
 
     return (
         <FormSection>
-            <FormTitle>{option.name}</FormTitle>
+            <FormTitle>{option.description}</FormTitle>
             <TextInput
                 type="text"
                 value={state}

@@ -26,7 +26,7 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
 
     return (
         <FormSection>
-            <FormTitle>{option.name}</FormTitle>
+            <FormTitle>{option.description}</FormTitle>
             <Select
                 isDisabled={option.disabled?.() ?? false}
                 options={option.options}

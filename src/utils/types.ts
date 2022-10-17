@@ -54,7 +54,7 @@ interface PluginDef {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
     /**
-     * Allows
+     * Optionally provide settings that the user can configure in the Plugins tab of settings.
      */
     options?: Record<string, PluginOptionsItem>;
     /**
@@ -79,7 +79,7 @@ export type PluginOptionsItem =
     | PluginOptionSelect;
 
 export interface PluginOptionBase {
-    name: string;
+    description: string;
     placeholder?: string;
     onChange?(newValue: any): void;
     disabled?(): boolean;

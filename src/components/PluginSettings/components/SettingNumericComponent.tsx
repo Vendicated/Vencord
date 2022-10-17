@@ -34,7 +34,7 @@ export function SettingNumericComponent({ option, pluginSettings, id, onChange, 
 
     return (
         <FormSection>
-            <FormTitle>{option.name}</FormTitle>
+            <FormTitle>{option.description}</FormTitle>
             <TextInput
                 type="number"
                 pattern="-?[0-9]+"

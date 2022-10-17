@@ -1,3 +1,5 @@
+import { User } from "discord-types/general";
+
 import { lazyWebpack } from "../utils/misc";
 import { _resolveReady, filters, waitFor } from "./webpack";
 
@@ -87,7 +89,7 @@ export const Toasts = {
 };
 
 export const UserUtils = {
-    getUser: lazyWebpack(filters.byCode(".USER(", "getUser")),
+    fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
 };
 
 waitFor("useState", m => React = m);

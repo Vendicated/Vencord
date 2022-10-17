@@ -32,7 +32,7 @@ export function SettingBooleanComponent({ option, pluginSettings, id, onChange, 
 
     return (
         <FormSection>
-            <FormTitle>{option.name}</FormTitle>
+            <FormTitle>{option.description}</FormTitle>
             <Select
                 isDisabled={option.disabled?.() ?? false}
                 options={options}
