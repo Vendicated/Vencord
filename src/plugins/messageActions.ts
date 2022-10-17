@@ -15,10 +15,10 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     start() {
-        const { deleteMessage, startEditMessage } = findByProps("deleteMessage");
+        const { deleteMessage, startEditMessage } = findByProps("deleteMessage", "startEditMessage");
         const { can } = findByProps("can", "initialize");
         const { MANAGE_MESSAGES } = find(m => typeof m.MANAGE_MESSAGES === "bigint");
-        const { isEditing } = findByProps("isEditing");
+        const { isEditing } = findByProps("isEditing", "isEditingAny");
 
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
