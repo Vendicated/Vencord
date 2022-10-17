@@ -17,12 +17,6 @@ import { checkForUpdates, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { Router } from "./webpack/common";
 
-Object.defineProperty(window, "IS_WEB", {
-    get: () => !window.DiscordNative,
-    configurable: true,
-    enumerable: true
-});
-
 export let Components: any;
 
 async function init() {
@@ -30,21 +24,23 @@ async function init() {
     startAllPlugins();
     Components = await import("./components");
 
-    try {
-        const isOutdated = await checkForUpdates();
-        if (isOutdated && Settings.notifyAboutUpdates)
-            setTimeout(() => {
-                showNotice(
-                    "A Vencord update is available!",
-                    "View Update",
-                    () => {
-                        popNotice();
-                        Router.open("VencordUpdater");
-                    }
-                );
-            }, 10000);
-    } catch (err) {
-        UpdateLogger.error("Failed to check for updates", err);
+    if (!IS_WEB) {
+        try {
+            const isOutdated = await checkForUpdates();
+            if (isOutdated && Settings.notifyAboutUpdates)
+                setTimeout(() => {
+                    showNotice(
+                        "A Vencord update is available!",
+                        "View Update",
+                        () => {
+                            popNotice();
+                            Router.open("VencordUpdater");
+                        }
+                    );
+                }, 10000);
+        } catch (err) {
+            UpdateLogger.error("Failed to check for updates", err);
+        }
     }
 }
 

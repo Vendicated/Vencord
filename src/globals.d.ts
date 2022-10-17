@@ -1,10 +1,30 @@
 declare global {
+    /**
+     * This exists only at build time, so references to it in patches should insert it
+     * via String interpolation OR use different replacement code based on this
+     * but NEVER refrence it inside the patched code
+     *
+     * @example
+     * // BAD
+     * replace: "IS_WEB?foo:bar"
+     * // GOOD
+     * replace: IS_WEB ? "foo" : "bar"
+     * // also good
+     * replace: `${IS_WEB}?foo:bar`
+     */
     export var IS_WEB: boolean;
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
     export var appSettings: {
         set(setting: string, v: any): void;
     };
+    /**
+     * Only available when running in Electron, undefined on web.
+     * Thus, avoid using this or only use it inside an {@link IS_WEB} guard.
+     *
+     * If you really must use it, mark your plugin as Desktop App only via
+     * `target: "DESKTOP"`
+     */
     export var DiscordNative: any;
 
     interface Window {
