@@ -1,13 +1,13 @@
 import Plugins from "plugins";
 
-import { useSettings } from "../../api/settings";
+import { Settings, useSettings } from "../../api/settings";
 import { startPlugin, stopPlugin } from "../../plugins";
 import { Modals } from "../../utils";
 import { ChangeList } from "../../utils/ChangeList";
 import { classes, lazyWebpack } from "../../utils/misc";
 import { Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts } from "../../webpack/common";
+import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import PluginModal from "./PluginModal";
@@ -27,7 +27,13 @@ function showErrorToast(message: string) {
     });
 }
 
-function PluginCard({ plugin, disabled, onRestartNeeded }: { plugin: Plugin; disabled: boolean; onRestartNeeded(): void; }) {
+interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
+    plugin: Plugin;
+    disabled: boolean;
+    onRestartNeeded(): void;
+}
+
+function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave }: PluginCardProps) {
     const settings = useSettings().plugins[plugin.name];
 
     function isEnabled() {
@@ -55,7 +61,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded }: { plugin: Plugin; dis
     }
 
     return (
-        <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()}>
+        <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Text variant="text-md/bold">{plugin.name}</Text>
             <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>
             <Flex flexDirection="row-reverse" style={{ marginTop: "auto", width: "100%", justifyContent: "space-between" }}>
@@ -165,7 +171,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <div style={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
-                    .filter(a => !a.required && !hasDependents(a) && pluginFilter(a))
+                    .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
                         const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
                         const dependency = enabledDependants?.length;
@@ -186,17 +192,26 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
             <div style={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
-                    .filter(a => a.required || hasDependents(a) && pluginFilter(a))
+                    .filter(a => a.required || dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
                         const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
                         const dependency = enabledDependants?.length;
-                        return <PluginCard
-                            onRestartNeeded={() => {
-                                changes.handleChange(plugin.name);
-                            }}
-                            disabled={plugin.required || !!dependency}
-                            plugin={plugin}
-                        />;
+                        const tooltipText = plugin.required
+                            ? "This plugin is required for Vencord to function."
+                            : makeDependencyList(dependencyCheck(plugin.name, depMap));
+                        return <Tooltip text={tooltipText}>
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <PluginCard
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    onRestartNeeded={() => {
+                                        changes.handleChange(plugin.name);
+                                    }}
+                                    disabled={plugin.required || !!dependency}
+                                    plugin={plugin}
+                                />
+                            )}
+                        </Tooltip>;
                     })
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
                 }
@@ -204,3 +219,16 @@ export default ErrorBoundary.wrap(function Settings() {
         </Forms.FormSection >
     );
 });
+
+function makeDependencyList(deps: string[]) {
+    return (
+        <React.Fragment>
+            <Forms.FormText>This plugin is required by:</Forms.FormText>
+            {deps.map((dep: string) => <Forms.FormText style={{ margin: "0 auto" }}>{dep}</Forms.FormText>)}
+        </React.Fragment>
+    );
+}
+
+function dependencyCheck(pluginName: string, depMap: Record<string, string[]>): string[] {
+    return depMap[pluginName] || [];
+}
