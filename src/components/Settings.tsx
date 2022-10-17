@@ -1,25 +1,10 @@
-import { classes, humanFriendlyJoin, useAwaiter } from "../utils/misc";
-import Plugins from "plugins";
 import { useSettings } from "../api/settings";
-import IpcEvents from "../utils/IpcEvents";
-
-import { Button, Switch, Forms, React, Margins, Toasts, Alerts, Parser } from "../webpack/common";
-import ErrorBoundary from "./ErrorBoundary";
-import { startPlugin } from "../plugins";
-import { stopPlugin } from "../plugins/index";
-import { Flex } from "./Flex";
 import { ChangeList } from "../utils/ChangeList";
-
-function showErrorToast(message: string) {
-    Toasts.show({
-        message,
-        type: Toasts.Type.FAILURE,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        }
-    });
-}
+import IpcEvents from "../utils/IpcEvents";
+import { useAwaiter } from "../utils/misc";
+import { Alerts, Button, Forms, Margins, Parser, React, Switch } from "../webpack/common";
+import ErrorBoundary from "./ErrorBoundary";
+import { Flex } from "./Flex";
 
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -46,21 +31,6 @@ export default ErrorBoundary.wrap(function Settings() {
         }));
     }, []);
 
-    const depMap = React.useMemo(() => {
-        const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
-            if (deps) {
-                for (const dep of deps) {
-                    o[dep] ??= [];
-                    o[dep].push(plugin);
-                }
-            }
-        }
-        return o;
-    }, []);
-
-    const sortedPlugins = React.useMemo(() => Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)), []);
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
@@ -69,10 +39,10 @@ export default ErrorBoundary.wrap(function Settings() {
             </Forms.FormTitle>
 
             <Forms.FormText>
-                SettingsDir: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
+                Settings Directory: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
             </Forms.FormText>
 
-            {!IS_WEB && <Flex className={Margins.marginBottom20}>
+            {!IS_WEB && <Flex className={Margins.marginBottom20} style={{ marginTop: 8 }}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -118,58 +88,6 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Get notified about new Updates
             </Switch>}
-
-            <Forms.FormDivider />
-
-            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
-                Plugins
-            </Forms.FormTitle>
-
-            {sortedPlugins.map(p => {
-                const enabledDependants = depMap[p.name]?.filter(d => settings.plugins[d].enabled);
-                const dependency = enabledDependants?.length;
-
-                return (
-                    <Switch
-                        disabled={p.required || dependency}
-                        key={p.name}
-                        value={settings.plugins[p.name].enabled || p.required || dependency}
-                        onChange={(v: boolean) => {
-                            settings.plugins[p.name].enabled = v;
-                            let needsRestart = Boolean(p.patches?.length);
-                            if (v) {
-                                p.dependencies?.forEach(d => {
-                                    const dep = Plugins[d];
-                                    needsRestart ||= Boolean(dep.patches?.length && !settings.plugins[d].enabled);
-                                    settings.plugins[d].enabled = true;
-                                    if (!needsRestart && !dep.started && !startPlugin(dep)) {
-                                        showErrorToast(`Failed to start dependency ${d}. Check the console for more info.`);
-                                    }
-                                });
-                                if (!needsRestart && !p.started && !startPlugin(p)) {
-                                    showErrorToast(`Failed to start plugin ${p.name}. Check the console for more info.`);
-                                }
-                            } else {
-                                if ((p.started || !p.start && p.commands?.length) && !stopPlugin(p)) {
-                                    showErrorToast(`Failed to stop plugin ${p.name}. Check the console for more info.`);
-                                }
-                            }
-                            if (needsRestart) changes.handleChange(p.name);
-                        }}
-                        note={p.description}
-                        tooltipNote={
-                            p.required ?
-                                "This plugin is required. Thus you cannot disable it."
-                                : dependency ?
-                                    `${humanFriendlyJoin(enabledDependants)} ${enabledDependants.length === 1 ? "depends" : "depend"} on this plugin. Thus you cannot disable it.`
-                                    : null
-                        }
-                    >
-                        {p.name}
-                    </Switch>
-                );
-            })
-            }
         </Forms.FormSection >
     );
 });
