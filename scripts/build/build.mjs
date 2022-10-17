@@ -24,6 +24,7 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/patcher.ts"],
+        external: ["electron"],
         outfile: "dist/patcher.js",
         plugins: process.argv[2] === "nix" ? [] : [makeAllPackagesExternalPlugin],
     }),
