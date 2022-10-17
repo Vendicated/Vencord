@@ -101,7 +101,7 @@ abc.isStaff = function () {
 
 The match value _can_ be a string, rather than regex, however usually regex will be better suited, as it can work with unknown values, whereas strings must be exact matches.
 
-Once you've made your plugin, make sure you run `pnpm lint` and make sure your code is nice and clean!
+Once you've made your plugin, make sure you run `pnpm test` and make sure your code is nice and clean!
 
 If you want to publish your plugin into the Vencord repo, move your plugin from `src/userplugins` into the `src/plugins` folder and open a PR!
 
