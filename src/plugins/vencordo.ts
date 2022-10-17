@@ -3,8 +3,8 @@ import { Devs } from "../utils/constants";
 
 
 export default definePlugin({
-    name: "vencordo",
-    description: "replace the \"discordo\" sound on startup with something a bit more interesting ",
+    name: "Vencordo",
+    description: "replace the \"discordo\" sound on startup with something a bit more interesting",
     authors: [
         Devs.echo,
     ],
