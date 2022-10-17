@@ -42,8 +42,7 @@ export default definePlugin({
             },
         ],
     }],
-
-    settings: {
+    options: {
         enableIsStaff: {
             name: "Enable isStaff (requires restart)",
             type: OptionType.BOOLEAN,
