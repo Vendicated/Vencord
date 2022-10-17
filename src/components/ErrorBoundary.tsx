@@ -5,6 +5,7 @@ import { ErrorCard } from "./ErrorCard";
 interface Props {
     fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; }>>;
     onError?(error: Error, errorInfo: React.ErrorInfo): void;
+    message?: string;
 }
 
 const color = "#e78284";
@@ -58,15 +59,14 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
                 {...this.state}
             />;
 
+        const msg = this.props.message || "An error occurred while rendering this Component. More info can be found below and in your console.";
+
         return (
             <ErrorCard style={{
                 overflow: "hidden",
             }}>
                 <h1>Oh no!</h1>
-                <p>
-                    An error occurred while rendering this Component. More info can be found below
-                    and in your console.
-                </p>
+                <p>{msg}</p>
                 <code>
                     {this.state.message}
                     {!!this.state.stack && (
