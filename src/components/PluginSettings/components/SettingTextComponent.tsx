@@ -4,13 +4,12 @@ import { Forms, React, TextInput } from "../../../webpack/common";
 
 const { FormSection, FormTitle } = Forms;
 
-export function SettingInputComponent(props: ISettingElementProps<PluginSettingsString>) {
-    const { setting, pluginSettings, id } = props;
-    const [state, setState] = React.useState<any>(pluginSettings[id] ?? setting.default ?? null);
+export function SettingInputComponent({ setting, pluginSettings, id, onChange }: ISettingElementProps<PluginSettingsString>) {
+    const [state, setState] = React.useState(pluginSettings[id] ?? setting.default ?? null);
 
-    function onChange(newValue) {
+    function handleChange(newValue) {
         setState(newValue);
-        props.onChange(newValue);
+        onChange(newValue);
     }
 
     return (
@@ -19,7 +18,7 @@ export function SettingInputComponent(props: ISettingElementProps<PluginSettings
             <TextInput
                 type="text"
                 value={state}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder={setting.placeholder ?? "Enter a value"}
                 disabled={setting.disabled?.() ?? false}
                 {...setting.componentProps}

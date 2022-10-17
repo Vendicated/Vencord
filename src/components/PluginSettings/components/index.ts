@@ -14,5 +14,3 @@ export * from "./SettingBooleanComponent";
 export * from "./SettingNumericComponent";
 export * from "./SettingSelectComponent";
 export * from "./SettingTextComponent";
-
-

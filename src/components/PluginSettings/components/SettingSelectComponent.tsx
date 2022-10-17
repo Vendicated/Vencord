@@ -4,14 +4,13 @@ import { Forms, React, Select } from "../../../webpack/common";
 
 const { FormSection, FormTitle } = Forms;
 
-export function SettingSelectComponent(props: ISettingElementProps<PluginSettingsSelect>) {
-    const { setting, pluginSettings, id } = props;
+export function SettingSelectComponent({ setting, pluginSettings, onChange, id }: ISettingElementProps<PluginSettingsSelect>) {
     const def = pluginSettings[id] ?? setting.options?.find(o => o.default)?.value;
     const [state, setState] = React.useState<any>(def ?? null);
 
-    function onChange(newValue) {
+    function handleChange(newValue) {
         setState(newValue);
-        props.onChange(newValue);
+        onChange(newValue);
     }
 
     return (
@@ -23,7 +22,7 @@ export function SettingSelectComponent(props: ISettingElementProps<PluginSetting
                 placeholder={setting.placeholder ?? "Select an option"}
                 maxVisibleItems={5}
                 closeOnSelect={true}
-                select={onChange}
+                select={handleChange}
                 isSelected={v => v === state}
                 serialize={v => String(v)}
                 {...setting.componentProps}

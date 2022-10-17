@@ -5,7 +5,7 @@ import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
 import { lazyWebpack, proxyLazy } from "../../utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { Plugin, PluginSettingType } from "../../utils/types";
+import { Plugin, SettingType } from "../../utils/types";
 import { filters } from "../../webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
 import { Flex } from "../Flex";
@@ -86,20 +86,20 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             const props = { onChange, pluginSettings, id: key };
             switch (setting.type) {
-                case PluginSettingType.SELECT: {
+                case SettingType.SELECT: {
                     options.push(<SettingSelectComponent key={key} setting={setting} {...props} />);
                     break;
                 }
-                case PluginSettingType.STRING: {
+                case SettingType.STRING: {
                     options.push(<SettingInputComponent key={key} setting={setting} {...props} />);
                     break;
                 }
-                case PluginSettingType.NUMBER:
-                case PluginSettingType.BIGINT: {
+                case SettingType.NUMBER:
+                case SettingType.BIGINT: {
                     options.push(<SettingNumericComponent key={key} setting={setting} {...props} />);
                     break;
                 }
-                case PluginSettingType.BOOLEAN: {
+                case SettingType.BOOLEAN: {
                     options.push(<SettingBooleanComponent key={key} setting={setting} {...props} />);
                 }
             }
@@ -149,10 +149,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         />
                     </div>
                 </FormSection>
-                {plugin.aboutComponent && (
+                {plugin.settingsAboutComponent && (
                     <div style={{ marginBottom: 8 }}>
                         <FormSection>
-                            {plugin.aboutComponent()}
+                            {plugin.settingsAboutComponent()}
                         </FormSection>
                     </div>
                 )}

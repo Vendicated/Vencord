@@ -27,8 +27,7 @@ function showErrorToast(message: string) {
     });
 }
 
-function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(): void; }) {
-    const { plugin, disabled } = props;
+function PluginCard({ plugin, disabled, onRestartNeeded }: { plugin: Plugin; disabled: boolean; onRestartNeeded(): void; }) {
     const settings = useSettings().plugins[plugin.name];
 
     function isEnabled() {
@@ -38,7 +37,7 @@ function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(
     function openModal() {
         Modals.openModalLazy(async () => {
             return modalProps => {
-                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={props.onRestartNeeded} />;
+                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={onRestartNeeded} />;
             };
         });
     }
@@ -52,12 +51,12 @@ function PluginCard(props: { plugin: Plugin; disabled: boolean; onRestartNeeded(
             return;
         }
         settings.enabled = !settings.enabled;
-        if (plugin.patches) props.onRestartNeeded();
+        if (plugin.patches) onRestartNeeded();
     }
 
     return (
         <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()}>
-            <Text variant="heading-md/bold">{plugin.name}</Text>
+            <Text variant="text-md/bold">{plugin.name}</Text>
             <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>
             <Flex flexDirection="row" style={{ marginTop: "auto", marginLeft: "auto", gap: 10 }}>
                 <Button color={Button.Colors.BRAND}>Settings</Button>

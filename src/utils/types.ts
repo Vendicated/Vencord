@@ -35,25 +35,42 @@ interface PluginDef {
     start?(): void;
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
+    /**
+     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     */
     commands?: Command[];
+    /**
+     * A list of other plugins that your plugin depends on.
+     * These will automatically be enabled and loaded before your plugin
+     * Common examples are CommandsAPI, MessageEventsAPI...
+     */
     dependencies?: string[],
+    /**
+     * Whether this plugin is required and forcefully enabled
+     */
     required?: boolean;
     /**
      * Set this if your plugin only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
+    /**
+     * Allows
+     */
     settings?: Record<string, PluginSettingsItem>;
-    aboutComponent?(): React.ReactNode;
+    /**
+     * Allows you to specify a custom Component that will be rendered in your
+     * plugin's settings page
+     */
+    settingsAboutComponent?(): React.ReactNode;
 }
 
-export enum PluginSettingType {
+export enum SettingType {
     STRING,
     NUMBER,
     BIGINT,
     BOOLEAN,
     SELECT,
 }
-
 
 export type PluginSettingsItem =
     | PluginSettingsString
@@ -75,22 +92,22 @@ export interface PluginSettingsBase {
 }
 
 export interface PluginSettingsString extends PluginSettingsBase {
-    type: PluginSettingType.STRING;
+    type: SettingType.STRING;
     default?: string;
 }
 
 export interface PluginSettingsNumber extends PluginSettingsBase {
-    type: PluginSettingType.NUMBER | PluginSettingType.BIGINT;
+    type: SettingType.NUMBER | SettingType.BIGINT;
     default?: number;
 }
 
 export interface PluginSettingsBoolean extends PluginSettingsBase {
-    type: PluginSettingType.BOOLEAN;
+    type: SettingType.BOOLEAN;
     default?: boolean;
 }
 
 export interface PluginSettingsSelect extends PluginSettingsBase {
-    type: PluginSettingType.SELECT;
+    type: SettingType.SELECT;
     options: PluginSettingsItemOption[];
 }
 export interface PluginSettingsItemOption {

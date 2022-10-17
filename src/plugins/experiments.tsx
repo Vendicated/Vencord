@@ -1,6 +1,6 @@
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
-import definePlugin, { PluginSettingType } from "../utils/types";
+import definePlugin, { SettingType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
@@ -30,7 +30,7 @@ export default definePlugin({
         },
     }, {
         find: ".isStaff=function(){",
-        predicate: () => Settings.plugins["Experiments"]?.enableIsStaff === true,
+        predicate: () => Settings.plugins["Experiments"].enableIsStaff === true,
         replacement: [
             {
                 match: /return\s*(\w+)\.hasFlag\((.+?)\.STAFF\)}/,
@@ -42,15 +42,17 @@ export default definePlugin({
             },
         ],
     }],
+
     settings: {
         enableIsStaff: {
             name: "Enable isStaff (requires restart)",
-            type: PluginSettingType.BOOLEAN,
+            type: SettingType.BOOLEAN,
             default: false,
             restartNeeded: true,
         }
     },
-    aboutComponent: () => {
+
+    settingsAboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");
         const modKey = isMacOS ? "cmd" : "ctrl";
         const altKey = isMacOS ? "opt" : "alt";

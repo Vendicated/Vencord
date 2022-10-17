@@ -4,19 +4,18 @@ import { Forms, React, Select } from "../../../webpack/common";
 
 const { FormSection, FormTitle } = Forms;
 
-export function SettingBooleanComponent(props: ISettingElementProps<PluginSettingsBoolean>) {
-    const { setting, pluginSettings, id } = props;
+export function SettingBooleanComponent({ setting, pluginSettings, id, onChange }: ISettingElementProps<PluginSettingsBoolean>) {
     const def = pluginSettings[id] ?? setting.default;
-    const [state, setState] = React.useState<any>(def ?? false);
+    const [state, setState] = React.useState(def ?? false);
 
     const options = [
         { label: "Enabled", value: true, default: def === true },
         { label: "Disabled", value: false, default: typeof def === "undefined" || def === false },
     ];
 
-    function onChange(newValue) {
+    function handleChange(newValue: any) {
         setState(newValue);
-        props.onChange(newValue);
+        onChange(newValue);
     }
 
     return (
@@ -28,7 +27,7 @@ export function SettingBooleanComponent(props: ISettingElementProps<PluginSettin
                 placeholder={setting.placeholder ?? "Select an option"}
                 maxVisibleItems={5}
                 closeOnSelect={true}
-                select={onChange}
+                select={handleChange}
                 isSelected={v => v === state}
                 serialize={v => String(v)}
                 {...setting.componentProps}
