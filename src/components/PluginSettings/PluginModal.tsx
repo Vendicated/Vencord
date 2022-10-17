@@ -5,7 +5,7 @@ import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
 import { lazyWebpack, proxyLazy } from "../../utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { Plugin, SettingType } from "../../utils/types";
+import { OptionType, Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
@@ -63,28 +63,28 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }, []);
 
     function saveAndClose() {
-        if (!plugin.settings) {
+        if (!plugin.options) {
             onClose();
             return;
         }
         let restartNeeded = false;
         for (const [key, value] of Object.entries(tempSettings)) {
-            const setting = plugin.settings[key];
+            const option = plugin.options[key];
             pluginSettings[key] = value;
-            setting?.onChange?.(value);
-            if (setting?.restartNeeded) restartNeeded = true;
+            option?.onChange?.(value);
+            if (option?.restartNeeded) restartNeeded = true;
         }
         if (restartNeeded) onRestartNeeded();
         onClose();
     }
 
     function renderSettings() {
-        if (!pluginSettings || !plugin.settings) {
+        if (!pluginSettings || !plugin.options) {
             return <FormText>There are no settings for this plugin.</FormText>;
         }
 
         const options: JSX.Element[] = [];
-        for (const [key, setting] of Object.entries(plugin.settings)) {
+        for (const [key, setting] of Object.entries(plugin.options)) {
             function onChange(newValue) {
                 setTempSettings(s => ({ ...s, [key]: newValue }));
             }
@@ -95,21 +95,21 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             const props = { onChange, pluginSettings, id: key, onError };
             switch (setting.type) {
-                case SettingType.SELECT: {
-                    options.push(<SettingSelectComponent key={key} setting={setting} {...props} />);
+                case OptionType.SELECT: {
+                    options.push(<SettingSelectComponent key={key} option={setting} {...props} />);
                     break;
                 }
-                case SettingType.STRING: {
-                    options.push(<SettingInputComponent key={key} setting={setting} {...props} />);
+                case OptionType.STRING: {
+                    options.push(<SettingInputComponent key={key} option={setting} {...props} />);
                     break;
                 }
-                case SettingType.NUMBER:
-                case SettingType.BIGINT: {
-                    options.push(<SettingNumericComponent key={key} setting={setting} {...props} />);
+                case OptionType.NUMBER:
+                case OptionType.BIGINT: {
+                    options.push(<SettingNumericComponent key={key} option={setting} {...props} />);
                     break;
                 }
-                case SettingType.BOOLEAN: {
-                    options.push(<SettingBooleanComponent key={key} setting={setting} {...props} />);
+                case OptionType.BOOLEAN: {
+                    options.push(<SettingBooleanComponent key={key} option={setting} {...props} />);
                 }
             }
         }

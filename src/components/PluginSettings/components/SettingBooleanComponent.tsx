@@ -1,11 +1,11 @@
 import { ISettingElementProps } from ".";
-import { PluginSettingsBoolean } from "../../../utils/types";
+import { PluginOptionBoolean } from "../../../utils/types";
 import { Forms, React, Select } from "../../../webpack/common";
 
 const { FormSection, FormTitle, FormText } = Forms;
 
-export function SettingBooleanComponent({ setting, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginSettingsBoolean>) {
-    const def = pluginSettings[id] ?? setting.default;
+export function SettingBooleanComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
+    const def = pluginSettings[id] ?? option.default;
 
     const [state, setState] = React.useState(def ?? false);
     const [error, setError] = React.useState<string | null>(null);
@@ -20,7 +20,7 @@ export function SettingBooleanComponent({ setting, pluginSettings, id, onChange,
     ];
 
     function handleChange(newValue: boolean): void {
-        let isValid = (setting.isValid && setting.isValid(newValue)) ?? true;
+        let isValid = (option.isValid && option.isValid(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
@@ -32,17 +32,17 @@ export function SettingBooleanComponent({ setting, pluginSettings, id, onChange,
 
     return (
         <FormSection>
-            <FormTitle>{setting.name}</FormTitle>
+            <FormTitle>{option.name}</FormTitle>
             <Select
-                isDisabled={setting.disabled?.() ?? false}
+                isDisabled={option.disabled?.() ?? false}
                 options={options}
-                placeholder={setting.placeholder ?? "Select an option"}
+                placeholder={option.placeholder ?? "Select an option"}
                 maxVisibleItems={5}
                 closeOnSelect={true}
                 select={handleChange}
                 isSelected={v => v === state}
                 serialize={v => String(v)}
-                {...setting.componentProps}
+                {...option.componentProps}
             />
             {error && <FormText style={{ color: "var(--text-danger)" }}>{error}</FormText>}
         </FormSection>

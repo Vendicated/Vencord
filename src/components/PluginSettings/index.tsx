@@ -76,7 +76,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 >
                     {isEnabled() ? "Disable" : "Enable"}
                 </Button>
-                {plugin.settings && <Forms.FormText style={{ margin: "auto 0 auto 10px" }}>Click to configure</Forms.FormText>}
+                {plugin.options && <Forms.FormText style={{ margin: "auto 0 auto 10px" }}>Click to configure</Forms.FormText>}
             </Flex>
         </Flex>
     );

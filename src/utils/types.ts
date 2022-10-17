@@ -56,7 +56,7 @@ interface PluginDef {
     /**
      * Allows
      */
-    settings?: Record<string, PluginSettingsItem>;
+    options?: Record<string, PluginOptionsItem>;
     /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
@@ -64,7 +64,7 @@ interface PluginDef {
     settingsAboutComponent?: React.ComponentType;
 }
 
-export enum SettingType {
+export enum OptionType {
     STRING,
     NUMBER,
     BIGINT,
@@ -72,13 +72,13 @@ export enum SettingType {
     SELECT,
 }
 
-export type PluginSettingsItem =
-    | PluginSettingsString
-    | PluginSettingsNumber
-    | PluginSettingsBoolean
-    | PluginSettingsSelect;
+export type PluginOptionsItem =
+    | PluginOptionString
+    | PluginOptionNumber
+    | PluginOptionBoolean
+    | PluginOptionSelect;
 
-export interface PluginSettingsBase {
+export interface PluginOptionBase {
     name: string;
     placeholder?: string;
     onChange?(newValue: any): void;
@@ -91,8 +91,8 @@ export interface PluginSettingsBase {
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
-export interface PluginSettingsString extends PluginSettingsBase {
-    type: SettingType.STRING;
+export interface PluginOptionString extends PluginOptionBase {
+    type: OptionType.STRING;
     /**
      * Prevents the user from saving settings if this is false or a string
      */
@@ -100,8 +100,8 @@ export interface PluginSettingsString extends PluginSettingsBase {
     default?: string;
 }
 
-export interface PluginSettingsNumber extends PluginSettingsBase {
-    type: SettingType.NUMBER | SettingType.BIGINT;
+export interface PluginOptionNumber extends PluginOptionBase {
+    type: OptionType.NUMBER | OptionType.BIGINT;
     /**
      * Prevents the user from saving settings if this is false or a string
      */
@@ -109,8 +109,8 @@ export interface PluginSettingsNumber extends PluginSettingsBase {
     default?: number;
 }
 
-export interface PluginSettingsBoolean extends PluginSettingsBase {
-    type: SettingType.BOOLEAN;
+export interface PluginOptionBoolean extends PluginOptionBase {
+    type: OptionType.BOOLEAN;
     /**
      * Prevents the user from saving settings if this is false or a string
      */
@@ -118,15 +118,15 @@ export interface PluginSettingsBoolean extends PluginSettingsBase {
     default?: boolean;
 }
 
-export interface PluginSettingsSelect extends PluginSettingsBase {
-    type: SettingType.SELECT;
+export interface PluginOptionSelect extends PluginOptionBase {
+    type: OptionType.SELECT;
     /**
      * Prevents the user from saving settings if this is false or a string
      */
-    isValid?(value: PluginSettingsItemOption): boolean | string;
-    options: PluginSettingsItemOption[];
+    isValid?(value: PluginOptionSelectOption): boolean | string;
+    options: PluginOptionSelectOption[];
 }
-export interface PluginSettingsItemOption {
+export interface PluginOptionSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;

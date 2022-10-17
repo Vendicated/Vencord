@@ -1,7 +1,7 @@
-import { PluginSettingsBase } from "../../../utils/types";
+import { PluginOptionBase } from "../../../utils/types";
 
-export interface ISettingElementProps<T extends PluginSettingsBase> {
-    setting: T;
+export interface ISettingElementProps<T extends PluginOptionBase> {
+    option: T;
     onChange(newValue: any): void;
     pluginSettings: {
         [setting: string]: any;

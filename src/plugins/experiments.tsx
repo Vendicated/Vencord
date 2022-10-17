@@ -1,6 +1,6 @@
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
-import definePlugin, { SettingType } from "../utils/types";
+import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
@@ -46,7 +46,7 @@ export default definePlugin({
     settings: {
         enableIsStaff: {
             name: "Enable isStaff (requires restart)",
-            type: SettingType.BOOLEAN,
+            type: OptionType.BOOLEAN,
             default: false,
             restartNeeded: true,
         }
