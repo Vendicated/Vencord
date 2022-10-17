@@ -8,6 +8,7 @@ export interface ISettingElementProps<T extends PluginSettingsBase> {
         enabled: boolean;
     };
     id: string;
+    onError(hasError: boolean): void;
 }
 
 export * from "./SettingBooleanComponent";

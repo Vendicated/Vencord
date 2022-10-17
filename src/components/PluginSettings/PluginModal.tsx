@@ -49,6 +49,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const [tempSettings, setTempSettings] = React.useState<Record<string, any>>({});
 
+    const [errors, setErrors] = React.useState<Record<string, boolean>>({});
+
+    const canSubmit = () => Object.values(errors).every(e => !e);
+
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
@@ -79,13 +83,17 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <FormText>There are no settings for this plugin.</FormText>;
         }
 
-        let options: JSX.Element[] = [];
+        const options: JSX.Element[] = [];
         for (const [key, setting] of Object.entries(plugin.settings)) {
             function onChange(newValue) {
                 setTempSettings(s => ({ ...s, [key]: newValue }));
             }
 
-            const props = { onChange, pluginSettings, id: key };
+            function onError(hasError: boolean) {
+                setErrors(e => ({ ...e, [key]: hasError }));
+            }
+
+            const props = { onChange, pluginSettings, id: key, onError };
             switch (setting.type) {
                 case SettingType.SELECT: {
                     options.push(<SettingSelectComponent key={key} setting={setting} {...props} />);
@@ -173,13 +181,20 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     >
                         Exit Without Saving
                     </Button>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.BRAND}
-                        onClick={saveAndClose}
-                    >
-                        Save & Exit
-                    </Button>
+                    <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                        {({ onMouseEnter, onMouseLeave }) => (
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.BRAND}
+                                onClick={saveAndClose}
+                                onMouseEnter={onMouseEnter}
+                                onMouseLeave={onMouseLeave}
+                                disabled={!canSubmit()}
+                            >
+                                Save & Exit
+                            </Button>
+                        )}
+                    </Tooltip>
                 </Flex>
             </ModalFooter>
         </ModalRoot>

@@ -93,21 +93,37 @@ export interface PluginSettingsBase {
 
 export interface PluginSettingsString extends PluginSettingsBase {
     type: SettingType.STRING;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: string): boolean | string;
     default?: string;
 }
 
 export interface PluginSettingsNumber extends PluginSettingsBase {
     type: SettingType.NUMBER | SettingType.BIGINT;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: number | BigInt): boolean | string;
     default?: number;
 }
 
 export interface PluginSettingsBoolean extends PluginSettingsBase {
     type: SettingType.BOOLEAN;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: boolean): boolean | string;
     default?: boolean;
 }
 
 export interface PluginSettingsSelect extends PluginSettingsBase {
     type: SettingType.SELECT;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: PluginSettingsItemOption): boolean | string;
     options: PluginSettingsItemOption[];
 }
 export interface PluginSettingsItemOption {

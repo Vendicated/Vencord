@@ -58,8 +58,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded }: { plugin: Plugin; dis
         <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()}>
             <Text variant="text-md/bold">{plugin.name}</Text>
             <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>
-            <Flex flexDirection="row" style={{ marginTop: "auto", marginLeft: "auto", gap: 10 }}>
-                <Button color={Button.Colors.BRAND}>Settings</Button>
+            <Flex flexDirection="row-reverse" style={{ marginTop: "auto", width: "100%", justifyContent: "space-between" }}>
                 <Button
                     onClick={e => {
                         e.preventDefault();
@@ -71,6 +70,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded }: { plugin: Plugin; dis
                 >
                     {isEnabled() ? "Disable" : "Enable"}
                 </Button>
+                {plugin.settings && <Forms.FormText style={{ margin: "auto 0 auto 10px" }}>Click to configure</Forms.FormText>}
             </Flex>
         </Flex>
     );
