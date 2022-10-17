@@ -61,7 +61,7 @@ interface PluginDef {
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?(): React.ReactNode;
+    settingsAboutComponent?: React.ComponentType;
 }
 
 export enum SettingType {

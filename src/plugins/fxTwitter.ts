@@ -20,5 +20,9 @@ export default definePlugin({
 
     stop() {
         removePreSendListener(this.preSend);
+    },
+
+    settingsAboutComponent: () => {
+        throw new Error("Oh no!");
     }
 });

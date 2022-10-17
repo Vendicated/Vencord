@@ -8,6 +8,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSiz
 import { Plugin, SettingType } from "../../utils/types";
 import { filters } from "../../webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
+import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
     SettingBooleanComponent,
@@ -149,10 +150,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         />
                     </div>
                 </FormSection>
-                {plugin.settingsAboutComponent && (
+                {!!plugin.settingsAboutComponent && (
                     <div style={{ marginBottom: 8 }}>
                         <FormSection>
-                            {plugin.settingsAboutComponent()}
+                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
+                                <plugin.settingsAboutComponent />
+                            </ErrorBoundary>
                         </FormSection>
                     </div>
                 )}
