@@ -26,6 +26,13 @@ pnpm buildWeb
 
 You will find the built extension at dist/extension.zip. Now just install this extension in your Browser
 
+## Installing Plugins
+
+Vencord comes with a bunch of plugins out of the box!
+However, if you want to install your own ones, create a `userplugins` folder in the `src` directory and create or clone your plugins in there!
+
+Want to learn how to create your own plugin, and maybe PR it into Vencord? See the [Contributing](#contributing) section below!
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [Megu's Plugin Guide!](docs/2_PLUGINS.md)
