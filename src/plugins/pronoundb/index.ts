@@ -1,6 +1,11 @@
-import definePlugin from "../../utils/types";
-import PronounComponent from "./PronounComponent";
-import { fetchPronouns } from "./utils";
+import definePlugin, { OptionType } from "../../utils/types";
+import PronounsAboutComponent from "./components/PronounsAboutComponent";
+import PronounsComponent from "./components/PronounsComponent";
+
+export enum PronounsFormat {
+    Lowercase = "lowercase",
+    Capitalized = "capitalized"
+}
 
 export default definePlugin({
     name: "PronounDB",
@@ -14,10 +19,33 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(?<=return\s+\w{1,3}\.createElement\(.+!\w{1,3}&&)(\w{1,3}.createElement\(.+?\{.+?\}\))/,
-                replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounComponent(e)]"
+                replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsComponent(e)]"
             }
         }
     ],
+    options: {
+        pronounsFormat: {
+            type: OptionType.SELECT,
+            description: "The format for pronouns to appear in chat",
+            options: [
+                {
+                    label: "Lowercase",
+                    value: PronounsFormat.Lowercase,
+                    default: true
+                },
+                {
+                    label: "Capitalized",
+                    value: PronounsFormat.Capitalized
+                }
+            ]
+        },
+        showSelf: {
+            type: OptionType.BOOLEAN,
+            description: "Enable or disable showing pronouns for the current user",
+            default: true
+        }
+    },
+    settingsAboutComponent: PronounsAboutComponent,
     // Re-export the component on the plugin object so it is easily accessible in patches
-    PronounComponent
+    PronounsComponent
 });

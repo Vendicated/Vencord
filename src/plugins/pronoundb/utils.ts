@@ -1,3 +1,4 @@
+import gitHash from "git-hash";
 import { debounce } from "../../utils";
 import { PronounCode, PronounsResponse } from "./types";
 
@@ -41,7 +42,8 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
         const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params, {
             method: "GET",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "X-PronounDB-Source": `Vencord/${gitHash} (github.com/Vendicated/Vencord)`
             }
         });
         return await req.json()
