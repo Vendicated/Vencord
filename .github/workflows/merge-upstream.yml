@@ -1,0 +1,14 @@
+name: Merge Upstream
+on:
+  schedule:
+    - cron: "0 * * * *"
+jobs:
+  merge-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge Upstream
+        uses: exions/merge-upstream@v1
+        with:
+          upstream: Vendicated/Vencord
+          upstream-branch: main
+          branch: main
