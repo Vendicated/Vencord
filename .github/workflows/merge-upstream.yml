@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Merge Upstream
-        uses: exions/merge-upstream@v1
+        uses: tgymnich/fork-sync@v1.6.3
         with:
-          upstream: Vendicated/Vencord
-          upstream-branch: main
-          branch: main
+          owner: Vendicated
+          base: main
+          head: main
