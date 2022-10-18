@@ -59,7 +59,7 @@ function makeProxy(settings: Settings, root = settings, path = ""): Settings {
                             // normal setting with a default value
                             return setting.default;
                         if (setting.type === OptionType.SELECT)
-                            return setting.options.find(o => o.default);
+                            return setting.options.find(o => o.default)?.value;
                     }
                 }
                 return v;
