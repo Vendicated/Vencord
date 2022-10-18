@@ -6,16 +6,17 @@ jobs:
   merge-upstream:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ secrets.GH_TOKEN }}
-      - name: Merge Upstream
-        uses: exions/merge-upstream@v1
-        with:
-          upstream: Vendicated/Vencord
-          upstream-branch: main
-          branch: main
-          token: ${{ secrets.GH_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Merge upstream
+        run: |
+          git config --global user.name 'pupbrained'
+          git config --global user.email 'mars@pupbrained.xyz'
+
+          git pull --unshallow
+
+          git remote add upstream https://github.com/Vendicated/Vencord.git
+          git fetch upstream
+
+          git checkout main
+          git merge --no-edit upstream/main
+          git push origin main
