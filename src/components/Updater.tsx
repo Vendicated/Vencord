@@ -72,7 +72,7 @@ function Updatable(props: CommonProps) {
     const [isChecking, setIsChecking] = React.useState(false);
     const [isUpdating, setIsUpdating] = React.useState(false);
 
-    const isOutdated = updates.length > 0;
+    const isOutdated = (updates?.length ?? 0) > 0;
 
     return (
         <>
