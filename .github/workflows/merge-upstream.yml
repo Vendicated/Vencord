@@ -6,9 +6,14 @@ jobs:
   merge-upstream:
     runs-on: ubuntu-latest
     steps:
-      - name: Merge Upstream
-        uses: tgymnich/fork-sync@v1.6.3
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          owner: Vendicated
-          base: main
-          head: main
+          ref: main
+          fetch-depth: 0
+      - name: Merge Upstream
+        uses: exions/merge-upstream@v1
+        with:
+          upstream: Vendicated/Vencord
+          upstream-branch: main
+          branch: main
