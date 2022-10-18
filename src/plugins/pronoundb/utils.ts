@@ -1,6 +1,8 @@
 import gitHash from "git-hash";
+import { PronounsFormat } from ".";
 import { debounce } from "../../utils";
-import { PronounCode, PronounsResponse } from "./types";
+import { Settings } from "../../Vencord";
+import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
 // A map of cached pronouns so the same request isn't sent twice
 const cache: Record<string, PronounCode> = {};
@@ -58,4 +60,17 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
         Object.assign(cache, dummyPronouns);
         return dummyPronouns;
     }
+}
+
+export function formatPronouns(pronouns: PronounCode): string {
+    const { pronounsFormat } = Settings.plugins["PronounDB"] as { pronounsFormat: PronounsFormat, enabled: boolean; };
+    // For capitalized pronouns, just return the mapping (it is by default capitalized)
+    if (pronounsFormat === PronounsFormat.Capitalized) return PronounMapping[pronouns];
+    // If it is set to lowercase and a special code (any, ask, avoid), then just return the capitalized text
+    else if (
+        pronounsFormat === PronounsFormat.Lowercase
+        && ["any", "ask", "avoid", "other"].includes(pronouns)
+    ) return PronounMapping[pronouns];
+    // Otherwise (lowercase and not a special code), then convert the mapping to lowercase
+    else return PronounMapping[pronouns].toLowerCase();
 }

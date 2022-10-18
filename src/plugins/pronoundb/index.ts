@@ -3,8 +3,8 @@ import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import PronounsComponent from "./components/PronounsComponent";
 
 export enum PronounsFormat {
-    Lowercase = "lowercase",
-    Capitalized = "capitalized"
+    Lowercase = "LOWERCASE",
+    Capitalized = "CAPITALIZED"
 }
 
 export default definePlugin({
