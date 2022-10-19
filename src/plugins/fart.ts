@@ -23,7 +23,7 @@ export default definePlugin({
 
         execute(args) {
             const fart = new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3");
-            fart.volume = Settings.plugins["Fart2"].volume;
+            fart.volume = Settings.plugins.Fart2.volume;
             fart.play();
 
             return {
