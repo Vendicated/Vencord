@@ -114,6 +114,6 @@ function getMoyaiCount(message: string) {
 function boom() {
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
-    audioElement.volume = Settings.plugins["Moyai"].volume;
+    audioElement.volume = Settings.plugins.Moyai.volume;
     audioElement.play();
 }
