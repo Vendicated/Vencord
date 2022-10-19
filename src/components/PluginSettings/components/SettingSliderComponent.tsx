@@ -5,7 +5,7 @@ import { Forms, React, Slider } from "../../../webpack/common";
 export function makeRange(start: number, end: number, step = 1) {
     let ranges: number[] = [];
     for (let value = start; value <= end; value += step) {
-        ranges.push(parseFloat(value.toFixed(2)));
+        ranges.push(Math.round(value * 100) / 100);
     }
     return ranges;
 }
