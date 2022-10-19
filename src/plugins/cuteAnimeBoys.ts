@@ -9,15 +9,14 @@ async function fetchReddit(sub: string) {
     const r = rand(1, 100);
     const res = await fetch(`https://www.reddit.com/r/${sub}/top.json?limit=${r}&t=all`);
     const resp = await res.json();
-    let url = "";
     try {
-        url = resp.data.children[r-1].data.url;
+        return resp.data.children[r-1].data.url;
     } catch (err) {
         console.error(resp);
         console.error(r);
         console.error(err);
     }
-    return url;
+    return "";
 }
 
 export default definePlugin({
