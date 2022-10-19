@@ -3,7 +3,7 @@ import { PluginOptionSlider } from "../../../utils/types";
 import { Forms, React, Slider } from "../../../webpack/common";
 
 export function makeRange(start: number, end: number, step = 1) {
-    let ranges: number[] = [];
+    const ranges: number[] = [];
     for (let value = start; value <= end; value += step) {
         ranges.push(Math.round(value * 100) / 100);
     }
