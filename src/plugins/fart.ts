@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType } from "../api/Commands";
+import { makeRange } from "../components/PluginSettings/components";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
-import { makeLazy } from "../utils/misc";
 import { Settings } from "../Vencord";
 
 export default definePlugin({
@@ -33,10 +33,11 @@ export default definePlugin({
     }],
     options: {
         volume: {
-            type: OptionType.NUMBER,
-            description: "Loudness volume",
+            description: "how loud you wanna fart (aka volume)",
+            type: OptionType.SLIDER,
+            markers: makeRange(0, 1, 0.1),
             default: 0.5,
-            restartNeeded: false
+            stickToMarkers: false,
         }
     }
 });
