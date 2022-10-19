@@ -27,7 +27,7 @@ export default definePlugin({
         predicate: () => Settings.plugins.Ify.keepSpotifyActivityOnIdle,
         replacement: {
             match: /(shouldShowActivity=function\(\){.{1,50})&&!.{1,6}\.isIdle\(\)(.{0,}?})/,
-            replace: "$1$2"
+            replace: (_, functionDeclarationAndExpression, restOfFunction) => `${functionDeclarationAndExpression}${restOfFunction}`
         }
     }],
     options: {
