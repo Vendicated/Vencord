@@ -1,8 +1,11 @@
-import definePlugin from "../utils/types";
-import { Devs } from "../utils/constants";
 import { Message, ReactionEmoji } from "discord-types/general";
-import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
+
+import { makeRange } from "../components/PluginSettings/components/SettingSliderComponent";
+import { Devs } from "../utils/constants";
 import { sleep } from "../utils/misc";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
+import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -67,6 +70,16 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
     },
+
+    options: {
+        volume: {
+            description: "Volume of the 🗿🗿🗿",
+            type: OptionType.SLIDER,
+            markers: makeRange(0, 1, 0.1),
+            default: 0.5,
+            stickToMarkers: false,
+        }
+    }
 });
 
 function countOccurrences(sourceString: string, subString: string) {
@@ -101,5 +114,6 @@ function getMoyaiCount(message: string) {
 function boom() {
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
+    audioElement.volume = Settings.plugins.Moyai.volume;
     audioElement.play();
 }

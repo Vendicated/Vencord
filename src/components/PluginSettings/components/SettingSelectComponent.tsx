@@ -2,8 +2,6 @@ import { ISettingElementProps } from ".";
 import { PluginOptionSelect } from "../../../utils/types";
 import { Forms, React, Select } from "../../../webpack/common";
 
-const { FormSection, FormTitle, FormText } = Forms;
-
 export function SettingSelectComponent({ option, pluginSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
 
@@ -25,8 +23,8 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
     }
 
     return (
-        <FormSection>
-            <FormTitle>{option.description}</FormTitle>
+        <Forms.FormSection>
+            <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <Select
                 isDisabled={option.disabled?.() ?? false}
                 options={option.options}
@@ -38,7 +36,7 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
                 serialize={v => String(v)}
                 {...option.componentProps}
             />
-            {error && <FormText style={{ color: "var(--text-danger)" }}>{error}</FormText>}
-        </FormSection>
+            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+        </Forms.FormSection>
     );
 }

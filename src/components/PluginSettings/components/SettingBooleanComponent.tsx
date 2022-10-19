@@ -2,8 +2,6 @@ import { ISettingElementProps } from ".";
 import { PluginOptionBoolean } from "../../../utils/types";
 import { Forms, React, Select } from "../../../webpack/common";
 
-const { FormSection, FormTitle, FormText } = Forms;
-
 export function SettingBooleanComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
 
@@ -31,8 +29,8 @@ export function SettingBooleanComponent({ option, pluginSettings, id, onChange, 
     }
 
     return (
-        <FormSection>
-            <FormTitle>{option.description}</FormTitle>
+        <Forms.FormSection>
+            <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <Select
                 isDisabled={option.disabled?.() ?? false}
                 options={options}
@@ -44,8 +42,8 @@ export function SettingBooleanComponent({ option, pluginSettings, id, onChange, 
                 serialize={v => String(v)}
                 {...option.componentProps}
             />
-            {error && <FormText style={{ color: "var(--text-danger)" }}>{error}</FormText>}
-        </FormSection>
+            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+        </Forms.FormSection>
     );
 }
 

@@ -31,6 +31,7 @@ export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 
 export const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = lazyWebpack(filters.byCode("closestMarkerIndex", "stickToMarkers"));
 
 export let Parser: any;
 export let Alerts: {
