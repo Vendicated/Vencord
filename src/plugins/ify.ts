@@ -1,18 +1,47 @@
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
 
 export default definePlugin({
     name: "Ify",
-    description: "Disables Spotify auto-pausing and Premium checks, allowing you to listen along with others.",
-    authors: [Devs.Cyn],
+    description: "Disables Spotify auto-pausing, allows activity to continue playing when idling and bypasses premium checks, allowing you to listen along with others.",
+    authors: [
+        Devs.Cyn,
+        { name: "Nuckyz", id: 235834946571337729n }
+    ],
     patches: [{
-        find: '.displayName="SpotifyStore"',
+        find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
         replacement: [{
-            match: /\.isPremium=.;/,
-            replace: ".isPremium=true;"
-        }, {
+            match: /(function\((.{1,2})\){)(.{1,6}dispatch\({type:"SPOTIFY_PROFILE_UPDATE")/,
+            replace: '$1$2.body.product=\"premium\";$3'
+        }],
+    }, {
+        find: '.displayName="SpotifyStore"',
+        predicate: () => Settings.plugins["Ify"].noSpotifyAutoPause === true,
+        replacement: {
             match: /function (.{1,2})\(\).{0,200}SPOTIFY_AUTO_PAUSED\);.{0,}}}}/,
             replace: "function $1(){}"
-        }]
-    }]
+        }
+    }, {
+        find: '.displayName="SpotifyStore"',
+        predicate: () => Settings.plugins["Ify"].keepSpotifyActivityOnIdle === true,
+        replacement: {
+            match: /(shouldShowActivity=function\(\){.{1,50})&&!.{1,6}\.isIdle\(\)(.{0,}?})/,
+            replace: "$1$2"
+        }
+    }],
+    options: {
+        noSpotifyAutoPause: {
+            description: "Disable Spotify auto-pause",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: true,
+        },
+        keepSpotifyActivityOnIdle: {
+            description: "Keep Spotify activity playing when idling",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        }
+    }
 });
