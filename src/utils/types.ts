@@ -70,13 +70,15 @@ export enum OptionType {
     BIGINT,
     BOOLEAN,
     SELECT,
+    SLIDER,
 }
 
 export type PluginOptionsItem =
     | PluginOptionString
     | PluginOptionNumber
     | PluginOptionBoolean
-    | PluginOptionSelect;
+    | PluginOptionSelect
+    | PluginOptionSlider;
 
 export interface PluginOptionBase {
     description: string;
@@ -130,6 +132,26 @@ export interface PluginOptionSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;
+}
+
+export interface PluginOptionSlider extends PluginOptionBase {
+    type: OptionType.SLIDER;
+    /**
+     * All the possible values in the slider. Needs at least two values.
+     */
+    markers: number[];
+    /**
+     * Default value to use
+     */
+    default: number;
+    /**
+     * If false, allow users to select values in-between your markers.
+     */
+    stickToMarkers?: boolean;
+    /**
+     * Prevents the user from saving settings if this is false or a string
+     */
+    isValid?(value: number): number;
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };

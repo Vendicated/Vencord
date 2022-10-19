@@ -15,9 +15,8 @@ import {
     SettingInputComponent,
     SettingNumericComponent,
     SettingSelectComponent,
+    SettingSliderComponent,
 } from "./components";
-
-const { FormSection, FormText, FormTitle } = Forms;
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));
@@ -80,7 +79,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     function renderSettings() {
         if (!pluginSettings || !plugin.options) {
-            return <FormText>There are no settings for this plugin.</FormText>;
+            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         }
 
         const options: JSX.Element[] = [];
@@ -110,6 +109,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 }
                 case OptionType.BOOLEAN: {
                     options.push(<SettingBooleanComponent key={key} option={setting} {...props} />);
+                    break;
+                }
+                case OptionType.SLIDER: {
+                    options.push(<SettingSliderComponent key={key} option={setting} {...props} />);
+                    break;
                 }
             }
         }
@@ -142,9 +146,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <Text variant="heading-md/bold">{plugin.name}</Text>
             </ModalHeader>
             <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
-                <FormSection>
-                    <FormTitle tag="h3">About {plugin.name}</FormTitle>
-                    <FormText>{plugin.description}</FormText>
+                <Forms.FormSection>
+                    <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
+                    <Forms.FormText>{plugin.description}</Forms.FormText>
                     <div style={{ marginTop: 8, marginBottom: 8, width: "fit-content" }}>
                         <UserSummaryItem
                             users={authors}
@@ -157,20 +161,20 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             renderMoreUsers={renderMoreUsers}
                         />
                     </div>
-                </FormSection>
+                </Forms.FormSection>
                 {!!plugin.settingsAboutComponent && (
                     <div style={{ marginBottom: 8 }}>
-                        <FormSection>
+                        <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
                                 <plugin.settingsAboutComponent />
                             </ErrorBoundary>
-                        </FormSection>
+                        </Forms.FormSection>
                     </div>
                 )}
-                <FormSection>
-                    <FormTitle tag="h3">Settings</FormTitle>
+                <Forms.FormSection>
+                    <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
                     {renderSettings()}
-                </FormSection>
+                </Forms.FormSection>
             </ModalContent>
             <ModalFooter>
                 <Flex>
