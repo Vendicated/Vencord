@@ -78,5 +78,5 @@ the GPL-3.0 as found in [LICENSE](LICENSE)
  #### For contributors
  
  For contributors wanting to submit a plugin, as stated above you may license your plugin under your own License as long as it satisfies the following Conditions:
- - It is an open source license approved by either the [OSI](https://opensource.org/licenses/alphabetical) or the [FSF](https://www.gnu.org/licenses/licenses.en.html)
+ - It is an open source license approved by either the [OSI](https://opensource.org/licenses/alphabetical) or the [FSF](https://www.gnu.org/licenses/license-list.html)
  - It is GPL-3.0-compatible
