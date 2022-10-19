@@ -2,9 +2,10 @@ import { Message, ReactionEmoji } from "discord-types/general";
 
 import { makeRange } from "../components/PluginSettings/components/SettingSliderComponent";
 import { Devs } from "../utils/constants";
-import { sleep } from "../utils/misc";
+import { sleep, lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
+import { filters } from "../webpack";
 import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
 
 interface IMessageCreate {
@@ -31,12 +32,15 @@ const MOYAI_URL =
 // Implement once Settings are a thing
 const ignoreBots = true;
 
+const WindowStore = lazyWebpack(filters.byProps(["isFocused", "windowSize"]));
+
 export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
 
     async onMessage(e: IMessageCreate) {
+        if (!Settings.plugins.Moyai.triggerWhenUnfocused && !WindowStore.isFocused()) return;
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
         if (ignoreBots && e.message.author?.bot) return;
@@ -52,6 +56,7 @@ export default definePlugin({
     },
 
     onReaction(e: IReactionAdd) {
+        if (!Settings.plugins.Moyai.triggerWhenUnfocused && !WindowStore.isFocused()) return;
         if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
