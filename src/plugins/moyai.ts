@@ -36,7 +36,7 @@ const WindowStore = lazyWebpack(filters.byProps(["isFocused", "windowSize"]));
 
 export default definePlugin({
     name: "Moyai",
-    authors: [Devs.Megu],
+    authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
 
     async onMessage(e: IMessageCreate) {
