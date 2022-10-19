@@ -37,7 +37,6 @@ export default definePlugin({
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
 
     async onMessage(e: IMessageCreate) {
-        if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
         if (ignoreBots && e.message.author?.bot) return;
@@ -53,7 +52,6 @@ export default definePlugin({
     },
 
     onReaction(e: IReactionAdd) {
-        if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
         if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -120,6 +118,7 @@ function getMoyaiCount(message: string) {
 }
 
 function boom() {
+    if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
     audioElement.volume = Settings.plugins.Moyai.volume;
