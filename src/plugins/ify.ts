@@ -17,14 +17,14 @@ export default definePlugin({
         }],
     }, {
         find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins["Ify"].noSpotifyAutoPause === true,
+        predicate: () => Settings.plugins.Ify.noSpotifyAutoPause,
         replacement: {
             match: /function (.{1,2})\(\).{0,200}SPOTIFY_AUTO_PAUSED\);.{0,}}}}/,
             replace: "function $1(){}"
         }
     }, {
         find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins["Ify"].keepSpotifyActivityOnIdle === true,
+        predicate: () => Settings.plugins.Ify.keepSpotifyActivityOnIdle,
         replacement: {
             match: /(shouldShowActivity=function\(\){.{1,50})&&!.{1,6}\.isIdle\(\)(.{0,}?})/,
             replace: "$1$2"
