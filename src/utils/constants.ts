@@ -51,5 +51,8 @@ export const Devs = Object.freeze({
         name: "ECHO",
         id: 712639419785412668n
     },
-
+    katlyn: {
+        name: "katlyn",
+        id: 250322741406859265n
+    }
 });
