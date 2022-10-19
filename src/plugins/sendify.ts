@@ -56,7 +56,7 @@ const sendMessage = (channelID: string, message: PartialDeep<Message>) => {
 
 export default definePlugin({
     name: "Sendify",
-    description: "Send your current Spotify track to chat",
+    description: "Send your current Spotify music to chat",
     authors: [Devs.katlyn],
     dependencies: ["CommandsAPI"],
     commands: [
