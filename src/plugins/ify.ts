@@ -9,6 +9,7 @@ export default definePlugin({
         Devs.Cyn,
         { name: "Nuckyz", id: 235834946571337729n }
     ],
+
     patches: [{
         find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
         replacement: [{
@@ -30,6 +31,7 @@ export default definePlugin({
             replace: (_, functionDeclarationAndExpression, restOfFunction) => `${functionDeclarationAndExpression}${restOfFunction}`
         }
     }],
+
     options: {
         noSpotifyAutoPause: {
             description: "Disable Spotify auto-pause",
