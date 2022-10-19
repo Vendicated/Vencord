@@ -1,7 +1,8 @@
 import { ApplicationCommandOptionType } from "../api/Commands";
+import { makeRange } from "../components/PluginSettings/components";
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { makeLazy } from "../utils/misc";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
 
 export default definePlugin({
     name: "Fart2",
@@ -22,12 +23,21 @@ export default definePlugin({
 
         execute(args) {
             const fart = new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3");
-            fart.volume = 0.3;
+            fart.volume = Settings.plugins.Fart2.volume;
             fart.play();
 
             return {
                 content: (args[0]) ? `<@${args[0].value}> fart` : "fart"
             };
         },
-    }]
+    }],
+    options: {
+        volume: {
+            description: "how loud you wanna fart (aka volume)",
+            type: OptionType.SLIDER,
+            markers: makeRange(0, 1, 0.1),
+            default: 0.5,
+            stickToMarkers: false,
+        }
+    }
 });
