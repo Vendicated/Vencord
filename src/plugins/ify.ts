@@ -13,7 +13,7 @@ export default definePlugin({
         find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
         replacement: [{
             match: /(function\((.{1,2})\){)(.{1,6}dispatch\({type:"SPOTIFY_PROFILE_UPDATE")/,
-            replace: '$1$2.body.product=\"premium\";$3'
+            replace: (_, functionStart, data, functionBody) => `${functionStart}${data}.body.product="premium";${functionBody}`
         }],
     }, {
         find: '.displayName="SpotifyStore"',
