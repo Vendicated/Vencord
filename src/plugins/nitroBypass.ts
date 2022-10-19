@@ -15,7 +15,7 @@ export default definePlugin({
             replacement: [
                 "canUseAnimatedEmojis",
                 "canUseEmojisEverywhere",
-                "canUseHighVideoQuality",
+                "canUseHighVideoUploadQuality",
                 "canStreamHighQuality",
                 "canStreamMidQuality"
             ].map(func => {
