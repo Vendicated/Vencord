@@ -111,7 +111,7 @@ function countMatches(sourceString: string, pattern: RegExp) {
 const customMoyaiRe = /<a?:\w*moy?ai\w*:\d{17,20}>/gi;
 
 function getMoyaiCount(message: string) {
-    let count = countOccurrences(message, MOYAI)
+    const count = countOccurrences(message, MOYAI)
         + countMatches(message, customMoyaiRe);
 
     return Math.min(count, 10);

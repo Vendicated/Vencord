@@ -13,7 +13,7 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
     }, [error]);
 
     function handleChange(newValue) {
-        let isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {

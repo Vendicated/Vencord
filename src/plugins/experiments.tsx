@@ -30,7 +30,7 @@ export default definePlugin({
         },
     }, {
         find: ".isStaff=function(){",
-        predicate: () => Settings.plugins["Experiments"].enableIsStaff === true,
+        predicate: () => Settings.plugins.Experiments.enableIsStaff === true,
         replacement: [
             {
                 match: /return\s*(\w+)\.hasFlag\((.+?)\.STAFF\)}/,
