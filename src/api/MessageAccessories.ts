@@ -1,4 +1,4 @@
-export type AccessoryCallback = (props: object) => JSX.Element;
+export type AccessoryCallback = (props: Record<string, any>) => JSX.Element;
 export type Accessory = {
     callback: AccessoryCallback;
     position: number | null | undefined;
@@ -21,7 +21,10 @@ export function removeAccessory(identifier: string) {
     accessories.delete(identifier);
 }
 
-export function _modifyAccessories(elements: JSX.Element[], props: object) {
+export function _modifyAccessories(
+    elements: JSX.Element[],
+    props: Record<string, any>
+) {
     for (const accessory of accessories.values()) {
         elements.splice(
             accessory.position != null
