@@ -1,7 +1,7 @@
 export type AccessoryCallback = (props: Record<string, any>) => JSX.Element;
 export type Accessory = {
     callback: AccessoryCallback;
-    position: number | null | undefined;
+    position?: number;
 };
 
 export const accessories = new Map<String, Accessory>();
@@ -9,7 +9,7 @@ export const accessories = new Map<String, Accessory>();
 export function addAccessory(
     identifier: string,
     callback: AccessoryCallback,
-    position: number | null | undefined
+    position?: number
 ) {
     accessories.set(identifier, {
         callback,
