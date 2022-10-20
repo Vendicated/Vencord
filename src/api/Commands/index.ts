@@ -75,6 +75,15 @@ function modifyOpt(opt: Option | Command) {
 }
 
 export function registerCommand(command: Command, plugin: string) {
+    if (!BUILT_IN) {
+        console.warn(
+            "[CommandsAPI]",
+            `Not registering ${command.name} as the CommandsAPI hasn't been initialised.`,
+            "Please restart to use commands"
+        );
+        return;
+    }
+
     if (BUILT_IN.some(c => c.name === command.name))
         throw new Error(`Command '${command.name}' already exists.`);
 
