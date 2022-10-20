@@ -3,13 +3,7 @@
     "parser": "@typescript-eslint/parser",
     "ignorePatterns": ["dist"],
     "rules": {
-        "quotes": [
-            "error",
-            "double",
-            {
-                "avoidEscape": true
-            }
-        ],
+        "quotes": ["error", "double", { "avoidEscape": true }],
         "jsx-quotes": ["error", "prefer-double"],
         "no-mixed-spaces-and-tabs": "error",
         "indent": ["error", 4, { "SwitchCase": 1 }],
@@ -25,7 +19,7 @@
         "block-spacing": ["error", "always"],
         "object-curly-spacing": ["error", "always"],
         "eqeqeq": ["error", "always", { "null": "ignore" }],
-        "spaced-comment": ["error", "always"],
+        "spaced-comment": ["error", "always", { "markers": ["!"] }],
         "yoda": "error",
         "prefer-destructuring": ["error", { "object": true, "array": false }],
         "operator-assignment": ["error", "always"],
