@@ -2,25 +2,54 @@ import { WEBPACK_CHUNK } from "../utils/constants";
 import Logger from "../utils/logger";
 import { _initWebpack } from ".";
 
-let webpackChunk: any[];
-
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
-Object.defineProperty(window, WEBPACK_CHUNK, {
-    get: () => webpackChunk,
-    set: v => {
-        if (v?.push !== Array.prototype.push) {
-            logger.info(`Patching ${WEBPACK_CHUNK}.push`);
-            _initWebpack(v);
-            patchPush();
+let webpackChunk: unknown;
+let __chunk_webpack_chunk_push_imported_map: Map<string, boolean> = new Map();
+
+const patchPush = () => {
+    Object.defineProperty(webpackChunk, 'push', {
+        get: () => (...args: any[]) => {
+            const imports = args.filter(arg => typeof arg === 'string') as string[];
+            for (const imp of imports) {
+                if (!__chunk_webpack_chunk_push_imported_map.has(imp)) {
+                    __chunk_webpack_chunk_push_imported_map.set(imp, true);
+                    logger.info(`Load chunk: ${imp}`);
+                }
+            }
             // @ts-ignore
-            delete window[WEBPACK_CHUNK];
-            window[WEBPACK_CHUNK] = v;
-        }
-        webpackChunk = v;
-    },
-    configurable: true
-});
+            return Array.prototype.push.apply(webpackChunk, args);
+        },
+    });
+}
+
+const _initWebpack = (chunk: any) => {
+    if (typeof chunk !== 'object' || !chunk) {
+        logger.error('webpackChunk is not an object');
+        return;
+    }
+    if (!Array.isArray(chunk)) {
+        logger.error('webpackChunk is not an array');
+        return;
+    }
+    if (chunk.push !== Array.prototype.push) {
+        logger.error('webpackChunk.push is not a function');
+        return;
+    }
+    const imports = chunk.filter(arg => typeof arg === 'string') as string[];
+    for (const imp of imports) {
+        __chunk_webpack_chunk_push_imported_map.set(imp, true);
+    }
+}
+
+const initWebpack = () => {
+    if (!webpackChunk) {
+        logger.error('webpackChunk is not set');
+        return;
+    }
+    _initWebpack(webpackChunk);
+    patchPush();
+}
 
 function patchPush() {
     function handlePush(chunk) {
