@@ -5,7 +5,7 @@ import { Devs } from "../utils/constants";
 import { sleep } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
+import { FluxDispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -28,9 +28,6 @@ const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
 
-// Implement once Settings are a thing
-const ignoreBots = true;
-
 export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu, Devs.Nuckyz],
@@ -39,7 +36,7 @@ export default definePlugin({
     async onMessage(e: IMessageCreate) {
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
-        if (ignoreBots && e.message.author?.bot) return;
+        if (Settings.plugins.Moyai.ignoreBots && e.message.author?.bot) return;
         if (!e.message.content) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -53,6 +50,7 @@ export default definePlugin({
 
     onReaction(e: IReactionAdd) {
         if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
+        if (Settings.plugins.Moyai.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
         const name = e.emoji.name.toLowerCase();
@@ -81,6 +79,12 @@ export default definePlugin({
         },
         triggerWhenUnfocused: {
             description: "Trigger the 🗿 even when the window is unfocused",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false,
+        },
+        ignoreBots: {
+            description: "Ignore bots",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: false,
