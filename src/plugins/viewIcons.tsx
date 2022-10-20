@@ -49,7 +49,7 @@ export default definePlugin({
                     replace: (m, guild) => `_guild=${guild},${m}`
                 },
                 {
-                    match: /(?<=createElement\((.{1,5}),\{id:"leave-guild".{0,100}\,)(.{1,2}\.createElement)\((.{1,5}),null,(.{1,2})\)(?=\)\}function)/,
+                    match: /(?<=createElement\((.{1,5}),\{id:"leave-guild".{0,100},)(.{1,2}\.createElement)\((.{1,5}),null,(.{1,2})\)(?=\)\}function)/,
                     replace: (_, menu, createElement, menuGroup, copyIdElement) =>
                         `${createElement}(${menuGroup},null,[` +
                         `_guild.icon&&${createElement}(${menu},` +

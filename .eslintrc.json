@@ -35,6 +35,26 @@
         "no-constant-condition": ["error", { "checkLoops": false }],
         "no-duplicate-imports": "error",
         "no-extra-semi": "error",
-        "consistent-return": ["error", { "treatUndefinedAsUnspecified": true }]
+        "consistent-return": ["warn", { "treatUndefinedAsUnspecified": true }],
+        "dot-notation": "error",
+        "no-useless-escape": "error",
+        "no-fallthrough": "error",
+        "for-direction": "error",
+        "no-async-promise-executor": "error",
+        "no-cond-assign": "error",
+        "no-dupe-else-if": "error",
+        "no-duplicate-case": "error",
+        "no-irregular-whitespace": "error",
+        "no-loss-of-precision": "error",
+        "no-misleading-character-class": "error",
+        "no-prototype-builtins": "error",
+        "no-regex-spaces": "error",
+        "no-shadow-restricted-names": "error",
+        "no-unexpected-multiline": "error",
+        "no-unsafe-optional-chaining": "error",
+        "no-useless-backreference": "error",
+        "use-isnan": "error",
+        "prefer-const": "error",
+        "prefer-spread": "error"
     }
 }

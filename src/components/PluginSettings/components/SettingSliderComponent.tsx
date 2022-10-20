@@ -20,7 +20,7 @@ export function SettingSliderComponent({ option, pluginSettings, id, onChange, o
     }, [error]);
 
     function handleChange(newValue: number): void {
-        let isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {

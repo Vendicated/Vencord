@@ -38,7 +38,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     params.append("ids", ids.join(","));
 
     try {
-        const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params, {
+        const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params.toString(), {
             method: "GET",
             headers: {
                 "Accept": "application/json"

@@ -31,14 +31,14 @@ function uwuify(message: string): string {
         .split(" ")
         .map(w => {
             let owofied = false;
-            let lowerCase = w.toLowerCase();
+            const lowerCase = w.toLowerCase();
             // return if the word is too short - uwuifying short words makes them unreadable
             if (w.length < 4) {
                 return w;
             }
 
             // replacing the words based on the array on line 29
-            for (let [find, replace] of replacements) {
+            for (const [find, replace] of replacements) {
                 if (w.includes(find)) {
                     w = w.replace(find, replace);
                     owofied = true;

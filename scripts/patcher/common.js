@@ -72,7 +72,7 @@ function question(question) {
 }
 
 async function getMenuItem(installations) {
-    let menuItems = installations.map(info => ({
+    const menuItems = installations.map(info => ({
         title: info.patched ? "[MODIFIED] " + info.location : info.location,
         info,
     }));
@@ -126,7 +126,7 @@ function getWindowsDirs() {
             .filter(file => file.name.startsWith("app-"))
             .map(file => path.join(location, file.name));
 
-        let versions = [];
+        const versions = [];
         let patched = false;
 
         for (const fqAppDir of appDirs) {
@@ -140,7 +140,7 @@ function getWindowsDirs() {
             }
             versions.push({
                 path: appDir,
-                name: /app-([0-9\.]+)/.exec(fqAppDir)[1],
+                name: /app-([0-9.]+)/.exec(fqAppDir)[1],
             });
         }
 
@@ -173,7 +173,7 @@ function getDarwinDirs() {
             .filter(file => file.name.startsWith("Resources"))
             .map(file => path.join(location, file.name));
 
-        let versions = [];
+        const versions = [];
         let patched = false;
 
         for (const resourceDir of appDirs) {
@@ -248,7 +248,7 @@ function getLinuxDirs() {
                     .map(file => path.join(location, file.name));
             }
 
-            let versions = [];
+            const versions = [];
             let patched = false;
 
             for (const resourceDir of appDirs) {
@@ -260,7 +260,7 @@ function getLinuxDirs() {
                     patched = true;
                 }
 
-                const version = /app-([0-9\.]+)/.exec(resourceDir);
+                const version = /app-([0-9.]+)/.exec(resourceDir);
 
                 versions.push({
                     path: appDir,
