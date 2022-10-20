@@ -4,7 +4,8 @@
 // I would usually not add my own Copyright for such a small modification
 // but the Apache License requires this.
 
-/*
+/*!
+ * idb-keyval v6.2.0
  * Copyright 2016, Jake Archibald
  * Copyright 2022, Vendicated
  *
