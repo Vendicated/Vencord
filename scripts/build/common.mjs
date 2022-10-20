@@ -13,7 +13,8 @@ export const commonOpts = {
     bundle: true,
     watch,
     minify: !watch,
-    sourcemap: watch ? "inline" : ""
+    sourcemap: watch ? "inline" : "",
+    legalComments: "linked"
 };
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
@@ -23,7 +24,7 @@ export const commonOpts = {
 export const makeAllPackagesExternalPlugin = {
     name: "make-all-packages-external",
     setup(build) {
-        let filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/; // Must not start with "/" or "./" or "../"
+        const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
         build.onResolve({ filter }, args => ({ path: args.path, external: true }));
     },
 };
