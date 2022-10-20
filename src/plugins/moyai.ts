@@ -33,7 +33,7 @@ const ignoreBots = true;
 
 export default definePlugin({
     name: "Moyai",
-    authors: [Devs.Megu],
+    authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
 
     async onMessage(e: IMessageCreate) {
@@ -78,6 +78,12 @@ export default definePlugin({
             markers: makeRange(0, 1, 0.1),
             default: 0.5,
             stickToMarkers: false,
+        },
+        triggerWhenUnfocused: {
+            description: "Trigger the 🗿 even when the window is unfocused",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false,
         }
     }
 });
@@ -112,6 +118,7 @@ function getMoyaiCount(message: string) {
 }
 
 function boom() {
+    if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
     audioElement.volume = Settings.plugins.Moyai.volume;

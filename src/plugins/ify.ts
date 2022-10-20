@@ -7,7 +7,7 @@ export default definePlugin({
     description: "Disables Spotify auto-pausing, allows activity to continue playing when idling and bypasses premium checks, allowing you to listen along with others.",
     authors: [
         Devs.Cyn,
-        { name: "Nuckyz", id: 235834946571337729n }
+        Devs.Nuckyz
     ],
 
     patches: [{
