@@ -34,13 +34,16 @@ export const listeners = new Set<CallbackFn>();
 
 export type CallbackFn = (mod: any) => void;
 
-export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
-    if (cache !== void 0) throw "no.";
-
-    wreq = instance.push([[Symbol()], {}, r => r]);
-    cache = wreq.c;
-    instance.pop();
-}
+let req: {
+    w: {
+        m(ids: readonly symbol[], callback: (...modules: any[]) => void): void;
+        c: {
+            [k: string]: any;
+        };
+    };
+    a: any;
+};
+req.w.m(["a"], (a) => req.a = a);
 
 export function find(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
