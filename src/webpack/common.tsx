@@ -93,6 +93,10 @@ export const UserUtils = {
     fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
 };
 
+export const Clipboard = {
+    copy: lazyWebpack(filters.byCode(".default.copy(")),
+};
+
 waitFor("useState", m => React = m);
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
