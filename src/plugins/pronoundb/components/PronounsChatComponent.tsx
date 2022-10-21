@@ -12,7 +12,7 @@ export default function ({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
     if (message.author.bot || message.author.system) return null;
     // Respect showSelf options
-    if (!(Settings.plugins["PronounDB"].showSelf) && message.author.id === UserStore.getCurrentUser().id) return null;
+    if (!Settings.plugins["PronounDB"].showSelf && message.author.id === UserStore.getCurrentUser().id) return null;
 
     const [result, , isPending] = useAwaiter(
         () => fetchPronouns(message.author.id),

@@ -1,3 +1,14 @@
+import { User } from "discord-types/general";
+
+export interface UserProfileProps {
+    customStatus: JSX.Element,
+    displayProfile: {
+        // In the future (if discord ever uses their pronouns system) this taking priority can be a plugin setting
+        pronouns: string;
+    };
+    user: User;
+}
+
 export interface PronounsResponse {
     [id: string]: PronounCode;
 }

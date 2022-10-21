@@ -1,6 +1,7 @@
 import definePlugin, { OptionType } from "../../utils/types";
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
-import PronounsComponent from "./components/PronounsComponent";
+import PronounsChatComponent from "./components/PronounsChatComponent";
+import PronounsProfileWrapper from "./components/PronounsProfileWrapper";
 
 export enum PronounsFormat {
     Lowercase = "LOWERCASE",
@@ -15,11 +16,20 @@ export default definePlugin({
     }],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
+        // Patch the chat timestamp element
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(?<=return\s+\w{1,3}\.createElement\(.+!\w{1,3}&&)(\w{1,3}.createElement\(.+?\{.+?\}\))/,
-                replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsComponent(e)]"
+                replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsChatComponent(e)]"
+            }
+        },
+        // Hijack the discord pronouns section (hidden without experiment) and add a wrapper around the text section
+        {
+            find: ".headerTagUsernameNoNickname",
+            replacement: {
+                match: /""!==(.{1,2})&&(r\.createElement\(r\.Fragment.+?\.Messages\.USER_POPOUT_PRONOUNS.+?pronounsText.+?\},\1\)\))/,
+                replace: (_, __, fragment) => `Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(e, ${fragment})`
             }
         }
     ],
@@ -46,6 +56,7 @@ export default definePlugin({
         }
     },
     settingsAboutComponent: PronounsAboutComponent,
-    // Re-export the component on the plugin object so it is easily accessible in patches
-    PronounsComponent
+    // Re-export the components on the plugin object so it is easily accessible in patches
+    PronounsChatComponent,
+    PronounsProfileWrapper
 });
