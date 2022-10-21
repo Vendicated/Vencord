@@ -1,7 +1,7 @@
 import { User } from "discord-types/general";
 
 import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, waitFor } from "./webpack";
+import { _resolveReady, filters, waitFor, mapMangledModuleLazy } from "./webpack";
 
 import type Components from "discord-types/components";
 import type Stores from "discord-types/stores";
@@ -92,6 +92,11 @@ export const Toasts = {
 export const UserUtils = {
     fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
 };
+
+export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
+    copy: filters.byCode(".default.copy("),
+    SUPPORTS_COPY: x => typeof x === "boolean",
+});
 
 waitFor("useState", m => React = m);
 waitFor(["dispatch", "subscribe"], m => {
