@@ -12,16 +12,10 @@ import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
+import { NewBadge } from "./components";
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
-
-// Not sure where to put this lol
-function NewBadge(): JSX.Element {
-    return (
-        <div style={{ backgroundColor: "#5865F2", justifySelf: "flex-end", marginLeft: "auto" }} className="textBadge-1fdDPJ base-3IDx3L baseShapeRound-3epLEv">New</div>
-    );
-}
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -69,7 +63,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
 
     return (
         <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <Text variant="text-md/bold" style={{ display: "flex" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
+            <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
             <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>
             <Flex flexDirection="row-reverse" style={{ marginTop: "auto", width: "100%", justifyContent: "space-between" }}>
                 <Button
