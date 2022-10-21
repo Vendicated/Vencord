@@ -1,20 +1,21 @@
-// ==UserScript==
-// @name            Vencord
-// @description     A Discord client mod - Web version
-// @version         %version%
-// @author          Vendicated (https://github.com/Vendicated)
-// @namespace       https://github.com/Vendicated/Vencord
-// @supportURL      https://github.com/Vendicated/Vencord
-// @license         GPL-3.0
-// @match           *://*.discord.com/*
-// @grant           none
-// @run-at          document-start
-// @compatible      chrome Chrome + Tampermonkey or Violentmonkey
-// @compatible      firefox Firefox Tampermonkey
-// @compatible      opera Opera + Tampermonkey or Violentmonkey
-// @compatible      edge Edge + Tampermonkey or Violentmonkey
-// @compatible      safari Safari + Tampermonkey or Violentmonkey
-// ==/UserScript==
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 
 // this UserScript DOES NOT work on Firefox with Violentmonkey or Greasemonkey due to a bug that makes it impossible
 // to overwrite stuff on the window on sites that use CSP. Use Tampermonkey or use a chromium based browser
