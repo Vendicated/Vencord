@@ -9,7 +9,7 @@ A Discord client mod that does things differently
 -   Custom Css and Themes: Manually edit `%appdata%/Vencord/settings/quickCss.css` / `~/.config/Vencord/settings/quickCss.css` with your favourite editor and the client will automatically apply your changes. To import BetterDiscord themes, just add `@import url(theUrl)` on the top of this file. (Make sure the url is a github raw URL or similar and only contains plain text, and NOT a nice looking website)
 -   Many Useful™ plugins - [List](https://github.com/Vendicated/Vencord/tree/main/src/plugins)
 -   Experiments
--   Proper context isolation -> Works in newer Electron versions (Confirmed working on versions 13-21)
+-   Proper context isolation -> Works in newer Electron versions (Confirmed working on versions 13-22)
 -   Inline patches: Patch Discord's code with regex replacements! See [the experiments plugin](src/plugins/experiments.ts) for an example. While being more complex, this is more powerful than monkey patching since you can patch only small parts of functions instead of fully replacing them, access non exported/local variables and even replace constants (like in the aforementioned experiments patch!)
 
 ## Installing / Uninstalling
