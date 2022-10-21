@@ -8,7 +8,7 @@ export default function PronounsProfileWrapper(props: UserProfileProps, pronouns
     // Don't bother fetching bot or system users
     if (props.user.bot || props.user.system) return null;
     // Respect showSelf options
-    if (!Settings.plugins["PronounDB"].showSelf && props.user.id === UserStore.getCurrentUser().id) return null;
+    if (!Settings.plugins.PronounDB.showSelf && props.user.id === UserStore.getCurrentUser().id) return null;
 
     const [result, , isPending] = useAwaiter(
         () => fetchPronouns(props.user.id),

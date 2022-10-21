@@ -63,7 +63,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
 }
 
 export function formatPronouns(pronouns: PronounCode): string {
-    const { pronounsFormat } = Settings.plugins["PronounDB"] as { pronounsFormat: PronounsFormat, enabled: boolean; };
+    const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
     // For capitalized pronouns, just return the mapping (it is by default capitalized)
     if (pronounsFormat === PronounsFormat.Capitalized) return PronounMapping[pronouns];
     // If it is set to lowercase and a special code (any, ask, avoid), then just return the capitalized text
