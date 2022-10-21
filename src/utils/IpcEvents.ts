@@ -14,6 +14,7 @@ function strEnum<T extends Record<string, string>>(obj: T): T {
 export default strEnum({
     QUICK_CSS_UPDATE: "VencordQuickCssUpdate",
     GET_QUICK_CSS: "VencordGetQuickCss",
+    SET_QUICK_CSS: "VencordSetQuickCss",
     GET_SETTINGS_DIR: "VencordGetSettingsDir",
     GET_SETTINGS: "VencordGetSettings",
     SET_SETTINGS: "VencordSetSettings",
