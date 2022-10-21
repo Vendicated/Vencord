@@ -1,7 +1,7 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "ignorePatterns": ["dist"],
+    "ignorePatterns": ["dist", "browser"],
     "plugins": ["header"],
     "rules": {
         // Since it's only been a month and Vencord has already been stolen
@@ -13,7 +13,7 @@
             [
                 {
                     "pattern": "!?",
-                    "template": ""
+                    "template": " "
                 },
                 " * Vencord, a modification for Discord's desktop app",
                 {
