@@ -4,7 +4,7 @@ import { PronounMapping, UserProfileProps } from "../types";
 import { useAwaiter, classes } from "../../../utils";
 import { fetchPronouns, formatPronouns } from "../utils";
 
-export default function (props: UserProfileProps, pronounsComponent: JSX.Element) {
+export default function PronounsProfileWrapper(props: UserProfileProps, pronounsComponent: JSX.Element) {
     // Don't bother fetching bot or system users
     if (props.user.bot || props.user.system) return null;
     // Respect showSelf options

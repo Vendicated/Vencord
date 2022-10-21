@@ -8,7 +8,7 @@ import { Settings } from "../../../Vencord";
 
 const styles: Record<string, string> = lazyWebpack(filters.byProps(["timestampInline"]));
 
-export default function ({ message }: { message: Message; }) {
+export default function PronounsChatComponent({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
     if (message.author.bot || message.author.system) return null;
     // Respect showSelf options
