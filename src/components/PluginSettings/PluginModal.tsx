@@ -16,6 +16,7 @@ import {
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
+    NewBadge
 } from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
@@ -143,7 +144,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-md/bold">{plugin.name}</Text>
+                <Text variant="heading-md/bold" style={{ display: "flex", width: "100%", alignItems: "center" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
             </ModalHeader>
             <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
                 <Forms.FormSection>
