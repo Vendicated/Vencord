@@ -2,8 +2,6 @@ import { ISettingElementProps } from ".";
 import { OptionType, PluginOptionNumber } from "../../../utils/types";
 import { Forms, React, TextInput } from "../../../webpack/common";
 
-const { FormSection, FormTitle, FormText } = Forms;
-
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
 export function SettingNumericComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionNumber>) {
@@ -20,7 +18,7 @@ export function SettingNumericComponent({ option, pluginSettings, id, onChange, 
     }, [error]);
 
     function handleChange(newValue) {
-        let isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
@@ -33,8 +31,8 @@ export function SettingNumericComponent({ option, pluginSettings, id, onChange, 
     }
 
     return (
-        <FormSection>
-            <FormTitle>{option.description}</FormTitle>
+        <Forms.FormSection>
+            <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <TextInput
                 type="number"
                 pattern="-?[0-9]+"
@@ -44,7 +42,7 @@ export function SettingNumericComponent({ option, pluginSettings, id, onChange, 
                 disabled={option.disabled?.() ?? false}
                 {...option.componentProps}
             />
-            {error && <FormText style={{ color: "var(--text-danger)" }}>{error}</FormText>}
-        </FormSection>
+            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+        </Forms.FormSection>
     );
 }

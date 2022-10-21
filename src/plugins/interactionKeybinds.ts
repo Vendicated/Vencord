@@ -103,12 +103,13 @@ function nextReply(isUp: boolean) {
         });
 
     const channel = ChannelStore.getChannel(message.channel_id);
+    const meId = UserStore.getCurrentUser().id;
     Dispatcher.dispatch({
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
         shouldMention: true,
-        showMentionToggle: channel.guild_id !== null,
+        showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });
 }

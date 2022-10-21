@@ -2,8 +2,6 @@ import { ISettingElementProps } from ".";
 import { PluginOptionString } from "../../../utils/types";
 import { Forms, React, TextInput } from "../../../webpack/common";
 
-const { FormSection, FormTitle, FormText } = Forms;
-
 export function SettingInputComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
     const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
     const [error, setError] = React.useState<string | null>(null);
@@ -13,7 +11,7 @@ export function SettingInputComponent({ option, pluginSettings, id, onChange, on
     }, [error]);
 
     function handleChange(newValue) {
-        let isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
@@ -23,8 +21,8 @@ export function SettingInputComponent({ option, pluginSettings, id, onChange, on
     }
 
     return (
-        <FormSection>
-            <FormTitle>{option.description}</FormTitle>
+        <Forms.FormSection>
+            <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <TextInput
                 type="text"
                 value={state}
@@ -33,7 +31,7 @@ export function SettingInputComponent({ option, pluginSettings, id, onChange, on
                 disabled={option.disabled?.() ?? false}
                 {...option.componentProps}
             />
-            {error && <FormText style={{ color: "var(--text-danger)" }}>{error}</FormText>}
-        </FormSection>
+            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+        </Forms.FormSection>
     );
 }
