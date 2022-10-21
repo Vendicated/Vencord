@@ -26,6 +26,7 @@ export interface PluginAuthor {
 export interface Plugin extends PluginDef {
     patches?: Patch[];
     started: boolean;
+    new?: boolean;
 }
 
 interface PluginDef {

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
-import { mkdirSync, readFileSync, watch } from "fs";
+import { mkdirSync, readFileSync, watch, statSync } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { debounce } from "../utils/debounce";
@@ -52,7 +52,6 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
 
     shell.openExternal(url);
 });
-
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 
