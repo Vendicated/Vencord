@@ -6,6 +6,7 @@ import * as $MessageEventsAPI from "./MessageEvents";
 import * as $Notices from "./Notices";
 import * as $Commands from "./Commands";
 import * as $DataStore from "./DataStore";
+import * as $MessageAccessories from "./MessageAccessories";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
@@ -36,12 +37,11 @@ const Commands = $Commands;
  *
  * This is actually just idb-keyval, so if you're familiar with that, you're golden!
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#supported_types}
-*/
+ */
 const DataStore = $DataStore;
+/**
+ * An API allowing you to add custom components as message accessories
+ */
+const MessageAccessories = $MessageAccessories;
 
-export {
-    DataStore,
-    MessageEvents,
-    Notices,
-    Commands
-};
+export { DataStore, MessageAccessories, MessageEvents, Notices, Commands };
