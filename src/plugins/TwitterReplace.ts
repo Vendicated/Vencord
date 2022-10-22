@@ -16,20 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../utils/types";
+import definePlugin, { OptionType } from "../utils/types";
 import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
+import { Settings } from "../Vencord";
 
 const re = /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g;
 
 export default definePlugin({
-    name: "FxTwitter",
-    description: "Uses FxTwitter to improve embeds from twitter on send",
-    authors: [Devs.Samu],
+    name: "TwitterReplace",
+    description: "Uses sites to improve embeds from Twitter when sending a message.",
+    authors: [
+        Devs.Samu,
+        { name: "salad", id: 884947813744640020n }
+    ],
     dependencies: ["MessageEventsAPI"],
 
+    options: {
+        url: {
+            description: "URL replacement",
+            type: OptionType.SELECT,
+            options: [
+                { label: "vxtwitter", value: "https://vxtwitter.com/", default: true },
+                { label: "fxtwitter", value: "https://fxtwitter.com" },
+                { label: "twxtter", value: "https://twxtter.com" },
+            ],
+        },
+    },
+
     addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(re, "https://fxtwitter.com");
+        msg.content = msg.content.replace(re, Settings.plugins.TwitterReplace.url);
     },
 
     start() {
