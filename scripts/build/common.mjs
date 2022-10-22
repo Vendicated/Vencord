@@ -19,21 +19,10 @@
 import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { existsSync } from "fs";
-import { readdir } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
+import { join } from "path";
 
 const watch = process.argv.includes("--watch");
-
-/**
- * @type {esbuild.BuildOptions}
- */
-export const commonOpts = {
-    logLevel: "info",
-    bundle: true,
-    watch,
-    minify: !watch,
-    sourcemap: watch ? "inline" : "",
-    legalComments: "linked"
-};
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -102,4 +91,40 @@ export const gitHashPlugin = {
             contents: `export default "${gitHash}"`
         }));
     }
+};
+
+/**
+ * @type {esbuild.Plugin}
+ */
+export const fileIncludePlugin = {
+    name: "file-include-plugin",
+    setup: build => {
+        const filter = /^@fileContent\/.+$/;
+        build.onResolve({ filter }, args => ({
+            namespace: "include-file",
+            path: args.path,
+            pluginData: {
+                path: join(args.resolveDir, args.path.slice("include-file/".length))
+            }
+        }));
+        build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
+            const [name, format] = path.split(";");
+            return {
+                contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
+            };
+        });
+    }
+};
+
+/**
+ * @type {esbuild.BuildOptions}
+ */
+export const commonOpts = {
+    logLevel: "info",
+    bundle: true,
+    watch,
+    minify: !watch,
+    sourcemap: watch ? "inline" : "",
+    legalComments: "linked",
+    plugins: [fileIncludePlugin]
 };
