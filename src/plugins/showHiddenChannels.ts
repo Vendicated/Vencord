@@ -23,7 +23,7 @@ import { waitFor } from "../webpack";
 const VIEW_CHANNEL = 1024n;
 
 let can = (permission, channel) => false;
-waitFor(m => m.can && m.initialize, m => ({ can } = m.can));
+waitFor(m => m.can && m.initialize, m => ({ can } = m));
 
 export default definePlugin({
     name: "ShowHiddenChannels",
@@ -42,6 +42,7 @@ export default definePlugin({
             restartNeeded: true // Restart is needed to refresh channel list
         }
     },
+
     patches: [
         {
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
@@ -68,6 +69,7 @@ export default definePlugin({
             }
         }
     ],
+
     isHiddenChannel(channel) {
         if (!channel) return false;
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
