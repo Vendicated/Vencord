@@ -25,7 +25,7 @@ import { ChangeList } from "../../utils/ChangeList";
 import { classes, lazyWebpack } from "../../utils/misc";
 import { Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts, Tooltip, Switch } from "../../webpack/common";
+import { Alerts, Button, Forms, Margins, Parser, React, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import PluginModal from "./PluginModal";
@@ -81,26 +81,22 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         if (plugin.patches) onRestartNeeded();
     }
 
-    const descHolder = (desc) => <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{desc}</Text>;
-
     return (
         <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
                 onChange={e => { toggleEnabled(); }}
                 disabled={disabled}
                 value={isEnabled()}
-                note={descHolder(plugin.description)}
+                note={() => <Text variant="text-md/normal" style={{ minHeight: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plugin.description}</Text>}
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
                     <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
-                        {plugin.options ? <CogWheel/> : <InfoIcon width="24" height="24"/> }
+                        {plugin.options ? <CogWheel /> : <InfoIcon width="24" height="24" />}
                     </button>
                 </Flex>
             </Switch>
-
-            {/* <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text> */}
         </Flex>
     );
 }
@@ -114,7 +110,7 @@ export default ErrorBoundary.wrap(function Settings() {
             title: "Restart required",
             body: (
                 <>
-                    <p>The following plugin require a restart:</p>
+                    <p>The following plugins require a restart:</p>
                     <div>{changes.map((s, i) => (
                         <>
                             {i > 0 && ", "}
