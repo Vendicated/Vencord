@@ -95,13 +95,12 @@ async function getMenuItem(installations) {
         info,
     }));
 
-    if (menuItems.length === 0) {
-        console.log("No Discord installations found.");
-        process.exit(1);
-    }
-
     const result = await menu(
-        [...menuItems, { title: "Specify custom path", info: "custom" }, { title: "Exit without patching", exit: true }],
+        [
+            ...menuItems,
+            { title: "Specify custom path", info: "custom" },
+            { title: "Exit without patching", exit: true }
+        ],
         {
             header: "Select a Discord installation to patch:",
             border: true,
