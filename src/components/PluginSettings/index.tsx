@@ -89,7 +89,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 disabled={disabled}
                 value={isEnabled()}
                 note={descHolder(plugin.description)}
-                style={{ marginBottom: "0" }}
+                hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
                     <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
