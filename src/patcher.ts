@@ -1,25 +1,6 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import { join } from "path";
 import { initIpc } from "./ipcMain";
-import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
 
 console.log("[Vencord] Starting up...");
@@ -69,7 +50,11 @@ electron.app.whenReady().then(() => {
     try {
         const settings = JSON.parse(readSettings());
         if (settings.enableReactDevtools)
-            installExt("fmkadmapgofadopljbjfkapdkoienihi")
+            import("electron-devtools-installer")
+                .then(({ default: inst, REACT_DEVELOPER_TOOLS }) =>
+                    // @ts-ignore: cursed fake esm turns it into exports.default.default
+                    (inst.default ?? inst)(REACT_DEVELOPER_TOOLS)
+                )
                 .then(() => console.info("[Vencord] Installed React Developer Tools"))
                 .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
     } catch { }

@@ -1,25 +1,7 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import { User } from "discord-types/general";
 
 import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, waitFor, mapMangledModuleLazy } from "./webpack";
+import { _resolveReady, filters, waitFor } from "./webpack";
 
 import type Components from "discord-types/components";
 import type Stores from "discord-types/stores";
@@ -110,11 +92,6 @@ export const Toasts = {
 export const UserUtils = {
     fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
 };
-
-export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".default.copy("),
-    SUPPORTS_COPY: x => typeof x === "boolean",
-});
 
 waitFor("useState", m => React = m);
 waitFor(["dispatch", "subscribe"], m => {

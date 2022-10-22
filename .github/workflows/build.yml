@@ -53,4 +53,9 @@ jobs:
                   draft: false
                   prerelease: false
                   files: |
-                      dist/*
+                      dist/Vencord.user.js
+                      dist/browser.js
+                      dist/extension.zip
+                      dist/renderer.js
+                      dist/patcher.js
+                      dist/preload.js

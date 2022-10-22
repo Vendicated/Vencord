@@ -1,27 +1,8 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import electron, { contextBridge, webFrame, ipcRenderer } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
 import VencordNative from "./VencordNative";
 import IpcEvents from "./utils/IpcEvents";
-import { debounce } from "./utils/debounce";
 
 if (electron.desktopCapturer === void 0) {
     // Fix for desktopCapturer being main only in Electron 17+
@@ -40,14 +21,6 @@ if (electron.desktopCapturer === void 0) {
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
-if (location.protocol !== "data:") {
-    // Discord
-    webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-    require(process.env.DISCORD_PRELOAD!);
-} else {
-    // Monaco Popout
-    contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
-    contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
-    // shrug
-    contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
-}
+webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+
+require(process.env.DISCORD_PRELOAD!);

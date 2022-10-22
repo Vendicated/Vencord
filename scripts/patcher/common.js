@@ -1,21 +1,3 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 const path = require("path");
 const readline = require("readline");
 const fs = require("fs");
@@ -95,12 +77,13 @@ async function getMenuItem(installations) {
         info,
     }));
 
+    if (menuItems.length === 0) {
+        console.log("No Discord installations found.");
+        process.exit(1);
+    }
+
     const result = await menu(
-        [
-            ...menuItems,
-            { title: "Specify custom path", info: "custom" },
-            { title: "Exit without patching", exit: true }
-        ],
+        [...menuItems, { title: "Exit without patching", exit: true }],
         {
             header: "Select a Discord installation to patch:",
             border: true,
@@ -113,33 +96,6 @@ async function getMenuItem(installations) {
     if (!result || !result.info || result.exit) {
         console.log("No installation selected.");
         process.exit(0);
-    }
-
-    if (result.info === "custom") {
-        const customPath = await question("Please enter the path: ");
-        if (!customPath || !fs.existsSync(customPath)) {
-            console.log("No such Path or not specifed.");
-            process.exit();
-        }
-
-        const resourceDir = path.join(customPath, "resources");
-        if (!fs.existsSync(path.join(resourceDir, "app.asar"))) {
-            console.log("Unsupported Install. resources/app.asar not found");
-            process.exit();
-        }
-
-        const appDir = path.join(resourceDir, "app");
-        result.info = {
-            branch: "unknown",
-            patched: fs.existsSync(appDir),
-            location: customPath,
-            versions: [{
-                path: appDir,
-                name: null
-            }],
-            arch: process.platform === "linux" ? "linux" : "win32",
-            isFlatpak: false,
-        };
     }
 
     if (result.info.patched) {

@@ -1,28 +1,21 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import { execSync } from "child_process";
 import esbuild from "esbuild";
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { readdir } from "fs/promises";
 
 const watch = process.argv.includes("--watch");
+
+/**
+ * @type {esbuild.BuildOptions}
+ */
+export const commonOpts = {
+    logLevel: "info",
+    bundle: true,
+    watch,
+    minify: !watch,
+    sourcemap: watch ? "inline" : "",
+    legalComments: "linked"
+};
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -91,40 +84,4 @@ export const gitHashPlugin = {
             contents: `export default "${gitHash}"`
         }));
     }
-};
-
-/**
- * @type {esbuild.Plugin}
- */
-export const fileIncludePlugin = {
-    name: "file-include-plugin",
-    setup: build => {
-        const filter = /^@fileContent\/.+$/;
-        build.onResolve({ filter }, args => ({
-            namespace: "include-file",
-            path: args.path,
-            pluginData: {
-                path: join(args.resolveDir, args.path.slice("include-file/".length))
-            }
-        }));
-        build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
-            const [name, format] = path.split(";");
-            return {
-                contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
-            };
-        });
-    }
-};
-
-/**
- * @type {esbuild.BuildOptions}
- */
-export const commonOpts = {
-    logLevel: "info",
-    bundle: true,
-    watch,
-    minify: !watch,
-    sourcemap: watch ? "inline" : "",
-    legalComments: "linked",
-    plugins: [fileIncludePlugin]
 };
