@@ -16,6 +16,7 @@
 // @compatible      safari Safari + Tampermonkey or Violentmonkey
 // ==/UserScript==
 
+
 // this UserScript DOES NOT work on Firefox with Violentmonkey or Greasemonkey due to a bug that makes it impossible
 // to overwrite stuff on the window on sites that use CSP. Use Tampermonkey or use a chromium based browser
 // https://github.com/violentmonkey/violentmonkey/issues/997

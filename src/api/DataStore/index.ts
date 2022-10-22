@@ -1,8 +1,4 @@
-// This is https://github.com/jakearchibald/idb-keyval v6.2.0
-// The only change is changing the default DB & Store name
-// and formatting it to pass our configs
-// I would usually not add my own Copyright for such a small modification
-// but the Apache License requires this.
+/* eslint-disable header/header */
 
 /*!
  * idb-keyval v6.2.0
