@@ -1,5 +1,3 @@
-// This is just the bootstrap script
-
 if (typeof browser === "undefined") {
     var browser = chrome;
 }

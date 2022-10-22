@@ -16,22 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "../webpack/common";
+import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
 
-interface Props {
-    href: string;
-    disabled?: boolean;
-    style?: React.CSSProperties;
-}
-
-export function Link(props: React.PropsWithChildren<Props>) {
-    if (props.disabled) {
-        props.style ??= {};
-        props.style.pointerEvents = "none";
-    }
-    return (
-        <a href={props.href} target="_blank" style={props.style}>
-            {props.children}
-        </a>
-    );
-}
+export default definePlugin({
+    name: "MessageAccessoriesAPI",
+    description: "API to add message accessories.",
+    authors: [Devs.Cyn],
+    patches: [
+        {
+            find: "_messageAttachmentToEmbedMedia",
+            replacement: {
+                match: /\(\)\.container\)},(.+?)\)};return/,
+                replace: (_, accessories) =>
+                    `().container)},Vencord.Api.MessageAccessories._modifyAccessories([${accessories}],this.props))};return`,
+            },
+        },
+    ],
+});

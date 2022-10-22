@@ -16,22 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "../webpack/common";
+import { Promisable } from "type-fest";
 
-interface Props {
-    href: string;
-    disabled?: boolean;
-    style?: React.CSSProperties;
-}
+export class Queue {
+    private promise = Promise.resolve();
 
-export function Link(props: React.PropsWithChildren<Props>) {
-    if (props.disabled) {
-        props.style ??= {};
-        props.style.pointerEvents = "none";
+    add(func: () => Promisable<void>) {
+        this.promise = this.promise.then(func);
     }
-    return (
-        <a href={props.href} target="_blank" style={props.style}>
-            {props.children}
-        </a>
-    );
 }
