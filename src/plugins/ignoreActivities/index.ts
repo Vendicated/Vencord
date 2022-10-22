@@ -118,7 +118,6 @@ export default definePlugin({
 
     async start() {
         ignoredActivitiesCache = (await DataStore.get<string[]>("IgnoreActivities_ignoredActivities")) ?? [];
-        this.handleActivityToggle = this.handleActivityToggle.bind(this);
     },
 
     isActivityEnabled(props: Record<string, any>) {
@@ -127,14 +126,10 @@ export default definePlugin({
         return true;
     },
 
-    handleActivityToggle(props: Record<string, any>) {
+    async handleActivityToggle(props: Record<string, any>) {
         if (ignoredActivitiesCache.includes(props.id)) ignoredActivitiesCache.splice(ignoredActivitiesCache.indexOf(props.id, 1));
         else ignoredActivitiesCache.push(props.id);
         RunningGameStore.IgnoreActivities_reRenderGames();
-        this.saveCacheToDataStore();
-    },
-
-    async saveCacheToDataStore() {
         await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
     }
 });
