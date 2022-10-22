@@ -57,7 +57,7 @@ function patchLatest() {
     const app = join(discordPath, latestVersion, "resources", "app");
     if (existsSync(app)) return;
 
-    console.info("Detected Host Update. Repatching...");
+    console.info("[Vencord] Detected Host Update. Repatching...");
 
     const patcherPath = join(__dirname, "patcher.js");
     mkdirSync(app);
@@ -65,7 +65,7 @@ function patchLatest() {
         name: "discord",
         main: "index.js"
     }));
-    writeFileSync(join(app, "index.js"), `require(${JSON.stringify(patcherPath)}); require("../app.asar")`);
+    writeFileSync(join(app, "index.js"), `require(${JSON.stringify(patcherPath)});`);
 }
 
 function patchUpdater() {
