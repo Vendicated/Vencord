@@ -32,7 +32,6 @@ export default definePlugin({
             name: "Luximus",
         },
     ],
-    patches: [],
     capitalize(msg: MessageObject) {
         const sentences = msg.content.split(". ");
 
