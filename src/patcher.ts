@@ -17,12 +17,33 @@
 */
 
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
-import { join } from "path";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
 
 console.log("[Vencord] Starting up...");
+
+// Our injector file at app/index.js
+const injectorPath = require.main!.filename;
+
+// special discord_arch_electron injection method
+const asarName = injectorPath.endsWith("app.asar/index.js") ? "_app.asar" : "app.asar";
+
+// The original app.asar
+const asarPath = join(dirname(injectorPath), "..", asarName);
+
+const discordPkg = require(join(asarPath, "package.json"));
+require.main!.filename = join(asarPath, discordPkg.main);
+
+// @ts-ignore Untyped method? Dies from cringe
+app.setAppPath(asarPath);
+
+// Repatch after host updates on Windows
+if (process.platform === "win32")
+    require("./patchWin32Updater");
 
 class BrowserWindow extends electron.BrowserWindow {
     constructor(options: BrowserWindowConstructorOptions) {
@@ -88,3 +109,24 @@ electron.app.whenReady().then(() => {
         cb({ cancel: false, responseHeaders });
     });
 });
+
+console.log("[Vencord] Loading original Discord app.asar");
+// Legacy Vencord Injector requires "../app.asar". However, because we
+// restore the require.main above this is messed up, so monkey patch Module._load to
+// redirect such requires
+// FIXME: remove this eventually
+if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
+    console.warn("[Vencord] [--> WARNING <--] You have a legacy Vencord install. Please reinject");
+    const Module = require("module");
+    const loadModule = Module._load;
+    Module._load = function (path: string) {
+        if (path === "../app.asar") {
+            Module._load = loadModule;
+            arguments[0] = require.main!.filename;
+        }
+        return loadModule.apply(this, arguments);
+    };
+} else {
+    console.log(require.main!.filename);
+    require(require.main!.filename);
+}

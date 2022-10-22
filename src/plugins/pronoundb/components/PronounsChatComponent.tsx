@@ -17,12 +17,13 @@
 */
 
 import { Message } from "discord-types/general";
-import { fetchPronouns, formatPronouns } from "../utils";
+
 import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { PronounMapping } from "../types";
+import { Settings } from "../../../Vencord";
 import { filters } from "../../../webpack";
 import { UserStore } from "../../../webpack/common";
-import { Settings } from "../../../Vencord";
+import { PronounMapping } from "../types";
+import { fetchPronouns, formatPronouns } from "../utils";
 
 const styles: Record<string, string> = lazyWebpack(filters.byProps(["timestampInline"]));
 

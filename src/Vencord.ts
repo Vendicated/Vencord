@@ -16,21 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * as Plugins from "./plugins";
-export * as Webpack from "./webpack";
 export * as Api from "./api";
-export * as Updater from "./utils/updater";
-export * as QuickCss from "./utils/quickCss";
+export * as Plugins from "./plugins";
 export * as Util from "./utils";
+export * as QuickCss from "./utils/quickCss";
+export * as Updater from "./utils/updater";
+export * as Webpack from "./webpack";
 
 import { popNotice, showNotice } from "./api/Notices";
-import { Settings, PlainSettings } from "./api/settings";
+import { PlainSettings,Settings } from "./api/settings";
 import { startAllPlugins } from "./plugins";
 
-export { Settings, PlainSettings };
+export { PlainSettings,Settings };
 
 import "./webpack/patchWebpack";
 import "./utils/quickCss";
+
 import { checkForUpdates, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { Router } from "./webpack/common";

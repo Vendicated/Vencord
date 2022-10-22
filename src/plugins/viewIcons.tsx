@@ -17,9 +17,9 @@
 */
 
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
 import { lazyWebpack, makeLazy } from "../utils/misc";
 import { ModalRoot, ModalSize, openModal } from "../utils/modal";
+import definePlugin from "../utils/types";
 import { find } from "../webpack";
 import { React } from "../webpack/common";
 

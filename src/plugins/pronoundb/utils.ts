@@ -17,9 +17,10 @@
 */
 
 import gitHash from "git-hash";
-import { PronounsFormat } from ".";
+
 import { debounce } from "../../utils";
 import { Settings } from "../../Vencord";
+import { PronounsFormat } from ".";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
 // A map of cached pronouns so the same request isn't sent twice

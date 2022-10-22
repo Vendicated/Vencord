@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ISettingElementProps } from ".";
 import { PluginOptionString } from "../../../utils/types";
 import { Forms, React, TextInput } from "../../../webpack/common";
+import { ISettingElementProps } from ".";
 
 export function SettingInputComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
     const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
