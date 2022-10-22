@@ -19,6 +19,7 @@
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import { join } from "path";
 import { initIpc } from "./ipcMain";
+import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
 
 console.log("[Vencord] Starting up...");
@@ -68,11 +69,7 @@ electron.app.whenReady().then(() => {
     try {
         const settings = JSON.parse(readSettings());
         if (settings.enableReactDevtools)
-            import("electron-devtools-installer")
-                .then(({ default: inst, REACT_DEVELOPER_TOOLS }) =>
-                    // @ts-ignore: cursed fake esm turns it into exports.default.default
-                    (inst.default ?? inst)(REACT_DEVELOPER_TOOLS)
-                )
+            installExt("fmkadmapgofadopljbjfkapdkoienihi")
                 .then(() => console.info("[Vencord] Installed React Developer Tools"))
                 .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
     } catch { }

@@ -26,21 +26,9 @@ import monacoHtml from "@fileContent/../components/monacoWin.html;base64";
 
 import "./updater";
 import { Queue } from "../utils/Queue";
+import { QUICKCSS_PATH, ALLOWED_PROTOCOLS, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
 
-const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
-    process.env.DISCORD_USER_DATA_DIR
-        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
-        : join(app.getPath("userData"), "..", "Vencord")
-);
-const SETTINGS_DIR = join(DATA_DIR, "settings");
-const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
-const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
-const ALLOWED_PROTOCOLS = [
-    "https:",
-    "http:",
-    "steam:",
-    "spotify:"
-];
+
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
