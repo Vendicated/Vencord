@@ -1,9 +1,29 @@
-import { waitFor, filters, _resolveReady } from "./webpack";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { User } from "discord-types/general";
+
+import { lazyWebpack } from "../utils/misc";
+import { _resolveReady, filters, waitFor, mapMangledModuleLazy } from "./webpack";
+
 import type Components from "discord-types/components";
 import type Stores from "discord-types/stores";
 import type Other from "discord-types/other";
-import { lazyWebpack } from "../utils/misc";
-
 export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 
 export let FluxDispatcher: Other.FluxDispatcher;
@@ -25,6 +45,11 @@ export let Button: any;
 export let Switch: any;
 export let Tooltip: Components.Tooltip;
 export let Router: any;
+export let TextInput: any;
+export let Text: (props: TextProps) => JSX.Element;
+
+export const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = lazyWebpack(filters.byCode("closestMarkerIndex", "stickToMarkers"));
 
 export let Parser: any;
 export let Alerts: {
@@ -82,6 +107,15 @@ export const Toasts = {
     }
 };
 
+export const UserUtils = {
+    fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
+};
+
+export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
+    copy: filters.byCode(".default.copy("),
+    SUPPORTS_COPY: x => typeof x === "boolean",
+});
+
 waitFor("useState", m => React = m);
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
@@ -120,3 +154,23 @@ waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
 
 waitFor(["open", "saveAccountChanges"], m => Router = m);
+waitFor(["defaultProps", "Sizes", "contextType"], m => TextInput = m);
+
+waitFor(m => {
+    if (typeof m !== "function") return false;
+    const s = m.toString();
+    return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
+}, m => Text = m);
+
+export type TextProps = React.PropsWithChildren & {
+    variant: TextVariant;
+    style?: React.CSSProperties;
+    color?: string;
+    tag?: "div" | "span" | "p" | "strong";
+    selectable?: boolean;
+    lineClamp?: number;
+    id?: string;
+    className?: string;
+};
+
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-md" | "display-lg" | "code";

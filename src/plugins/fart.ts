@@ -1,8 +1,26 @@
-import { ApplicationCommandOptionType } from "../api/Commands";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-const sound = { fart: new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3") };
+import { ApplicationCommandOptionType } from "../api/Commands";
+import { makeRange } from "../components/PluginSettings/components";
+import { Devs } from "../utils/constants";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
 
 export default definePlugin({
     name: "Fart2",
@@ -22,11 +40,22 @@ export default definePlugin({
         ],
 
         execute(args) {
-            sound.fart.volume = 0.3;
-            sound.fart.play();
+            const fart = new Audio("https://raw.githubusercontent.com/ItzOnlyAnimal/AliuPlugins/main/fart.mp3");
+            fart.volume = Settings.plugins.Fart2.volume;
+            fart.play();
+
             return {
                 content: (args[0]) ? `<@${args[0].value}> fart` : "fart"
             };
         },
-    }]
+    }],
+    options: {
+        volume: {
+            description: "how loud you wanna fart (aka volume)",
+            type: OptionType.SLIDER,
+            markers: makeRange(0, 1, 0.1),
+            default: 0.5,
+            stickToMarkers: false,
+        }
+    }
 });

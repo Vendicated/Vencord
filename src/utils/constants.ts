@@ -1,3 +1,21 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 
@@ -42,5 +60,21 @@ export const Devs = Object.freeze({
     Animal: {
         name: "Animal",
         id: 118437263754395652n
+    },
+    MaiKokain: {
+        name: "Mai",
+        id: 722647978577363026n
+    },
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
+    },
+    katlyn: {
+        name: "katlyn",
+        id: 250322741406859265n
+    },
+    Nuckyz: {
+        name: "Nuckyz",
+        id: 235834946571337729n
     }
 });

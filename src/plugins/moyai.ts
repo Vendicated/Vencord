@@ -1,8 +1,29 @@
-import definePlugin from "../utils/types";
-import { Devs } from "../utils/constants";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Message, ReactionEmoji } from "discord-types/general";
-import { FluxDispatcher, SelectedChannelStore } from "../webpack/common";
+
+import { makeRange } from "../components/PluginSettings/components/SettingSliderComponent";
+import { Devs } from "../utils/constants";
 import { sleep } from "../utils/misc";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
+import { FluxDispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -23,20 +44,17 @@ interface IReactionAdd {
 
 const MOYAI = "🗿";
 const MOYAI_URL =
-    "https://github.com/MeguminSama/VencordPlugins/raw/main/plugins/moyai/moyai.mp3";
-
-// Implement once Settings are a thing
-const ignoreBots = true;
+    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
 
 export default definePlugin({
     name: "Moyai",
-    authors: [Devs.Megu],
+    authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
 
     async onMessage(e: IMessageCreate) {
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
-        if (ignoreBots && e.message.author?.bot) return;
+        if (Settings.plugins.Moyai.ignoreBots && e.message.author?.bot) return;
         if (!e.message.content) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -50,6 +68,7 @@ export default definePlugin({
 
     onReaction(e: IReactionAdd) {
         if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
+        if (Settings.plugins.Moyai.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
         const name = e.emoji.name.toLowerCase();
@@ -67,6 +86,28 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
     },
+
+    options: {
+        volume: {
+            description: "Volume of the 🗿🗿🗿",
+            type: OptionType.SLIDER,
+            markers: makeRange(0, 1, 0.1),
+            default: 0.5,
+            stickToMarkers: false,
+        },
+        triggerWhenUnfocused: {
+            description: "Trigger the 🗿 even when the window is unfocused",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false,
+        },
+        ignoreBots: {
+            description: "Ignore bots",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false,
+        }
+    }
 });
 
 function countOccurrences(sourceString: string, subString: string) {
@@ -92,14 +133,16 @@ function countMatches(sourceString: string, pattern: RegExp) {
 const customMoyaiRe = /<a?:\w*moy?ai\w*:\d{17,20}>/gi;
 
 function getMoyaiCount(message: string) {
-    let count = countOccurrences(message, MOYAI)
+    const count = countOccurrences(message, MOYAI)
         + countMatches(message, customMoyaiRe);
 
     return Math.min(count, 10);
 }
 
 function boom() {
+    if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
+    audioElement.volume = Settings.plugins.Moyai.volume;
     audioElement.play();
 }

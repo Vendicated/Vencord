@@ -1,3 +1,21 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
@@ -7,7 +25,11 @@ import IpcEvents from "../utils/IpcEvents";
 
 import "./updater";
 
-const DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
+    process.env.DISCORD_USER_DATA_DIR
+        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
+        : join(app.getPath("userData"), "..", "Vencord")
+);
 const SETTINGS_DIR = join(DATA_DIR, "settings");
 const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
 const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");

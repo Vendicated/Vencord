@@ -1,12 +1,40 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import definePlugin from "../utils/types";
-import { ApplicationCommandInputType, sendBotMessage, findOption, OptionalMessageOption } from "../api/Commands";
+import { ApplicationCommandInputType, OptionalMessageOption, sendBotMessage, findOption, RequiredMessageOption } from "../api/Commands";
 import { Devs } from "../utils/constants";
+
+
+function mock(input: string): string {
+    let output = "";
+    for (let i = 0; i < input.length; i++) {
+        output += i % 2 ? input[i].toUpperCase() : input[i].toLowerCase();
+    }
+    return output;
+}
 
 export default definePlugin({
     name: "MoreCommands",
-    description: "echo, lenny",
+    description: "echo, lenny, mock",
     authors: [
         Devs.Arjix,
+        Devs.echo,
         {
             name: "ICodeInAssembly",
             id: 702973430449832038n
@@ -31,6 +59,14 @@ export default definePlugin({
             options: [OptionalMessageOption],
             execute: opts => ({
                 content: findOption(opts, "message", "") + " ( ͡° ͜ʖ ͡°)"
+            }),
+        },
+        {
+            name: "mock",
+            description: "mOcK PeOpLe",
+            options: [RequiredMessageOption],
+            execute: opts => ({
+                content: mock(findOption(opts, "message", ""))
             }),
         },
     ]
