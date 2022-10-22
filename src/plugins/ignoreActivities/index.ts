@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../../utils/types";
-import { Devs } from "../../utils/constants";
-import { filters } from "../../webpack";
-import { lazyWebpack } from "../../utils";
 import { DataStore } from "../../api";
+import { lazyWebpack } from "../../utils";
+import { Devs } from "../../utils/constants";
+import definePlugin from "../../utils/types";
+import { filters } from "../../webpack";
 
 interface MatchAndReplace {
     match: RegExp;
@@ -122,8 +122,8 @@ export default definePlugin({
     },
 
     isActivityEnabled(props: Record<string, any>) {
-        if ('application_id' in props) return !ignoredActivitiesCache.includes(props.application_id);
-        else if ('id' in props) return !ignoredActivitiesCache.includes(props.id);
+        if ("application_id" in props) return !ignoredActivitiesCache.includes(props.application_id);
+        else if ("id" in props) return !ignoredActivitiesCache.includes(props.id);
         return true;
     },
 
