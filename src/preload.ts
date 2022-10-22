@@ -21,6 +21,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import VencordNative from "./VencordNative";
 import IpcEvents from "./utils/IpcEvents";
+import { debounce } from "./utils/debounce";
 
 if (electron.desktopCapturer === void 0) {
     // Fix for desktopCapturer being main only in Electron 17+
@@ -39,6 +40,14 @@ if (electron.desktopCapturer === void 0) {
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
-webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-
-require(process.env.DISCORD_PRELOAD!);
+if (location.protocol !== "data:") {
+    // Discord
+    webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+    require(process.env.DISCORD_PRELOAD!);
+} else {
+    // Monaco Popout
+    contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
+    contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
+    // shrug
+    contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
+}

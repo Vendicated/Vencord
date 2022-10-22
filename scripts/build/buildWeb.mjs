@@ -23,7 +23,7 @@ import yazl from "yazl";
 import esbuild from "esbuild";
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
-import { commonOpts, gitHashPlugin, globPlugins } from "./common.mjs";
+import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -36,7 +36,8 @@ const commonOptions = {
     external: ["plugins", "git-hash"],
     plugins: [
         globPlugins,
-        gitHashPlugin
+        gitHashPlugin,
+        fileIncludePlugin
     ],
     target: ["esnext"],
     define: {

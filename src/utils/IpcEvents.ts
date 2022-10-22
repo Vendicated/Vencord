@@ -43,5 +43,6 @@ export default strEnum({
     GET_HASHES: "VencordGetHashes",
     UPDATE: "VencordUpdate",
     BUILD: "VencordBuild",
-    GET_DESKTOP_CAPTURE_SOURCES: "VencordGetDesktopCaptureSources"
+    GET_DESKTOP_CAPTURE_SOURCES: "VencordGetDesktopCaptureSources",
+    OPEN_MONACO_EDITOR: "VencordOpenMonacoEditor"
 } as const);

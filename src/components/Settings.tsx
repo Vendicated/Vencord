@@ -77,7 +77,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     Launch Directory
                 </Button>
                 <Button
-                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_QUICKCSS)}
+                    onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
                     size={Button.Sizes.SMALL}
                     disabled={settingsDir === "Loading..."}
                 >

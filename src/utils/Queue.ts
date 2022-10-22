@@ -16,20 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="standalone-electron-types"/>
+import { Promisable } from "type-fest";
 
-declare module "plugins" {
-    const plugins: Record<string, import("./utils/types").Plugin>;
-    export default plugins;
-}
+export class Queue {
+    private promise = Promise.resolve();
 
-declare module "git-hash" {
-    const hash: string;
-    export default hash;
-}
-
-declare module "@fileContent/*" {
-    const content: string;
-    export default content;
+    add(func: () => Promisable<void>) {
+        this.promise = this.promise.then(func);
+    }
 }
