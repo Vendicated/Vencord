@@ -29,11 +29,13 @@ console.log("[Vencord] Starting up...");
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
 // The original app.asar
-const discordPath = join(dirname(injectorPath), "..", "app.asar");
-// Full main path Discord uses
-require.main!.filename = join(discordPath, "app_bootstrap/index.js");
+const asarPath = join(dirname(injectorPath), "..", "app.asar");
+
+const discordPkg = require(join(asarPath, "package.json"));
+require.main!.filename = join(asarPath, discordPkg.main);
+
 // @ts-ignore Untyped method? Dies from cringe
-app.setAppPath(discordPath);
+app.setAppPath(asarPath);
 
 // Repatch after host updates on Windows
 if (process.platform === "win32")
@@ -121,5 +123,6 @@ if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
         return loadModule.apply(this, arguments);
     };
 } else {
-    require(discordPath);
+    console.log(require.main!.filename);
+    require(require.main!.filename);
 }
