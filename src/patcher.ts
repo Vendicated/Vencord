@@ -25,12 +25,16 @@ import { readFileSync } from "fs";
 
 console.log("[Vencord] Starting up...");
 
+// Our injector file at app/index.js
 const injectorPath = require.main!.filename;
+// The original app.asar
 const discordPath = join(dirname(injectorPath), "..", "app.asar");
+// Full main path Discord uses
 require.main!.filename = join(discordPath, "app_bootstrap/index.js");
-// @ts-ignore
+// @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(discordPath);
 
+// Repatch after host updates on Windows
 if (process.platform === "win32")
     require("./patchWin32Updater");
 
@@ -100,7 +104,9 @@ electron.app.whenReady().then(() => {
 });
 
 console.log("[Vencord] Loading original Discord app.asar");
-// legacy
+// Legacy Vencord Injector requires "../app.asar". However, because we
+// restore the require.main above this is messed up, so monkey patch Module._load to
+// redirect such requires
 // FIXME: remove this eventually
 if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
     console.warn("[Vencord] [--> WARNING <--] You have a legacy Vencord install. Please reinject");
