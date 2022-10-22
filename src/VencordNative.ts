@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IPC_EVENTS from "./utils/IpcEvents";
 import { IpcRenderer, ipcRenderer } from "electron";
+
+import IPC_EVENTS from "./utils/IpcEvents";
 
 function assertEventAllowed(event: string) {
     if (!(event in IPC_EVENTS)) throw new Error(`Event ${event} not allowed.`);

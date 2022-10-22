@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { UserStore } from "../../../webpack/common";
+import { classes,useAwaiter } from "../../../utils";
 import { Settings } from "../../../Vencord";
+import { UserStore } from "../../../webpack/common";
 import { PronounMapping, UserProfileProps } from "../types";
-import { useAwaiter, classes } from "../../../utils";
 import { fetchPronouns, formatPronouns } from "../utils";
 
 export default function PronounsProfileWrapper(props: UserProfileProps, pronounsComponent: JSX.Element) {

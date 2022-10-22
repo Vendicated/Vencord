@@ -17,6 +17,7 @@
 */
 
 import type { WebpackInstance } from "discord-types/other";
+
 import { proxyLazy } from "../utils/proxyLazy";
 
 export let _resolveReady: () => void;

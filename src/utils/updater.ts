@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import gitHash from "git-hash";
+
 import IpcEvents from "./IpcEvents";
 import Logger from "./logger";
 import { IpcRes } from "./types";
-import gitHash from "git-hash";
 
 export const UpdateLogger = new Logger("Updater", "white");
 export let isOutdated = false;

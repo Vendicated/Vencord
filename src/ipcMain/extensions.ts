@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import https from "https";
-import { mkdir, rm, writeFile, access } from "fs/promises";
-import { constants as fsConstants } from "fs";
-import { join } from "path";
-import { DATA_DIR } from "./constants";
-import { unzip } from "fflate";
 import { session } from "electron";
+import { unzip } from "fflate";
+import { constants as fsConstants } from "fs";
+import { access,mkdir, rm, writeFile } from "fs/promises";
+import https from "https";
+import { join } from "path";
+
+import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
