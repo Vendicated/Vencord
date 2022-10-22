@@ -44,11 +44,7 @@ export const FiltersBar: React.CSSProperties = {
 export const SettingsIcon: React.CSSProperties = {
     height: "24px",
     width: "24px",
-    borderRadius: "100px",
     padding: "0",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
     background: "transparent",
-    marginRight: 5
+    marginRight: 8
 };
