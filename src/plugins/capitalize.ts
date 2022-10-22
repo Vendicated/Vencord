@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin, { OptionType } from "../../utils/types";
-import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "../../api/MessageEvents";
-import { Settings } from "../../Vencord";
+import definePlugin, { OptionType } from "../utils/types";
+import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
+import { Settings } from "../Vencord";
 
 const blacklistSeperator = ";";
 const urlRegex = new RegExp("^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$");
