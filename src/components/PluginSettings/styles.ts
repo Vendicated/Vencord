@@ -29,7 +29,7 @@ export const PluginsGridItem: React.CSSProperties = {
     borderRadius: 3,
     cursor: "pointer",
     display: "block",
-    height: 150,
+    height: "min-content",
     padding: 10,
     width: "100%",
 };
@@ -39,4 +39,16 @@ export const FiltersBar: React.CSSProperties = {
     height: 40,
     gridTemplateColumns: "1fr 150px",
     display: "grid"
+};
+
+export const SettingsIcon: React.CSSProperties = {
+    height: "24px",
+    width: "24px",
+    borderRadius: "100px",
+    padding: "0",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "transparent",
+    marginRight: 5
 };
