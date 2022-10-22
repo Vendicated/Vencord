@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import esbuild from "esbuild";
-import { existsSync, statSync } from "fs";
-import { readdir } from "fs/promises";
+import { existsSync } from "fs";
+import { readdir, stat } from "fs/promises";
 
 const watch = process.argv.includes("--watch");
 
@@ -57,8 +57,8 @@ export const globPlugins = {
                     const files = await readdir(`./src/${dir}`);
                     for (const file of files) {
                         let isNew = false;
-                        let stats = statSync(`./src/${dir}/${file}`);
-                        let dirStats = statSync(`./src/${dir}`);
+                        let stats = await stat(`./src/${dir}/${file}`);
+                        let dirStats = await stat(`./src/${dir}`);
                         if (
                             // File is younger than a week old
                             (new Date(stats.birthtime.valueOf()).setDate(
