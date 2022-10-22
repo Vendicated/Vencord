@@ -58,13 +58,25 @@ export const globPlugins = {
                     for (const file of files) {
                         let isNew = false;
                         let stats = statSync(`./src/${dir}/${file}`);
+                        let dirStats = statSync(`./src/${dir}`);
                         if (
-                            new Date(stats.birthtime.valueOf()).setDate(
+                            // File is younger than a week old
+                            (new Date(stats.birthtime.valueOf()).setDate(
                                 stats.birthtime.getDate() + 7
-                            ) > Date.now()
+                            ) > Date.now() && // AND directory is older than a week old
+                                new Date(dirStats.birthtime.valueOf()).setDate(
+                                    dirStats.birthtime.getDate() + 7
+                                ) < Date.now()) ||
+                            (new Date(dirStats.birthtime.valueOf()).setDate(
+                                // OR directory is younger than a week old
+                                dirStats.birthtime.getDate() + 7
+                            ) > Date.now() &&
+                                new Date(stats.birthtime.valueOf()).setHours(
+                                    // AND file is older than the directory (by at least an hour)
+                                    stats.birthtime.getHours() - 1
+                                ) > dirStats.birthtime)
                         ) {
-                            // IF FILE IS NEW
-                            console.log(`./src/${dir}/${file} `);
+                            // If file is new
                             isNew = true;
                         }
                         if (file === "index.ts") {
@@ -74,8 +86,7 @@ export const globPlugins = {
                         code += `import ${mod} from "./${dir}/${file.replace(
                             /.tsx?$/,
                             ""
-                        )}";\n`;
-                        code += `${mod}.new = ${isNew};\n`;
+                        )}";\n${mod}.new = ${isNew};\n`;
                         plugins += `[${mod}.name]:${mod},\n`;
                         i++;
                     }
