@@ -87,7 +87,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={e => { toggleEnabled(); }}
                 disabled={disabled}
                 value={isEnabled()}
-                note={() => <Text variant="text-md/normal" style={{ minHeight: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plugin.description}</Text>}
+                note={<Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>}
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
