@@ -84,7 +84,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     return (
         <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
-                onChange={e => { toggleEnabled(); }}
+                onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
                 note={<Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>}
