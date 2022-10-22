@@ -29,8 +29,9 @@ const nodeCommonOpts = {
     platform: "node",
     target: ["esnext"],
     minify: true,
+    bundle: true,
     sourcemap: "linked",
-    plugins: [...commonOpts.plugins, makeAllPackagesExternalPlugin],
+    external: ["electron"]
 };
 
 await Promise.all([
