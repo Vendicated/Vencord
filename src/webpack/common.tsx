@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type Components from "discord-types/components";
 import { User } from "discord-types/general";
+import type Other from "discord-types/other";
+import type Stores from "discord-types/stores";
 
 import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, waitFor, mapMangledModuleLazy } from "./webpack";
-
-import type Components from "discord-types/components";
-import type Stores from "discord-types/stores";
-import type Other from "discord-types/other";
+import { _resolveReady, filters, mapMangledModuleLazy,waitFor } from "./webpack";
 export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 
 export let FluxDispatcher: Other.FluxDispatcher;

@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../utils/types";
-import { lazyWebpack } from "../utils";
-import { filters } from "../webpack";
-import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
-import { Devs } from "../utils/constants";
-import { PartialDeep } from "type-fest";
 import { Message } from "discord-types/general";
+import { PartialDeep } from "type-fest";
+
+import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
+import { lazyWebpack } from "../utils";
+import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
+import { filters } from "../webpack";
 import { FluxDispatcher } from "../webpack/common";
 
 interface Album {

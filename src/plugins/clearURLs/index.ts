@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { defaultRules } from "./defaultRules";
 import {
-    addPreSendListener,
     addPreEditListener,
+    addPreSendListener,
     MessageObject,
-    removePreSendListener,
     removePreEditListener,
+    removePreSendListener,
 } from "../../api/MessageEvents";
 import definePlugin from "../../utils/types";
+import { defaultRules } from "./defaultRules";
 
 // From lodash
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;

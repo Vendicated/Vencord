@@ -17,7 +17,8 @@
 */
 
 import { Guild } from "discord-types/general";
-import { ChannelStore, SelectedChannelStore, GuildStore } from "../webpack/common";
+
+import { ChannelStore, GuildStore,SelectedChannelStore } from "../webpack/common";
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());

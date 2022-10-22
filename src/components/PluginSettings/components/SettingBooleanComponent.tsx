@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ISettingElementProps } from ".";
 import { PluginOptionBoolean } from "../../../utils/types";
 import { Forms, React, Select } from "../../../webpack/common";
+import { ISettingElementProps } from ".";
 
 export function SettingBooleanComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;

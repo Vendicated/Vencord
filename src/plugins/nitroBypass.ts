@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreSendListener, addPreEditListener, removePreSendListener, removePreEditListener } from "../api/MessageEvents";
-import { findByProps } from "../webpack";
-import definePlugin, { OptionType } from "../utils/types";
+import { addPreEditListener, addPreSendListener, removePreEditListener,removePreSendListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
-import { UserStore } from "../webpack/common";
+import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
+import { findByProps } from "../webpack";
+import { UserStore } from "../webpack/common";
 
 export default definePlugin({
     name: "NitroBypass",

@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import electron, { contextBridge, webFrame, ipcRenderer } from "electron";
+import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
-import VencordNative from "./VencordNative";
-import IpcEvents from "./utils/IpcEvents";
+
 import { debounce } from "./utils/debounce";
+import IpcEvents from "./utils/IpcEvents";
+import VencordNative from "./VencordNative";
 
 if (electron.desktopCapturer === void 0) {
     // Fix for desktopCapturer being main only in Electron 17+

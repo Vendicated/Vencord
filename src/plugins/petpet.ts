@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType, findOption, ApplicationCommandInputType, Argument, CommandContext } from "../api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext,findOption } from "../api/Commands";
 import { Devs } from "../utils/constants";
+import { lazyWebpack,makeLazy } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { makeLazy, lazyWebpack } from "../utils/misc";
 import { filters } from "../webpack";
 
 const DRAFT_TYPE = 0;

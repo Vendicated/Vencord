@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Message, Channel } from "discord-types/general";
+import type { Channel,Message } from "discord-types/general";
+
 import Logger from "../utils/logger";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");

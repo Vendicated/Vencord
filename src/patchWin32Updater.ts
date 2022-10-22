@@ -17,8 +17,8 @@
 */
 
 import { app, autoUpdater } from "electron";
-import { dirname, basename, join } from "path";
-import { readdirSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
+import { basename, dirname, join } from "path";
 
 const { setAppUserModelId } = app;
 

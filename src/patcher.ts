@@ -17,11 +17,12 @@
 */
 
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
+import { readFileSync } from "fs";
 import { dirname, join } from "path";
+
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
-import { readFileSync } from "fs";
 
 console.log("[Vencord] Starting up...");
 

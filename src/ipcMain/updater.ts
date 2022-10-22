@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ipcMain } from "electron";
-import { promisify } from "util";
-import IpcEvents from "../utils/IpcEvents";
 import { execFile as cpExecFile } from "child_process";
-import { join } from "path";
-import { createReadStream } from "fs";
 import { createHash } from "crypto";
+import { ipcMain } from "electron";
+import { createReadStream } from "fs";
+import { join } from "path";
+import { promisify } from "util";
+
+import IpcEvents from "../utils/IpcEvents";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
 
