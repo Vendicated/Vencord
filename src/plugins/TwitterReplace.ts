@@ -38,8 +38,9 @@ export default definePlugin({
             type: OptionType.SELECT,
             options: [
                 { label: "vxtwitter", value: "https://vxtwitter.com/", default: true },
-                { label: "fxtwitter", value: "https://fxtwitter.com" },
-                { label: "twxtter", value: "https://twxtter.com" },
+                { label: "fxtwitter", value: "https://fxtwitter.com/" },
+                { label: "twxtter", value: "https://twxtter.com/" },
+                { label: "sxtwitter", value: "https://sxtwitter.com/" },
             ],
         },
     },
