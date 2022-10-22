@@ -71,11 +71,11 @@ await Promise.all(
 
 zip({
     dist: {
-        "Vencord.js": readFileSync("dist/browser.js", "binary")
+        "Vencord.js": readFileSync("dist/browser.js")
     },
     ...Object.fromEntries(await Promise.all(["background.js", "content.js", "manifest.json"].map(async f => [
         f,
-        await readFile(join("browser", f), "binary")
+        await readFile(join("browser", f))
     ]))),
 }, {}, (err, data) => {
     if (err) {
