@@ -103,7 +103,7 @@ async function install(installations) {
 
         fs.writeFileSync(
             path.join(dir, "index.js"),
-            `require("${ENTRYPOINT}"); require("../app.asar");`
+            `require("${ENTRYPOINT}");`
         );
         fs.writeFileSync(
             path.join(dir, "package.json"),

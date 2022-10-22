@@ -17,12 +17,26 @@
 */
 
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
-import { join } from "path";
+import { dirname, join } from "path";
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
+import { readFileSync } from "fs";
 
 console.log("[Vencord] Starting up...");
+
+// Our injector file at app/index.js
+const injectorPath = require.main!.filename;
+// The original app.asar
+const discordPath = join(dirname(injectorPath), "..", "app.asar");
+// Full main path Discord uses
+require.main!.filename = join(discordPath, "app_bootstrap/index.js");
+// @ts-ignore Untyped method? Dies from cringe
+app.setAppPath(discordPath);
+
+// Repatch after host updates on Windows
+if (process.platform === "win32")
+    require("./patchWin32Updater");
 
 class BrowserWindow extends electron.BrowserWindow {
     constructor(options: BrowserWindowConstructorOptions) {
@@ -88,3 +102,23 @@ electron.app.whenReady().then(() => {
         cb({ cancel: false, responseHeaders });
     });
 });
+
+console.log("[Vencord] Loading original Discord app.asar");
+// Legacy Vencord Injector requires "../app.asar". However, because we
+// restore the require.main above this is messed up, so monkey patch Module._load to
+// redirect such requires
+// FIXME: remove this eventually
+if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
+    console.warn("[Vencord] [--> WARNING <--] You have a legacy Vencord install. Please reinject");
+    const Module = require("module");
+    const loadModule = Module._load;
+    Module._load = function (path: string) {
+        if (path === "../app.asar") {
+            Module._load = loadModule;
+            arguments[0] = require.main!.filename;
+        }
+        return loadModule.apply(this, arguments);
+    };
+} else {
+    require(discordPath);
+}
