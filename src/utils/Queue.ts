@@ -16,5 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * as Common from "./common";
-export * from "./webpack";
+import { Promisable } from "type-fest";
+
+export class Queue {
+    private promise = Promise.resolve();
+
+    add(func: () => Promisable<void>) {
+        this.promise = this.promise.then(func);
+    }
+}

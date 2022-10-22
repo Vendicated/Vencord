@@ -18,7 +18,7 @@
 */
 
 import esbuild from "esbuild";
-import { commonOpts, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
+import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -29,8 +29,9 @@ const nodeCommonOpts = {
     platform: "node",
     target: ["esnext"],
     minify: true,
+    bundle: true,
     sourcemap: "linked",
-    plugins: [makeAllPackagesExternalPlugin],
+    external: ["electron"]
 };
 
 await Promise.all([
@@ -57,7 +58,8 @@ await Promise.all([
         external: ["plugins", "git-hash"],
         plugins: [
             globPlugins,
-            gitHashPlugin
+            gitHashPlugin,
+            fileIncludePlugin
         ],
         define: {
             IS_WEB: "false"
@@ -67,6 +69,6 @@ await Promise.all([
     console.error("Build failed");
     console.error(err.message);
     // make ci fail
-    if (!watch)
+    if (!commonOpts.watch)
         process.exitCode = 1;
 });

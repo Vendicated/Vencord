@@ -28,3 +28,8 @@ declare module "git-hash" {
     const hash: string;
     export default hash;
 }
+
+declare module "@fileContent/*" {
+    const content: string;
+    export default content;
+}
