@@ -22,6 +22,8 @@ import { readdirSync, existsSync, mkdirSync, writeFileSync } from "fs";
 
 const { setAppUserModelId } = app;
 
+// Apparently requiring Discords updater too early leads into issues,
+// copied this workaround from powerCord
 app.setAppUserModelId = function (id: string) {
     app.setAppUserModelId = setAppUserModelId;
 
@@ -68,6 +70,8 @@ function patchLatest() {
     writeFileSync(join(app, "index.js"), `require(${JSON.stringify(patcherPath)});`);
 }
 
+// Windows Host Updates install to a new folder app-{HOST_VERSION}, so we
+// need to reinject
 function patchUpdater() {
     const main = require.main!;
     const buildInfo = require(join(process.resourcesPath, "build_info.json"));
@@ -78,9 +82,9 @@ function patchUpdater() {
             const { update } = require(autoStartScript);
 
             // New Updater Injection
-            require.cache[autoStartScript]!.exports.update = (callback: Function) => {
+            require.cache[autoStartScript]!.exports.update = function () {
                 patchLatest();
-                update();
+                update.apply(this, arguments);
             };
         } else {
             const hostUpdaterScript = join(main.filename, "..", "hostUpdater.js");
@@ -89,11 +93,11 @@ function patchUpdater() {
             // Old Updater Injection
             require.cache[hostUpdaterScript]!.exports.quitAndInstall = function () {
                 patchLatest();
-                quitAndInstall.call(this);
+                quitAndInstall.apply(this, arguments);
             };
         }
     } catch {
-        // OpenAsar
+        // OpenAsar uses electrons autoUpdater on Windows
         const { quitAndInstall } = autoUpdater;
         autoUpdater.quitAndInstall = function () {
             patchLatest();
