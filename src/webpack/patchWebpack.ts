@@ -1,3 +1,21 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { WEBPACK_CHUNK } from "../utils/constants";
 import Logger from "../utils/logger";
 import { _initWebpack } from ".";
@@ -50,7 +68,7 @@ function patchPush() {
                         if (mod === originalMod) throw err;
 
                         logger.error("Error in patched chunk", err);
-                        return originalMod(module, exports, require);
+                        return void originalMod(module, exports, require);
                     }
 
                     // There are (at the time of writing) 11 modules exporting the window
@@ -100,6 +118,7 @@ function patchPush() {
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
+                    if (patch.predicate && !patch.predicate()) continue;
                     if (code.includes(patch.find)) {
                         patchedBy.add(patch.plugin);
                         // @ts-ignore we change all patch.replacement to array in plugins/index
@@ -127,7 +146,7 @@ function patchPush() {
                                 patchedBy.delete(patch.plugin);
                             }
                         }
-                        patches.splice(i--, 1);
+                        if (!patch.all) patches.splice(i--, 1);
                     }
                 }
             }
@@ -145,4 +164,3 @@ function patchPush() {
         configurable: true
     });
 }
-

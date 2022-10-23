@@ -1,4 +1,24 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import type { WebpackInstance } from "discord-types/other";
+
+import { proxyLazy } from "../utils/proxyLazy";
 
 export let _resolveReady: () => void;
 /**
@@ -59,7 +79,7 @@ export function find(filter: FilterFn, getDefault = true) {
 
         // is 3 is the longest obfuscated export?
         // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length < 3) {
+        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) return nested;
         }
@@ -68,7 +88,6 @@ export function find(filter: FilterFn, getDefault = true) {
     return null;
 }
 
-// TODO fix
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -84,13 +103,58 @@ export function findAll(filter: FilterFn, getDefault = true) {
 
         if (mod.exports.default && filter(mod.exports.default))
             ret.push(getDefault ? mod.exports.default : mod.exports);
-        else for (const nestedMod in mod.exports) if (nestedMod.length < 3) {
+        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
         }
     }
 
     return ret;
+}
+
+/**
+ * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
+ * then maps it into an easily usable module via the specified mappers
+ * @param code Code snippet
+ * @param mappers Mappers to create the non mangled exports
+ * @returns Unmangled exports as specified in mappers
+ *
+ * @example mapMangledModule("headerIdIsManaged:", {
+ *             openModal: filters.byCode("headerIdIsManaged:"),
+ *             closeModal: filters.byCode("key==")
+ *          })
+ */
+export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    const exports = {} as Record<S, any>;
+
+    // search every factory function
+    for (const id in wreq.m) {
+        const src = wreq.m[id].toString() as string;
+        if (src.includes(code)) {
+            const mod = wreq(id as any as number);
+            outer:
+            for (const key in mod) {
+                const member = mod[key];
+                for (const newName in mappers) {
+                    // if the current mapper matches this module
+                    if (mappers[newName](member)) {
+                        exports[newName] = member;
+                        continue outer;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    return exports;
+}
+
+/**
+ * Same as {@link mapMangledModule} but lazy
+ */
+export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    return proxyLazy(() => mapMangledModule(code, mappers));
 }
 
 export function findByProps(...props: string[]) {

@@ -1,36 +1,89 @@
-// TODO: fix
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-import Components from "discord-types/components";
-import { waitFor } from "../webpack";
+import { filters } from "../webpack";
+import { mapMangledModuleLazy } from "../webpack/webpack";
 
-export let Modal: Components.Modal;
-export let modals: any;
+export enum ModalSize {
+    SMALL = "small",
+    MEDIUM = "medium",
+    LARGE = "large",
+    DYNAMIC = "dynamic",
+}
 
-waitFor("openModalLazy", m => modals = m);
-waitFor("ModalRoot", m => Modal = m);
+enum ModalTransitionState {
+    ENTERING,
+    ENTERED,
+    EXITING,
+    EXITED,
+    HIDDEN,
+}
 
-let modalId = 1337;
+export interface ModalProps {
+    transitionState: ModalTransitionState;
+    onClose(): Promise<void>;
+}
 
-/**
- * Open a modal
- * @param Component The component to render in the modal
- * @returns The key of this modal. This can be used to close the modal later with closeModal
- */
-export function openModal(Component: React.ComponentType, modalProps: Record<string, any>) {
-    let key = `Vencord${modalId++}`;
-    modals.openModal(props => (
-        <Modal.ModalRoot {...props} {...modalProps}>
-            <Component />
-        </Modal.ModalRoot>
-    ), { modalKey: key });
+export interface ModalOptions {
+    modalKey?: string;
+    onCloseRequest?: (() => void);
+    onCloseCallback?: (() => void);
+}
 
-    return key;
-};
+interface ModalRootProps {
+    transitionState: ModalTransitionState;
+    children: React.ReactNode;
+    size?: ModalSize;
+    role?: "alertdialog" | "dialog";
+    className?: string;
+    onAnimationEnd?(): string;
+}
 
-/**
- * Close a modal by key. The id you need for this is returned by openModal.
- * @param key The key of the modal to close
- */
-export function closeModal(key: string) {
-    modals.closeModal(key);
+type RenderFunction = (props: ModalProps) => React.ReactNode;
+
+export const Modals = mapMangledModuleLazy(".onAnimationEnd,", {
+    ModalRoot: filters.byCode("headerIdIsManaged:"),
+    ModalHeader: filters.byCode("children", "separator", "wrap", "NO_WRAP", "grow", "shrink", "id", "header"),
+    ModalContent: filters.byCode("scrollerRef", "content", "className", "children"),
+    ModalFooter: filters.byCode("HORIZONTAL_REVERSE", "START", "STRETCH", "NO_WRAP", "footerSeparator"),
+    ModalCloseButton: filters.byCode("closeWithCircleBackground", "hideOnFullscreen"),
+});
+
+export const ModalRoot = (props: ModalRootProps) => <Modals.ModalRoot {...props} />;
+export const ModalHeader = (props: any) => <Modals.ModalHeader {...props} />;
+export const ModalContent = (props: any) => <Modals.ModalContent {...props} />;
+export const ModalFooter = (props: any) => <Modals.ModalFooter {...props} />;
+export const ModalCloseButton = (props: any) => <Modals.ModalCloseButton {...props} />;
+
+const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
+    openModal: filters.byCode("onCloseRequest:null!="),
+    closeModal: filters.byCode("onCloseCallback&&"),
+    openModalLazy: m => m?.length === 1 && filters.byCode(".apply(this,arguments)")(m),
+});
+
+export function openModalLazy(render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }): Promise<string> {
+    return ModalAPI.openModalLazy(render, options);
+}
+
+export function openModal(render: RenderFunction, options?: ModalOptions, contextKey?: string): string {
+    return ModalAPI.openModal(render, options, contextKey);
+}
+
+export function closeModal(modalKey: string, contextKey?: string): void {
+    return ModalAPI.closeModal(modalKey, contextKey);
 }

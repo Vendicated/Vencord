@@ -1,3 +1,22 @@
+#!/usr/bin/node
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 const path = require("path");
 const fs = require("fs");
 const { execSync } = require("child_process");
@@ -5,7 +24,7 @@ const { execSync } = require("child_process");
 console.log("\nVencord Installer\n");
 
 if (!fs.existsSync(path.join(process.cwd(), "node_modules"))) {
-    console.log("You need to install dependencies first. Run:", "pnpm install");
+    console.log("You need to install dependencies first. Run:", "pnpm install --frozen-lockfile");
     process.exit(1);
 }
 
@@ -43,7 +62,7 @@ async function install(installations) {
     // Attempt to give flatpak perms
     if (selected.isFlatpak) {
         try {
-            const branch = selected.branch;
+            const { branch } = selected;
             const cwd = process.cwd();
             const globalCmd = `flatpak override ${branch} --filesystem=${cwd}`;
             const userCmd = `flatpak override --user ${branch} --filesystem=${cwd}`;
@@ -84,7 +103,7 @@ async function install(installations) {
 
         fs.writeFileSync(
             path.join(dir, "index.js"),
-            `require("${ENTRYPOINT}"); require("../app.asar");`
+            `require("${ENTRYPOINT}");`
         );
         fs.writeFileSync(
             path.join(dir, "package.json"),

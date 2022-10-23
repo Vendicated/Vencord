@@ -1,11 +1,32 @@
-import plugins from "plugins";
-import IpcEvents from "../utils/IpcEvents";
-import { React } from "../webpack/common";
-import { mergeDefaults } from "../utils/misc";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-interface Settings {
+import plugins from "plugins";
+
+import IpcEvents from "../utils/IpcEvents";
+import { mergeDefaults } from "../utils/misc";
+import { OptionType } from "../utils/types";
+import { React } from "../webpack/common";
+
+export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
+    enableReactDevtools: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -17,6 +38,7 @@ interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     useQuickCss: true,
+    enableReactDevtools: false,
     plugins: {}
 };
 
@@ -28,9 +50,6 @@ for (const plugin in plugins) {
 
 try {
     var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
-    for (const key in DefaultSettings) {
-        settings[key] ??= DefaultSettings[key];
-    }
     mergeDefaults(settings, DefaultSettings);
 } catch (err) {
     console.error("Corrupt settings file. ", err);
@@ -40,24 +59,52 @@ try {
 type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
 const subscriptions = new Set<SubscriptionCallback>();
 
+// Wraps the passed settings object in a Proxy to nicely handle change listeners and default values
 function makeProxy(settings: Settings, root = settings, path = ""): Settings {
     return new Proxy(settings, {
         get(target, p: string) {
             const v = target[p];
-            if (typeof v === "object" && !Array.isArray(v))
+
+            // using "in" is important in the following cases to properly handle falsy or nullish values
+            if (!(p in target)) {
+                // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
+                // the default value.
+                if (path.startsWith("plugins.")) {
+                    const plugin = path.slice("plugins.".length);
+                    if (plugin in plugins) {
+                        const setting = plugins[plugin].options?.[p];
+                        if (!setting) return v;
+                        if ("default" in setting)
+                            // normal setting with a default value
+                            return setting.default;
+                        if (setting.type === OptionType.SELECT)
+                            return setting.options.find(o => o.default)?.value;
+                    }
+                }
+                return v;
+            }
+
+            // Recursively proxy Objects with the updated property path
+            if (typeof v === "object" && !Array.isArray(v) && v !== null)
                 return makeProxy(v, root, `${path}${path && "."}${p}`);
+
+            // primitive or similar, no need to proxy further
             return v;
         },
+
         set(target, p: string, v) {
+            // avoid unnecessary updates to React Components and other listeners
             if (target[p] === v) return true;
 
             target[p] = v;
+            // Call any listeners that are listening to a setting of this path
             const setPath = `${path}${path && "."}${p}`;
             for (const subscription of subscriptions) {
                 if (!subscription._path || subscription._path === setPath) {
                     subscription(v, setPath);
                 }
             }
+            // And don't forget to persist the settings!
             VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }
@@ -65,8 +112,18 @@ function makeProxy(settings: Settings, root = settings, path = ""): Settings {
 }
 
 /**
+ * Same as {@link Settings} but unproxied. You should treat this as readonly,
+ * as modifying properties on this will not save to disk or call settings
+ * listeners.
+ * WARNING: default values specified in plugin.options will not be ensured here. In other words,
+ * settings for which you specified a default value may be uninitialised. If you need proper
+ * handling for default values, use {@link Settings}
+ */
+export const PlainSettings = settings;
+/**
  * A smart settings object. Altering props automagically saves
  * the updated settings to disk.
+ * This recursively proxies objects. If you need the object non proxied, use {@link PlainSettings}
  */
 export const Settings = makeProxy(settings);
 
