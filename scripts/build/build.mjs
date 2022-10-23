@@ -19,10 +19,10 @@
 
 import esbuild from "esbuild";
 
-import { commonOpts, fileIncludePlugin, gitHash, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
+import { commonOpts, fileIncludePlugin, gitHash, gitHashPlugin, globPlugins, isStandalone, makeAllPackagesExternalPlugin } from "./common.mjs";
 
 const defines = {
-    IS_STANDALONE: JSON.stringify(process.argv.includes("--standalone"))
+    IS_STANDALONE: isStandalone
 };
 if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimise
@@ -72,14 +72,13 @@ await Promise.all([
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer" },
         globalName: "Vencord",
-        external: ["@plugins", "@git-hash"],
         plugins: [
             globPlugins,
-            gitHashPlugin,
-            fileIncludePlugin
+            ...commonOpts.plugins
         ],
         define: {
-            IS_WEB: "false"
+            IS_WEB: "false",
+            IS_STANDALONE: isStandalone
         }
     }),
 ]).catch(err => {

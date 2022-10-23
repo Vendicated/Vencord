@@ -22,6 +22,7 @@ import { ipcMain } from "electron";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
+import { VENCORD_USER_AGENT } from "../../utils/constants";
 import IpcEvents from "../../utils/IpcEvents";
 import { get } from "../simpleGet";
 import { calculateHashes, serializeErrors } from "./common";
@@ -33,6 +34,9 @@ async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
+            // "All API requests MUST include a valid User-Agent header.
+            // Requests with no User-Agent header will be rejected."
+            "User-Agent": VENCORD_USER_AGENT,
             // todo: perhaps add support for (optional) api token?
             // unauthorised rate limit is 60 reqs/h
             // https://github.com/settings/tokens/new?description=Vencord%20Updater
@@ -47,7 +51,8 @@ async function calculateGitChanges() {
     return data.commits.map(c => ({
         hash: c.sha,
         author: c.author.login,
-        message: c.commit.message
+        // github api only sends the long sha
+        message: c.commit.message.slice(0, 7)
     }));
 }
 
@@ -74,7 +79,7 @@ async function applyUpdates() {
 }
 
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
-ipcMain.handle(IpcEvents.GET_REPO, () => `https://github.com/${gitRemote}`);
+ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

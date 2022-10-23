@@ -23,7 +23,8 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
-const watch = process.argv.includes("--watch");
+export const watch = process.argv.includes("--watch");
+export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
