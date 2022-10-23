@@ -20,7 +20,7 @@ import { Flex } from "../components/Flex";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { findByProps, waitFor } from "../webpack";
+import { waitFor } from "../webpack";
 import { Button, ChannelStore, Text } from "../webpack/common";
 
 const VIEW_CHANNEL = 1024n;
@@ -100,7 +100,7 @@ export default definePlugin({
 
         const isHidden = this.isHiddenChannel(channel);
         if (isHidden) {
-            const lastMessageDate = channel.lastMessageId ? new Date(findByProps("extractTimestamp").extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
+            const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
 
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
