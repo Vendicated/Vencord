@@ -67,6 +67,7 @@ export default definePlugin({
             }
         },
         {
+            // I can't find the right onClick to patch
             find: "selectChannel:function",
             replacement: [
                 {
@@ -76,6 +77,7 @@ export default definePlugin({
             ]
         },
         {
+            // Prevents Discord from trying to fetch message and create a 403 error
             find: "fetchMessages:function",
             replacement: {
                 match: /fetchMessages:function\((\w)\){/g,
@@ -83,6 +85,7 @@ export default definePlugin({
             }
         },
         {
+            // Hide unreads
             find: "?\"button\":\"link\"",
             predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
             replacement: {
@@ -93,10 +96,8 @@ export default definePlugin({
     ],
     isHiddenChannel(channel) {
         if (!channel) return false;
-
         if (channel.channelId)
             channel = ChannelStore.getChannel(channel.channelId);
-
         if (channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
             return false;
 
