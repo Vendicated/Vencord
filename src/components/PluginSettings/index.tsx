@@ -92,7 +92,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
-                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
+                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1" }}><span style={{ marginRight: "10px" }}>{plugin.name}</span>{(plugin.new) && <NewBadge />}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options ? <CogWheel /> : <InfoIcon width="24" height="24" />}
                     </button>
@@ -167,7 +167,7 @@ export default ErrorBoundary.wrap(function Settings() {
     };
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord">
+        <Forms.FormSection tag="h1" title="Vencord Plugins">
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Plugins
             </Forms.FormTitle>
