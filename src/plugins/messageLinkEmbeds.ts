@@ -10,7 +10,7 @@ const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmb
 if (msgLink) {
     $2.message.embeds = [
         ...Vencord.Plugins.plugins.MessageLinkEmbeds
-          .generateEmbed(msgLink, $2.message.embeds)
+          .generateEmbed(msgLink, $2.message.embeds, { channelID: $2.message.channel_id, messageID: $2.message.id })
     ].filter(item => item);
 };
 
@@ -26,7 +26,7 @@ let get: (...args) => Promise<any>;
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
 let toTimestamp = lazy(() => find(m => m.prototype?.toDate));
 
-function getMessage(channelID: string, messageID: string) {
+function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string }) {
     get({
         // TODO: don't hardcode endpoint
         url: `/channels/${channelID}/messages`,
@@ -45,6 +45,17 @@ function getMessage(channelID: string, messageID: string) {
             message.embeds[0].color &&= "#" + message.embeds[0].color.toString(16);
         }
         cache[message.id] = message;
+
+        console.log(originalMessage);
+        if (originalMessage) FluxDispatcher.dispatch({
+            type: "MESSAGE_UPDATE",
+            message: {
+                guild_id: ChannelStore.getChannel(originalMessage.channelID).guild_id,
+                channel_id: originalMessage.channelID,
+                id: originalMessage.messageID,
+            }
+        });
+
     }).catch(() => {});
 }
 
@@ -92,7 +103,7 @@ export default definePlugin({
         return null;
     },
 
-    generateEmbed(messageURL: string, existingEmbeds: Embed[]) {
+    generateEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string }) {
         const [guildID, channelID, messageID] = messageURL.split("/");
         if (existingEmbeds.find(i => i._isMessageEmbed)) return [...existingEmbeds];
         const message = MessageStore.getMessage(channelID, messageID) || cache[messageID];
@@ -101,7 +112,8 @@ export default definePlugin({
             else existingEmbeds = existingEmbeds.filter(i => i.id !== "messageLinkEmbeds-1");
         }
         if (!message) {
-            getMessage(channelID, messageID);
+            console.log(originalMessage);
+            getMessage(channelID, messageID, originalMessage);
             return [...existingEmbeds, {
                 author: {
                     name: "Clyde#0000",
