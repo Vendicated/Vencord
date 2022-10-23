@@ -11,9 +11,9 @@ export let React: typeof import("react");
 
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
-export let GuildMemberStore: Stores.GuildMemberStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let ChannelStore: Stores.ChannelStore;
+export let GuildMemberStore: Stores.GuildMemberStore;
 export let MessageStore: Stores.MessageStore;
 
 export const Forms = {} as {
