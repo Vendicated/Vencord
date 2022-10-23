@@ -111,6 +111,7 @@ export default definePlugin({
         };
         const firstEmbed = message.embeds[0];
         if (!firstEmbed) return null;
+        // { url: "https://cdn.discordapp.com/attachments/764071870336598016/1033696245086163005/Untitled.png", proxyURL: "https://cdn.discordapp.com/attachments/764071870336598016/1033696245086163005/Untitled.png" };
         if (firstEmbed.type === "image" || (firstEmbed.type === "rich" && firstEmbed.image))
             return firstEmbed.image ? { ...firstEmbed.image } : { ...firstEmbed.thumbnail };
         if (firstEmbed.type === "gifv" && !firstEmbed.url!.match(/https:\/\/(?:www.)?tenor\.com/)) return {
@@ -171,7 +172,7 @@ export default definePlugin({
                 iconURL: hasActualEmbed ? firstEmbed.footer?.iconURL : undefined,
             },
             rawTitle: hasActualEmbed ? firstEmbed.rawTitle : undefined,
-            thumbnail: hasActualEmbed ? { ...firstEmbed.thumbnail } : undefined,
+            thumbnail: hasActualEmbed && firstEmbed.thumbnail ? { ...firstEmbed.thumbnail } : undefined,
             timestamp: message.timestamp,
             id: `messageLinkEmbeds-${messageID}`,
             fields: [],
