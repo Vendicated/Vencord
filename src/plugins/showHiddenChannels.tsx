@@ -108,7 +108,7 @@ export default definePlugin({
     shouldShow(channel, category, isMuted) {
         if (!this.isHiddenChannel(channel)) return false;
         if (!category) return false;
-        if (category.guild?.hideMutedChannels && isMuted) return false;
+        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
 
         return !category.isCollapsed;
     },
@@ -119,10 +119,11 @@ export default definePlugin({
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
             return false;
 
-        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || !can(CONNECT, channel);
+        channel._isHiddenChannel = (channel.type === 0 && !can(VIEW_CHANNEL, channel)) || (channel.type === 2 && !can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
     channelSelected(channelData) {
+        if (!channelData) return false;
         const channel = ChannelStore.getChannel(channelData.channelId);
 
         const isHidden = this.isHiddenChannel(channel);
