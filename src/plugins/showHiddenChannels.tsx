@@ -76,6 +76,13 @@ export default definePlugin({
             ]
         },
         {
+            find: "fetchMessages:function",
+            replacement: {
+                match: /fetchMessages:function\((\w)\){/g,
+                replace: "fetchMessages:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1)) return;"
+            }
+        },
+        {
             find: "?\"button\":\"link\"",
             predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
             replacement: {
@@ -86,13 +93,18 @@ export default definePlugin({
     ],
     isHiddenChannel(channel) {
         if (!channel) return false;
+
+        if (channel.channelId)
+            channel = ChannelStore.getChannel(channel.channelId);
+
+        if (channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
+            return false;
+
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
         return channel._isHiddenChannel;
     },
     channelSelected(channelData) {
         const channel = ChannelStore.getChannel(channelData.channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
         const isHidden = this.isHiddenChannel(channel);
         if (isHidden)
