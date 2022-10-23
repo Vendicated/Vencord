@@ -59,13 +59,14 @@ interface ReloadRequiredCardProps extends React.HTMLProps<HTMLDivElement> {
 function ReloadRequiredCard({ plugins, ...props }: ReloadRequiredCardProps) {
     if (plugins.length === 0) return null;
 
-    const pluginText = plugins.length === 1
-        ? `The plugin ${plugins[0]} requires a reload to apply changes.`
-        : `The following plugins require a reload to apply changes: ${plugins.join(", ")}.`;
+    const pluginPrefix = plugins.length === 1 ? "The plugin" : "The following plugins require a reload to apply changes:";
+    const pluginSuffix = plugins.length === 1 ? " requires a reload to apply changes." : ".";
 
     return (
         <ErrorCard {...props} style={{ padding: "1em", display: "grid", gridTemplateColumns: "1fr auto", gap: 8, ...props.style }}>
-            <span style={{ margin: "auto 0" }}>{pluginText}</span>
+            <span style={{ margin: "auto 0" }}>
+                {pluginPrefix} <code>{plugins.join(", ")}</code>{pluginSuffix}
+            </span>
             <Button look={Button.Looks.INVERTED} onClick={() => location.reload()}>Reload</Button>
         </ErrorCard>
     );
