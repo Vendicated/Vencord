@@ -112,7 +112,6 @@ export default definePlugin({
             else existingEmbeds = existingEmbeds.filter(i => i.id !== "messageLinkEmbeds-1");
         }
         if (!message) {
-            console.log(originalMessage);
             getMessage(channelID, messageID, originalMessage);
             return [...existingEmbeds, {
                 author: {
