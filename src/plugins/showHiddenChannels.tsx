@@ -67,21 +67,19 @@ export default definePlugin({
             }
         },
         {
-            // I can't find the right onClick to patch
-            find: "selectChannel:function",
-            replacement: [
-                {
-                    match: /selectChannel:function\((\w)\){/g,
-                    replace: "selectChannel:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($1)) return;"
-                }
-            ]
-        },
-        {
             // Prevents Discord from trying to fetch message and create a 403 error
             find: "fetchMessages:function",
             replacement: {
                 match: /fetchMessages:function\((\w)\){/g,
                 replace: "fetchMessages:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1)) return;"
+            }
+        },
+        {
+            // Don't switch to the channel if it's hidden, but show a modal instead
+            find: ".selectGuild(",
+            replacement: {
+                match: /(function \w+\(\w\)\{var (\w)=\w+\(\w\);)/g,
+                replace: "$1if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2.params))return;"
             }
         },
         {
@@ -98,7 +96,7 @@ export default definePlugin({
         if (!channel) return false;
         if (channel.channelId)
             channel = ChannelStore.getChannel(channel.channelId);
-        if (channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
             return false;
 
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
