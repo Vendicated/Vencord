@@ -71,7 +71,6 @@ export default definePlugin({
             replacement: [
                 {
                     match: /selectChannel:function\((\w)\){/g,
-                    // replace: "},onMouseDown:function($1){$2 (e.preventDefault())}"
                     replace: "selectChannel:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($1)) return;"
                 }
             ]
@@ -85,6 +84,11 @@ export default definePlugin({
             }
         }
     ],
+    isHiddenChannel(channel) {
+        if (!channel) return false;
+        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
+        return channel._isHiddenChannel;
+    },
     channelSelected(channelData) {
         const channel = ChannelStore.getChannel(channelData.channelId);
 
@@ -129,10 +133,5 @@ export default definePlugin({
                 </ModalRoot>
             ));
         return isHidden;
-    },
-    isHiddenChannel(channel) {
-        if (!channel) return false;
-        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
-        return channel._isHiddenChannel;
     }
 });
