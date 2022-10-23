@@ -39,7 +39,11 @@ export default definePlugin({
         {
             name: "Average React Enjoyer",
             id: 1004904120056029256n
-        }
+        },
+        {
+            name: "D3SOX",
+            id: 201052085641281538n
+        },
     ],
     options: {
         hideUnreads: {
