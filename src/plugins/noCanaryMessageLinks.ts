@@ -18,16 +18,38 @@
 
 import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "../Vencord";
 
 export default definePlugin({
     name: "NoCanaryMessageLinks",
-    description: "Removes the canary and ptb prefix from message links",
-    authors: [Devs.Samu],
+    description: "Allows you to change/remove the subdomain of discord message and channel links",
+    authors: [
+        Devs.Samu,
+        Devs.nea,
+    ],
+    options: {
+        linkPrefix: {
+            description: "The subdomain for your discord message links",
+            type: OptionType.STRING,
+            default: "",
+            restartNeeded: false,
+        },
+        alwaysUseDiscordHost: {
+            description: "Always use discord.com host (replace discordapp.com)",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: false,
+        },
+    },
     dependencies: ["MessageEventsAPI"],
 
     removeBetas(msg: MessageObject) {
-        msg.content = msg.content.replace(/(?<=https:\/\/)(canary.|ptb.)(?=discord(?:app)?.com\/channels\/(?:\d{17,20}|@me)\/\d{17,20}\/\d{17,20})/g, ""); // Ven W
+        const settings = Settings.plugins.NoCanaryMessageLinks;
+        msg.content = msg.content.replace(
+            /https:\/\/(?:canary\.|ptb\.)?(discord(?:app)?\.com)(\/channels\/(?:\d{17,20}|@me)\/\d{17,20}(?:\/\d{17,20})?)/g,
+            (_, host, path) => "https://" + (settings.linkPrefix ? settings.linkPrefix + "." : "") + (settings.alwaysUseDiscordHost ? "discord.com" : host) + path
+        );
     },
 
     start() {
