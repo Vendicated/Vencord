@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "@git-hash";
-import gitRemote from "@git-remote";
+import gitHash from "~git-hash";
+import gitRemote from "~git-remote";
 
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";

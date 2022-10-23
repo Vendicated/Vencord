@@ -44,7 +44,7 @@ export const makeAllPackagesExternalPlugin = {
 export const globPlugins = {
     name: "glob-plugins",
     setup: build => {
-        const filter = /^@plugins$/;
+        const filter = /^~plugins$/;
         build.onResolve({ filter }, args => {
             return {
                 namespace: "import-plugins",
@@ -86,7 +86,7 @@ export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8
 export const gitHashPlugin = {
     name: "git-hash-plugin",
     setup: build => {
-        const filter = /^@git-hash$/;
+        const filter = /^~git-hash$/;
         build.onResolve({ filter }, args => ({
             namespace: "git-hash", path: args.path
         }));
@@ -102,7 +102,7 @@ export const gitHashPlugin = {
 export const gitRemotePlugin = {
     name: "git-remote-plugin",
     setup: build => {
-        const filter = /^@git-remote$/;
+        const filter = /^~git-remote$/;
         build.onResolve({ filter }, args => ({
             namespace: "git-remote", path: args.path
         }));
@@ -124,7 +124,7 @@ export const gitRemotePlugin = {
 export const fileIncludePlugin = {
     name: "file-include-plugin",
     setup: build => {
-        const filter = /^@fileContent\/.+$/;
+        const filter = /^~fileContent\/.+$/;
         build.onResolve({ filter }, args => ({
             namespace: "include-file",
             path: args.path,
@@ -152,5 +152,5 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
-    external: ["@plugins", "@git-hash", "@git-remote"]
+    external: ["~plugins", "~git-hash", "~git-remote"]
 };

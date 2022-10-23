@@ -18,11 +18,12 @@
 
 import "./updater";
 
-import monacoHtml from "@fileContent/../components/monacoWin.html;base64";
 import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
+
+import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
 import { debounce } from "../utils/debounce";
 import IpcEvents from "../utils/IpcEvents";
