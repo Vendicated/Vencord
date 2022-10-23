@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Plugins from "plugins";
+import Plugins from "~plugins";
 
 import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";

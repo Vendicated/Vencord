@@ -16,9 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Message } from "discord-types/general";
-import { PartialDeep } from "type-fest";
-
 import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
@@ -27,33 +24,33 @@ import { filters } from "../webpack";
 import { FluxDispatcher } from "../webpack/common";
 
 interface Album {
-    id: string
+    id: string;
     image: {
-        height: number
-        width: number
-        url: string
-    }
-    name: string
+        height: number;
+        width: number;
+        url: string;
+    };
+    name: string;
 }
 
 interface Artist {
     external_urls: {
-        spotify: string
-    }
-    href: string
-    id: string
-    name: string
-    type: "artist" | string
-    uri: string
+        spotify: string;
+    };
+    href: string;
+    id: string;
+    name: string;
+    type: "artist" | string;
+    uri: string;
 }
 
 interface Track {
-    id: string
-    album: Album
-    artists: Artist[]
-    duration: number
-    isLocal: boolean
-    name: string
+    id: string;
+    album: Album;
+    artists: Artist[];
+    duration: number;
+    isLocal: boolean;
+    name: string;
 }
 
 const Spotify = lazyWebpack(filters.byProps(["getPlayerState"]));
