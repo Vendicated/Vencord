@@ -1,8 +1,27 @@
-import { MessageStore, GuildMemberStore, ChannelStore, GuildStore, FluxDispatcher } from "../webpack/common";
-import { find, waitFor } from "../webpack";
-import definePlugin from "../utils/types";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Embed as _Embed, Message } from "discord-types/general";
+
 import { lazy } from "../utils/misc";
+import definePlugin from "../utils/types";
+import { find, waitFor } from "../webpack";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, MessageStore } from "../webpack/common";
 
 const replacement = `
 const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)?.[1];
@@ -20,13 +39,13 @@ var
   $4 = $2.renderSuppressEmbeds /* Don't add a semicolon here, there are more definitions after this. */
 `.trim().replace(/(?<=[^(?:const)|(?:var)])\s+/gm, "");
 
-const cache: { [id: string]: Message } = {};
+const cache: { [id: string]: Message; } = {};
 
 let get: (...args) => Promise<any>;
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
-let toTimestamp = lazy(() => find(m => m.prototype?.toDate));
+const toTimestamp = lazy(() => find(m => m.prototype?.toDate));
 
-function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string }) {
+function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }) {
     get({
         // TODO: don't hardcode endpoint
         url: `/channels/${channelID}/messages`,
@@ -56,15 +75,15 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
             }
         });
 
-    }).catch(() => {});
+    }).catch(() => { });
 }
 
 interface Embed extends _Embed {
     _isMessageEmbed?: boolean,
     footer?: {
         text: string,
-        iconURL?: string
-    }
+        iconURL?: string;
+    };
 }
 
 export default definePlugin({
@@ -103,7 +122,7 @@ export default definePlugin({
         return null;
     },
 
-    generateEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string }) {
+    generateEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
         const [guildID, channelID, messageID] = messageURL.split("/");
         if (existingEmbeds.find(i => i._isMessageEmbed)) return [...existingEmbeds];
         const message = MessageStore.getMessage(channelID, messageID) || cache[messageID];
