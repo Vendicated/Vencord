@@ -44,7 +44,7 @@ export function startAllPlugins() {
 
 export function startDependenciesRecursive(p: Plugin) {
     let restartNeeded = false;
-    let failures: string[] = [];
+    const failures: string[] = [];
     if (p.dependencies) for (const dep of p.dependencies) {
         if (!Settings.plugins[dep].enabled) {
             startDependenciesRecursive(Plugins[dep]);

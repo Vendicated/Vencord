@@ -17,8 +17,8 @@
 */
 
 import Plugins from "plugins";
-import { showNotice } from "../../api/Notices";
 
+import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 import { Logger, Modals } from "../../utils";
@@ -266,7 +266,7 @@ export default ErrorBoundary.wrap(function Settings() {
                         const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
                         const dependency = enabledDependants?.length;
                         return <PluginCard
-                            onRestartNeeded={(name) => changes.add(name)}
+                            onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
                         />;
@@ -292,7 +292,7 @@ export default ErrorBoundary.wrap(function Settings() {
                                 <PluginCard
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    onRestartNeeded={(name) => changes.add(name)}
+                                    onRestartNeeded={name => changes.add(name)}
                                     disabled={plugin.required || !!dependency}
                                     plugin={plugin}
                                 />
