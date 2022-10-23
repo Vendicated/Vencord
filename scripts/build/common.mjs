@@ -32,10 +32,7 @@ export const makeAllPackagesExternalPlugin = {
     name: "make-all-packages-external",
     setup(build) {
         const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
-        build.onResolve({ filter }, (args) => ({
-            path: args.path,
-            external: true,
-        }));
+        build.onResolve({ filter }, args => ({ path: args.path, external: true }));
     },
 };
 
@@ -44,88 +41,68 @@ export const makeAllPackagesExternalPlugin = {
  */
 export const globPlugins = {
     name: "glob-plugins",
-    setup: (build) => {
-        build.onResolve({ filter: /^plugins$/ }, (args) => {
+    setup: build => {
+        build.onResolve({ filter: /^plugins$/ }, args => {
             return {
                 namespace: "import-plugins",
-                path: args.path,
+                path: args.path
             };
         });
 
-        build.onLoad(
-            { filter: /^plugins$/, namespace: "import-plugins" },
-            async () => {
-                const pluginDirs = ["plugins", "userplugins"];
-                let code = "";
-                let plugins = "\n";
-                let i = 0;
-                for (const dir of pluginDirs) {
-                    if (!existsSync(`./src/${dir}`)) continue;
-                    const files = await readdir(`./src/${dir}`);
-                    for (const file of files) {
-                        let isNew = false;
-                        let stats = await stat(`./src/${dir}/${file}`);
-                        let dirStats = await stat(`./src/${dir}`);
-                        if (
-                            // File is younger than a week old
-                            (new Date(stats.birthtime.valueOf()).setDate(
-                                stats.birthtime.getDate() + 7
-                            ) > Date.now() && // AND directory is older than a week old
-                                new Date(dirStats.birthtime.valueOf()).setDate(
-                                    dirStats.birthtime.getDate() + 7
-                                ) < Date.now()) ||
-                            (new Date(dirStats.birthtime.valueOf()).setDate(
-                                // OR directory is younger than a week old
-                                dirStats.birthtime.getDate() + 7
-                            ) > Date.now() &&
-                                new Date(stats.birthtime.valueOf()).setHours(
-                                    // AND file is older than the directory (by at least an hour)
-                                    stats.birthtime.getHours() - 1
-                                ) > dirStats.birthtime)
-                        ) {
-                            // If file is new
-                            isNew = true;
-                        }
-                        if (file === "index.ts") {
-                            continue;
-                        }
-                        const mod = `p${i}`;
-                        code += `import ${mod} from "./${dir}/${file.replace(
-                            /.tsx?$/,
-                            ""
-                        )}";\n${mod}.new = ${isNew};\n`;
-                        plugins += `[${mod}.name]:${mod},\n`;
-                        i++;
+        build.onLoad({ filter: /^plugins$/, namespace: "import-plugins" }, async () => {
+            const pluginDirs = ["plugins", "userplugins"];
+            let code = "";
+            let plugins = "\n";
+            let i = 0;
+            for (const dir of pluginDirs) {
+                if (!existsSync(`./src/${dir}`)) continue;
+                const files = await readdir(`./src/${dir}`);
+                for (const file of files) {
+                    if (file === "index.ts") {
+                        continue;
                     }
+                    let isNew = false;
+                    let fileCreatedAt = (await stat(`./src/${dir}/${file}`)).birthtime;
+                    let dirCreatedAt = (await stat(`./src/${dir}/`)).birthtime;
+                    let dateNow = Date.now();
+
+                    let fileMaxAge = new Date(fileCreatedAt.valueOf()).setDate(fileCreatedAt.getDate() + 7);
+                    let dirMaxAge = new Date(dirCreatedAt.valueOf()).setDate(dirCreatedAt.getDate() + 7);
+                    let fileCreatedAtPlusAnHour = new Date(fileCreatedAt.valueOf()).setHours(fileCreatedAt.getHours() - 1);
+
+                    if ((fileMaxAge > dateNow && dirMaxAge < dateNow) || (dirMaxAge < dateNow && fileCreatedAtPlusAnHour > dirCreatedAt)) {
+                        isNew = true;
+                    };
+                    const mod = `p${i}`;
+                    code += `import ${mod} from "./${dir}/${file.replace(/.tsx?$/, "")}";\n${mod}.new = ${isNew};\n`;
+                    plugins += `[${mod}.name]:${mod},\n`;
+                    i++;
                 }
-                code += `export default {${plugins}};`;
-                return {
-                    contents: code,
-                    resolveDir: "./src",
-                };
             }
-        );
-    },
+            code += `export default {${plugins}};`;
+            return {
+                contents: code,
+                resolveDir: "./src"
+            };
+        });
+    }
 };
 
-const gitHash = execSync("git rev-parse --short HEAD", {
-    encoding: "utf-8",
-}).trim();
+const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */
 export const gitHashPlugin = {
     name: "git-hash-plugin",
-    setup: (build) => {
+    setup: build => {
         const filter = /^git-hash$/;
-        build.onResolve({ filter }, (args) => ({
-            namespace: "git-hash",
-            path: args.path,
+        build.onResolve({ filter }, args => ({
+            namespace: "git-hash", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-hash" }, () => ({
-            contents: `export default "${gitHash}"`,
+            contents: `export default "${gitHash}"`
         }));
-    },
+    }
 };
 
 /**
