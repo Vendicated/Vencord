@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import esbuild from "esbuild";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
+import { promisify } from "util";
 
 const watch = process.argv.includes("--watch");
 
@@ -42,14 +43,15 @@ export const makeAllPackagesExternalPlugin = {
 export const globPlugins = {
     name: "glob-plugins",
     setup: build => {
-        build.onResolve({ filter: /^plugins$/ }, args => {
+        const filter = /^@plugins$/;
+        build.onResolve({ filter }, args => {
             return {
                 namespace: "import-plugins",
                 path: args.path
             };
         });
 
-        build.onLoad({ filter: /^plugins$/, namespace: "import-plugins" }, async () => {
+        build.onLoad({ filter, namespace: "import-plugins" }, async () => {
             const pluginDirs = ["plugins", "userplugins"];
             let code = "";
             let plugins = "\n";
@@ -83,13 +85,35 @@ export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8
 export const gitHashPlugin = {
     name: "git-hash-plugin",
     setup: build => {
-        const filter = /^git-hash$/;
+        const filter = /^@git-hash$/;
         build.onResolve({ filter }, args => ({
             namespace: "git-hash", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-hash" }, () => ({
             contents: `export default "${gitHash}"`
         }));
+    }
+};
+
+/**
+ * @type {esbuild.Plugin}
+ */
+export const gitRemotePlugin = {
+    name: "git-remote-plugin",
+    setup: build => {
+        const filter = /^@git-remote$/;
+        build.onResolve({ filter }, args => ({
+            namespace: "git-remote", path: args.path
+        }));
+        build.onLoad({ filter, namespace: "git-remote" }, async () => {
+            const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+            const remote = res.stdout.trim()
+                .replace("https://github.com/", "")
+                .replace("git@github.com:", "")
+                .replace(/.git$/, "");
+
+            return { contents: `export default "${remote}"` };
+        });
     }
 };
 
@@ -126,5 +150,6 @@ export const commonOpts = {
     minify: !watch,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
-    plugins: [fileIncludePlugin, gitHashPlugin]
+    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
+    external: ["@plugins", "@git-hash", "@git-remote"]
 };

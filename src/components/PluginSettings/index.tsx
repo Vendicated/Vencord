@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Plugins from "plugins";
+import Plugins from "@plugins";
 
 import { Settings, useSettings } from "../../api/settings";
 import { startPlugin, stopPlugin } from "../../plugins";

@@ -16,30 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import gitHash from "@git-hash";
+import gitRemote from "@git-remote";
 import { ipcMain } from "electron";
 import { writeFile } from "fs/promises";
-import gitHash from "git-hash";
 import { join } from "path";
 
-import { IpcEvents } from "../../utils";
+import IpcEvents from "../../utils/IpcEvents";
 import { get } from "../simpleGet";
 import { calculateHashes, serializeErrors } from "./common";
 
-const API_BASE = "https://api.github.com";
+const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, Buffer][];
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
-            // todo: perhaps add support for tokens?
+            // todo: perhaps add support for (optional) api token?
             // unauthorised rate limit is 60 reqs/h
+            // https://github.com/settings/tokens/new?description=Vencord%20Updater
         }
     });
 }
 
 async function calculateGitChanges() {
-    const res = await githubGet(`/repos/Vendicated/Vencord/compare/${gitHash}...HEAD`);
+    const res = await githubGet(`/compare/${gitHash}...HEAD`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map(c => ({
@@ -50,7 +52,7 @@ async function calculateGitChanges() {
 }
 
 async function fetchUpdates() {
-    const release = await githubGet("/repos/Vendicated/Vencord/releases/latest");
+    const release = await githubGet("/releases/latest");
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -72,7 +74,7 @@ async function applyUpdates() {
 }
 
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
-ipcMain.handle(IpcEvents.GET_REPO, () => "lmao");
+ipcMain.handle(IpcEvents.GET_REPO, () => `https://github.com/${gitRemote}`);
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

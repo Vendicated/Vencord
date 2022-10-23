@@ -19,14 +19,18 @@
 // eslint-disable-next-line spaced-comment
 /// <reference types="standalone-electron-types"/>
 
-declare module "plugins" {
+declare module "@plugins" {
     const plugins: Record<string, import("./utils/types").Plugin>;
     export default plugins;
 }
 
-declare module "git-hash" {
+declare module "@git-hash" {
     const hash: string;
     export default hash;
+}
+declare module "@git-remote" {
+    const remote: string;
+    export default remote;
 }
 
 declare module "@fileContent/*" {

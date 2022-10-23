@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "git-hash";
+import gitHash from "@git-hash";
 
 import { debounce } from "../../utils";
 import { Settings } from "../../Vencord";

@@ -46,7 +46,7 @@ const nodeCommonOpts = {
     minify: true,
     bundle: true,
     sourcemap: "linked",
-    external: ["electron"],
+    external: ["electron", ...commonOpts.external],
     define: defines,
     banner: {
         js: header
@@ -72,7 +72,7 @@ await Promise.all([
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer" },
         globalName: "Vencord",
-        external: ["plugins", "git-hash"],
+        external: ["@plugins", "@git-hash"],
         plugins: [
             globPlugins,
             gitHashPlugin,
