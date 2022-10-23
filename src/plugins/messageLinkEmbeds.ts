@@ -65,7 +65,6 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
         }
         cache[message.id] = message;
 
-        console.log(originalMessage);
         if (originalMessage) FluxDispatcher.dispatch({
             type: "MESSAGE_UPDATE",
             message: {
