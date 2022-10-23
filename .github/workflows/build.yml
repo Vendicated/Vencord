@@ -28,7 +28,7 @@ jobs:
               run: pnpm buildWeb
 
             - name: Build
-              run: pnpm build
+              run: pnpm build --standalone
 
             - name: Get some values needed for the release
               id: vars

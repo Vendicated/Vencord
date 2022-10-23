@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes,useAwaiter } from "../../../utils";
+import { useAwaiter } from "../../../utils";
 import { Settings } from "../../../Vencord";
 import { UserStore } from "../../../webpack/common";
 import { PronounMapping, UserProfileProps } from "../types";

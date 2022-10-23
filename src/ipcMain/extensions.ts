@@ -19,32 +19,14 @@
 import { session } from "electron";
 import { unzip } from "fflate";
 import { constants as fsConstants } from "fs";
-import { access,mkdir, rm, writeFile } from "fs/promises";
-import https from "https";
+import { access, mkdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
 import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";
+import { get } from "./simpleGet";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
-
-function download(url: string) {
-    return new Promise<Buffer>((resolve, reject) => {
-        https.get(url, res => {
-            const { statusCode, statusMessage, headers } = res;
-            if (statusCode! >= 400)
-                return void reject(`${statusCode}: ${statusMessage} - ${url}`);
-            if (statusCode! >= 300)
-                return void resolve(download(headers.location!));
-
-            const chunks = [] as Buffer[];
-            res.on("error", reject);
-
-            res.on("data", chunk => chunks.push(chunk));
-            res.once("end", () => resolve(Buffer.concat(chunks)));
-        });
-    });
-}
 
 async function extract(data: Buffer, outDir: string) {
     await mkdir(outDir, { recursive: true });
@@ -86,7 +68,7 @@ export async function installExt(id: string) {
         await access(extDir, fsConstants.F_OK);
     } catch (err) {
         const url = `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&x=id%3D${id}%26uc&prodversion=32`;
-        const buf = await download(url);
+        const buf = await get(url);
         await extract(crxToZip(buf), extDir);
     }
 
