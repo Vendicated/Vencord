@@ -18,9 +18,12 @@
 */
 
 
-import { createWriteStream, readFileSync } from "fs";
-import yazl from "yazl";
 import esbuild from "esbuild";
+import { zip } from "fflate";
+import { readFileSync, writeFileSync } from "fs";
+import { readFile } from "fs/promises";
+import { join } from "path";
+
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
 import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins } from "./common.mjs";
@@ -66,13 +69,20 @@ await Promise.all(
     ]
 );
 
-const zip = new yazl.ZipFile();
-zip.outputStream.pipe(createWriteStream("dist/extension.zip")).on("close", () => {
-    console.info("Extension written to dist/extension.zip");
+zip({
+    dist: {
+        "Vencord.js": readFileSync("dist/browser.js")
+    },
+    ...Object.fromEntries(await Promise.all(["background.js", "content.js", "manifest.json"].map(async f => [
+        f,
+        await readFile(join("browser", f))
+    ]))),
+}, {}, (err, data) => {
+    if (err) {
+        console.error(err);
+        process.exitCode = 1;
+    } else {
+        writeFileSync("dist/extension.zip", data);
+        console.info("Extension written to dist/extension.zip");
+    }
 });
-
-zip.addFile("dist/browser.js", "dist/Vencord.js");
-["background.js", "content.js", "manifest.json"].forEach(f => {
-    zip.addFile(`browser/${f}`, `${f}`);
-});
-zip.end();

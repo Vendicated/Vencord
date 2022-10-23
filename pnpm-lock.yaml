@@ -15,7 +15,6 @@ specifiers:
   standalone-electron-types: ^1.0.0
   type-fest: ^3.1.0
   typescript: ^4.8.4
-  yazl: ^2.5.1
 
 dependencies:
   console-menu: 0.1.0
@@ -34,7 +33,6 @@ devDependencies:
   standalone-electron-types: 1.0.0
   type-fest: 3.1.0
   typescript: 4.8.4
-  yazl: 2.5.1
 
 packages:
 
@@ -268,10 +266,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       fill-range: 7.0.1
-    dev: true
-
-  /buffer-crc32/0.2.13:
-    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: true
 
   /callsites/3.1.0:
@@ -1180,12 +1174,6 @@ packages:
 
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
-    dev: true
-
-  /yazl/2.5.1:
-    resolution: {integrity: sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==}
-    dependencies:
-      buffer-crc32: 0.2.13
     dev: true
 
   /yocto-queue/0.1.0:
