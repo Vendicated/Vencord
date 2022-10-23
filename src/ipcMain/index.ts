@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./updater";
+import("./updater");
 
 import monacoHtml from "@fileContent/../components/monacoWin.html;base64";
-import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
+import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
@@ -28,8 +28,6 @@ import { debounce } from "../utils/debounce";
 import IpcEvents from "../utils/IpcEvents";
 import { Queue } from "../utils/Queue";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
-
-
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 

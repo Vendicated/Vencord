@@ -76,7 +76,7 @@ export const globPlugins = {
     }
 };
 
-const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */
@@ -126,5 +126,5 @@ export const commonOpts = {
     minify: !watch,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
-    plugins: [fileIncludePlugin]
+    plugins: [fileIncludePlugin, gitHashPlugin]
 };

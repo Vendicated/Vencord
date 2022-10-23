@@ -18,7 +18,22 @@
 */
 
 import esbuild from "esbuild";
-import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
+
+import { commonOpts, fileIncludePlugin, gitHash, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
+
+const defines = {
+    IS_STANDALONE: JSON.stringify(process.argv.includes("--standalone"))
+};
+if (defines.IS_STANDALONE === "false")
+    // If this is a local build (not standalone), optimise
+    // for the specific platform we're on
+    defines["process.platform"] = JSON.stringify(process.platform);
+
+const header = `
+// Vencord ${gitHash}
+// Standalone: ${defines.IS_STANDALONE}
+// Platform: ${defines["process.platform"] || "Universal"}
+`.trim();
 
 /**
  * @type {esbuild.BuildOptions}
@@ -31,7 +46,11 @@ const nodeCommonOpts = {
     minify: true,
     bundle: true,
     sourcemap: "linked",
-    external: ["electron"]
+    external: ["electron"],
+    define: defines,
+    banner: {
+        js: header
+    }
 };
 
 await Promise.all([
