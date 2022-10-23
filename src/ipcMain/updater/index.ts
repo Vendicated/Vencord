@@ -17,6 +17,3 @@
 */
 
 import(IS_STANDALONE ? "./http" : "./git");
-
-// esm moment
-export { };

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import("./updater");
+import "./updater";
 
 import monacoHtml from "@fileContent/../components/monacoWin.html;base64";
 import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
