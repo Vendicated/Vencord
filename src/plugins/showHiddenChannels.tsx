@@ -119,7 +119,8 @@ export default definePlugin({
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
             return false;
 
-        channel._isHiddenChannel = (channel.type === 0 && !can(VIEW_CHANNEL, channel)) || (channel.type === 2 && !can(CONNECT, channel));
+        // check for disallowed voice channels too so that they get hidden when collapsing the category
+        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || (channel.type === 2 && !can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
     channelSelected(channelData) {
@@ -127,7 +128,8 @@ export default definePlugin({
         const channel = ChannelStore.getChannel(channelData.channelId);
 
         const isHidden = this.isHiddenChannel(channel);
-        if (isHidden) {
+        // check for type again, otherwise it would show it for hidden stage channels
+        if (channel.type === 0 && isHidden) {
             const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
 
             openModal(modalProps => (
