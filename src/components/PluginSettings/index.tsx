@@ -25,7 +25,7 @@ import { ChangeList } from "../../utils/ChangeList";
 import { classes, lazyWebpack } from "../../utils/misc";
 import { Plugin } from "../../utils/types";
 import { filters } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
+import { Alerts, Button, Forms, Margins, Parser, React, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import { NewBadge } from "./components";
@@ -34,6 +34,9 @@ import * as styles from "./styles";
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
+
+const CogWheel = lazyWebpack(filters.byCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
+const InfoIcon = lazyWebpack(filters.byCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -80,23 +83,21 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex style={styles.PluginsGridItem} flexDirection="column" onClick={() => openModal()} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
-            <Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>
-            <Flex flexDirection="row-reverse" style={{ marginTop: "auto", width: "100%", justifyContent: "space-between" }}>
-                <Button
-                    onClick={e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleEnabled();
-                    }}
-                    disabled={disabled}
-                    color={isEnabled() ? Button.Colors.RED : Button.Colors.GREEN}
-                >
-                    {isEnabled() ? "Disable" : "Enable"}
-                </Button>
-                {plugin.options && <Forms.FormText style={{ cursor: "pointer", margin: "auto 0 auto 10px" }}>Click to configure</Forms.FormText>}
-            </Flex>
+        <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            <Switch
+                onChange={toggleEnabled}
+                disabled={disabled}
+                value={isEnabled()}
+                note={<Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>}
+                hideBorder={true}
+            >
+                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
+                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1" }}>{plugin.name} {(plugin.new) && <NewBadge />}</Text>
+                    <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
+                        {plugin.options ? <CogWheel /> : <InfoIcon width="24" height="24" />}
+                    </button>
+                </Flex>
+            </Switch>
         </Flex>
     );
 }
