@@ -50,7 +50,7 @@ export default ErrorBoundary.wrap(function Settings() {
         }));
     }, []);
 
-
+    throw new Error("beans");
     return (
         <Forms.FormSection tag="h1" title="Vencord">
             <Forms.FormTitle tag="h5">

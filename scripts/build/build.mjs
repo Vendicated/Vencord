@@ -19,7 +19,7 @@
 
 import esbuild from "esbuild";
 
-import { commonOpts, fileIncludePlugin, gitHash, gitHashPlugin, globPlugins, isStandalone, makeAllPackagesExternalPlugin } from "./common.mjs";
+import { commonOpts, gitHash, globPlugins, isStandalone } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone
@@ -45,7 +45,6 @@ const nodeCommonOpts = {
     target: ["esnext"],
     minify: true,
     bundle: true,
-    sourcemap: "linked",
     external: ["electron", ...commonOpts.external],
     define: defines,
     banner: {
@@ -58,11 +57,15 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/preload.js",
+        footer: { js: "//# sourceURL=VencordPreload\n//# sourceMappingURL=vencord://preload.js.map" },
+        sourcemap: "external",
     }),
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/patcher.ts"],
         outfile: "dist/patcher.js",
+        footer: { js: "//# sourceURL=VencordPatcher\n//# sourceMappingURL=vencord://patcher.js.map" },
+        sourcemap: "external",
     }),
     esbuild.build({
         ...commonOpts,
@@ -70,8 +73,9 @@ await Promise.all([
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer" },
+        footer: { js: "//# sourceURL=VencordRenderer\n//# sourceMappingURL=vencord://renderer.js.map" },
         globalName: "Vencord",
+        sourcemap: "external",
         plugins: [
             globPlugins,
             ...commonOpts.plugins

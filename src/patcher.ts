@@ -17,8 +17,8 @@
 */
 
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
+import { existsSync, readFileSync } from "fs";
+import { dirname, join, normalize } from "path";
 
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
@@ -87,6 +87,20 @@ Object.defineProperty(global, "appSettings", {
 process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
 electron.app.whenReady().then(() => {
+    electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
+        let url = unsafeUrl.slice("vencord://".length);
+        if (url.endsWith("/")) url = url.slice(0, -1);
+        switch (url) {
+            case "renderer.js.map":
+            case "preload.js.map":
+            case "patcher.js.map": // doubt
+                cb(join(__dirname, url));
+                break;
+            default:
+                cb({ statusCode: 403 });
+        }
+    });
+
     try {
         const settings = JSON.parse(readSettings());
         if (settings.enableReactDevtools)
