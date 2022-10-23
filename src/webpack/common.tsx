@@ -8,11 +8,14 @@ export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");
-export const UserStore: Stores.UserStore = lazyWebpack(filters.byProps(["getCurrentUser", "initialize"]));
-export const GuildStore: Stores.GuildStore = lazyWebpack(filters.byProps(["getGuildCount", "initialize"]));
-export const ChannelStore: Stores.ChannelStore = lazyWebpack(filters.byProps(["getChannel", "initialize"]));
-export const GuildMemberStore: Stores.GuildMemberStore = lazyWebpack(filters.byProps(["getMember", "initialize"]));
-export const MessageStore: Stores.MessageStore = lazyWebpack(filters.byProps(["getMessage", "initialize"]));
+
+export let GuildStore: Stores.GuildStore;
+export let UserStore: Stores.UserStore;
+export let GuildMemberStore: Stores.GuildMemberStore;
+export let SelectedChannelStore: Stores.SelectedChannelStore;
+export let ChannelStore: Stores.ChannelStore;
+export let MessageStore: Stores.MessageStore;
+
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
     FormSection: any;
@@ -90,6 +93,14 @@ waitFor(["dispatch", "subscribe"], m => {
     };
     m.subscribe("CONNECTION_OPEN", cb);
 });
+
+waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
+waitFor("getSortedPrivateChannels", m => ChannelStore = m);
+waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
+waitFor("getGuildCount", m => GuildStore = m);
+waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
+waitFor(["getMessage", "initialize"], m => MessageStore = m);
+
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
 waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
