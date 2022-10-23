@@ -29,13 +29,12 @@ import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUti
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
+    NewBadge,
     SettingBooleanComponent,
     SettingInputComponent,
     SettingNumericComponent,
     SettingSelectComponent,
-    SettingSliderComponent,
-    NewBadge
-} from "./components";
+    SettingSliderComponent } from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));

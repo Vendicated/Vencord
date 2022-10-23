@@ -20,7 +20,7 @@ import "./updater";
 
 import monacoHtml from "@fileContent/../components/monacoWin.html;base64";
 import { app, BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
-import { mkdirSync, readFileSync, watch, statSync } from "fs";
+import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 

@@ -28,9 +28,9 @@ import { filters } from "../../webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
+import { NewBadge } from "./components";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
-import { NewBadge } from "./components";
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
