@@ -20,7 +20,7 @@ import { Flex } from "../components/Flex";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { waitFor } from "../webpack";
+import { findByProps, waitFor } from "../webpack";
 import { Button, ChannelStore, Text } from "../webpack/common";
 
 const VIEW_CHANNEL = 1024n;
@@ -89,21 +89,6 @@ export default definePlugin({
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
         return channel._isHiddenChannel;
     },
-    getDateFromSnowflake(snowflake: string) {
-        try {
-            const id = parseInt(snowflake);
-            const binary = id.toString(2).padStart(64, "0");
-
-            const excerpt = binary.substring(0, 42);
-            const decimal = parseInt(excerpt, 2);
-            const unix = decimal + 1420070400000;
-
-            return new Date(unix).toLocaleString();
-        } catch (e) {
-            console.error(e);
-            return "Failed to get date";
-        }
-    },
     channelSelected(channelData) {
         const channel = ChannelStore.getChannel(channelData.channelId);
 
@@ -111,7 +96,7 @@ export default definePlugin({
 
         const isHidden = this.isHiddenChannel(channel);
         if (isHidden) {
-            const lastMessageDate = channel.lastMessageId ? this.getDateFromSnowflake(channel.lastMessageId) : null;
+            const lastMessageDate = channel.lastMessageId ? new Date(findByProps("extractTimestamp").extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
 
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
