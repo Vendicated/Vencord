@@ -18,6 +18,7 @@
 */
 
 import esbuild from "esbuild";
+
 import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
 
 /**
@@ -31,7 +32,7 @@ const nodeCommonOpts = {
     minify: true,
     bundle: true,
     sourcemap: "linked",
-    external: ["electron"]
+    external: ["electron", "@fileContent/../components/monacoWin.html;base64"]
 };
 
 await Promise.all([
@@ -43,7 +44,7 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/patcher.ts"],
-        external: ["electron"],
+        external: ["electron", "@fileContent/../components/monacoWin.html;base64"],
         outfile: "dist/patcher.js",
         plugins: process.argv[2] === "nix" ? [] : [makeAllPackagesExternalPlugin],
     }),
