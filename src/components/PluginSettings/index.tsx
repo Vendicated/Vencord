@@ -96,10 +96,10 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     function toggleEnabled() {
-        const enabled = isEnabled();
+        const wasEnabled = isEnabled();
 
         // If we're enabling a plugin, make sure all deps are enabled recursively.
-        if (!enabled) {
+        if (!wasEnabled) {
             const { restartNeeded, failures } = startDependenciesRecursive(plugin);
             if (failures.length) {
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
@@ -115,19 +115,19 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
 
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches) {
-            pluginSettings.enabled = !enabled;
+            pluginSettings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name);
             return;
         }
 
         // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
-        if (enabled && !plugin.started) {
-            pluginSettings.enabled = !enabled;
+        if (wasEnabled && !plugin.started) {
+            pluginSettings.enabled = !wasEnabled;
             return;
         }
 
-        const result = enabled ? stopPlugin(plugin) : startPlugin(plugin);
-        const action = enabled ? "stop" : "start";
+        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
+        const action = wasEnabled ? "stop" : "start";
 
         if (!result) {
             logger.error(`Failed to ${action} plugin ${plugin.name}`);
@@ -135,7 +135,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
             return;
         }
 
-        pluginSettings.enabled = !enabled;
+        pluginSettings.enabled = !wasEnabled;
     }
 
     return (
