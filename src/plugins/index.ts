@@ -42,6 +42,26 @@ export function startAllPlugins() {
     }
 }
 
+export function startDependenciesRecursive(p: Plugin) {
+    let restartNeeded = false;
+    let failures: string[] = [];
+    if (p.dependencies) for (const dep of p.dependencies) {
+        if (!Settings.plugins[dep].enabled) {
+            startDependenciesRecursive(Plugins[dep]);
+            // If the plugin has patches, don't start the plugin, just enable it.
+            if (Plugins[dep].patches) {
+                logger.warn(`Enabling dependency ${dep} requires restart.`);
+                Settings.plugins[dep].enabled = true;
+                restartNeeded = true;
+                continue;
+            }
+            const result = startPlugin(Plugins[dep]);
+            if (!result) failures.push(dep);
+        }
+    }
+    return { restartNeeded, failures };
+}
+
 export function startPlugin(p: Plugin) {
     if (p.start) {
         logger.info("Starting plugin", p.name);
