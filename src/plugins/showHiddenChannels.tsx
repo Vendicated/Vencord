@@ -126,7 +126,7 @@ export default definePlugin({
     channelSelected(channelData) {
         if (!channelData) return false;
         const channel = ChannelStore.getChannel(channelData.channelId);
-
+        if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
         if (channel.type === 0 && isHidden) {
