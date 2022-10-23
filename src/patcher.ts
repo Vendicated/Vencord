@@ -17,8 +17,8 @@
 */
 
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
-import { existsSync, readFileSync } from "fs";
-import { dirname, join, normalize } from "path";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
@@ -87,6 +87,8 @@ Object.defineProperty(global, "appSettings", {
 process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
 electron.app.whenReady().then(() => {
+    // Source Maps! Maybe there's a better way but since the renderer is executed
+    // from a string I don't think any other form of sourcemaps would work
     electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
         let url = unsafeUrl.slice("vencord://".length);
         if (url.endsWith("/")) url = url.slice(0, -1);
