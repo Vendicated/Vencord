@@ -89,13 +89,30 @@ export default definePlugin({
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
         return channel._isHiddenChannel;
     },
+    getDateFromSnowflake(snowflake: string) {
+        try {
+            const id = parseInt(snowflake);
+            const binary = id.toString(2).padStart(64, "0");
+
+            const excerpt = binary.substring(0, 42);
+            const decimal = parseInt(excerpt, 2);
+            const unix = decimal + 1420070400000;
+
+            return new Date(unix).toLocaleString();
+        } catch (e) {
+            console.error(e);
+            return "Failed to get date";
+        }
+    },
     channelSelected(channelData) {
         const channel = ChannelStore.getChannel(channelData.channelId);
 
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
         const isHidden = this.isHiddenChannel(channel);
-        if (isHidden)
+        if (isHidden) {
+            const lastMessageDate = channel.lastMessageId ? this.getDateFromSnowflake(channel.lastMessageId) : null;
+
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -118,6 +135,14 @@ export default definePlugin({
                                 <Text variant="code">{channel.topic}</Text>
                             </>
                         )}
+                        {lastMessageDate && (
+                            <>
+                                <Text variant="text-md/bold" style={{ marginTop: 10 }}>
+                                    Last message sent:
+                                </Text>
+                                <Text variant="code">{lastMessageDate}</Text>
+                            </>
+                        )}
                     </ModalContent>
                     <ModalFooter>
                         <Flex>
@@ -132,6 +157,7 @@ export default definePlugin({
                     </ModalFooter>
                 </ModalRoot>
             ));
+        }
         return isHidden;
     }
 });
