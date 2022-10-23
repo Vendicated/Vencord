@@ -81,6 +81,8 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
 
+    const [iconHover, setIconHover] = React.useState(false);
+
     function isEnabled() {
         return pluginSettings?.enabled || plugin.started;
     }
@@ -148,7 +150,18 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
                     <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
-                        {plugin.options ? <CogWheel /> : <InfoIcon width="24" height="24" />}
+                        {plugin.options
+                            ? <CogWheel
+                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
+                                onMouseEnter={() => setIconHover(true)}
+                                onMouseLeave={() => setIconHover(false)}
+                            />
+                            : <InfoIcon
+                                width="24" height="24"
+                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
+                                onMouseEnter={() => setIconHover(true)}
+                                onMouseLeave={() => setIconHover(false)}
+                            />}
                     </button>
                 </Flex>
             </Switch>
