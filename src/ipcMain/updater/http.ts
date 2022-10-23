@@ -50,10 +50,10 @@ async function calculateGitChanges() {
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map(c => ({
-        hash: c.sha,
-        author: c.author.login,
         // github api only sends the long sha
-        message: c.commit.message.slice(0, 7)
+        hash: c.sha.slice(0, 7),
+        author: c.author.login,
+        message: c.commit.message
     }));
 }
 
