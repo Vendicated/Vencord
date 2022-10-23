@@ -23,6 +23,7 @@ import { Settings } from "../Vencord";
 import { waitFor } from "../webpack";
 import { Button, ChannelStore, Text } from "../webpack/common";
 
+const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
 
 let can = (permission, channel) => true;
@@ -59,11 +60,11 @@ export default definePlugin({
             find: ".CannotShow",
             replacement: {
                 match: /renderLevel:(\w+)\.CannotShow/g,
-                replace: "renderLevel:$1.Show"
+                replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted) ? $1.Show : $1.CannotShow"
             }
         },
         {
-            // This is where the logic that chooses the icon is, we overide it to be a locked voice channel if it's hidden
+            // This is where the logic that chooses the icon is, we override it to be a locked voice channel if it's hidden
             find: ".rulesChannelId))",
             replacement: {
                 match: /(\w+)\.locked(.*?)switch\((\w+)\.type\)({case \w+\.\w+\.GUILD_ANNOUNCEMENT)/g,
@@ -71,15 +72,31 @@ export default definePlugin({
             }
         },
         {
-            find: "selectChannel:function",
-            replacement: [
-                {
-                    match: /selectChannel:function\((\w)\){/g,
-                    replace: "selectChannel:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($1)) return;"
-                }
-            ]
+            // Prevents Discord from trying to fetch message and create a 403 error
+            find: "fetchMessages:function",
+            replacement: {
+                match: /fetchMessages:function\((\w)\){/g,
+                replace: "fetchMessages:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1)) return;"
+            }
         },
         {
+            // Don't switch to the channel if it's hidden, but show a modal instead
+            find: ".selectGuild(",
+            replacement: {
+                match: /(function \w+\(\w\)\{var (\w)=\w+\(\w\);)/g,
+                replace: "$1if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.params))return;"
+            }
+        },
+        {
+            // Prevent categories from disappearing when they're collapsed
+            find: ".prototype.shouldShowEmptyCategory=function(){",
+            replacement: {
+                match: /(\.prototype\.shouldShowEmptyCategory=function\(\){)/g,
+                replace: "$1return true;"
+            }
+        },
+        {
+            // Hide unreads
             find: "?\"button\":\"link\"",
             predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
             replacement: {
@@ -88,15 +105,25 @@ export default definePlugin({
             }
         }
     ],
+    shouldShow(channel, category, isMuted) {
+        if (!this.isHiddenChannel(channel)) return false;
+        if (!category) return false;
+        if (category.guild?.hideMutedChannels && isMuted) return false;
+
+        return !category.isCollapsed;
+    },
     isHiddenChannel(channel) {
         if (!channel) return false;
-        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
+        if (channel.channelId)
+            channel = ChannelStore.getChannel(channel.channelId);
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
+            return false;
+
+        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || !can(CONNECT, channel);
         return channel._isHiddenChannel;
     },
     channelSelected(channelData) {
         const channel = ChannelStore.getChannel(channelData.channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
         const isHidden = this.isHiddenChannel(channel);
         if (isHidden) {
