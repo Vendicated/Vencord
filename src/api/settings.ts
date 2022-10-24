@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import plugins from "plugins";
+import plugins from "~plugins";
 
 import IpcEvents from "../utils/IpcEvents";
 import { mergeDefaults } from "../utils/misc";

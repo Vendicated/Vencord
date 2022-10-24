@@ -16,35 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const PluginsGrid: React.CSSProperties = {
-    marginTop: 16,
-    display: "grid",
-    gridGap: 16,
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-};
+import https from "https";
 
-export const PluginsGridItem: React.CSSProperties = {
-    backgroundColor: "var(--background-modifier-selected)",
-    color: "var(--interactive-active)",
-    borderRadius: 3,
-    cursor: "pointer",
-    display: "block",
-    height: "min-content",
-    padding: 10,
-    width: "100%",
-};
+export function get(url: string, options: https.RequestOptions = {}) {
+    return new Promise<Buffer>((resolve, reject) => {
+        https.get(url, options, res => {
+            const { statusCode, statusMessage, headers } = res;
+            if (statusCode! >= 400)
+                return void reject(`${statusCode}: ${statusMessage} - ${url}`);
+            if (statusCode! >= 300)
+                return void resolve(get(headers.location!, options));
 
-export const FiltersBar: React.CSSProperties = {
-    gap: 10,
-    height: 40,
-    gridTemplateColumns: "1fr 150px",
-    display: "grid"
-};
+            const chunks = [] as Buffer[];
+            res.on("error", reject);
 
-export const SettingsIcon: React.CSSProperties = {
-    height: "24px",
-    width: "24px",
-    padding: "0",
-    background: "transparent",
-    marginRight: 8
-};
+            res.on("data", chunk => chunks.push(chunk));
+            res.once("end", () => resolve(Buffer.concat(chunks)));
+        });
+    });
+}

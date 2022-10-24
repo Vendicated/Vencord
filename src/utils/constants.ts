@@ -16,8 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import gitHash from "~git-hash";
+import gitRemote from "~git-remote";
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
 // Add yourself here if you made more than one plugin
 export const Devs = Object.freeze({
@@ -72,6 +76,10 @@ export const Devs = Object.freeze({
     katlyn: {
         name: "katlyn",
         id: 250322741406859265n
+    },
+    nea: {
+        name: "nea",
+        id: 310702108997320705n,
     },
     Nuckyz: {
         name: "Nuckyz",

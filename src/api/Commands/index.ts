@@ -18,7 +18,7 @@
 
 import { makeCodeblock } from "../../utils/misc";
 import { generateId, sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandType, Argument, Command, CommandContext, CommandReturnValue,Option } from "./types";
+import { ApplicationCommandInputType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
 
 export * from "./commandHelpers";
 export * from "./types";
