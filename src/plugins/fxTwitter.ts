@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022 Samu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../utils/types";
 import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
 
 const re = /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g;
 

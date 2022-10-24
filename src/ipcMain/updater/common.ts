@@ -16,25 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ipcMain } from "electron";
-import { promisify } from "util";
-import IpcEvents from "../utils/IpcEvents";
-import { execFile as cpExecFile } from "child_process";
-import { join } from "path";
-import { createReadStream } from "fs";
 import { createHash } from "crypto";
+import { createReadStream } from "fs";
+import { join } from "path";
 
-const VENCORD_SRC_DIR = join(__dirname, "..");
-
-const execFile = promisify(cpExecFile);
-
-function git(...args: string[]) {
-    return execFile("git", args, {
-        cwd: VENCORD_SRC_DIR
-    });
-}
-
-async function calculateHashes() {
+export async function calculateHashes() {
     const hashes = {} as Record<string, string>;
 
     await Promise.all(
@@ -53,7 +39,7 @@ async function calculateHashes() {
     return hashes;
 }
 
-function serializeErrors(func: (...args: any[]) => any) {
+export function serializeErrors(func: (...args: any[]) => any) {
     return async function () {
         try {
             return {
@@ -71,42 +57,3 @@ function serializeErrors(func: (...args: any[]) => any) {
         }
     };
 }
-
-async function getRepo() {
-    const res = await git("remote", "get-url", "origin");
-    return res.stdout.trim()
-        .replace(/git@(.+):/, "https://$1/")
-        .replace(/\.git$/, "");
-}
-
-async function calculateGitChanges() {
-    await git("fetch");
-
-    const res = await git("log", "HEAD...origin/main", "--pretty=format:%an/%h/%s");
-
-    const commits = res.stdout.trim();
-    return commits ? commits.split("\n").map(line => {
-        const [author, hash, ...rest] = line.split("/");
-        return {
-            hash, author, message: rest.join("/")
-        };
-    }) : [];
-}
-
-async function pull() {
-    const res = await git("pull");
-    return res.stdout.includes("Fast-forward");
-}
-
-async function build() {
-    const res = await execFile("node", ["scripts/build/build.mjs"], {
-        cwd: VENCORD_SRC_DIR
-    });
-    return !res.stderr.includes("Build failed");
-}
-
-ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
-ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));
-ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));

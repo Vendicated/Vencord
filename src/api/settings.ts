@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import plugins from "plugins";
+import plugins from "~plugins";
+
 import IpcEvents from "../utils/IpcEvents";
-import { React } from "../webpack/common";
 import { mergeDefaults } from "../utils/misc";
 import { OptionType } from "../utils/types";
+import { React } from "../webpack/common";
 
 export interface Settings {
     notifyAboutUpdates: boolean;

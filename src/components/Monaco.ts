@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import monacoHtml from "~fileContent/monacoWin.html";
+
 import { IpcEvents } from "../utils";
 import { debounce } from "../utils/debounce";
-import { find } from "../webpack/webpack";
-import monacoHtml from "@fileContent/monacoWin.html";
 import { Queue } from "../utils/Queue";
+import { find } from "../webpack/webpack";
 
 const queue = new Queue();
 const setCss = debounce((css: string) => {

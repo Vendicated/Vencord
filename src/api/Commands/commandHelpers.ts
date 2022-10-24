@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, waitFor } from "../../webpack";
-import type { PartialDeep } from "type-fest";
 import { Message } from "discord-types/general";
+import type { PartialDeep } from "type-fest";
+
 import { lazyWebpack, mergeDefaults } from "../../utils/misc";
+import { filters, waitFor } from "../../webpack";
 import { Argument } from "./types";
 
 const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));

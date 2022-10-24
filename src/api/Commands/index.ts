@@ -18,10 +18,10 @@
 
 import { makeCodeblock } from "../../utils/misc";
 import { generateId, sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandType, Argument, Command, CommandContext, Option, CommandReturnValue } from "./types";
+import { ApplicationCommandInputType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
 
-export * from "./types";
 export * from "./commandHelpers";
+export * from "./types";
 
 export let BUILT_IN: Command[];
 export const commands = {} as Record<string, Command>;

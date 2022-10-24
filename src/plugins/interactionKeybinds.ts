@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../utils/types";
-import { Devs } from "../utils/constants";
-import { FluxDispatcher as Dispatcher, ChannelStore, SelectedChannelStore, UserStore } from "../webpack/common";
-import { filters } from "../webpack";
-import { lazyWebpack } from "../utils/misc";
 import { Message } from "discord-types/general";
+
+import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
+import definePlugin from "../utils/types";
+import { filters } from "../webpack";
+import { ChannelStore, FluxDispatcher as Dispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
 
 const MessageStore = lazyWebpack(filters.byProps(["getRawMessages"]));
 

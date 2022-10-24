@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022 Vendicated, Samu and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "../utils/types";
-import { ApplicationCommandInputType, OptionalMessageOption, sendBotMessage, findOption, RequiredMessageOption } from "../api/Commands";
+import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "../api/Commands";
 import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
 
 
 function mock(input: string): string {

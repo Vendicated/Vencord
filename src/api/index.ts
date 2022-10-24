@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as $MessageEventsAPI from "./MessageEvents";
-import * as $Notices from "./Notices";
 import * as $Commands from "./Commands";
 import * as $DataStore from "./DataStore";
 import * as $MessageAccessories from "./MessageAccessories";
+import * as $MessageEventsAPI from "./MessageEvents";
+import * as $Notices from "./Notices";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
@@ -58,4 +58,4 @@ const DataStore = $DataStore;
  */
 const MessageAccessories = $MessageAccessories;
 
-export { DataStore, MessageAccessories, MessageEvents, Notices, Commands };
+export { Commands,DataStore, MessageAccessories, MessageEvents, Notices };

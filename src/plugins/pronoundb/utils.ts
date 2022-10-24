@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "git-hash";
-import { PronounsFormat } from ".";
-import { debounce } from "../../utils";
+import { VENCORD_USER_AGENT } from "../../utils/constants";
+import { debounce } from "../../utils/debounce";
 import { Settings } from "../../Vencord";
+import { PronounsFormat } from ".";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
 // A map of cached pronouns so the same request isn't sent twice
@@ -63,7 +63,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
             method: "GET",
             headers: {
                 "Accept": "application/json",
-                "X-PronounDB-Source": `Vencord/${gitHash} (github.com/Vendicated/Vencord)`
+                "X-PronounDB-Source": VENCORD_USER_AGENT
             }
         });
         return await req.json()

@@ -16,5 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * as Common from "./common";
-export * from "./webpack";
+import(IS_STANDALONE ? "./http" : "./git");

@@ -2,7 +2,7 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "ignorePatterns": ["dist", "browser"],
-    "plugins": ["header"],
+    "plugins": ["header", "simple-import-sort", "unused-imports"],
     "rules": {
         // Since it's only been a month and Vencord has already been stolen
         // by random skids who rebranded it to "AlphaCord" and erased all license
@@ -83,6 +83,11 @@
         "no-useless-backreference": "error",
         "use-isnan": "error",
         "prefer-const": "error",
-        "prefer-spread": "error"
+        "prefer-spread": "error",
+
+        "simple-import-sort/imports": "error",
+        "simple-import-sort/exports": "error",
+
+        "unused-imports/no-unused-imports": "error"
     }
 }
