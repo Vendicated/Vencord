@@ -28,18 +28,18 @@ export default definePlugin({
     }],
     patches: [
         {
-            find: "function Vp(e){",
+            find: ".PREMIUM_GIFT_BUTTON_TOOLTIP",
             predicate: () => Settings.plugins.RemoveNitroAds.removeGiftButton === true,
             replacement: [{
-                match: /(return r\.createElement\(Mp,Hp\({},e,{)/,
+                match: /(return .{1,2}\.createElement\(.{1,2},.{1,2}\({},e,{innerClassName:.{1,2}\(\))/,
                 replace: "return null;$1",
             }]
         }, {
-            find: "NJ=function(e){",
+            find: "().premiumTier0Badge",
             predicate: () => Settings.plugins.RemoveNitroAds.removeChatListNitroButton === true,
             replacement: [{
-                match: /(NJ=function\(e\){)/,
-                replace: "$1return null;",
+                match: /(.{1,2}=function\(e\){)(var .{1,2},.{1,2},.{1,2}=e\.selected)/,
+                replace: "$1return null;$2",
             }]
         }
     ],
