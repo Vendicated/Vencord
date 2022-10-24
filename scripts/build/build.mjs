@@ -18,7 +18,22 @@
 */
 
 import esbuild from "esbuild";
-import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins, makeAllPackagesExternalPlugin } from "./common.mjs";
+
+import { commonOpts, gitHash, globPlugins, isStandalone } from "./common.mjs";
+
+const defines = {
+    IS_STANDALONE: isStandalone
+};
+if (defines.IS_STANDALONE === "false")
+    // If this is a local build (not standalone), optimise
+    // for the specific platform we're on
+    defines["process.platform"] = JSON.stringify(process.platform);
+
+const header = `
+// Vencord ${gitHash}
+// Standalone: ${defines.IS_STANDALONE}
+// Platform: ${defines["process.platform"] || "Universal"}
+`.trim();
 
 /**
  * @type {esbuild.BuildOptions}
@@ -30,8 +45,11 @@ const nodeCommonOpts = {
     target: ["esnext"],
     minify: true,
     bundle: true,
-    sourcemap: "linked",
-    external: ["electron"]
+    external: ["electron", ...commonOpts.external],
+    define: defines,
+    banner: {
+        js: header
+    }
 };
 
 await Promise.all([
@@ -39,11 +57,15 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/preload.js",
+        footer: { js: "//# sourceURL=VencordPreload\n//# sourceMappingURL=vencord://preload.js.map" },
+        sourcemap: "external",
     }),
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/patcher.ts"],
         outfile: "dist/patcher.js",
+        footer: { js: "//# sourceURL=VencordPatcher\n//# sourceMappingURL=vencord://patcher.js.map" },
+        sourcemap: "external",
     }),
     esbuild.build({
         ...commonOpts,
@@ -51,16 +73,16 @@ await Promise.all([
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer" },
+        footer: { js: "//# sourceURL=VencordRenderer\n//# sourceMappingURL=vencord://renderer.js.map" },
         globalName: "Vencord",
-        external: ["plugins", "git-hash"],
+        sourcemap: "external",
         plugins: [
             globPlugins,
-            gitHashPlugin,
-            fileIncludePlugin
+            ...commonOpts.plugins
         ],
         define: {
-            IS_WEB: "false"
+            IS_WEB: "false",
+            IS_STANDALONE: isStandalone
         }
     }),
 ]).catch(err => {

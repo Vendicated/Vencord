@@ -32,6 +32,14 @@ export class ChangeList<T>{
             this.set.add(item);
     }
 
+    public add(item: T) {
+        return this.set.add(item);
+    }
+
+    public remove(item: T) {
+        return this.set.delete(item);
+    }
+
     public getChanges() {
         return this.set.values();
     }
