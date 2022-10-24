@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "../../api";
-import { lazyWebpack } from "../../utils";
-import { Devs } from "../../utils/constants";
-import definePlugin from "../../utils/types";
-import { filters } from "../../webpack";
+import { DataStore } from "../api";
+import { lazyWebpack } from "../utils";
+import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
+import { filters } from "../webpack";
 
 interface MatchAndReplace {
     match: RegExp;
@@ -54,7 +54,7 @@ export default definePlugin({
                     /** Create an easily accessable variable to use the game props and then replace the boolean to determine if the button is activated or not with our custom function  */
                     { match: /((.)=this\.props\.game)(.{1,70})=.{1,2}overlay/, replace: "$1,IgnoreActivities_gameProps=$2$3=Vencord.Plugins.plugins.IgnoreActivities.isActivityEnabled(IgnoreActivities_gameProps)" },
                     /** Change the handler for clicking the button */
-                    { match: /.\.handleOverlayToggle/, replace: "() => Vencord.Plugins.plugins.IgnoreActivities.handleActivityToggle(gameProps)" },
+                    { match: /.\.handleOverlayToggle/, replace: "() => Vencord.Plugins.plugins.IgnoreActivities.handleActivityToggle(IgnoreActivities_gameProps)" },
                     /** Change the button on component to our custom */
                     { match: /(\.createElement\()(.{2})\..(.{1,50}\.overlayToggleIconOn)/, replace: "$1$2.IgnoreActivities_toggleOn$3" },
                     /** Change the button off component to our custom */
