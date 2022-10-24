@@ -19,7 +19,7 @@ in
 
     postBuild = ''
       mkdir -p $out/opt/DiscordCanary/resources/app
-      echo -e 'require("../dist/patcher.js");\nrequire("../app.asar");' > $out/opt/DiscordCanary/resources/app/index.js
+      echo -e 'require("../dist/patcher.js");' > $out/opt/DiscordCanary/resources/app/index.js
       echo -e '{ "name": "discord", "main": "index.js" }' > $out/opt/DiscordCanary/resources/app/package.json
       mkdir -p $out/opt/DiscordCanary/resources/dist
       cp ${vencord.vencord}/* $out/opt/DiscordCanary/resources/dist

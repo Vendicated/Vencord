@@ -16,115 +16,145 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import esbuild from "esbuild";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
+import { promisify } from "util";
 
-const watch = process.argv.includes("--watch");
+export const watch = process.argv.includes("--watch");
+export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
  * @type {esbuild.Plugin}
  */
 export const makeAllPackagesExternalPlugin = {
-    name: "make-all-packages-external",
-    setup(build) {
-        const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
-        build.onResolve({ filter }, args => ({ path: args.path, external: true }));
-    },
+  name: "make-all-packages-external",
+  setup(build) {
+    const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
+    build.onResolve({ filter }, args => ({ path: args.path, external: true }));
+  },
 };
 
 /**
  * @type {esbuild.Plugin}
  */
 export const globPlugins = {
-    name: "glob-plugins",
-    setup: build => {
-        build.onResolve({ filter: /^plugins$/ }, args => {
-            return {
-                namespace: "import-plugins",
-                path: args.path
-            };
-        });
+  name: "glob-plugins",
+  setup: build => {
+    const filter = /^~plugins$/;
+    build.onResolve({ filter }, args => {
+      return {
+        namespace: "import-plugins",
+        path: args.path
+      };
+    });
 
-        build.onLoad({ filter: /^plugins$/, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
-            let code = "";
-            let plugins = "\n";
-            let i = 0;
-            for (const dir of pluginDirs) {
-                if (!existsSync(`./src/${dir}`)) continue;
-                const files = await readdir(`./src/${dir}`);
-                for (const file of files) {
-                    if (file === "index.ts") {
-                        continue;
-                    }
-                    const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/.tsx?$/, "")}";\n`;
-                    plugins += `[${mod}.name]:${mod},\n`;
-                    i++;
-                }
-            }
-            code += `export default {${plugins}};`;
-            return {
-                contents: code,
-                resolveDir: "./src"
-            };
-        });
-    }
+    build.onLoad({ filter, namespace: "import-plugins" }, async () => {
+      const pluginDirs = ["plugins", "userplugins"];
+      let code = "";
+      let plugins = "\n";
+      let i = 0;
+      for (const dir of pluginDirs) {
+        if (!existsSync(`./src/${dir}`)) continue;
+        const files = await readdir(`./src/${dir}`);
+        for (const file of files) {
+          if (file === "index.ts") {
+            continue;
+          }
+          const mod = `p${i}`;
+          code += `import ${mod} from "./${dir}/${file.replace(/.tsx?$/, "")}";\n`;
+          plugins += `[${mod}.name]:${mod},\n`;
+          i++;
+        }
+      }
+      code += `export default {${plugins}};`;
+      return {
+        contents: code,
+        resolveDir: "./src"
+      };
+    });
+  }
 };
 
-const gitHash = process.argv[2] === "nix" ? process.argv[3].substring(0, 7) : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const gitHash = process.argv[2] === "nix" ? process.argv[3].substring(0, 7) : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */
 export const gitHashPlugin = {
-    name: "git-hash-plugin",
-    setup: build => {
-        const filter = /^git-hash$/;
-        build.onResolve({ filter }, args => ({
-            namespace: "git-hash", path: args.path
-        }));
-        build.onLoad({ filter, namespace: "git-hash" }, () => ({
-            contents: `export default "${gitHash}"`
-        }));
-    }
+  name: "git-hash-plugin",
+  setup: build => {
+    const filter = /^~git-hash$/;
+    build.onResolve({ filter }, args => ({
+      namespace: "git-hash", path: args.path
+    }));
+    build.onLoad({ filter, namespace: "git-hash" }, () => ({
+      contents: `export default "${gitHash}"`
+    }));
+  }
+};
+
+/**
+ * @type {esbuild.Plugin}
+ */
+export const gitRemotePlugin = {
+  name: "git-remote-plugin",
+  setup: build => {
+    const filter = /^~git-remote$/;
+    build.onResolve({ filter }, args => ({
+      namespace: "git-remote", path: args.path
+    }));
+    build.onLoad({ filter, namespace: "git-remote" }, async () => {
+      try {
+        const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+        const remote = res.stdout.trim()
+          .replace("https://github.com/", "")
+          .replace("git@github.com:", "")
+          .replace(/.git$/, "");
+
+        return { contents: `export default "${remote}"` };
+      } catch {
+        return { contents: `export default "Unavailable"` };
+      }
+    });
+  }
 };
 
 /**
  * @type {esbuild.Plugin}
  */
 export const fileIncludePlugin = {
-    name: "file-include-plugin",
-    setup: build => {
-        const filter = /^@fileContent\/.+$/;
-        build.onResolve({ filter }, args => ({
-            namespace: "include-file",
-            path: args.path,
-            pluginData: {
-                path: join(args.resolveDir, args.path.slice("include-file/".length))
-            }
-        }));
-        build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
-            const [name, format] = path.split(";");
-            return {
-                contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
-            };
-        });
-    }
+  name: "file-include-plugin",
+  setup: build => {
+    const filter = /^~fileContent\/.+$/;
+    build.onResolve({ filter }, args => ({
+      namespace: "include-file",
+      path: args.path,
+      pluginData: {
+        path: join(args.resolveDir, args.path.slice("include-file/".length))
+      }
+    }));
+    build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
+      const [name, format] = path.split(";");
+      return {
+        contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
+      };
+    });
+  }
 };
 
 /**
  * @type {esbuild.BuildOptions}
  */
 export const commonOpts = {
-    logLevel: "info",
-    bundle: true,
-    watch,
-    minify: !watch,
-    sourcemap: watch ? "inline" : "",
-    legalComments: "linked",
-    plugins: [fileIncludePlugin]
+  logLevel: "info",
+  bundle: true,
+  watch,
+  minify: !watch,
+  sourcemap: watch ? "inline" : "",
+  legalComments: "linked",
+  plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
+  external: ["~plugins", "~git-hash", "~git-remote"]
 };

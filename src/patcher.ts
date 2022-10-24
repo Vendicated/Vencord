@@ -87,6 +87,22 @@ Object.defineProperty(global, "appSettings", {
 process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
 electron.app.whenReady().then(() => {
+    // Source Maps! Maybe there's a better way but since the renderer is executed
+    // from a string I don't think any other form of sourcemaps would work
+    electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
+        let url = unsafeUrl.slice("vencord://".length);
+        if (url.endsWith("/")) url = url.slice(0, -1);
+        switch (url) {
+            case "renderer.js.map":
+            case "preload.js.map":
+            case "patcher.js.map": // doubt
+                cb(join(__dirname, url));
+                break;
+            default:
+                cb({ statusCode: 403 });
+        }
+    });
+
     try {
         const settings = JSON.parse(readSettings());
         if (settings.enableReactDevtools)

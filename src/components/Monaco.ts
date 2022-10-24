@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import monacoHtml from "@fileContent/monacoWin.html";
+import monacoHtml from "~fileContent/monacoWin.html";
 
 import { IpcEvents } from "../utils";
 import { debounce } from "../utils/debounce";
