@@ -35,7 +35,7 @@ let ignoredActivitiesCache: string[] = [];
 export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
-    description: "Ignore certain activities from showing up on your status.",
+    description: "Ignore certain activities (like games) from showing up on your status. You can configure which ones are ignored from the Registered Games tab.",
     patches: [{
         find: ".Messages.SETTINGS_GAMES_OVERLAY_ON",
         replacement: [{
