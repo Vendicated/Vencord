@@ -76,6 +76,11 @@ interface PluginDef {
      */
     options?: Record<string, PluginOptionsItem>;
     /**
+     * Check that this returns true before allowing a save to complete.
+     * If a string is returned, show the error to the user.
+     */
+    beforeSave?(options: Record<string, any>): (true | string) | Promise<true | string>;
+    /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
