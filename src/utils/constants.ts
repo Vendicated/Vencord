@@ -84,5 +84,9 @@ export const Devs = Object.freeze({
     Nuckyz: {
         name: "Nuckyz",
         id: 235834946571337729n
+    },
+    D3SOX: {
+        name: "D3SOX",
+        id: 201052085641281538n
     }
 });
