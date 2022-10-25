@@ -14,11 +14,16 @@ A Discord client mod that does things differently
 
 ## Installing / Uninstalling
 
-Read [Megu's Installation Guide!](docs/1_INSTALLING.md)
+If you're just a normal user, use [our simple gui installer!](https://github.com/Vendicated/VencordInstaller#usage)
+
+If you wanna make plugins or contribute or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
 
 ## Installing on Browser
 
-Run the same commands as in the regular install method. Now run
+Install [the browser extension](https://github.com/Vendicated/Vencord/releases/latest/download/extension.zip) or [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js). Please note that they aren't automatically updated for now, so you will regularely have to reinstall it.
+
+You may also build them from source, to do that do the same steps as in the manual regular install method,
+except run `pnpm buildWeb` instead of `pnpm build`, and your outputs will be in the dist folder
 
 ```sh
 pnpm buildWeb
@@ -28,7 +33,11 @@ You will find the built extension at dist/extension.zip. Now just install this e
 
 ## Installing Plugins
 
+> **Note**
+> You can only use 3rd party plugins in the manual Vencord install for now.
+
 Vencord comes with a bunch of plugins out of the box!
+
 However, if you want to install your own ones, create a `userplugins` folder in the `src` directory and create or clone your plugins in there.
 Don't forget to rebuild!
 
