@@ -27,8 +27,11 @@ interface MatchAndReplace {
     replace: string;
 }
 
-/** Used to re-render the Registered Games tab to update how our button looks like */
-const RunningGameStore = lazyWebpack(filters.byProps(["IgnoreActivities_reRenderGames"]));
+const RunningGameStore = {
+    store: lazyWebpack(filters.byProps(["getRunningGames", "getGamesSeen"])),
+    /** Used to re-render the Registered Games tab to update how our button looks like */
+    reRenderGamesExport: lazyWebpack(filters.byProps(["IgnoreActivities_reRenderGames"]))
+};
 
 let ignoredActivitiesCache: string[] = [];
 
@@ -134,19 +137,44 @@ export default definePlugin({
 
     async start() {
         ignoredActivitiesCache = (await DataStore.get<string[]>("IgnoreActivities_ignoredActivities")) ?? [];
+
+        if (ignoredActivitiesCache.length !== 0) {
+            const gamesSeen: Record<string, any>[] = RunningGameStore.store.getGamesSeen();
+
+            for (const [index, ignoredActivity] of ignoredActivitiesCache.entries()) {
+                if (!gamesSeen.some(game => (game.id !== undefined && game.id === ignoredActivity) || game.exePath === ignoredActivity)) {
+                    ignoredActivitiesCache.splice(index, 1);
+                }
+            }
+
+            await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
+        }
     },
 
-    /** This method is used in different places. The Registered Games tab game props only have an id and the LocalActivityStore have the application_id */
     isActivityEnabled(props: Record<string, any>) {
-        if ("application_id" in props) return !ignoredActivitiesCache.includes(props.application_id);
-        else if ("id" in props) return !ignoredActivitiesCache.includes(props.id);
+        /** LocalActivityStore games have a "type" prop */
+        if ("type" in props) {
+            if (props.application_id !== undefined) return !ignoredActivitiesCache.includes(props.application_id);
+            else {
+                const exePath = RunningGameStore.store.getRunningGames().find(game => game.name === props.name)?.exePath;
+                if (exePath) return !ignoredActivitiesCache.includes(exePath);
+            }
+        }
+        /** Registered Games tab games have an "id" prop */
+        else if ("id" in props) {
+            if (props.id !== undefined) return !ignoredActivitiesCache.includes(props.id);
+            else return !ignoredActivitiesCache.includes(props.exePath);
+        }
         return true;
     },
 
     async handleActivityToggle(props: Record<string, any>) {
-        if (ignoredActivitiesCache.includes(props.id)) ignoredActivitiesCache.splice(ignoredActivitiesCache.indexOf(props.id, 1));
-        else ignoredActivitiesCache.push(props.id);
-        RunningGameStore.IgnoreActivities_reRenderGames();
+        const id = props.id ?? props.exePath;
+        if (id === undefined) return;
+
+        if (ignoredActivitiesCache.includes(id)) ignoredActivitiesCache.splice(ignoredActivitiesCache.indexOf(id, 1));
+        else ignoredActivitiesCache.push(id);
+        RunningGameStore.reRenderGamesExport.IgnoreActivities_reRenderGames();
         await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
     }
 });
