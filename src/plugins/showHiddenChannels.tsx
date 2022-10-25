@@ -17,6 +17,7 @@
 */
 
 import { Flex } from "../components/Flex";
+import { Devs } from "../utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
@@ -41,10 +42,7 @@ export default definePlugin({
             name: "Average React Enjoyer",
             id: 1004904120056029256n
         },
-        {
-            name: "D3SOX",
-            id: 201052085641281538n
-        },
+        Devs.D3SOX,
     ],
     options: {
         hideUnreads: {
