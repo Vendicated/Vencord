@@ -31,14 +31,22 @@ export default definePlugin({
     patches: [
         {
             find: "VoiceChannel.renderPopout",
-            replacement: {
-                match: /onClick:(.*)function\(\)\{(e\.handleClick.+?)}/g,
-                // hack: this is not a react onClick, it is a custom prop handled by Discord
-                // thus, replacin this with onDoubleClick won't work and you also cannot check
-                // e.detail since instead of the event they pass the channel.
-                // do this timer workaround instead
-                replace: "onClick:$1function(){Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{$2}, e)}",
-            },
+            // hack: these are not React onClick, it is a custom prop handled by Discord
+            // thus, replacing this with onDoubleClick won't work, and you also cannot check
+            // e.detail since instead of the event they pass the channel.
+            // do this timer workaround instead
+            replacement: [
+                // voice channels
+                {
+                    match: /onClick:(.*)function\(\)\{(e\.handleClick.+?)}/g,
+                    replace: "onClick:$1function(){Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{$2}, e)}",
+                },
+                // stage channels
+                {
+                    match: /onClick:(\w+)\?void 0:this\.handleClick,/g,
+                    replace: "onClick:$1?void 0:Vencord.Plugins.plugins.vcDoubleClick.scheduleStage.bind(this),",
+                }
+            ],
         },
         {
             find: 'className:"channelMention",iconType:(',
@@ -49,8 +57,19 @@ export default definePlugin({
         }
     ],
 
+    scheduleStage(...args) {
+        const channel = args[0];
+        if (channel) {
+            // Workaround because plugins type does not contain possible methods
+            (Vencord.Plugins.plugins.vcDoubleClick as any).schedule(() => {
+                this.handleClick(...args);
+            }, channel);
+        }
+    },
+
     schedule(cb: () => void, e: any) {
-        const id = e.props.channel.id as string;
+        // support from stage and voice channels patch
+        const id = e?.id ?? e.props.channel.id as string;
         // use a different counter for each channel
         const data = (timers[id] ??= { timeout: void 0, i: 0 });
         // clear any existing timer
