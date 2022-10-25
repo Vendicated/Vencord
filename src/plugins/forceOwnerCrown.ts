@@ -34,8 +34,8 @@ export default definePlugin({
             // This is the logic where it decides whether to render the owner crown or not
             find: ".renderOwner=",
             replacement: {
-                match: /isOwner;return null!=(\w+)?&&/g,
-                replace: "isOwner;if(Vencord.Plugins.plugins.ForceOwnerCrown.isGuildOwner(this.props)){$1=true;}return null!=$1&&"
+                match: /(\w+).isOwner;/g,
+                replace: "Vencord.Plugins.plugins.ForceOwnerCrown.isGuildOwner(this.props) ? true : $1.isOwner;"
             }
         },
     ],
