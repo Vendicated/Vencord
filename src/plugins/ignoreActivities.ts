@@ -27,11 +27,8 @@ interface MatchAndReplace {
     replace: string;
 }
 
-const RunningGameStore = {
-    store: lazyWebpack(filters.byProps(["getRunningGames", "getGamesSeen"])),
-    /** Used to re-render the Registered Games tab to update how our button looks like */
-    reRenderGamesExport: lazyWebpack(filters.byProps(["IgnoreActivities_reRenderGames"]))
-};
+/** Used to re-render the Registered Games tab to update how our button looks like */
+const RunningGameStoreModule = lazyWebpack(filters.byProps(["IgnoreActivities_reRenderGames"]));
 
 let ignoredActivitiesCache: string[] = [];
 
@@ -139,7 +136,7 @@ export default definePlugin({
         ignoredActivitiesCache = (await DataStore.get<string[]>("IgnoreActivities_ignoredActivities")) ?? [];
 
         if (ignoredActivitiesCache.length !== 0) {
-            const gamesSeen: Record<string, any>[] = RunningGameStore.store.getGamesSeen();
+            const gamesSeen: Record<string, any>[] = RunningGameStoreModule.Z.getGamesSeen();
 
             for (const [index, ignoredActivity] of ignoredActivitiesCache.entries()) {
                 if (!gamesSeen.some(game => (game.id !== undefined && game.id === ignoredActivity) || game.exePath === ignoredActivity)) {
@@ -156,7 +153,7 @@ export default definePlugin({
         if ("type" in props) {
             if (props.application_id !== undefined) return !ignoredActivitiesCache.includes(props.application_id);
             else {
-                const exePath = RunningGameStore.store.getRunningGames().find(game => game.name === props.name)?.exePath;
+                const exePath = RunningGameStoreModule.Z.getRunningGames().find(game => game.name === props.name)?.exePath;
                 if (exePath) return !ignoredActivitiesCache.includes(exePath);
             }
         }
@@ -174,7 +171,7 @@ export default definePlugin({
 
         if (ignoredActivitiesCache.includes(id)) ignoredActivitiesCache.splice(ignoredActivitiesCache.indexOf(id, 1));
         else ignoredActivitiesCache.push(id);
-        RunningGameStore.reRenderGamesExport.IgnoreActivities_reRenderGames();
+        RunningGameStoreModule.IgnoreActivities_reRenderGames();
         await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
     }
 });
