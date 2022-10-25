@@ -48,9 +48,8 @@ export default definePlugin({
             const guild = GuildStore.getGuild(guildId);
             if (guild) {
                 return guild.ownerId === userId;
-            } else {
-                console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
             }
+            console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
         } else {
             console.error("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
         }
