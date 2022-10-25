@@ -47,7 +47,7 @@ export default definePlugin({
                 // stage channels
                 {
                     match: /onClick:(\w+)\?void 0:this\.handleClick,/g,
-                    replace: "onClick:$1?void 0:Vencord.Plugins.plugins.vcDoubleClick.scheduleStage.bind(this),",
+                    replace: "onClick:$1?void 0:(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
                 }
             ],
         },
@@ -59,16 +59,6 @@ export default definePlugin({
             }
         }
     ],
-
-    scheduleStage(...args) {
-        const channel = args[0];
-        if (channel) {
-            // Workaround because plugins type does not contain possible methods
-            (Vencord.Plugins.plugins.vcDoubleClick as any).schedule(() => {
-                this.handleClick(...args);
-            }, channel);
-        }
-    },
 
     schedule(cb: () => void, e: any) {
         // support from stage and voice channels patch
