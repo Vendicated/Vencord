@@ -20,9 +20,10 @@
 // Just copy paste the entire file into a running Vencord install and it will prompt you
 // to save the file
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="../src/modules"/>
+
 (() => {
-    // eslint-disable-next-line spaced-comment
-    /// <reference types="../src/modules"/>
     /**
      * @type {typeof import("~plugins").default}
      */
@@ -39,7 +40,7 @@
     let list = "\n\n";
 
     for (const p of Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name))) {
-        tableOfContents += `- [${p.name}](#${encodeURIComponent(p.name)})\n`;
+        tableOfContents += `- [${p.name}](#${p.name.replaceAll(" ", "-")})\n`;
 
         list += `## ${p.name}
 
@@ -49,7 +50,7 @@ ${p.description}
 `;
 
         if (p.commands?.length) {
-            list += "\n\n### Commands\n";
+            list += "\n\n#### Commands\n";
             for (const cmd of p.commands) {
                 list += `${cmd.name} - ${cmd.description}\n\n`;
             }
@@ -57,9 +58,6 @@ ${p.description}
         list += "\n\n";
     }
 
-    const data = new Blob([header.trimStart(), tableOfContents, list.trimEnd()], { type: "text/plain" });
-    data.arrayBuffer().then(buf =>
-        DiscordNative.fileManager.saveWithDialog(new Uint8Array(buf), "plugins.md")
-    );
-
+    const data = new TextEncoder().encode(header + tableOfContents + list);
+    DiscordNative.fileManager.saveWithDialog(data, "plugins.md");
 })();
