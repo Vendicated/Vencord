@@ -1,0 +1,58 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
+import { waitFor } from "../webpack";
+
+let GuildStore;
+waitFor(["getGuild"], m => GuildStore = m);
+
+export default definePlugin({
+    name: "ForceOwnerCrown",
+    description: "Force the owner crown next to usernames even if the server is large.",
+    authors: [
+        Devs.D3SOX
+    ],
+    patches: [
+        {
+            // This is the logic where it decides whether to render the owner crown or not
+            find: ".renderOwner",
+            replacement: {
+                match: /isOwner;return null!=(\w+)?&&/g,
+                replace: "isOwner;if(Vencord.Plugins.plugins.ForceOwnerCrown.isGuildOwner(this.props)){$1=true;}return null!=$1&&"
+            }
+        },
+    ],
+    isGuildOwner(props) {
+        // guild id is in props twice, fallback if the first is undefined
+        const guildId = props.guildId ?? props?.channel?.guild_id;
+
+        if (guildId) {
+            const guild = GuildStore.getGuild(guildId);
+            if (guild) {
+                return guild.ownerId === props.user.id;
+            } else {
+                console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
+            }
+        } else {
+            console.error("[ForceOwnerCrown] no guildId", { guildId, props });
+        }
+        return false;
+    },
+});
