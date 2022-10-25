@@ -55,7 +55,7 @@ export default definePlugin({
             find: 'className:"channelMention",iconType:(',
             replacement: {
                 match: /onClick:(.{1,3}),/,
-                replace: "onClick:(_vcEv)=>_vcEv.detail>=2||_vcEv.target.className.includes('MentionText')&&($1)(),",
+                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2||_vcEv.target.className.includes('MentionText'))&&($1)(),",
             }
         }
     ],
