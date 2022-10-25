@@ -41,17 +41,18 @@ export default definePlugin({
     ],
     isGuildOwner(props) {
         // guild id is in props twice, fallback if the first is undefined
-        const guildId = props.guildId ?? props?.channel?.guild_id;
+        const guildId = props?.guildId ?? props?.channel?.guild_id;
+        const userId = props?.user?.id;
 
-        if (guildId) {
+        if (guildId && userId) {
             const guild = GuildStore.getGuild(guildId);
             if (guild) {
-                return guild.ownerId === props.user.id;
+                return guild.ownerId === userId;
             } else {
                 console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
             }
         } else {
-            console.error("[ForceOwnerCrown] no guildId", { guildId, props });
+            console.error("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
         }
         return false;
     },
