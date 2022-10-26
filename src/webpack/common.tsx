@@ -22,7 +22,7 @@ import type Other from "discord-types/other";
 import type Stores from "discord-types/stores";
 
 import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, mapMangledModuleLazy,waitFor } from "./webpack";
+import { _resolveReady, filters, mapMangledModuleLazy, waitFor } from "./webpack";
 export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
 
 export let FluxDispatcher: Other.FluxDispatcher;
@@ -115,7 +115,12 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
-waitFor("useState", m => React = m);
+waitFor("useState", m => {
+    window._Ve$ = m.createElement;
+    window._VF$ = m.Fragment;
+    React = m;
+});
+
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
     const cb = () => {
