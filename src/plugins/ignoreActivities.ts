@@ -157,8 +157,8 @@ export default definePlugin({
                 if (exePath) return !ignoredActivitiesCache.includes(exePath);
             }
         }
-        /** Registered Games tab games have an "id" prop */
-        else if ("id" in props) {
+        /** Registered Games tab games have an "exePath" prop */
+        else if ("exePath" in props) {
             if (props.id !== undefined) return !ignoredActivitiesCache.includes(props.id);
             else return !ignoredActivitiesCache.includes(props.exePath);
         }
