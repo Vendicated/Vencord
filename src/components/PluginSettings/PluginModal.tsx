@@ -30,10 +30,11 @@ import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
     SettingBooleanComponent,
+    SettingCustomComponent,
     SettingInputComponent,
     SettingNumericComponent,
     SettingSelectComponent,
-    SettingSliderComponent,
+    SettingSliderComponent
 } from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
@@ -141,6 +142,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 }
                 case OptionType.SLIDER: {
                     options.push(<SettingSliderComponent key={key} option={setting} {...props} />);
+                    break;
+                }
+                case OptionType.COMPONENT: {
+                    options.push(<SettingCustomComponent key={key} option={setting} {...props} />);
                     break;
                 }
             }
