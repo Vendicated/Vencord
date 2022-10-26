@@ -3,6 +3,12 @@ on:
     push:
         branches:
             - main
+        paths:
+            - .github/workflows/build.yml
+            - src/**
+            - browser/**
+            - scripts/build/**
+            - package.json
 env:
     FORCE_COLOR: true
 
@@ -16,9 +22,9 @@ jobs:
             - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 18
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
               with:
-                  node-version: 18
+                  node-version: 19
                   cache: "pnpm"
 
             - name: Install dependencies
