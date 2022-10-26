@@ -42,6 +42,7 @@
         "eslint": "^8.24.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-simple-import-sort": "^8.0.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
         "standalone-electron-types": "^1.0.0",
         "type-fest": "^3.1.0",
         "typescript": "^4.8.4"

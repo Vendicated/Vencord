@@ -15,8 +15,9 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         // https://esbuild.github.io/api/#jsx-factory
-        "jsxFactory": "Vencord.Webpack.Common.React.createElement",
-        "jsxFragmentFactory": "Vencord.Webpack.Common.React.Fragment",
+        // these short window aliases make the bundle ~10% smaller
+        "jsxFactory": "_Ve$",
+        "jsxFragmentFactory": "_VF$",
         "jsx": "react"
     },
     "include": ["src/**/*"]

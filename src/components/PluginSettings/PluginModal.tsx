@@ -67,6 +67,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const [tempSettings, setTempSettings] = React.useState<Record<string, any>>({});
 
     const [errors, setErrors] = React.useState<Record<string, boolean>>({});
+    const [saveError, setSaveError] = React.useState<string | null>(null);
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
@@ -79,11 +80,20 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         })();
     }, []);
 
-    function saveAndClose() {
+    async function saveAndClose() {
         if (!plugin.options) {
             onClose();
             return;
         }
+
+        if (plugin.beforeSave) {
+            const result = await Promise.resolve(plugin.beforeSave(tempSettings));
+            if (result !== true) {
+                setSaveError(result);
+                return;
+            }
+        }
+
         let restartNeeded = false;
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
@@ -195,28 +205,31 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 </Forms.FormSection>
             </ModalContent>
             <ModalFooter>
-                <Flex>
-                    <Button
-                        onClick={onClose}
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.RED}
-                    >
-                        Exit Without Saving
-                    </Button>
-                    <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
-                        {({ onMouseEnter, onMouseLeave }) => (
-                            <Button
-                                size={Button.Sizes.SMALL}
-                                color={Button.Colors.BRAND}
-                                onClick={saveAndClose}
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                                disabled={!canSubmit()}
-                            >
-                                Save & Exit
-                            </Button>
-                        )}
-                    </Tooltip>
+                <Flex flexDirection="column" style={{ width: "100%" }}>
+                    <Flex style={{ marginLeft: "auto" }}>
+                        <Button
+                            onClick={onClose}
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.RED}
+                        >
+                            Exit Without Saving
+                        </Button>
+                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    color={Button.Colors.BRAND}
+                                    onClick={saveAndClose}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    disabled={!canSubmit()}
+                                >
+                                    Save & Exit
+                                </Button>
+                            )}
+                        </Tooltip>
+                    </Flex>
+                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
                 </Flex>
             </ModalFooter>
         </ModalRoot>

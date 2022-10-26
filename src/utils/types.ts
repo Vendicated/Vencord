@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Promisable } from "type-fest";
+
 import { Command } from "../api/Commands";
 
 // exists to export default definePlugin({...})
@@ -76,6 +78,11 @@ interface PluginDef {
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      */
     options?: Record<string, PluginOptionsItem>;
+    /**
+     * Check that this returns true before allowing a save to complete.
+     * If a string is returned, show the error to the user.
+     */
+    beforeSave?(options: Record<string, any>): Promisable<true | string>;
     /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page

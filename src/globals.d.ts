@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import React from "react";
+
 declare global {
     /**
      * This exists only at build time, so references to it in patches should insert it
@@ -31,6 +33,8 @@ declare global {
      * replace: `${IS_WEB}?foo:bar`
      */
     export var IS_WEB: boolean;
+    export var IS_STANDALONE: boolean;
+
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
     export var appSettings: {
@@ -45,6 +49,12 @@ declare global {
      */
     export var DiscordNative: any;
 
+    // jsFactory, here to make ts happy
+    /** Shorter alias for React.createElement to reduce bundle size, don't use this. */
+    export var _Ve$: typeof React["createElement"];
+    /** Shorter alias for React.Fragment to reduce bundle size, don't use this. */
+    export var _VF$: typeof React["Fragment"];
+
     interface Window {
         webpackChunkdiscord_app: {
             push(chunk: any): any;
@@ -53,5 +63,3 @@ declare global {
         [k: string]: any;
     }
 }
-
-export { };
