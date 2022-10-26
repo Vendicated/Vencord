@@ -24,10 +24,10 @@ export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
 
 import { popNotice, showNotice } from "./api/Notices";
-import { PlainSettings,Settings } from "./api/settings";
+import { PlainSettings, Settings } from "./api/settings";
 import { startAllPlugins } from "./plugins";
 
-export { PlainSettings,Settings };
+export { PlainSettings, Settings };
 
 import "./webpack/patchWebpack";
 import "./utils/quickCss";
