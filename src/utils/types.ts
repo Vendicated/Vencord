@@ -119,6 +119,7 @@ export interface PluginOptionBase {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
+
 export interface PluginOptionString extends PluginOptionBase {
     type: OptionType.STRING;
     /**
