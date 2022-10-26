@@ -96,6 +96,7 @@ export enum OptionType {
     BOOLEAN,
     SELECT,
     SLIDER,
+    COMPONENT,
 }
 
 export type PluginOptionsItem =
@@ -103,7 +104,8 @@ export type PluginOptionsItem =
     | PluginOptionNumber
     | PluginOptionBoolean
     | PluginOptionSelect
-    | PluginOptionSlider;
+    | PluginOptionSlider
+    | PluginOptionComponent;
 
 export interface PluginOptionBase {
     description: string;
@@ -117,7 +119,6 @@ export interface PluginOptionBase {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
-
 export interface PluginOptionString extends PluginOptionBase {
     type: OptionType.STRING;
     /**
@@ -176,7 +177,28 @@ export interface PluginOptionSlider extends PluginOptionBase {
     /**
      * Prevents the user from saving settings if this is false or a string
      */
-    isValid?(value: number): number;
+    isValid?(value: number): boolean | string;
+}
+
+interface IPluginOptionComponentProps {
+    /**
+     * Run this when the value changes.
+     *
+     * NOTE: The user will still need to click save to apply these changes.
+     */
+    onChange(newValue: any): void;
+    /**
+     * Set to true to prevent the user from saving.
+     *
+     * NOTE: This will not show the error to the user. It will only stop them saving.
+     * Make sure to show the error in your component.
+     */
+    setError(error: boolean): void;
+}
+
+export interface PluginOptionComponent extends PluginOptionBase {
+    type: OptionType.COMPONENT;
+    component: (props: IPluginOptionComponentProps) => JSX.Element;
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };

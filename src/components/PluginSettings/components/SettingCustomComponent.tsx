@@ -16,22 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionBase } from "../../../utils/types";
+import { PluginOptionComponent } from "../../../utils/types";
+import { ISettingElementProps } from ".";
 
-export interface ISettingElementProps<T extends PluginOptionBase> {
-    option: T;
-    onChange(newValue: any): void;
-    pluginSettings: {
-        [setting: string]: any;
-        enabled: boolean;
-    };
-    id: string;
-    onError(hasError: boolean): void;
+export function SettingCustomComponent({ option, onChange, onError }: ISettingElementProps<PluginOptionComponent>) {
+    return option.component({ onChange, setError: onError });
 }
-
-export * from "./SettingBooleanComponent";
-export * from "./SettingCustomComponent";
-export * from "./SettingNumericComponent";
-export * from "./SettingSelectComponent";
-export * from "./SettingSliderComponent";
-export * from "./SettingTextComponent";
