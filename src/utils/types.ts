@@ -187,7 +187,7 @@ interface IPluginOptionComponentProps {
      *
      * NOTE: The user will still need to click save to apply these changes.
      */
-    onChange(newValue: any): void;
+    setValue(newValue: any): void;
     /**
      * Set to true to prevent the user from saving.
      *
@@ -195,6 +195,10 @@ interface IPluginOptionComponentProps {
      * Make sure to show the error in your component.
      */
     setError(error: boolean): void;
+    /**
+     * The options object
+     */
+    option: PluginOptionComponent;
 }
 
 export interface PluginOptionComponent extends PluginOptionBase {
