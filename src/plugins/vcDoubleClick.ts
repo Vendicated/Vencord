@@ -27,30 +27,42 @@ const timers = {} as Record<string, {
 export default definePlugin({
     name: "vcDoubleClick",
     description: "Join VCs via DoubleClick instead of single click",
-    authors: [Devs.Ven],
+    authors: [
+        Devs.Ven,
+        Devs.D3SOX,
+    ],
     patches: [
         {
             find: "VoiceChannel.renderPopout",
-            replacement: {
-                match: /onClick:function\(\)\{(e\.handleClick.+?)}/g,
-                // hack: this is not a react onClick, it is a custom prop handled by Discord
-                // thus, replacin this with onDoubleClick won't work and you also cannot check
-                // e.detail since instead of the event they pass the channel.
-                // do this timer workaround instead
-                replace: "onClick:function(){Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{$1}, e)}",
-            },
+            // hack: these are not React onClick, it is a custom prop handled by Discord
+            // thus, replacing this with onDoubleClick won't work, and you also cannot check
+            // e.detail since instead of the event they pass the channel.
+            // do this timer workaround instead
+            replacement: [
+                // voice channels
+                {
+                    match: /onClick:(.*)function\(\)\{(e\.handleClick.+?)}/g,
+                    replace: "onClick:$1function(){Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{$2}, e)}",
+                },
+                // stage channels
+                {
+                    match: /onClick:(\w+)\?void 0:this\.handleClick,/g,
+                    replace: "onClick:$1?void 0:(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
+                }
+            ],
         },
         {
             find: 'className:"channelMention",iconType:(',
             replacement: {
                 match: /onClick:(.{1,3}),/,
-                replace: "onClick:(_vcEv)=>_vcEv.detail>=2&&($1)(),",
+                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2||_vcEv.target.className.includes('MentionText'))&&($1)(),",
             }
         }
     ],
 
     schedule(cb: () => void, e: any) {
-        const id = e.props.channel.id as string;
+        // support from stage and voice channels patch
+        const id = e?.id ?? e.props.channel.id as string;
         // use a different counter for each channel
         const data = (timers[id] ??= { timeout: void 0, i: 0 });
         // clear any existing timer
