@@ -18,10 +18,11 @@
 
 import { Embed as _Embed, Message } from "discord-types/general";
 
+import { addAccessory, removeAccessory } from "../api/MessageAccessories";
 import { lazy } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { find, waitFor } from "../webpack";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, MessageStore } from "../webpack/common";
+import { filters, find, waitFor } from "../webpack";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, MessageStore, React } from "../webpack/common";
 
 const replacement = `
 const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)?.[1];
@@ -29,7 +30,9 @@ const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmb
 if (msgLink) {
     $2.message.embeds = [
         ...Vencord.Plugins.plugins.MessageLinkEmbeds
-          .generateEmbed(msgLink, $2.message.embeds, { channelID: $2.message.channel_id, messageID: $2.message.id })
+        .generateRichEmbed(msgLink, $2.message.embeds,
+            { channelID: $2.message.channel_id, messageID: $2.message.id }
+        )
     ].filter(item => item);
 };
 
@@ -39,14 +42,31 @@ var
   $4 = $2.renderSuppressEmbeds /* Don't add a semicolon here, there are more definitions after this. */
 `.trim().replace(/(?<=[^(?:const)|(?:var)])\s+/gm, "");
 
-const cache: { [id: string]: Message; } = {};
+const messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
+const elementCache: { [id: string]: { element: JSX.Element, shouldRenderRichEmbed: boolean; }; } = {};
 
-let get: (...args) => Promise<any>;
+let get: (...query) => Promise<any>,
+    MessageEmbed: (...props) => JSX.Element,
+    parse: (content: string) => any[] /* (JSX.Element | string)[] i think */;
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
-const toTimestamp = lazy(() => find(m => m.prototype?.toDate));
+waitFor(["MessageEmbed"], _ => ({ MessageEmbed } = _));
+waitFor(["parse", "parseTopic"], _ => ({ parse } = _));
+const TextContainer = lazy(() => find(filters.byCode('case"always-white":')));
 
-function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }) {
-    get({
+function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
+    function callback(message: any) {
+        if (!message) return;
+        const actualMessage: Message = (MessageStore.getMessages(message.channel_id) as any).receiveMessage(message).get(message.id);
+        messageCache[message.id] = {
+            message: actualMessage,
+            fetched: true
+        };
+        if (originalMessage) dispatchBlankUpdate(originalMessage.channelID, originalMessage.messageID);
+    }
+    if (messageID in messageCache && !messageCache[messageID].fetched) return null;
+    if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
+    messageCache[messageID] = { fetched: false };
+    return get({
         // TODO: don't hardcode endpoint
         url: `/channels/${channelID}/messages`,
         query: {
@@ -54,36 +74,50 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
             around: messageID
         },
         retries: 2
-    }).then(res => {
-        const message = res.body?.[0];
-        if (!message) return;
-        message.timestamp = toTimestamp()(message.timestamp);
-        if (message.embeds[0]?.type === "rich") {
-            message.embeds[0].rawDescription = message.embeds[0].description || "";
-            message.embeds[0].rawTitle = message.embeds[0].title || "";
-            message.embeds[0].color &&= "#" + message.embeds[0].color.toString(16);
+    }).then(res =>
+        callback(res.body?.[0])
+    ).catch(console.log);
+}
+
+function dispatchBlankUpdate(channelID: string, messageID: string): void {
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_UPDATE",
+        message: {
+            guild_id: ChannelStore.getChannel(channelID).guild_id,
+            channel_id: channelID,
+            id: messageID,
         }
-        cache[message.id] = message;
-
-        if (originalMessage) FluxDispatcher.dispatch({
-            type: "MESSAGE_UPDATE",
-            message: {
-                guild_id: ChannelStore.getChannel(originalMessage.channelID).guild_id,
-                channel_id: originalMessage.channelID,
-                id: originalMessage.messageID,
-            }
-        });
-
-    }).catch(() => { });
+    });
 }
 
 interface Embed extends _Embed {
-    _isMessageEmbed?: boolean,
+    _messageEmbed?: "rich" | "clyde", /* can't be an automod embed because that's an accessory */
     footer?: {
         text: string,
         iconURL?: string;
-    };
+    },
+    timestamp?: moment.Moment;
 }
+
+const noContent = (attachments: number, embeds: number): string => {
+    if (!attachments && !embeds) return "";
+    if (!attachments) return `[no content, ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
+    if (!embeds) return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""}]`;
+    return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""} and ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
+};
+
+const computeWidthAndHeight = (width: number, height: number) => {
+    const maxWidth = 400, maxHeight = 300;
+    let newWidth: number, newHeight: number;
+    if (width > height) {
+        newWidth = Math.min(width, maxWidth);
+        newHeight = Math.round(height / (width / newWidth));
+    } else {
+        newHeight = Math.min(height, maxHeight);
+        newWidth = Math.round(width / (height / newHeight));
+    }
+    return { width: newWidth, height: newHeight };
+};
 
 export default definePlugin({
     name: "MessageLinkEmbeds",
@@ -92,15 +126,101 @@ export default definePlugin({
         name: "ActuallyTheSun",
         id: 406028027768733696n
     }],
+    dependencies: ["MessageAccessoriesAPI"],
     patches: [{
         find: "_messageAttachmentToEmbedMedia",
         replacement: {
             match: /var (.{1,2})=(.{1,2})\.channel,(.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.renderSuppressEmbeds/,
             replace: replacement
         }
+    },
+    {
+        find: "().embedCard",
+        replacement: [{
+            match: /{"use strict";(.{0,10})\(\)=>(.{1,2})}\);/,
+            replace: '{"use strict";$1()=>$2,me:()=>messageEmbed});'
+        }, {
+            match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\(\)\.embedCard(.{0,500})}\)\)\)}/,
+            replace: "function $1($2){var $3=$2.message,$4=$2.channel$5().embedCard$6})))}\
+            var messageEmbed={MessageEmbed:$1};"
+        }]
     }],
 
+    start() {
+        addAccessory("messageLinkEmbed", props => this.messageEmbedAccessory(props), 4 /* just above rich embeds*/);
+    },
+
+    stop() {
+        // requires a restart to remove the rich embeds because that's not an accessory
+        // and even if they were removed all messages keep their embeds until rerendered
+        // is there a point in having a stop function?
+        removeAccessory("messageLinkEmbed");
+    },
+
     messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19})/,
+
+    messageEmbedAccessory(props: Record<string, any>): JSX.Element {
+        const { message } = props;
+        const Nothing = React.createElement("Fragment", {}, null);
+
+        const msgLink = message.content?.match(this.messageLinkRegex)?.[1];
+        if (!msgLink) return Nothing;
+        const [guildID, channelID, messageID] = msgLink.split("/");
+        if (messageID in elementCache) return elementCache[messageID].element;
+        const linkedMessage = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
+        if (!linkedMessage) {
+            getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
+            return Nothing;
+        }
+        const linkedChannel = ChannelStore.getChannel(channelID);
+        const isDM = guildID === "@me";
+        const image = this.getImage(linkedMessage);
+        const hasActualEmbed = (linkedMessage.author.bot && linkedMessage.embeds[0]?.type === "rich" && !(linkedMessage.embeds[0] as Embed)._messageEmbed);
+        if (hasActualEmbed && !linkedMessage.content) {
+            elementCache[linkedMessage.id] = {
+                element: Nothing,
+                shouldRenderRichEmbed: true
+            };
+            return Nothing;
+        }
+
+        const MessageEmbedElement = React.createElement(MessageEmbed, {
+            channel: linkedChannel,
+            childrenAccessories: React.createElement(TextContainer(), {
+                color: "text-muted",
+                tag: "span",
+                variant: "text-xs/medium"
+            }, [
+                ...(isDM ? parse(`<@${ChannelStore.getChannel(linkedChannel.id).recipients[0]}>`) : parse(`<#${linkedChannel.id}>`)),
+                React.createElement("span", {}, isDM ? " - Direct Message" : " - " + GuildStore.getGuild(linkedChannel.guild_id)?.name)
+            ]),
+            compact: false,
+            content: [
+                ...(linkedMessage.content ?
+                    parse(linkedMessage.content) :
+                    [noContent(linkedMessage.attachments.length, linkedMessage.embeds.length)]
+                ),
+                // separator
+                (image) ? React.createElement("div", {}, null) : null,
+                image ? React.createElement("img", {
+                    src: image.url,
+                    width: computeWidthAndHeight(image.width!, image.height!).width,
+                    height: computeWidthAndHeight(image.width!, image.height!).height
+                }) : null
+            ].filter(i => i),
+            hideTimestamp: false,
+            message: linkedMessage,
+            _messageEmbed: "automod"
+        }, null);
+
+        elementCache[linkedMessage.id] = {
+            element: MessageEmbedElement,
+            shouldRenderRichEmbed: hasActualEmbed
+        };
+        // dispatch needed here because it otherwise shows both the automod and rich embed
+        dispatchBlankUpdate(message.channel_id, message.id);
+        return MessageEmbedElement;
+    },
 
     getImage(message: Message) {
         if (message.attachments[0] && !message.attachments[0].content_type!.startsWith("video/")) return {
@@ -121,11 +241,12 @@ export default definePlugin({
         return null;
     },
 
-    generateEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
+    generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
         const [guildID, channelID, messageID] = messageURL.split("/");
-        if (existingEmbeds.find(i => i._isMessageEmbed)) return [...existingEmbeds];
-        const message = MessageStore.getMessage(channelID, messageID) || cache[messageID];
-        if (existingEmbeds.find(i => i.id === "messageLinkEmbeds-1")) {
+        if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed) return [...existingEmbeds.filter(i => i._messageEmbed !== "rich")];
+        if (existingEmbeds.find(i => i._messageEmbed === "rich")) return [...existingEmbeds];
+        const message = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
+        if (existingEmbeds.find(i => i._messageEmbed === "clyde")) {
             if (!message) return [...existingEmbeds];
             else existingEmbeds = existingEmbeds.filter(i => i.id !== "messageLinkEmbeds-1");
         }
@@ -134,27 +255,35 @@ export default definePlugin({
             return [...existingEmbeds, {
                 author: {
                     name: "Clyde#0000",
-                    // TODO: don't hardcode icon url
+                    // the only place where this is found in discord's code is a webpack module
+                    // with the sole purpose of exporting the image
+                    // there is absolutely nothing to find it by other than the randomized string
                     iconURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png",
                     iconProxyURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png"
                 },
                 rawDescription: "Failed to fetch message",
                 id: "messageLinkEmbeds-1",
                 fields: [],
-                type: "rich"
-                // _isMessageEmbed missing is intentional
-            }];
+                type: "rich",
+                _messageEmbed: "clyde"
+            }] as Embed[];
         }
 
         const firstEmbed = message.embeds[0] as Embed;
-        const hasActualEmbed = !!(message.author.bot && firstEmbed?.type === "rich" && (!firstEmbed.id || firstEmbed.id.match(/embed_\d+/)));
+        const hasActualEmbed = !!(message.author.bot && firstEmbed?.type === "rich" && firstEmbed.id.match(/embed_\d+/));
+        if (hasActualEmbed && message.content) return [...existingEmbeds, { ...firstEmbed, _messageEmbed: "rich" }];
+
+        const usernameAndDiscriminator = `${message.author.username}#${message.author.discriminator}`;
+        const channelAndServer = guildID === "@me" ? "Direct Message" :
+            "#" + ChannelStore.getChannel(channelID).name + ` (${GuildStore.getGuild(guildID).name})`;
 
         const embeds = [...existingEmbeds, {
             author: {
                 iconProxyURL: `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${message.author.id}/${message.author.avatar}`,
                 iconURL: `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${message.author.id}/${message.author.avatar}`,
-                name: `${message.author.username}#${message.author.discriminator}${hasActualEmbed && firstEmbed.author ?
-                    ` | ${firstEmbed.author?.name}` : ""}`,
+                name: hasActualEmbed ?
+                    `${usernameAndDiscriminator}${firstEmbed.author ? ` | ${firstEmbed.author.name}` : ""}`
+                    : usernameAndDiscriminator,
                 url: hasActualEmbed ? firstEmbed.author?.url! : undefined,
             },
             color: hasActualEmbed ? firstEmbed.color :
@@ -162,12 +291,11 @@ export default definePlugin({
             image: this.getImage(message),
             rawDescription: hasActualEmbed && firstEmbed.rawDescription.length ? firstEmbed.rawDescription :
                 message.content.length ? message.content :
-                    `[no content, ${message.attachments.length} attachment${message.attachments.length !== 1 ? "s" : ""}]`,
+                    noContent(message.attachments.length, message.embeds.length),
             footer: {
-                text: guildID === "@me" ? "Direct Message" :
-                    "#" + ChannelStore.getChannel(channelID).name +
-                    ` (${GuildStore.getGuild(guildID).name})${hasActualEmbed && firstEmbed.footer ?
-                        ` | ${firstEmbed.footer.text}` : ""}`,
+                text: hasActualEmbed
+                    ? `${channelAndServer}${firstEmbed.footer ? ` | ${firstEmbed.footer.text}` : ""}`
+                    : channelAndServer,
                 iconURL: hasActualEmbed ? firstEmbed.footer?.iconURL : undefined,
             },
             rawTitle: hasActualEmbed ? firstEmbed.rawTitle : undefined,
@@ -176,8 +304,8 @@ export default definePlugin({
             id: `messageLinkEmbeds-${messageID}`,
             fields: [],
             type: "rich",
-            _isMessageEmbed: true
-        }];
+            _messageEmbed: "rich"
+        }] as Embed[];
 
         return embeds;
     }
