@@ -42,12 +42,6 @@ const DefaultSettings: Settings = {
     plugins: {}
 };
 
-for (const plugin in plugins) {
-    DefaultSettings.plugins[plugin] = {
-        enabled: plugins[plugin].required ?? false
-    };
-}
-
 try {
     var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
     mergeDefaults(settings, DefaultSettings);
@@ -60,13 +54,17 @@ type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: 
 const subscriptions = new Set<SubscriptionCallback>();
 
 // Wraps the passed settings object in a Proxy to nicely handle change listeners and default values
-function makeProxy(settings: Settings, root = settings, path = ""): Settings {
+function makeProxy(settings: any, root = settings, path = ""): Settings {
     return new Proxy(settings, {
         get(target, p: string) {
             const v = target[p];
 
             // using "in" is important in the following cases to properly handle falsy or nullish values
             if (!(p in target)) {
+                // Return empty for plugins with no settings
+                if (path === "plugins" && p in Vencord.Plugins.plugins)
+                    return target[p] = makeProxy({}, root, `plugins/${p}`);
+
                 // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
                 // the default value.
                 if (path.startsWith("plugins.")) {
