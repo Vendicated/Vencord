@@ -19,7 +19,7 @@
 import { Embed as _Embed, Message } from "discord-types/general";
 
 import { addAccessory, removeAccessory } from "../api/MessageAccessories";
-import { lazy } from "../utils/misc";
+import { lazy, lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters, find, waitFor } from "../webpack";
 import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, MessageStore, React } from "../webpack/common";
@@ -51,6 +51,7 @@ let get: (...query) => Promise<any>,
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
 waitFor(["MessageEmbed"], _ => ({ MessageEmbed } = _));
 waitFor(["parse", "parseTopic"], _ => ({ parse } = _));
+const Endpoints = lazyWebpack(filters.byProps(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"]));
 const TextContainer = lazy(() => find(filters.byCode('case"always-white":')));
 
 function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
@@ -67,8 +68,7 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
     if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
     messageCache[messageID] = { fetched: false };
     return get({
-        // TODO: don't hardcode endpoint
-        url: `/channels/${channelID}/messages`,
+        url: Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
