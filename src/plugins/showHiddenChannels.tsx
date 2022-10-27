@@ -140,8 +140,7 @@ export default definePlugin({
                             ))}
                         </Flex>
                     </ModalHeader>
-                    <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
-                        <Text variant="text-md/normal">You don't have the permission to view the messages in this channel.</Text>
+                    <ModalContent style={{ marginBottom: 10, marginRight: 8, marginLeft: 8 }}>
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
@@ -166,7 +165,7 @@ export default definePlugin({
                                 size={Button.Sizes.SMALL}
                                 color={Button.Colors.PRIMARY}
                             >
-                                Continue
+                                Close
                             </Button>
                         </Flex>
                     </ModalFooter>
