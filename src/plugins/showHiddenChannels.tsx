@@ -93,6 +93,14 @@ export default definePlugin({
                 match: /(\w)\.connected,(\w)=(\w\.unread),(\w=\w\.canHaveDot)/g,
                 replace: "$1.connected,$2=Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1.channel)?false:$3,$4"
             }
+        },
+        {
+            // Hide New unreads box for hidden channels
+            find: '.displayName="ChannelListUnreadsStore"',
+            replacement: {
+                match: /((.)\.getGuildId\(\))(&&\(!\(.\.isThread.{1,100}\.hasRelevantUnread\()/,
+                replace: "$1&&!$2._isHiddenChannel$3"
+            }
         }
     ],
     shouldShow(channel, category, isMuted) {
