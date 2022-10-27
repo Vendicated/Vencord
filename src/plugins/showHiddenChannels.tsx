@@ -70,19 +70,11 @@ export default definePlugin({
             }
         },
         {
-            // Prevents Discord from trying to fetch message and create a 403 error
-            find: "fetchMessages:function",
+            // inside the onMouseClick handler, we check if the channel is hidden and open the modal if it is
+            find: ".handleThreadsPopoutClose();",
             replacement: {
-                match: /fetchMessages:function\((\w)\){/g,
-                replace: "fetchMessages:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1)) return;"
-            }
-        },
-        {
-            // Don't switch to the channel if it's hidden, but show a modal instead
-            find: ".selectGuild(",
-            replacement: {
-                match: /(function \w+\(\w\)\{var (\w)=\w+\(\w\);)/g,
-                replace: "$1if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.params))return;"
+                match: /((\w)\.handleThreadsPopoutClose\(\);)/g,
+                replace: "if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.props?.channel))return;$1"
             }
         },
         {
@@ -121,9 +113,7 @@ export default definePlugin({
         channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || (channel.type === 2 && !can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
-    channelSelected(channelData) {
-        if (!channelData) return false;
-        const channel = ChannelStore.getChannel(channelData.channelId);
+    channelSelected(channel) {
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
