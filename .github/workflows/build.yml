@@ -36,27 +36,7 @@ jobs:
             - name: Build
               run: pnpm build --standalone
 
-            - name: Get some values needed for the release
-              id: vars
-              shell: bash
-              run: |
-                  echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-
-            - uses: dev-drprasad/delete-tag-and-release@085c6969f18bad0de1b9f3fe6692a3cd01f64fe5 # v0.2.0
-              with:
-                  delete_release: true
-                  tag_name: devbuild
+            - name: Upload Devbuild
+              run: gh release upload devbuild --clobber dist/*
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Create the release
-              uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  tag_name: devbuild
-                  name: Dev Build ${{ steps.vars.outputs.sha_short }}
-                  draft: false
-                  prerelease: false
-                  files: |
-                      dist/*
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
