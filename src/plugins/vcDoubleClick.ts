@@ -18,6 +18,7 @@
 
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
+import { SelectedChannelStore } from "../webpack/common";
 
 const timers = {} as Record<string, {
     timeout?: NodeJS.Timeout;
@@ -63,6 +64,13 @@ export default definePlugin({
     schedule(cb: () => void, e: any) {
         // support from stage and voice channels patch
         const id = e?.id ?? e.props.channel.id as string;
+        const activeVoiceChannel = SelectedChannelStore.getVoiceChannelId();
+        if (activeVoiceChannel) {
+            if (activeVoiceChannel === id) {
+                cb();
+                return;
+            }
+        }
         // use a different counter for each channel
         const data = (timers[id] ??= { timeout: void 0, i: 0 });
         // clear any existing timer
