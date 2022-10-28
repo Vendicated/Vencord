@@ -31,10 +31,12 @@ import { Flex } from "../Flex";
 import {
     NewBadge,
     SettingBooleanComponent,
+    SettingCustomComponent,
     SettingInputComponent,
     SettingNumericComponent,
     SettingSelectComponent,
-    SettingSliderComponent } from "./components";
+    SettingSliderComponent
+} from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));
@@ -141,6 +143,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 }
                 case OptionType.SLIDER: {
                     options.push(<SettingSliderComponent key={key} option={setting} {...props} />);
+                    break;
+                }
+                case OptionType.COMPONENT: {
+                    options.push(<SettingCustomComponent key={key} option={setting} {...props} />);
                     break;
                 }
             }
