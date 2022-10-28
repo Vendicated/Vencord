@@ -47,8 +47,8 @@ export default definePlugin({
                 },
                 // stage channels
                 {
-                    match: /onClick:(\w+)\?void 0:this\.handleClick,/g,
-                    replace: "onClick:$1?void 0:(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
+                    match: /onClick:(.*)this\.handleClick,/g,
+                    replace: "onClick:$1(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
                 }
             ],
         },
