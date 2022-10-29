@@ -106,6 +106,32 @@ interface Attachment {
     proxyURL?: string;
 }
 
+function getImages(message: Message): Attachment[] {
+    const attachments: Attachment[] = [];
+    if (message.attachments) message.attachments.forEach(a => {
+        if (a.content_type!.startsWith("image/")) attachments.push({
+            height: a.height!,
+            width: a.width!,
+            url: a.url,
+            proxyURL: a.proxy_url!
+        });
+    });
+    if (!message.embeds) return attachments;
+    message.embeds.forEach(e => {
+        if (e.type === "image" || (e.type === "rich" && e.image)) attachments.push(
+            e.image ? { ...e.image } : { ...e.thumbnail! }
+        );
+        if (e.type === "gifv" && !e.url!.match(/https:\/\/(?:www.)?tenor\.com/)) {
+            attachments.push({
+                height: e.thumbnail!.height,
+                width: e.thumbnail!.width,
+                url: e.url!
+            });
+        }
+    });
+    return attachments;
+}
+
 const noContent = (attachments: number, embeds: number): string => {
     if (!attachments && !embeds) return "";
     if (!attachments) return `[no content, ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
@@ -181,7 +207,7 @@ export default definePlugin({
         }
         const linkedChannel = ChannelStore.getChannel(channelID);
         const isDM = guildID === "@me";
-        const images = this.getImages(linkedMessage);
+        const images = getImages(linkedMessage);
         const hasActualEmbed = (linkedMessage.author.bot && linkedMessage.embeds[0]?.type === "rich" && !(linkedMessage.embeds[0] as Embed)._messageEmbed);
         if (hasActualEmbed && !linkedMessage.content) {
             elementCache[linkedMessage.id] = {
@@ -226,32 +252,6 @@ export default definePlugin({
         // dispatch needed here because it otherwise shows both the automod and rich embed
         dispatchBlankUpdate(message.channel_id, message.id);
         return MessageEmbedElement;
-    },
-
-    getImages(message: Message): Attachment[] {
-        const attachments: Attachment[] = [];
-        if (message.attachments) message.attachments.forEach(a => {
-            if (a.content_type!.startsWith("image/")) attachments.push({
-                height: a.height!,
-                width: a.width!,
-                url: a.url,
-                proxyURL: a.proxy_url!
-            });
-        });
-        if (!message.embeds) return attachments;
-        message.embeds.forEach(e => {
-            if (e.type === "image" || (e.type === "rich" && e.image)) attachments.push(
-                e.image ? { ...e.image } : { ...e.thumbnail! }
-            );
-            if (e.type === "gifv" && !e.url!.match(/https:\/\/(?:www.)?tenor\.com/)) {
-                attachments.push({
-                    height: e.thumbnail!.height,
-                    width: e.thumbnail!.width,
-                    url: e.url!
-                });
-            }
-        });
-        return attachments;
     },
 
     generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
@@ -301,7 +301,7 @@ export default definePlugin({
             },
             color: hasActualEmbed ? firstEmbed.color :
                 GuildMemberStore.getMember(guildID, message.author.id)?.colorString,
-            image: this.getImages(message)[0],
+            image: getImages(message)[0],
             rawDescription: hasActualEmbed && firstEmbed.rawDescription.length ? firstEmbed.rawDescription :
                 message.content.length ? message.content :
                     noContent(message.attachments.length, message.embeds.length),
