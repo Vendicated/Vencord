@@ -24,7 +24,6 @@ export default definePlugin({
     name: "ClipboardImageFix",
     description: "Fixes being unable to paste images under some circumstances (usually on Linux)",
     authors: [Devs.Cyn],
-    required: true,
     patches: [
         {
             find: ".clipboardData.items[0].getAsString",
