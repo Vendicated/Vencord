@@ -159,7 +159,7 @@ function patchPush() {
 
                                     // inline require to avoid including it in !IS_DEV builds
                                     const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
-                                    let fmt = "%c%s";
+                                    let fmt = "%c %s ";
                                     const elements = [] as string[];
                                     for (const d of diff) {
                                         const color = d.removed
@@ -171,9 +171,10 @@ function patchPush() {
                                         elements.push("color:" + color, d.value);
                                     }
 
-                                    logger.error("Before", context);
-                                    logger.error("After", patchedContext);
-                                    logger.errorCustomFmt(fmt, "", " Diff", ...elements);
+                                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
+                                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), context);
+                                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
+                                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                                 }
                                 code = lastCode;
                                 mod = lastMod;
