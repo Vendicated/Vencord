@@ -109,7 +109,7 @@ interface Attachment {
 
 function getImages(message: Message): Attachment[] {
     const attachments: Attachment[] = [];
-    if (message.attachments) message.attachments.forEach(a => {
+    message.attachments?.forEach(a => {
         if (a.content_type!.startsWith("image/")) attachments.push({
             height: a.height!,
             width: a.width!,
@@ -117,8 +117,7 @@ function getImages(message: Message): Attachment[] {
             proxyURL: a.proxy_url!
         });
     });
-    if (!message.embeds) return attachments;
-    message.embeds.forEach(e => {
+    message.embeds?.forEach(e => {
         if (e.type === "image" || (e.type === "rich" && e.image)) attachments.push(
             e.image ? { ...e.image } : { ...e.thumbnail! }
         );
@@ -195,12 +194,13 @@ export default definePlugin({
 
     messageEmbedAccessory(props: Record<string, any>): JSX.Element {
         const { message } = props;
-        const Nothing = React.createElement("Fragment", {}, null);
+        const Nothing = React.createElement("Fragment");
 
         const msgLink = message.content?.match(this.messageLinkRegex)?.[1];
         if (!msgLink) return Nothing;
         const [guildID, channelID, messageID] = msgLink.split("/");
         if (messageID in elementCache) return elementCache[messageID].element;
+
         const linkedMessage = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
         if (!linkedMessage) {
             getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
@@ -209,7 +209,11 @@ export default definePlugin({
         const linkedChannel = ChannelStore.getChannel(channelID);
         const isDM = guildID === "@me";
         const images = getImages(linkedMessage);
-        const hasActualEmbed = (linkedMessage.author.bot && linkedMessage.embeds[0]?.type === "rich" && !(linkedMessage.embeds[0] as Embed)._messageEmbed);
+        const hasActualEmbed = (linkedMessage.author.bot
+            && linkedMessage.embeds[0]?.type === "rich"
+            && !(linkedMessage.embeds[0] as Embed)._messageEmbed
+        );
+
         if (hasActualEmbed && !linkedMessage.content) {
             elementCache[linkedMessage.id] = {
                 element: Nothing,
@@ -239,12 +243,13 @@ export default definePlugin({
                         src: a.url,
                         width: computeWidthAndHeight(a.width, a.height).width,
                         height: computeWidthAndHeight(a.width, a.height).height
-                    }))))
+                    }))
+                ))
             ],
             hideTimestamp: false,
             message: linkedMessage,
             _messageEmbed: "automod"
-        }, null);
+        });
 
         elementCache[linkedMessage.id] = {
             element: MessageEmbedElement,
@@ -257,8 +262,10 @@ export default definePlugin({
 
     generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
         const [guildID, channelID, messageID] = messageURL.split("/");
-        if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed) return [...existingEmbeds.filter(i => i._messageEmbed !== "rich")];
+        if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed)
+            return [...existingEmbeds.filter(i => i._messageEmbed !== "rich")];
         if (existingEmbeds.find(i => i._messageEmbed === "rich")) return [...existingEmbeds];
+
         const message = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
         if (existingEmbeds.find(i => i._messageEmbed === "clyde")) {
             if (!message) return [...existingEmbeds];
