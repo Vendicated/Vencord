@@ -26,7 +26,7 @@ export default class Logger {
      * @example logger.errorCustomFmt(...Logger.makeTitleElements("white", "Hello"), "World");
      */
     static makeTitle(color: string, title: string): [string, ...string[]] {
-        return [" %c %c %s ", "", `background: ${color}; color: black; font-weight: bold; border-radius: 5px;`, title];
+        return ["%c %c %s ", "", `background: ${color}; color: black; font-weight: bold; border-radius: 5px;`, title];
     }
 
     constructor(public name: string, public color: string) { }
