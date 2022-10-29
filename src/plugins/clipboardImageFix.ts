@@ -22,8 +22,7 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "ClipboardImageFix",
-    description:
-        "Fixes image pasting issues perdominantly caused by Firefox and assumptions made by Discord.",
+    description: "Fixes being unable to paste images under some circumstances (usually on Linux)",
     authors: [Devs.Cyn],
     required: true,
     patches: [
@@ -32,7 +31,8 @@ export default definePlugin({
             replacement: {
                 match: /2===(.)\.clipboardData\.items\.length\?.\.clipboardData\.items\[0\]\.getAsString\((.+?)\):(.+?);/,
                 replace: (_, event, getAsStringCallback, normalCallback) =>
-                    `if(2===${event}.clipboardData.items.length){const clipboardItems=${event}.clipboardData.items;for(let i = 0;i<clipboardItems.length;i++){const item = clipboardItems[i];if(item.type=="text/html"){item.getAsString(${getAsStringCallback});break;}}}else{${normalCallback}}`,
+                    `if(2===${event}.clipboardData.items.length){const clipboardItems=${event}.clipboardData.items;` +
+                    `for(let i = 0;i<clipboardItems.length;i++){const item = clipboardItems[i];if(item.type=="text/html"){item.getAsString(${getAsStringCallback});break;}}}else{${normalCallback}}`,
             },
         },
     ],
