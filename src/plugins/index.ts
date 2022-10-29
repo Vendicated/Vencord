@@ -32,10 +32,10 @@ export function isPluginEnabled(p: string) {
     return (Settings.plugins[p]?.enabled || Plugins[p]?.required) ?? false;
 }
 
-for (const { patches, name } of Object.values(Plugins))
-    if (patches && isPluginEnabled(name)) {
-        for (const patch of patches) {
-            patch.plugin = name;
+for (const p of Object.values(Plugins))
+    if (p.patches && isPluginEnabled(p.name)) {
+        for (const patch of p.patches) {
+            patch.plugin = p.name;
             if (!Array.isArray(patch.replacement))
                 patch.replacement = [patch.replacement];
             patches.push(patch);
