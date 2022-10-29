@@ -101,7 +101,7 @@ function patchPush() {
                                     callback(exports.default);
                                 }
 
-                                for (const nested in exports) if (nested.length < 3) {
+                                for (const nested in exports) if (nested.length <= 3) {
                                     if (exports[nested] && filter(exports[nested])) {
                                         subscriptions.delete(filter);
                                         callback(exports[nested]);
