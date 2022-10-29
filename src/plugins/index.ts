@@ -28,24 +28,31 @@ const logger = new Logger("PluginManager", "#a6d189");
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
-for (const plugin of Object.values(Plugins)) if (plugin.patches && Settings.plugins[plugin.name].enabled) {
-    for (const patch of plugin.patches) {
-        patch.plugin = plugin.name;
-        if (!Array.isArray(patch.replacement)) patch.replacement = [patch.replacement];
-        patches.push(patch);
-    }
+export function isPluginEnabled(p: string) {
+    return (Settings.plugins[p]?.enabled || Plugins[p]?.required) ?? false;
 }
 
-export function startAllPlugins() {
-    for (const name in Plugins) if (Settings.plugins[name].enabled) {
-        startPlugin(Plugins[name]);
+for (const { patches, name } of Object.values(Plugins))
+    if (patches && isPluginEnabled(name)) {
+        for (const patch of patches) {
+            patch.plugin = name;
+            if (!Array.isArray(patch.replacement))
+                patch.replacement = [patch.replacement];
+            patches.push(patch);
+        }
     }
+
+export function startAllPlugins() {
+    for (const name in Plugins)
+        if (isPluginEnabled(name)) {
+            startPlugin(Plugins[name]);
+        }
 }
 
 export function startDependenciesRecursive(p: Plugin) {
     let restartNeeded = false;
     const failures: string[] = [];
-    if (p.dependencies) for (const dep of p.dependencies) {
+    p.dependencies?.forEach(dep => {
         if (!Settings.plugins[dep].enabled) {
             startDependenciesRecursive(Plugins[dep]);
             // If the plugin has patches, don't start the plugin, just enable it.
@@ -53,12 +60,12 @@ export function startDependenciesRecursive(p: Plugin) {
                 logger.warn(`Enabling dependency ${dep} requires restart.`);
                 Settings.plugins[dep].enabled = true;
                 restartNeeded = true;
-                continue;
+                return;
             }
             const result = startPlugin(Plugins[dep]);
             if (!result) failures.push(dep);
         }
-    }
+    });
     return { restartNeeded, failures };
 }
 
