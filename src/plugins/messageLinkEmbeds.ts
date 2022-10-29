@@ -99,6 +99,13 @@ interface Embed extends _Embed {
     timestamp?: moment.Moment;
 }
 
+interface Attachment {
+    height: number;
+    width: number;
+    url: string;
+    proxyURL?: string;
+}
+
 const noContent = (attachments: number, embeds: number): string => {
     if (!attachments && !embeds) return "";
     if (!attachments) return `[no content, ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
@@ -174,7 +181,7 @@ export default definePlugin({
         }
         const linkedChannel = ChannelStore.getChannel(channelID);
         const isDM = guildID === "@me";
-        const image = this.getImage(linkedMessage);
+        const images = this.getImages(linkedMessage);
         const hasActualEmbed = (linkedMessage.author.bot && linkedMessage.embeds[0]?.type === "rich" && !(linkedMessage.embeds[0] as Embed)._messageEmbed);
         if (hasActualEmbed && !linkedMessage.content) {
             elementCache[linkedMessage.id] = {
@@ -200,14 +207,13 @@ export default definePlugin({
                     parse(linkedMessage.content) :
                     [noContent(linkedMessage.attachments.length, linkedMessage.embeds.length)]
                 ),
-                // separator
-                (image) ? React.createElement("div", {}, null) : null,
-                image ? React.createElement("img", {
-                    src: image.url,
-                    width: computeWidthAndHeight(image.width!, image.height!).width,
-                    height: computeWidthAndHeight(image.width!, image.height!).height
-                }) : null
-            ].filter(i => i),
+                ...(images.map<JSX.Element>(a =>
+                    React.createElement("div", {}, React.createElement("img", {
+                        src: a.url,
+                        width: computeWidthAndHeight(a.width, a.height).width,
+                        height: computeWidthAndHeight(a.width, a.height).height
+                    }))))
+            ],
             hideTimestamp: false,
             message: linkedMessage,
             _messageEmbed: "automod"
@@ -222,23 +228,30 @@ export default definePlugin({
         return MessageEmbedElement;
     },
 
-    getImage(message: Message) {
-        if (message.attachments[0] && !message.attachments[0].content_type!.startsWith("video/")) return {
-            height: message.attachments[0].height,
-            width: message.attachments[0].width,
-            url: message.attachments[0].url,
-            proxyURL: message.attachments[0].proxy_url!!
-        };
-        const firstEmbed = message.embeds[0];
-        if (!firstEmbed) return null;
-        if (firstEmbed.type === "image" || (firstEmbed.type === "rich" && firstEmbed.image))
-            return firstEmbed.image ? { ...firstEmbed.image } : { ...firstEmbed.thumbnail };
-        if (firstEmbed.type === "gifv" && !firstEmbed.url!.match(/https:\/\/(?:www.)?tenor\.com/)) return {
-            height: firstEmbed.thumbnail!.height,
-            width: firstEmbed.thumbnail!.width,
-            url: firstEmbed.url
-        };
-        return null;
+    getImages(message: Message): Attachment[] {
+        const attachments: Attachment[] = [];
+        if (message.attachments) message.attachments.forEach(a => {
+            if (a.content_type!.startsWith("image/")) attachments.push({
+                height: a.height!,
+                width: a.width!,
+                url: a.url,
+                proxyURL: a.proxy_url!
+            });
+        });
+        if (!message.embeds) return attachments;
+        message.embeds.forEach(e => {
+            if (e.type === "image" || (e.type === "rich" && e.image)) attachments.push(
+                e.image ? { ...e.image } : { ...e.thumbnail! }
+            );
+            if (e.type === "gifv" && !e.url!.match(/https:\/\/(?:www.)?tenor\.com/)) {
+                attachments.push({
+                    height: e.thumbnail!.height,
+                    width: e.thumbnail!.width,
+                    url: e.url!
+                });
+            }
+        });
+        return attachments;
     },
 
     generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
@@ -288,7 +301,7 @@ export default definePlugin({
             },
             color: hasActualEmbed ? firstEmbed.color :
                 GuildMemberStore.getMember(guildID, message.author.id)?.colorString,
-            image: this.getImage(message),
+            image: this.getImages(message)[0],
             rawDescription: hasActualEmbed && firstEmbed.rawDescription.length ? firstEmbed.rawDescription :
                 message.content.length ? message.content :
                     noContent(message.attachments.length, message.embeds.length),
