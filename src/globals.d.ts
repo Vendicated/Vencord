@@ -32,6 +32,7 @@ declare global {
      * replace: `${IS_WEB}?foo:bar`
      */
     export var IS_WEB: boolean;
+    export var IS_DEV: boolean;
     export var IS_STANDALONE: boolean;
 
     export var VencordNative: typeof import("./VencordNative").default;

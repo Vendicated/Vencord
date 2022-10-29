@@ -19,10 +19,11 @@
 
 import esbuild from "esbuild";
 
-import { commonOpts, gitHash, globPlugins, isStandalone } from "./common.mjs";
+import { commonOpts, gitHash, globPlugins, isStandalone, watch } from "./common.mjs";
 
 const defines = {
-    IS_STANDALONE: isStandalone
+    IS_STANDALONE: isStandalone,
+    IS_DEV: JSON.stringify(watch)
 };
 if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimise
@@ -81,8 +82,8 @@ await Promise.all([
             ...commonOpts.plugins
         ],
         define: {
-            IS_WEB: "false",
-            IS_STANDALONE: isStandalone
+            ...defines,
+            IS_WEB: false
         }
     }),
 ]).catch(err => {

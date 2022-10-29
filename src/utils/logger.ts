@@ -19,9 +19,9 @@
 export default class Logger {
     constructor(public name: string, public color: string) { }
 
-    private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[]) {
+    private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
         console[level](
-            `%c Vencord %c %c ${this.name} `,
+            `%c Vencord %c %c ${this.name} ${customFmt}`,
             `background: ${levelColor}; color: black; font-weight: bold; border-radius: 5px;`,
             "",
             `background: ${this.color}; color: black; font-weight: bold; border-radius: 5px;`
@@ -39,6 +39,10 @@ export default class Logger {
 
     public error(...args: any[]) {
         this._log("error", "#e78284", args);
+    }
+
+    public errorCustomFmt(fmt: string, ...args: any[]) {
+        this._log("error", "#e78284", args, fmt);
     }
 
     public warn(...args: any[]) {
