@@ -62,9 +62,9 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             // using "in" is important in the following cases to properly handle falsy or nullish values
             if (!(p in target)) {
                 // Return empty for plugins with no settings
-                if (path === "plugins" && p in Vencord.Plugins.plugins)
+                if (path === "plugins" && p in plugins)
                     return target[p] = makeProxy({
-                        enabled: Vencord.Plugins.plugins[p].required ?? false
+                        enabled: plugins[p].required ?? false
                     }, root, `plugins/${p}`);
 
                 // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
