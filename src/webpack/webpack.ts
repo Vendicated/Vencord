@@ -94,7 +94,7 @@ export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
             // Strict behaviour in DevBuilds to fail early and make sure the issue is found
             throw err;
         }
-        logger.error(err);
+        logger.warn(err);
     }
 
     return null;
@@ -160,11 +160,11 @@ export function mapMangledModule<S extends string>(code: string, mappers: Record
         }
     }
 
-    const err = new Error("Did'nt find module matching this code:\n" + code);
+    const err = new Error("Didn't find module matching this code:\n" + code);
     if (IS_DEV)
         throw err;
 
-    logger.error(err);
+    logger.warn(err);
     return exports;
 }
 
