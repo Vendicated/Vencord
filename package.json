@@ -30,9 +30,11 @@
     },
     "dependencies": {
         "console-menu": "^0.1.0",
+        "diff": "^5.1.0",
         "fflate": "^0.7.4"
     },
     "devDependencies": {
+        "@types/diff": "^5.0.2",
         "@types/node": "^18.7.13",
         "@types/react": "^18.0.17",
         "@types/yazl": "^2.4.2",
