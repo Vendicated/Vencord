@@ -18,6 +18,7 @@
 
 import type { WebpackInstance } from "discord-types/other";
 
+import Logger from "../utils/logger";
 import { proxyLazy } from "../utils/proxyLazy";
 
 export let _resolveReady: () => void;
@@ -33,11 +34,13 @@ export let cache: WebpackInstance["c"];
 export type FilterFn = (mod: any) => boolean;
 
 export const filters = {
-    byProps: (props: string[]): FilterFn =>
+    byProps: (...props: string[]): FilterFn =>
         props.length === 1
             ? m => m[props[0]] !== void 0
             : m => props.every(p => m[p] !== void 0),
+
     byDisplayName: (deezNuts: string): FilterFn => m => m.default?.displayName === deezNuts,
+
     byCode: (...code: string[]): FilterFn => m => {
         if (typeof m !== "function") return false;
         const s = Function.prototype.toString.call(m);
@@ -48,6 +51,7 @@ export const filters = {
     },
 };
 
+const logger = new Logger("Webpack");
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
@@ -56,12 +60,12 @@ export type CallbackFn = (mod: any) => void;
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol()], {}, r => r]);
+    wreq = instance.push([[Symbol("Vencord")], {}, r => r]);
     cache = wreq.c;
     instance.pop();
 }
 
-export function find(filter: FilterFn, getDefault = true) {
+export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -77,7 +81,6 @@ export function find(filter: FilterFn, getDefault = true) {
         if (mod.exports.default && filter(mod.exports.default))
             return getDefault ? mod.exports.default : mod.exports;
 
-        // is 3 is the longest obfuscated export?
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
@@ -85,11 +88,21 @@ export function find(filter: FilterFn, getDefault = true) {
         }
     }
 
+    if (!isWaitFor) {
+        const err = new Error("Didn't find module matching this filter");
+        if (IS_DEV) {
+            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            throw err;
+        }
+        logger.warn(err);
+    }
+
     return null;
 }
 
 export function findAll(filter: FilterFn, getDefault = true) {
-    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
+    if (typeof filter !== "function")
+        throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     const ret = [] as any[];
     for (const key in cache) {
@@ -113,17 +126,17 @@ export function findAll(filter: FilterFn, getDefault = true) {
 }
 
 /**
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers
- * @param code Code snippet
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
- *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
- *          })
- */
+     * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
+     * then maps it into an easily usable module via the specified mappers
+     * @param code Code snippet
+     * @param mappers Mappers to create the non mangled exports
+     * @returns Unmangled exports as specified in mappers
+     *
+     * @example mapMangledModule("headerIdIsManaged:", {
+     *             openModal: filters.byCode("headerIdIsManaged:"),
+     *             closeModal: filters.byCode("key==")
+     *          })
+     */
 export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     const exports = {} as Record<S, any>;
 
@@ -143,26 +156,31 @@ export function mapMangledModule<S extends string>(code: string, mappers: Record
                     }
                 }
             }
-            break;
+            return exports;
         }
     }
 
+    const err = new Error("Didn't find module matching this code:\n" + code);
+    if (IS_DEV)
+        throw err;
+
+    logger.warn(err);
     return exports;
 }
 
 /**
- * Same as {@link mapMangledModule} but lazy
- */
+     * Same as {@link mapMangledModule} but lazy
+     */
 export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
 
 export function findByProps(...props: string[]) {
-    return find(filters.byProps(props));
+    return find(filters.byProps(...props));
 }
 
 export function findAllByProps(...props: string[]) {
-    return findAll(filters.byProps(props));
+    return findAll(filters.byProps(...props));
 }
 
 export function findByDisplayName(deezNuts: string) {
@@ -170,11 +188,14 @@ export function findByDisplayName(deezNuts: string) {
 }
 
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
-    if (typeof filter === "string") filter = filters.byProps([filter]);
-    else if (Array.isArray(filter)) filter = filters.byProps(filter);
-    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got " + typeof filter);
+    if (typeof filter === "string")
+        filter = filters.byProps(filter);
+    else if (Array.isArray(filter))
+        filter = filters.byProps(...filter);
+    else if (typeof filter !== "function")
+        throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const existing = find(filter!);
+    const existing = find(filter!, true, true);
     if (existing) return void callback(existing);
 
     subscriptions.set(filter, callback);
@@ -189,11 +210,11 @@ export function removeListener(callback: CallbackFn) {
 }
 
 /**
- * Search modules by keyword. This searches the factory methods,
- * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
- * @param filters One or more strings or regexes
- * @returns Mapping of found modules
- */
+     * Search modules by keyword. This searches the factory methods,
+     * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
+     * @param filters One or more strings or regexes
+     * @returns Mapping of found modules
+     */
 export function search(...filters: Array<string | RegExp>) {
     const results = {} as Record<number, Function>;
     const factories = wreq.m;
@@ -212,13 +233,13 @@ export function search(...filters: Array<string | RegExp>) {
 }
 
 /**
- * Extract a specific module by id into its own Source File. This has no effect on
- * the code, it is only useful to be able to look at a specific module without having
- * to view a massive file. extract then returns the extracted module so you can jump to it.
- * As mentioned above, note that this extracted module is not actually used,
- * so putting breakpoints or similar will have no effect.
- * @param id The id of the module to extract
- */
+     * Extract a specific module by id into its own Source File. This has no effect on
+     * the code, it is only useful to be able to look at a specific module without having
+     * to view a massive file. extract then returns the extracted module so you can jump to it.
+     * As mentioned above, note that this extracted module is not actually used,
+     * so putting breakpoints or similar will have no effect.
+     * @param id The id of the module to extract
+     */
 export function extract(id: number) {
     const mod = wreq.m[id] as Function;
     if (!mod) return null;

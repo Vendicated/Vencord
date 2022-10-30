@@ -29,7 +29,7 @@ const Engines = {
     TinEye: "https://www.tineye.com/search?url="
 };
 
-const Menu = lazyWebpack(filters.byProps(["MenuItem"]));
+const Menu = lazyWebpack(filters.byProps("MenuItem"));
 
 
 export default definePlugin({

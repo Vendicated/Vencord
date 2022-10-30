@@ -36,7 +36,7 @@ import * as styles from "./styles";
 const logger = new Logger("PluginSettings", "#a6d189");
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
+const InputStyles = lazyWebpack(filters.byProps("inputDefault", "inputWrapper"));
 
 const CogWheel = lazyWebpack(filters.byCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = lazyWebpack(filters.byCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));

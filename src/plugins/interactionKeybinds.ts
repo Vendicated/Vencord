@@ -24,7 +24,7 @@ import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 import { ChannelStore, FluxDispatcher as Dispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
 
-const MessageStore = lazyWebpack(filters.byProps(["getRawMessages"]));
+const MessageStore = lazyWebpack(filters.byProps("getRawMessages"));
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;

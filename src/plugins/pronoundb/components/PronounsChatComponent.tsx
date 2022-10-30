@@ -25,7 +25,7 @@ import { UserStore } from "../../../webpack/common";
 import { PronounMapping } from "../types";
 import { fetchPronouns, formatPronouns } from "../utils";
 
-const styles: Record<string, string> = lazyWebpack(filters.byProps(["timestampInline"]));
+const styles: Record<string, string> = lazyWebpack(filters.byProps("timestampInline"));
 
 export default function PronounsChatComponent({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
