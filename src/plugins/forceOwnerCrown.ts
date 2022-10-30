@@ -47,9 +47,9 @@ export default definePlugin({
             if (guild) {
                 return guild.ownerId === userId;
             }
-            console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
+            console.debug("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
         } else {
-            console.error("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
+            console.debug("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
         }
         return false;
     },
