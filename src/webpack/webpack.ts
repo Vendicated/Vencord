@@ -60,7 +60,7 @@ export type CallbackFn = (mod: any) => void;
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol()], {}, r => r]);
+    wreq = instance.push([[Symbol("Vencord")], {}, r => r]);
     cache = wreq.c;
     instance.pop();
 }
@@ -88,12 +88,15 @@ export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
         }
     }
 
-    if (IS_DEV && !isWaitFor) {
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        throw new Error("Didn't find module matching this filter");
+    if (!isWaitFor) {
+        const err = new Error("Didn't find module matching this filter");
+        if (IS_DEV) {
+            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            throw err;
+        }
+        logger.error(err);
     }
 
-    // In non dev builds & waitFors, just return null, it might be ok
     return null;
 }
 
@@ -123,17 +126,17 @@ export function findAll(filter: FilterFn, getDefault = true) {
 }
 
 /**
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers
- * @param code Code snippet
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
- *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
- *          })
- */
+     * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
+     * then maps it into an easily usable module via the specified mappers
+     * @param code Code snippet
+     * @param mappers Mappers to create the non mangled exports
+     * @returns Unmangled exports as specified in mappers
+     *
+     * @example mapMangledModule("headerIdIsManaged:", {
+     *             openModal: filters.byCode("headerIdIsManaged:"),
+     *             closeModal: filters.byCode("key==")
+     *          })
+     */
 export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     const exports = {} as Record<S, any>;
 
@@ -157,14 +160,17 @@ export function mapMangledModule<S extends string>(code: string, mappers: Record
         }
     }
 
-    logger.error(new Error("Did'nt find module matching this code:\n" + code));
+    const err = new Error("Did'nt find module matching this code:\n" + code);
+    if (IS_DEV)
+        throw err;
 
+    logger.error(err);
     return exports;
 }
 
 /**
- * Same as {@link mapMangledModule} but lazy
- */
+     * Same as {@link mapMangledModule} but lazy
+     */
 export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
@@ -204,11 +210,11 @@ export function removeListener(callback: CallbackFn) {
 }
 
 /**
- * Search modules by keyword. This searches the factory methods,
- * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
- * @param filters One or more strings or regexes
- * @returns Mapping of found modules
- */
+     * Search modules by keyword. This searches the factory methods,
+     * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
+     * @param filters One or more strings or regexes
+     * @returns Mapping of found modules
+     */
 export function search(...filters: Array<string | RegExp>) {
     const results = {} as Record<number, Function>;
     const factories = wreq.m;
@@ -227,13 +233,13 @@ export function search(...filters: Array<string | RegExp>) {
 }
 
 /**
- * Extract a specific module by id into its own Source File. This has no effect on
- * the code, it is only useful to be able to look at a specific module without having
- * to view a massive file. extract then returns the extracted module so you can jump to it.
- * As mentioned above, note that this extracted module is not actually used,
- * so putting breakpoints or similar will have no effect.
- * @param id The id of the module to extract
- */
+     * Extract a specific module by id into its own Source File. This has no effect on
+     * the code, it is only useful to be able to look at a specific module without having
+     * to view a massive file. extract then returns the extracted module so you can jump to it.
+     * As mentioned above, note that this extracted module is not actually used,
+     * so putting breakpoints or similar will have no effect.
+     * @param id The id of the module to extract
+     */
 export function extract(id: number) {
     const mod = wreq.m[id] as Function;
     if (!mod) return null;
