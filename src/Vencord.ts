@@ -62,15 +62,17 @@ async function init() {
         }
     }
 
-    if (IS_DEV && patches.length) {
-        PMLogger.warn(
-            "Webpack has finished initialising, but some patches haven't been applied yet.",
-            "This might be expected since some Modules are lazy loaded, but please verify",
-            "that all plugins are working as intended.",
-            "You are seeing this warning because this is a Development build of Vencord.",
-            "\nThe following patches have not been applied:",
-            "\n\n" + patches.map(p => `${p.plugin}: ${p.find}`).join("\n")
-        );
+    if (IS_DEV) {
+        const pendingPatches = patches.filter(p => !p.all && p.predicate?.() !== false);
+        if (pendingPatches.length)
+            PMLogger.warn(
+                "Webpack has finished initialising, but some patches haven't been applied yet.",
+                "This might be expected since some Modules are lazy loaded, but please verify",
+                "that all plugins are working as intended.",
+                "You are seeing this warning because this is a Development build of Vencord.",
+                "\nThe following patches have not been applied:",
+                "\n\n" + pendingPatches.map(p => `${p.plugin}: ${p.find}`).join("\n")
+            );
     }
 }
 
