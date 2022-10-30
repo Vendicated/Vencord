@@ -18,6 +18,7 @@
 
 import type { WebpackInstance } from "discord-types/other";
 
+import Logger from "../utils/logger";
 import { proxyLazy } from "../utils/proxyLazy";
 
 export let _resolveReady: () => void;
@@ -33,11 +34,13 @@ export let cache: WebpackInstance["c"];
 export type FilterFn = (mod: any) => boolean;
 
 export const filters = {
-    byProps: (props: string[]): FilterFn =>
+    byProps: (...props: string[]): FilterFn =>
         props.length === 1
             ? m => m[props[0]] !== void 0
             : m => props.every(p => m[p] !== void 0),
+
     byDisplayName: (deezNuts: string): FilterFn => m => m.default?.displayName === deezNuts,
+
     byCode: (...code: string[]): FilterFn => m => {
         if (typeof m !== "function") return false;
         const s = Function.prototype.toString.call(m);
@@ -48,6 +51,7 @@ export const filters = {
     },
 };
 
+const logger = new Logger("Webpack");
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
@@ -61,7 +65,7 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     instance.pop();
 }
 
-export function find(filter: FilterFn, getDefault = true) {
+export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -77,7 +81,6 @@ export function find(filter: FilterFn, getDefault = true) {
         if (mod.exports.default && filter(mod.exports.default))
             return getDefault ? mod.exports.default : mod.exports;
 
-        // is 3 is the longest obfuscated export?
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
@@ -85,11 +88,18 @@ export function find(filter: FilterFn, getDefault = true) {
         }
     }
 
+    if (IS_DEV && !isWaitFor) {
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        throw new Error("Didn't find module matching this filter");
+    }
+
+    // In non dev builds & waitFors, just return null, it might be ok
     return null;
 }
 
 export function findAll(filter: FilterFn, getDefault = true) {
-    if (typeof filter !== "function") throw new Error("Invalid filter. Expected a function got " + typeof filter);
+    if (typeof filter !== "function")
+        throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
     const ret = [] as any[];
     for (const key in cache) {
@@ -143,9 +153,11 @@ export function mapMangledModule<S extends string>(code: string, mappers: Record
                     }
                 }
             }
-            break;
+            return exports;
         }
     }
+
+    logger.error(new Error("Did'nt find module matching this code:\n" + code));
 
     return exports;
 }
@@ -158,11 +170,11 @@ export function mapMangledModuleLazy<S extends string>(code: string, mappers: Re
 }
 
 export function findByProps(...props: string[]) {
-    return find(filters.byProps(props));
+    return find(filters.byProps(...props));
 }
 
 export function findAllByProps(...props: string[]) {
-    return findAll(filters.byProps(props));
+    return findAll(filters.byProps(...props));
 }
 
 export function findByDisplayName(deezNuts: string) {
@@ -170,11 +182,14 @@ export function findByDisplayName(deezNuts: string) {
 }
 
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
-    if (typeof filter === "string") filter = filters.byProps([filter]);
-    else if (Array.isArray(filter)) filter = filters.byProps(filter);
-    else if (typeof filter !== "function") throw new Error("filter must be a string, string[] or function, got " + typeof filter);
+    if (typeof filter === "string")
+        filter = filters.byProps(filter);
+    else if (Array.isArray(filter))
+        filter = filters.byProps(...filter);
+    else if (typeof filter !== "function")
+        throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const existing = find(filter!);
+    const existing = find(filter!, true, true);
     if (existing) return void callback(existing);
 
     subscriptions.set(filter, callback);

@@ -25,7 +25,7 @@ export * as Webpack from "./webpack";
 
 import { popNotice, showNotice } from "./api/Notices";
 import { PlainSettings, Settings } from "./api/settings";
-import { startAllPlugins } from "./plugins";
+import { patches, PMLogger, startAllPlugins } from "./plugins";
 
 export { PlainSettings, Settings };
 
@@ -60,6 +60,17 @@ async function init() {
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
+    }
+
+    if (IS_DEV && patches.length) {
+        PMLogger.warn(
+            "Webpack has finished initialising, but some patches haven't been applied yet.",
+            "This might be expected since some Modules are lazy loaded, but please verify",
+            "that all plugins are working as intended.",
+            "You are seeing this warning because this is a Development build of Vencord.",
+            "\nThe following patches have not been applied:",
+            "\n\n" + patches.map(p => `${p.plugin}: ${p.find}`).join("\n")
+        );
     }
 }
 

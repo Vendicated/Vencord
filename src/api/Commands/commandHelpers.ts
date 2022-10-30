@@ -24,7 +24,7 @@ import { filters, waitFor } from "../../webpack";
 import { Argument } from "./types";
 
 const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));
-const MessageSender = lazyWebpack(filters.byProps(["receiveMessage"]));
+const MessageSender = lazyWebpack(filters.byProps("receiveMessage"));
 
 let SnowflakeUtils: any;
 waitFor("fromTimestamp", m => SnowflakeUtils = m);

@@ -29,7 +29,7 @@ export default class Logger {
         return ["%c %c %s ", "", `background: ${color}; color: black; font-weight: bold; border-radius: 5px;`, title];
     }
 
-    constructor(public name: string, public color: string) { }
+    constructor(public name: string, public color: string = "white") { }
 
     private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
         console[level](
