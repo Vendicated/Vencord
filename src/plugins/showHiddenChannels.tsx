@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { Flex } from "../components/Flex";
 import { Devs } from "../utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
@@ -58,7 +59,7 @@ export default definePlugin({
             find: ".CannotShow",
             replacement: {
                 match: /renderLevel:(\w+)\.CannotShow/g,
-                replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted) ? $1.Show : $1.CannotShow"
+                replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted)?$1.Show:$1.CannotShow"
             }
         },
         {
@@ -74,7 +75,7 @@ export default definePlugin({
             find: ".handleThreadsPopoutClose();",
             replacement: {
                 match: /((\w)\.handleThreadsPopoutClose\(\);)/g,
-                replace: "if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.props?.channel))return;$1"
+                replace: "if(arguments[0].button===0&&Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.props?.channel))return;$1"
             }
         },
         {
@@ -127,7 +128,6 @@ export default definePlugin({
         // check for type again, otherwise it would show it for hidden stage channels
         if (channel.type === 0 && isHidden) {
             const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
-
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -166,7 +166,7 @@ export default definePlugin({
                                 size={Button.Sizes.SMALL}
                                 color={Button.Colors.PRIMARY}
                             >
-                                Continue
+                                Close
                             </Button>
                         </Flex>
                     </ModalFooter>
