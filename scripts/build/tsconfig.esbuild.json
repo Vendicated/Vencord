@@ -1,0 +1,7 @@
+// Work around https://github.com/evanw/esbuild/issues/2460
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "jsx": "react"
+    }
+}
