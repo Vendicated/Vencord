@@ -115,11 +115,7 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
-waitFor("useState", m => {
-    window._Ve$ = m.createElement;
-    window._VF$ = m.Fragment;
-    React = m;
-});
+waitFor("useState", m => React = m);
 
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;

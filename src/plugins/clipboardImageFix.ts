@@ -16,28 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
-    name: "NoticesApi",
-    description: "Fixes notices being automatically dismissed",
-    authors: [Devs.Ven],
-    required: true,
+    name: "ClipboardImageFix",
+    description: "Fixes being unable to paste images under some circumstances (usually on Linux)",
+    authors: [Devs.Cyn],
     patches: [
         {
-            find: "updateNotice:",
-            replacement: [
-                {
-                    match: /;(.{1,2}=null;)(?=.{0,50}updateNotice)/g,
-                    replace:
-                        ";if(Vencord.Api.Notices.currentNotice)return !1;$1"
-                },
-                {
-                    match: /(?<=NOTICE_DISMISS:function.+?){(?=if\(null==(.+?)\))/,
-                    replace: '{if($1?.id=="VencordNotice")return ($1=null,Vencord.Api.Notices.nextNotice(),true);'
-                }
-            ]
-        }
+            find: ".clipboardData.items[0].getAsString",
+            replacement: {
+                match: /2===(.)\.clipboardData\.items\.length\?.\.clipboardData\.items\[0\]\.getAsString\((.+?)\):(.+?);/,
+                replace: (_, event, getAsStringCallback, normalCallback) =>
+                    `if(2===${event}.clipboardData.items.length){const clipboardItems=${event}.clipboardData.items;` +
+                    `for(let i = 0;i<clipboardItems.length;i++){const item = clipboardItems[i];if(item.type=="text/html"){item.getAsString(${getAsStringCallback});break;}}}else{${normalCallback}}`,
+            },
+        },
     ],
 });
