@@ -145,7 +145,19 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
-                note={<Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>}
+                note={<Text variant="text-md/normal" style={{
+                    height: 40,
+                    overflow: "hidden",
+                    // mfw css is so bad you need whatever this is to get multi line overflow ellipsis to work
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box", // firefox users will cope (it doesn't support it)
+                    WebkitLineClamp: 2,
+                    lineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    boxOrient: "vertical"
+                }}>
+                    {plugin.description}
+                </Text>}
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
