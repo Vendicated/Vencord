@@ -39,7 +39,7 @@ export default definePlugin({
     ],
     isGuildOwner(props) {
         // Check if channel is a Group DM, if so return false
-        if (props.channel.type === 3) {
+        if (props?.channel?.type === 3) {
             return false;
         }
 
