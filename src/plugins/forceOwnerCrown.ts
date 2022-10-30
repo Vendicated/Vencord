@@ -38,6 +38,11 @@ export default definePlugin({
         },
     ],
     isGuildOwner(props) {
+        // Check if channel is a Group DM, if so return false
+        if (props.channel.type === 3) {
+            return false;
+        }
+
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props?.guildId ?? props?.channel?.guild_id;
         const userId = props?.user?.id;
@@ -47,9 +52,9 @@ export default definePlugin({
             if (guild) {
                 return guild.ownerId === userId;
             }
-            console.debug("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
+            console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
         } else {
-            console.debug("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
+            console.error("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
         }
         return false;
     },
