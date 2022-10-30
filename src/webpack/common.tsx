@@ -23,7 +23,7 @@ import type Stores from "discord-types/stores";
 
 import { lazyWebpack } from "../utils/misc";
 import { _resolveReady, filters, mapMangledModuleLazy, waitFor } from "./webpack";
-export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
+export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");

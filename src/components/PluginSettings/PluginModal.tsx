@@ -38,7 +38,7 @@ import {
 } from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = lazyWebpack(filters.byProps(["moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"]));
+const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {

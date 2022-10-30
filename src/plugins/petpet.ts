@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext,findOption } from "../api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption } from "../api/Commands";
 import { Devs } from "../utils/constants";
-import { lazyWebpack,makeLazy } from "../utils/misc";
+import { lazyWebpack, makeLazy } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 
@@ -41,7 +41,7 @@ const getFrames = makeLazy(() => Promise.all(
 
 const fetchUser = lazyWebpack(filters.byCode(".USER("));
 const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
-const UploadStore = lazyWebpack(filters.byProps(["getUploads"]));
+const UploadStore = lazyWebpack(filters.byProps("getUploads"));
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
