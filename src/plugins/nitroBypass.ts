@@ -38,7 +38,7 @@ export default definePlugin({
             ].map(func => {
                 return {
                     match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function (e) { return true; }`
+                    replace: `${func}:function(e){return true;}`
                 };
             })
         },
@@ -52,7 +52,7 @@ export default definePlugin({
             ].map(func => {
                 return {
                     match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function (e) { return true; }`
+                    replace: `${func}:function(e){return true;}`
                 };
             })
         },
