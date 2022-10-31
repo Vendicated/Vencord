@@ -25,8 +25,11 @@ import { UserStore } from "../webpack/common";
 
 export default definePlugin({
     name: "NitroBypass",
-    authors: [Devs.Arjix],
-    description: "Allows you to stream in nitro quality and send fake emojis.",
+    authors: [
+        Devs.Arjix,
+        Devs.D3SOX,
+    ],
+    description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
     patches: [
         {
@@ -41,6 +44,14 @@ export default definePlugin({
                     replace: `${func}:function(e){return true;}`
                 };
             })
+        },
+        {
+            find: "canUseAnimatedEmojis:function",
+            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
+            replacement: {
+                match: /canUseStickersEverywhere:function\(.+?}/,
+                replace: "canUseStickersEverywhere:function(e){return true;}"
+            },
         },
         {
             find: "canUseAnimatedEmojis:function",
@@ -72,6 +83,12 @@ export default definePlugin({
             default: true,
             restartNeeded: true,
         },
+        enableStickerBypass: {
+            description: "Allow sending fake stickers",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: true,
+        },
         enableStreamQualityBypass: {
             description: "Allow streaming in nitro quality",
             type: OptionType.BOOLEAN,
@@ -89,7 +106,7 @@ export default definePlugin({
     },
 
     start() {
-        if (!Settings.plugins.NitroBypass.enableEmojiBypass) {
+        if (!Settings.plugins.NitroBypass.enableEmojiBypass && !Settings.plugins.NitroBypass.enableStickerBypass) {
             return;
         }
 
@@ -104,17 +121,30 @@ export default definePlugin({
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
 
-        this.preSend = addPreSendListener((_, messageObj) => {
+        this.preSend = addPreSendListener((_, messageObj, extra) => {
             const { guildId } = this;
-            for (const emoji of messageObj.validNonShortcutEmojis) {
-                if (!emoji.require_colons) continue;
-                if (emoji.guildId === guildId && !emoji.animated) continue;
 
-                const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                const url = emoji.url.replace(/\?size=\d+/, "?size=48");
-                messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
-                });
+            if (Settings.plugins.NitroBypass.enableEmojiBypass) {
+                const stickerIds = extra?.stickerIds;
+                if (stickerIds) {
+                    // TODO: find out guildId from sticker and return when it matches
+                    // TODO: this doesn't work with discord internal stickers
+                    messageObj.content = `https://cdn.discordapp.com/stickers/${stickerIds[0]}.png`;
+                    delete extra.stickerIds;
+                }
+            }
+
+            if (Settings.plugins.NitroBypass.enableEmojiBypass) {
+                for (const emoji of messageObj.validNonShortcutEmojis) {
+                    if (!emoji.require_colons) continue;
+                    if (emoji.guildId === guildId && !emoji.animated) continue;
+
+                    const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
+                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
+                    messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
+                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                    });
+                }
             }
         });
 
