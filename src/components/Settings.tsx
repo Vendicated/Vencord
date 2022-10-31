@@ -23,7 +23,6 @@ import { useAwaiter } from "../utils/misc";
 import { Alerts, Button, Forms, Margins, Parser, React, Switch } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { Flex } from "./Flex";
-import { launchMonacoEditor } from "./Monaco";
 
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -49,7 +48,6 @@ export default ErrorBoundary.wrap(function Settings() {
             onConfirm: () => location.reload()
         }));
     }, []);
-
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
@@ -86,7 +84,7 @@ export default ErrorBoundary.wrap(function Settings() {
             </Flex>}
 
             {IS_WEB && <Button
-                onClick={launchMonacoEditor}
+                onClick={() => require("./Monaco").launchMonacoEditor()}
                 size={Button.Sizes.SMALL}
                 disabled={settingsDir === "Loading..."}
             >

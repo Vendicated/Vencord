@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 declare global {
     /**
      * This exists only at build time, so references to it in patches should insert it
@@ -31,6 +32,9 @@ declare global {
      * replace: `${IS_WEB}?foo:bar`
      */
     export var IS_WEB: boolean;
+    export var IS_DEV: boolean;
+    export var IS_STANDALONE: boolean;
+
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
     export var appSettings: {

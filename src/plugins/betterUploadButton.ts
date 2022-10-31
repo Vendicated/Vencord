@@ -21,15 +21,17 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "BetterUploadButton",
-    authors: [Devs.obscurity],
+    authors: [Devs.obscurity, Devs.Ven],
     description: "Upload with a single click, open menu with right click",
     patches: [
         {
             find: "Messages.CHAT_ATTACH_UPLOAD_OR_INVITE",
             replacement: {
-                match: /CHAT_ATTACH_UPLOAD_OR_INVITE,onDoubleClick:([^,]+),onClick:([^,]+)}}/,
-                replace:
-                    "CHAT_ATTACH_UPLOAD_OR_INVITE,onClick:$1,onContextMenu:$2}}",
+                // Discord merges multiple props here with Object.assign()
+                // This patch passes a third object to it with which we override onClick and onContextMenu
+                match: /CHAT_ATTACH_UPLOAD_OR_INVITE,onDoubleClick:(.+?:void 0)\},(.{1,3})\)/,
+                replace: (m, onDblClick, otherProps) =>
+                    `${m.slice(0, -1)},{onClick:${onDblClick},onContextMenu:${otherProps}.onClick})`,
             },
         },
     ],

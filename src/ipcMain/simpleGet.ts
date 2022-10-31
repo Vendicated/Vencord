@@ -16,22 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionBase } from "../../../utils/types";
+import https from "https";
 
-export interface ISettingElementProps<T extends PluginOptionBase> {
-    option: T;
-    onChange(newValue: any): void;
-    pluginSettings: {
-        [setting: string]: any;
-        enabled: boolean;
-    };
-    id: string;
-    onError(hasError: boolean): void;
+export function get(url: string, options: https.RequestOptions = {}) {
+    return new Promise<Buffer>((resolve, reject) => {
+        https.get(url, options, res => {
+            const { statusCode, statusMessage, headers } = res;
+            if (statusCode! >= 400)
+                return void reject(`${statusCode}: ${statusMessage} - ${url}`);
+            if (statusCode! >= 300)
+                return void resolve(get(headers.location!, options));
+
+            const chunks = [] as Buffer[];
+            res.on("error", reject);
+
+            res.on("data", chunk => chunks.push(chunk));
+            res.once("end", () => resolve(Buffer.concat(chunks)));
+        });
+    });
 }
-
-export * from "./SettingBooleanComponent";
-export * from "./SettingCustomComponent";
-export * from "./SettingNumericComponent";
-export * from "./SettingSelectComponent";
-export * from "./SettingSliderComponent";
-export * from "./SettingTextComponent";

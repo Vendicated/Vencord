@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Plugins from "plugins";
+import Plugins from "~plugins";
 
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
@@ -25,21 +25,49 @@ import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
+export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
-for (const plugin of Object.values(Plugins)) if (plugin.patches && Settings.plugins[plugin.name].enabled) {
-    for (const patch of plugin.patches) {
-        patch.plugin = plugin.name;
-        if (!Array.isArray(patch.replacement)) patch.replacement = [patch.replacement];
-        patches.push(patch);
-    }
+export function isPluginEnabled(p: string) {
+    return (Settings.plugins[p]?.enabled || Plugins[p]?.required) ?? false;
 }
 
-export function startAllPlugins() {
-    for (const name in Plugins) if (Settings.plugins[name].enabled) {
-        startPlugin(Plugins[name]);
+for (const p of Object.values(Plugins))
+    if (p.patches && isPluginEnabled(p.name)) {
+        for (const patch of p.patches) {
+            patch.plugin = p.name;
+            if (!Array.isArray(patch.replacement))
+                patch.replacement = [patch.replacement];
+            patches.push(patch);
+        }
     }
+
+export function startAllPlugins() {
+    for (const name in Plugins)
+        if (isPluginEnabled(name)) {
+            startPlugin(Plugins[name]);
+        }
+}
+
+export function startDependenciesRecursive(p: Plugin) {
+    let restartNeeded = false;
+    const failures: string[] = [];
+    p.dependencies?.forEach(dep => {
+        if (!Settings.plugins[dep].enabled) {
+            startDependenciesRecursive(Plugins[dep]);
+            // If the plugin has patches, don't start the plugin, just enable it.
+            if (Plugins[dep].patches) {
+                logger.warn(`Enabling dependency ${dep} requires restart.`);
+                Settings.plugins[dep].enabled = true;
+                restartNeeded = true;
+                return;
+            }
+            const result = startPlugin(Plugins[dep]);
+            if (!result) failures.push(dep);
+        }
+    });
+    return { restartNeeded, failures };
 }
 
 export function startPlugin(p: Plugin) {

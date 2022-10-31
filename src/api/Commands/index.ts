@@ -18,7 +18,7 @@
 
 import { makeCodeblock } from "../../utils/misc";
 import { generateId, sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandType, Argument, Command, CommandContext, CommandReturnValue,Option } from "./types";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
 
 export * from "./commandHelpers";
 export * from "./types";
@@ -79,7 +79,12 @@ export const _handleCommand = function (cmd: Command, args: Argument[], ctx: Com
     }
 } as never;
 
-function modifyOpt(opt: Option | Command) {
+
+/**
+ * Prepare a Command Option for Discord by filling missing fields
+ * @param opt
+ */
+export function prepareOption<O extends Option | Command>(opt: O): O {
     opt.displayName ||= opt.name;
     opt.displayDescription ||= opt.description;
     opt.options?.forEach((opt, i, opts) => {
@@ -88,11 +93,36 @@ function modifyOpt(opt: Option | Command) {
         else if (opt === ReqPlaceholder) opts[i] = RequiredMessageOption;
         opt.choices?.forEach(x => x.displayName ||= x.name);
 
-        modifyOpt(opts[i]);
+        prepareOption(opts[i]);
+    });
+    return opt;
+}
+
+// Yes, Discord registers individual commands for each subcommand
+// TODO: This probably doesn't support nested subcommands. If that is ever needed,
+// investigate
+function registerSubCommands(cmd: Command, plugin: string) {
+    cmd.options?.forEach(o => {
+        if (o.type !== ApplicationCommandOptionType.SUB_COMMAND)
+            throw new Error("When specifying sub-command options, all options must be sub-commands.");
+        const subCmd = {
+            ...cmd,
+            ...o,
+            type: ApplicationCommandType.CHAT_INPUT,
+            name: `${cmd.name} ${o.name}`,
+            displayName: `${cmd.name} ${o.name}`,
+            subCommandPath: [{
+                name: o.name,
+                type: o.type,
+                displayName: o.name
+            }],
+            rootCommand: cmd
+        };
+        registerCommand(subCmd as any, plugin);
     });
 }
 
-export function registerCommand(command: Command, plugin: string) {
+export function registerCommand<C extends Command>(command: C, plugin: string) {
     if (!BUILT_IN) {
         console.warn(
             "[CommandsAPI]",
@@ -112,7 +142,13 @@ export function registerCommand(command: Command, plugin: string) {
     command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
     command.plugin ||= plugin;
 
-    modifyOpt(command);
+    prepareOption(command);
+
+    if (command.options?.[0]?.type === ApplicationCommandOptionType.SUB_COMMAND) {
+        registerSubCommands(command, plugin);
+        return;
+    }
+
     commands[command.name] = command;
     BUILT_IN.push(command);
 }

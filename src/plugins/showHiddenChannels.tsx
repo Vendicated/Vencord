@@ -16,13 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { Flex } from "../components/Flex";
+import { Devs } from "../utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { waitFor } from "../webpack";
 import { Button, ChannelStore, Text } from "../webpack/common";
 
+const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
 
 let can = (permission, channel) => true;
@@ -39,7 +42,8 @@ export default definePlugin({
         {
             name: "Average React Enjoyer",
             id: 1004904120056029256n
-        }
+        },
+        Devs.D3SOX,
     ],
     options: {
         hideUnreads: {
@@ -55,11 +59,11 @@ export default definePlugin({
             find: ".CannotShow",
             replacement: {
                 match: /renderLevel:(\w+)\.CannotShow/g,
-                replace: "renderLevel:$1.Show"
+                replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted)?$1.Show:$1.CannotShow"
             }
         },
         {
-            // This is where the logic that chooses the icon is, we overide it to be a locked voice channel if it's hidden
+            // This is where the logic that chooses the icon is, we override it to be a locked voice channel if it's hidden
             find: ".rulesChannelId))",
             replacement: {
                 match: /(\w+)\.locked(.*?)switch\((\w+)\.type\)({case \w+\.\w+\.GUILD_ANNOUNCEMENT)/g,
@@ -67,35 +71,63 @@ export default definePlugin({
             }
         },
         {
-            find: "selectChannel:function",
-            replacement: [
-                {
-                    match: /selectChannel:function\((\w)\){/g,
-                    replace: "selectChannel:function($1){if(Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($1)) return;"
-                }
-            ]
+            // inside the onMouseClick handler, we check if the channel is hidden and open the modal if it is
+            find: ".handleThreadsPopoutClose();",
+            replacement: {
+                match: /((\w)\.handleThreadsPopoutClose\(\);)/g,
+                replace: "if(arguments[0].button===0&&Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.props?.channel))return;$1"
+            }
         },
         {
+            // Prevent categories from disappearing when they're collapsed
+            find: ".prototype.shouldShowEmptyCategory=function(){",
+            replacement: {
+                match: /(\.prototype\.shouldShowEmptyCategory=function\(\){)/g,
+                replace: "$1return true;"
+            }
+        },
+        {
+            // Hide unreads
             find: "?\"button\":\"link\"",
             predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
             replacement: {
                 match: /(\w)\.connected,(\w)=(\w\.unread),(\w=\w\.canHaveDot)/g,
                 replace: "$1.connected,$2=Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1.channel)?false:$3,$4"
             }
+        },
+        {
+            // Hide New unreads box for hidden channels
+            find: '.displayName="ChannelListUnreadsStore"',
+            replacement: {
+                match: /((.)\.getGuildId\(\))(&&\(!\(.\.isThread.{1,100}\.hasRelevantUnread\()/,
+                replace: "$1&&!$2._isHiddenChannel$3"
+            }
         }
     ],
+    shouldShow(channel, category, isMuted) {
+        if (!this.isHiddenChannel(channel)) return false;
+        if (!category) return false;
+        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
+
+        return !category.isCollapsed;
+    },
     isHiddenChannel(channel) {
         if (!channel) return false;
-        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel);
+        if (channel.channelId)
+            channel = ChannelStore.getChannel(channel.channelId);
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
+            return false;
+
+        // check for disallowed voice channels too so that they get hidden when collapsing the category
+        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || (channel.type === 2 && !can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
-    channelSelected(channelData) {
-        const channel = ChannelStore.getChannel(channelData.channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
-
+    channelSelected(channel) {
+        if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
-        if (isHidden)
+        // check for type again, otherwise it would show it for hidden stage channels
+        if (channel.type === 0 && isHidden) {
+            const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -118,6 +150,14 @@ export default definePlugin({
                                 <Text variant="code">{channel.topic}</Text>
                             </>
                         )}
+                        {lastMessageDate && (
+                            <>
+                                <Text variant="text-md/bold" style={{ marginTop: 10 }}>
+                                    Last message sent:
+                                </Text>
+                                <Text variant="code">{lastMessageDate}</Text>
+                            </>
+                        )}
                     </ModalContent>
                     <ModalFooter>
                         <Flex>
@@ -126,12 +166,13 @@ export default definePlugin({
                                 size={Button.Sizes.SMALL}
                                 color={Button.Colors.PRIMARY}
                             >
-                                Continue
+                                Close
                             </Button>
                         </Flex>
                     </ModalFooter>
                 </ModalRoot>
             ));
+        }
         return isHidden;
     }
 });

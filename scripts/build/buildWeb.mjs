@@ -26,7 +26,7 @@ import { join } from "path";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
-import { commonOpts, fileIncludePlugin, gitHashPlugin, globPlugins } from "./common.mjs";
+import { commonOpts, fileIncludePlugin, gitHashPlugin, gitRemotePlugin, globPlugins, watch } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -40,11 +40,14 @@ const commonOptions = {
     plugins: [
         globPlugins,
         gitHashPlugin,
+        gitRemotePlugin,
         fileIncludePlugin
     ],
     target: ["esnext"],
     define: {
-        IS_WEB: "true"
+        IS_WEB: "true",
+        IS_STANDALONE: "true",
+        IS_DEV: JSON.stringify(watch)
     }
 };
 
