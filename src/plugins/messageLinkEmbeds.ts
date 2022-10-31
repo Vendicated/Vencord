@@ -207,6 +207,13 @@ export default definePlugin({
             return Nothing;
         }
         const linkedChannel = ChannelStore.getChannel(channelID);
+        if (!linkedChannel) {
+            elementCache[messageID] = {
+                element: Nothing,
+                shouldRenderRichEmbed: true
+            };
+            return Nothing;
+        }
         const isDM = guildID === "@me";
         const images = getImages(linkedMessage);
         const hasActualEmbed = (linkedMessage.author.bot
@@ -289,6 +296,8 @@ export default definePlugin({
                 _messageEmbed: "clyde"
             }] as Embed[];
         }
+        const channel = ChannelStore.getChannel(channelID);
+        if (!channel) return [...existingEmbeds];
 
         const firstEmbed = message.embeds[0] as Embed;
         const hasActualEmbed = !!(message.author.bot && firstEmbed?.type === "rich" && firstEmbed.id.match(/embed_\d+/));
@@ -296,7 +305,7 @@ export default definePlugin({
 
         const usernameAndDiscriminator = `${message.author.username}#${message.author.discriminator}`;
         const channelAndServer = guildID === "@me" ? "Direct Message" :
-            "#" + ChannelStore.getChannel(channelID).name + ` (${GuildStore.getGuild(guildID).name})`;
+            "#" + channel.name + ` (${GuildStore.getGuild(guildID).name})`;
 
         const embeds = [...existingEmbeds, {
             author: {
