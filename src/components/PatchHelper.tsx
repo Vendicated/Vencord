@@ -119,7 +119,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
             {!!diff?.length && (
                 <Button className={Margins.marginTop20} onClick={() => {
                     try {
-                        Function(patchedCode);
+                        Function(patchedCode.replace(/^function\(/, "function patchedModule("));
                         setCompileResult([true, "Compiled successfully"]);
                     } catch (err) {
                         setCompileResult([false, (err as Error).message]);
