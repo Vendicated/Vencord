@@ -18,11 +18,6 @@ If you're just a normal user, use [our simple gui installer!](https://github.com
 
 If you wanna make plugins or contribute or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
 
-### For Canary/PTB users
-
-Due to a recent electron update, you may have to go to `%localappdata%/app-1.0.51/resources` (or the equivalent install location)
-and rename `app.asar` to `_app.asar`, and `app` to `app.asar`
-
 ## Installing on Browser
 
 Install [the browser extension](https://github.com/Vendicated/Vencord/releases/latest/download/extension.zip) or [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js). Please note that they aren't automatically updated for now, so you will regularely have to reinstall it.
