@@ -26,7 +26,7 @@ waitFor(["getGuild"], m => GuildStore = m);
 export default definePlugin({
     name: "ForceOwnerCrown",
     description: "Force the owner crown next to usernames even if the server is large.",
-    authors: [Devs.D3SOX],
+    authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
             // This is the logic where it decides whether to render the owner crown or not
@@ -38,6 +38,11 @@ export default definePlugin({
         },
     ],
     isGuildOwner(props) {
+        // Check if channel is a Group DM, if so return false
+        if (props?.channel?.type === 3) {
+            return false;
+        }
+
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props?.guildId ?? props?.channel?.guild_id;
         const userId = props?.user?.id;

@@ -30,7 +30,7 @@ export default definePlugin({
     authors: [
         Devs.Megu,
         Devs.Ven,
-        { name: "Nickyux", id: 427146305651998721n },
+        Devs.Nickyux,
         { name: "BanTheNons", id: 460478012794863637n },
     ],
     description: "Enable Access to Experiments in Discord!",

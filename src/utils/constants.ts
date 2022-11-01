@@ -88,5 +88,9 @@ export const Devs = Object.freeze({
     D3SOX: {
         name: "D3SOX",
         id: 201052085641281538n
+    },
+    Nickyux: {
+        name: "Nickyux",
+        id: 427146305651998721n
     }
 });
