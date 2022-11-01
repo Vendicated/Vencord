@@ -48,3 +48,23 @@ export const SettingsIcon: React.CSSProperties = {
     background: "transparent",
     marginRight: 8
 };
+
+export const Badge: React.CSSProperties = {
+    paddingTop: "0",
+    paddingBottom: "0",
+    paddingRight: "6px",
+    paddingLeft: "6px",
+    fontFamily: "var(--font-display)",
+    fontWeight: "500px",
+    textTransform: "uppercase",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    borderRadius: "8px",
+    height: "16px",
+    minWidth: "16px",
+    minHeight: "16px",
+    fontSize: "12px",
+    lineHeight: "16px",
+    color: "white",
+};
