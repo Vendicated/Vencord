@@ -20,8 +20,16 @@ import { Embed as _Embed, Message } from "discord-types/general";
 
 import { addAccessory, removeAccessory } from "../api/MessageAccessories";
 import definePlugin from "../utils/types";
-import { filters, waitFor } from "../webpack";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, MessageStore, React } from "../webpack/common";
+import { waitFor } from "../webpack";
+import {
+    ChannelStore,
+    FluxDispatcher,
+    GuildMemberStore,
+    GuildStore,
+    MessageStore,
+    React,
+    Text
+} from "../webpack/common";
 
 const replacement = `
 const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)?.[1];
@@ -47,13 +55,11 @@ const elementCache: { [id: string]: { element: JSX.Element, shouldRenderRichEmbe
 let get: (...query) => Promise<any>,
     MessageEmbed: (...props) => JSX.Element,
     parse: (content: string) => any[] /* (JSX.Element | string)[] i think */,
-    TextContainer, Endpoints;
+    Endpoints: Record<string, any>;
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
 waitFor(["MessageEmbed"], _ => ({ MessageEmbed } = _));
 waitFor(["parse", "parseTopic"], _ => ({ parse } = _));
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
-waitFor(filters.byCode('case"always-white":'), _ => TextContainer = _);
-
 
 function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
     function callback(message: any) {
@@ -231,7 +237,7 @@ export default definePlugin({
 
         const MessageEmbedElement = React.createElement(MessageEmbed, {
             channel: linkedChannel,
-            childrenAccessories: React.createElement(TextContainer, {
+            childrenAccessories: React.createElement(Text, {
                 color: "text-muted",
                 tag: "span",
                 variant: "text-xs/medium"
