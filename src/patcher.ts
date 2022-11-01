@@ -30,7 +30,7 @@ console.log("[Vencord] Starting up...");
 const injectorPath = require.main!.filename;
 
 // special discord_arch_electron injection method
-const asarName = injectorPath.endsWith("app.asar/index.js") ? "_app.asar" : "app.asar";
+const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
 
 // The original app.asar
 const asarPath = join(dirname(injectorPath), "..", asarName);

@@ -17,7 +17,6 @@
 */
 
 import { exec, execSync } from "child_process";
-import esbuild from "esbuild";
 import { existsSync } from "fs";
 import { readdir, readFile, stat } from "fs/promises";
 import { join } from "path";
@@ -154,7 +153,7 @@ export const fileIncludePlugin = {
 };
 
 /**
- * @type {esbuild.BuildOptions}
+ * @type {import("esbuild").BuildOptions}
  */
 export const commonOpts = {
     logLevel: "info",
@@ -164,5 +163,10 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote"]
+    external: ["~plugins", "~git-hash", "~git-remote"],
+    inject: ["./scripts/build/inject/react.mjs"],
+    jsxFactory: "VencordCreateElement",
+    jsxFragment: "VencordFragment",
+    // Work around https://github.com/evanw/esbuild/issues/2460
+    tsconfig: "./scripts/build/tsconfig.esbuild.json"
 };

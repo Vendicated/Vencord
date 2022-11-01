@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export { default as PatchHelper } from "./PatchHelper";
-export { default as PluginSettings } from "./PluginSettings";
-export { default as Settings } from "./Settings";
-export { default as Updater } from "./Updater";
+export const VencordFragment = Symbol.for("react.fragment");
+export let VencordCreateElement =
+    (...args) => (VencordCreateElement = Vencord.Webpack.Common.React.createElement)(...args);

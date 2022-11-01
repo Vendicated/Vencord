@@ -23,14 +23,14 @@ import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
 
-const KbdStyles = lazyWebpack(filters.byProps(["key", "removeBuildOverride"]));
+const KbdStyles = lazyWebpack(filters.byProps("key", "removeBuildOverride"));
 
 export default definePlugin({
     name: "Experiments",
     authors: [
         Devs.Megu,
         Devs.Ven,
-        { name: "Nickyux", id: 427146305651998721n },
+        Devs.Nickyux,
         { name: "BanTheNons", id: 460478012794863637n },
     ],
     description: "Enable Access to Experiments in Discord!",

@@ -37,7 +37,7 @@ import * as styles from "./styles";
 const logger = new Logger("PluginSettings", "#a6d189");
 
 const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-const InputStyles = lazyWebpack(filters.byProps(["inputDefault", "inputWrapper"]));
+const InputStyles = lazyWebpack(filters.byProps("inputDefault", "inputWrapper"));
 
 const CogWheel = lazyWebpack(filters.byCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = lazyWebpack(filters.byCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
@@ -146,7 +146,19 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
-                note={<Text variant="text-md/normal" style={{ height: 40, overflow: "hidden" }}>{plugin.description}</Text>}
+                note={<Text variant="text-md/normal" style={{
+                    height: 40,
+                    overflow: "hidden",
+                    // mfw css is so bad you need whatever this is to get multi line overflow ellipsis to work
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box", // firefox users will cope (it doesn't support it)
+                    WebkitLineClamp: 2,
+                    lineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    boxOrient: "vertical"
+                }}>
+                    {plugin.description}
+                </Text>}
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
@@ -209,11 +221,6 @@ export default ErrorBoundary.wrap(function Settings() {
         return o;
     }, []);
 
-    function hasDependents(plugin: Plugin) {
-        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
-        return !!enabledDependants?.length;
-    }
-
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
@@ -253,7 +260,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             { label: "Show Enabled", value: "enabled" },
                             { label: "Show Disabled", value: "disabled" }
                         ]}
-                        serialize={v => String(v)}
+                        serialize={String}
                         select={onStatusChange}
                         isSelected={v => v === searchValue.status}
                         closeOnSelect={true}

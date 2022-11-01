@@ -81,6 +81,7 @@ export interface Argument {
     name: string;
     value: string;
     focused: undefined;
+    options: Argument[];
 }
 
 export interface Command {

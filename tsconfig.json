@@ -14,11 +14,7 @@
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
-        // https://esbuild.github.io/api/#jsx-factory
-        // these short window aliases make the bundle ~10% smaller
-        "jsxFactory": "_Ve$",
-        "jsxFragmentFactory": "_VF$",
-        "jsx": "react"
+        "jsx": "preserve"
     },
     "include": ["src/**/*"]
 }

@@ -41,7 +41,7 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
 });
 
 function patchPush() {
-    function handlePush(chunk) {
+    function handlePush(chunk: any) {
         try {
             const modules = chunk[1];
             const { subscriptions, listeners } = Vencord.Webpack;
@@ -56,7 +56,7 @@ function patchPush() {
                 // Additionally, `[actual newline]` is one less char than "\n", so if Discord
                 // ever targets newer browsers, the minifier could potentially use this trick and
                 // cause issues.
-                let code = mod.toString().replaceAll("\n", "");
+                let code: string = mod.toString().replaceAll("\n", "");
                 const originalMod = mod;
                 const patchedBy = new Set();
 
@@ -90,6 +90,7 @@ function patchPush() {
                             logger.error("Error in webpack listener", err);
                         }
                     }
+
                     for (const [filter, callback] of subscriptions) {
                         try {
                             if (filter(exports)) {
@@ -101,7 +102,7 @@ function patchPush() {
                                     callback(exports.default);
                                 }
 
-                                for (const nested in exports) if (nested.length < 3) {
+                                for (const nested in exports) if (nested.length <= 3) {
                                     if (exports[nested] && filter(exports[nested])) {
                                         subscriptions.delete(filter);
                                         callback(exports[nested]);
@@ -113,45 +114,80 @@ function patchPush() {
                         }
                     }
                 };
+
                 modules[id].toString = () => mod.toString();
                 modules[id].original = originalMod;
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
                     if (patch.predicate && !patch.predicate()) continue;
+
                     if (code.includes(patch.find)) {
                         patchedBy.add(patch.plugin);
+
                         // @ts-ignore we change all patch.replacement to array in plugins/index
                         for (const replacement of patch.replacement) {
                             const lastMod = mod;
                             const lastCode = code;
+
                             try {
                                 const newCode = code.replace(replacement.match, replacement.replace);
                                 if (newCode === code) {
-                                    logger.warn(`Patch by ${patch.plugin} had no effect: ${replacement.match}`);
-                                    logger.debug("Function Source:\n", code);
+                                    logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                    if (IS_DEV) {
+                                        logger.debug("Function Source:\n", code);
+                                    }
                                 } else {
                                     code = newCode;
                                     mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                                 }
                             } catch (err) {
-                                // TODO - More meaningful errors. This probably means moving away from string.replace
-                                // in favour of manual matching. Then cut out the context and log some sort of
-                                // diff
-                                logger.error("Failed to apply patch of", patch.plugin, err);
-                                logger.debug("Original Source\n", lastCode);
-                                logger.debug("Patched Source\n", code);
+                                logger.error(`Failed to apply patch ${replacement.match} of ${patch.plugin} to ${id}:\n`, err);
+
+                                if (IS_DEV) {
+                                    const changeSize = code.length - lastCode.length;
+                                    const match = lastCode.match(replacement.match)!;
+
+                                    // Use 200 surrounding characters of context
+                                    const start = Math.max(0, match.index! - 200);
+                                    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
+                                    // (changeSize may be negative)
+                                    const endPatched = end + changeSize;
+
+                                    const context = lastCode.slice(start, end);
+                                    const patchedContext = code.slice(start, endPatched);
+
+                                    // inline require to avoid including it in !IS_DEV builds
+                                    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
+                                    let fmt = "%c %s ";
+                                    const elements = [] as string[];
+                                    for (const d of diff) {
+                                        const color = d.removed
+                                            ? "red"
+                                            : d.added
+                                                ? "lime"
+                                                : "grey";
+                                        fmt += "%c%s";
+                                        elements.push("color:" + color, d.value);
+                                    }
+
+                                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
+                                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), context);
+                                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
+                                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
+                                }
                                 code = lastCode;
                                 mod = lastMod;
                                 patchedBy.delete(patch.plugin);
                             }
                         }
+
                         if (!patch.all) patches.splice(i--, 1);
                     }
                 }
             }
         } catch (err) {
-            logger.error("oopsie", err);
+            logger.error("Error in handlePush", err);
         }
 
         return handlePush.original.call(window[WEBPACK_CHUNK], chunk);

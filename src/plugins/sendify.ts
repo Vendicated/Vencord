@@ -53,9 +53,9 @@ interface Track {
     name: string;
 }
 
-const Spotify = lazyWebpack(filters.byProps(["getPlayerState"]));
-const MessageCreator = lazyWebpack(filters.byProps(["getSendMessageOptionsForReply", "sendMessage"]));
-const PendingReplyStore = lazyWebpack(filters.byProps(["getPendingReply"]));
+const Spotify = lazyWebpack(filters.byProps("getPlayerState"));
+const MessageCreator = lazyWebpack(filters.byProps("getSendMessageOptionsForReply", "sendMessage"));
+const PendingReplyStore = lazyWebpack(filters.byProps("getPendingReply"));
 
 function sendMessage(channelId, message) {
     message = {
