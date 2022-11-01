@@ -20,7 +20,7 @@ import { PluginOptionString } from "../../../utils/types";
 import { Forms, React, TextInput } from "../../../webpack/common";
 import { ISettingElementProps } from ".";
 
-export function SettingInputComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
+export function SettingTextComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
     const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
     const [error, setError] = React.useState<string | null>(null);
 

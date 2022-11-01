@@ -29,12 +29,13 @@ import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUti
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
+    ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
-    SettingInputComponent,
     SettingNumericComponent,
     SettingSelectComponent,
-    SettingSliderComponent
+    SettingSliderComponent,
+    SettingTextComponent
 } from "./components";
 
 const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
@@ -60,6 +61,16 @@ function makeDummyUser(user: { name: string, id: BigInt; }) {
     return newUser;
 }
 
+const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
+    [OptionType.STRING]: SettingTextComponent,
+    [OptionType.NUMBER]: SettingNumericComponent,
+    [OptionType.BIGINT]: SettingNumericComponent,
+    [OptionType.BOOLEAN]: SettingBooleanComponent,
+    [OptionType.SELECT]: SettingSelectComponent,
+    [OptionType.SLIDER]: SettingSliderComponent,
+    [OptionType.COMPONENT]: SettingCustomComponent
+};
+
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
     const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
 
@@ -75,8 +86,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id ? await UserUtils.fetchUser(`${user.id}`).catch(() => null) : makeDummyUser(user);
-                setAuthors(a => [...a, author || makeDummyUser(user)]);
+                const author = user.id
+                    ? await UserUtils.fetchUser(`${user.id}`).catch(() => makeDummyUser(user))
+                    : makeDummyUser(user);
+                setAuthors(a => [...a, author]);
             }
         })();
     }, []);
@@ -111,9 +124,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         }
 
-        const options: JSX.Element[] = [];
-        for (const [key, setting] of Object.entries(plugin.options)) {
-            function onChange(newValue) {
+        const options = Object.entries(plugin.options).map(([key, setting]) => {
+            function onChange(newValue: any) {
                 setTempSettings(s => ({ ...s, [key]: newValue }));
             }
 
@@ -121,35 +133,19 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 setErrors(e => ({ ...e, [key]: hasError }));
             }
 
-            const props = { onChange, pluginSettings, id: key, onError };
-            switch (setting.type) {
-                case OptionType.SELECT: {
-                    options.push(<SettingSelectComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-                case OptionType.STRING: {
-                    options.push(<SettingInputComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-                case OptionType.NUMBER:
-                case OptionType.BIGINT: {
-                    options.push(<SettingNumericComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-                case OptionType.BOOLEAN: {
-                    options.push(<SettingBooleanComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-                case OptionType.SLIDER: {
-                    options.push(<SettingSliderComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-                case OptionType.COMPONENT: {
-                    options.push(<SettingCustomComponent key={key} option={setting} {...props} />);
-                    break;
-                }
-            }
-        }
+            const Component = Components[setting.type];
+            return (
+                <Component
+                    id={key}
+                    key={key}
+                    option={setting}
+                    onChange={onChange}
+                    onError={onError}
+                    pluginSettings={pluginSettings}
+                />
+            );
+        });
+
         return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
     }
 

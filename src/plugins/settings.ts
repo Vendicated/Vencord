@@ -55,11 +55,13 @@ export default definePlugin({
             match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) => {
                 const updater = !IS_WEB ? '{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater},' : "";
+                const patchHelper = IS_DEV ? '{section:"VencordPatchHelper",label:"PatchHelper",element:Vencord.Components.PatchHelper},' : "";
                 return (
                     `{section:${mod}.ID.HEADER,label:"Vencord"},` +
                     '{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},' +
                     '{section:"VencordPlugins",label:"Plugins",element:Vencord.Components.PluginSettings},' +
                     updater +
+                    patchHelper +
                     `{section:${mod}.ID.DIVIDER},${m}`
                 );
             }

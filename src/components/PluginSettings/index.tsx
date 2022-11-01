@@ -220,11 +220,6 @@ export default ErrorBoundary.wrap(function Settings() {
         return o;
     }, []);
 
-    function hasDependents(plugin: Plugin) {
-        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
-        return !!enabledDependants?.length;
-    }
-
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
@@ -264,7 +259,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             { label: "Show Enabled", value: "enabled" },
                             { label: "Show Disabled", value: "disabled" }
                         ]}
-                        serialize={v => String(v)}
+                        serialize={String}
                         select={onStatusChange}
                         isSelected={v => v === searchValue.status}
                         closeOnSelect={true}
