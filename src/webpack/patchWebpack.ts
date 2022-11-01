@@ -57,6 +57,11 @@ function patchPush() {
                 // ever targets newer browsers, the minifier could potentially use this trick and
                 // cause issues.
                 let code: string = mod.toString().replaceAll("\n", "");
+                // a very small minority of modules use function() instead of arrow functions,
+                // but, unnamed toplevel functions aren't valid. Thus, give those a name
+                if (code.startsWith("function(")) {
+                    code = "function patchedModule" + code.slice("function".length);
+                }
                 const originalMod = mod;
                 const patchedBy = new Set();
 
