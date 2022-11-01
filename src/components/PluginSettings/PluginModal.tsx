@@ -29,8 +29,8 @@ import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUti
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
-    NewBadge,
     ISettingElementProps,
+    NewBadge,
     SettingBooleanComponent,
     SettingCustomComponent,
     SettingNumericComponent,
