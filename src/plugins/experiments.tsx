@@ -23,7 +23,7 @@ import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
 
-const KbdStyles = lazyWebpack(filters.byProps(["key", "removeBuildOverride"]));
+const KbdStyles = lazyWebpack(filters.byProps("key", "removeBuildOverride"));
 
 export default definePlugin({
     name: "Experiments",
