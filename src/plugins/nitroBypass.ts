@@ -26,6 +26,7 @@ import { UserStore } from "../webpack/common";
 
 export default definePlugin({
     stickerPacks: [] as any[],
+    stickerMap: null as Map<string, any> | null,
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -78,6 +79,13 @@ export default definePlugin({
             }
         },
         {
+            find: "getStickerById=",
+            replacement: {
+                match: /getStickerById=function\((\w+)\)\{return (\w+).get/,
+                replace: "getStickerById=function($1){Vencord.Plugins.plugins.NitroBypass.saveStickerMap($2);return $2.get"
+            }
+        },
+        {
             find: "ingestStickers:",
             predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
             replacement: {
@@ -88,6 +96,9 @@ export default definePlugin({
     ],
     savePacks(stickerPacks) {
         this.stickerPacks = stickerPacks;
+    },
+    saveStickerMap(stickerMap) {
+        this.stickerMap = stickerMap;
     },
     options: {
         enableEmojiBypass: {
@@ -156,9 +167,21 @@ export default definePlugin({
                             return;
                         }
 
-                        // TODO: find out guildId from sticker and return when it matches
-                        messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
-                        delete extra.stickerIds;
+                        if (this.stickerMap) {
+                            // get guild id from sticker
+                            const sticker = this.stickerMap.get(stickerId);
+                            const stickerGuildId = sticker.guild_id;
+
+                            // only modify if sticker is not from current guild
+                            if (stickerGuildId !== guildId) {
+                                messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+                                delete extra.stickerIds;
+                            }
+                        } else {
+                            console.warn("[NitroBypass] Can't find sticker in stickerMap", stickerId, "modifying just in case");
+                            messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+                            delete extra.stickerIds;
+                        }
                     }
                 }
             }
