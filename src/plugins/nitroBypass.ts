@@ -130,7 +130,7 @@ export default definePlugin({
     },
 
     getStickerLink(stickerId: string) {
-        return `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+        return `${location.origin}/stickers/${stickerId}.png`;
     },
 
     start() {
