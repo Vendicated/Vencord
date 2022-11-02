@@ -207,14 +207,13 @@ export default definePlugin({
                         const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
 
                         if (isDiscordSticker) {
-                            delete extra.stickerIds;
                             sendBotMessage(channelId, {
                                 content: "Discord stickers are not supported!",
                                 author: {
                                     username: "Vencord"
                                 }
                             });
-                            return;
+                            return { cancel: true };
                         }
 
                         const stickerLink = this.getStickerLink(stickerId);
@@ -233,7 +232,7 @@ export default definePlugin({
 
                                     if (!this.apng || !this.gif) {
                                         console.error("[NitroBypass] Can't send animated sticker because the apng or gif library is not loaded");
-                                        return;
+                                        return { cancel: true };
                                     }
 
                                     const { GIFEncoder, quantize, applyPalette } = this.gif;
@@ -272,8 +271,7 @@ export default definePlugin({
                                     });
 
                                     // animated stickers are handled above
-                                    delete extra.stickerIds;
-                                    return;
+                                    return { cancel: true };
                                 }
 
                                 messageObj.content = stickerLink;

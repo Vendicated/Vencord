@@ -37,7 +37,7 @@ export interface MessageObject {
     validNonShortcutEmojis: Emoji[];
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: any) => void;
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: any) => void | { cancel: boolean };
 export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => void;
 
 const sendListeners = new Set<SendListener>();
@@ -46,9 +46,13 @@ const editListeners = new Set<EditListener>();
 export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: any) {
     for (const listener of sendListeners) {
         try {
-            listener(channelId, messageObj, extra);
+            const result = listener(channelId, messageObj, extra);
+            if (result && result.cancel) {
+                return true;
+            }
         } catch (e) { MessageEventsLogger.error(`MessageSendHandler: Listener encountered an unknown error. (${e})`); }
     }
+    return false;
 }
 
 export function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
