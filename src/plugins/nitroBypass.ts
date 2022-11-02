@@ -129,6 +129,10 @@ export default definePlugin({
         return Boolean(UserStore.getCurrentUser().premiumType);
     },
 
+    getStickerLink(stickerId: string) {
+        return `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+    },
+
     start() {
         if (!Settings.plugins.NitroBypass.enableEmojiBypass && !Settings.plugins.NitroBypass.enableStickerBypass) {
             return;
@@ -174,12 +178,12 @@ export default definePlugin({
 
                             // only modify if sticker is not from current guild
                             if (stickerGuildId !== guildId) {
-                                messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+                                messageObj.content = this.getStickerLink(stickerId);
                                 delete extra.stickerIds;
                             }
                         } else {
                             console.warn("[NitroBypass] Can't find sticker in stickerMap", stickerId, "modifying just in case");
-                            messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+                            messageObj.content = this.getStickerLink(stickerId);
                             delete extra.stickerIds;
                         }
                     }
