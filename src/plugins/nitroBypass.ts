@@ -268,7 +268,7 @@ export default definePlugin({
 
                                 });
 
-                                // bail out
+                                // animated stickers are handled above
                                 delete extra.stickerIds;
                                 return;
                             }
