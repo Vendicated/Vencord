@@ -232,6 +232,7 @@ export default definePlugin({
                                 if (isAnimated) {
 
                                     if (!this.apng || !this.gif) {
+                                        console.error("[NitroBypass] Can't send animated sticker because the apng or gif library is not loaded");
                                         return;
                                     }
 
