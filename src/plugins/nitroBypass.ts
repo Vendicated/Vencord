@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendBotMessage } from "../api/Commands";
 import { addPreEditListener, addPreSendListener, removePreEditListener,removePreSendListener } from "../api/MessageEvents";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
@@ -24,6 +25,7 @@ import { findByProps } from "../webpack";
 import { UserStore } from "../webpack/common";
 
 export default definePlugin({
+    stickerPacks: [] as any[],
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -74,8 +76,19 @@ export default definePlugin({
                 match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
                 replace: ""
             }
-        }
+        },
+        {
+            find: "ingestStickers:",
+            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
+            replacement: {
+                match: /(\w+)=(\w+).sticker_packs;(\w+)\.(\w+)\.dispatch\(\{type:"STICKER_PACKS_FETCH_SUCCESS"/g,
+                replace: "$1=$2.sticker_packs;Vencord.Plugins.plugins.NitroBypass.savePacks($1);$3.$4.dispatch({type:\"STICKER_PACKS_FETCH_SUCCESS\""
+            },
+        },
     ],
+    savePacks(stickerPacks) {
+        this.stickerPacks = stickerPacks;
+    },
     options: {
         enableEmojiBypass: {
             description: "Allow sending fake emojis",
@@ -121,16 +134,32 @@ export default definePlugin({
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
 
-        this.preSend = addPreSendListener((_, messageObj, extra) => {
+        this.preSend = addPreSendListener((channelId, messageObj, extra) => {
             const { guildId } = this;
 
-            if (Settings.plugins.NitroBypass.enableEmojiBypass) {
+            if (Settings.plugins.NitroBypass.enableStickerBypass) {
                 const stickerIds = extra?.stickerIds;
-                if (stickerIds) {
-                    // TODO: find out guildId from sticker and return when it matches
-                    // TODO: this doesn't work with discord internal stickers
-                    messageObj.content = `https://cdn.discordapp.com/stickers/${stickerIds[0]}.png`;
-                    delete extra.stickerIds;
+
+                if (stickerIds && stickerIds.length) {
+                    const stickerId = stickerIds[0];
+                    if (stickerId) {
+                        const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
+
+                        if (isDiscordSticker) {
+                            delete extra.stickerIds;
+                            sendBotMessage(channelId, {
+                                content: "Discord stickers are not supported!",
+                                author: {
+                                    username: "Vencord"
+                                }
+                            });
+                            return;
+                        }
+
+                        // TODO: find out guildId from sticker and return when it matches
+                        messageObj.content = `https://cdn.discordapp.com/stickers/${stickerId}.png`;
+                        delete extra.stickerIds;
+                    }
                 }
             }
 
