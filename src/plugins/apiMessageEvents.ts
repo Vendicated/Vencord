@@ -35,7 +35,7 @@ export default definePlugin({
             }]
         },
         {
-            find: "if(e.altKey){",
+            find: '("interactionUsernameProfile',
             replacement: {
                 match: /var \w=(\w)\.id,\w=(\w)\.id;return .{1,2}\.useCallback\(\(?function\((.{1,2})\){/,
                 replace: (m, message, channel, event) =>
