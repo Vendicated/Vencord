@@ -111,11 +111,25 @@ electron.app.whenReady().then(() => {
                 .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
     } catch { }
 
+
     // Remove CSP
+    function patchCsp(headers: Record<string, string[]>, header: string) {
+        if (header in headers) {
+            let patchedHeader = headers[header][0];
+            for (const directive of ["style-src", "connect-src", "img-src", "font-src"]) {
+                patchedHeader = patchedHeader.replace(new RegExp(`${directive}.+?;`), `${directive} * blob: data: 'unsafe-inline';`);
+            }
+            // TODO: Restrict this to only imported packages with fixed version.
+            // Perhaps auto generate with esbuild
+            patchedHeader = patchedHeader.replace(/script-src.+?(?=;)/, "$& 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com");
+            headers[header] = [patchedHeader];
+        }
+    }
+
     electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, url }, cb) => {
         if (responseHeaders) {
-            delete responseHeaders["content-security-policy-report-only"];
-            delete responseHeaders["content-security-policy"];
+            patchCsp(responseHeaders, "content-security-policy");
+            patchCsp(responseHeaders, "content-security-policy-report-only");
 
             // Fix hosts that don't properly set the content type, such as
             // raw.githubusercontent.com
