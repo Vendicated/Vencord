@@ -223,58 +223,60 @@ export default definePlugin({
                             const isAnimated = sticker.format_type === 2;
                             const stickerGuildId = sticker.guild_id;
 
-                            // if it's animated download it, convert to gif and send it
-                            if (isAnimated) {
+                            // only modify if sticker is not from current guild
+                            if (stickerGuildId !== guildId) {
 
-                                if (!this.apng || !this.gif) {
+                                // if it's animated download it, convert to gif and send it
+                                if (isAnimated) {
+
+                                    if (!this.apng || !this.gif) {
+                                        return;
+                                    }
+
+                                    this.apng.parseURL(this.getStickerLink(stickerId)).then(apng => {
+                                        console.log("NITRO BYPASS apng", apng);
+
+                                        const { GIFEncoder, quantize, applyPalette } = this.gif;
+
+                                        const gif = new GIFEncoder();
+                                        // width should be equal to height for stickers, so it doesn't matter if we use width or height here
+                                        const resolution = apng.width; // or configurable
+                                        const delay = apng.playTime / apng.frames.length;
+
+                                        const canvas = document.createElement("canvas");
+                                        canvas.width = canvas.height = resolution;
+                                        const ctx = canvas.getContext("2d")!;
+
+                                        const { frames } = apng;
+
+                                        for (const frame of frames) {
+                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+
+                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
+
+                                            const palette = quantize(data, 256);
+                                            const index = applyPalette(data, palette);
+
+                                            gif.writeFrame(index, resolution, resolution, {
+                                                transparent: true,
+                                                palette,
+                                                delay,
+                                            });
+                                        }
+
+                                        gif.finish();
+                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+
+                                    });
+
+                                    // animated stickers are handled above
+                                    delete extra.stickerIds;
                                     return;
                                 }
 
-                                this.apng.parseURL(this.getStickerLink(stickerId)).then(apng => {
-                                    console.log("NITRO BYPASS apng", apng);
 
-                                    const { GIFEncoder, quantize, applyPalette } = this.gif;
-
-                                    const gif = new GIFEncoder();
-                                    // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-                                    const resolution = apng.width; // or configurable
-                                    const delay = apng.playTime / apng.frames.length;
-
-                                    const canvas = document.createElement("canvas");
-                                    canvas.width = canvas.height = resolution;
-                                    const ctx = canvas.getContext("2d")!;
-
-                                    const { frames } = apng;
-
-                                    for (const frame of frames) {
-                                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                        ctx.drawImage(frame.img, 0, 0, resolution, resolution);
-
-                                        const { data } = ctx.getImageData(0, 0, resolution, resolution);
-
-                                        const palette = quantize(data, 256);
-                                        const index = applyPalette(data, palette);
-
-                                        gif.writeFrame(index, resolution, resolution, {
-                                            transparent: true,
-                                            palette,
-                                            delay,
-                                        });
-                                    }
-
-                                    gif.finish();
-                                    const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-                                    promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-
-                                });
-
-                                // animated stickers are handled above
-                                delete extra.stickerIds;
-                                return;
-                            }
-
-                            // only modify if sticker is not from current guild
-                            if (stickerGuildId !== guildId) {
                                 messageObj.content = this.getStickerLink(stickerId);
                                 delete extra.stickerIds;
                             }
