@@ -51,10 +51,10 @@ export function _handlePreSend(channelId: string, messageObj: MessageObject, ext
     }
 }
 
-export function _handlePreEdit(channeld: string, messageId: string, messageObj: MessageObject) {
+export function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
-            listener(channeld, messageId, messageObj);
+            listener(channelId, messageId, messageObj);
         } catch (e) { MessageEventsLogger.error(`MessageEditHandler: Listener encountered an unknown error. (${e})`); }
     }
 }
