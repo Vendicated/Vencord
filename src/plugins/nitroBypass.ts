@@ -115,6 +115,7 @@ export default definePlugin({
         },
         {
             find: "getStickerById=",
+            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
             replacement: {
                 match: /getStickerById=function\((\w+)\)\{return (\w+).get/,
                 replace: "getStickerById=function($1){Vencord.Plugins.plugins.NitroBypass.saveStickerMap($2);return $2.get"
