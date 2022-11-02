@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
@@ -36,9 +37,9 @@ export default definePlugin({
         {
             find: 'preload:"none","aria',
             replacement: {
-                match: /\?.{0,5}\.Messages\.GIF/,
+                match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
                 replace:
-                    "?(e.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify(e))",
+                    "?($1.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify($1))",
             },
         },
     ],
