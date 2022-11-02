@@ -18,15 +18,50 @@
 
 import { sendBotMessage } from "../api/Commands";
 import { addPreEditListener, addPreSendListener, removePreEditListener,removePreSendListener } from "../api/MessageEvents";
+import { lazyWebpack, makeLazy } from "../utils";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { findByProps } from "../webpack";
+import { filters, findByProps, waitFor } from "../webpack";
 import { UserStore } from "../webpack/common";
+
+const importApngJs = makeLazy(async () => {
+    const exports = {};
+    const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
+    Function("self", await fetch("https://cdnjs.cloudflare.com/ajax/libs/apng-canvas/2.1.1/apng-canvas.min.js").then(r => r.text()))(winProxy);
+    // @ts-ignore
+    return exports.APNG;
+});
+
+const DRAFT_TYPE = 0;
+// https://github.com/mattdesl/gifenc
+// this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
+// @ts-ignore ts mad
+const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
+const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
+
+let ChannelStore;
+waitFor(["getChannel"], m => ChannelStore = m);
+
+interface Frame {
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+    img: HTMLImageElement
+}
+
+interface FrameData {
+    width: number,
+    height: number,
+    frames: Frame[],
+    playTime: number
+}
 
 export default definePlugin({
     stickerPacks: [] as any[],
     stickerMap: null as Map<string, any> | null,
+    apng: null as { parseURL(url: string): Promise<FrameData> } | null,
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -99,6 +134,7 @@ export default definePlugin({
     },
     saveStickerMap(stickerMap) {
         this.stickerMap = stickerMap;
+        // TODO: I think this could use something like const StickerStore = lazyWebpack(filters.byProps("getStickers??"));
     },
     options: {
         enableEmojiBypass: {
@@ -138,6 +174,10 @@ export default definePlugin({
             return;
         }
 
+        importApngJs().then(apng => {
+            this.apng = apng;
+        });
+
         if (this.canUseEmotes) {
             console.info("[NitroBypass] Skipping start because you have nitro");
             return;
@@ -174,7 +214,55 @@ export default definePlugin({
                         if (this.stickerMap) {
                             // get guild id from sticker
                             const sticker = this.stickerMap.get(stickerId);
+                            const isAnimated = sticker.format_type === 2;
                             const stickerGuildId = sticker.guild_id;
+
+                            // if it's animated download it, convert to gif and send it
+                            if (isAnimated) {
+                                this.apng!.parseURL(this.getStickerLink(stickerId)).then(apng => {
+                                    console.log("NITRO BYPASS apng", apng);
+
+                                    getGifEncoder().then(lib => {
+                                        const { GIFEncoder, quantize, applyPalette } = lib;
+
+                                        const gif = new GIFEncoder();
+                                        const resolution = apng.width; // or configurable
+                                        const delay = apng.playTime / apng.frames.length;
+
+                                        const canvas = document.createElement("canvas");
+                                        canvas.width = apng.width;
+                                        canvas.height = apng.height;
+                                        const ctx = canvas.getContext("2d")!;
+
+                                        const { frames } = apng;
+
+                                        for (const frame of frames) {
+                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+
+                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
+
+                                            const palette = quantize(data, 256);
+                                            const index = applyPalette(data, palette);
+
+                                            gif.writeFrame(index, resolution, resolution, {
+                                                transparent: true,
+                                                palette,
+                                                delay,
+                                            });
+                                        }
+
+                                        gif.finish();
+                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+                                    });
+
+                                });
+
+                                // bail out
+                                delete extra.stickerIds;
+                                return;
+                            }
 
                             // only modify if sticker is not from current guild
                             if (stickerGuildId !== guildId) {
