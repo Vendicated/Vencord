@@ -217,6 +217,8 @@ export default definePlugin({
                             return;
                         }
 
+                        const stickerLink = this.getStickerLink(stickerId);
+
                         if (this.stickerMap) {
                             // get guild id from sticker
                             const sticker = this.stickerMap.get(stickerId);
@@ -233,7 +235,7 @@ export default definePlugin({
                                         return;
                                     }
 
-                                    this.apng.parseURL(this.getStickerLink(stickerId)).then(apng => {
+                                    this.apng.parseURL(stickerLink).then(apng => {
                                         console.log("NITRO BYPASS apng", apng);
 
                                         const { GIFEncoder, quantize, applyPalette } = this.gif;
@@ -277,12 +279,12 @@ export default definePlugin({
                                 }
 
 
-                                messageObj.content = this.getStickerLink(stickerId);
+                                messageObj.content = stickerLink;
                                 delete extra.stickerIds;
                             }
                         } else {
                             console.warn("[NitroBypass] Can't find sticker in stickerMap", stickerId, "modifying just in case");
-                            messageObj.content = this.getStickerLink(stickerId);
+                            messageObj.content = stickerLink;
                             delete extra.stickerIds;
                         }
                     }
