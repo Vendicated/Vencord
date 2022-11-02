@@ -235,11 +235,9 @@ export default definePlugin({
                                         return;
                                     }
 
+                                    const { GIFEncoder, quantize, applyPalette } = this.gif;
+
                                     this.apng.parseURL(stickerLink).then(apng => {
-                                        console.log("NITRO BYPASS apng", apng);
-
-                                        const { GIFEncoder, quantize, applyPalette } = this.gif;
-
                                         const gif = new GIFEncoder();
                                         // width should be equal to height for stickers, so it doesn't matter if we use width or height here
                                         const resolution = apng.width; // or configurable
@@ -270,14 +268,12 @@ export default definePlugin({
                                         gif.finish();
                                         const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
                                         promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-
                                     });
 
                                     // animated stickers are handled above
                                     delete extra.stickerIds;
                                     return;
                                 }
-
 
                                 messageObj.content = stickerLink;
                                 delete extra.stickerIds;
