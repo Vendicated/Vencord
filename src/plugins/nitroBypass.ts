@@ -62,6 +62,7 @@ export default definePlugin({
     stickerPacks: [] as any[],
     stickerMap: null as Map<string, any> | null,
     apng: null as { parseURL(url: string): Promise<FrameData> } | null,
+    gif: null as any | null,
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -179,6 +180,10 @@ export default definePlugin({
             this.apng = apng;
         });
 
+        getGifEncoder().then(gif => {
+            this.gif = gif;
+        });
+
         if (this.canUseEmotes) {
             console.info("[NitroBypass] Skipping start because you have nitro");
             return;
@@ -220,43 +225,46 @@ export default definePlugin({
 
                             // if it's animated download it, convert to gif and send it
                             if (isAnimated) {
-                                this.apng!.parseURL(this.getStickerLink(stickerId)).then(apng => {
+
+                                if (!this.apng || !this.gif) {
+                                    return;
+                                }
+
+                                this.apng.parseURL(this.getStickerLink(stickerId)).then(apng => {
                                     console.log("NITRO BYPASS apng", apng);
 
-                                    getGifEncoder().then(lib => {
-                                        const { GIFEncoder, quantize, applyPalette } = lib;
+                                    const { GIFEncoder, quantize, applyPalette } = this.gif;
 
-                                        const gif = new GIFEncoder();
-                                        const resolution = apng.width; // or configurable
-                                        const delay = apng.playTime / apng.frames.length;
+                                    const gif = new GIFEncoder();
+                                    // width should be equal to height for stickers, so it doesn't matter if we use width or height here
+                                    const resolution = apng.width; // or configurable
+                                    const delay = apng.playTime / apng.frames.length;
 
-                                        const canvas = document.createElement("canvas");
-                                        canvas.width = apng.width;
-                                        canvas.height = apng.height;
-                                        const ctx = canvas.getContext("2d")!;
+                                    const canvas = document.createElement("canvas");
+                                    canvas.width = canvas.height = resolution;
+                                    const ctx = canvas.getContext("2d")!;
 
-                                        const { frames } = apng;
+                                    const { frames } = apng;
 
-                                        for (const frame of frames) {
-                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+                                    for (const frame of frames) {
+                                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                        ctx.drawImage(frame.img, 0, 0, resolution, resolution);
 
-                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
+                                        const { data } = ctx.getImageData(0, 0, resolution, resolution);
 
-                                            const palette = quantize(data, 256);
-                                            const index = applyPalette(data, palette);
+                                        const palette = quantize(data, 256);
+                                        const index = applyPalette(data, palette);
 
-                                            gif.writeFrame(index, resolution, resolution, {
-                                                transparent: true,
-                                                palette,
-                                                delay,
-                                            });
-                                        }
+                                        gif.writeFrame(index, resolution, resolution, {
+                                            transparent: true,
+                                            palette,
+                                            delay,
+                                        });
+                                    }
 
-                                        gif.finish();
-                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-                                    });
+                                    gif.finish();
+                                    const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+                                    promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
 
                                 });
 
