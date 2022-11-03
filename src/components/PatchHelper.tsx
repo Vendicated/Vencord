@@ -80,7 +80,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
         const fullMatch = matchResult[0] ? makeCodeblock(matchResult[0], "js") : "";
         const groups = matchResult.length > 1
-            ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i}: ${g}`).join("\n"), "yml")
+            ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i + 1}: ${g}`).join("\n"), "yml")
             : "";
 
         return (
@@ -172,6 +172,22 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 onChange={onChange}
                 error={error ?? replacementError}
             />
+            {!isFunc && (
+                <>
+                    <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
+                    {Object.entries({
+                        "$$": "Insert a $",
+                        "$&": "Insert the entire match",
+                        "$\\`": "Insert the substring before the match",
+                        "$'": "Insert the substring after the match",
+                        "$n": "Insert the nth capturing group ($1, $2...)"
+                    }).map(([placeholder, desc]) => (
+                        <Forms.FormText key={placeholder}>
+                            {Parser.parse("`" + placeholder + "`")}: {desc}
+                        </Forms.FormText>
+                    ))}
+                </>
+            )}
 
             <Switch
                 className={Margins.marginTop8}
@@ -202,7 +218,7 @@ function PatchHelper() {
     find: ${JSON.stringify(find)},
     replacement: {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
-        replacement: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
+        replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 }
         `.trim();
