@@ -66,6 +66,14 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     instance.pop();
 }
 
+if (IS_DEV && !IS_WEB) {
+    var devToolsOpen = false;
+    // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
+    setTimeout(() => {
+        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+    }, 0);
+}
+
 export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
@@ -92,10 +100,12 @@ export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (!isWaitFor) {
         const err = new Error("Didn't find module matching this filter");
         if (IS_DEV) {
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        } else {
+            logger.warn(err);
         }
-        logger.warn(err);
     }
 
     return null;
@@ -196,10 +206,12 @@ export function bulk(...filterFns: FilterFn[]) {
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
         if (IS_DEV) {
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        } else {
+            logger.warn(err);
         }
-        logger.warn(err);
     }
 
     return results;
@@ -219,10 +231,12 @@ export function findModuleId(code: string) {
 
     const err = new Error("Didn't find module with code:\n" + code);
     if (IS_DEV) {
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        throw err;
+        if (!devToolsOpen)
+            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            throw err;
+    } else {
+        logger.warn(err);
     }
-    logger.warn(err);
 
     return null;
 }

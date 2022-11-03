@@ -24,4 +24,6 @@ export { default as IpcEvents } from "./IpcEvents";
 export { default as Logger } from "./logger";
 export * from "./misc";
 export * as Modals from "./modal";
+export * from "./onceDefined";
 export * from "./proxyLazy";
+export * from "./Queue";
