@@ -18,6 +18,7 @@
 
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
+import { SelectedChannelStore } from "../webpack/common";
 
 const timers = {} as Record<string, {
     timeout?: NodeJS.Timeout;
@@ -46,8 +47,8 @@ export default definePlugin({
                 },
                 // stage channels
                 {
-                    match: /onClick:(\w+)\?void 0:this\.handleClick,/g,
-                    replace: "onClick:$1?void 0:(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
+                    match: /onClick:(.{0,15})this\.handleClick,/g,
+                    replace: "onClick:$1(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
                 }
             ],
         },
@@ -63,6 +64,10 @@ export default definePlugin({
     schedule(cb: () => void, e: any) {
         // support from stage and voice channels patch
         const id = e?.id ?? e.props.channel.id as string;
+        if (SelectedChannelStore.getVoiceChannelId() === id) {
+            cb();
+            return;
+        }
         // use a different counter for each channel
         const data = (timers[id] ??= { timeout: void 0, i: 0 });
         // clear any existing timer

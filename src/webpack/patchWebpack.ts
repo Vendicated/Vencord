@@ -57,6 +57,11 @@ function patchPush() {
                 // ever targets newer browsers, the minifier could potentially use this trick and
                 // cause issues.
                 let code: string = mod.toString().replaceAll("\n", "");
+                // a very small minority of modules use function() instead of arrow functions,
+                // but, unnamed toplevel functions aren't valid. However 0, function() makes it a statement
+                if (code.startsWith("function(")) {
+                    code = "0," + code;
+                }
                 const originalMod = mod;
                 const patchedBy = new Set();
 
@@ -102,7 +107,7 @@ function patchPush() {
                                     callback(exports.default);
                                 }
 
-                                for (const nested in exports) if (nested.length < 3) {
+                                for (const nested in exports) if (nested.length <= 3) {
                                     if (exports[nested] && filter(exports[nested])) {
                                         subscriptions.delete(filter);
                                         callback(exports[nested]);
