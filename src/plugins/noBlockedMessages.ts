@@ -21,7 +21,7 @@ import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
-const RelationshipStore = lazyWebpack(filters.byProps(["getRelationships", "isBlocked"]));
+const RelationshipStore = lazyWebpack(filters.byProps("getRelationships", "isBlocked"));
 
 export default definePlugin({
     name: "NoBlockedMessages",
