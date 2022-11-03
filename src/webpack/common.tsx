@@ -27,6 +27,7 @@ export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export let React: typeof import("react");
+export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
