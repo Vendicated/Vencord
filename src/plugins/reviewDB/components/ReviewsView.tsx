@@ -1,8 +1,24 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-import { React } from '../../../webpack/common';
-import { findByProps } from '../../../webpack';
-import { TextInput } from '../../../webpack/common';
-import { addReview, getReviews } from '../Utils/ReviewDBAPI';
+import { findByProps } from "../../../webpack";
+import { React, TextInput } from "../../../webpack/common";
+import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
 const { eyebrow } = findByProps("eyebrow");
@@ -36,7 +52,7 @@ export default class ReviewsView extends React.Component<any, IState> {
     };
 
     componentDidMount(): void {
-        const reviews = this.state.reviews;
+        const { reviews } = this.state;
         if (reviews === undefined) {
             this.fetchReviews();
         }
@@ -58,7 +74,7 @@ export default class ReviewsView extends React.Component<any, IState> {
     }
 
     render() {
-        const reviews = this.state.reviews;
+        const { reviews } = this.state;
         return (
             <div>
                 <h3 className={eyebrow + " " + bodyTitle + " " + section} style={{ color: "var(--header-secondary)" }}>User Reviews</h3>
@@ -68,10 +84,10 @@ export default class ReviewsView extends React.Component<any, IState> {
                     })) : (<div><br></br></div>)
                 }
                 {(reviews?.length === 0) && (
-                    <h2 className={defaultColor + " " + section} style={{ fontSize: 16, fontStyle: 'italic', fontWeight: 'bold', marginBottom: 16 }}>Looks like nobody reviewed this user, you can be first</h2>
+                    <h2 className={defaultColor + " " + section} style={{ fontSize: 16, fontStyle: "italic", fontWeight: "bold", marginBottom: 16 }}>Looks like nobody reviewed this user, you can be first</h2>
                 )}
 
-                <TextInput placeholder='Enter a comment' onKeyPress={(e) => this.onKeyPress(e)}></TextInput>
+                <TextInput placeholder="Enter a comment" onKeyPress={e => this.onKeyPress(e)}></TextInput>
             </div>
         );
     }

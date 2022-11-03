@@ -1,3 +1,21 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Settings } from "../../../Vencord";
 import { Toasts } from "../../../webpack/common";
 import { Review } from "../entities/Review";
@@ -14,7 +32,7 @@ export const getReviews = async (discorid: string): Promise<Review[]> => {
 };
 
 export const addReview = async (review: any): Promise<number> => {
-    let token = settings.token;
+    const { token } = settings;
     if (token === "") {
         authorize();
 
@@ -26,7 +44,7 @@ export const addReview = async (review: any): Promise<number> => {
 
         return 2;
     }
-    review["token"] = token;
+    review.token = token;
 
     return await fetch(API_URL + "/addUserReview", { method: "POST", body: JSON.stringify(review) }).then(r => r.text()).then(
         res => {
@@ -51,7 +69,7 @@ export const addReview = async (review: any): Promise<number> => {
 };
 
 export const deleteReview = async (reviewid: string): Promise<any> => {
-    let data: any = {
+    const data: any = {
         "token": settings.get("token", ""),
         "reviewid": reviewid
     };
@@ -59,7 +77,7 @@ export const deleteReview = async (reviewid: string): Promise<any> => {
 };
 
 export const reportReview = (reviewID: string) => {
-    let data: any = {
+    const data: any = {
         "reviewid": reviewID,
         "token": settings.get("token", "")
     };
