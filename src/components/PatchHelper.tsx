@@ -178,7 +178,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                     {Object.entries({
                         "$$": "Insert a $",
                         "$&": "Insert the entire match",
-                        "$\\`": "Insert the substring before the match",
+                        "$`​": "Insert the substring before the match",
                         "$'": "Insert the substring after the match",
                         "$n": "Insert the nth capturing group ($1, $2...)"
                     }).map(([placeholder, desc]) => (
