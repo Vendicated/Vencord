@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export type Review = {
+export interface Review {
     comment: string,
     id: number,
     senderdiscordid: string,
@@ -24,4 +24,4 @@ export type Review = {
     star: number,
     username: string,
     profile_photo: string;
-};
+}

@@ -37,7 +37,6 @@ export function authorize(callback?: any) {
     const { getOAuth2AuthorizeProps } = findByProps("openOAuth2Modal");
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
-
     const opts = getOAuth2AuthorizeProps("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify");
 
     openModal((props: any) =>
@@ -49,17 +48,18 @@ export function authorize(callback?: any) {
             callback: (c: any) => {
                 try {
                     const url = new URL(c);
-                    fetch(url + "&returnType=json&clientMod=vencord").then(res => {
-                        res.json().then(res => {
-                            if (res.status === 0) {
-                                settings.set("token", res.token);
-                                showToast("Successfully logged in!");
-                                callback?.();
-                            } else if (res.status === 1) {
-                                showToast("An Error Occured while logging in.");
-                            }
+                    fetch(url + "&returnType=json&clientMod=vencord")
+                        .then(res => {
+                            res.json().then(res => {
+                                if (res.status === 0) {
+                                    settings.set("token", res.token);
+                                    showToast("Successfully logged in!");
+                                    callback?.();
+                                } else if (res.status === 1) {
+                                    showToast("An Error Occured while logging in.");
+                                }
+                            });
                         });
-                    });
                 } catch (e) {
                     console.log(e);
                 }

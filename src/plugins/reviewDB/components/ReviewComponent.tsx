@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Queue } from "../../../utils/Queue";
 import { findByProps } from "../../../webpack";
 import { Alerts, React, UserStore,UserUtils } from "../../../webpack/common";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
-import { openUserProfileModal, showToast, sleep } from "../Utils/Utils";
+import { openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
-import { Queue } from "./ReviewsView";
 
 const { cozyMessage, buttons } = findByProps("cozyMessage");
 const { container, isHeader } = findByProps("container", "isHeader");
@@ -38,92 +38,65 @@ const getUser = UserUtils.fetchUser;
 const buttonClassNames = findByProps("button", "wrapper", "disabled");
 const usernameClickable = findByProps("clickable", "username").clickable;
 const { defaultColor } = findByProps("defaultColor");
+const { useEffect } = React;
+
+const queue = new Queue();
 
 
-interface IState {
-    profilePhoto: string,
-}
+export default function ReviewComponent(props) {
+    const { review } = props;
 
-export default class ReviewComponent extends React.Component<any, IState> {
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            profilePhoto: "",
-        };
+    function openModal() {
+        openUserProfileModal(props.review.senderdiscordid);
     }
 
-    openModal = () => {
-        openUserProfileModal(this.props.review.senderdiscordid);
-    };
-
-    modalProps: any = { "cancelText": "Nop", "confirmText": "Yop", "header": "ARE YOU SURE ABOUT THAT" };
-
-    deleteReview() {
-
+    function delReview() {
         Alerts.show({
-            title: "ARE YOU SURE ABOUT THAT", body: "DELETE THAT REVIEWW????", confirmText: "Yop", cancelText: "Explod", onConfirm: () => {
-                deleteReview(this.props.review.id).then(res => {
+            title: "ARE YOU SURE ABOUT THAT",
+            body: "DELETE THAT REVIEWW????",
+            confirmText: "Yop",
+            cancelText: "Explod",
+            onConfirm: () => {
+                deleteReview(props.review.id).then(res => {
                     if (res.successful) {
-                        this.props.fetchReviews();
+                        props.fetchReviews();
                     }
                     showToast(res.message);
                 });
             }
         });
-
     }
 
-    reportReview() {
+    function reportRev() {
         Alerts.show({
             title: "ARE YOU SURE ABOUT THAT",
             body: "REPORT THAT REVIEWW????",
             confirmText: "Yop",
             cancelText: "Explod",
             onConfirm: () => {
-                reportReview(this.props.review.id);
+                reportReview(review.id);
             }
         });
     }
 
-    fetchUser() {
-        const { review } = this.props;
-
-        var user = UserStore.getUser(review.senderdiscordid);
-        if (user === undefined) {
-            Queue.push(() => getUser(review.senderdiscordid).then((u: any) => { this.setState({}); review.profile_photo = getUserAvatarURL(u); }).then((m: any) => sleep(400)));
-        } else {
-            review.profile_photo = getUserAvatarURL(user);
-            this.setState({});
-        }
-    }
-
-    componentDidMount(): void {
-        const { review } = this.props;
-
-        if (!review.profile_photo || review.profile_photo === "") {
-            this.fetchUser();
-        }
-    }
-
-    render() {
-        const { review } = this.props;
-
-        return (
-            <div>
-                <div className={cozyMessage + " " + message + " " + groupStart + " " + wrapper + " " + cozy}>
-                    <div className={contents}>
-                        <img className={avatar + " " + clickable} onClick={() => { this.openModal(); }} onError={() => { this.fetchUser(); }} src={review.profile_photo === "" ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}></img>
-                        <span className={username + " " + usernameClickable} style={{ color: "var(--text-muted)" }} onClick={() => this.openModal()}>{review.username}</span>
-                        <p className={messageContent + " " + defaultColor} style={{ fontSize: 15, marginTop: 4 }}>{review.comment}</p>
-                        <div className={container + " " + isHeader + " " + buttons}>
-                            <div className={buttonClassNames.wrapper}>
-                                <MessageButton type="report" callback={() => this.reportReview()}></MessageButton>
-                                {(review.senderdiscordid === UserStore.getCurrentUser().id) && (<MessageButton type="delete" callback={() => this.deleteReview()}></MessageButton>)}
-                            </div>
+    return (
+        <div>
+            <div className={cozyMessage + " " + message + " " + groupStart + " " + wrapper + " " + cozy}>
+                <div className={contents}>
+                    <img className={avatar + " " + clickable} onClick={() => { openModal(); }}
+                        src={review.profile_photo === "" ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}></img>
+                    <span className={username + " " + usernameClickable}
+                        style={{ color: "var(--text-muted)" }} onClick={() => openModal()}>{review.username}</span>
+                    <p className={messageContent + " " + defaultColor} style={{ fontSize: 15, marginTop: 4 }}>{review.comment}</p>
+                    <div className={container + " " + isHeader + " " + buttons}>
+                        <div className={buttonClassNames.wrapper}>
+                            <MessageButton type="report" callback={() => reportRev()}></MessageButton>
+                            {(review.senderdiscordid === UserStore.getCurrentUser().id) && (<MessageButton type="delete" callback={() => delReview()}></MessageButton>)}
                         </div>
                     </div>
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
+
 }

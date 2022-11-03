@@ -43,32 +43,30 @@ export default definePlugin({
                     window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify")
                 }>Get OAUTH2 Token</Button>;
             }, description: "Authorize your account"
-        }
+        },
+        "lastreviewid": { type: OptionType.COMPONENT, default: 0,component: () => (<></>),
+            description: "Last review id on your profile" }
     },
 
     async start() {
         this.ReviewsView = await import("./components/ReviewsView");
         this.getLastReviewID = (await import("./Utils/ReviewDBAPI")).getLastReviewID;
-
-
-        console.log("ReviewDB Started");
-
         const settings = Settings.plugins.ReviewDB;
 
-        settings.get = (key: string) => settings[key];
-        settings.set = (key: string, value: any) => settings[key] = value;
 
-
-        this.getLastReviewID(UserStore.getCurrentUser().id).then(lastreviewid => {
-            const storedLastReviewID: number = settings.get("lastreviewid", 0);
-            if (settings.get("notifyReviews", true) && storedLastReviewID < lastreviewid) {
-                if (storedLastReviewID !== 0) {
-                    showToast("You have new reviews on your profile");
-                }
-
-                settings.set("lastreviewid", lastreviewid);
-            }
-        });
+        setTimeout(() => {
+            this.getLastReviewID(UserStore.getCurrentUser().id)
+                .then(lastreviewid => {
+                    console.log(lastreviewid + "Ready to explode");
+                    const storedLastReviewID: number = settings.lastreviewid;
+                    if (settings.notifyReviews && storedLastReviewID < lastreviewid) {
+                        if (storedLastReviewID !== 0) {
+                            showToast("You have new reviews on your profile");
+                        }
+                        settings.lastreviewid = lastreviewid;
+                    }
+                });
+        },4000);
 
     },
 

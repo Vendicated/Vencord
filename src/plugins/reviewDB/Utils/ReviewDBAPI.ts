@@ -26,14 +26,14 @@ const settings = Settings.plugins.ReviewDB;
 
 const API_URL = "https://manti.vendicated.dev";
 
-export const getReviews = async (discorid: string): Promise<Review[]> => {
-    const res = await fetch("https://manti.vendicated.dev/getUserReviews?snowflakeFormat=string&discordid=" + discorid.toString());
+export async function getReviews(discorid: string): Promise<Review[]> {
+    const res = await fetch("https://manti.vendicated.dev/getUserReviews?snowflakeFormat=string&discordid=" + discorid);
     return await res.json() as Review[];
-};
+}
 
 export const addReview = async (review: any): Promise<number> => {
     const { token } = settings;
-    if (token === "") {
+    if (!token) {
         authorize();
 
         Toasts.show({
@@ -46,46 +46,53 @@ export const addReview = async (review: any): Promise<number> => {
     }
     review.token = token;
 
-    return await fetch(API_URL + "/addUserReview", { method: "POST", body: JSON.stringify(review) }).then(r => r.text()).then(
-        res => {
-            Toasts.show({
-                message: res, options: { position: 1 },
-                id: "",
-                type: 0
-            });
+    return fetch(API_URL + "/addUserReview", {
+        method: "POST",
+        body: JSON.stringify(review),
+        headers: { "Content-Type": "application/json" }
+    })
+        .then(r => r.text())
+        .then(
+            res => {
+                Toasts.show({
+                    message: res, options: { position: 1 },
+                    id: "",
+                    type: 0
+                });
 
-            let responseCode = 0;
-            // 0 means added ,1 means edited, 2 means error
-            if (res === "Added your review") {
-                responseCode = 0;
-            } else if (res === "Updated your review") {
-                responseCode = 1;
-            } else {
-                responseCode = 2;
+                // 0 means added ,1 means edited, 2 means error
+                return (res === "Added your review") ? 0 : (res === "Updated your review") ? 1 : 2;
             }
-            return responseCode;
-        }
-    );
+        );
 };
 
-export const deleteReview = async (reviewid: string): Promise<any> => {
-    const data: any = {
-        "token": settings.get("token", ""),
+export async function deleteReview(reviewid: string): Promise<any> {
+    const data = {
+        "token": settings.token,
         "reviewid": reviewid
     };
-    return await fetch(API_URL + "/deleteReview", { method: "POST", body: JSON.stringify(data) }).then(r => r.json());
-};
+    return fetch(API_URL + "/deleteReview", { method: "POST", body: JSON.stringify(data) })
+        .then(r => r.json());
+}
 
-export const reportReview = (reviewID: string) => {
-    const data: any = {
+export function reportReview(reviewID: string) {
+    const data = {
         "reviewid": reviewID,
         "token": settings.get("token", "")
     };
-    fetch(API_URL + "/reportReview", { method: "POST", body: JSON.stringify(data) }).then(r => r.text()).then(res => showToast(res));
-};
+    fetch(API_URL + "/reportReview", {
+        method: "POST",
+        body: JSON.stringify(data)
+    })
+        .then(r => r.text())
+        .then(res => showToast(res));
+}
 
 export const getLastReviewID = async (userid: string): Promise<number> => {
-    return await fetch(API_URL + "/getLastReviewID?discordid=" + userid).then(r => r.text()).then(r => Number.parseInt(r));
+    console.log("Ur mom calling");
+    return fetch(API_URL + "/getLastReviewID?discordid=" + userid)
+        .then(r => r.text())
+        .then(Number);
 };
 
 
