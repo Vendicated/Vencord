@@ -21,9 +21,7 @@ import { Toasts } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 import { authorize, showToast } from "./Utils";
 
-
 const settings = Settings.plugins.ReviewDB;
-
 const API_URL = "https://manti.vendicated.dev";
 
 export async function getReviews(discorid: string): Promise<Review[]> {
@@ -31,7 +29,7 @@ export async function getReviews(discorid: string): Promise<Review[]> {
     return await res.json() as Review[];
 }
 
-export const addReview = async (review: any): Promise<number> => {
+export async function addReview(review: any): Promise<number> {
     const { token } = settings;
     if (!token) {
         authorize();
@@ -64,9 +62,9 @@ export const addReview = async (review: any): Promise<number> => {
                 return (res === "Added your review") ? 0 : (res === "Updated your review") ? 1 : 2;
             }
         );
-};
+}
 
-export async function deleteReview(reviewid: string): Promise<any> {
+export function deleteReview(reviewid: string): Promise<any> {
     const data = {
         "token": settings.token,
         "reviewid": reviewid

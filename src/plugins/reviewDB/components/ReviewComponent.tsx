@@ -18,7 +18,7 @@
 
 import { Queue } from "../../../utils/Queue";
 import { findByProps } from "../../../webpack";
-import { Alerts, React, UserStore,UserUtils } from "../../../webpack/common";
+import { Alerts, React, UserStore } from "../../../webpack/common";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
@@ -33,12 +33,9 @@ const { groupStart } = findByProps("groupStart");
 const { wrapper } = findByProps("wrapper", "zalgo");
 const { cozy } = findByProps("cozy", "zalgo");
 const { contents } = findByProps("contents");
-const { getUserAvatarURL } = findByProps("getUserAvatarURL");
-const getUser = UserUtils.fetchUser;
 const buttonClassNames = findByProps("button", "wrapper", "disabled");
 const usernameClickable = findByProps("clickable", "username").clickable;
 const { defaultColor } = findByProps("defaultColor");
-const { useEffect } = React;
 
 const queue = new Queue();
 
