@@ -23,6 +23,7 @@ import { dirname, join } from "path";
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
+import { onceDefined } from "./utils/onceDefined";
 
 console.log("[Vencord] Starting up...");
 
@@ -74,15 +75,9 @@ require.cache[electronPath]!.exports = {
 };
 
 // Patch appSettings to force enable devtools
-Object.defineProperty(global, "appSettings", {
-    set: (v: typeof global.appSettings) => {
-        v.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
-        // @ts-ignore
-        delete global.appSettings;
-        global.appSettings = v;
-    },
-    configurable: true
-});
+onceDefined(global, "appSettings", s =>
+    s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true)
+);
 
 process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
