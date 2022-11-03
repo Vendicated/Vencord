@@ -20,7 +20,7 @@ export function authorize(callback?: any) {
     const { OAuth2AuthorizeModal } = findByProps('OAuth2AuthorizeModal');
 
 
-    var opts = getOAuth2AuthorizeProps("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify");
+    let opts = getOAuth2AuthorizeProps("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify");
 
     openModal((props: any) =>
         React.createElement(OAuth2AuthorizeModal, {

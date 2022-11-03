@@ -1,4 +1,4 @@
-import { showToast, sleep } from "./Utils/Utils";
+import { showToast } from "./Utils/Utils";
 import definePlugin, { OptionType } from "../../utils/types";
 import { Button, React, UserStore } from "../../webpack/common";
 import { Settings } from "../../Vencord";
@@ -36,11 +36,6 @@ export default definePlugin({
 
 
         console.log("ReviewDB Started");
-        do {
-
-            var currentUser = UserStore.getCurrentUser();
-            if (!currentUser) await sleep(3000);
-        } while (!currentUser);
 
         const settings = Settings.plugins.ReviewDB;
 
