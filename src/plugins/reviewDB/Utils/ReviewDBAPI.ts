@@ -86,5 +86,6 @@ export const reportReview = (reviewID: string) => {
 
 export const getLastReviewID = async (userid: string): Promise<number> => {
     return await fetch(API_URL + "/getLastReviewID?discordid=" + userid).then(r => r.text()).then(r => Number.parseInt(r));
-}
+};
+
 
