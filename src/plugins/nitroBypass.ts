@@ -44,18 +44,19 @@ let ChannelStore;
 waitFor(["getChannel"], m => ChannelStore = m);
 
 interface Frame {
-    left: number,
-    top: number,
-    width: number,
-    height: number,
-    img: HTMLImageElement
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    img: HTMLImageElement;
+    delay: number;
 }
 
 interface FrameData {
-    width: number,
-    height: number,
-    frames: Frame[],
-    playTime: number
+    width: number;
+    height: number;
+    frames: Frame[];
+    playTime: number;
 }
 
 export default definePlugin({
@@ -241,7 +242,6 @@ export default definePlugin({
                                         const gif = new GIFEncoder();
                                         // width should be equal to height for stickers, so it doesn't matter if we use width or height here
                                         const resolution = apng.width; // or configurable
-                                        const delay = apng.playTime / apng.frames.length;
 
                                         const canvas = document.createElement("canvas");
                                         canvas.width = canvas.height = resolution;
@@ -261,7 +261,7 @@ export default definePlugin({
                                             gif.writeFrame(index, resolution, resolution, {
                                                 transparent: true,
                                                 palette,
-                                                delay,
+                                                delay: frame.delay,
                                             });
                                         }
 
