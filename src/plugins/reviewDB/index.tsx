@@ -1,11 +1,7 @@
-
-//import ReviewDBSettings from "./components/Settings";
-//import { patcher } from "ittai";
 import { showToast, sleep } from "./Utils/Utils";
 import definePlugin, { OptionType } from "../../utils/types";
 import { Button, React, UserStore } from "../../webpack/common";
 import { Settings } from "../../Vencord";
-import { Logger } from "../../utils";
 
 export default definePlugin({
     name: "ReviewDB",
@@ -63,9 +59,8 @@ export default definePlugin({
             }
         });
 
-        //this.setSettingsPanel(() => React.createElement(ReviewDBSettings));
     },
-    //
+
     getReviewsComponent(user) {
         return (
             <this.ReviewsView.default userid={user.id.toString()} />
