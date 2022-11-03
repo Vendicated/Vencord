@@ -1,8 +1,8 @@
-import  { React } from '../../../webpack/common'
-const PureComponent = React.PureComponent
+import { React } from '../../../webpack/common';
+const PureComponent = React.PureComponent;
 
-import { findByProps } from '../../../webpack'
-const { button, dangerous } = findByProps("button", "wrapper", "disabled")
+import { findByProps } from '../../../webpack';
+const { button, dangerous } = findByProps("button", "wrapper", "disabled");
 
 export default class MessageButton extends PureComponent<any> {
 
@@ -24,6 +24,6 @@ export default class MessageButton extends PureComponent<any> {
                         </svg>
                     }
                 </div>)
-        )
+        );
     }
 }

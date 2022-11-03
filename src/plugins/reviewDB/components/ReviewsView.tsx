@@ -1,12 +1,10 @@
 
-//import { Spinner } from 'ittai/components';
 import { React } from '../../../webpack/common';
-const Component = React.Component;
-
 import { findByProps } from '../../../webpack';
 import { TextInput } from '../../../webpack/common';
 import { addReview, getReviews } from '../Utils/ReviewDBAPI';
 import ReviewComponent from "./ReviewComponent";
+
 const { eyebrow } = findByProps("eyebrow");
 const { bodyTitle } = findByProps("bodyTitle");
 const { section } = findByProps("section", "lastSection");
@@ -23,7 +21,7 @@ export const Queue = {
     }
 };
 
-export default class ReviewsView extends Component<any, IState> {
+export default class ReviewsView extends React.Component<any, IState> {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -62,16 +60,16 @@ export default class ReviewsView extends Component<any, IState> {
     render() {
         const reviews = this.state.reviews;
         return (
-            <div >
+            <div>
                 <h3 className={eyebrow + " " + bodyTitle + " " + section} style={{ color: "var(--header-secondary)" }}>User Reviews</h3>
                 {
                     (reviews) ? (reviews.map(review => {
                         return <ReviewComponent fetchReviews={this.fetchReviews} review={review} />;
                     })) : (<div><br></br></div>)
                 }
-                {(reviews?.length === 0) ? (
+                {(reviews?.length === 0) && (
                     <h2 className={defaultColor + " " + section} style={{ fontSize: 16, fontStyle: 'italic', fontWeight: 'bold', marginBottom: 16 }}>Looks like nobody reviewed this user, you can be first</h2>
-                ) : <></>}
+                )}
 
                 <TextInput placeholder='Enter a comment' onKeyPress={(e) => this.onKeyPress(e)}></TextInput>
             </div>

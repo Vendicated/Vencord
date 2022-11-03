@@ -1,19 +1,17 @@
-
-
-import { lazyWebpack } from "../../../utils";
-import { ModalRoot, openModal } from "../../../utils/modal";
+import { openModal } from "../../../utils/modal";
 import { Settings } from "../../../Vencord";
-import { filters, find, findByProps, wreq } from "../../../webpack";
-import { React, Toasts, UserStore } from "../../../webpack/common";
+import { findByProps } from "../../../webpack";
+import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
 
-export function openUserProfileModal(userId) {
-    //var modal = find(m=>m?.toString?.().includes("().overlayBackground"))
-    const Modal = wreq(828087).Z;
-    const PopupOpener = wreq(761434).ZP;
-    //modal({ user: UserStore.getUser("343383572805058560")})
-    //openModal(()=><PopupOpener renderPopout={
-    //<Modal userId={userId} user={UserStore.getUser("343383572805058560")} profileType={0} />
-    //}></PopupOpener>)
+export async function openUserProfileModal(userId) {
+    await UserUtils.fetchUser(userId);
+    return FluxDispatcher.dispatch({
+        type: "USER_PROFILE_MODAL_OPEN",
+        userId,
+        channelId: SelectedChannelStore.getChannelId(),
+        analyticsLocation: "Explosive Hotel"
+    });
+
 }
 
 export function authorize(callback?: any) {
@@ -51,7 +49,6 @@ export function authorize(callback?: any) {
         })
     );
 }
-
 
 export function showToast(text: string) {
     Toasts.show({
