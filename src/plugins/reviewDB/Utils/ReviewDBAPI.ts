@@ -46,8 +46,7 @@ export async function addReview(review: any): Promise<number> {
 
     return fetch(API_URL + "/addUserReview", {
         method: "POST",
-        body: JSON.stringify(review),
-        headers: { "Content-Type": "application/json" }
+        body: JSON.stringify(review)
     })
         .then(r => r.text())
         .then(
