@@ -215,8 +215,8 @@ export default definePlugin({
 
                                             const { data } = ctx.getImageData(0, 0, resolution, resolution);
 
-                                            const palette = quantize(data, 256, { format: "rgb444" });
-                                            const index = applyPalette(data, palette, "rgb444");
+                                            const palette = quantize(data, 256);
+                                            const index = applyPalette(data, palette);
 
                                             gif.writeFrame(index, resolution, resolution, {
                                                 transparent: true,
