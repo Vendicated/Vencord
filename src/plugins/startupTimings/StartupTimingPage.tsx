@@ -75,24 +75,15 @@ interface TimingSectionProps {
 function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
     const startTime = logs.find(l => l.timestamp)?.timestamp ?? 0;
 
-    const timings = logs.map((_log, i) => {
+    let lastTimestamp = startTime;
+    const timings = logs.map(log => {
         // Get last log entry with valid timestamp
-        let timestamp = 0;
-        let j = i;
-        while (timestamp === 0 && j >= 0) {
-            timestamp = logs[j--]?.timestamp ?? 0;
-        }
-
-        // Get last log entry with valid timestamp
-        let lastTimestamp = 0;
-        j = i - 1;
-        while (lastTimestamp === 0 && j >= 0) {
-            lastTimestamp = logs[j--]?.timestamp ?? 0;
-        }
-        if (lastTimestamp === 0) lastTimestamp = startTime;
+        const timestamp = log.timestamp ?? lastTimestamp;
 
         const sinceStart = (timestamp - startTime) / 1000;
         const sinceLast = (timestamp - lastTimestamp) / 1000;
+
+        lastTimestamp = timestamp;
 
         return { sinceStart, sinceLast };
     });
