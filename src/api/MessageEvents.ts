@@ -47,10 +47,10 @@ export function _handlePreSend(channelId: string, messageObj: MessageObject, ext
     for (const listener of sendListeners) {
         try {
             const result = listener(channelId, messageObj, extra);
-            if (result && result.cancel) {
+            if (result && result.cancel === true) {
                 return true;
             }
-        } catch (e) { MessageEventsLogger.error(`MessageSendHandler: Listener encountered an unknown error. (${e})`); }
+        } catch (e) { MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e); }
     }
     return false;
 }
@@ -59,7 +59,7 @@ export function _handlePreEdit(channelId: string, messageId: string, messageObj:
     for (const listener of editListeners) {
         try {
             listener(channelId, messageId, messageObj);
-        } catch (e) { MessageEventsLogger.error(`MessageEditHandler: Listener encountered an unknown error. (${e})`); }
+        } catch (e) { MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e); }
     }
 }
 
@@ -94,7 +94,7 @@ export function _handleClick(message: Message, channel: Channel, event: MouseEve
     for (const listener of listeners) {
         try {
             listener(message, channel, event);
-        } catch (e) { MessageEventsLogger.error(`MessageClickHandler: Listener encountered an unknown error. (${e})`); }
+        } catch (e) { MessageEventsLogger.error("MessageClickHandler: Listener encountered an unknown error\n", e); }
     }
 }
 
