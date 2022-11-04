@@ -18,46 +18,19 @@
 
 import { sendBotMessage } from "../api/Commands";
 import { addPreEditListener, addPreSendListener, removePreEditListener,removePreSendListener } from "../api/MessageEvents";
-import { lazyWebpack, makeLazy } from "../utils";
+import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
+import { getGifEncoder, importApngJs } from "../utils/dependencies";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters, findByProps, waitFor } from "../webpack";
 import { UserStore } from "../webpack/common";
 
-const importApngJs = makeLazy(async () => {
-    const exports = {};
-    const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
-    Function("self", await fetch("https://cdnjs.cloudflare.com/ajax/libs/apng-canvas/2.1.1/apng-canvas.min.js").then(r => r.text()))(winProxy);
-    // @ts-ignore
-    return exports.APNG as { parseURL(url: string): Promise<FrameData> };
-});
-
 const DRAFT_TYPE = 0;
-// https://github.com/mattdesl/gifenc
-// this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
-// @ts-ignore ts mad
-const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
 const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
 
 let ChannelStore;
 waitFor(["getChannel"], m => ChannelStore = m);
-
-interface Frame {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-    img: HTMLImageElement;
-    delay: number;
-}
-
-interface FrameData {
-    width: number;
-    height: number;
-    frames: Frame[];
-    playTime: number;
-}
 
 export default definePlugin({
     stickerPacks: [] as any[],
