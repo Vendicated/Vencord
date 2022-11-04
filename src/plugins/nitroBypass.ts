@@ -30,7 +30,7 @@ const importApngJs = makeLazy(async () => {
     const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
     Function("self", await fetch("https://cdnjs.cloudflare.com/ajax/libs/apng-canvas/2.1.1/apng-canvas.min.js").then(r => r.text()))(winProxy);
     // @ts-ignore
-    return exports.APNG;
+    return exports.APNG as { parseURL(url: string): Promise<FrameData> };
 });
 
 const DRAFT_TYPE = 0;
@@ -62,8 +62,6 @@ interface FrameData {
 export default definePlugin({
     stickerPacks: [] as any[],
     stickerMap: null as Map<string, any> | null,
-    apng: null as { parseURL(url: string): Promise<FrameData> } | null,
-    gif: null as any | null,
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -177,14 +175,6 @@ export default definePlugin({
             return;
         }
 
-        importApngJs().then(apng => {
-            this.apng = apng;
-        });
-
-        getGifEncoder().then(gif => {
-            this.gif = gif;
-        });
-
         if (this.canUseEmotes) {
             console.info("[NitroBypass] Skipping start because you have nitro");
             return;
@@ -231,43 +221,42 @@ export default definePlugin({
                                 // if it's animated download it, convert to gif and send it
                                 if (isAnimated) {
 
-                                    if (!this.apng || !this.gif) {
-                                        console.error("[NitroBypass] Can't send animated sticker because the apng or gif library is not loaded");
-                                        return { cancel: true };
-                                    }
+                                    Promise.all([importApngJs(), getGifEncoder()]).then(([apngCanvas, gifEncoder]) => {
+                                        apngCanvas.parseURL(stickerLink).then(apng => {
+                                            console.log("NITRO BYPASS apng", apng);
 
-                                    const { GIFEncoder, quantize, applyPalette } = this.gif;
+                                            const { GIFEncoder, quantize, applyPalette } = gifEncoder;
 
-                                    this.apng.parseURL(stickerLink).then(apng => {
-                                        const gif = new GIFEncoder();
-                                        // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-                                        const resolution = apng.width; // or configurable
+                                            const gif = new GIFEncoder();
+                                            // width should be equal to height for stickers, so it doesn't matter if we use width or height here
+                                            const resolution = apng.width; // or configurable
 
-                                        const canvas = document.createElement("canvas");
-                                        canvas.width = canvas.height = resolution;
-                                        const ctx = canvas.getContext("2d")!;
+                                            const canvas = document.createElement("canvas");
+                                            canvas.width = canvas.height = resolution;
+                                            const ctx = canvas.getContext("2d")!;
 
-                                        const { frames } = apng;
+                                            const { frames } = apng;
 
-                                        for (const frame of frames) {
-                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+                                            for (const frame of frames) {
+                                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                ctx.drawImage(frame.img, 0, 0, resolution, resolution);
 
-                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
+                                                const { data } = ctx.getImageData(0, 0, resolution, resolution);
 
-                                            const palette = quantize(data, 256);
-                                            const index = applyPalette(data, palette);
+                                                const palette = quantize(data, 256, { format: "rgb444" });
+                                                const index = applyPalette(data, palette, "rgb444");
 
-                                            gif.writeFrame(index, resolution, resolution, {
-                                                transparent: true,
-                                                palette,
-                                                delay: frame.delay,
-                                            });
-                                        }
+                                                gif.writeFrame(index, resolution, resolution, {
+                                                    transparent: true,
+                                                    palette,
+                                                    delay: frame.delay,
+                                                });
+                                            }
 
-                                        gif.finish();
-                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+                                            gif.finish();
+                                            const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+                                            promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+                                        });
                                     });
 
                                     // animated stickers are handled above
