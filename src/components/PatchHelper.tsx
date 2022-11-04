@@ -85,8 +85,8 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
         return (
             <>
-                {Parser.parse(fullMatch)}
-                {Parser.parse(groups)}
+                <span style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</span>
+                <span style={{ userSelect: "text" }}>{Parser.parse(groups)}</span>
             </>
         );
     }
@@ -94,7 +94,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     function renderDiff() {
         return diff?.map(p => {
             const color = p.added ? "lime" : p.removed ? "red" : "grey";
-            return <span style={{ color }}>{p.value}</span>;
+            return <span style={{ color, userSelect: "text" }}>{p.value}</span>;
         });
     }
 
@@ -284,7 +284,7 @@ function PatchHelper() {
             {!!(find && match && replacement) && (
                 <>
                     <Forms.FormTitle className={Margins.marginTop20}>Code</Forms.FormTitle>
-                    {Parser.parse(makeCodeblock(code, "ts"))}
+                    <span style={{ userSelect: "text" }}>{Parser.parse(makeCodeblock(code, "ts"))}</span>
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}
