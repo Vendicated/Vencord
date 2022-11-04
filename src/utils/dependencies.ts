@@ -18,11 +18,16 @@
 
 import { makeLazy } from "./misc";
 
+/*
+    Add dynamically loaded dependencies for plugins here.
+ */
+
 // https://github.com/mattdesl/gifenc
 // this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
 // @ts-ignore ts mad
 export const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
 
+// needed to parse APNGs in the nitroBypass plugin
 export const importApngJs = makeLazy(async () => {
     const exports = {};
     const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
