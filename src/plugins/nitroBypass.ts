@@ -221,11 +221,9 @@ export default definePlugin({
                                 // if it's animated download it, convert to gif and send it
                                 if (isAnimated) {
 
-                                    Promise.all([importApngJs(), getGifEncoder()]).then(([apngCanvas, gifEncoder]) => {
-                                        apngCanvas.parseURL(stickerLink).then(apng => {
+                                    Promise.all([importApngJs(), getGifEncoder()]).then(([{ parseURL }, { GIFEncoder, quantize, applyPalette }]) => {
+                                        parseURL(stickerLink).then(apng => {
                                             console.log("NITRO BYPASS apng", apng);
-
-                                            const { GIFEncoder, quantize, applyPalette } = gifEncoder;
 
                                             const gif = new GIFEncoder();
                                             // width should be equal to height for stickers, so it doesn't matter if we use width or height here
