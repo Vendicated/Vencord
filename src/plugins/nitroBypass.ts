@@ -194,41 +194,41 @@ export default definePlugin({
                                 // if it's animated download it, convert to gif and send it
                                 if (isAnimated) {
 
-                                    Promise.all([importApngJs(), getGifEncoder()]).then(([{ parseURL }, { GIFEncoder, quantize, applyPalette }]) => {
-                                        parseURL(stickerLink).then(apng => {
-                                            console.log("NITRO BYPASS apng", apng);
+                                    (async () => {
+                                        const [{ parseURL }, { GIFEncoder, quantize, applyPalette }] = await Promise.all([importApngJs(), getGifEncoder()]);
 
-                                            const gif = new GIFEncoder();
-                                            // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-                                            const resolution = apng.width; // or configurable
+                                        const apng = await parseURL(stickerLink);
 
-                                            const canvas = document.createElement("canvas");
-                                            canvas.width = canvas.height = resolution;
-                                            const ctx = canvas.getContext("2d")!;
+                                        const gif = new GIFEncoder();
+                                        // width should be equal to height for stickers, so it doesn't matter if we use width or height here
+                                        const resolution = apng.width; // or configurable
 
-                                            const { frames } = apng;
+                                        const canvas = document.createElement("canvas");
+                                        canvas.width = canvas.height = resolution;
+                                        const ctx = canvas.getContext("2d")!;
 
-                                            for (const frame of frames) {
-                                                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                                ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+                                        const { frames } = apng;
 
-                                                const { data } = ctx.getImageData(0, 0, resolution, resolution);
+                                        for (const frame of frames) {
+                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
 
-                                                const palette = quantize(data, 256, { format: "rgb444" });
-                                                const index = applyPalette(data, palette, "rgb444");
+                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
 
-                                                gif.writeFrame(index, resolution, resolution, {
-                                                    transparent: true,
-                                                    palette,
-                                                    delay: frame.delay,
-                                                });
-                                            }
+                                            const palette = quantize(data, 256, { format: "rgb444" });
+                                            const index = applyPalette(data, palette, "rgb444");
 
-                                            gif.finish();
-                                            const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-                                            promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-                                        });
-                                    });
+                                            gif.writeFrame(index, resolution, resolution, {
+                                                transparent: true,
+                                                palette,
+                                                delay: frame.delay,
+                                            });
+                                        }
+
+                                        gif.finish();
+                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+                                    })();
 
                                     // animated stickers are handled above
                                     return { cancel: true };
