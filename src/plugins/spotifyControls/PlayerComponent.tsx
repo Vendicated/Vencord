@@ -122,7 +122,6 @@ function Info({ track }: { track: Track; }) {
                     {track.artists.map((a, i) => (
                         <React.Fragment key={a.id}>
                             <a
-                                key={a.id}
                                 className={cl("artist")}
                                 href={`https://open.spotify.com/artist/${a.id}`}
                                 target="_blank"
