@@ -150,12 +150,13 @@ function SeekBar() {
 
     const storePosition = useStateFromStores([SpotifyStore], () => SpotifyStore.mPosition);
     const isSettingPosition = useStateFromStores([SpotifyStore], () => SpotifyStore.isSettingPosition);
+    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
 
     const [position, setPosition] = React.useState(storePosition);
 
     // eslint-disable-next-line consistent-return
     React.useEffect(() => {
-        if (!isSettingPosition) {
+        if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
             const interval = setInterval(() => {
                 setPosition(p => p + 1000);
@@ -163,7 +164,7 @@ function SeekBar() {
 
             return () => clearInterval(interval);
         }
-    }, [storePosition, isSettingPosition]);
+    }, [storePosition, isSettingPosition, isPlaying]);
 
     return (
         <div id={cl("progress-bar")}>
