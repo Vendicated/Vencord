@@ -95,9 +95,10 @@ function TooltipText(props: React.HtmlHTMLAttributes<HTMLParagraphElement>) {
 }
 
 function Controls() {
-    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
-    const shuffle = useStateFromStores([SpotifyStore], () => SpotifyStore.shuffle);
-    const repeat = useStateFromStores([SpotifyStore], () => SpotifyStore.repeat);
+    const [isPlaying, shuffle, repeat] = useStateFromStores(
+        [SpotifyStore],
+        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat]
+    );
 
     const [nextRepeat, repeatClassName] = (() => {
         switch (repeat) {
@@ -148,9 +149,10 @@ const Slider = LazyComponent(() => {
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
-    const storePosition = useStateFromStores([SpotifyStore], () => SpotifyStore.mPosition);
-    const isSettingPosition = useStateFromStores([SpotifyStore], () => SpotifyStore.isSettingPosition);
-    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
+    const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
+        [SpotifyStore],
+        () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
+    );
 
     const [position, setPosition] = React.useState(storePosition);
 
