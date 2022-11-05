@@ -38,6 +38,7 @@ interface Sticker {
     name: string;
     tags: string;
     type: number;
+    _notAvailable?: boolean;
 }
 
 export default definePlugin({
@@ -149,13 +150,18 @@ export default definePlugin({
             return;
         }
 
-        if (this.canUseEmotes) {
-            console.info("[NitroBypass] Skipping start because you have nitro");
-            return;
-        }
-
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
         const { getAllGuildStickers } = findByProps("getAllGuildStickers");
+
+        // make all available to click
+        getAllGuildStickers().forEach((packs: Sticker[]) => {
+            packs.forEach((sticker: Sticker) => {
+                if (!sticker.available) {
+                    sticker.available = true;
+                    sticker._notAvailable = true;
+                }
+            });
+        });
 
         function getWordBoundary(origStr, offset) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
@@ -170,16 +176,20 @@ export default definePlugin({
                 if (stickerIds && stickerIds.length) {
                     const stickerId = stickerIds[0];
                     if (stickerId) {
-                        const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
 
-                        if (isDiscordSticker) {
-                            sendBotMessage(channelId, {
-                                content: "Discord stickers are not supported!",
-                                author: {
-                                    username: "Vencord"
-                                }
-                            });
-                            return { cancel: true };
+                        // can't send Discord stickers without nitro
+                        if (!this.canUseEmotes) {
+                            const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
+
+                            if (isDiscordSticker) {
+                                sendBotMessage(channelId, {
+                                    content: "Discord stickers are not supported!",
+                                    author: {
+                                        username: "Vencord"
+                                    }
+                                });
+                                return { cancel: true };
+                            }
                         }
 
                         const stickerLink = this.getStickerLink(stickerId);
@@ -188,6 +198,11 @@ export default definePlugin({
                         const sticker = stickersList.find(x => x.id === stickerId);
 
                         if (sticker) {
+                            // when the user has Nitro and the sticker is available, send the sticker normally
+                            if (this.canUseEmotes && !sticker._notAvailable) {
+                                return { cancel: false };
+                            }
+
                             // get guild id from sticker
                             const stickerGuildId = sticker.guild_id;
 
@@ -250,7 +265,7 @@ export default definePlugin({
                 }
             }
 
-            if (Settings.plugins.NitroBypass.enableEmojiBypass) {
+            if (!this.canUseEmotes && Settings.plugins.NitroBypass.enableEmojiBypass) {
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
@@ -262,22 +277,26 @@ export default definePlugin({
                     });
                 }
             }
+
+            return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener((_, __, messageObj) => {
-            const { guildId } = this;
+        if (!this.canUseEmotes && Settings.plugins.NitroBypass.enableEmojiBypass) {
+            this.preEdit = addPreEditListener((_, __, messageObj) => {
+                const { guildId } = this;
 
-            for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
-                const emoji = getCustomEmojiById(emojiId);
-                if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
-                if (!emoji.require_colons) continue;
+                for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
+                    const emoji = getCustomEmojiById(emojiId);
+                    if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
+                    if (!emoji.require_colons) continue;
 
-                const url = emoji.url.replace(/\?size=\d+/, "?size=48");
-                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
-                });
-            }
-        });
+                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
+                    messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
+                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                    });
+                }
+            });
+        }
     },
 
     stop() {
