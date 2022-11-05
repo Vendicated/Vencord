@@ -29,9 +29,19 @@ import { ChannelStore, UserStore } from "../webpack/common";
 const DRAFT_TYPE = 0;
 const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
 
+interface Sticker {
+    available: boolean;
+    description: string;
+    format_type: number;
+    guild_id: string;
+    id: string;
+    name: string;
+    tags: string;
+    type: number;
+}
+
 export default definePlugin({
     stickerPacks: [] as any[],
-    stickerMap: null as Map<string, any> | null,
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -84,14 +94,6 @@ export default definePlugin({
             }
         },
         {
-            find: "getStickerById=",
-            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
-            replacement: {
-                match: /getStickerById=function\((\w+)\)\{return (\w+).get/,
-                replace: "getStickerById=function($1){Vencord.Plugins.plugins.NitroBypass.saveStickerMap($2);return $2.get"
-            }
-        },
-        {
             find: "ingestStickers:",
             predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
             replacement: {
@@ -102,10 +104,6 @@ export default definePlugin({
     ],
     savePacks(stickerPacks) {
         this.stickerPacks = stickerPacks;
-    },
-    saveStickerMap(stickerMap) {
-        this.stickerMap = stickerMap;
-        // TODO: I think this could use something like const StickerStore = lazyWebpack(filters.byProps("getStickers??"));
     },
     options: {
         enableEmojiBypass: {
@@ -157,6 +155,7 @@ export default definePlugin({
         }
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
+        const { getAllGuildStickers } = findByProps("getAllGuildStickers");
 
         function getWordBoundary(origStr, offset) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
@@ -185,16 +184,18 @@ export default definePlugin({
 
                         const stickerLink = this.getStickerLink(stickerId);
 
-                        if (this.stickerMap) {
+                        const stickersList = Array.from(getAllGuildStickers().values()).flat() as Sticker[];
+                        const sticker = stickersList.find(x => x.id === stickerId);
+
+                        if (sticker) {
                             // get guild id from sticker
-                            const sticker = this.stickerMap.get(stickerId);
-                            const isAnimated = sticker.format_type === 2;
                             const stickerGuildId = sticker.guild_id;
 
                             // only modify if sticker is not from current guild
                             if (stickerGuildId !== guildId) {
 
                                 // if it's animated download it, convert to gif and send it
+                                const isAnimated = sticker.format_type === 2;
                                 if (isAnimated) {
 
                                     (async () => {
@@ -241,7 +242,7 @@ export default definePlugin({
                                 delete extra.stickerIds;
                             }
                         } else {
-                            console.warn("[NitroBypass] Can't find sticker in stickerMap", stickerId, "modifying just in case");
+                            console.warn("[NitroBypass] Can't find sticker in stickersList", stickerId, "modifying just in case");
                             messageObj.content = stickerLink;
                             delete extra.stickerIds;
                         }
