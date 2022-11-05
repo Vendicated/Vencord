@@ -167,7 +167,7 @@ export const commonOpts = {
                 } else {
                     document.addEventListener('readystatechange', (event) => {
                         if (document.readyState !== "complete") return;
-                        if (document.getElementById(id)) return;;
+                        if (document.getElementById(id)) return;
                         document.body.appendChild(style);
                     });
                 };`,
