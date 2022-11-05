@@ -162,15 +162,10 @@ export const commonOpts = {
                 const style = document.createElement("style");
                 const id = style.id = "vencord-css-${digest}";
                 style.textContent = \`${cssContent.replace(/\n/g, "")}\`;
-                if (document.readyState === "complete" && !document.getElementById(id)) {
+                document.addEventListener("DOMContentLoaded", () => {
+                    if (document.getElementById(id)) return;
                     document.body.appendChild(style);
-                } else {
-                    document.addEventListener('readystatechange', (event) => {
-                        if (document.readyState !== "complete") return;
-                        if (document.getElementById(id)) return;
-                        document.body.appendChild(style);
-                    });
-                };`,
+                });`,
             generateScopedName: (name, filename, css) => {
                 const hash = stringHash(css).toString(36).substring(0, 5);
                 const fname = basename(filename)
