@@ -23,14 +23,11 @@ import { Devs } from "../utils/constants";
 import { getGifEncoder, importApngJs } from "../utils/dependencies";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { filters, findByProps, waitFor } from "../webpack";
-import { UserStore } from "../webpack/common";
+import { filters, findByProps } from "../webpack";
+import { ChannelStore, UserStore } from "../webpack/common";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
-
-let ChannelStore;
-waitFor(["getChannel"], m => ChannelStore = m);
 
 export default definePlugin({
     stickerPacks: [] as any[],
