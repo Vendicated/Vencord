@@ -54,7 +54,12 @@ interface PlayerState {
     position: number,
     context?: any;
     device?: any;
+
+    // added by patch
+    actual_repeat: Repeat;
 }
+
+type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazy(() => {
@@ -82,8 +87,10 @@ export const SpotifyStore = proxyLazy(() => {
         public track: Track | null = null;
         public device: any = null;
         public isPlaying = false;
-        public repeat = false;
+        public repeat: Repeat = "off";
+        public shuffle = false;
         public volume = 0;
+
         public isSettingPosition = false;
 
         public openExternal(path: string) {
@@ -125,6 +132,21 @@ export const SpotifyStore = proxyLazy(() => {
             this.req("put", playing ? "/play" : "/pause");
         }
 
+        setRepeat(state: Repeat) {
+            this.req("put", "/repeat", {
+                query: { state }
+            });
+        }
+
+        setShuffle(state: boolean) {
+            this.req("put", "/shuffle", {
+                query: { state }
+            }).then(() => {
+                this.shuffle = state;
+                this.emitChange();
+            });
+        }
+
         seek(ms: number) {
             if (this.isSettingPosition) return Promise.resolve();
 
@@ -153,8 +175,8 @@ export const SpotifyStore = proxyLazy(() => {
         SPOTIFY_PLAYER_STATE(e: PlayerState) {
             store.track = e.track;
             store.isPlaying = e.isPlaying ?? false;
-            store.repeat = e.repeat ?? false;
             store.volume = e.volumePercent ?? 0;
+            store.repeat = e.actual_repeat || "off";
             store.position = e.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();

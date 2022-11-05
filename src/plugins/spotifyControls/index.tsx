@@ -41,6 +41,14 @@ export default definePlugin({
                 match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
                 replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
             }
+        },
+        // Discord doesn't give you the repeat kind, only a boolean
+        {
+            find: 'repeat:"off"!==',
+            replacement: {
+                match: /repeat:"off"!==(.{1,3}),/,
+                replace: "actual_repeat:$1,$&"
+            }
         }
     ],
 

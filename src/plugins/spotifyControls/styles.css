@@ -4,7 +4,24 @@
 }
 
 .vc-spotify-button:hover {
-    color: var(--interactive-active);
+    filter: brightness(1.3);
+}
+
+.vc-spotify-shuffle-on,
+.vc-spotify-repeat-context,
+.vc-spotify-repeat-track {
+    color: #1db954;
+}
+
+/* Hack to stack icon and bullet */
+.vc-spotify-repeat-track {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+.vc-spotify-repeat-track * {
+    grid-column: 1;
+    grid-row: 1;
 }
 
 .vc-spotify-tooltip-text {
@@ -14,8 +31,7 @@
     max-width: 100%;
 }
 
-#vc-spotify-buttons {
-    gap: 0.2em;
+.vc-spotify-button-row {
     justify-content: center;
 }
 
