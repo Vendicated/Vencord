@@ -34,7 +34,7 @@ export function proxyLazy<T>(factory: () => T): T {
 
     return new Proxy(ProxyDummy, {
         get: (_, prop) => lazy()[prop],
-        set: (_, prop, value) => lazy()[prop] = value,
+        set: (_, prop, value) => (lazy()[prop] = value, true),
         has: (_, prop) => prop in lazy(),
         apply: (_, $this, args) => (lazy() as Function).apply($this, args),
         ownKeys: () => Reflect.ownKeys(lazy() as object),

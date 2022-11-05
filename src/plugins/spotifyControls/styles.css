@@ -70,3 +70,24 @@
     filter: brightness(1.2);
     cursor: pointer;
 }
+
+#vc-spotify-progress-bar {
+    display: flex;
+    flex-direction: row;
+    color: var(--text-normal);
+
+    width: calc(100% - 1em);
+    margin: 0.5em;
+    margin-bottom: 0;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] {
+    flex-grow: 1;
+}
+
+#vc-spotify-progress-text {
+    margin: 0;
+    font-size: 80%;
+    /* need to fix or it will constantly grow/shrink due to character width differences */
+    width: 20%;
+}

@@ -72,7 +72,11 @@ export const SpotifyStore = proxyLazy(() => {
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
     class SpotifyStore extends Store {
-        private mPosition = 0;
+        constructor(dispatcher: any, handlers: any) {
+            super(dispatcher, handlers);
+        }
+
+        public mPosition = 0;
         private start = 0;
 
         public track: Track | null = null;
@@ -80,6 +84,7 @@ export const SpotifyStore = proxyLazy(() => {
         public isPlaying = false;
         public repeat = false;
         public volume = 0;
+        public isSettingPosition = false;
 
         public openExternal(path: string) {
             VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://open.spotify.com" + path);
@@ -97,10 +102,6 @@ export const SpotifyStore = proxyLazy(() => {
         public set position(p: number) {
             this.mPosition = p;
             this.start = Date.now();
-        }
-
-        constructor(dispatcher: any, handlers: any) {
-            super(dispatcher, handlers);
         }
 
         prev() {
@@ -124,9 +125,18 @@ export const SpotifyStore = proxyLazy(() => {
             this.req("put", playing ? "/play" : "/pause");
         }
 
-        seek(position_ms: number) {
-            this.req("put", "/seek", {
-                query: { position_ms }
+        seek(ms: number) {
+            if (this.isSettingPosition) return Promise.resolve();
+
+            this.isSettingPosition = true;
+
+            return this.req("put", "/seek", {
+                query: {
+                    position_ms: Math.round(ms)
+                }
+            }).catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to seek", e);
+                this.isSettingPosition = false;
             });
         }
 
@@ -146,6 +156,7 @@ export const SpotifyStore = proxyLazy(() => {
             store.repeat = e.repeat ?? false;
             store.volume = e.volumePercent ?? 0;
             store.position = e.position ?? 0;
+            store.isSettingPosition = false;
             store.emitChange();
         }
     });

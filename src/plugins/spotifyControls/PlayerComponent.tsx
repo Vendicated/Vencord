@@ -20,10 +20,17 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
 import { classes, lazyWebpack } from "../../utils";
 import { Forms, React, Tooltip } from "../../webpack/common";
-import { filters } from "../../webpack/webpack";
+import { filters, wreq } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = (className: string) => `vc-spotify-${className}`;
+
+function msToHuman(ms: number) {
+    const minutes = ms / 1000 / 60;
+    const m = Math.floor(minutes);
+    const s = Math.floor((minutes - m) * 60);
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
 
 const useStateFromStores: <T>(
     stores: typeof SpotifyStore[],
@@ -101,6 +108,52 @@ function Controls() {
     );
 }
 
+function SeekBar() {
+    const { duration } = SpotifyStore.track!;
+
+    const storePosition = useStateFromStores([SpotifyStore], () => SpotifyStore.mPosition);
+
+    const [isSettingPosition, setIsSettingPosition] = React.useState(false);
+    const [position, setPosition] = React.useState(storePosition);
+
+    // eslint-disable-next-line consistent-return
+    React.useEffect(() => {
+        if (!isSettingPosition) {
+            setPosition(SpotifyStore.position);
+            const interval = setInterval(() => {
+                setPosition(p => p + 1000);
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [storePosition, isSettingPosition]);
+
+    const Slider = wreq(42944).Z;
+
+    const ref = React.useRef();
+
+    return (
+        <div id={cl("progress-bar")}>
+            <span className={cl("progress-time")}>{msToHuman(position)}</span>
+            <Slider
+                ref={ref}
+                minValue={0}
+                maxValue={duration}
+                value={position}
+                onChange={!isSettingPosition && ((v: number) => {
+                    setPosition(v);
+                    setIsSettingPosition(true);
+                    SpotifyStore.seek(v).then(() =>
+                        setIsSettingPosition(false)
+                    );
+                })}
+                renderValue={msToHuman}
+            />
+            <span className={cl("progress-time")}>{msToHuman(duration)}</span>
+        </div>
+    );
+}
+
 function Info({ track }: { track: Track; }) {
     const img = track?.album?.image;
 
@@ -156,6 +209,7 @@ export function Player() {
         )}>
             <div id={cl("player")}>
                 <Info track={track} />
+                <SeekBar />
                 <Controls />
             </div>
         </ErrorBoundary>
