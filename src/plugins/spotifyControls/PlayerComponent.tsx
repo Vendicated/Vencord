@@ -19,7 +19,7 @@
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
 import { classes, lazyWebpack } from "../../utils";
-import { Forms, Tooltip } from "../../webpack/common";
+import { Forms, React, Tooltip } from "../../webpack/common";
 import { filters } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
@@ -119,15 +119,18 @@ function Info({ track }: { track: Track; }) {
                     {track.name}
                 </TooltipText>
                 <TooltipText>
-                    {track.artists.map(a => (
-                        <a
-                            key={a.id}
-                            className={cl("artist")}
-                            href={`https://open.spotify.com/artist/${a.id}`}
-                            target="_blank"
-                        >
-                            {a.name}
-                        </a>
+                    {track.artists.map((a, i) => (
+                        <React.Fragment key={a.id}>
+                            <a
+                                key={a.id}
+                                className={cl("artist")}
+                                href={`https://open.spotify.com/artist/${a.id}`}
+                                target="_blank"
+                            >
+                                {a.name}
+                            </a>
+                            {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
+                        </React.Fragment>
                     ))}
                 </TooltipText>
             </div>
