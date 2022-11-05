@@ -18,9 +18,9 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
-import { classes, debounce, lazyWebpack } from "../../utils";
+import { classes, debounce, LazyComponent, lazyWebpack } from "../../utils";
 import { Forms, React, Tooltip } from "../../webpack/common";
-import { filters, wreq } from "../../webpack/webpack";
+import { filters, find } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = (className: string) => `vc-spotify-${className}`;
@@ -112,6 +112,11 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
+const Slider = LazyComponent(() => {
+    const filter = filters.byCode("sliderContainer");
+    return find(m => m.render && filter(m.render));
+});
+
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
@@ -132,15 +137,10 @@ function SeekBar() {
         }
     }, [storePosition, isSettingPosition]);
 
-    const Slider = wreq(42944).Z;
-
-    const ref = React.useRef();
-
     return (
         <div id={cl("progress-bar")}>
             <span className={cl("progress-time")}>{msToHuman(position)}</span>
             <Slider
-                ref={ref}
                 minValue={0}
                 maxValue={duration}
                 value={position}
