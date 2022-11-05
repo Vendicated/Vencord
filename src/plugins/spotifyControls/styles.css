@@ -1,4 +1,5 @@
 .vc-spotify-button {
+    height: 100%;
     background: none;
     color: var(--interactive-normal);
 }
