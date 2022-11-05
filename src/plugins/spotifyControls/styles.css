@@ -59,8 +59,10 @@
 #vc-spotify-song-title:hover {
     text-decoration: underline;
     color: var(--interactive-active);
+    cursor: pointer;
 }
 
 #vc-spotify-album-image:hover {
     filter: brightness(1.2);
+    cursor: pointer;
 }
