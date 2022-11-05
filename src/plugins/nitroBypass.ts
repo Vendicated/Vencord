@@ -120,6 +120,12 @@ export default definePlugin({
             default: true,
             restartNeeded: true,
         },
+        stickerSize: {
+            description: "Size of the stickers when sending",
+            type: OptionType.SLIDER,
+            default: 160,
+            markers: [32, 64, 128, 160, 256, 512],
+        },
         enableStreamQualityBypass: {
             description: "Allow streaming in nitro quality",
             type: OptionType.BOOLEAN,
@@ -137,7 +143,7 @@ export default definePlugin({
     },
 
     getStickerLink(stickerId: string) {
-        return `${location.origin}/stickers/${stickerId}.png`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.NitroBypass.stickerSize}`;
     },
 
     start() {
@@ -198,7 +204,7 @@ export default definePlugin({
 
                                         const gif = new GIFEncoder();
                                         // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-                                        const resolution = apng.width; // or configurable
+                                        const resolution = Settings.plugins.NitroBypass.stickerSize;
 
                                         const canvas = document.createElement("canvas");
                                         canvas.width = canvas.height = resolution;
