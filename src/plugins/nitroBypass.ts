@@ -177,11 +177,10 @@ export default definePlugin({
                     const stickerId = stickerIds[0];
                     if (stickerId) {
 
-                        // can't send Discord stickers without nitro
-                        if (!this.canUseEmotes) {
-                            const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
-
-                            if (isDiscordSticker) {
+                        const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
+                        if (isDiscordSticker) {
+                            // can't send Discord stickers without nitro
+                            if (!this.canUseEmotes) {
                                 sendBotMessage(channelId, {
                                     content: "Discord stickers are not supported!",
                                     author: {
@@ -189,6 +188,8 @@ export default definePlugin({
                                     }
                                 });
                                 return { cancel: true };
+                            } else {
+                                return { cancel: false };
                             }
                         }
 
