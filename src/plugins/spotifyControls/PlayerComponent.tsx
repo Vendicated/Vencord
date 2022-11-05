@@ -48,8 +48,8 @@ function Svg(path: string, label: string) {
             width="24"
             viewBox="0 0 48 48"
             fill="currentColor"
-            aria-hidden={true}
             aria-label={label}
+            focusable={false}
         >
             <path d={path} />
         </svg>
@@ -110,7 +110,10 @@ function Controls() {
 
     return (
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
-            <Button className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))} onClick={() => SpotifyStore.setShuffle(!shuffle)}>
+            <Button
+                className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
+                onClick={() => SpotifyStore.setShuffle(!shuffle)}
+            >
                 <Shuffle />
             </Button>
             <Button onClick={() => SpotifyStore.prev()}>
@@ -164,7 +167,7 @@ function SeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <span className={cl("progress-time")}>{msToHuman(position)}</span>
+            <span className={cl("progress-time")} aria-label="Progress">{msToHuman(position)}</span>
             <Slider
                 minValue={0}
                 maxValue={duration}
@@ -176,7 +179,7 @@ function SeekBar() {
                 }}
                 renderValue={msToHuman}
             />
-            <span className={cl("progress-time")}>{msToHuman(duration)}</span>
+            <span className={cl("progress-time")} aria-label="Total Duration">{msToHuman(duration)}</span>
         </div>
     );
 }
@@ -189,6 +192,7 @@ function Info({ track }: { track: Track; }) {
             <img
                 id={cl("album-image")}
                 src={img?.url}
+                alt="Album Image"
                 onClick={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
             />
             <div id={cl("titles")}>
