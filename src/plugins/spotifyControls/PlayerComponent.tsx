@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
-import { classes, lazyWebpack } from "../../utils";
+import { classes, debounce, lazyWebpack } from "../../utils";
 import { Forms, React, Tooltip } from "../../webpack/common";
 import { filters, wreq } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
@@ -108,12 +108,16 @@ function Controls() {
     );
 }
 
+const seek = debounce((v: number) => {
+    SpotifyStore.seek(v);
+});
+
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
     const storePosition = useStateFromStores([SpotifyStore], () => SpotifyStore.mPosition);
+    const isSettingPosition = useStateFromStores([SpotifyStore], () => SpotifyStore.isSettingPosition);
 
-    const [isSettingPosition, setIsSettingPosition] = React.useState(false);
     const [position, setPosition] = React.useState(storePosition);
 
     // eslint-disable-next-line consistent-return
@@ -140,13 +144,11 @@ function SeekBar() {
                 minValue={0}
                 maxValue={duration}
                 value={position}
-                onChange={!isSettingPosition && ((v: number) => {
+                onChange={(v: number) => {
+                    if (isSettingPosition) return;
                     setPosition(v);
-                    setIsSettingPosition(true);
-                    SpotifyStore.seek(v).then(() =>
-                        setIsSettingPosition(false)
-                    );
-                })}
+                    seek(v);
+                }}
                 renderValue={msToHuman}
             />
             <span className={cl("progress-time")}>{msToHuman(duration)}</span>
