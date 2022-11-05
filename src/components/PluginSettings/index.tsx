@@ -31,7 +31,7 @@ import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";
 import PluginModal from "./PluginModal";
-import * as styles from "./styles";
+import styles from "./PluginSettings.module.css";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
@@ -81,8 +81,6 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave }: PluginCardProps) {
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
-
-    const [iconHover, setIconHover] = React.useState(false);
 
     function isEnabled() {
         return pluginSettings?.enabled || plugin.started;
@@ -140,7 +138,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <Flex className={styles.pluginsGridItem} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
                 onChange={toggleEnabled}
                 disabled={disabled}
@@ -162,19 +160,12 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
                     <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
-                    <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
-                        {plugin.options
-                            ? <CogWheel
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />
-                            : <InfoIcon
-                                width="24" height="24"
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />}
+                    <button role="switch" onClick={() => openModal()} className={classes(styles.settingsIcon, "button-12Fmur")}>
+                        {
+                            plugin.options
+                                ? <CogWheel className={styles.pluginCardIcon} />
+                                : <InfoIcon width="24" height="24" className={styles.pluginCardIcon} />
+                        }
                     </button>
                 </Flex>
             </Switch>
@@ -249,7 +240,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
 
-            <div style={styles.FiltersBar}>
+            <div className={styles.filtersBar}>
                 <TextInput value={searchValue.value} placeholder={"Search for a plugin..."} onChange={onSearch} style={{ marginBottom: 24 }} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
@@ -267,7 +258,7 @@ export default ErrorBoundary.wrap(function Settings() {
                 </div>
             </div>
 
-            <div style={styles.PluginsGrid}>
+            <div className={styles.pluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
@@ -286,7 +277,7 @@ export default ErrorBoundary.wrap(function Settings() {
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>
-            <div style={styles.PluginsGrid}>
+            <div className={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => a.required || dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
@@ -310,7 +301,7 @@ export default ErrorBoundary.wrap(function Settings() {
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
                 }
             </div>
-        </Forms.FormSection >
+        </Forms.FormSection>
     );
 });
 

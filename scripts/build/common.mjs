@@ -17,9 +17,11 @@
 */
 
 import { exec, execSync } from "child_process";
+import CssModulesPlugin from "esbuild-css-modules-plugin";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { basename, join } from "path";
+import stringHash from "string-hash";
 import { promisify } from "util";
 
 export const watch = process.argv.includes("--watch");
@@ -150,7 +152,35 @@ export const commonOpts = {
     minify: !watch,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
-    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
+    plugins: [
+        fileIncludePlugin,
+        gitHashPlugin,
+        gitRemotePlugin,
+        CssModulesPlugin({
+            // Sometimes CSS is injected before the DOM is ready, so some extra logic is needed.
+            inject: (cssContent, digest) => `
+                const style = document.createElement("style");
+                const id = style.id = "vencord-css-${digest}";
+                style.textContent = \`${cssContent.replace(/\n/g, "")}\`;
+                if (document.readyState === "complete" && !document.getElementById(id)) {
+                    document.body.appendChild(style);
+                } else {
+                    document.addEventListener('readystatechange', (event) => {
+                        if (document.readyState !== "complete") return;
+                        if (document.getElementById(id)) return;;
+                        document.body.appendChild(style);
+                    });
+                };`,
+            generateScopedName: (name, filename, css) => {
+                const hash = stringHash(css).toString(36).substring(0, 5);
+                const fname = basename(filename)
+                    .replace(/(\.module)?\.css$/, "") // Remove file extension
+                    .replace(".", "_")
+                    .replace(/\W/g, ""); // Remove non-alphanumeric chars
+                return `${fname}-${name}-${hash}`;
+            }
+        })
+    ],
     external: ["~plugins", "~git-hash", "~git-remote"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",

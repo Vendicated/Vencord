@@ -1,0 +1,37 @@
+.pluginCardIcon:hover {
+    color: var(--text-muted);
+}
+
+.pluginsGrid {
+    display: grid;
+    margin-top: 16px;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.pluginsGridItem {
+    background-color: var(--background-modifier-selected);
+    color: var(--interactive-active);
+    border-radius: 3px;
+    flex-direction: column;
+    cursor: pointer;
+    display: block;
+    height: min-content;
+    padding: 10px;
+    width: 100%;
+}
+
+.filtersBar {
+    gap: 10px;
+    height: 40px;
+    grid-template-columns: 1fr 150px;
+    display: grid;
+}
+
+.settingsIcon {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    margin-right: 8px;
+}
