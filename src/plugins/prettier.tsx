@@ -24,19 +24,8 @@ import definePlugin, { OptionType, PluginOptionsItem } from "../utils/types";
 import { Settings } from "../Vencord";
 import { Forms, React } from "../webpack/common";
 const prettierPlugins: Record<string, object> = {};
-// @ts-ignore
 let prettier;
 
-// const def_opt: PrettierOptions = {
-//     trailingComma: "es5",
-//     tabWidth: 4,
-//     semi: false,
-//     singleQuote: true,
-//     parser: "babel",
-//     useTabs: false,
-// };
-
-// fucking wrote this second time becuz deleted old file due to skill issue with prettier :(;;...
 const options: Record<string, PluginOptionsItem> = {
     FormatOnSend: {
         description: "Format On Send",
@@ -199,8 +188,8 @@ interface PrettierOptions {
 
 // all those shorted lang name
 function weDoLoveLanguagesDontWe(lang: string): string {
-    let to_ret: string = "";
-    const langs_lang_name = {
+    let langLove: string = "";
+    const langsShort = {
         babel: ["js", "javascript", "jsx", "tsx", "typescript", "ts"],
         html: ["vue", "angular", "xml", "html", "xhtml", "rss", "atom", "xjb", "xsd", "xsl", "plist", "svg"],
         css: ["less", "css", "scss"],
@@ -208,12 +197,12 @@ function weDoLoveLanguagesDontWe(lang: string): string {
         markdown: ["md", "markdown"],
     };
 
-    Object.keys(langs_lang_name).forEach(x => {
-        if (!langs_lang_name[x].includes(lang)) return;
-        to_ret = x;
+    Object.keys(langsShort).forEach(x => {
+        if (!langsShort[x].includes(lang)) return;
+        langLove = x;
         return;
     });
-    return to_ret;
+    return langLove;
 }
 
 function getSetting(name: string) {
