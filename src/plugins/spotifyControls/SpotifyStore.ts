@@ -124,11 +124,14 @@ export const SpotifyStore = proxyLazy(() => {
             this.req("post", "/next");
         }
 
-        setVolume(volume_percent: number) {
+        setVolume(percent: number) {
             this.req("put", "/volume", {
-                query: { volume_percent }
+                query: {
+                    volume_percent: Math.round(percent)
+                }
+
             }).then(() => {
-                this.volume = volume_percent;
+                this.volume = percent;
                 this.emitChange();
             });
         }

@@ -44,8 +44,13 @@
     gap: 0.2em;
 }
 
-#vc-spotify-album-image {
+#vc-spotify-info-wrapper img {
     height: 100%;
+    object-fit: contain;
+}
+
+#vc-spotify-album-expanded-wrapper img {
+    width: 100%;
     object-fit: contain;
 }
 

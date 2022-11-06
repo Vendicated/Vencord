@@ -19,7 +19,7 @@
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
 import { classes, debounce, LazyComponent, lazyWebpack } from "../../utils";
-import { Forms, React, Tooltip } from "../../webpack/common";
+import { ContextMenu, FluxDispatcher, Forms, Menu, React, Tooltip } from "../../webpack/common";
 import { filters, find } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
@@ -187,17 +187,74 @@ function SeekBar() {
     );
 }
 
+
+function AlbumContextMenu({ track }: { track: Track; }) {
+    const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
+
+    return (
+        <Menu.ContextMenu
+            navId="spotify-album-menu"
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label="Spotify Album Menu"
+        >
+            <Menu.MenuItem
+                key="open-album"
+                id="open-album"
+                label="Open Album"
+                action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+            />
+            <Menu.MenuItem
+                key="view-cover"
+                id="view-cover"
+                label="View Album Cover"
+                // trolley
+                action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
+            />
+            <Menu.MenuControlItem
+                id="spotify-volume"
+                key="spotify-volume"
+                label="Volume"
+                control={(props, ref) => (
+                    <Slider
+                        {...props}
+                        ref={ref}
+                        value={volume}
+                        minValue={0}
+                        maxValue={100}
+                        onChange={debounce((v: number) => SpotifyStore.setVolume(v))}
+                    />
+                )}
+            />
+        </Menu.ContextMenu>
+    );
+}
+
 function Info({ track }: { track: Track; }) {
     const img = track?.album?.image;
 
+    const [coverExpanded, setCoverExpanded] = React.useState(false);
+
+    const i = (
+        <img
+            id={cl("album-image")}
+            src={img?.url}
+            alt="Album Image"
+            onClick={() => setCoverExpanded(!coverExpanded)}
+            onContextMenu={e => {
+                ContextMenu.open(e, () => <AlbumContextMenu track={track} />);
+            }}
+        />
+    );
+
+    if (coverExpanded) return (
+        <div id={cl("album-expanded-wrapper")}>
+            {i}
+        </div>
+    );
+
     return (
         <div id={cl("info-wrapper")}>
-            <img
-                id={cl("album-image")}
-                src={img?.url}
-                alt="Album Image"
-                onClick={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
-            />
+            {i}
             <div id={cl("titles")}>
                 <TooltipText
                     id={cl("song-title")}
