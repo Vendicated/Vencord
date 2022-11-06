@@ -26,7 +26,6 @@ import { _resolveReady, filters, findByCode, mapMangledModuleLazy, waitFor } fro
 export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
-export const Flux = lazyWebpack(filters.byProps("connectStores"));
 export let React: typeof import("react");
 export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 

@@ -24,11 +24,9 @@ export function Flex(props: React.PropsWithChildren<{
     className?: string;
 } & React.HTMLProps<HTMLDivElement>>) {
     props.style ??= {};
-    props.style.display = "flex";
-    // TODO(ven): Remove me, what was I thinking??
-    props.style.gap ??= "1em";
     props.style.flexDirection ||= props.flexDirection;
-    delete props.flexDirection;
+    props.style.gap ??= "1em";
+    props.style.display = "flex";
     return (
         <div {...props}>
             {props.children}
