@@ -139,6 +139,64 @@ export default definePlugin({
         return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.NitroBypass.stickerSize}`;
     },
 
+    sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
+        (async () => {
+            const [{ parseURL }, {
+                GIFEncoder,
+                quantize,
+                applyPalette
+            }] = await Promise.all([importApngJs(), getGifEncoder()]);
+
+            const apng = await parseURL(stickerLink);
+
+            const gif = new GIFEncoder();
+            // width should be equal to height for stickers, so it doesn't matter if we use width or height here
+            const resolution = Settings.plugins.NitroBypass.stickerSize;
+
+            const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
+                return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
+            }, [0, 0]);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d", {
+                willReadFrequently: true
+            })!;
+
+            const { frames } = apng;
+
+            let lastImageData: ImageData | null = null;
+            for (const frame of frames) {
+                if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
+                    ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
+                }
+                ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
+
+                const imageData = ctx.getImageData(0, 0, width, height);
+
+                const palette = quantize(imageData.data, 256);
+                const index = applyPalette(imageData.data, palette);
+
+                gif.writeFrame(index, width, height, {
+                    transparent: true,
+                    palette,
+                    delay: frame.delay,
+                });
+
+                if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
+                    ctx.putImageData(lastImageData, 0, 0);
+                }
+                lastImageData = imageData;
+            }
+
+            gif.finish();
+            const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+            promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+        })();
+    },
+
     start() {
         if (!Settings.plugins.NitroBypass.enableEmojiBypass && !Settings.plugins.NitroBypass.enableStickerBypass) {
             return;
@@ -156,7 +214,7 @@ export default definePlugin({
             const { guildId } = this;
 
             if (Settings.plugins.NitroBypass.enableStickerBypass) {
-                const stickerIds = extra?.stickerIds;
+                const stickerIds: string[] = extra?.stickerIds;
 
                 const addStickerToMessage = (stickerLink: string) => {
                     if (messageObj.content) {
@@ -206,57 +264,7 @@ export default definePlugin({
                                 const isAnimated = sticker.format_type === 2;
                                 if (!discordStickerPack && isAnimated) {
 
-                                    (async () => {
-                                        const [{ parseURL }, { GIFEncoder, quantize, applyPalette }] = await Promise.all([importApngJs(), getGifEncoder()]);
-
-                                        const apng = await parseURL(stickerLink);
-
-                                        const gif = new GIFEncoder();
-                                        // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-                                        const resolution = Settings.plugins.NitroBypass.stickerSize;
-
-                                        const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
-                                            return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
-                                        }, [0, 0]);
-
-                                        const canvas = document.createElement("canvas");
-                                        canvas.width = width;
-                                        canvas.height = height;
-
-                                        const ctx = canvas.getContext("2d", {
-                                            willReadFrequently: true
-                                        })!;
-
-                                        const { frames } = apng;
-
-                                        let lastImageData: ImageData | null = null;
-                                        for (const frame of frames) {
-                                            if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
-                                                ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
-                                            }
-                                            ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
-
-                                            const imageData = ctx.getImageData(0, 0, width, height);
-
-                                            const palette = quantize(imageData.data, 256);
-                                            const index = applyPalette(imageData.data, palette);
-
-                                            gif.writeFrame(index, width, height, {
-                                                transparent: true,
-                                                palette,
-                                                delay: frame.delay,
-                                            });
-
-                                            if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
-                                                ctx.putImageData(lastImageData, 0, 0);
-                                            }
-                                            lastImageData = imageData;
-                                        }
-
-                                        gif.finish();
-                                        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-                                        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-                                    })();
+                                    this.sendAnimatedSticker(stickerLink, stickerId, channelId);
 
                                     // animated stickers are handled above
                                     return { cancel: true };
