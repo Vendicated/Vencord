@@ -202,9 +202,9 @@ export default definePlugin({
                             // only modify if sticker is not from current guild
                             if (stickerGuildId !== guildId) {
 
-                                // if it's animated download it, convert to gif and send it
+                                // if it's an animated guild sticker download it, convert to gif and send it
                                 const isAnimated = sticker.format_type === 2;
-                                if (isAnimated) {
+                                if (!discordStickerPack && isAnimated) {
 
                                     (async () => {
                                         const [{ parseURL }, { GIFEncoder, quantize, applyPalette }] = await Promise.all([importApngJs(), getGifEncoder()]);
