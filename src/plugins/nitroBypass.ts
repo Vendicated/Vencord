@@ -171,7 +171,7 @@ export default definePlugin({
                     if (stickerId) {
 
                         let stickerLink = this.getStickerLink(stickerId);
-                        let sticker;
+                        let sticker: Sticker | undefined;
 
                         const discordStickerPack = getPremiumPacks().find(pack => {
                             const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
