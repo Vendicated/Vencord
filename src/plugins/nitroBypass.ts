@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { sendBotMessage } from "../api/Commands";
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
@@ -163,26 +162,25 @@ export default definePlugin({
                     const stickerId = stickerIds[0];
                     if (stickerId) {
 
-                        const isDiscordSticker = getPremiumPacks().flatMap(x => x.stickers).find(sticker => sticker.id === stickerId);
-                        if (isDiscordSticker) {
-                            // can't send Discord stickers without nitro
-                            if (!this.canUseEmotes) {
-                                sendBotMessage(channelId, {
-                                    content: "Discord stickers are not supported!",
-                                    author: {
-                                        username: "Vencord"
-                                    }
-                                });
-                                return { cancel: true };
-                            } else {
-                                return { cancel: false };
+                        let stickerLink = this.getStickerLink(stickerId);
+                        let sticker;
+
+                        const discordStickerPack = getPremiumPacks().find(pack => {
+                            const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
+                            if (discordSticker) {
+                                sticker = discordSticker;
                             }
+                            return discordSticker;
+                        });
+
+                        if (discordStickerPack) {
+                            // discord stickers provided by the Distok project
+                            stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}-small.gif`;
+                        } else {
+                            // guild stickers
+                            const stickersList = Array.from(getAllGuildStickers().values()).flat() as Sticker[];
+                            sticker = stickersList.find(x => x.id === stickerId);
                         }
-
-                        const stickerLink = this.getStickerLink(stickerId);
-
-                        const stickersList = Array.from(getAllGuildStickers().values()).flat() as Sticker[];
-                        const sticker = stickersList.find(x => x.id === stickerId);
 
                         if (sticker) {
                             // when the user has Nitro and the sticker is available, send the sticker normally
