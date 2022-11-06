@@ -183,7 +183,7 @@ export default definePlugin({
 
                         if (discordStickerPack) {
                             // discord stickers provided by the Distok project
-                            stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}-small.gif`;
+                            stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
                         } else {
                             // guild stickers
                             const stickersList = Array.from(getAllGuildStickers().values()).flat() as Sticker[];
