@@ -158,6 +158,14 @@ export default definePlugin({
             if (Settings.plugins.NitroBypass.enableStickerBypass) {
                 const stickerIds = extra?.stickerIds;
 
+                const addStickerToMessage = (stickerLink: string) => {
+                    if (messageObj.content) {
+                        messageObj.content += ` ${stickerLink}`;
+                    } else {
+                        messageObj.content = stickerLink;
+                    }
+                };
+
                 if (stickerIds && stickerIds.length) {
                     const stickerId = stickerIds[0];
                     if (stickerId) {
@@ -254,12 +262,12 @@ export default definePlugin({
                                     return { cancel: true };
                                 }
 
-                                messageObj.content = stickerLink;
+                                addStickerToMessage(stickerLink);
                                 delete extra.stickerIds;
                             }
                         } else {
                             console.warn("[NitroBypass] Can't find sticker in stickersList", stickerId, "modifying just in case");
-                            messageObj.content = stickerLink;
+                            addStickerToMessage(stickerLink);
                             delete extra.stickerIds;
                         }
                     }
