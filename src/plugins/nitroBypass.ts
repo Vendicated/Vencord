@@ -17,10 +17,10 @@
 */
 
 import { sendBotMessage } from "../api/Commands";
-import { addPreEditListener, addPreSendListener, removePreEditListener,removePreSendListener } from "../api/MessageEvents";
+import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
 import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
-import { getGifEncoder, importApngJs } from "../utils/dependencies";
+import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters, findByProps } from "../webpack";
@@ -225,24 +225,34 @@ export default definePlugin({
 
                                         const canvas = document.createElement("canvas");
                                         canvas.width = canvas.height = resolution;
-                                        const ctx = canvas.getContext("2d")!;
+                                        const ctx = canvas.getContext("2d", {
+                                            willReadFrequently: true
+                                        })!;
 
                                         const { frames } = apng;
 
+                                        let lastImageData: ImageData | null = null;
                                         for (const frame of frames) {
-                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                            ctx.drawImage(frame.img, 0, 0, resolution, resolution);
+                                            if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
+                                                ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
+                                            }
+                                            ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
 
-                                            const { data } = ctx.getImageData(0, 0, resolution, resolution);
+                                            const imageData = ctx.getImageData(0, 0, resolution, resolution);
 
-                                            const palette = quantize(data, 256);
-                                            const index = applyPalette(data, palette);
+                                            const palette = quantize(imageData.data, 256);
+                                            const index = applyPalette(imageData.data, palette);
 
                                             gif.writeFrame(index, resolution, resolution, {
                                                 transparent: true,
                                                 palette,
                                                 delay: frame.delay,
                                             });
+
+                                            if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
+                                                ctx.putImageData(lastImageData, 0, 0);
+                                            }
+                                            lastImageData = imageData;
                                         }
 
                                         gif.finish();
