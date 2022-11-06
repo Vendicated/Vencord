@@ -72,6 +72,13 @@ export default definePlugin({
             },
         },
         {
+            find: "\"SENDABLE\"",
+            replacement: {
+                match: /(\w+)\.available\?/,
+                replace: "true?"
+            }
+        },
+        {
             find: "canUseAnimatedEmojis:function",
             predicate: () => Settings.plugins.NitroBypass.enableStreamQualityBypass === true,
             replacement: [
@@ -142,16 +149,6 @@ export default definePlugin({
         const { getAllGuildStickers } = findByProps("getAllGuildStickers");
         const { getPremiumPacks } = findByProps("getStickerById");
 
-        // make all available to click
-        getAllGuildStickers().forEach((packs: Sticker[]) => {
-            packs.forEach((sticker: Sticker) => {
-                if (!sticker.available) {
-                    sticker.available = true;
-                    sticker._notAvailable = true;
-                }
-            });
-        });
-
         function getWordBoundary(origStr, offset) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
@@ -189,7 +186,7 @@ export default definePlugin({
 
                         if (sticker) {
                             // when the user has Nitro and the sticker is available, send the sticker normally
-                            if (this.canUseEmotes && !sticker._notAvailable) {
+                            if (this.canUseEmotes && sticker.available) {
                                 return { cancel: false };
                             }
 
