@@ -42,7 +42,6 @@ interface Sticker {
 }
 
 export default definePlugin({
-    stickerPacks: [] as any[],
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
@@ -94,18 +93,7 @@ export default definePlugin({
                 replace: ""
             }
         },
-        {
-            find: "ingestStickers:",
-            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
-            replacement: {
-                match: /(\w+)=(\w+).sticker_packs;(\w+)\.(\w+)\.dispatch\(\{type:"STICKER_PACKS_FETCH_SUCCESS"/g,
-                replace: "$1=$2.sticker_packs;Vencord.Plugins.plugins.NitroBypass.savePacks($1);$3.$4.dispatch({type:\"STICKER_PACKS_FETCH_SUCCESS\""
-            },
-        },
     ],
-    savePacks(stickerPacks) {
-        this.stickerPacks = stickerPacks;
-    },
     options: {
         enableEmojiBypass: {
             description: "Allow sending fake emojis",
@@ -152,6 +140,7 @@ export default definePlugin({
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
         const { getAllGuildStickers } = findByProps("getAllGuildStickers");
+        const { getPremiumPacks } = findByProps("getStickerById");
 
         // make all available to click
         getAllGuildStickers().forEach((packs: Sticker[]) => {
@@ -177,7 +166,7 @@ export default definePlugin({
                     const stickerId = stickerIds[0];
                     if (stickerId) {
 
-                        const isDiscordSticker = this.stickerPacks.find(pack => pack.stickers.find(sticker => sticker.id === stickerId));
+                        const isDiscordSticker = getPremiumPacks().flatMap(x => x.stickers).find(sticker => sticker.id === stickerId);
                         if (isDiscordSticker) {
                             // can't send Discord stickers without nitro
                             if (!this.canUseEmotes) {
