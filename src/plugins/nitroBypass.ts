@@ -223,8 +223,14 @@ export default definePlugin({
                                         // width should be equal to height for stickers, so it doesn't matter if we use width or height here
                                         const resolution = Settings.plugins.NitroBypass.stickerSize;
 
+                                        const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
+                                            return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
+                                        }, [0, 0]);
+
                                         const canvas = document.createElement("canvas");
-                                        canvas.width = canvas.height = resolution;
+                                        canvas.width = width;
+                                        canvas.height = height;
+
                                         const ctx = canvas.getContext("2d", {
                                             willReadFrequently: true
                                         })!;
@@ -238,12 +244,12 @@ export default definePlugin({
                                             }
                                             ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
 
-                                            const imageData = ctx.getImageData(0, 0, resolution, resolution);
+                                            const imageData = ctx.getImageData(0, 0, width, height);
 
                                             const palette = quantize(imageData.data, 256);
                                             const index = applyPalette(imageData.data, palette);
 
-                                            gif.writeFrame(index, resolution, resolution, {
+                                            gif.writeFrame(index, width, height, {
                                                 transparent: true,
                                                 palette,
                                                 delay: frame.delay,
