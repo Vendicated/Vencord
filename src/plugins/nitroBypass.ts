@@ -165,6 +165,9 @@ export default definePlugin({
                 willReadFrequently: true
             })!;
 
+            const scale = resolution / width;
+            ctx.scale(scale, scale);
+
             const { frames } = apng;
 
             let lastImageData: ImageData | null = null;
@@ -174,12 +177,12 @@ export default definePlugin({
                 }
                 ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
 
-                const imageData = ctx.getImageData(0, 0, width, height);
+                const imageData = ctx.getImageData(0, 0, resolution, resolution);
 
                 const palette = quantize(imageData.data, 256);
                 const index = applyPalette(imageData.data, palette);
 
-                gif.writeFrame(index, width, height, {
+                gif.writeFrame(index, resolution, resolution, {
                     transparent: true,
                     palette,
                     delay: frame.delay,
