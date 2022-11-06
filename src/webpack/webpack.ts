@@ -290,6 +290,10 @@ export function findAllByProps(...props: string[]) {
     return findAll(filters.byProps(...props));
 }
 
+export function findByCode(...code: string[]) {
+    return find(filters.byCode(...code));
+}
+
 export function findByDisplayName(deezNuts: string) {
     return find(filters.byDisplayName(deezNuts));
 }
