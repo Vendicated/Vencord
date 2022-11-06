@@ -16,9 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { makeLazy } from "./misc";
+// Proxies demand that these properties be unmodified, so proxyLazy
+// will always return the function default for them.
+const unconfigurable = ["arguments", "caller", "prototype"];
 
-const ProxyDummy = function () { };
+const handler: ProxyHandler<any> = {};
+
+for (const method of [
+    "apply",
+    "construct",
+    "defineProperty",
+    "deleteProperty",
+    "get",
+    "getOwnPropertyDescriptor",
+    "getPrototypeOf",
+    "has",
+    "isExtensible",
+    "ownKeys",
+    "preventExtensions",
+    "set",
+    "setPrototypeOf"
+]) {
+    handler[method] =
+        (target: any, ...args: any[]) => Reflect[method](target.get(), ...args);
+}
+
+handler.ownKeys = target => {
+    const v = target.get();
+    const keys = Reflect.ownKeys(v);
+    for (const key of unconfigurable) {
+        if (!keys.includes(key)) keys.push(key);
+    }
+    return keys;
+};
+
+handler.getOwnPropertyDescriptor = (target, p) => {
+    if (typeof p === "string" && unconfigurable.includes(p))
+        return Reflect.getOwnPropertyDescriptor(target, p);
+
+    return Reflect.getOwnPropertyDescriptor(target.get(), p);
+};
 
 /**
  * Wraps the result of {@see makeLazy} in a Proxy you can consume as if it wasn't lazy.
@@ -30,17 +67,10 @@ const ProxyDummy = function () { };
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazy<T>(factory: () => T): T {
-    const lazy = makeLazy(factory);
+    const proxyDummy: { (): void; cachedValue?: T; get(): T; } = function () { };
 
-    return new Proxy(ProxyDummy, {
-        get: (_, prop) => lazy()[prop],
-        set: (_, prop, value) => (lazy()[prop] = value, true),
-        has: (_, prop) => prop in lazy(),
-        apply: (_, $this, args) => (lazy() as Function).apply($this, args),
-        ownKeys: () => Reflect.ownKeys(lazy() as object),
-        construct: (_, args) => Reflect.construct(lazy() as Function, args),
-        deleteProperty: (_, prop) => delete lazy()[prop],
-        defineProperty: (_, property, attributes) => !!Object.defineProperty(lazy(), property, attributes),
-        getPrototypeOf: () => Object.getPrototypeOf(lazy())
-    }) as any as T;
+    proxyDummy.cachedValue = void 0;
+    proxyDummy.get = () => proxyDummy.cachedValue ??= factory();
+
+    return new Proxy(proxyDummy, handler) as any;
 }
