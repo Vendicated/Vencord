@@ -53,10 +53,15 @@ interface PlayerState {
     repeat: boolean,
     position: number,
     context?: any;
-    device?: any;
+    device?: Device;
 
     // added by patch
     actual_repeat: Repeat;
+}
+
+interface Device {
+    id: string;
+    is_active: boolean;
 }
 
 type Repeat = "off" | "track" | "context";
@@ -85,7 +90,7 @@ export const SpotifyStore = proxyLazy(() => {
         private start = 0;
 
         public track: Track | null = null;
-        public device: any = null;
+        public device: Device | null = null;
         public isPlaying = false;
         public repeat: Repeat = "off";
         public shuffle = false;
@@ -163,6 +168,9 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         private req(method: "post" | "get" | "put", route: string, data: any = {}) {
+            if (this.device?.is_active)
+                (data.query ??= {}).device_id = this.device.id;
+
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
             return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
@@ -174,12 +182,16 @@ export const SpotifyStore = proxyLazy(() => {
     const store = new SpotifyStore(FluxDispatcher, {
         SPOTIFY_PLAYER_STATE(e: PlayerState) {
             store.track = e.track;
+            store.device = e.device ?? null;
             store.isPlaying = e.isPlaying ?? false;
             store.volume = e.volumePercent ?? 0;
             store.repeat = e.actual_repeat || "off";
             store.position = e.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
+        },
+        SPOTIFY_SET_DEVICES({ devices }: { devices: Device[]; }) {
+            store.device = devices.find(d => d.is_active) ?? devices[0] ?? null;
         }
     });
 

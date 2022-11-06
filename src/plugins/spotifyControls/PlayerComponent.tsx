@@ -232,7 +232,28 @@ export function Player() {
         (prev, next) => prev?.id === next?.id
     );
 
-    if (!track) return null;
+    const device = useStateFromStores(
+        [SpotifyStore],
+        () => SpotifyStore.device,
+        null,
+        (prev, next) => prev?.id === next?.id
+    );
+
+    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
+    const [shouldHide, setShouldHide] = React.useState(false);
+
+    // Hide player after 5 minutes of inactivity
+    // eslint-disable-next-line consistent-return
+    React.useEffect(() => {
+        setShouldHide(false);
+        if (!isPlaying) {
+            const timeout = setTimeout(() => setShouldHide(true), 1000 * 60 * 5);
+            return () => clearTimeout(timeout);
+        }
+    }, [isPlaying]);
+
+    if (!track || !device?.is_active || shouldHide)
+        return null;
 
     return (
         <ErrorBoundary fallback={() => (
