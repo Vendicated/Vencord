@@ -21,9 +21,9 @@ import { User } from "discord-types/general";
 import type Other from "discord-types/other";
 import type Stores from "discord-types/stores";
 
-import { proxyLazy } from "../utils";
-import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
+import { proxyLazy } from "../utils/proxyLazy";
+import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { _resolveReady, filters, findByCode, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
 export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
@@ -50,8 +50,8 @@ export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 
-export const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-export const Slider = lazyWebpack(filters.byCode("closestMarkerIndex", "stickToMarkers"));
+export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
 
 export let Parser: any;
 export let Alerts: {
