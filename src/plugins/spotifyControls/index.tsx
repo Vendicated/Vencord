@@ -24,6 +24,7 @@ export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
     authors: [Devs.Ven],
+    dependencies: ["MenuItemDeobfuscatorApi"],
     patches: [
         {
             find: "showTaglessAccountPanel:",
