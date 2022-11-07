@@ -214,6 +214,7 @@ export default definePlugin({
         const StickerStore = lazyWebpack(filters.byProps("getAllGuildStickers")) as {
             getPremiumPacks(): StickerPack[];
             getAllGuildStickers(): Map<string, Sticker[]>;
+            getStickerById(id: string): Sticker | undefined;
         };
 
         function getWordBoundary(origStr: string, offset: number) {
@@ -224,64 +225,48 @@ export default definePlugin({
             const { guildId } = this;
 
             if (settings.enableStickerBypass) {
-                const stickerIds = extra?.stickerIds;
+                const stickerId = extra?.stickerIds?.[0];
 
-                const addStickerToMessage = (stickerLink: string) => {
-                    if (messageObj.content) {
-                        messageObj.content += ` ${stickerLink}`;
+                if (stickerId) {
+                    let stickerLink = this.getStickerLink(stickerId);
+                    let sticker: Sticker | undefined;
+
+                    const discordStickerPack = StickerStore.getPremiumPacks().find(pack => {
+                        const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
+                        if (discordSticker) {
+                            sticker = discordSticker;
+                        }
+                        return discordSticker;
+                    });
+
+                    if (discordStickerPack) {
+                        // discord stickers provided by the Distok project
+                        stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
                     } else {
-                        messageObj.content = stickerLink;
+                        // guild stickers
+                        sticker = StickerStore.getStickerById(stickerId);
                     }
-                    delete extra.stickerIds;
-                };
 
-                if (stickerIds && stickerIds.length) {
-                    const stickerId = stickerIds[0];
-                    if (stickerId) {
-                        let stickerLink = this.getStickerLink(stickerId);
-                        let sticker: Sticker | undefined;
-
-                        const discordStickerPack = StickerStore.getPremiumPacks().find(pack => {
-                            const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
-                            if (discordSticker) {
-                                sticker = discordSticker;
-                            }
-                            return discordSticker;
-                        });
-
-                        if (discordStickerPack) {
-                            // discord stickers provided by the Distok project
-                            stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
-                        } else {
-                            // guild stickers
-                            const stickersList = Array.from(StickerStore.getAllGuildStickers().values()).flat();
-                            sticker = stickersList.find(x => x.id === stickerId);
+                    if (sticker) {
+                        // when the user has Nitro and the sticker is available, send the sticker normally
+                        if (this.canUseEmotes && sticker.available) {
+                            return { cancel: false };
                         }
 
-                        if (sticker) {
-                            // when the user has Nitro and the sticker is available, send the sticker normally
-                            if (this.canUseEmotes && sticker.available) {
-                                return { cancel: false };
+                        // only modify if sticker is not from current guild
+                        if (sticker.guild_id !== guildId) {
+                            // if it's an animated guild sticker, download it, convert to gif and send it
+                            const isAnimated = sticker.format_type === 2;
+                            if (!discordStickerPack && isAnimated) {
+                                this.sendAnimatedSticker(stickerLink, stickerId, channelId);
+                                return { cancel: true };
                             }
 
-                            const stickerGuildId = sticker.guild_id;
+                            if (messageObj.content)
+                                messageObj.content += " ";
+                            messageObj.content += stickerLink;
 
-                            // only modify if sticker is not from current guild
-                            if (stickerGuildId !== guildId) {
-                                // if it's an animated guild sticker, download it, convert to gif and send it
-                                const isAnimated = sticker.format_type === 2;
-                                if (!discordStickerPack && isAnimated) {
-                                    this.sendAnimatedSticker(stickerLink, stickerId, channelId);
-
-                                    // animated stickers are handled above
-                                    return { cancel: true };
-                                }
-
-                                addStickerToMessage(stickerLink);
-                            }
-                        } else {
-                            console.warn("[NitroBypass] Can't find sticker in stickersList", stickerId, "modifying just in case");
-                            addStickerToMessage(stickerLink);
+                            delete extra.stickerIds;
                         }
                     }
                 }
