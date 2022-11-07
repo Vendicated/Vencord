@@ -74,9 +74,9 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
  * @param factory Function returning a Component
  * @returns Result of factory function
  */
-export function LazyComponent<T extends JSX.IntrinsicAttributes = any>(factory: () => React.ComponentType<T>) {
+export function LazyComponent<T = any>(factory: () => React.ComponentType<T>) {
     const get = makeLazy(factory);
-    return (props: T) => {
+    return (props: T & JSX.IntrinsicAttributes) => {
         const Component = get();
         return <Component {...props} />;
     };

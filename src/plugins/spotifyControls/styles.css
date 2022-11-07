@@ -1,0 +1,115 @@
+.vc-spotify-button {
+    height: 100%;
+    background: none;
+    color: var(--interactive-normal);
+}
+
+.vc-spotify-button:hover {
+    filter: brightness(1.3);
+}
+
+.vc-spotify-shuffle-on,
+.vc-spotify-repeat-context,
+.vc-spotify-repeat-track {
+    color: #1db954;
+}
+
+/* Hack to stack icon and bullet */
+.vc-spotify-repeat-track {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+.vc-spotify-repeat-track * {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.vc-spotify-tooltip-text {
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 0.2em;
+    max-width: 100%;
+}
+
+.vc-spotify-button-row {
+    justify-content: center;
+}
+
+#vc-spotify-info-wrapper {
+    display: flex;
+    flex-direction: row;
+    height: 3em;
+    flex-direction: row;
+    gap: 0.2em;
+}
+
+#vc-spotify-info-wrapper img {
+    height: 100%;
+    object-fit: contain;
+}
+
+#vc-spotify-album-expanded-wrapper img {
+    width: 100%;
+    object-fit: contain;
+}
+
+#vc-spotify-titles {
+    display: flex;
+    flex-direction: column;
+    padding: 0.2em;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+    overflow: hidden;
+}
+
+.vc-spotify-tooltip-text {
+    margin: unset;
+}
+
+#vc-spotify-song-title {
+    color: var(--header-primary);
+}
+
+.vc-spotify-artist {
+    text-decoration: none;
+    color: var(--header-secondary);
+}
+
+.vc-spotify-comma {
+    color: var(--header-secondary);
+}
+
+.vc-spotify-artist:hover,
+#vc-spotify-song-title:hover {
+    text-decoration: underline;
+    color: var(--interactive-active);
+    cursor: pointer;
+}
+
+#vc-spotify-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#vc-spotify-progress-bar {
+    display: flex;
+    flex-direction: row;
+    color: var(--text-normal);
+
+    width: calc(100% - 1em);
+    margin: 0.5em;
+    margin-bottom: 0;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] {
+    flex-grow: 1;
+}
+
+#vc-spotify-progress-text {
+    margin: 0;
+    font-size: 80%;
+    /* need to fix or it will constantly grow/shrink due to character width differences */
+    width: 20%;
+}
