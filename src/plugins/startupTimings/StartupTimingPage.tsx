@@ -18,9 +18,9 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
-import { lazyWebpack } from "../../utils";
-import { filters } from "../../webpack";
+import { lazyWebpack } from "../../utils/misc";
 import { Forms, React } from "../../webpack/common";
+import { filters } from "../../webpack/webpack";
 
 interface AppStartPerformance {
     prefix: string;

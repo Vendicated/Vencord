@@ -21,9 +21,10 @@ import Plugins from "~plugins";
 import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import { Logger, Modals } from "../../utils";
 import { ChangeList } from "../../utils/ChangeList";
+import Logger from "../../utils/logger";
 import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
+import { openModalLazy } from "../../utils/modal";
 import { Plugin } from "../../utils/types";
 import { filters, findByCode } from "../../webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
@@ -88,7 +89,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     function openModal() {
-        Modals.openModalLazy(async () => {
+        openModalLazy(async () => {
             return modalProps => {
                 return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => onRestartNeeded(plugin.name)} />;
             };

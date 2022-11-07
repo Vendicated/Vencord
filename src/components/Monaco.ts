@@ -18,8 +18,8 @@
 
 import monacoHtml from "~fileContent/monacoWin.html";
 
-import { IpcEvents } from "../utils";
 import { debounce } from "../utils/debounce";
+import IpcEvents from "../utils/IpcEvents";
 import { Queue } from "../utils/Queue";
 import { find } from "../webpack/webpack";
 

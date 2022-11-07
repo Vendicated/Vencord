@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useAwaiter } from "../../../utils";
+import { useAwaiter } from "../../../utils/misc";
 import { Settings } from "../../../Vencord";
 import { UserStore } from "../../../webpack/common";
+import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping, UserProfileProps } from "../types";
-import { fetchPronouns, formatPronouns } from "../utils";
 
 export default function PronounsProfileWrapper(props: UserProfileProps, pronounsComponent: JSX.Element) {
     // Don't bother fetching bot or system users

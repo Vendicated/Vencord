@@ -22,8 +22,8 @@ import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
 import { Settings } from "../../../Vencord";
 import { filters } from "../../../webpack";
 import { UserStore } from "../../../webpack/common";
+import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping } from "../types";
-import { fetchPronouns, formatPronouns } from "../utils";
 
 const styles: Record<string, string> = lazyWebpack(filters.byProps("timestampInline"));
 

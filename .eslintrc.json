@@ -2,7 +2,12 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "ignorePatterns": ["dist", "browser"],
-    "plugins": ["header", "simple-import-sort", "unused-imports"],
+    "plugins": [
+        "@typescript-eslint",
+        "header",
+        "simple-import-sort",
+        "unused-imports"
+    ],
     "rules": {
         // Since it's only been a month and Vencord has already been stolen
         // by random skids who rebranded it to "AlphaCord" and erased all license
@@ -88,6 +93,46 @@
         "simple-import-sort/imports": "error",
         "simple-import-sort/exports": "error",
 
-        "unused-imports/no-unused-imports": "error"
+        "unused-imports/no-unused-imports": "error",
+
+        "@typescript-eslint/no-restricted-imports": [
+            "error",
+            {
+                "paths": [
+                    // shrug, couldn't find a better way since the pattern one doesn't work:
+                    // ["utils", "!utils/*"]
+                    {
+                        "name": "./utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "../utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "../../utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "../../../utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "../../../../utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "../../../../../utils",
+                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
+                        "allowTypeImports": true
+                    }
+                ]
+            }
+        ]
     }
 }

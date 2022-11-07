@@ -17,8 +17,8 @@
 */
 
 import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
-import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 import { FluxDispatcher } from "../webpack/common";

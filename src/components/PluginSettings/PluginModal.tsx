@@ -21,8 +21,9 @@ import { Constructor } from "type-fest";
 
 import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
-import { LazyComponent, lazyWebpack, proxyLazy } from "../../utils";
+import { LazyComponent, lazyWebpack } from "../../utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
+import { proxyLazy } from "../../utils/proxyLazy";
 import { OptionType, Plugin } from "../../utils/types";
 import { filters, findByCode } from "../../webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";

@@ -18,7 +18,9 @@
 
 import cssText from "~fileContent/styles.css";
 
-import { IpcEvents, lazyWebpack, proxyLazy } from "../../utils";
+import IpcEvents from "../../utils/IpcEvents";
+import { lazyWebpack } from "../../utils/misc";
+import { proxyLazy } from "../../utils/proxyLazy";
 import { filters } from "../../webpack";
 import { Flux, FluxDispatcher } from "../../webpack/common";
 

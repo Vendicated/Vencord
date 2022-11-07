@@ -17,9 +17,9 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption } from "../api/Commands";
-import { lazyWebpack, makeLazy } from "../utils";
 import { Devs } from "../utils/constants";
 import { getGifEncoder } from "../utils/dependencies";
+import { lazyWebpack, makeLazy } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 

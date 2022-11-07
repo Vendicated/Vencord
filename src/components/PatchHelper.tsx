@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { makeCodeblock } from "../utils";
 import { debounce } from "../utils/debounce";
+import { makeCodeblock } from "../utils/misc";
 import { Button, Clipboard, Forms, Margins, Parser, React, Switch, TextInput } from "../webpack/common";
 import { search } from "../webpack/webpack";
 import { CheckedTextInput } from "./CheckedTextInput";
