@@ -37,13 +37,17 @@ export interface MessageObject {
     validNonShortcutEmojis: Emoji[];
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: any) => void | { cancel: boolean };
+export interface MessageExtra {
+    stickerIds?: string[];
+}
+
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => void | { cancel: boolean };
 export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => void;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: any) {
+export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
     for (const listener of sendListeners) {
         try {
             const result = listener(channelId, messageObj, extra);

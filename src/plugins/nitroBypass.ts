@@ -40,6 +40,16 @@ interface Sticker {
     _notAvailable?: boolean;
 }
 
+interface StickerPack {
+    id: string;
+    name: string;
+    sku_id: string;
+    description: string;
+    cover_sticker_id: string;
+    banner_asset_id: string;
+    stickers: Sticker[];
+}
+
 export default definePlugin({
     name: "NitroBypass",
     authors: [
@@ -139,65 +149,62 @@ export default definePlugin({
         return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.NitroBypass.stickerSize}`;
     },
 
-    sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
-        (async () => {
-            const [{ parseURL }, {
-                GIFEncoder,
-                quantize,
-                applyPalette
-            }] = await Promise.all([importApngJs(), getGifEncoder()]);
+    async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
+        const [{ parseURL }, {
+            GIFEncoder,
+            quantize,
+            applyPalette
+        }] = await Promise.all([importApngJs(), getGifEncoder()]);
 
-            const apng = await parseURL(stickerLink);
+        const apng = await parseURL(stickerLink);
 
-            const gif = new GIFEncoder();
-            // width should be equal to height for stickers, so it doesn't matter if we use width or height here
-            const resolution = Settings.plugins.NitroBypass.stickerSize;
+        const gif = new GIFEncoder();
+        const resolution = Settings.plugins.NitroBypass.stickerSize;
 
-            const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
-                return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
-            }, [0, 0]);
+        const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
+            return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
+        }, [0, 0]);
 
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
 
-            const ctx = canvas.getContext("2d", {
-                willReadFrequently: true
-            })!;
+        const ctx = canvas.getContext("2d", {
+            willReadFrequently: true
+        })!;
 
-            const scale = resolution / width;
-            ctx.scale(scale, scale);
+        const scale = resolution / width;
+        ctx.scale(scale, scale);
 
-            const { frames } = apng;
+        const { frames } = apng;
 
-            let lastImageData: ImageData | null = null;
-            for (const frame of frames) {
-                if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
-                    ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
-                }
-                ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
-
-                const imageData = ctx.getImageData(0, 0, resolution, resolution);
-
-                const palette = quantize(imageData.data, 256);
-                const index = applyPalette(imageData.data, palette);
-
-                gif.writeFrame(index, resolution, resolution, {
-                    transparent: true,
-                    palette,
-                    delay: frame.delay,
-                });
-
-                if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
-                    ctx.putImageData(lastImageData, 0, 0);
-                }
-                lastImageData = imageData;
+        let lastImageData: ImageData | null = null;
+        for (const frame of frames) {
+            if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
+                ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
             }
+            ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
 
-            gif.finish();
-            const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-            promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
-        })();
+            const imageData = ctx.getImageData(0, 0, resolution, resolution);
+
+            const palette = quantize(imageData.data, 256);
+            const index = applyPalette(imageData.data, palette);
+
+            gif.writeFrame(index, resolution, resolution, {
+                transparent: true,
+                palette,
+                delay: frame.delay,
+            });
+
+            if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
+                ctx.putImageData(lastImageData, 0, 0);
+            }
+            lastImageData = imageData;
+        }
+
+        gif.finish();
+        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
     },
 
     start() {
@@ -206,8 +213,8 @@ export default definePlugin({
         }
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
-        const { getAllGuildStickers } = findByProps("getAllGuildStickers");
-        const { getPremiumPacks } = findByProps("getStickerById");
+        const { getAllGuildStickers }: { getAllGuildStickers: () => Map<string, Sticker[]> } = findByProps("getAllGuildStickers");
+        const { getPremiumPacks }: { getPremiumPacks: () => StickerPack[] } = findByProps("getStickerById");
 
         function getWordBoundary(origStr, offset) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
@@ -217,7 +224,7 @@ export default definePlugin({
             const { guildId } = this;
 
             if (Settings.plugins.NitroBypass.enableStickerBypass) {
-                const stickerIds: string[] = extra?.stickerIds;
+                const stickerIds = extra?.stickerIds;
 
                 const addStickerToMessage = (stickerLink: string) => {
                     if (messageObj.content) {
@@ -225,6 +232,7 @@ export default definePlugin({
                     } else {
                         messageObj.content = stickerLink;
                     }
+                    delete extra.stickerIds;
                 };
 
                 if (stickerIds && stickerIds.length) {
@@ -247,7 +255,7 @@ export default definePlugin({
                             stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
                         } else {
                             // guild stickers
-                            const stickersList = Array.from(getAllGuildStickers().values()).flat() as Sticker[];
+                            const stickersList = Array.from(getAllGuildStickers().values()).flat();
                             sticker = stickersList.find(x => x.id === stickerId);
                         }
 
@@ -274,12 +282,10 @@ export default definePlugin({
                                 }
 
                                 addStickerToMessage(stickerLink);
-                                delete extra.stickerIds;
                             }
                         } else {
                             console.warn("[NitroBypass] Can't find sticker in stickersList", stickerId, "modifying just in case");
                             addStickerToMessage(stickerLink);
-                            delete extra.stickerIds;
                         }
                     }
                 }
