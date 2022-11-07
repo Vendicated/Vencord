@@ -17,8 +17,8 @@
 */
 
 import { addClickListener, removeClickListener } from "../api/MessageEvents";
-import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 import { UserStore } from "../webpack/common";
