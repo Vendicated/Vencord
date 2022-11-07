@@ -31,7 +31,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Build web
-              run: pnpm buildWeb
+              run: pnpm buildWeb --standalone
 
             - name: Build
               run: pnpm build --standalone
