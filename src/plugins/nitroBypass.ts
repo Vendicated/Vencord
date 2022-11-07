@@ -156,14 +156,10 @@ export default definePlugin({
             applyPalette
         }] = await Promise.all([importApngJs(), getGifEncoder()]);
 
-        const apng = await parseURL(stickerLink);
+        const { frames, width, height } = await parseURL(stickerLink);
 
         const gif = new GIFEncoder();
         const resolution = Settings.plugins.NitroBypass.stickerSize;
-
-        const [width, height] = apng.frames.reduce(([maxW, maxH], currFrame) => {
-            return [Math.max(maxW, currFrame.width), Math.max(maxH, currFrame.height)];
-        }, [0, 0]);
 
         const canvas = document.createElement("canvas");
         canvas.width = width;
@@ -176,30 +172,28 @@ export default definePlugin({
         const scale = resolution / width;
         ctx.scale(scale, scale);
 
-        const { frames } = apng;
-
-        let lastImageData: ImageData | null = null;
-        for (const frame of frames) {
-            if (frame.disposeOp === ApngDisposeOp.BACKGROUND) {
-                ctx.clearRect(frame.left, frame.top, frame.width, frame.height);
+        let lastImg: HTMLImageElement | null = null;
+        for (const { left, top, width, height, disposeOp, img, delay } of frames) {
+            if (disposeOp === ApngDisposeOp.BACKGROUND) {
+                ctx.clearRect(left, top, width, height);
             }
-            ctx.drawImage(frame.img, frame.left, frame.top, frame.width, frame.height);
+            ctx.drawImage(img, left, top, width, height);
 
-            const imageData = ctx.getImageData(0, 0, resolution, resolution);
+            const { data } = ctx.getImageData(0, 0, resolution, resolution);
 
-            const palette = quantize(imageData.data, 256);
-            const index = applyPalette(imageData.data, palette);
+            const palette = quantize(data, 256);
+            const index = applyPalette(data, palette);
 
             gif.writeFrame(index, resolution, resolution, {
                 transparent: true,
                 palette,
-                delay: frame.delay,
+                delay,
             });
 
-            if (frame.disposeOp === ApngDisposeOp.PREVIOUS && lastImageData) {
-                ctx.putImageData(lastImageData, 0, 0);
+            if (disposeOp === ApngDisposeOp.PREVIOUS && lastImg) {
+                ctx.drawImage(lastImg, left, top, width, height);
             }
-            lastImageData = imageData;
+            lastImg = img;
         }
 
         gif.finish();
@@ -213,8 +207,8 @@ export default definePlugin({
         }
 
         const { getCustomEmojiById } = findByProps("getCustomEmojiById");
-        const { getAllGuildStickers }: { getAllGuildStickers: () => Map<string, Sticker[]> } = findByProps("getAllGuildStickers");
-        const { getPremiumPacks }: { getPremiumPacks: () => StickerPack[] } = findByProps("getStickerById");
+        const { getAllGuildStickers }: { getAllGuildStickers: () => Map<string, Sticker[]>; } = findByProps("getAllGuildStickers");
+        const { getPremiumPacks }: { getPremiumPacks: () => StickerPack[]; } = findByProps("getStickerById");
 
         function getWordBoundary(origStr, offset) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
