@@ -18,6 +18,7 @@
 
 import type { WebpackInstance } from "discord-types/other";
 
+import { traceFunction } from "../debug/Tracer";
 import Logger from "../utils/logger";
 import { proxyLazy } from "../utils/proxyLazy";
 
@@ -74,7 +75,7 @@ if (IS_DEV && !IS_WEB) {
     }, 0);
 }
 
-export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
+export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -109,7 +110,7 @@ export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     }
 
     return null;
-}
+});
 
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
@@ -222,7 +223,7 @@ export function bulk(...filterFns: FilterFn[]) {
  * @param code Code
  * @returns number or null
  */
-export function findModuleId(code: string) {
+export const findModuleId = traceFunction("findModuleId", function findModuleId(code: string) {
     for (const id in wreq.m) {
         if (wreq.m[id].toString().includes(code)) {
             return Number(id);
@@ -239,7 +240,7 @@ export function findModuleId(code: string) {
     }
 
     return null;
-}
+});
 
 /**
  * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
@@ -253,7 +254,7 @@ export function findModuleId(code: string) {
  *             closeModal: filters.byCode("key==")
  *          })
  */
-export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     const exports = {} as Record<S, any>;
 
     const id = findModuleId(code);
@@ -273,7 +274,7 @@ export function mapMangledModule<S extends string>(code: string, mappers: Record
         }
     }
     return exports;
-}
+});
 
 /**
  * Same as {@link mapMangledModule} but lazy
