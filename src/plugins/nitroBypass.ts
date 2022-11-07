@@ -22,7 +22,7 @@ import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { filters, findByProps } from "../webpack";
+import { filters } from "../webpack";
 import { ChannelStore, UserStore } from "../webpack/common";
 
 const DRAFT_TYPE = 0;
@@ -55,9 +55,11 @@ export default definePlugin({
     authors: [
         Devs.Arjix,
         Devs.D3SOX,
+        Devs.Ven
     ],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
+
     patches: [
         {
             find: "canUseAnimatedEmojis:function",
@@ -110,6 +112,7 @@ export default definePlugin({
             }
         },
     ],
+
     options: {
         enableEmojiBypass: {
             description: "Allow sending fake emojis",
@@ -202,22 +205,25 @@ export default definePlugin({
     },
 
     start() {
-        if (!Settings.plugins.NitroBypass.enableEmojiBypass && !Settings.plugins.NitroBypass.enableStickerBypass) {
+        const settings = Settings.plugins.NitroBypass;
+        if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
             return;
         }
 
-        const { getCustomEmojiById } = findByProps("getCustomEmojiById");
-        const { getAllGuildStickers }: { getAllGuildStickers: () => Map<string, Sticker[]>; } = findByProps("getAllGuildStickers");
-        const { getPremiumPacks }: { getPremiumPacks: () => StickerPack[]; } = findByProps("getStickerById");
+        const EmojiStore = lazyWebpack(filters.byProps("getCustomEmojiById"));
+        const StickerStore = lazyWebpack(filters.byProps("getAllGuildStickers")) as {
+            getPremiumPacks(): StickerPack[];
+            getAllGuildStickers(): Map<string, Sticker[]>;
+        };
 
-        function getWordBoundary(origStr, offset) {
+        function getWordBoundary(origStr: string, offset: number) {
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
 
         this.preSend = addPreSendListener((channelId, messageObj, extra) => {
             const { guildId } = this;
 
-            if (Settings.plugins.NitroBypass.enableStickerBypass) {
+            if (settings.enableStickerBypass) {
                 const stickerIds = extra?.stickerIds;
 
                 const addStickerToMessage = (stickerLink: string) => {
@@ -232,11 +238,10 @@ export default definePlugin({
                 if (stickerIds && stickerIds.length) {
                     const stickerId = stickerIds[0];
                     if (stickerId) {
-
                         let stickerLink = this.getStickerLink(stickerId);
                         let sticker: Sticker | undefined;
 
-                        const discordStickerPack = getPremiumPacks().find(pack => {
+                        const discordStickerPack = StickerStore.getPremiumPacks().find(pack => {
                             const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
                             if (discordSticker) {
                                 sticker = discordSticker;
@@ -249,7 +254,7 @@ export default definePlugin({
                             stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
                         } else {
                             // guild stickers
-                            const stickersList = Array.from(getAllGuildStickers().values()).flat();
+                            const stickersList = Array.from(StickerStore.getAllGuildStickers().values()).flat();
                             sticker = stickersList.find(x => x.id === stickerId);
                         }
 
@@ -259,16 +264,13 @@ export default definePlugin({
                                 return { cancel: false };
                             }
 
-                            // get guild id from sticker
                             const stickerGuildId = sticker.guild_id;
 
                             // only modify if sticker is not from current guild
                             if (stickerGuildId !== guildId) {
-
-                                // if it's an animated guild sticker download it, convert to gif and send it
+                                // if it's an animated guild sticker, download it, convert to gif and send it
                                 const isAnimated = sticker.format_type === 2;
                                 if (!discordStickerPack && isAnimated) {
-
                                     this.sendAnimatedSticker(stickerLink, stickerId, channelId);
 
                                     // animated stickers are handled above
@@ -285,7 +287,7 @@ export default definePlugin({
                 }
             }
 
-            if (!this.canUseEmotes && Settings.plugins.NitroBypass.enableEmojiBypass) {
+            if (!this.canUseEmotes && settings.enableEmojiBypass) {
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
@@ -301,12 +303,12 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        if (!this.canUseEmotes && Settings.plugins.NitroBypass.enableEmojiBypass) {
+        if (!this.canUseEmotes && settings.enableEmojiBypass) {
             this.preEdit = addPreEditListener((_, __, messageObj) => {
                 const { guildId } = this;
 
                 for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
-                    const emoji = getCustomEmojiById(emojiId);
+                    const emoji = EmojiStore.getCustomEmojiById(emojiId);
                     if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
                     if (!emoji.require_colons) continue;
 
