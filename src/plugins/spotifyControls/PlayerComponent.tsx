@@ -116,10 +116,7 @@ function Controls() {
                 onClick={() => SpotifyStore.setRepeat(nextRepeat)}
                 style={{ position: "relative" }}
             >
-                {repeat === "track" && <span style={{
-                    fontSize: "70%", position: "absolute",
-                    top: "45%", left: "50%", transform: "translate(-50%, -50%)"
-                }}>1</span>}
+                {repeat === "track" && <span className={cl("repeat-1")}>1</span>}
                 <Repeat />
             </Button>
         </Flex>

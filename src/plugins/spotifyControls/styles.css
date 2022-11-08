@@ -52,6 +52,13 @@
     padding-right: 0.2em;
     max-width: 100%;
 }
+.vc-spotify-repeat-1 {
+    font-size: 70%;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
 .vc-spotify-button-row {
     justify-content: center;
