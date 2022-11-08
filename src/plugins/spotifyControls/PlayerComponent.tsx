@@ -156,7 +156,13 @@ function SeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <Forms.FormText variant="text-xs/medium" className={cl("progress-time") + " " + cl("time-left")} aria-label="Progress">{msToHuman(position)}</Forms.FormText>
+            <Forms.FormText
+                variant="text-xs/medium"
+                className={cl("progress-time") + " " + cl("time-left")}
+                aria-label="Progress"
+            >
+                {msToHuman(position)}
+            </Forms.FormText>
             <Slider
                 minValue={0}
                 maxValue={duration}
@@ -168,7 +174,13 @@ function SeekBar() {
                 }}
                 renderValue={msToHuman}
             />
-            <Forms.FormText variant="text-xs/medium" className={cl("progress-time") + " " + cl("time-right")} aria-label="Total Duration">{msToHuman(duration)}</Forms.FormText>
+            <Forms.FormText
+                variant="text-xs/medium"
+                className={cl("progress-time") + " " + cl("time-right")}
+                aria-label="Total Duration"
+            >
+                {msToHuman(duration)}
+            </Forms.FormText>
         </div>
     );
 }
