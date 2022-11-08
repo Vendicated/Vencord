@@ -261,7 +261,7 @@ function Info({ track }: { track: Track; }) {
                     id={cl("song-title")}
                     onClick={() => SpotifyStore.openExternal(`/track/${track.id}`)}
                 >
-                    {track.name}
+                    <Forms.FormText>{track.name}</Forms.FormText>
                 </TooltipText>
                 <TooltipText>
                     {track.artists.map((a, i) => (
