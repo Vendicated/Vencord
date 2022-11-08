@@ -47,7 +47,7 @@ function Svg(path: string, label: string) {
             className={classes(cl("button-icon"), cl(label))}
             height="24"
             width="24"
-            viewBox="0 0 48 48"
+            viewBox="0 0 24 24"
             fill="currentColor"
             aria-label={label}
             focusable={false}
@@ -57,15 +57,13 @@ function Svg(path: string, label: string) {
     );
 }
 
-// https://fonts.google.com/icons
-const PlayButton = Svg("M14.75 40.15V7.55l25.6 16.3Z", "play");
-const PauseButton = Svg("M28.2 40.3V7.7h11.2v32.6Zm-19.6 0V7.7h11.2v32.6Z", "pause");
-const SkipPrev = Svg("M8.65 38.35V9.65h4.7v28.7Zm30.7 0L18.5 24 39.35 9.65Z", "previous");
-const SkipNext = Svg("M34.65 38.35V9.65h4.7v28.7Zm-26 0V9.65L29.5 24Z", "next");
-// const Like = Svg("m24 41.95-2.05-1.85q-5.3-4.85-8.75-8.375-3.45-3.525-5.5-6.3T4.825 20.4Q4 18.15 4 15.85q0-4.5 3.025-7.525Q10.05 5.3 14.5 5.3q2.85 0 5.275 1.35Q22.2 8 24 10.55q2.1-2.7 4.45-3.975T33.5 5.3q4.45 0 7.475 3.025Q44 11.35 44 15.85q0 2.3-.825 4.55T40.3 25.425q-2.05 2.775-5.5 6.3T26.05 40.1ZM24 38q5.05-4.65 8.325-7.975 3.275-3.325 5.2-5.825 1.925-2.5 2.7-4.45.775-1.95.775-3.9 0-3.3-2.1-5.425T33.5 8.3q-2.55 0-4.75 1.575T25.2 14.3h-2.45q-1.3-2.8-3.5-4.4-2.2-1.6-4.75-1.6-3.3 0-5.4 2.125Q7 12.55 7 15.85q0 1.95.775 3.925.775 1.975 2.7 4.5Q12.4 26.8 15.7 30.1 19 33.4 24 38Zm0-14.85Z", "like");
-// const LikeOn = Svg("m24 41.95-2.05-1.85q-5.3-4.85-8.75-8.375-3.45-3.525-5.5-6.3T4.825 20.4Q4 18.15 4 15.85q0-4.5 3.025-7.525Q10.05 5.3 14.5 5.3q2.85 0 5.275 1.35Q22.2 8 24 10.55q2.1-2.7 4.45-3.975T33.5 5.3q4.45 0 7.475 3.025Q44 11.35 44 15.85q0 2.3-.825 4.55T40.3 25.425q-2.05 2.775-5.5 6.3T26.05 40.1ZM24 38q5.05-4.65 8.325-7.975 3.275-3.325 5.2-5.825 1.925-2.5 2.7-4.45.775-1.95.775-3.9 0-3.3-2.1-5.425T33.5 8.3q-2.55 0-4.75 1.575T25.2 14.3h-2.45q-1.3-2.8-3.5-4.4-2.2-1.6-4.75-1.6-3.3 0-5.4 2.125Q7 12.55 7 15.85q0 1.95.775 3.925.775 1.975 2.7 4.5Q12.4 26.8 15.7 30.1 19 33.4 24 38Zm0-14.85Z", "liked");
-const Repeat = Svg("M14 44.4 5.6 36l8.4-8.4 2.5 2.6-4 4h22.2v-8h3.6v11.6H12.5l4 4ZM9.7 21.8V10.2h25.85l-4.05-4L34 3.6l8.4 8.4-8.4 8.4-2.5-2.6 4.05-4H13.3v8Z", "repeat");
-const Shuffle = Svg("M28.6 41.05v-4.1h5.45l-8.3-8.25 2.9-2.95 8.4 8.25v-5.5h4.15v12.55Zm-18.9.25-2.85-2.95L34.15 11H28.6V6.9h12.6v12.55h-4.15V14Zm9.75-19.1L6.85 9.6l2.9-2.95 12.7 12.6Z", "shuffle");
+// KraXen's icons :yesyes:
+const PlayButton = Svg("M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z", "play");
+const PauseButton = Svg("M8 19c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2v10c0 1.1.9 2 2 2zm6-12v10c0 1.1.9 2 2 2s2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2z", "pause");
+const SkipPrev = Svg("M7 6c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1s-1-.45-1-1V7c0-.55.45-1 1-1zm3.66 6.82l5.77 4.07c.66.47 1.58-.01 1.58-.82V7.93c0-.81-.91-1.28-1.58-.82l-5.77 4.07c-.57.4-.57 1.24 0 1.64z", "previous");
+const SkipNext = Svg("M7.58 16.89l5.77-4.07c.56-.4.56-1.24 0-1.63L7.58 7.11C6.91 6.65 6 7.12 6 7.93v8.14c0 .81.91 1.28 1.58.82zM16 7v10c0 .55.45 1 1 1s1-.45 1-1V7c0-.55-.45-1-1-1s-1 .45-1 1z", "next");
+const Repeat = Svg("M7 7h10v1.79c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.36V5H6c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1s1-.45 1-1V7zm10 10H7v-1.79c0-.45-.54-.67-.85-.35l-2.79 2.79c-.2.2-.2.51 0 .71l2.79 2.79c.31.31.85.09.85-.36V19h11c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1s-1 .45-1 1v3z", "repeat");
+const Shuffle = Svg("M10.59 9.17L6.12 4.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.46 4.46 1.42-1.4zm4.76-4.32l1.19 1.19L4.7 17.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L17.96 7.46l1.19 1.19c.31.31.85.09.85-.36V4.5c0-.28-.22-.5-.5-.5h-3.79c-.45 0-.67.54-.36.85zm-.52 8.56l-1.41 1.41 3.13 3.13-1.2 1.2c-.31.31-.09.85.36.85h3.79c.28 0 .5-.22.5-.5v-3.79c0-.45-.54-.67-.85-.35l-1.19 1.19-3.13-3.14z", "shuffle");
 
 function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     return (
@@ -75,23 +73,6 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
         >
             {props.children}
         </button>
-    );
-}
-
-function TooltipText(props: React.HtmlHTMLAttributes<HTMLParagraphElement>) {
-    return (
-        <Tooltip text={props.children}>
-            {({ onMouseLeave, onMouseEnter }) => (
-                <p
-                    className={cl("tooltip-text")}
-                    {...props}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                >
-                    {props.children}
-                </p >
-            )}
-        </Tooltip>
     );
 }
 
@@ -110,6 +91,7 @@ function Controls() {
         }
     })();
 
+    // the 1 is using position absolute so it does not make the button jump around
     return (
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
@@ -130,8 +112,12 @@ function Controls() {
             <Button
                 className={classes(cl("button"), cl(repeatClassName))}
                 onClick={() => SpotifyStore.setRepeat(nextRepeat)}
+                style={{ position: "relative" }}
             >
-                {repeat === "track" && <span style={{ fontSize: "70%" }}>1</span>}
+                {repeat === "track" && <span style={{
+                    fontSize: "70%", position: "absolute",
+                    top: "45%", left: "50%", transform: "translate(-50%, -50%)"
+                }}>1</span>}
                 <Repeat />
             </Button>
         </Flex>
@@ -171,7 +157,7 @@ function SeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <span className={cl("progress-time")} aria-label="Progress">{msToHuman(position)}</span>
+            <Forms.FormText variant="text-xs/medium" className={cl("progress-time") + " " + cl("time-left")} aria-label="Progress">{msToHuman(position)}</Forms.FormText>
             <Slider
                 minValue={0}
                 maxValue={duration}
@@ -183,7 +169,7 @@ function SeekBar() {
                 }}
                 renderValue={msToHuman}
             />
-            <span className={cl("progress-time")} aria-label="Total Duration">{msToHuman(duration)}</span>
+            <Forms.FormText variant="text-xs/medium" className={cl("progress-time") + " " + cl("time-right")} aria-label="Total Duration">{msToHuman(duration)}</Forms.FormText>
         </div>
     );
 }
@@ -257,26 +243,44 @@ function Info({ track }: { track: Track; }) {
         <div id={cl("info-wrapper")}>
             {i}
             <div id={cl("titles")}>
-                <TooltipText
+                <Forms.FormText
+                    variant="text-sm/semibold"
                     id={cl("song-title")}
+                    className="ellipoverflow"
+                    title={track.name}
                     onClick={() => SpotifyStore.openExternal(`/track/${track.id}`)}
                 >
-                    <Forms.FormText>{track.name}</Forms.FormText>
-                </TooltipText>
-                <TooltipText>
+                    {track.name}
+                </Forms.FormText>
+                <Forms.FormText variant="text-sm/normal" className="ellipoverflow">
+                    by&nbsp;
                     {track.artists.map((a, i) => (
                         <React.Fragment key={a.id}>
                             <a
                                 className={cl("artist")}
                                 href={`https://open.spotify.com/artist/${a.id}`}
                                 target="_blank"
+                                style={{ fontSize: "inherit" }}
+                                title={a.name}
                             >
                                 {a.name}
                             </a>
                             {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                         </React.Fragment>
                     ))}
-                </TooltipText>
+                </Forms.FormText>
+                <Forms.FormText variant="text-sm/normal" className="ellipoverflow">
+                    on&nbsp;
+                    <a id={cl("album-title")}
+                        href={`https://open.spotify.com/album/${track.album.id}`}
+                        target="_blank"
+                        className={cl("album")}
+                        style={{ fontSize: "inherit" }}
+                        title={track.album.name}
+                    >
+                        {track.album.name}
+                    </a>
+                </Forms.FormText>
             </div>
         </div>
     );
