@@ -46,9 +46,9 @@
 #vc-spotify-info-wrapper {
     display: flex;
     flex-direction: row;
+    align-items: center;
     height: 3em;
-    flex-direction: row;
-    gap: 4px;
+    gap: 0.5em;
 }
 
 #vc-spotify-info-wrapper img {
@@ -127,5 +127,5 @@
 
 .vc-spotify-progress-time {
     font-size: 12px;
-    width: 32px;
+    width: 2.5em;
 }
