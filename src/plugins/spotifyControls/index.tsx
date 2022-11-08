@@ -30,6 +30,7 @@ export default definePlugin({
             name: "afn",
         },
     ],
+    dependencies: ["MenuItemDeobfuscatorApi"],
     patches: [
         {
             find: "showTaglessAccountPanel:",

@@ -18,7 +18,8 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
-import { classes, debounce, LazyComponent, lazyWebpack } from "../../utils";
+import { debounce } from "../../utils/debounce";
+import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React, Tooltip } from "../../webpack/common";
 import { filters, find } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";

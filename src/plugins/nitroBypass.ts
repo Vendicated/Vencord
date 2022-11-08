@@ -17,9 +17,9 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
-import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
