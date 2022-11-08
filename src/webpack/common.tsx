@@ -32,6 +32,7 @@ export const Flux = lazyWebpack(filters.byProps("connectStores"));
 export let React: typeof import("react");
 export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 
+export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Stores.MessageStore;
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
