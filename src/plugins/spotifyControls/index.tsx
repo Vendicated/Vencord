@@ -23,7 +23,13 @@ import { Player } from "./PlayerComponent";
 export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
-    authors: [Devs.Ven],
+    authors: [
+        Devs.Ven,
+        {
+            id: 420043923822608384n,
+            name: "afn",
+        },
+    ],
     patches: [
         {
             find: "showTaglessAccountPanel:",

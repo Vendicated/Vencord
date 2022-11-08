@@ -1,7 +1,14 @@
+#vc-spotify-player {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--background-modifier-accent);
+}
 .vc-spotify-button {
-    height: 100%;
     background: none;
     color: var(--interactive-normal);
+}
+
+.vc-spotify-button svg {
+    height: 20px;
 }
 
 .vc-spotify-button:hover {
@@ -41,11 +48,11 @@
     flex-direction: row;
     height: 3em;
     flex-direction: row;
-    gap: 0.2em;
+    gap: 4px;
 }
 
 #vc-spotify-info-wrapper img {
-    height: 100%;
+    height: 90%;
     object-fit: contain;
 }
 
@@ -70,9 +77,13 @@
 
 #vc-spotify-song-title {
     color: var(--header-primary);
+    font-weight: 600;
+    font-size: 14px;
+    text-overflow: ellipsis;
 }
 
 .vc-spotify-artist {
+    font-size: 12px;
     text-decoration: none;
     color: var(--header-secondary);
 }
@@ -88,6 +99,10 @@
     cursor: pointer;
 }
 
+#vc-spotify-album-image {
+    border-radius: 4px;
+}
+
 #vc-spotify-album-image:hover {
     filter: brightness(1.2);
     cursor: pointer;
@@ -97,9 +112,8 @@
     display: flex;
     flex-direction: row;
     color: var(--text-normal);
-
-    width: calc(100% - 1em);
-    margin: 0.5em;
+    width: 100%;
+    margin: 0.5em 0;
     margin-bottom: 0;
 }
 
@@ -109,7 +123,9 @@
 
 #vc-spotify-progress-text {
     margin: 0;
-    font-size: 80%;
-    /* need to fix or it will constantly grow/shrink due to character width differences */
-    width: 20%;
+}
+
+.vc-spotify-progress-time {
+    font-size: 12px;
+    width: 32px;
 }
