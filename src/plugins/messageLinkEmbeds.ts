@@ -276,13 +276,13 @@ export default definePlugin({
     generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
         const [guildID, channelID, messageID] = messageURL.split("/");
         if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed)
-            return [...existingEmbeds.filter(i => i._messageEmbed !== "rich")];
+            return [...existingEmbeds.filter(i => !i._messageEmbed)];
         if (existingEmbeds.find(i => i._messageEmbed === "rich")) return [...existingEmbeds];
 
         const message = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
         if (existingEmbeds.find(i => i._messageEmbed === "clyde")) {
             if (!message) return [...existingEmbeds];
-            else existingEmbeds = existingEmbeds.filter(i => i.id !== "messageLinkEmbeds-1");
+            else existingEmbeds = existingEmbeds.filter(i => i._messageEmbed !== "clyde");
         }
         if (!message) {
             getMessage(channelID, messageID, originalMessage);
