@@ -6,7 +6,7 @@
 .vc-spotify-button {
     background: none;
     color: var(--interactive-normal);
-    padding: 0 !important;
+    padding: 0;
     width: 32px;
     height: 32px;
 
@@ -52,6 +52,13 @@
     padding-right: 0.2em;
     max-width: 100%;
 }
+.vc-spotify-repeat-1 {
+    font-size: 70%;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
 .vc-spotify-button-row {
     justify-content: center;
@@ -94,7 +101,7 @@
     font-size: 14px;
     font-weight: 600;
 }
-.ellipoverflow {
+.vc-spotify-ellipoverflow {
     white-space: nowrap;
     overflow: hidden;
     width: 100%;
@@ -147,11 +154,12 @@
     height: 4px !important;
 }
 #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+    /* these importants are neccessary, it applies a width and height through inline styles */
     height: 10px !important;
     width: 10px !important;
-    background-color: var(--interactive-normal) !important;
-    border-color: var(--interactive-normal) !important;
-    color: var(--interactive-normal) !important;
+    background-color: var(--interactive-normal);
+    border-color: var(--interactive-normal);
+    color: var(--interactive-normal);
 }
 
 #vc-spotify-progress-text {
@@ -160,7 +168,6 @@
 
 .vc-spotify-progress-time {
     font-size: 12px;
-    width: 2.5em;
 
     top: 10px;
     position: absolute;
