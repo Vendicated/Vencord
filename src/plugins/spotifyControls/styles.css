@@ -154,11 +154,12 @@
     height: 4px !important;
 }
 #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+    /* these importants are neccessary, it applies a width and height through inline styles */
     height: 10px !important;
     width: 10px !important;
-    background-color: var(--interactive-normal) !important;
-    border-color: var(--interactive-normal) !important;
-    color: var(--interactive-normal) !important;
+    background-color: var(--interactive-normal);
+    border-color: var(--interactive-normal);
+    color: var(--interactive-normal);
 }
 
 #vc-spotify-progress-text {
