@@ -29,6 +29,10 @@ export default definePlugin({
             id: 420043923822608384n,
             name: "afn",
         },
+        {
+            id: 379304073515499530n,
+            name: "KraXen72"
+        }
     ],
     dependencies: ["MenuItemDeobfuscatorApi"],
     patches: [
