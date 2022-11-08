@@ -77,7 +77,6 @@
 
 #vc-spotify-song-title {
     color: var(--header-primary);
-    font-weight: 600;
     font-size: 14px;
     text-overflow: ellipsis;
 }
