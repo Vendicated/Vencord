@@ -145,11 +145,11 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        return UserStore.getCurrentUser().premiumType ?? 0 > 0;
+        return (UserStore.getCurrentUser().premiumType ?? 0) > 0;
     },
 
     get canUseSticker() {
-        return UserStore.getCurrentUser().premiumType ?? 0 > 1;
+        return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
     getStickerLink(stickerId: string) {
