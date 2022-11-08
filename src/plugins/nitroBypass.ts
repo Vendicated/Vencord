@@ -145,7 +145,11 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        return Boolean(UserStore.getCurrentUser().premiumType);
+        return (UserStore.getCurrentUser().premiumType ?? 0) > 0;
+    },
+
+    get canUseSticker() {
+        return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
     getStickerLink(stickerId: string) {
@@ -249,7 +253,7 @@ export default definePlugin({
 
                     if (sticker) {
                         // when the user has Nitro and the sticker is available, send the sticker normally
-                        if (this.canUseEmotes && sticker.available) {
+                        if (this.canUseSticker && sticker.available) {
                             return { cancel: false };
                         }
 
