@@ -245,13 +245,13 @@ function Info({ track }: { track: Track; }) {
                 <Forms.FormText
                     variant="text-sm/semibold"
                     id={cl("song-title")}
-                    className="ellipoverflow"
+                    className={cl("ellipoverflow")}
                     title={track.name}
                     onClick={() => SpotifyStore.openExternal(`/track/${track.id}`)}
                 >
                     {track.name}
                 </Forms.FormText>
-                <Forms.FormText variant="text-sm/normal" className="ellipoverflow">
+                <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                     by&nbsp;
                     {track.artists.map((a, i) => (
                         <React.Fragment key={a.id}>
@@ -268,7 +268,7 @@ function Info({ track }: { track: Track; }) {
                         </React.Fragment>
                     ))}
                 </Forms.FormText>
-                <Forms.FormText variant="text-sm/normal" className="ellipoverflow">
+                <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                     on&nbsp;
                     <a id={cl("album-title")}
                         href={`https://open.spotify.com/album/${track.album.id}`}

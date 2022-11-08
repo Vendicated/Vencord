@@ -101,7 +101,7 @@
     font-size: 14px;
     font-weight: 600;
 }
-.ellipoverflow {
+.vc-spotify-ellipoverflow {
     white-space: nowrap;
     overflow: hidden;
     width: 100%;
