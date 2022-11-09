@@ -181,9 +181,6 @@ export default definePlugin({
 
         let lastImg: HTMLImageElement | null = null;
         for (const { left, top, width, height, disposeOp, img, delay } of frames) {
-            if (disposeOp === ApngDisposeOp.BACKGROUND) {
-                ctx.clearRect(left, top, width, height);
-            }
             ctx.drawImage(img, left, top, width, height);
 
             const { data } = ctx.getImageData(0, 0, resolution, resolution);
@@ -197,9 +194,12 @@ export default definePlugin({
                 delay,
             });
 
-            if (disposeOp === ApngDisposeOp.PREVIOUS && lastImg) {
+            if (disposeOp === ApngDisposeOp.BACKGROUND) {
+                ctx.clearRect(left, top, width, height);
+            } else if (disposeOp === ApngDisposeOp.PREVIOUS && lastImg) {
                 ctx.drawImage(lastImg, left, top, width, height);
             }
+
             lastImg = img;
         }
 
