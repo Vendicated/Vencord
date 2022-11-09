@@ -16,12 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Link } from "../../../components/Link";
 import { Forms, React } from "../../../webpack/common";
 
 export default function PronounsAboutComponent() {
     return (
         <React.Fragment>
             <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
+            <Forms.FormText>To add your own pronouns, visit{" "}
+                <Link href="https://pronoundb.org">pronoundb.org</Link>
+            </Forms.FormText>
+            <Forms.FormDivider />
             <Forms.FormText>
                 The two pronoun formats are lowercase and capitalized. Example:
                 <ul>
