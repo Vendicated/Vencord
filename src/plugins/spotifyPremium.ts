@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import definePlugin from "../../utils/types";
+import { Devs } from "../utils/constants";
+import definePlugin from "../utils/types";
 
 export default definePlugin({
 	name: "Spotify Premium",
@@ -26,6 +27,7 @@ export default definePlugin({
 			id: 619284841187246090n,
 			name: "Polar",
 		},
+		Devs.Megu
 	],
 	patches: [
 		{
