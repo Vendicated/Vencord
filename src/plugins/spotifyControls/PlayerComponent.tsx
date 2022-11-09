@@ -248,7 +248,7 @@ function Info({ track }: { track: Track; }) {
         </>
     );
 
-    if (coverExpanded) return (
+    if (coverExpanded && img) return (
         <div id={cl("album-expanded-wrapper")}>
             {i}
         </div>
