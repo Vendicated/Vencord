@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption } from "../api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import { getGifEncoder } from "../utils/dependencies";
 import { lazyWebpack, makeLazy } from "../utils/misc";
@@ -132,8 +132,9 @@ export default definePlugin({
                     var url = await resolveImage(opts, cmdCtx, noServerPfp);
                     if (!url) throw "No Image specified!";
                 } catch (err) {
-                    // Todo make this send a clyde message once that PR is done
-                    console.log(err);
+                    sendBotMessage(cmdCtx.channel.id, {
+                        content: String(err),
+                    });
                     return;
                 }
 
