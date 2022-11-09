@@ -233,18 +233,22 @@ function Info({ track }: { track: Track; }) {
     const [coverExpanded, setCoverExpanded] = React.useState(false);
 
     const i = (
-        <img
-            id={cl("album-image")}
-            src={img?.url}
-            alt="Album Image"
-            onClick={() => setCoverExpanded(!coverExpanded)}
-            onContextMenu={e => {
-                ContextMenu.open(e, () => <AlbumContextMenu track={track} />);
-            }}
-        />
+        <>
+            {img && (
+                <img
+                    id={cl("album-image")}
+                    src={img.url}
+                    alt="Album Image"
+                    onClick={() => setCoverExpanded(!coverExpanded)}
+                    onContextMenu={e => {
+                        ContextMenu.open(e, () => <AlbumContextMenu track={track} />);
+                    }}
+                />
+            )}
+        </>
     );
 
-    if (coverExpanded) return (
+    if (coverExpanded && img) return (
         <div id={cl("album-expanded-wrapper")}>
             {i}
         </div>
@@ -280,18 +284,20 @@ function Info({ track }: { track: Track; }) {
                         </React.Fragment>
                     ))}
                 </Forms.FormText>
-                <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
+                {track.album.name && (
+                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                     on&nbsp;
-                    <a id={cl("album-title")}
-                        href={`https://open.spotify.com/album/${track.album.id}`}
-                        target="_blank"
-                        className={cl("album")}
-                        style={{ fontSize: "inherit" }}
-                        title={track.album.name}
-                    >
-                        {track.album.name}
-                    </a>
-                </Forms.FormText>
+                        <a id={cl("album-title")}
+                            href={`https://open.spotify.com/album/${track.album.id}`}
+                            target="_blank"
+                            className={cl("album")}
+                            style={{ fontSize: "inherit" }}
+                            title={track.album.name}
+                        >
+                            {track.album.name}
+                        </a>
+                    </Forms.FormText>
+                )}
             </div>
         </div>
     );
