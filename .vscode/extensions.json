@@ -1,3 +1,11 @@
 {
-    "recommendations": [ "EditorConfig.EditorConfig" ]
+    "recommendations": [
+        "EditorConfig.EditorConfig",
+        "pmneo.tsimporter",
+        "dbaeumer.vscode-eslint",
+        "formulahendry.auto-rename-tag",
+        "GregorBiswanger.json2ts",
+        "eamodio.gitlens",
+        "kamikillerto.vscode-colorize"
+    ]
 }
