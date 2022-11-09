@@ -14,7 +14,7 @@ browser.webRequest.onHeadersReceived.addListener(({ responseHeaders, url }) => {
         else
             responseHeaders.push({
                 name: "content-type",
-                value: "text/json"
+                value: "text/css"
             });
     }
 
