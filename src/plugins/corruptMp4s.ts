@@ -29,6 +29,7 @@ export default definePlugin({
     name: "CorruptMp4s",
     description: "Create corrupt mp4s with extremely high or negative duration",
     authors: [Devs.Ven],
+    dependencies: ["CommandsAPI"],
     commands: [{
         name: "corrupt",
         description: "Create a corrupt mp4 with extremely high or negative duration",
