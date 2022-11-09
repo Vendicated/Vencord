@@ -237,7 +237,7 @@ function Info({ track }: { track: Track; }) {
             {img && (
                 <img
                     id={cl("album-image")}
-                    src={img?.url}
+                    src={img.url}
                     alt="Album Image"
                     onClick={() => setCoverExpanded(!coverExpanded)}
                     onContextMenu={e => {
