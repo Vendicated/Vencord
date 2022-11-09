@@ -169,14 +169,14 @@ export default definePlugin({
         const resolution = Settings.plugins.NitroBypass.stickerSize;
 
         const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = resolution;
+        canvas.height = resolution;
 
         const ctx = canvas.getContext("2d", {
             willReadFrequently: true
         })!;
 
-        const scale = resolution / width;
+        const scale = resolution / Math.max(width, height);
         ctx.scale(scale, scale);
 
         let lastImg: HTMLImageElement | null = null;
