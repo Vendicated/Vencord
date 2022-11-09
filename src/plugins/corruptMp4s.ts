@@ -69,7 +69,7 @@ export default definePlugin({
                     content: "Please upload a mp4 file"
                 });
 
-            const corruption = findOption(args, "kind", "negative");
+            const corruption = findOption<string>(args, "kind", "infinite");
 
             const buf = new Uint8Array(await video.arrayBuffer());
             let found = false;
