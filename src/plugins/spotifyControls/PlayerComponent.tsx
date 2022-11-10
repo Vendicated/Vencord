@@ -262,27 +262,41 @@ function Info({ track }: { track: Track; }) {
                     variant="text-sm/semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
+                    data-track-id={track.id}
                     title={track.name}
-                    onClick={() => SpotifyStore.openExternal(`/track/${track.id}`)}
+                    onClick={() => {
+                        if (track.id) SpotifyStore.openExternal(`/track/${track.id}`);
+                    }}
                 >
                     {track.name}
                 </Forms.FormText>
                 <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                     by&nbsp;
-                    {track.artists.map((a, i) => (
-                        <React.Fragment key={a.id}>
-                            <a
-                                className={cl("artist")}
-                                href={`https://open.spotify.com/artist/${a.id}`}
-                                target="_blank"
-                                style={{ fontSize: "inherit" }}
-                                title={a.name}
-                            >
-                                {a.name}
-                            </a>
+                    {track.artists.map((a, i) =>
+                        // id can be null for local tracks
+                        (<React.Fragment key={a.name}>
+                            {a.id ? (
+                                <a
+                                    className={cl("artist")}
+                                    href={`https://open.spotify.com/artist/${a.id}`}
+                                    target="_blank"
+                                    style={{ fontSize: "inherit" }}
+                                    title={a.name}
+                                >
+                                    {a.name}
+                                </a>
+                            ) : (
+                                <span
+                                    className={cl("artist")}
+                                    style={{ fontSize: "inherit" }}
+                                    title={a.name}
+                                >
+                                    {a.name}
+                                </span>
+                            )}
                             {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                         </React.Fragment>
-                    ))}
+                        ))}
                 </Forms.FormText>
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>

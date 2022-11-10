@@ -119,9 +119,9 @@
     color: var(--header-secondary);
 }
 
-.vc-spotify-artist:hover,
+a.vc-spotify-artist:hover,
 #vc-spotify-album-title:hover,
-#vc-spotify-song-title:hover {
+#vc-spotify-song-title[data-track-id]:hover {
     text-decoration: underline;
     cursor: pointer;
 }
