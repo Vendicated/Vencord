@@ -18,6 +18,7 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
+import { Link } from "../../components/Link";
 import { debounce } from "../../utils/debounce";
 import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "../../webpack/common";
@@ -262,31 +263,36 @@ function Info({ track }: { track: Track; }) {
                     variant="text-sm/semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
+                    role={track.id ? "link" : undefined}
                     title={track.name}
-                    onClick={() => SpotifyStore.openExternal(`/track/${track.id}`)}
+                    onClick={track.id ? () => {
+                        SpotifyStore.openExternal(`/track/${track.id}`);
+                    } : void 0}
                 >
                     {track.name}
                 </Forms.FormText>
-                <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                    by&nbsp;
-                    {track.artists.map((a, i) => (
-                        <React.Fragment key={a.id}>
-                            <a
-                                className={cl("artist")}
-                                href={`https://open.spotify.com/artist/${a.id}`}
-                                target="_blank"
-                                style={{ fontSize: "inherit" }}
-                                title={a.name}
-                            >
-                                {a.name}
-                            </a>
-                            {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
-                        </React.Fragment>
-                    ))}
-                </Forms.FormText>
+                {track.artists.some(a => a.name) && (
+                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
+                        by&nbsp;
+                        {track.artists.map((a, i) => (
+                            <React.Fragment key={a.name}>
+                                <Link
+                                    className={cl("artist")}
+                                    disabled={!a.id}
+                                    href={`https://open.spotify.com/artist/${a.id}`}
+                                    style={{ fontSize: "inherit" }}
+                                    title={a.name}
+                                >
+                                    {a.name}
+                                </Link>
+                                {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
+                            </React.Fragment>
+                        ))}
+                    </Forms.FormText>
+                )}
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                    on&nbsp;
+                        on&nbsp;
                         <a id={cl("album-title")}
                             href={`https://open.spotify.com/album/${track.album.id}`}
                             target="_blank"
@@ -308,7 +314,7 @@ export function Player() {
         [SpotifyStore],
         () => SpotifyStore.track,
         null,
-        (prev, next) => prev?.id === next?.id
+        (prev, next) => prev?.id ? (prev.id === next?.id) : prev?.name === next?.name
     );
 
     const device = useStateFromStores(

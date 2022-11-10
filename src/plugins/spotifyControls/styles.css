@@ -121,7 +121,7 @@
 
 .vc-spotify-artist:hover,
 #vc-spotify-album-title:hover,
-#vc-spotify-song-title:hover {
+#vc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
     cursor: pointer;
 }

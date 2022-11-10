@@ -18,19 +18,18 @@
 
 import { React } from "../webpack/common";
 
-interface Props {
-    href: string;
+interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
     disabled?: boolean;
-    style?: React.CSSProperties;
 }
 
 export function Link(props: React.PropsWithChildren<Props>) {
     if (props.disabled) {
         props.style ??= {};
         props.style.pointerEvents = "none";
+        props["aria-disabled"] = true;
     }
     return (
-        <a href={props.href} target="_blank" style={props.style}>
+        <a role="link" target="_blank" {...props}>
             {props.children}
         </a>
     );
