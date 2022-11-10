@@ -36,7 +36,7 @@ export default definePlugin({
     patches: [{
         find: "open-native-link",
         replacement: {
-            match: /key:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\}\)/,
+            match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
             replace: (m, src) =>
                 `${m},Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${src}, arguments[2])`
         }
