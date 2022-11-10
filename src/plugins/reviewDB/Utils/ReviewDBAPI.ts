@@ -46,7 +46,7 @@ export async function addReview(review: any): Promise<Response> {
             type: 0
         });
 
-        return 2;
+        return Response.Error;
     }
     review.token = token;
 
