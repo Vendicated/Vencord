@@ -293,15 +293,16 @@ function Info({ track }: { track: Track; }) {
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                         on&nbsp;
-                        <a id={cl("album-title")}
+                        <Link id={cl("album-title")}
                             href={`https://open.spotify.com/album/${track.album.id}`}
                             target="_blank"
                             className={cl("album")}
+                            disabled={!track.album.id}
                             style={{ fontSize: "inherit" }}
                             title={track.album.name}
                         >
                             {track.album.name}
-                        </a>
+                        </Link>
                     </Forms.FormText>
                 )}
             </div>
