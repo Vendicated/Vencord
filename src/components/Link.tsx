@@ -22,6 +22,8 @@ interface Props {
     href: string;
     disabled?: boolean;
     style?: React.CSSProperties;
+    className?: string;
+    title?: string;
 }
 
 export function Link(props: React.PropsWithChildren<Props>) {
@@ -30,7 +32,7 @@ export function Link(props: React.PropsWithChildren<Props>) {
         props.style.pointerEvents = "none";
     }
     return (
-        <a href={props.href} target="_blank" style={props.style}>
+        <a href={props.href} target="_blank" style={props.style} className={props.className} title={props.title}>
             {props.children}
         </a>
     );

@@ -18,6 +18,7 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
+import { Link } from "../../components/Link";
 import { debounce } from "../../utils/debounce";
 import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "../../webpack/common";
@@ -275,25 +276,13 @@ function Info({ track }: { track: Track; }) {
                     {track.artists.map((a, i) =>
                         // id can be null for local tracks
                         (<React.Fragment key={a.name}>
-                            {a.id ? (
-                                <a
-                                    className={cl("artist")}
-                                    href={`https://open.spotify.com/artist/${a.id}`}
-                                    target="_blank"
-                                    style={{ fontSize: "inherit" }}
-                                    title={a.name}
-                                >
-                                    {a.name}
-                                </a>
-                            ) : (
-                                <span
-                                    className={cl("artist")}
-                                    style={{ fontSize: "inherit" }}
-                                    title={a.name}
-                                >
-                                    {a.name}
-                                </span>
-                            )}
+                            <Link className={cl("artist")}
+                                disabled={!a.id}
+                                href={`https://open.spotify.com/artist/${a.id}`}
+                                style={{ fontSize: "inherit" }}
+                                title={a.name}>
+                                {a.name}
+                            </Link>
                             {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                         </React.Fragment>
                         ))}
