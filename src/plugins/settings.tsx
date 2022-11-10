@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import React from "react";
+
 import gitHash from "~git-hash";
 
 import { Devs } from "../utils/constants";
@@ -30,22 +32,10 @@ export default definePlugin({
         find: "().versionHash",
         replacement: [
             {
-                match: /\w\.createElement\(.{1,2}.Fragment,.{0,30}\{[^}]+\},"Host ".+?\):null/,
-                replace: m => {
-                    const idx = m.indexOf("Host") - 1;
-                    const template = m.slice(0, idx);
-                    const additionalInfo = IS_WEB
-                        ? " (Web)"
-                        : IS_STANDALONE
-                            ? " (Standalone)"
-                            : "";
-
-                    let r = `${m}, ${template}"Vencord ", "${gitHash}${additionalInfo}"), " ")`;
-                    if (!IS_WEB) {
-                        r += `,${template} "Electron ",VencordNative.getVersions().electron)," "),`;
-                        r += `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
-                    }
-                    return r;
+                match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}\(\)\.versionHash,.+?\})\)," "/,
+                replace: (m, component, props) => {
+                    props = props.replace(/children:\[.+\]/, "");
+                    return `${m},Vencord.Plugins.plugins.Settings.makeInfoElements(${component}, ${props})`;
                 }
             }
         ]
@@ -66,5 +56,20 @@ export default definePlugin({
                 );
             }
         }
-    }]
+    }],
+
+    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+        const additionalInfo = IS_WEB
+            ? " (Web)"
+            : IS_STANDALONE
+                ? " (Standalone)"
+                : "";
+        return (
+            <>
+                <Component {...props}>Vencord {gitHash}{additionalInfo}</Component>
+                <Component {...props}>Electron {VencordNative.getVersions().electron}</Component>
+                <Component {...props}>Chromium {VencordNative.getVersions().chrome}</Component>
+            </>
+        );
+    }
 });

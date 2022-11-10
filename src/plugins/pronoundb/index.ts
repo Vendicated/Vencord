@@ -38,7 +38,7 @@ export default definePlugin({
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(?<=return\s+\w{1,3}\.createElement\(.+!\w{1,3}&&)(\w{1,3}.createElement\(.+?\{.+?\}\))/,
+                match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\))/,
                 replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsChatComponent(e)]"
             }
         },
@@ -46,8 +46,8 @@ export default definePlugin({
         {
             find: ".headerTagUsernameNoNickname",
             replacement: {
-                match: /""!==(.{1,2})&&(r\.createElement\(r\.Fragment.+?\.Messages\.USER_POPOUT_PRONOUNS.+?pronounsText.+?\},\1\)\))/,
-                replace: (_, __, fragment) => `Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(e, ${fragment})`
+                match: /(?<=""!==(.{1,2})&&).+?children:\1.+?(?=,)/,
+                replace: "Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(e, $1)"
             }
         }
     ],
