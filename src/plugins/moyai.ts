@@ -42,6 +42,15 @@ interface IReactionAdd {
     emoji: ReactionEmoji;
 }
 
+interface IVoiceChannelEffectSendEvent {
+    type: string;
+    emoji?: ReactionEmoji; // Just in case...
+    channelId: string;
+    userId: string;
+    animationType: number;
+    animationId: number;
+}
+
 const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
@@ -77,14 +86,24 @@ export default definePlugin({
         boom();
     },
 
+    onVoiceChannelEffect(e: IVoiceChannelEffectSendEvent) {
+        if (!e.emoji?.name) return;
+        const name = e.emoji.name.toLowerCase();
+        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
+        boom();
+    },
+
     start() {
         FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.subscribe("MESSAGE_REACTION_ADD", this.onReaction);
+        FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
     },
 
     stop() {
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
+        FluxDispatcher.unsubscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
     },
 
     options: {
