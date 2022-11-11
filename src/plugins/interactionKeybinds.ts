@@ -22,9 +22,9 @@ import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
+import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "../webpack/common";
 
-const MessageStore = lazyWebpack(filters.byProps("getRawMessages"));
+const Kangaroo = lazyWebpack(filters.byProps("jumpToMessage"));
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
@@ -91,6 +91,24 @@ function onKeydown(e: KeyboardEvent) {
         nextReply(isUp);
 }
 
+function jumpIfOffScreen(channelId: string, messageId: string) {
+    const element = document.getElementById("message-content-" + messageId);
+    if (!element) return;
+
+    const vh = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    const rect = element.getBoundingClientRect();
+    const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
+
+    if (isOffscreen) {
+        Kangaroo.jumpToMessage({
+            channelId,
+            messageId,
+            flash: false,
+            jumpType: "INSTANT"
+        });
+    }
+}
+
 function getNextMessage(isUp: boolean, isReply: boolean) {
     let messages: Message[] = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
     if (!isReply) { // we are editing so only include own
@@ -131,6 +149,7 @@ function nextReply(isUp: boolean) {
         showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });
+    jumpIfOffScreen(channel.id, message.id);
 }
 
 // handle next/prev edit
@@ -142,7 +161,7 @@ function nextEdit(isUp: boolean) {
             type: "MESSAGE_END_EDIT",
             channelId: SelectedChannelStore.getChannelId()
         });
-    else
+    else {
         Dispatcher.dispatch({
             type: "MESSAGE_START_EDIT",
             channelId: message.channel_id,
@@ -150,4 +169,6 @@ function nextEdit(isUp: boolean) {
             content: message.content,
             _isQuickEdit: true
         });
+        jumpIfOffScreen(message.channel_id, message.id);
+    }
 }
