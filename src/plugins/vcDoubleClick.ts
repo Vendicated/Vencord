@@ -28,7 +28,7 @@ const timers = {} as Record<string, {
 export default definePlugin({
     name: "vcDoubleClick",
     description: "Join VCs via DoubleClick instead of single click",
-    authors: [Devs.Ven, Devs.D3sox],
+    authors: [Devs.Ven, Devs.Nico],
     patches: [
         {
             find: "VoiceChannel.renderPopout",

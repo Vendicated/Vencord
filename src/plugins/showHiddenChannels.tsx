@@ -34,7 +34,7 @@ waitFor(m => m.can && m.initialize, m => ({ can } = m));
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show hidden channels",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3sox],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.Nico],
     options: {
         hideUnreads: {
             description: "Hide unreads",
