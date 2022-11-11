@@ -17,14 +17,13 @@
 */
 
 import { Devs } from "../utils/constants";
-import { lazyWebpack, makeLazy } from "../utils/misc";
+import { LazyComponent } from "../utils/misc";
 import { ModalRoot, ModalSize, openModal } from "../utils/modal";
 import definePlugin from "../utils/types";
 import { find } from "../webpack";
-import { React } from "../webpack/common";
 
-const ImageModal = lazyWebpack(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE"));
-const getMaskedLink = makeLazy(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
+const ImageModal = LazyComponent(() => find(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE")));
+const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default definePlugin({
@@ -39,7 +38,7 @@ export default definePlugin({
                     shouldAnimate={true}
                     original={url}
                     src={url}
-                    renderLinkComponent={props => React.createElement(getMaskedLink(), props)}
+                    renderLinkComponent={() => <MaskedLink />}
                 />
             </ModalRoot>
         ));

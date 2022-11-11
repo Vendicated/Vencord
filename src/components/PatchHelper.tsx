@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { makeCodeblock } from "../utils";
 import { debounce } from "../utils/debounce";
+import { makeCodeblock } from "../utils/misc";
 import { Button, Clipboard, Forms, Margins, Parser, React, Switch, TextInput } from "../webpack/common";
 import { search } from "../webpack/webpack";
 import { CheckedTextInput } from "./CheckedTextInput";
@@ -80,13 +80,13 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
         const fullMatch = matchResult[0] ? makeCodeblock(matchResult[0], "js") : "";
         const groups = matchResult.length > 1
-            ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i}: ${g}`).join("\n"), "yml")
+            ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i + 1}: ${g}`).join("\n"), "yml")
             : "";
 
         return (
             <>
-                {Parser.parse(fullMatch)}
-                {Parser.parse(groups)}
+                <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
+                <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
             </>
         );
     }
@@ -94,7 +94,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     function renderDiff() {
         return diff?.map(p => {
             const color = p.added ? "lime" : p.removed ? "red" : "grey";
-            return <span style={{ color }}>{p.value}</span>;
+            return <div style={{ color, userSelect: "text" }}>{p.value}</div>;
         });
     }
 
@@ -172,6 +172,22 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 onChange={onChange}
                 error={error ?? replacementError}
             />
+            {!isFunc && (
+                <>
+                    <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
+                    {Object.entries({
+                        "$$": "Insert a $",
+                        "$&": "Insert the entire match",
+                        "$`​": "Insert the substring before the match",
+                        "$'": "Insert the substring after the match",
+                        "$n": "Insert the nth capturing group ($1, $2...)"
+                    }).map(([placeholder, desc]) => (
+                        <Forms.FormText key={placeholder}>
+                            {Parser.parse("`" + placeholder + "`")}: {desc}
+                        </Forms.FormText>
+                    ))}
+                </>
+            )}
 
             <Switch
                 className={Margins.marginTop8}
@@ -202,7 +218,7 @@ function PatchHelper() {
     find: ${JSON.stringify(find)},
     replacement: {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
-        replacement: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
+        replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 }
         `.trim();
@@ -268,7 +284,7 @@ function PatchHelper() {
             {!!(find && match && replacement) && (
                 <>
                     <Forms.FormTitle className={Margins.marginTop20}>Code</Forms.FormTitle>
-                    {Parser.parse(makeCodeblock(code, "ts"))}
+                    <div style={{ userSelect: "text" }}>{Parser.parse(makeCodeblock(code, "ts"))}</div>
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}

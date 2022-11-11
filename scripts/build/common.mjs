@@ -24,6 +24,14 @@ import { promisify } from "util";
 
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
+export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const banner = {
+    js: `
+// Vencord ${gitHash}
+// Standalone: ${isStandalone}
+// Platform: ${isStandalone === "false" ? process.platform : "Universal"}
+`.trim()
+};
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -78,7 +86,6 @@ export const globPlugins = {
     }
 };
 
-export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 /**
  * @type {esbuild.Plugin}
  */
@@ -150,6 +157,7 @@ export const commonOpts = {
     minify: !watch,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
+    banner,
     plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
     external: ["~plugins", "~git-hash", "~git-remote"],
     inject: ["./scripts/build/inject/react.mjs"],
