@@ -25,12 +25,17 @@ jobs:
                 pnpm install --frozen-lockfile
                 pnpm add puppeteer
 
+                sudo apt-get install -y chromium-browser
+
             - name: Build web
               run: pnpm buildWeb --standalone
 
             - name: Create Report
+              timeout-minutes: 10
               run: |
                 export PATH="$PWD/node_modules/.bin:$PATH"
+                export CHROMIUM_BIN=$(which chromium-browser)
+
                 esbuild test/generateReport.ts > dist/report.mjs
                 node dist/report.mjs >> $GITHUB_STEP_SUMMARY
               env:
