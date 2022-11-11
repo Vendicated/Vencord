@@ -53,7 +53,7 @@ export default definePlugin({
                     // UserSettings
                     if (pronounProps.includes("onPronounsChange")) return original;
 
-                    return `Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(${PronounComponent}, ${pronounProps}, ${fullProps})`;
+                    return `${fullProps}&&Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(${PronounComponent}, ${pronounProps}, ${fullProps})`;
                 }
             }
         },

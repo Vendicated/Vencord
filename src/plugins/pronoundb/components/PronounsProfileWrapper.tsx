@@ -23,8 +23,6 @@ import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
-    if (!profileProps) return null;
-
     const user = UserStore.getUser(profileProps.userId) ?? {};
     // Don't bother fetching bot or system users
     if (user.bot || user.system) return null;
