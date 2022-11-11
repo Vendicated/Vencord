@@ -54,7 +54,7 @@ export default definePlugin({
     name: "NitroBypass",
     authors: [
         Devs.Arjix,
-        Devs.D3SOX,
+        Devs.D3sox,
         Devs.Ven
     ],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",

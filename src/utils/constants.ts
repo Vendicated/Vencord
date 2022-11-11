@@ -23,7 +23,7 @@ export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
-// Add yourself here if you made more than one plugin
+// Add yourself here if you made a plugin
 export const Devs = Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -41,15 +41,15 @@ export const Devs = Object.freeze({
         name: "Megumin",
         id: 545581357812678656n
     },
-    botato: {
+    Botato: {
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
+    Obscurity: {
         name: "obscurity",
         id: 336678828233588736n,
     },
-    rushii: {
+    Rushii: {
         name: "rushii",
         id: 295190422244950017n
     },
@@ -69,7 +69,7 @@ export const Devs = Object.freeze({
         name: "Mai",
         id: 722647978577363026n
     },
-    echo: {
+    Echo: {
         name: "ECHO",
         id: 712639419785412668n
     },
@@ -77,7 +77,7 @@ export const Devs = Object.freeze({
         name: "katlyn",
         id: 250322741406859265n
     },
-    nea: {
+    Nea: {
         name: "nea",
         id: 310702108997320705n,
     },
@@ -85,12 +85,52 @@ export const Devs = Object.freeze({
         name: "Nuckyz",
         id: 235834946571337729n
     },
-    D3SOX: {
+    D3sox: {
         name: "D3SOX",
         id: 201052085641281538n
     },
     Nickyux: {
         name: "Nickyux",
         id: 427146305651998721n
+    },
+    Xinto: {
+        name: "Xinto",
+        id: 423915768191647755n
+    },
+    JacobTm: {
+        name: "Jacob.Tm",
+        id: 302872992097107991n
+    },
+    DustyAngel47: {
+        name: "DustyAngel47",
+        id: 714583473804935238n
+    },
+    BanTheNons: {
+        name: "BanTheNons",
+        id: 460478012794863637n
+    },
+    BigDuck: {
+        name: "BigDuck",
+        id: 1024588272623681609n
+    },
+    AverageReactEnjoyer: {
+        name: "Average React Enjoyer",
+        id: 1004904120056029256n
+    },
+    Adryd: {
+        name: "Adryd",
+        id: 0n
+    },
+    Tyman: {
+        name: "Tyman",
+        id: 487443883127472129n
+    },
+    Afn: {
+        name: "afn",
+        id: 420043923822608384n
+    },
+    KraXen72: {
+        name: "KraXen72",
+        id: 379304073515499530n
     }
 });

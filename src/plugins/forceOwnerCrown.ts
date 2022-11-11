@@ -26,7 +26,7 @@ waitFor(["getGuild"], m => GuildStore = m);
 export default definePlugin({
     name: "ForceOwnerCrown",
     description: "Force the owner crown next to usernames even if the server is large.",
-    authors: [Devs.D3SOX, Devs.Nickyux],
+    authors: [Devs.D3sox, Devs.Nickyux],
     patches: [
         {
             // This is the logic where it decides whether to render the owner crown or not

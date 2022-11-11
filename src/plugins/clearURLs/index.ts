@@ -23,6 +23,7 @@ import {
     removePreEditListener,
     removePreSendListener,
 } from "../../api/MessageEvents";
+import { Devs } from "../../utils/constants";
 import definePlugin from "../../utils/types";
 import { defaultRules } from "./defaultRules";
 
@@ -33,12 +34,7 @@ const reHasRegExpChar = RegExp(reRegExpChar.source);
 export default definePlugin({
     name: "clearURLs",
     description: "Removes tracking garbage from URLs",
-    authors: [
-        {
-            name: "adryd",
-            id: 0n,
-        },
-    ],
+    authors: [Devs.Adryd],
     dependencies: ["MessageEventsAPI"],
 
     escapeRegExp(str: string) {

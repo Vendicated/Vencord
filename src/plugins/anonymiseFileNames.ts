@@ -28,7 +28,7 @@ enum Methods {
 
 export default definePlugin({
     name: "AnonymiseFileNames",
-    authors: [Devs.obscurity],
+    authors: [Devs.Obscurity],
     description: "Anonymise uploaded file names",
     patches: [
         {
