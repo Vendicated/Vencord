@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { InsertAt, ProfileBadge } from "../api/Badges";
+import { BadgePosition, ProfileBadge } from "../api/Badges";
 import { Flex } from "../components/Flex";
 import { Devs } from "../utils/constants";
 import IpcEvents from "../utils/IpcEvents";
@@ -32,7 +32,7 @@ const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
 const ContributorBadge: ProfileBadge = {
     tooltip: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
-    insertAt: InsertAt.START,
+    position: BadgePosition.START,
     props: {
         style: {
             borderRadius: "50%",

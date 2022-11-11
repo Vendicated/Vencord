@@ -19,7 +19,7 @@
 import { User } from "discord-types/general";
 import { HTMLProps } from "react";
 
-export enum InsertAt {
+export enum BadgePosition {
     START,
     END
 }
@@ -36,7 +36,7 @@ export interface ProfileBadge {
     /** Optional props (e.g. style) for the badge */
     props?: HTMLProps<HTMLImageElement>;
     /** Insert at start or end? */
-    insertAt?: InsertAt;
+    position?: BadgePosition;
 
     /** The badge name to display. Discord uses this, but we don't. */
     key?: string;
@@ -57,7 +57,7 @@ export function addBadge(badge: ProfileBadge) {
  * @param badge The badge to remove
  */
 export function removeBadge(badge: ProfileBadge) {
-    Badges.delete(badge);
+    return Badges.delete(badge);
 }
 
 /**
@@ -67,7 +67,7 @@ export function removeBadge(badge: ProfileBadge) {
 export function inject(badgeArray: ProfileBadge[], args: BadgeUserArgs) {
     for (const badge of Badges) {
         if (!badge.shouldShow || badge.shouldShow(args)) {
-            badge.insertAt === InsertAt.START
+            badge.position === BadgePosition.START
                 ? badgeArray.unshift(badge)
                 : badgeArray.push(badge);
         }
