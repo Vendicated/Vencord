@@ -179,9 +179,9 @@ export default definePlugin({
             match: /{"use strict";(.{0,10})\(\)=>(.{1,2})}\);/,
             replace: '{"use strict";$1()=>$2,me:()=>messageEmbed});'
         }, {
-            match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\(\)\.embedCard(.{0,500})}\)\)\)}/,
-            replace: "function $1($2){var $3=$2.message,$4=$2.channel$5().embedCard$6})))}\
-            var messageEmbed={MessageEmbed:$1};"
+            match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\(\)\.embedCard(.{0,500})}\)}/,
+            replace: "function $1($2){var $3=$2.message,$4=$2.channel$5().embedCard$6})}\
+var messageEmbed={MessageEmbed:$1};"
         }]
     }],
 

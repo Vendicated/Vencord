@@ -38,7 +38,6 @@ export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let ChannelStore: Stores.ChannelStore;
 export let GuildMemberStore: Stores.GuildMemberStore;
-export let MessageStore: Stores.MessageStore;
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
@@ -138,7 +137,6 @@ waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
 waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
-waitFor(["getMessage", "initialize"], m => MessageStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
 waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);

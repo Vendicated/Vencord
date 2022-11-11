@@ -27,9 +27,9 @@ export default definePlugin({
         {
             find: "_messageAttachmentToEmbedMedia",
             replacement: {
-                match: /\(\)\.container\)},(.+?)\)};return/,
+                match: /\(\)\.container\),children:\[(.{1,150})\]}\)};/,
                 replace: (_, accessories) =>
-                    `().container)},Vencord.Api.MessageAccessories._modifyAccessories([${accessories}],this.props))};return`,
+                    `().container),children:Vencord.Api.MessageAccessories._modifyAccessories([${accessories}],this.props)})};`,
             },
         },
     ],
