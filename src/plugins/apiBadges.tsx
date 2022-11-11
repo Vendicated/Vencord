@@ -17,12 +17,9 @@
 */
 
 import { BadgePosition, ProfileBadge } from "../api/Badges";
-import { Flex } from "../components/Flex";
 import { Devs } from "../utils/constants";
 import IpcEvents from "../utils/IpcEvents";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModalLazy } from "../utils/modal";
 import definePlugin from "../utils/types";
-import { Button, Text } from "../webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
 
@@ -40,35 +37,7 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => contributorIds.includes(user.id),
-    onClick: () => {
-        openModalLazy(async () => {
-            return modalProps => {
-                function openGithub() {
-                    VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/Vendicated/Vencord");
-                    modalProps.onClose();
-                }
-                return (
-                    <ModalRoot {...modalProps} size={ModalSize.SMALL}>
-                        <ModalHeader>
-                            <Text variant="heading-md/bold">Vencord Contributor</Text>
-                        </ModalHeader>
-                        <ModalContent>
-                            <div style={{ padding: "10px 0" }}>
-                                <Text variant="text-md/normal">This user is a Vencord contributor!</Text>
-                                <Text variant="text-md/normal">To learn how you can contribute to Vencord, visit our GitHub repo!</Text>
-                            </div>
-                        </ModalContent>
-                        <ModalFooter>
-                            <Flex style={{ gap: 6 }}>
-                                <Button onClick={openGithub}>Visit GitHub</Button>
-                                <Button onClick={modalProps.onClose}>Close</Button>
-                            </Flex>
-                        </ModalFooter>
-                    </ModalRoot >
-                );
-            };
-        });
-    }
+    onClick: () => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/Vendicated/Vencord")
 };
 
 export default definePlugin({
