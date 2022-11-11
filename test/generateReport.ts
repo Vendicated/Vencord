@@ -22,21 +22,22 @@
 /// <reference types="../src/modules" />
 
 import { readFileSync } from "fs";
-// puppeteer is not added as dependency because it downloads chromium (~100mb)
-// which is not needed for normal development and manually installed by github actions
-// Thus, if you want to run this locally, run `pnpm i puppeteer` first
-import pup, { JSHandle } from "puppeteer";
+import pup, { JSHandle } from "puppeteer-core";
+
+for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
+    if (!process.env[variable]) {
+        console.error(`Missing environment variable ${variable}`);
+        process.exit(1);
+    }
+}
 
 const browser = await pup.launch({
     headless: true,
-    args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        '--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"',
-    ]
+    executablePath: process.env.CHROMIUM_BIN
 });
 
 const page = await browser.newPage();
+await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
 
 function maybeGetError(handle: JSHandle) {
     return (handle as JSHandle<Error>)?.getProperty("message")
@@ -82,6 +83,11 @@ function printReport() {
         console.log(`- ${p.plugin}`);
         console.log(`  - Error: ${toCodeBlock(p.error)}`);
     });
+
+    console.log("## Discord Errors");
+    report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
 }
 
 page.on("console", async e => {
@@ -96,6 +102,8 @@ page.on("console", async e => {
     }
 
     const isVencord = (await args[0]?.jsonValue()) === "[Vencord]";
+    const isDebug = (await args[0]?.jsonValue()) === "[PUP_DEBUG]";
+
     if (isVencord) {
         // make ci fail
         process.exitCode = 1;
@@ -123,7 +131,10 @@ page.on("console", async e => {
                 });
                 break;
         }
+    } else if (isDebug) {
+        console.error(e.text());
     } else if (level === "error") {
+        console.error("Got unexpected error", e.text());
         report.otherErrors.push(e.text());
     }
 });
@@ -134,56 +145,72 @@ page.on("pageerror", e => console.error("[Page Error]", e));
 await page.setBypassCSP(true);
 
 function runTime(token: string) {
-    // spoof languages to not be suspicious
-    Object.defineProperty(navigator, "languages", {
-        get: function () {
-            return ["en-US", "en"];
-        },
-    });
+    console.error("[PUP_DEBUG]", "Starting test...");
 
-
-    // Monkey patch Logger to not log with custom css
-    Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
-        if (level === "warn" || level === "error")
-            console[level]("[Vencord]", this.name + ":", ...args);
-    };
-
-    // force enable all plugins and patches
-    Vencord.Plugins.patches.length = 0;
-    Object.values(Vencord.Plugins.plugins).forEach(p => {
-        p.required = true;
-        p.patches?.forEach(patch => {
-            patch.plugin = p.name;
-            delete patch.predicate;
-            if (!Array.isArray(patch.replacement))
-                patch.replacement = [patch.replacement];
-            Vencord.Plugins.patches.push(patch);
+    try {
+        // spoof languages to not be suspicious
+        Object.defineProperty(navigator, "languages", {
+            get: function () {
+                return ["en-US", "en"];
+            },
         });
-    });
 
-    Vencord.Webpack.waitFor(
-        "loginToken",
-        m => m.loginToken(token)
-    );
 
-    // force load all chunks
-    Vencord.Webpack.onceReady.then(() => setTimeout(async () => {
-        const { wreq } = Vencord.Webpack;
+        // Monkey patch Logger to not log with custom css
+        Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
+            if (level === "warn" || level === "error")
+                console[level]("[Vencord]", this.name + ":", ...args);
+        };
 
-        const ids = Function("return" + wreq.u.toString().match(/\{.+\}/s)![0])();
-        for (const id in ids) {
-            const isWasm = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => t.includes(".module.wasm"));
+        // force enable all plugins and patches
+        Vencord.Plugins.patches.length = 0;
+        Object.values(Vencord.Plugins.plugins).forEach(p => {
+            p.required = true;
+            p.patches?.forEach(patch => {
+                patch.plugin = p.name;
+                delete patch.predicate;
+                if (!Array.isArray(patch.replacement))
+                    patch.replacement = [patch.replacement];
+                Vencord.Plugins.patches.push(patch);
+            });
+        });
 
-            if (!isWasm)
-                await wreq.e(id as any);
-        }
-        for (const patch of Vencord.Plugins.patches) {
-            new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
-        }
-        setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
-    }, 1000));
+        Vencord.Webpack.waitFor(
+            "loginToken",
+            m => {
+                console.error("[PUP_DEBUG]", "Logging in with token...");
+                m.loginToken(token);
+            }
+        );
+
+        // force load all chunks
+        Vencord.Webpack.onceReady.then(() => setTimeout(async () => {
+            console.error("[PUP_DEBUG]", "Webpack is ready!");
+
+            const { wreq } = Vencord.Webpack;
+
+            console.error("[PUP_DEBUG]", "Loading all chunks...");
+            const ids = Function("return" + wreq.u.toString().match(/\{.+\}/s)![0])();
+            for (const id in ids) {
+                const isWasm = await fetch(wreq.p + wreq.u(id))
+                    .then(r => r.text())
+                    .then(t => t.includes(".module.wasm"));
+
+                if (!isWasm)
+                    await wreq.e(id as any);
+            }
+            console.error("[PUP_DEBUG]", "Finished loading chunks!");
+
+            for (const patch of Vencord.Plugins.patches) {
+                new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+            }
+            setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
+        }, 1000));
+    } catch (e) {
+        console.error("[PUP_DEBUG]", "A fatal error occured");
+        console.error("[PUP_DEBUG]", e);
+        process.exit(1);
+    }
 }
 
 await page.evaluateOnNewDocument(`
