@@ -32,7 +32,7 @@ function mock(input: string): string {
 export default definePlugin({
     name: "MoreCommands",
     description: "echo, lenny, mock",
-    authors: [Devs.Arjix, Devs.Echo, Devs.Samu],
+    authors: [Devs.Arjix, Devs.echo, Devs.Samu],
     dependencies: ["CommandsAPI"],
     commands: [
         {

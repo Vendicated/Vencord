@@ -32,7 +32,7 @@ let editIdx = -1;
 
 export default definePlugin({
     name: "InteractionKeybinds",
-    authors: [Devs.Obscurity, Devs.Ven],
+    authors: [Devs.obscurity, Devs.Ven],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
 
     start() {

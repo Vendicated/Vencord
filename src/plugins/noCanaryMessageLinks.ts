@@ -24,7 +24,7 @@ import { Settings } from "../Vencord";
 export default definePlugin({
     name: "NoCanaryMessageLinks",
     description: "Allows you to change/remove the subdomain of discord message and channel links",
-    authors: [Devs.Samu, Devs.Nea],
+    authors: [Devs.Samu, Devs.nea],
     options: {
         linkPrefix: {
             description: "The subdomain for your discord message links",

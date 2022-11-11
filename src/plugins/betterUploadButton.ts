@@ -21,7 +21,7 @@ import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "BetterUploadButton",
-    authors: [Devs.Obscurity, Devs.Ven],
+    authors: [Devs.obscurity, Devs.Ven],
     description: "Upload with a single click, open menu with right click",
     patches: [
         {

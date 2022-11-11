@@ -41,15 +41,15 @@ export const Devs = Object.freeze({
         name: "Megumin",
         id: 545581357812678656n
     },
-    Botato: {
+    botato: {
         name: "botato",
         id: 440990343899643943n
     },
-    Obscurity: {
+    obscurity: {
         name: "obscurity",
         id: 336678828233588736n,
     },
-    Rushii: {
+    rushii: {
         name: "rushii",
         id: 295190422244950017n
     },
@@ -69,7 +69,7 @@ export const Devs = Object.freeze({
         name: "Mai",
         id: 722647978577363026n
     },
-    Echo: {
+    echo: {
         name: "ECHO",
         id: 712639419785412668n
     },
@@ -77,7 +77,7 @@ export const Devs = Object.freeze({
         name: "katlyn",
         id: 250322741406859265n
     },
-    Nea: {
+    nea: {
         name: "nea",
         id: 310702108997320705n,
     },
@@ -117,15 +117,15 @@ export const Devs = Object.freeze({
         name: "Average React Enjoyer",
         id: 1004904120056029256n
     },
-    Adryd: {
-        name: "Adryd",
+    adryd: {
+        name: "adryd",
         id: 0n
     },
     Tyman: {
         name: "Tyman",
         id: 487443883127472129n
     },
-    Afn: {
+    afn: {
         name: "afn",
         id: 420043923822608384n
     },

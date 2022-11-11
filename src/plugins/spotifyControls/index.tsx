@@ -23,7 +23,7 @@ import { Player } from "./PlayerComponent";
 export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
-    authors: [Devs.Ven, Devs.Afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
     dependencies: ["MenuItemDeobfuscatorApi"],
     patches: [
         {
