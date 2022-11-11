@@ -34,7 +34,7 @@ const reHasRegExpChar = RegExp(reRegExpChar.source);
 export default definePlugin({
     name: "clearURLs",
     description: "Removes tracking garbage from URLs",
-    authors: [Devs.Adryd],
+    authors: [Devs.adryd],
     dependencies: ["MessageEventsAPI"],
 
     escapeRegExp(str: string) {
