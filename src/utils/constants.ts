@@ -23,7 +23,7 @@ export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
-// Add yourself here if you made more than one plugin
+// Add yourself here if you made a plugin
 export const Devs = Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -92,5 +92,45 @@ export const Devs = Object.freeze({
     Nickyux: {
         name: "Nickyux",
         id: 427146305651998721n
+    },
+    Xinto: {
+        name: "Xinto",
+        id: 423915768191647755n
+    },
+    JacobTm: {
+        name: "Jacob.Tm",
+        id: 302872992097107991n
+    },
+    DustyAngel47: {
+        name: "DustyAngel47",
+        id: 714583473804935238n
+    },
+    BanTheNons: {
+        name: "BanTheNons",
+        id: 460478012794863637n
+    },
+    BigDuck: {
+        name: "BigDuck",
+        id: 1024588272623681609n
+    },
+    AverageReactEnjoyer: {
+        name: "Average React Enjoyer",
+        id: 1004904120056029256n
+    },
+    adryd: {
+        name: "adryd",
+        id: 0n
+    },
+    Tyman: {
+        name: "Tyman",
+        id: 487443883127472129n
+    },
+    afn: {
+        name: "afn",
+        id: 420043923822608384n
+    },
+    KraXen72: {
+        name: "KraXen72",
+        id: 379304073515499530n
     }
 });

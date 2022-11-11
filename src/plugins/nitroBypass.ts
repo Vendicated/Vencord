@@ -52,11 +52,7 @@ interface StickerPack {
 
 export default definePlugin({
     name: "NitroBypass",
-    authors: [
-        Devs.Arjix,
-        Devs.D3SOX,
-        Devs.Ven
-    ],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
 

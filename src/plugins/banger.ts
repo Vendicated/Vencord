@@ -22,13 +22,7 @@ import definePlugin, { OptionType } from "../utils/types";
 export default definePlugin({
     name: "BANger",
     description: "Replaces the GIF in the ban dialogue with a custom one.",
-    authors: [
-        {
-            name: "Xinto",
-            id: 423915768191647755n
-        },
-        Devs.Glitch
-    ],
+    authors: [Devs.Xinto, Devs.Glitch],
     patches: [
         {
             find: "BAN_CONFIRM_TITLE.",

@@ -17,6 +17,7 @@
 */
 
 import { findOption, RequiredMessageOption } from "../api/Commands";
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 const endings = [
@@ -109,10 +110,7 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [{
-        name: "ECHO",
-        id: 712639419785412668n
-    }],
+    authors: [Devs.echo],
     dependencies: ["CommandsAPI"],
 
     commands: [

@@ -31,7 +31,7 @@ export default definePlugin({
         Devs.Megu,
         Devs.Ven,
         Devs.Nickyux,
-        { name: "BanTheNons", id: 460478012794863637n },
+        Devs.BanTheNons
     ],
     description: "Enable Access to Experiments in Discord!",
     patches: [{

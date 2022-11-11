@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "../../utils/constants";
 import definePlugin, { OptionType } from "../../utils/types";
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import PronounsChatComponent from "./components/PronounsChatComponent";
@@ -28,10 +29,7 @@ export enum PronounsFormat {
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [{
-        name: "Tyman",
-        id: 487443883127472129n
-    }],
+    authors: [Devs.Tyman],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
         // Patch the chat timestamp element

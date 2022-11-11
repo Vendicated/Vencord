@@ -16,15 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [{
-        name: "DustyAngel47",
-        id: 714583473804935238n
-    }],
+    authors: [Devs.DustyAngel47],
     patches: [
         {
             find: "CREATE_PENDING_REPLY:function",

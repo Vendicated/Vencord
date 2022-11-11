@@ -16,18 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findOption,OptionalMessageOption } from "../api/Commands";
+import { findOption, OptionalMessageOption } from "../api/Commands";
+import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
     name: "moarKaomojis",
     description: "Adds more Kaomojis to discord. ヽ(´▽`)/",
-    authors: [
-        {
-            name: "Jacob.Tm",
-            id: 302872992097107991n
-        }
-    ],
+    authors: [Devs.JacobTm],
     dependencies: ["CommandsAPI"],
     commands: [
         { name: "dissatisfaction", description: " ＞﹏＜" },
