@@ -24,7 +24,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal
 import definePlugin from "../utils/types";
 import { Button, Text } from "../webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp?size=32";
+const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
 
 /** List of vencord contributor IDs */
 const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
