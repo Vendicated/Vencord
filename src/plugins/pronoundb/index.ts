@@ -46,11 +46,12 @@ export default definePlugin({
         {
             find: "currentPronouns:",
             all: true,
+            noWarn: true,
             replacement: {
                 match: /\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^[}]*currentPronouns:[^}]*(\w)\.pronouns[^}]*\})\)/,
                 replace: (original, PronounComponent, pronounProps, fullProps) => {
                     // UserSettings
-                    if (fullProps.includes("onPronounsChange")) return original;
+                    if (pronounProps.includes("onPronounsChange")) return original;
 
                     return `Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(${PronounComponent}, ${pronounProps}, ${fullProps})`;
                 }

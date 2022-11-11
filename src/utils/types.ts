@@ -34,7 +34,10 @@ export interface Patch {
     plugin: string;
     find: string;
     replacement: PatchReplacement | PatchReplacement[];
+    /** Whether this patch should apply to multiple modules */
     all?: boolean;
+    /** Do not warn if this patch did no changes */
+    noWarn?: boolean;
     predicate?(): boolean;
 }
 
