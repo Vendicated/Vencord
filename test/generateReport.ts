@@ -64,7 +64,7 @@ function toCodeBlock(s: string) {
     return "```" + s + " ```";
 }
 
-function printReport() {
+async function printReport() {
     console.log("# Vencord Report");
     console.log();
 
@@ -88,6 +88,56 @@ function printReport() {
     report.otherErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
+
+    if (process.env.DISCORD_WEBHOOK) {
+        // this code was written almost entirely by Copilot xD
+        await fetch(process.env.DISCORD_WEBHOOK, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                description: "Here's the latest Vencord Report!",
+                username: "Vencord Reporter",
+                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/f0204a918c6c9c9a43195997e97d8adf.webp",
+                embeds: [
+                    {
+                        title: "Bad Patches",
+                        description: report.badPatches.map(p => {
+                            const lines = [
+                                `**__${p.plugin} (${p.type}):__**`,
+                                `ID: \`${p.id}\``,
+                                `Match: ${toCodeBlock(p.match)}`
+                            ];
+                            if (p.error) lines.push(`Error: ${toCodeBlock(p.error)}`);
+                            return lines.join("\n");
+                        }).join("\n\n") || "None",
+                        color: report.badPatches.length ? 0xff0000 : 0x00ff00
+                    },
+                    {
+                        title: "Bad Starts",
+                        description: report.badStarts.map(p => {
+                            const lines = [
+                                `**__${p.plugin}:__**`,
+                                toCodeBlock(p.error)
+                            ];
+                            return lines.join("\n");
+                        }
+                        ).join("\n\n") || "None",
+                        color: report.badStarts.length ? 0xff0000 : 0x00ff00
+                    },
+                    {
+                        title: "Discord Errors",
+                        description: toCodeBlock(report.otherErrors.join("\n")),
+                        color: report.otherErrors.length ? 0xff0000 : 0x00ff00
+                    }
+                ]
+            })
+        }).then(res => {
+            if (!res.ok) console.error(`Webhook failed with status ${res.status}`);
+            else console.error("Posted to Discord Webhook successfully");
+        });
+    }
 }
 
 page.on("console", async e => {
@@ -97,7 +147,7 @@ page.on("console", async e => {
     const firstArg = (await args[0]?.jsonValue());
     if (firstArg === "PUPPETEER_TEST_DONE_SIGNAL") {
         await browser.close();
-        printReport();
+        await printReport();
         process.exit();
     }
 
