@@ -29,7 +29,7 @@ export default definePlugin({
         {
             find: "onCloseImage=",
             replacement: {
-                match: /(return .{1,2}\.createElement.{0,50}isWindowFocused)/,
+                match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
                     "Vencord.Plugins.plugins.BetterGifAltText.altify(e);$1",
             },

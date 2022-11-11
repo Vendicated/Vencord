@@ -37,7 +37,7 @@ const browser = await pup.launch({
 });
 
 const page = await browser.newPage();
-await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
+await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36");
 
 function maybeGetError(handle: JSHandle) {
     return (handle as JSHandle<Error>)?.getProperty("message")

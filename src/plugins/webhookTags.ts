@@ -42,7 +42,7 @@ export default definePlugin({
         {
             find: ".Types.ORIGINAL_POSTER",
             replacement: {
-                match: /return null==(.)\?null:.\.createElement\((.)\.Z/,
+                match: /return null==(.)\?null:\(0,.{1,3}\.jsxs?\)\((.{1,3})\.Z/,
                 replace: (orig, type, BotTag) =>
                     `if(arguments[0].message.webhookId&&arguments[0].user.isNonUserBot()){${type}=${BotTag}.Z.Types.WEBHOOK}${orig}`,
             },
