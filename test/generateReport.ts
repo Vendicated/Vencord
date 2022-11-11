@@ -252,7 +252,9 @@ function runTime(token: string) {
             console.error("[PUP_DEBUG]", "Finished loading chunks!");
 
             for (const patch of Vencord.Plugins.patches) {
-                new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                if (!patch.all) {
+                    new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                }
             }
             setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
         }, 1000));
