@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { lazyWebpack } from "../utils";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
@@ -31,7 +31,7 @@ export default definePlugin({
         Devs.Megu,
         Devs.Ven,
         Devs.Nickyux,
-        { name: "BanTheNons", id: 460478012794863637n },
+        Devs.BanTheNons
     ],
     description: "Enable Access to Experiments in Discord!",
     patches: [{

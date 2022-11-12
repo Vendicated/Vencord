@@ -67,7 +67,9 @@ export default definePlugin({
 
     anonymise(file: string) {
         let name = "image";
-        const ext = file.match(/\..+$/g)?.[0] ?? "";
+        const extIdx = file.lastIndexOf(".");
+        const ext = extIdx !== -1 ? file.slice(extIdx) : "";
+
         switch (Settings.plugins.AnonymiseFileNames.method) {
             case Methods.Random:
                 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

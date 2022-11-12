@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
 import * as $DataStore from "./DataStore";
 import * as $MessageAccessories from "./MessageAccessories";
@@ -57,5 +58,9 @@ const DataStore = $DataStore;
  * An API allowing you to add custom components as message accessories
  */
 const MessageAccessories = $MessageAccessories;
+/**
+ * An API allowing you to add badges to user profiles
+ */
+const Badges = $Badges;
 
-export { Commands,DataStore, MessageAccessories, MessageEvents, Notices };
+export { Badges, Commands, DataStore, MessageAccessories, MessageEvents, Notices };

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption } from "../api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "../api/Commands";
 import { Devs } from "../utils/constants";
+import { getGifEncoder } from "../utils/dependencies";
 import { lazyWebpack, makeLazy } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
@@ -26,11 +27,6 @@ const DRAFT_TYPE = 0;
 const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
 const FRAMES = 10;
-
-// https://github.com/mattdesl/gifenc
-// this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
-// @ts-ignore ts mad
-const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
 
 const getFrames = makeLazy(() => Promise.all(
     Array.from(
@@ -136,8 +132,9 @@ export default definePlugin({
                     var url = await resolveImage(opts, cmdCtx, noServerPfp);
                     if (!url) throw "No Image specified!";
                 } catch (err) {
-                    // Todo make this send a clyde message once that PR is done
-                    console.log(err);
+                    sendBotMessage(cmdCtx.channel.id, {
+                        content: String(err),
+                    });
                     return;
                 }
 

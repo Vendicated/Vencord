@@ -26,8 +26,8 @@ export default definePlugin({
     patches: [{
         find: "().expandedFolderIconWrapper",
         replacement: [{
-            match: /\(\w\|\|\w\)(&&\(\w=\w\.createElement\(\w+\.animated)/,
-            replace: "true$1",
+            match: /\(\w\|\|\w\)&&(\(.{0,40}\(.{1,3}\.animated)/,
+            replace: "$1",
         }]
     }]
 });

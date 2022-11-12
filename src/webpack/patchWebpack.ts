@@ -65,7 +65,7 @@ function patchPush() {
                 const originalMod = mod;
                 const patchedBy = new Set();
 
-                modules[id] = function (module, exports, require) {
+                const factory = modules[id] = function (module, exports, require) {
                     try {
                         mod(module, exports, require);
                     } catch (err) {
@@ -118,10 +118,14 @@ function patchPush() {
                             logger.error("Error while firing callback for webpack chunk", err);
                         }
                     }
-                };
+                } as any as { toString: () => string, original: any, (...args: any[]): void; };
 
-                modules[id].toString = () => mod.toString();
-                modules[id].original = originalMod;
+                // for some reason throws some error on which calling .toString() leads to infinite recursion
+                // when you force load all chunks???
+                try {
+                    factory.toString = () => mod.toString();
+                    factory.original = originalMod;
+                } catch { }
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
@@ -137,7 +141,7 @@ function patchPush() {
 
                             try {
                                 const newCode = code.replace(replacement.match, replacement.replace);
-                                if (newCode === code) {
+                                if (newCode === code && !replacement.noWarn) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                     if (IS_DEV) {
                                         logger.debug("Function Source:\n", code);
@@ -147,7 +151,7 @@ function patchPush() {
                                     mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                                 }
                             } catch (err) {
-                                logger.error(`Failed to apply patch ${replacement.match} of ${patch.plugin} to ${id}:\n`, err);
+                                logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
 
                                 if (IS_DEV) {
                                     const changeSize = code.length - lastCode.length;
