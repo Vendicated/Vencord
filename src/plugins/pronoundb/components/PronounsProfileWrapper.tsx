@@ -30,8 +30,22 @@ export default function PronounsProfileWrapper(PronounsComponent: React.ElementT
     if (!Settings.plugins.PronounDB.showSelf && user.id === UserStore.getCurrentUser().id)
         return null;
 
+    return <ProfilePronouns
+        userId={profileProps.userId}
+        Component={PronounsComponent}
+        leProps={props}
+    />;
+}
+
+function ProfilePronouns(
+    { userId, Component, leProps }: {
+        userId: string;
+        Component: React.ElementType<UserProfilePronounsProps>;
+        leProps: UserProfilePronounsProps;
+    }
+) {
     const [result, , isPending] = useAwaiter(
-        () => fetchPronouns(user.id),
+        () => fetchPronouns(userId),
         null,
         e => console.error("Fetching pronouns failed: ", e)
     );
@@ -39,8 +53,8 @@ export default function PronounsProfileWrapper(PronounsComponent: React.ElementT
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then render
     if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
         // First child is the header, second is a div with the actual text
-        props.currentPronouns ||= formatPronouns(result);
-        return <PronounsComponent {...props} />;
+        leProps.currentPronouns ||= formatPronouns(result);
+        return <Component {...leProps} />;
     }
 
     return null;

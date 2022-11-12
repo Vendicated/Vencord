@@ -22,8 +22,13 @@ import { Margins, React } from "../webpack/common";
 import { ErrorCard } from "./ErrorCard";
 
 interface Props {
+    /** Render nothing if an error occurs */
+    noop?: boolean;
+    /** Fallback component to render if an error occurs */
     fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; }>>;
+    /** called when an error occurs */
     onError?(error: Error, errorInfo: React.ErrorInfo): void;
+    /** Custom error message */
     message?: string;
 }
 
@@ -66,6 +71,8 @@ const ErrorBoundary = LazyComponent(() => {
 
         render() {
             if (this.state.error === NO_ERROR) return this.props.children;
+
+            if (this.props.noop) return null;
 
             if (this.props.fallback)
                 return <this.props.fallback
