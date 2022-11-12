@@ -228,9 +228,11 @@ export const Menu = proxyLazy(() => {
 
     if (!hasDeobfuscator) {
         for (const m of menuItems)
-            map[m] = () => {
-                throw new Error(`Your plugin needs to depend on MenuItemDeobfuscatorApi to use ${m}`);
-            };
+            Object.defineProperty(map, m, {
+                get() {
+                    throw new Error("MenuItemDeobfuscator must be enabled to use this.");
+                }
+            });
     }
 
     return map;

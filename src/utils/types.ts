@@ -49,9 +49,10 @@ export interface PluginAuthor {
 export interface Plugin extends PluginDef {
     patches?: Patch[];
     started: boolean;
+    isDependency?: boolean;
 }
 
-interface PluginDef {
+export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];

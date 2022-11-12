@@ -37,6 +37,7 @@ export default definePlugin({
             wreq: Vencord.Webpack.wreq,
             wpsearch: Vencord.Webpack.search,
             wpex: Vencord.Webpack.extract,
+            wpexs: (code: string) => Vencord.Webpack.extract(Vencord.Webpack.findModuleId(code)!),
             findByProps: Vencord.Webpack.findByProps,
             find: Vencord.Webpack.find,
             Plugins: Vencord.Plugins,
