@@ -20,6 +20,7 @@ import Plugins from "~plugins";
 
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
+import { traceFunction } from "../debug/Tracer";
 import Logger from "../utils/logger";
 import { Patch, Plugin } from "../utils/types";
 
@@ -43,12 +44,12 @@ for (const p of Object.values(Plugins))
         }
     }
 
-export function startAllPlugins() {
+export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
     for (const name in Plugins)
         if (isPluginEnabled(name)) {
             startPlugin(Plugins[name]);
         }
-}
+});
 
 export function startDependenciesRecursive(p: Plugin) {
     let restartNeeded = false;
@@ -70,7 +71,7 @@ export function startDependenciesRecursive(p: Plugin) {
     return { restartNeeded, failures };
 }
 
-export function startPlugin(p: Plugin) {
+export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     if (p.start) {
         logger.info("Starting plugin", p.name);
         if (p.started) {
@@ -100,9 +101,9 @@ export function startPlugin(p: Plugin) {
     }
 
     return true;
-}
+}, p => `startPlugin ${p.name}`);
 
-export function stopPlugin(p: Plugin) {
+export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     if (p.stop) {
         logger.info("Stopping plugin", p.name);
         if (!p.started) {
@@ -131,4 +132,4 @@ export function stopPlugin(p: Plugin) {
     }
 
     return true;
-}
+}, p => `stopPlugin ${p.name}`);

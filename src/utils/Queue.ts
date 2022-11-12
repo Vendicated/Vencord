@@ -19,9 +19,9 @@
 import { Promisable } from "type-fest";
 
 export class Queue {
-    private promise = Promise.resolve();
+    private promise: Promise<any> = Promise.resolve();
 
-    add(func: () => Promisable<void>) {
-        this.promise = this.promise.then(func);
+    add<T>(func: (lastValue: unknown) => Promisable<T>): Promise<T> {
+        return (this.promise = this.promise.then(func));
     }
 }
