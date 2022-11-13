@@ -78,7 +78,7 @@ export default definePlugin({
         };
     },
 
-    // Based on canary 56c8103413aa1add076201dbf622f8d26b48df9c
+    // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
     patches: [
         {
             // MessageStore
@@ -163,7 +163,7 @@ export default definePlugin({
 
         {
             // Base message component renderer
-            // Module 876389
+            // Module 748241
             find: "Message must not be a thread starter message",
             replacement: [
                 {
@@ -173,8 +173,8 @@ export default definePlugin({
                 },
                 {
                     // Append messageLogger-deleted to classNames if deleted
-                    match: /createElement\("li",{(.+?),className:/,
-                    replace: "createElement(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
+                    match: /\)\("li",\{(.+?),className:/,
+                    replace: ")(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
                 }
             ]
         },
@@ -182,12 +182,12 @@ export default definePlugin({
         {
             // Message content renderer
             // Module 43016
-            find: "Messages.MESSAGE_EDITED,\")\"))))",
+            find: "Messages.MESSAGE_EDITED,\")\"",
             replacement: [
                 {
                     // Render editHistory in the deepest div for message content
-                    match: /((\w)\.createElement\("div",{id.+?},)(null!=.+?)(\)}function)/,
-                    replace: "$1[ (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), $3]$4"
+                    match: /(\)\("div",\{id:.+?children:\[)/,
+                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), "
                 }
             ]
         },
@@ -210,6 +210,7 @@ export default definePlugin({
 
         {
             // Message "(edited)" timestamp component
+            // Module 23552
             find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
             replacement: {
                 // Re-export the timestamp component under a findable name
