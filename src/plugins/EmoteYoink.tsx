@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "../api/settings";
 import { CheckedTextInput } from "../components/CheckedTextInput";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
+import { lazyWebpack, makeLazy } from "../utils/misc";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "../utils/modal";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
@@ -185,6 +186,17 @@ export default definePlugin({
         replacement: {
             match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
             replace: "$&,Vencord.Plugins.plugins.EmoteYoink.makeMenu(arguments[2])"
+        },
+
+    },
+    // Also copy pasted from Reverse Image Search
+    {
+        // pass the target to the open link menu so we can grab its data
+        find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
+        predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
+        replacement: {
+            match: /(?<props>.).onHeightUpdate.{0,200}(.)=(.)=.\.url;.+?\(null!=\3\?\3:\2[^)]+/,
+            replace: "$&,$<props>.target"
         }
     }],
 
