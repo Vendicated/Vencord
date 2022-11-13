@@ -6,7 +6,9 @@ You don't need to run `pnpm build` every time you make a change. Instead, use `p
 
 ## Plugin Entrypoint
 
-1. Create a folder in `src/plugins/` with the name of your plugin. For example, `src/plugins/epicPlugin/` - All of your plugin files will go here.
+> If it doesn't already exist, create a folder called `userplugins` in the `src` directory of this repo.
+
+1. Create a folder in `src/userplugins/` with the name of your plugin. For example, `src/userplugins/epicPlugin/` - All of your plugin files will go here.
 
 2. Create a file in that folder called `index.ts`
 
@@ -20,7 +22,7 @@ export default definePlugin({
     description: "This plugin is absolutely epic",
     authors: [
         {
-            id: "your discord user id goes here",
+            id: 12345n,
             name: "Your Name",
         },
     ],
@@ -32,6 +34,8 @@ export default definePlugin({
 ```
 
 Change the name, description, and authors to your own information.
+
+Replace `12345n` with your user ID ending in `n` (e.g., `545581357812678656n`). If you don't want to share your Discord account, use `0n` instead!
 
 ## How Plugins Work In Vencord
 
@@ -86,7 +90,8 @@ The replacement string we used is:
 
 Which, using the above example, would replace the code with:
 
-> :exclamation: In this example, `$1` becomes `abc`
+> **Note**
+> In this example, `$1` becomes `abc`
 
 ```js
 abc.isStaff = function () {
@@ -96,8 +101,11 @@ abc.isStaff = function () {
 
 The match value _can_ be a string, rather than regex, however usually regex will be better suited, as it can work with unknown values, whereas strings must be exact matches.
 
-Once you've made your plugin, make sure you run `pnpm lint` and make sure your code is nice and clean, and then open a PR on github :)
+Once you've made your plugin, make sure you run `pnpm test` and make sure your code is nice and clean!
 
-> :exclamation: Make sure you've read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a PR
+If you want to publish your plugin into the Vencord repo, move your plugin from `src/userplugins` into the `src/plugins` folder and open a PR!
+
+> **Warning**
+> Make sure you've read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a PR
 
 If you need more help, ask in the support channel in our [Discord Server](https://discord.gg/D9uwnFnqmd).

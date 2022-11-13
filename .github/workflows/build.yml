@@ -1,0 +1,50 @@
+name: Build latest
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - .github/workflows/build.yml
+            - src/**
+            - browser/**
+            - scripts/build/**
+            - package.json
+env:
+    FORCE_COLOR: true
+
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+
+            - name: Use Node.js 18
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 19
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build web
+              run: pnpm buildWeb --standalone
+
+            - name: Build
+              run: pnpm build --standalone
+
+            - name: Get some values needed for the release
+              id: release_values
+              run: |
+                echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+            - name: Upload Devbuild
+              run: |
+                gh release upload devbuild --clobber dist/*
+                gh release edit devbuild --title "DevBuild $RELEASE_TAG"
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                RELEASE_TAG: ${{ env.release_tag }}

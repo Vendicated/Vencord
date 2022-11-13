@@ -1,14 +1,43 @@
-import { waitFor, filters, _resolveReady } from "./webpack";
-import type Components from "discord-types/components";
-import type Stores from "discord-types/stores";
-import type Other from "discord-types/other";
-import { lazyWebpack } from "../utils/misc";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-export const Margins = lazyWebpack(filters.byProps(["marginTop20"]));
+import type Components from "discord-types/components";
+import { User } from "discord-types/general";
+import type Other from "discord-types/other";
+import type Stores from "discord-types/stores";
+
+import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { proxyLazy } from "../utils/proxyLazy";
+import { _resolveReady, filters, findByCode, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
+
+export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
+export const Flux = lazyWebpack(filters.byProps("connectStores"));
 export let React: typeof import("react");
+export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
+
+export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
+export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
+export let SelectedChannelStore: Stores.SelectedChannelStore;
+export let ChannelStore: Stores.ChannelStore;
+
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
     FormSection: any;
@@ -20,6 +49,11 @@ export let Button: any;
 export let Switch: any;
 export let Tooltip: Components.Tooltip;
 export let Router: any;
+export let TextInput: any;
+export let Text: (props: TextProps) => JSX.Element;
+
+export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
 
 export let Parser: any;
 export let Alerts: {
@@ -77,7 +111,17 @@ export const Toasts = {
     }
 };
 
+export const UserUtils = {
+    fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
+};
+
+export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
+    copy: filters.byCode(".default.copy("),
+    SUPPORTS_COPY: x => typeof x === "boolean",
+});
+
 waitFor("useState", m => React = m);
+
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
     const cb = () => {
@@ -86,7 +130,12 @@ waitFor(["dispatch", "subscribe"], m => {
     };
     m.subscribe("CONNECTION_OPEN", cb);
 });
+
 waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
+waitFor("getSortedPrivateChannels", m => ChannelStore = m);
+waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
+waitFor("getGuildCount", m => GuildStore = m);
+
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
 waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
@@ -110,3 +159,100 @@ waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
 
 waitFor(["open", "saveAccountChanges"], m => Router = m);
+waitFor(["defaultProps", "Sizes", "contextType"], m => TextInput = m);
+
+waitFor(m => {
+    if (typeof m !== "function") return false;
+    const s = m.toString();
+    return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
+}, m => Text = m);
+
+export type TextProps = React.PropsWithChildren & {
+    variant: TextVariant;
+    style?: React.CSSProperties;
+    color?: string;
+    tag?: "div" | "span" | "p" | "strong";
+    selectable?: boolean;
+    lineClamp?: number;
+    id?: string;
+    className?: string;
+};
+
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-md" | "display-lg" | "code";
+
+type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
+interface Menu {
+    ContextMenu: RC<{
+        navId: string;
+        onClose(): void;
+        className?: string;
+        style?: React.CSSProperties;
+        hideScroller?: boolean;
+        onSelect?(): void;
+    }>;
+    MenuSeparator: React.ComponentType;
+    MenuGroup: RC<any>;
+    MenuItem: RC<{
+        id: string;
+        label: string;
+        render?: React.ComponentType;
+        onChildrenScroll?: Function;
+        childRowHeight?: number;
+        listClassName?: string;
+    }>;
+    MenuCheckboxItem: RC<{
+        id: string;
+    }>;
+    MenuRadioItem: RC<{
+        id: string;
+    }>;
+    MenuControlItem: RC<{
+        id: string;
+        interactive?: boolean;
+    }>;
+}
+
+/**
+ * Discord's Context menu items.
+ * To use anything but Menu.ContextMenu, your plugin HAS TO
+ * depend on MenuItemDeobfuscatorApi. Otherwise they will throw
+ */
+export const Menu = proxyLazy(() => {
+    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorApi.enabled;
+    const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
+
+    const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
+        ContextMenu: filters.byCode("getContainerProps"),
+        ...Object.fromEntries((hasDeobfuscator ? menuItems : []).map(s => [s, (m: any) => m.name === s]))
+    }) as Menu;
+
+    if (!hasDeobfuscator) {
+        for (const m of menuItems)
+            Object.defineProperty(map, m, {
+                get() {
+                    throw new Error("MenuItemDeobfuscator must be enabled to use this.");
+                }
+            });
+    }
+
+    return map;
+});
+
+export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
+    open: filters.byCode("stopPropagation"),
+    openLazy: m => m.toString().length < 50,
+    close: filters.byCode("CONTEXT_MENU_CLOSE")
+}) as {
+    close(): void;
+    open(
+        event: React.UIEvent,
+        render?: Menu["ContextMenu"],
+        options?: { enableSpellCheck?: boolean; },
+        renderLazy?: () => Promise<Menu["ContextMenu"]>
+    ): void;
+    openLazy(
+        event: React.UIEvent,
+        renderLazy?: () => Promise<Menu["ContextMenu"]>,
+        options?: { enableSpellCheck?: boolean; }
+    ): void;
+};

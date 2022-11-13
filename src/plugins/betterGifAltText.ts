@@ -1,3 +1,22 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
@@ -10,7 +29,7 @@ export default definePlugin({
         {
             find: "onCloseImage=",
             replacement: {
-                match: /(return .{1,2}\.createElement.{0,50}isWindowFocused)/,
+                match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
                     "Vencord.Plugins.plugins.BetterGifAltText.altify(e);$1",
             },
@@ -18,15 +37,15 @@ export default definePlugin({
         {
             find: 'preload:"none","aria',
             replacement: {
-                match: /\?.{0,5}\.Messages\.GIF/,
+                match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
                 replace:
-                    "?(e.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify(e))",
+                    "?($1.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify($1))",
             },
         },
     ],
 
     altify(props: any) {
-        if (props.alt !== "GIF") return;
+        if (props.alt !== "GIF") return props.alt;
 
         let url: string = props.original || props.src;
         try {

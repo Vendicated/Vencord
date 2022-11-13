@@ -1,7 +1,29 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import gitHash from "~git-hash";
+import gitRemote from "~git-remote";
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
-// Add yourself here if you made more than one plugin
+// Add yourself here if you made a plugin
 export const Devs = Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -34,5 +56,81 @@ export const Devs = Object.freeze({
     Glitch: {
         name: "Glitchy",
         id: 269567451199569920n
+    },
+    Samu: {
+        name: "Samu",
+        id: 702973430449832038n,
+    },
+    Animal: {
+        name: "Animal",
+        id: 118437263754395652n
+    },
+    MaiKokain: {
+        name: "Mai",
+        id: 722647978577363026n
+    },
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
+    },
+    katlyn: {
+        name: "katlyn",
+        id: 250322741406859265n
+    },
+    nea: {
+        name: "nea",
+        id: 310702108997320705n,
+    },
+    Nuckyz: {
+        name: "Nuckyz",
+        id: 235834946571337729n
+    },
+    D3SOX: {
+        name: "D3SOX",
+        id: 201052085641281538n
+    },
+    Nickyux: {
+        name: "Nickyux",
+        id: 427146305651998721n
+    },
+    Xinto: {
+        name: "Xinto",
+        id: 423915768191647755n
+    },
+    JacobTm: {
+        name: "Jacob.Tm",
+        id: 302872992097107991n
+    },
+    DustyAngel47: {
+        name: "DustyAngel47",
+        id: 714583473804935238n
+    },
+    BanTheNons: {
+        name: "BanTheNons",
+        id: 460478012794863637n
+    },
+    BigDuck: {
+        name: "BigDuck",
+        id: 1024588272623681609n
+    },
+    AverageReactEnjoyer: {
+        name: "Average React Enjoyer",
+        id: 1004904120056029256n
+    },
+    adryd: {
+        name: "adryd",
+        id: 0n
+    },
+    Tyman: {
+        name: "Tyman",
+        id: 487443883127472129n
+    },
+    afn: {
+        name: "afn",
+        id: 420043923822608384n
+    },
+    KraXen72: {
+        name: "KraXen72",
+        id: 379304073515499530n
     }
 });

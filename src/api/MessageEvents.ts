@@ -1,5 +1,25 @@
-import type { Message, Channel } from "discord-types/general";
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import type { Channel, Message } from "discord-types/general";
+
 import Logger from "../utils/logger";
+import { MessageStore } from "../webpack/common";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
@@ -18,25 +38,37 @@ export interface MessageObject {
     validNonShortcutEmojis: Emoji[];
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: any) => void;
+export interface MessageExtra {
+    stickerIds?: string[];
+}
+
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => void | { cancel: boolean; };
 export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => void;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: any) {
+export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
     for (const listener of sendListeners) {
         try {
-            listener(channelId, messageObj, extra);
-        } catch (e) { MessageEventsLogger.error(`MessageSendHandler: Listener encoutered an unknown error. (${e})`); }
+            const result = listener(channelId, messageObj, extra);
+            if (result && result.cancel === true) {
+                return true;
+            }
+        } catch (e) {
+            MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e);
+        }
     }
+    return false;
 }
 
-export function _handlePreEdit(channeld: string, messageId: string, messageObj: MessageObject) {
+export function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
-            listener(channeld, messageId, messageObj);
-        } catch (e) { MessageEventsLogger.error(`MessageEditHandler: Listener encoutered an unknown error. (${e})`); }
+            listener(channelId, messageId, messageObj);
+        } catch (e) {
+            MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
+        }
     }
 }
 
@@ -67,11 +99,15 @@ type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => 
 
 const listeners = new Set<ClickListener>();
 
-export function _handleClick(message, channel, event) {
+export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
+    // message object may be outdated, so (try to) fetch latest one
+    message = MessageStore.getMessage(channel.id, message.id) ?? message;
     for (const listener of listeners) {
         try {
             listener(message, channel, event);
-        } catch (e) { MessageEventsLogger.error(`MessageClickHandler: Listener encoutered an unknown error. (${e})`); }
+        } catch (e) {
+            MessageEventsLogger.error("MessageClickHandler: Listener encountered an unknown error\n", e);
+        }
     }
 }
 
