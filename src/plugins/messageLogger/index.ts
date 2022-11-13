@@ -266,6 +266,19 @@ export default definePlugin({
                 match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
                 replace: "{$1,messageLogger_TimestampComponent:()=>$2}"
             }
+        },
+
+        {
+            // Message context base menu
+            // Module 600300
+            find: "id:\"remove-reactions\"",
+            replacement: [
+                {
+                    // Remove the first section if message is deleted
+                    match: /children:(\[""===.+?\])/,
+                    replace: "children:arguments[0].message.deleted?[]:$1"
+                }
+            ]
         }
 
         // {
