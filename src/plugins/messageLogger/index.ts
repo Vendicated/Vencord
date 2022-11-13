@@ -41,12 +41,7 @@ export default definePlugin({
 
         .messageLogger-deleted-attachment:hover {
             filter: grayscale(0);
-            -webkit-transition: 250ms -webkit-filter linear;
-            -moz-transition: 250ms -moz-filter linear;
-            -moz-transition: 250ms filter linear;
-            -ms-transition: 250ms -ms-filter linear;
-            -o-transition: 250ms -o-filter linear;
-            transition: 250ms filter linear, 250ms -webkit-filter linear;
+            transition: 250ms filter linear;
         }
 
         .theme-dark .messageLogger-edited {
