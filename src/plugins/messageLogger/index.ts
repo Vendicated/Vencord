@@ -247,12 +247,12 @@ export default definePlugin({
             find: "displayName=\"ReferencedMessageStore\"",
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:function.+?},/,
-                    replace: "MESSAGE_DELETE:function(){},"
+                    match: /MESSAGE_DELETE:function\((\w)\).+?},/,
+                    replace: "MESSAGE_DELETE:function($1){},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function.+?},/,
-                    replace: "MESSAGE_DELETE_BULK:function(){},"
+                    match: /MESSAGE_DELETE_BULK:function\((\w)\).+?},/,
+                    replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
         },
