@@ -32,11 +32,15 @@ export default definePlugin({
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const friendInvites = await findByProps("createFriendInvite");
+                const friendInvites = findByProps("createFriendInvite");
                 const createInvite = await friendInvites.createFriendInvite();
 
                 return void sendBotMessage(ctx.channel.id, {
-                    content: `discord.gg/${createInvite.code} \nExpires: <t:${new Date(createInvite.expires_at).getTime() / 1000}:R> \nMax uses: \`${createInvite.max_uses}\``
+                    content: `
+                        discord.gg/${createInvite.code}
+                        Expires: <t:${new Date(createInvite.expires_at).getTime() / 1000}:R>
+                        Max uses: \`${createInvite.max_uses}\`
+                    `.trim().replace(/\s+/g, " ")
                 });
             },
         },
@@ -45,16 +49,16 @@ export default definePlugin({
             description: "View a list of all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const friendInvites = await findByProps("createFriendInvite");
-                const friendInviteListStore = await friendInvites.getAllFriendInvites();
-                let friendInviteList: any = [];
-
-                friendInviteListStore.forEach(invite => {
-                    friendInviteList += `_discord.gg/${invite.code}_ \nExpires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> \nTimes used: \`${invite.uses}/${invite.max_uses}\`\n\n`;
-                });
+                const friendInvites = findByProps("createFriendInvite");
+                const invites = await friendInvites.getAllFriendInvites();
+                const friendInviteList = invites.map(i =>
+                    `_discord.gg/${i.code}_
+                    Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R>
+                    Times used: \`${i.uses}/${i.max_uses}\``.trim().replace(/\s+/g, " ")
+                );
 
                 return void sendBotMessage(ctx.channel.id, {
-                    content: friendInviteList.length ? friendInviteList.slice(0, -1) : "You have no active friend invites."
+                    content: friendInviteList.join("\n\n") || "You have no active friend invites!"
                 });
             },
         },
