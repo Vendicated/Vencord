@@ -32,7 +32,16 @@ export default definePlugin({
 
     css: `
         .messageLogger-deleted {
-            background-color: rgba(240, 71, 71, 0.15)
+            background-color: rgba(240, 71, 71, 0.15);
+        }
+
+        .messageLogger-deleted-attachment {
+            filter: grayscale(1);
+        }
+
+        .messageLogger-deleted-attachment:hover {
+            filter: grayscale(0);
+            -webkit-transition: -webkit-filter 250ms linear;
         }
 
         .theme-dark .messageLogger-edited {
@@ -91,7 +100,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = cache.update($1.id,m=>m.set('deleted', true));" +
+                        "   cache = cache.update($1.id,m=>m.set('deleted', true).set('attachments', m.attachments.map(a => (a.deleted = true, a))));" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -101,7 +110,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $1.ids.reduce((pv,cv) => pv.update(cv, msg => msg.set('deleted', true)), cache);" +
+                        "   cache = $1.ids.reduce((pv,cv) => pv.update(cv, m => m.set('deleted', true).set('attachments', m.attachments.map(a => (a.deleted = true, a)))), cache);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -109,7 +118,11 @@ export default definePlugin({
                     // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
-                        ".update($3,m => $2.message.content!==m.editHistory?.[0]?.content ? m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) : m)" +
+                        ".update($3,m =>" +
+                        "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
+                        "       m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) :" +
+                        "       m" +
+                        ")" +
                         ".update($3"
                 }
             ]
@@ -156,11 +169,43 @@ export default definePlugin({
                 // },
                 {
                     // Construct new edited message and add editHistory & deleted (ref above)
+                    // Pass in custom data to attachment parser to mark attachments deleted as well
                     match: /attachments:(\w{1,2})\((\w)\)/,
                     replace:
-                        "attachments: $1(arguments[1] ?? $2)," +
+                        "attachments: $1((() => {" +
+                        "   let old = arguments[1]?.attachments;" +
+                        "   if (!old) return $2;" +
+                        "   let new_ = $2.attachments?.map(a => a.id) ?? [];" +
+                        "   let diff = old.filter(a => !new_.includes(a.id));" +
+                        "   old.forEach(a => a.deleted = true);" +
+                        "   $2.attachments = [...diff, ...$2.attachments];" +
+                        "   return $2;" +
+                        "})())," +
                         "deleted: arguments[1]?.deleted," +
                         "editHistory: arguments[1]?.editHistory"
+                },
+                {
+                    // Preserve deleted attribute on attachments
+                    match: /(\((\w)\){return null==\2\.attachments.+?)spoiler:/,
+                    replace:
+                        "$1deleted: arguments[0]?.deleted," +
+                        "spoiler:"
+                }
+            ]
+        },
+
+        {
+            // Attachment renderer
+            // Module 96063
+            find: "[\"className\",\"attachment\",\"inlineMedia\"]",
+            replacement: [
+                {
+                    match: /((\w)\.className,\w=\2\.attachment),/,
+                    replace: "$1,deleted=$2.attachment?.deleted,"
+                },
+                {
+                    match: /(hiddenSpoilers:\w,className:)/,
+                    replace: "$1 (deleted ? 'messageLogger-deleted-attachment ' : '') +"
                 }
             ]
         },
