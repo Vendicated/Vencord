@@ -17,9 +17,9 @@
 */
 
 import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
-import { findByProps } from "../webpack";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
+import { findByProps } from "../webpack";
 
 export default definePlugin({
     name: "FriendInvites",
