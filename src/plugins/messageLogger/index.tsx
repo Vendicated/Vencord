@@ -16,11 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "../../api/settings";
+import ErrorBoundary from "../../components/ErrorBoundary";
 import { Devs } from "../../utils/constants";
 import { lazyWebpack } from "../../utils/misc";
-import definePlugin from "../../utils/types";
+import definePlugin, { OptionType } from "../../utils/types";
 import { filters } from "../../webpack";
-import { React } from "../../webpack/common";
+
+function addDeleteStyleClass() {
+    if (Settings.plugins.MessageLogger.deleteStyle === "text") {
+        document.body.classList.remove("messagelogger-red-overlay");
+        document.body.classList.add("messagelogger-red-text");
+    } else {
+        document.body.classList.remove("messagelogger-red-text");
+        document.body.classList.add("messagelogger-red-overlay");
+    }
+}
 
 export default definePlugin({
     name: "MessageLogger",
@@ -28,11 +39,14 @@ export default definePlugin({
     authors: [Devs.rushii],
 
     timestampModule: null as any,
-    momentJsModule: null as Function | null,
+    moment: null as Function | null,
 
     css: `
-        .messageLogger-deleted {
+        .messagelogger-red-overlay .messageLogger-deleted {
             background-color: rgba(240, 71, 71, 0.15);
+        }
+        .messagelogger-red-text .messageLogger-deleted div {
+            color: #f04747;
         }
 
         .messageLogger-deleted-attachment {
@@ -54,37 +68,62 @@ export default definePlugin({
     `,
 
     start() {
-        this.momentJsModule = lazyWebpack(filters.byProps("relativeTimeRounding", "relativeTimeThreshold"));
+        this.moment = lazyWebpack(filters.byProps("relativeTimeRounding", "relativeTimeThreshold"));
         this.timestampModule = lazyWebpack(filters.byProps("messageLogger_TimestampComponent"));
 
-        const style = document.createElement("style");
+        const style = this.style = document.createElement("style");
         style.textContent = this.css;
         style.id = "MessageLogger-css";
         document.head.appendChild(style);
+
+        addDeleteStyleClass();
     },
 
     stop() {
-        document.head.querySelector("#MessageLogger-css")?.remove();
+        this.style?.remove();
+
+        document.querySelectorAll(".messageLogger-deleted").forEach(e => e.remove());
+        document.querySelectorAll(".messageLogger-edited").forEach(e => e.remove());
+        document.body.classList.remove("messagelogger-red-overlay");
+        document.body.classList.remove("messagelogger-red-text");
     },
 
-    renderEdit(edit: { timestamp: any, content: string }): any {
-        return React.createElement("div", { className: "messageLogger-edited" }, [
-            edit.content,
-            React.createElement(this.timestampModule.messageLogger_TimestampComponent, {
-                timestamp: edit.timestamp,
-                isEdited: true,
-                isInline: false
-            }, [
-                React.createElement("span", {}, " (edited)")
-            ])
-        ]);
+    renderEdit(edit: { timestamp: any, content: string; }) {
+        const Timestamp = this.timestampModule.messageLogger_TimestampComponent;
+        return (
+            <ErrorBoundary noop>
+                <div className="messageLogger-edited">
+                    {edit.content}
+                    <Timestamp
+                        timestamp={edit.timestamp}
+                        isEdited={true}
+                        isInline={false}
+                    >
+                        <span>{" "}(edited)</span>
+                    </Timestamp>
+                </div>
+            </ErrorBoundary>
+        );
     },
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: this.momentJsModule?.call(newMessage.edited_timestamp),
+            timestamp: this.moment?.call(newMessage.edited_timestamp),
             content: oldMessage.content
         };
+    },
+
+    options: {
+        deleteStyle: {
+            type: OptionType.SELECT,
+            description: "The style of deleted messages",
+            default: "text",
+            options: [
+                { label: "Red text", value: "text", default: true },
+                { label: "Red overlay", value: "overlay" }
+            ],
+            onChange: () => addDeleteStyleClass()
+        }
     },
 
     // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
