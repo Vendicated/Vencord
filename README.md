@@ -4,19 +4,18 @@ A Discord client mod that does things differently
 
 ## Features
 
--   Works on Discord's latest update that breaks all other mods
--   Browser Support (experimental): Run Vencord in your Browser instead of the desktop app
--   Custom Css and Themes: Manually edit `%appdata%/Vencord/settings/quickCss.css` / `~/.config/Vencord/settings/quickCss.css` with your favourite editor and the client will automatically apply your changes. To import BetterDiscord themes, just add `@import url(theUrl)` on the top of this file. (Make sure the url is a github raw URL or similar and only contains plain text, and NOT a nice looking website)
--   Many Useful™ plugins - [See a full List](https://gist.github.com/Vendicated/8696cde7b92548064a3ae92ead84d033)
--   Experiments
--   Proper context isolation -> Works in newer Electron versions (Confirmed working on versions 13-22)
--   Inline patches: Patch Discord's code with regex replacements! See [the experiments plugin](src/plugins/experiments.ts) for an example. While being more complex, this is more powerful than monkey patching since you can patch only small parts of functions instead of fully replacing them, access non exported/local variables and even replace constants (like in the aforementioned experiments patch!)
+-   Super easy to install, no git or node or anything else required
+-   Many plugins built in: [See a list](https://gist.github.com/Vendicated/8696cde7b92548064a3ae92ead84d033)
+    -   Some highlights: SpotifyControls, Experiments, NoTrack, MessageLogger, QuickReply, Free Emotes/Stickers, custom slash commands, ShowHiddenChannels
+-   Browser Support: Run Vencord in your Browser via extension or UserScript
+-   Custom CSS and Themes: Inbuilt css editor with support to import any css files (including BetterDiscord themes)
+-   Works in all Electron versions (Confirmed working on versions 13-23)
 
 ## Installing / Uninstalling
 
 If you're just a normal user, use [our simple gui installer!](https://github.com/Vendicated/VencordInstaller#usage)
 
-If you wanna make plugins or contribute or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
+If you're a power user who wants to contribute and make plugins or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
 
 ## Installing on Browser
 
