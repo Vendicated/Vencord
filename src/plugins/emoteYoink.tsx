@@ -194,6 +194,7 @@ export default definePlugin({
         // pass the target to the open link menu so we can grab its data
         find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
         predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
+        noWarn: true,
         replacement: {
             match: /(?<props>.).onHeightUpdate.{0,200}(.)=(.)=.\.url;.+?\(null!=\3\?\3:\2[^)]+/,
             replace: "$&,$<props>.target"
