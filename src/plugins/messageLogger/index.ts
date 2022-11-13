@@ -1,27 +1,43 @@
 import { Devs } from "../../utils/constants";
-import definePlugin, { PluginDef } from "../../utils/types";
+import definePlugin from "../../utils/types";
 import { React } from "../../webpack/common";
-import { lazyWebpack } from "../../utils/misc";
+import { lazyWebpack } from "../../utils";
 import { filters } from "../../webpack";
-import css from "./index.css";
-
-interface MessageLoggerDef extends PluginDef {
-    timestampModule: any;
-    momentJsModule: any;
-}
 
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii],
-    css: css,
 
-    timestampModule: null,
-    momentJsModule: null,
+    timestampModule: null as any,
+    momentJsModule: null as Function | null,
+
+    css: `
+        .messageLogger-deleted {
+            background-color: rgba(240, 71, 71, 0.15)
+        }
+
+        .theme-dark .messageLogger-edited {
+            filter: brightness(80%);
+        }
+
+        .theme-light .messageLogger-edited {
+            opacity: 0.5;
+        }
+    `,
 
     start() {
-        this.momentJsModule = lazyWebpack(filters.byProps(["relativeTimeRounding", "relativeTimeThreshold"]));
-        this.timestampModule = lazyWebpack(filters.byProps(["messageLogger_TimestampComponent"]));
+        this.momentJsModule = lazyWebpack(filters.byProps("relativeTimeRounding", "relativeTimeThreshold"));
+        this.timestampModule = lazyWebpack(filters.byProps("messageLogger_TimestampComponent"));
+
+        const style = document.createElement("style");
+        style.textContent = this.css;
+        style.id = "MessageLogger-css";
+        document.head.appendChild(style);
+    },
+
+    stop() {
+        document.head.querySelector("#MessageLogger-css")?.remove();
     },
 
     renderEdit(edit: { timestamp: any, content: string }): any {
@@ -39,7 +55,7 @@ export default definePlugin({
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: this.momentJsModule(newMessage.edited_timestamp),
+            timestamp: this.momentJsModule?.call(newMessage.edited_timestamp),
             content: oldMessage.content
         };
     },
@@ -178,7 +194,7 @@ export default definePlugin({
             // Message "(edited)" timestamp component
             find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
             replacement: {
-                // Mark the timestamp component clearly so that it won't
+                // Re-export the timestamp component under a findable name
                 match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
                 replace: "{$1,messageLogger_TimestampComponent:()=>$2}"
             }
@@ -197,4 +213,4 @@ export default definePlugin({
         //     ]
         // }
     ]
-} as MessageLoggerDef);
+});
