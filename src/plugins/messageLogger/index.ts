@@ -116,7 +116,7 @@ export default definePlugin({
         },
 
         {
-            // Message domain model parser(?)
+            // Message domain model
             // Module 451
             find: "isFirstMessageInForumPost=function",
             replacement: [
@@ -136,27 +136,31 @@ export default definePlugin({
             replacement: [
                 // {
                 //     // DEBUG: Log the params of the target function to the patch below
-                //     match: /function L\(e,t\){/,
+                //     match: /function N\(e,t\){/,
                 //     replace: "function L(e,t){console.log('pre-transform', e, t);"
                 // },
                 {
-                    // Pass through editHistory & deleted to the "edited message" transformer
+                    // Pass through editHistory & deleted & original attachments to the "edited message" transformer
                     match: /interactionData:(\w)\.interactionData/,
-                    replace: "interactionData:$1.interactionData," +
+                    replace:
+                        "interactionData:$1.interactionData," +
                         "deleted:$1.deleted," +
-                        "editHistory:$1.editHistory"
+                        "editHistory:$1.editHistory," +
+                        "attachments:$1.attachments"
                 },
+
                 // {
                 //     // DEBUG: Log the params of the target function to the patch below
                 //     match: /function R\(e\){/,
-                //     replace: "function R(e){console.log('transform',arguments);"
+                //     replace: "function R(e){console.log('after-edit-transform', arguments);"
                 // },
                 {
                     // Construct new edited message and add editHistory & deleted (ref above)
-                    match: /(roleSubscriptionData:\w\.role_subscription_data)/,
-                    replace: "$1," +
-                        "deleted:arguments[1]?.deleted," +
-                        "editHistory:arguments[1]?.editHistory"
+                    match: /attachments:(\w{1,2})\((\w)\)/,
+                    replace:
+                        "attachments: $1(arguments[1] ?? $2)," +
+                        "deleted: arguments[1]?.deleted," +
+                        "editHistory: arguments[1]?.editHistory"
                 }
             ]
         },
