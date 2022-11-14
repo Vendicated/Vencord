@@ -216,10 +216,10 @@ interface Menu {
 /**
  * Discord's Context menu items.
  * To use anything but Menu.ContextMenu, your plugin HAS TO
- * depend on MenuItemDeobfuscatorApi. Otherwise they will throw
+ * depend on MenuItemDeobfuscatorAPI. Otherwise they will throw
  */
 export const Menu = proxyLazy(() => {
-    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorApi.enabled;
+    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
     const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
 
     const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
