@@ -16,36 +16,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings, Settings } from "../api/settings";
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { Toasts } from "../webpack/common";
+import definePlugin, { OptionType } from "../utils/types";
+import { Clipboard, Toasts } from "../webpack/common";
 
+migratePluginSettings("BetterRoleDot", "ClickableRoleDot");
 export default definePlugin({
-    name: "ClickableRoleDot",
+    name: "BetterRoleDot",
     authors: [Devs.Ven],
     description:
-        "Makes RoleDots (Accessibility Feature) copy colour to clipboard on click",
+        "Copy role colour on RoleDot (accessibility setting) click. Also allows using both RoleDot and coloured names simultaneously",
+
     patches: [
         {
             find: "M0 4C0 1.79086 1.79086 0 4 0H16C18.2091 0 20 1.79086 20 4V16C20 18.2091 18.2091 20 16 20H4C1.79086 20 0 18.2091 0 16V4Z",
             replacement: {
-                match: /(viewBox:"0 0 20 20")/,
-                replace: "$1,onClick:()=>Vencord.Plugins.plugins.ClickableRoleDot.copyToClipBoard(e.color)",
+                match: /viewBox:"0 0 20 20"/,
+                replace: "$&,onClick:()=>Vencord.Plugins.plugins.BetterRoleDot.copyToClipBoard(e.color),style:{cursor:'pointer'}",
+            },
+        },
+        {
+            find: '"username"===',
+            all: true,
+            predicate: () => Settings.plugins.BetterRoleDot.bothStyles,
+            replacement: {
+                match: /"(?:username|dot)"===\w\b/g,
+                replace: "true",
             },
         },
     ],
 
-    copyToClipBoard(color: string) {
-        if (IS_WEB) {
-            navigator.clipboard.writeText(color)
-                .then(() => this.notifySuccess);
-        } else {
-            DiscordNative.clipboard.copy(color);
-            this.notifySuccess();
+    options: {
+        bothStyles: {
+            type: OptionType.BOOLEAN,
+            description: "Show both role dot and coloured names",
+            default: false,
         }
     },
 
-    notifySuccess() {
+    copyToClipBoard(color: string) {
+        Clipboard.copy(color);
         Toasts.show({
             message: "Copied to Clipboard!",
             type: Toasts.Type.SUCCESS,
@@ -55,5 +66,5 @@ export default definePlugin({
                 position: Toasts.Position.BOTTOM
             }
         });
-    }
+    },
 });
