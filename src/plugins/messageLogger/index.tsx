@@ -18,6 +18,7 @@
 
 import { Settings } from "../../api/settings";
 import ErrorBoundary from "../../components/ErrorBoundary";
+import { Logger } from "../../utils";
 import { Devs } from "../../utils/constants";
 import { lazyWebpack } from "../../utils/misc";
 import definePlugin, { OptionType } from "../../utils/types";
@@ -142,33 +143,37 @@ export default definePlugin({
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; }, isBulk: boolean) {
-        if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
+        try {
+            if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-        const { ignoreBots, ignoreSelf } = Settings.plugins.MessageLogger;
-        const myId = UserStore.getCurrentUser().id;
+            const { ignoreBots, ignoreSelf } = Settings.plugins.MessageLogger;
+            const myId = UserStore.getCurrentUser().id;
 
-        function mutate(id: string) {
-            const msg = cache.get(id);
-            if (!msg) return;
+            function mutate(id: string) {
+                const msg = cache.get(id);
+                if (!msg) return;
 
-            const EPHEMERAL = 64;
-            const shouldIgnore = (msg.flags & EPHEMERAL) === EPHEMERAL ||
-                ignoreBots && msg.author?.bot ||
-                ignoreSelf && msg.author?.id === myId;
+                const EPHEMERAL = 64;
+                const shouldIgnore = (msg.flags & EPHEMERAL) === EPHEMERAL ||
+                    ignoreBots && msg.author?.bot ||
+                    ignoreSelf && msg.author?.id === myId;
 
-            if (shouldIgnore) {
-                cache = cache.remove(id);
-            } else {
-                cache = cache.update(id, m => m
-                    .set("deleted", true)
-                    .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
+                if (shouldIgnore) {
+                    cache = cache.remove(id);
+                } else {
+                    cache = cache.update(id, m => m
+                        .set("deleted", true)
+                        .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
+                }
             }
-        }
 
-        if (isBulk) {
-            data.ids.forEach(mutate);
-        } else {
-            mutate(data.id);
+            if (isBulk) {
+                data.ids.forEach(mutate);
+            } else {
+                mutate(data.id);
+            }
+        } catch (e) {
+            new Logger("MessageLogger").error("Error during handleDelete", e);
         }
         return cache;
     },
