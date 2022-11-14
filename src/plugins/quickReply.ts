@@ -18,6 +18,7 @@
 
 import { Message } from "discord-types/general";
 
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
@@ -30,8 +31,10 @@ const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
 let editIdx = -1;
 
+migratePluginSettings("QuickReply", "InteractionKeybinds");
+
 export default definePlugin({
-    name: "InteractionKeybinds",
+    name: "QuickReply",
     authors: [Devs.obscurity, Devs.Ven],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
 

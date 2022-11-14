@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../api/settings";
+import { migratePluginSettings, Settings } from "../api/settings";
 import { CheckedTextInput } from "../components/CheckedTextInput";
 import { Devs } from "../utils/constants";
+import Logger from "../utils/Logger";
 import { lazyWebpack, makeLazy } from "../utils/misc";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "../utils/modal";
 import definePlugin from "../utils/types";
@@ -60,12 +61,12 @@ async function doClone(guildId: string, id: string, name: string, isAnimated: bo
             image: reader.result
         }).then(() => {
             Toasts.show({
-                message: `Successfully yoinked ${name}!`,
+                message: `Successfully cloned ${name}!`,
                 type: Toasts.Type.SUCCESS,
                 id: Toasts.genId()
             });
-        }).catch(e => {
-            console.error("[EmoteYoink] Failed to upload emoji", e);
+        }).catch((e: any) => {
+            new Logger("EmoteCloner").error("Failed to upload emoji", e);
             Toasts.show({
                 message: "Oopsie something went wrong :( Check console!!!",
                 type: Toasts.Type.FAILURE,
@@ -174,18 +175,19 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
     );
 }
 
+migratePluginSettings("EmoteCloner", "EmoteYoink");
 export default definePlugin({
-    name: "EmoteYoink",
-    description: "Clone emotes to your own server",
+    name: "EmoteCloner",
+    description: "Adds a Clone context menu item to emotes to clone them your own server",
     authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorApi"],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
 
     patches: [{
         // Literally copy pasted from ReverseImageSearch lol
         find: "open-native-link",
         replacement: {
             match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-            replace: "$&,Vencord.Plugins.plugins.EmoteYoink.makeMenu(arguments[2])"
+            replace: "$&,Vencord.Plugins.plugins.EmoteCloner.makeMenu(arguments[2])"
         },
 
     },
@@ -214,9 +216,9 @@ export default definePlugin({
         const isAnimated = new URL(htmlElement.src).pathname.endsWith(".gif");
 
         return <Menu.MenuItem
-            id="yoink"
-            key="yoink"
-            label="Yoink"
+            id="emote-cloner"
+            key="emote-cloner"
+            label="Clone"
             action={() =>
                 openModal(modalProps => (
                     <ModalRoot {...modalProps}>

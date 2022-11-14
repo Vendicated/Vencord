@@ -17,6 +17,7 @@
 */
 
 import { addClickListener, removeClickListener } from "../api/MessageEvents";
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
@@ -27,9 +28,11 @@ let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
+migratePluginSettings("MessageClickActions", "MessageQuickActions");
+
 export default definePlugin({
-    name: "MessageQuickActions",
-    description: "Quick Delete, Quick edit",
+    name: "MessageClickActions",
+    description: "Hold Delete and click to delete, double click to edit",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 

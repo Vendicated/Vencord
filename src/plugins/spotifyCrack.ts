@@ -16,13 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 
+migratePluginSettings("SpotifyCrack", "Ify");
 export default definePlugin({
-    name: "Ify",
-    description: "Disables Spotify auto-pausing, allows activity to continue playing when idling and bypasses premium checks, allowing you to listen along with others.",
+    name: "SpotifyCrack",
+    description: "Free listen along, no auto-pausing in voice chat, and allows activity to continue playing when idling",
     authors: [
         Devs.Cyn,
         Devs.Nuckyz
@@ -36,14 +38,14 @@ export default definePlugin({
         }],
     }, {
         find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins.Ify.noSpotifyAutoPause,
+        predicate: () => Settings.plugins.SpotifyCrack.noSpotifyAutoPause,
         replacement: {
             match: /function (.{1,2})\(\).{0,200}SPOTIFY_AUTO_PAUSED\);.{0,}}}}/,
             replace: "function $1(){}"
         }
     }, {
         find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins.Ify.keepSpotifyActivityOnIdle,
+        predicate: () => Settings.plugins.SpotifyCrack.keepSpotifyActivityOnIdle,
         replacement: {
             match: /(shouldShowActivity=function\(\){.{1,50})&&!.{1,6}\.isIdle\(\)(.{0,}?})/,
             replace: (_, functionDeclarationAndExpression, restOfFunction) => `${functionDeclarationAndExpression}${restOfFunction}`

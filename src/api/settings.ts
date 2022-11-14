@@ -19,10 +19,12 @@
 import plugins from "~plugins";
 
 import IpcEvents from "../utils/IpcEvents";
+import Logger from "../utils/Logger";
 import { mergeDefaults } from "../utils/misc";
 import { OptionType } from "../utils/types";
 import { React } from "../webpack/common";
 
+const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
@@ -168,4 +170,22 @@ export function addSettingsListener<Path extends string>(path: Path, onUpdate: (
 export function addSettingsListener(path: string, onUpdate: (newValue: any, path: string) => void) {
     (onUpdate as SubscriptionCallback)._path = path;
     subscriptions.add(onUpdate);
+}
+
+export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    const { plugins } = settings;
+    if (name in plugins) return;
+
+    for (const oldName of oldNames) {
+        if (oldName in plugins) {
+            logger.info(`Migrating settings from old name ${oldName} to ${name}`);
+            plugins[name] = plugins[oldName];
+            delete plugins[oldName];
+            VencordNative.ipc.invoke(
+                IpcEvents.SET_SETTINGS,
+                JSON.stringify(settings, null, 4)
+            );
+            break;
+        }
+    }
 }

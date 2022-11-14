@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { SelectedChannelStore } from "../webpack/common";
@@ -25,9 +26,10 @@ const timers = {} as Record<string, {
     i: number;
 }>;
 
+migratePluginSettings("VoiceChatDoubleClick", "vcDoubleClick");
 export default definePlugin({
-    name: "vcDoubleClick",
-    description: "Join VCs via DoubleClick instead of single click",
+    name: "VoiceChatDoubleClick",
+    description: "Join voice chats via double click instead of single click",
     authors: [Devs.Ven, Devs.D3SOX],
     patches: [
         {
@@ -40,12 +42,12 @@ export default definePlugin({
                 // voice channels
                 {
                     match: /onClick:(.*)function\(\)\{(e\.handleClick.+?)}/g,
-                    replace: "onClick:$1function(){Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{$2}, e)}",
+                    replace: "onClick:$1function(){Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{$2}, e)}",
                 },
                 // stage channels
                 {
                     match: /onClick:(.{0,15})this\.handleClick,/g,
-                    replace: "onClick:$1(...args)=>Vencord.Plugins.plugins.vcDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
+                    replace: "onClick:$1(...args)=>Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
                 }
             ],
         },

@@ -30,9 +30,9 @@ const Engines = {
 
 export default definePlugin({
     name: "ReverseImageSearch",
-    description: "yes",
+    description: "Adds ImageSearch to image context menus",
     authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorApi"],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [{
         find: "open-native-link",
         replacement: {
