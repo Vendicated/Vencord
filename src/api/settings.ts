@@ -181,6 +181,10 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
+            VencordNative.ipc.invoke(
+                IpcEvents.SET_SETTINGS,
+                JSON.stringify(settings, null, 4)
+            );
             break;
         }
     }
