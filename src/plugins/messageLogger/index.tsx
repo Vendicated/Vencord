@@ -22,7 +22,7 @@ import { Devs } from "../../utils/constants";
 import { lazyWebpack } from "../../utils/misc";
 import definePlugin, { OptionType } from "../../utils/types";
 import { filters } from "../../webpack";
-import { UserStore } from "../../webpack/common";
+import { Parser, UserStore } from "../../webpack/common";
 
 function addDeleteStyleClass() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -98,7 +98,7 @@ export default definePlugin({
         return (
             <ErrorBoundary noop>
                 <div className="messageLogger-edited">
-                    {edit.content}
+                    {Parser.parse(edit.content)}
                     <Timestamp
                         timestamp={edit.timestamp}
                         isEdited={true}
