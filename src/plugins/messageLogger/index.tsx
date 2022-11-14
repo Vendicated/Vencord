@@ -37,7 +37,7 @@ function addDeleteStyleClass() {
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii],
+    authors: [Devs.rushii, Devs.Ven],
 
     timestampModule: null as any,
     moment: null as Function | null,
