@@ -22,6 +22,7 @@ import { Devs } from "../../utils/constants";
 import { lazyWebpack } from "../../utils/misc";
 import definePlugin, { OptionType } from "../../utils/types";
 import { filters } from "../../webpack";
+import { UserStore } from "../../webpack/common";
 
 function addDeleteStyleClass() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -47,6 +48,10 @@ export default definePlugin({
         }
         .messagelogger-red-text .messageLogger-deleted div {
             color: #f04747;
+        }
+
+        .messageLogger-deleted [class^="buttons"] {
+            display: none;
         }
 
         .messageLogger-deleted-attachment {
@@ -123,7 +128,49 @@ export default definePlugin({
                 { label: "Red overlay", value: "overlay" }
             ],
             onChange: () => addDeleteStyleClass()
+        },
+        ignoreBots: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to ignore messages by bots",
+            default: false
+        },
+        ignoreSelf: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to ignore messages by yourself",
+            default: false
         }
+    },
+
+    handleDelete(cache: any, data: { ids: string[], id: string; }, isBulk: boolean) {
+        if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
+
+        const { ignoreBots, ignoreSelf } = Settings.plugins.MessageLogger;
+        const myId = UserStore.getCurrentUser().id;
+
+        function mutate(id: string) {
+            const msg = cache.get(id);
+            if (!msg) return;
+
+            const EPHEMERAL = 64;
+            const shouldIgnore = (msg.flags & EPHEMERAL) === EPHEMERAL ||
+                ignoreBots && msg.author?.bot ||
+                ignoreSelf && msg.author?.id === myId;
+
+            if (shouldIgnore) {
+                cache = cache.remove(id);
+            } else {
+                cache = cache.update(id, m => m
+                    .set("deleted", true)
+                    .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
+            }
+        }
+
+        if (isBulk) {
+            data.ids.forEach(mutate);
+        } else {
+            mutate(data.id);
+        }
+        return cache;
     },
 
     // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
@@ -139,7 +186,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = cache.update($1.id,m=>m.set('deleted', true).set('attachments', m.attachments.map(a => (a.deleted = true, a))));" +
+                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, false);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -149,7 +196,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $1.ids.reduce((pv,cv) => pv.update(cv, m => m.set('deleted', true).set('attachments', m.attachments.map(a => (a.deleted = true, a)))), cache);" +
+                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, true);" +
                         "   $2commit(cache);" +
                         "},"
                 },
