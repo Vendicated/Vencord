@@ -19,10 +19,12 @@
 import plugins from "~plugins";
 
 import IpcEvents from "../utils/IpcEvents";
+import Logger from "../utils/Logger";
 import { mergeDefaults } from "../utils/misc";
 import { OptionType } from "../utils/types";
 import { React } from "../webpack/common";
 
+const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
@@ -176,6 +178,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
 
     for (const oldName of oldNames) {
         if (oldName in plugins) {
+            logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
             break;
