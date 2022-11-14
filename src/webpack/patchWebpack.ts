@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { WEBPACK_CHUNK } from "../utils/constants";
-import Logger from "../utils/logger";
 import { _initWebpack } from ".";
+import { WEBPACK_CHUNK } from "../utils/constants";
+import Logger from "../utils/Logger";
 
 let webpackChunk: any[];
 

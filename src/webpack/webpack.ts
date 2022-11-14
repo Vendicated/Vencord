@@ -19,7 +19,7 @@
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { proxyLazy } from "../utils/proxyLazy";
 
 const logger = new Logger("Webpack");

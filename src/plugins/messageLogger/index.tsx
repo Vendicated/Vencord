@@ -18,8 +18,8 @@
 
 import { Settings } from "../../api/settings";
 import ErrorBoundary from "../../components/ErrorBoundary";
-import { Logger } from "../../utils";
 import { Devs } from "../../utils/constants";
+import Logger from "../../utils/Logger";
 import { lazyWebpack } from "../../utils/misc";
 import definePlugin, { OptionType } from "../../utils/types";
 import { filters } from "../../webpack";
