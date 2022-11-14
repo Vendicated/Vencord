@@ -21,7 +21,7 @@ import Plugins from "~plugins";
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");

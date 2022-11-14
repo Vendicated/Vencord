@@ -22,7 +22,7 @@ import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 import { ChangeList } from "../../utils/ChangeList";
-import Logger from "../../utils/logger";
+import Logger from "../../utils/Logger";
 import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
 import { openModalLazy } from "../../utils/modal";
 import { Plugin } from "../../utils/types";

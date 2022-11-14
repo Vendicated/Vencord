@@ -18,7 +18,7 @@
 
 import type { Channel, Message } from "discord-types/general";
 
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { MessageStore } from "../webpack/common";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
