@@ -169,3 +169,16 @@ export function addSettingsListener(path: string, onUpdate: (newValue: any, path
     (onUpdate as SubscriptionCallback)._path = path;
     subscriptions.add(onUpdate);
 }
+
+export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    const { plugins } = settings;
+    if (name in plugins) return;
+
+    for (const oldName of oldNames) {
+        if (oldName in plugins) {
+            plugins[name] = plugins[oldName];
+            delete plugins[oldName];
+            break;
+        }
+    }
+}

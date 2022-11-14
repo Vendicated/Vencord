@@ -17,6 +17,7 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
 import { lazyWebpack } from "../utils/misc";
@@ -55,8 +56,10 @@ interface StickerPack {
     stickers: Sticker[];
 }
 
+migratePluginSettings("FakeNitro", "NitroBypass");
+
 export default definePlugin({
-    name: "NitroBypass",
+    name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
@@ -64,7 +67,7 @@ export default definePlugin({
     patches: [
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableEmojiBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: [
                 "canUseAnimatedEmojis",
                 "canUseEmojisEverywhere"
@@ -77,7 +80,7 @@ export default definePlugin({
         },
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
                 match: /canUseStickersEverywhere:function\(.+?}/,
                 replace: "canUseStickersEverywhere:function(e){return true;}"
@@ -92,7 +95,7 @@ export default definePlugin({
         },
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableStreamQualityBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStreamQualityBypass === true,
             replacement: [
                 "canUseHighVideoUploadQuality",
                 "canStreamHighQuality",
@@ -106,7 +109,7 @@ export default definePlugin({
         },
         {
             find: "STREAM_FPS_OPTION.format",
-            predicate: () => Settings.plugins.NitroBypass.enableStreamQualityBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStreamQualityBypass === true,
             replacement: {
                 match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
                 replace: ""
@@ -154,7 +157,7 @@ export default definePlugin({
     },
 
     getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.NitroBypass.stickerSize}`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.FakeNitro.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -167,7 +170,7 @@ export default definePlugin({
         const { frames, width, height } = await parseURL(stickerLink);
 
         const gif = new GIFEncoder();
-        const resolution = Settings.plugins.NitroBypass.stickerSize;
+        const resolution = Settings.plugins.FakeNitro.stickerSize;
 
         const canvas = document.createElement("canvas");
         canvas.width = resolution;
@@ -210,7 +213,7 @@ export default definePlugin({
     },
 
     start() {
-        const settings = Settings.plugins.NitroBypass;
+        const settings = Settings.plugins.FakeNitro;
         if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
             return;
         }

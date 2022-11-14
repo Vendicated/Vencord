@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
+migratePluginSettings("NoticesAPI", "NoticesApi");
+
 export default definePlugin({
-    name: "NoticesApi",
+    name: "NoticesAPI",
     description: "Fixes notices being automatically dismissed",
     authors: [Devs.Ven],
     required: true,

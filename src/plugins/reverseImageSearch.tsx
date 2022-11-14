@@ -32,7 +32,7 @@ export default definePlugin({
     name: "ReverseImageSearch",
     description: "yes",
     authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorApi"],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [{
         find: "open-native-link",
         replacement: {

@@ -178,7 +178,7 @@ export default definePlugin({
     name: "EmoteYoink",
     description: "Clone emotes to your own server",
     authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorApi"],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
 
     patches: [{
         // Literally copy pasted from ReverseImageSearch lol
