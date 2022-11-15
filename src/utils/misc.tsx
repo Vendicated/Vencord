@@ -40,21 +40,23 @@ export function lazyWebpack<T = any>(filter: FilterFn): T {
     return proxyLazy(() => find(filter));
 }
 
+type AwaiterRes<T> = [T, any, boolean, () => void];
 /**
  * Await a promise
  * @param factory Factory
  * @param fallbackValue The fallback value that will be used until the promise resolved
  * @returns [value, error, isPending]
  */
-export function useAwaiter<T>(factory: () => Promise<T>): [T | null, any, boolean];
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): [T, any, boolean];
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: null, onError: (e: unknown) => unknown): [T, any, boolean];
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null, onError?: (e: unknown) => unknown): [T | null, any, boolean] {
+export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): AwaiterRes<T>;
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: null, onError: (e: unknown) => unknown): AwaiterRes<T>;
+export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null, onError?: (e: unknown) => unknown): AwaiterRes<T | null> {
     const [state, setState] = React.useState({
         value: fallbackValue,
         error: null,
         pending: true
     });
+    const [signal, setSignal] = React.useState(0);
 
     React.useEffect(() => {
         let isAlive = true;
@@ -63,9 +65,9 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
             .catch(error => isAlive && (setState({ value: null, error, pending: false }), onError?.(error)));
 
         return () => void (isAlive = false);
-    }, []);
+    }, [signal]);
 
-    return [state.value, state.error, state.pending];
+    return [state.value, state.error, state.pending, () => setSignal(signal + 1)];
 }
 
 /**

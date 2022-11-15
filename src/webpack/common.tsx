@@ -172,7 +172,7 @@ export type TextProps = React.PropsWithChildren & {
     variant: TextVariant;
     style?: React.CSSProperties;
     color?: string;
-    tag?: "div" | "span" | "p" | "strong";
+    tag?: "div" | "span" | "p" | "strong" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
     selectable?: boolean;
     lineClamp?: number;
     id?: string;
