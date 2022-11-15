@@ -33,6 +33,7 @@ export let React: typeof import("react");
 export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 
 export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
+export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
@@ -141,14 +142,14 @@ waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
 
-waitFor(m => m.Tags && filters.byCode("errorSeparator")(m), m => Forms.FormTitle = m);
-waitFor(m => m.Tags && filters.byCode("titleClassName", "sectionTitle")(m), m => Forms.FormSection = m);
+waitFor(filters.byCode("errorSeparator"), m => Forms.FormTitle = m);
+waitFor(filters.byCode("titleClassName", "sectionTitle"), m => Forms.FormSection = m);
 waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 
 waitFor(m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
-    return s.length < 200 && s.includes("divider");
+    return s.length < 200 && s.includes("().divider");
 }, m => Forms.FormDivider = m);
 
 // This is the same module but this is easier
@@ -215,10 +216,10 @@ interface Menu {
 /**
  * Discord's Context menu items.
  * To use anything but Menu.ContextMenu, your plugin HAS TO
- * depend on MenuItemDeobfuscatorApi. Otherwise they will throw
+ * depend on MenuItemDeobfuscatorAPI. Otherwise they will throw
  */
 export const Menu = proxyLazy(() => {
-    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorApi.enabled;
+    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
     const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
 
     const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
@@ -228,9 +229,11 @@ export const Menu = proxyLazy(() => {
 
     if (!hasDeobfuscator) {
         for (const m of menuItems)
-            map[m] = () => {
-                throw new Error(`Your plugin needs to depend on MenuItemDeobfuscatorApi to use ${m}`);
-            };
+            Object.defineProperty(map, m, {
+                get() {
+                    throw new Error("MenuItemDeobfuscator must be enabled to use this.");
+                }
+            });
     }
 
     return map;
