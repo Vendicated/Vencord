@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { User } from "discord-types/general";
+
 import { Devs } from "../../utils/constants";
 import definePlugin, { OptionType } from "../../utils/types";
 import { Settings } from "../../Vencord";
-import { Button, React, UserStore } from "../../webpack/common";
+import { Button, UserStore } from "../../webpack/common";
 import { showToast } from "./Utils/Utils";
 
 export default definePlugin({
     name: "ReviewDB",
     description: "See reviews of other people",
     authors: [Devs.mantikafasi],
+
     patches: [
         {
             find: "disableBorderColor:!0",
@@ -35,17 +38,29 @@ export default definePlugin({
             },
         }
     ],
+
     options: {
-        "notifyReviews": { type: OptionType.BOOLEAN, default: true, description: "Notify you when someone reviews you" },
-        "token": { type: OptionType.STRING, default: "", description: "Your token for ReviewDB API" }, "authorize": {
-            type: OptionType.COMPONENT, component: () => {
-                return <Button onClick={() =>
-                    window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify")
-                }>Get OAUTH2 Token</Button>;
-            }, description: "Authorize your account"
+        notifyReviews: {
+            type: OptionType.BOOLEAN,
+            description: "Notify about new reviews on startup",
+            default: true,
         },
-        "lastreviewid": { type: OptionType.COMPONENT, default: 0,component: () => (<></>),
-            description: "Last review id on your profile" }
+        token: {
+            type: OptionType.STRING,
+            description: "Your OAUTH token for the ReviewDB API",
+            default: "",
+        },
+        authorize: {
+            type: OptionType.COMPONENT,
+            description: "Authorize your account",
+            component: () => (
+                <Button onClick={() =>
+                    window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify")
+                }>
+                    Get OAUTH2 Token
+                </Button>
+            )
+        }
     },
 
     async start() {
@@ -53,26 +68,20 @@ export default definePlugin({
         this.getLastReviewID = (await import("./Utils/ReviewDBAPI")).getLastReviewID;
         const settings = Settings.plugins.ReviewDB;
 
-
-        setTimeout(() => {
-            this.getLastReviewID(UserStore.getCurrentUser().id)
-                .then(lastreviewid => {
-                    console.log(lastreviewid + "Ready to explode");
-                    const storedLastReviewID: number = settings.lastreviewid;
-                    if (settings.notifyReviews && storedLastReviewID < lastreviewid) {
-                        if (storedLastReviewID !== 0) {
-                            showToast("You have new reviews on your profile");
-                        }
-                        settings.lastreviewid = lastreviewid;
-                    }
-                });
-        },4000);
+        setTimeout(async () => {
+            const id = await this.getLastReviewID(UserStore.getCurrentUser().id);
+            const storedId: number = settings.lastReviewId;
+            if (storedId && storedId < id && settings.notifyReviews) {
+                showToast("You have new reviews on your profile!");
+                settings.lastReviewId = id;
+            }
+        }, 4000);
 
     },
 
-    getReviewsComponent(user) {
+    getReviewsComponent(user: User) {
         return (
-            <this.ReviewsView.default userid={user.id.toString()} />
+            <this.ReviewsView.default userid={user.id} />
         );
     }
 });

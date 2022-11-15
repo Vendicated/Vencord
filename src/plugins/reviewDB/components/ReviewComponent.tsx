@@ -16,84 +16,95 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Queue } from "../../../utils/Queue";
-import { findByProps } from "../../../webpack";
-import { Alerts, React, UserStore } from "../../../webpack/common";
+import { classes, LazyComponent } from "../../../utils/misc";
+import { bulk, filters } from "../../../webpack";
+import { Alerts, UserStore } from "../../../webpack/common";
+import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
 
-const { cozyMessage, buttons } = findByProps("cozyMessage");
-const { container, isHeader } = findByProps("container", "isHeader");
-const { avatar, clickable } = findByProps("avatar", "zalgo");
-const { username } = findByProps("header", "zalgo");
-const { messageContent } = findByProps("messageContent", "zalgo");
-const { message } = findByProps("message");
-const { groupStart } = findByProps("groupStart");
-const { wrapper } = findByProps("wrapper", "zalgo");
-const { cozy } = findByProps("cozy", "zalgo");
-const { contents } = findByProps("contents");
-const buttonClassNames = findByProps("button", "wrapper", "disabled");
-const usernameClickable = findByProps("clickable", "username").clickable;
-const { defaultColor } = findByProps("defaultColor");
+export default LazyComponent(() => {
+    // this is terrible, blame mantika
+    const p = filters.byProps;
+    const [
+        { cozyMessage, buttons, message, groupStart },
+        { container, isHeader },
+        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { contents },
+        buttonClasses,
+        { defaultColor }
+    ] = bulk(
+        p("cozyMessage"),
+        p("container", "isHeader"),
+        p("avatar", "zalgo"),
+        p("contents"),
+        p("button", "wrapper", "disabled"),
+        p("defaultColor")
+    );
 
-const queue = new Queue();
+    return function ReviewComponent({ review }: { review: Review; }) {
+        function openModal() {
+            openUserProfileModal(review.senderdiscordid);
+        }
 
+        function delReview() {
+            Alerts.show({
+                title: "ARE YOU SURE ABOUT THAT",
+                body: "DELETE THAT REVIEWW????",
+                confirmText: "Yop",
+                cancelText: "Explod",
+                onConfirm: () => {
+                    deleteReview(review.id).then(res => {
+                        if (res.successful) {
+                            fetchReviews();
+                        }
+                        showToast(res.message);
+                    });
+                }
+            });
+        }
 
-export default function ReviewComponent(props) {
-    const { review } = props;
+        function reportRev() {
+            Alerts.show({
+                title: "Are you sure?",
+                body: "Are you sure you want to report this review?",
+                onConfirm: () => reportReview(review.id)
+            });
+        }
 
-    function openModal() {
-        openUserProfileModal(props.review.senderdiscordid);
-    }
-
-    function delReview() {
-        Alerts.show({
-            title: "ARE YOU SURE ABOUT THAT",
-            body: "DELETE THAT REVIEWW????",
-            confirmText: "Yop",
-            cancelText: "Explod",
-            onConfirm: () => {
-                deleteReview(props.review.id).then(res => {
-                    if (res.successful) {
-                        props.fetchReviews();
-                    }
-                    showToast(res.message);
-                });
-            }
-        });
-    }
-
-    function reportRev() {
-        Alerts.show({
-            title: "ARE YOU SURE ABOUT THAT",
-            body: "REPORT THAT REVIEWW????",
-            confirmText: "Yop",
-            cancelText: "Explod",
-            onConfirm: () => {
-                reportReview(review.id);
-            }
-        });
-    }
-
-    return (
-        <div>
-            <div className={cozyMessage + " " + message + " " + groupStart + " " + wrapper + " " + cozy}>
-                <div className={contents}>
-                    <img className={avatar + " " + clickable} onClick={() => { openModal(); }}
-                        src={review.profile_photo === "" ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}></img>
-                    <span className={username + " " + usernameClickable}
-                        style={{ color: "var(--text-muted)" }} onClick={() => openModal()}>{review.username}</span>
-                    <p className={messageContent + " " + defaultColor} style={{ fontSize: 15, marginTop: 4 }}>{review.comment}</p>
-                    <div className={container + " " + isHeader + " " + buttons}>
-                        <div className={buttonClassNames.wrapper}>
-                            <MessageButton type="report" callback={() => reportRev()}></MessageButton>
-                            {(review.senderdiscordid === UserStore.getCurrentUser().id) && (<MessageButton type="delete" callback={() => delReview()}></MessageButton>)}
+        return (
+            <div>
+                <div className={classes(cozyMessage, message, groupStart, wrapper, cozy)}>
+                    <div className={contents}>
+                        <img
+                            className={classes(avatar, clickable)}
+                            onClick={openModal}
+                            src={review.profile_photo ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}
+                        />
+                        <span
+                            className={classes(username, clickable)}
+                            style={{ color: "var(--text-muted)" }}
+                            onClick={() => openModal()}
+                        >
+                            {review.username}
+                        </span>
+                        <p
+                            className={classes(messageContent, defaultColor)}
+                            style={{ fontSize: 15, marginTop: 4 }}
+                        >
+                            {review.comment}
+                        </p>
+                        <div className={classes(container, isHeader, buttons)}>
+                            <div className={buttonClasses.wrapper}>
+                                <MessageButton type="report" callback={reportRev} />
+                                {review.senderdiscordid === UserStore.getCurrentUser().id && (
+                                    <MessageButton type="delete" callback={delReview} />)}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
-
-}
+        );
+    };
+});

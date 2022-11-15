@@ -16,20 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { openModal } from "../../../utils/modal";
+import Logger from "../../../utils/Logger";
+import { ModalContent, ModalHeader, ModalRoot, openModal } from "../../../utils/modal";
 import { Settings } from "../../../Vencord";
 import { findByProps } from "../../../webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
+import { FluxDispatcher, Forms, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
 
-export async function openUserProfileModal(userId) {
+export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
-    return FluxDispatcher.dispatch({
+
+    await FluxDispatcher.dispatch({
         type: "USER_PROFILE_MODAL_OPEN",
         userId,
         channelId: SelectedChannelStore.getChannelId(),
         analyticsLocation: "Explosive Hotel"
     });
-
 }
 
 export function authorize(callback?: any) {
@@ -40,41 +41,53 @@ export function authorize(callback?: any) {
     const opts = getOAuth2AuthorizeProps("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify");
 
     openModal((props: any) =>
-        React.createElement(OAuth2AuthorizeModal, {
-            ...props,
-            ...opts,
-            responseType: "code",
-            cancelCompletesFlow: false,
-            callback: (c: any) => {
-                try {
-                    const url = new URL(c);
-                    fetch(url + "&returnType=json&clientMod=vencord")
-                        .then(res => {
-                            res.json().then(res => {
-                                if (res.status === 0) {
-                                    settings.set("token", res.token);
-                                    showToast("Successfully logged in!");
-                                    callback?.();
-                                } else if (res.status === 1) {
-                                    showToast("An Error Occured while logging in.");
-                                }
+        <ModalRoot {...props}>
+            <ModalHeader>
+                <Forms.FormText>Authorise</Forms.FormText>
+            </ModalHeader>
+            <ModalContent>
+                <OAuth2AuthorizeModal
+                    scopes={["identify"]}
+                    responseType="code"
+                    redirectUri="https://manti.vendicated.dev/URauth"
+                    permissions={0n}
+                    clientId="915703782174752809"
+                    cancelCompletesFlow={false}
+                    callback={async (u: string) => {
+                        try {
+                            const url = new URL(u);
+                            url.searchParams.append("returnType", "json");
+                            url.searchParams.append("clientMod", "vencord");
+                            const res = await fetch(url, {
+                                headers: new Headers({ Accept: "application/json" })
                             });
-                        });
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-        })
+                            const { token, status } = await res.json();
+                            if (status === 0) {
+                                settings.token = token;
+                                showToast("Successfully logged in!");
+                                callback?.();
+                            } else if (res.status === 1) {
+                                showToast("An Error occurred while logging in.");
+                            }
+                        } catch (e) {
+                            new Logger("ReviewDB").error("Failed to authorise", e);
+                        }
+                    }}
+                />
+            </ModalContent>
+        </ModalRoot>
     );
 }
 
 export function showToast(text: string) {
     Toasts.show({
-        message: text, options: { position: 1 },
-        id: "",
-        type: 0
+        type: Toasts.Type.MESSAGE,
+        message: text,
+        id: Toasts.genId(),
+        options: {
+            position: Toasts.Position.BOTTOM
+        },
     });
 }
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-

@@ -17,7 +17,6 @@
 */
 
 import { Settings } from "../../../Vencord";
-import { Toasts } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 import { authorize, showToast } from "./Utils";
 
@@ -30,25 +29,19 @@ enum Response {
     "Error" = 2,
 }
 
-export async function getReviews(discorid: string): Promise<Review[]> {
-    const res = await fetch("https://manti.vendicated.dev/getUserReviews?snowflakeFormat=string&discordid=" + discorid);
+export async function getReviews(id: string): Promise<Review[]> {
+    const res = await fetch(API_URL + "/getUserReviews?snowflakeFormat=string&discordid=" + id);
     return await res.json() as Review[];
 }
 
 export async function addReview(review: any): Promise<Response> {
-    const { token } = settings;
-    if (!token) {
+    review.token = settings.token;
+
+    if (!review.token) {
+        showToast("Please authorize to add a review.");
         authorize();
-
-        Toasts.show({
-            message: "Please authorize to add a review.", options: { position: 1 },
-            id: Toasts.genId(),
-            type: 0
-        });
-
         return Response.Error;
     }
-    review.token = token;
 
     return fetch(API_URL + "/addUserReview", {
         method: "POST",
@@ -56,48 +49,50 @@ export async function addReview(review: any): Promise<Response> {
         headers: {
             "Content-Type": "application/json",
         }
-
     })
         .then(r => r.text())
         .then(
             res => {
-                Toasts.show({
-                    message: res, options: { position: 1 },
-                    id: "",
-                    type: 0
-                });
+                showToast(res);
 
-                return (res in Response) ? Response[res] : Response.Error;
+                return res in Response
+                    ? Response[res]
+                    : Response.Error;
             }
         );
 }
 
-export function deleteReview(reviewid: string): Promise<any> {
+export function deleteReview(id: number): Promise<any> {
     return fetch(API_URL + "/deleteReview", {
-        method: "POST", body: JSON.stringify({
-            "token": settings.token,
-            "reviewid": reviewid
-        })
-    })
-        .then(r => r.json());
-}
-
-export function reportReview(reviewID: string) {
-    fetch(API_URL + "/reportReview", {
         method: "POST",
+        headers: new Headers({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        }),
         body: JSON.stringify({
-            "reviewid": reviewID,
-            "token": settings.get("token", "")
+            token: settings.token,
+            reviewid: id
         })
-    })
-        .then(r => r.text())
-        .then(res => showToast(res));
+    }).then(r => r.json());
 }
 
-export const getLastReviewID = async (userid: string): Promise<number> => {
-    return fetch(API_URL + "/getLastReviewID?discordid=" + userid)
+export async function reportReview(id: number) {
+    const res = await fetch(API_URL + "/reportReview", {
+        method: "POST",
+        headers: new Headers({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        }),
+        body: JSON.stringify({
+            reviewid: id,
+            token: settings.token
+        })
+    });
+    showToast(await res.text());
+}
+
+export function getLastReviewID(id: string): Promise<number> {
+    return fetch(API_URL + "/getLastReviewID?discordid=" + id)
         .then(r => r.text())
         .then(Number);
-};
-
-
+}
