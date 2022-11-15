@@ -24,6 +24,7 @@ import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "../
 import ErrorBoundary from "./ErrorBoundary";
 import { ErrorCard } from "./ErrorCard";
 import { Flex } from "./Flex";
+import { handleComponentFailed } from "./handleComponentFailed";
 import { Link } from "./Link";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
@@ -209,4 +210,7 @@ function Updater() {
     );
 }
 
-export default IS_WEB ? null : ErrorBoundary.wrap(Updater);
+export default IS_WEB ? null : ErrorBoundary.wrap(Updater, {
+    message: "Failed to render the Updater. If this persists, try using the installer to reinstall!",
+    onError: handleComponentFailed,
+});

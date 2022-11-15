@@ -23,6 +23,7 @@ import { useAwaiter } from "../utils/misc";
 import { Alerts, Button, Forms, Margins, Parser, React, Switch } from "../webpack/common";
 import ErrorBoundary from "./ErrorBoundary";
 import { Flex } from "./Flex";
+import { handleComponentFailed } from "./handleComponentFailed";
 
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -115,4 +116,7 @@ export default ErrorBoundary.wrap(function Settings() {
             </Switch>}
         </Forms.FormSection >
     );
+}, {
+    message: "Failed to render the Settings. If this persists, try using the installer to reinstall!",
+    onError: handleComponentFailed,
 });
