@@ -18,10 +18,13 @@
 
 import { User } from "discord-types/general";
 
+import ErrorBoundary from "../../components/ErrorBoundary";
 import { Devs } from "../../utils/constants";
 import definePlugin, { OptionType } from "../../utils/types";
 import { Settings } from "../../Vencord";
 import { Button, UserStore } from "../../webpack/common";
+import ReviewsView from "./components/ReviewsView";
+import { getLastReviewID } from "./Utils/ReviewDBAPI";
 import { showToast } from "./Utils/Utils";
 
 export default definePlugin({
@@ -64,24 +67,21 @@ export default definePlugin({
     },
 
     async start() {
-        this.ReviewsView = await import("./components/ReviewsView");
-        this.getLastReviewID = (await import("./Utils/ReviewDBAPI")).getLastReviewID;
         const settings = Settings.plugins.ReviewDB;
+        if (!settings.lastReviewId || !settings.notifyReviews) return;
 
         setTimeout(async () => {
-            const id = await this.getLastReviewID(UserStore.getCurrentUser().id);
-            const storedId: number = settings.lastReviewId;
-            if (storedId && storedId < id && settings.notifyReviews) {
+            const id = await getLastReviewID(UserStore.getCurrentUser().id);
+            if (settings.lastReviewId < id) {
                 showToast("You have new reviews on your profile!");
                 settings.lastReviewId = id;
             }
         }, 4000);
-
     },
 
-    getReviewsComponent(user: User) {
-        return (
-            <this.ReviewsView.default userid={user.id} />
-        );
-    }
+    getReviewsComponent: (user: User) => (
+        <ErrorBoundary message="Failed to render Reviews">
+            <ReviewsView userId={user.id} />
+        </ErrorBoundary>
+    )
 });

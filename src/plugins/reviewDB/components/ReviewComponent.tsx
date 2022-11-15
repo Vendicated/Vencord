@@ -43,21 +43,21 @@ export default LazyComponent(() => {
         p("defaultColor")
     );
 
-    return function ReviewComponent({ review }: { review: Review; }) {
+    return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
             openUserProfileModal(review.senderdiscordid);
         }
 
         function delReview() {
             Alerts.show({
-                title: "ARE YOU SURE ABOUT THAT",
-                body: "DELETE THAT REVIEWW????",
-                confirmText: "Yop",
-                cancelText: "Explod",
+                title: "Are you sure?",
+                body: "Do you really want to delete this review?",
+                confirmText: "Delete",
+                cancelText: "Nevermind",
                 onConfirm: () => {
                     deleteReview(review.id).then(res => {
                         if (res.successful) {
-                            fetchReviews();
+                            refetch();
                         }
                         showToast(res.message);
                     });
@@ -68,7 +68,10 @@ export default LazyComponent(() => {
         function reportRev() {
             Alerts.show({
                 title: "Are you sure?",
-                body: "Are you sure you want to report this review?",
+                body: "Do you really you want to report this review?",
+                confirmText: "Report",
+                cancelText: "Nevermind",
+                confirmColor: "red",
                 onConfirm: () => reportReview(review.id)
             });
         }

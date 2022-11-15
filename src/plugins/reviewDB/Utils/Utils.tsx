@@ -35,10 +35,7 @@ export async function openUserProfileModal(userId: string) {
 
 export function authorize(callback?: any) {
     const settings = Settings.plugins.ReviewDB;
-    const { getOAuth2AuthorizeProps } = findByProps("openOAuth2Modal");
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
-    const opts = getOAuth2AuthorizeProps("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify");
 
     openModal((props: any) =>
         <ModalRoot {...props}>
