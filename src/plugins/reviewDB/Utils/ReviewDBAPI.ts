@@ -51,15 +51,10 @@ export async function addReview(review: any): Promise<Response> {
         }
     })
         .then(r => r.text())
-        .then(
-            res => {
-                showToast(res);
-
-                return res in Response
-                    ? Response[res]
-                    : Response.Error;
-            }
-        );
+        .then(res => {
+            showToast(res);
+            return Response[res] ?? Response.Error;
+        });
 }
 
 export function deleteReview(id: number): Promise<any> {

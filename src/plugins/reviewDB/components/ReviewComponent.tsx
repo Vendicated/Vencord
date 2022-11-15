@@ -21,7 +21,7 @@ import { bulk, filters } from "../../../webpack";
 import { Alerts, UserStore } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
-import { openUserProfileModal, showToast } from "../Utils/Utils";
+import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
 
 export default LazyComponent(() => {
@@ -77,33 +77,32 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div>
-                <div className={classes(cozyMessage, message, groupStart, wrapper, cozy)}>
-                    <div className={contents}>
-                        <img
-                            className={classes(avatar, clickable)}
-                            onClick={openModal}
-                            src={review.profile_photo ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}
-                        />
-                        <span
-                            className={classes(username, clickable)}
-                            style={{ color: "var(--text-muted)" }}
-                            onClick={() => openModal()}
-                        >
-                            {review.username}
-                        </span>
-                        <p
-                            className={classes(messageContent, defaultColor)}
-                            style={{ fontSize: 15, marginTop: 4 }}
-                        >
-                            {review.comment}
-                        </p>
-                        <div className={classes(container, isHeader, buttons)}>
-                            <div className={buttonClasses.wrapper}>
-                                <MessageButton type="report" callback={reportRev} />
-                                {review.senderdiscordid === UserStore.getCurrentUser().id && (
-                                    <MessageButton type="delete" callback={delReview} />)}
-                            </div>
+            <div className={classes(cozyMessage, message, groupStart, wrapper, cozy)}>
+                <div className={contents}>
+                    <img
+                        className={classes(avatar, clickable)}
+                        onClick={openModal}
+                        src={review.profile_photo ? "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128" : review.profile_photo}
+                    />
+                    <span
+                        className={classes(username, clickable)}
+                        style={{ color: "var(--text-muted)" }}
+                        onClick={() => openModal()}
+                    >
+                        {review.username}
+                    </span>
+                    <p
+                        className={classes(messageContent, defaultColor)}
+                        style={{ fontSize: 15, marginTop: 4 }}
+                    >
+                        {review.comment}
+                    </p>
+                    <div className={classes(container, isHeader, buttons)}>
+                        <div className={buttonClasses.wrapper}>
+                            <MessageButton type="report" callback={reportRev} />
+                            {canDeleteReview(review, UserStore.getCurrentUser().id) && (
+                                <MessageButton type="delete" callback={delReview} />
+                            )}
                         </div>
                     </div>
                 </div>

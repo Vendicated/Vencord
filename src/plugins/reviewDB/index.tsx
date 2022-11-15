@@ -30,7 +30,7 @@ import { showToast } from "./Utils/Utils";
 export default definePlugin({
     name: "ReviewDB",
     description: "See reviews of other people",
-    authors: [Devs.mantikafasi],
+    authors: [Devs.mantikafasi, Devs.Ven],
 
     patches: [
         {

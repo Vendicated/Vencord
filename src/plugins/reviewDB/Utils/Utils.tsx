@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "../../../utils/constants";
 import Logger from "../../../utils/Logger";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "../../../utils/modal";
 import { Settings } from "../../../Vencord";
 import { findByProps } from "../../../webpack";
 import { FluxDispatcher, Forms, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
+import { Review } from "../entities/Review";
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -88,3 +90,12 @@ export function showToast(text: string) {
 }
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+export function canDeleteReview(review: Review, userId: string) {
+    if (review.senderdiscordid === userId) return true;
+
+    const myId = BigInt(userId);
+    return myId === Devs.mantikafasi.id ||
+        myId === Devs.Ven.id ||
+        myId === Devs.rushii.id;
+}
