@@ -55,9 +55,10 @@ export const traceFunction = !IS_DEV
             const traceName = mapper?.(...args) ?? name;
 
             beginTrace(traceName, ...arguments);
-            const result = f.apply(this, args);
-            finishTrace(traceName);
-
-            return result;
+            try {
+                return f.apply(this, args);
+            } finally {
+                finishTrace(traceName);
+            }
         } as F;
     };
