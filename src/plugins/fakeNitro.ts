@@ -88,6 +88,7 @@ export default definePlugin({
         },
         {
             find: "\"SENDABLE\"",
+            predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
                 match: /(\w+)\.available\?/,
                 replace: "true?"
