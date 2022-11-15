@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
@@ -33,8 +34,9 @@ const nameMap = {
     customitem: "MenuItem",
 };
 
+migratePluginSettings("MenuItemDeobfuscatorAPI", "MenuItemDeobfuscatorApi");
 export default definePlugin({
-    name: "MenuItemDeobfuscatorApi",
+    name: "MenuItemDeobfuscatorAPI",
     description: "Deobfuscates Discord's Menu Item module",
     authors: [Devs.Ven],
     patches: [

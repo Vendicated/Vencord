@@ -17,6 +17,7 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
 import { lazyWebpack } from "../utils/misc";
@@ -28,17 +29,22 @@ import { ChannelStore, UserStore } from "../webpack/common";
 const DRAFT_TYPE = 0;
 const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
 
-interface Sticker {
+interface BaseSticker {
     available: boolean;
     description: string;
     format_type: number;
-    guild_id: string;
     id: string;
     name: string;
     tags: string;
     type: number;
-    _notAvailable?: boolean;
 }
+interface GuildSticker extends BaseSticker {
+    guild_id: string;
+}
+interface DiscordSticker extends BaseSticker {
+    pack_id: string;
+}
+type Sticker = GuildSticker | DiscordSticker;
 
 interface StickerPack {
     id: string;
@@ -50,20 +56,18 @@ interface StickerPack {
     stickers: Sticker[];
 }
 
+migratePluginSettings("FakeNitro", "NitroBypass");
+
 export default definePlugin({
-    name: "NitroBypass",
-    authors: [
-        Devs.Arjix,
-        Devs.D3SOX,
-        Devs.Ven
-    ],
+    name: "FakeNitro",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
 
     patches: [
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableEmojiBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: [
                 "canUseAnimatedEmojis",
                 "canUseEmojisEverywhere"
@@ -76,7 +80,7 @@ export default definePlugin({
         },
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableStickerBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
                 match: /canUseStickersEverywhere:function\(.+?}/,
                 replace: "canUseStickersEverywhere:function(e){return true;}"
@@ -84,6 +88,7 @@ export default definePlugin({
         },
         {
             find: "\"SENDABLE\"",
+            predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
                 match: /(\w+)\.available\?/,
                 replace: "true?"
@@ -91,7 +96,7 @@ export default definePlugin({
         },
         {
             find: "canUseAnimatedEmojis:function",
-            predicate: () => Settings.plugins.NitroBypass.enableStreamQualityBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStreamQualityBypass === true,
             replacement: [
                 "canUseHighVideoUploadQuality",
                 "canStreamHighQuality",
@@ -105,7 +110,7 @@ export default definePlugin({
         },
         {
             find: "STREAM_FPS_OPTION.format",
-            predicate: () => Settings.plugins.NitroBypass.enableStreamQualityBypass === true,
+            predicate: () => Settings.plugins.FakeNitro.enableStreamQualityBypass === true,
             replacement: {
                 match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
                 replace: ""
@@ -148,12 +153,12 @@ export default definePlugin({
         return (UserStore.getCurrentUser().premiumType ?? 0) > 0;
     },
 
-    get canUseSticker() {
+    get canUseStickers() {
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
     getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.NitroBypass.stickerSize}`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.FakeNitro.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -166,7 +171,7 @@ export default definePlugin({
         const { frames, width, height } = await parseURL(stickerLink);
 
         const gif = new GIFEncoder();
-        const resolution = Settings.plugins.NitroBypass.stickerSize;
+        const resolution = Settings.plugins.FakeNitro.stickerSize;
 
         const canvas = document.createElement("canvas");
         canvas.width = resolution;
@@ -209,7 +214,7 @@ export default definePlugin({
     },
 
     start() {
-        const settings = Settings.plugins.NitroBypass;
+        const settings = Settings.plugins.FakeNitro;
         if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
             return;
         }
@@ -228,51 +233,34 @@ export default definePlugin({
         this.preSend = addPreSendListener((channelId, messageObj, extra) => {
             const { guildId } = this;
 
-            if (settings.enableStickerBypass) {
-                const stickerId = extra?.stickerIds?.[0];
+            stickerBypass: {
+                if (!settings.enableStickerBypass)
+                    break stickerBypass;
 
-                if (stickerId) {
-                    let stickerLink = this.getStickerLink(stickerId);
-                    let sticker: Sticker | undefined;
+                const sticker = StickerStore.getStickerById(extra?.stickerIds?.[0]!);
+                if (!sticker)
+                    break stickerBypass;
 
-                    const discordStickerPack = StickerStore.getPremiumPacks().find(pack => {
-                        const discordSticker = pack.stickers.find(sticker => sticker.id === stickerId);
-                        if (discordSticker) {
-                            sticker = discordSticker;
-                        }
-                        return discordSticker;
-                    });
+                if (sticker.available !== false && (this.canUseStickers || (sticker as GuildSticker)?.guild_id === guildId))
+                    break stickerBypass;
 
-                    if (discordStickerPack) {
-                        // discord stickers provided by the Distok project
-                        stickerLink = `https://distok.top/stickers/${discordStickerPack.id}/${stickerId}.gif`;
-                    } else {
-                        // guild stickers
-                        sticker = StickerStore.getStickerById(stickerId);
+                let link = this.getStickerLink(sticker.id);
+                if (sticker.format_type === 2) {
+                    this.sendAnimatedSticker(this.getStickerLink(sticker.id), sticker.id, channelId);
+                    return { cancel: true };
+                } else {
+                    if ("pack_id" in sticker) {
+                        const packId = sticker.pack_id === "847199849233514549"
+                            // Discord moved these stickers into a different pack at some point, but
+                            // Distok still uses the old id
+                            ? "749043879713701898"
+                            : sticker.pack_id;
+
+                        link = `https://distok.top/stickers/${packId}/${sticker.id}.gif`;
                     }
 
-                    if (sticker) {
-                        // when the user has Nitro and the sticker is available, send the sticker normally
-                        if (this.canUseSticker && sticker.available) {
-                            return { cancel: false };
-                        }
-
-                        // only modify if sticker is not from current guild
-                        if (sticker.guild_id !== guildId) {
-                            // if it's an animated guild sticker, download it, convert to gif and send it
-                            const isAnimated = sticker.format_type === 2;
-                            if (!discordStickerPack && isAnimated) {
-                                this.sendAnimatedSticker(stickerLink, stickerId, channelId);
-                                return { cancel: true };
-                            }
-
-                            if (messageObj.content)
-                                messageObj.content += " ";
-                            messageObj.content += stickerLink;
-
-                            delete extra.stickerIds;
-                        }
-                    }
+                    delete extra.stickerIds;
+                    messageObj.content += " " + link;
                 }
             }
 

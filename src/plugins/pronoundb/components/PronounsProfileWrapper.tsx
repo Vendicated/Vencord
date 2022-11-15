@@ -20,27 +20,42 @@ import { useAwaiter } from "../../../utils/misc";
 import { Settings } from "../../../Vencord";
 import { UserStore } from "../../../webpack/common";
 import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
-import { PronounMapping, UserProfileProps } from "../types";
+import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
 
-export default function PronounsProfileWrapper(props: UserProfileProps, pronounsComponent: JSX.Element) {
+export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
+    const user = UserStore.getUser(profileProps.userId) ?? {};
     // Don't bother fetching bot or system users
-    if (props.user.bot || props.user.system) return null;
+    if (user.bot || user.system) return null;
     // Respect showSelf options
-    if (!Settings.plugins.PronounDB.showSelf && props.user.id === UserStore.getCurrentUser().id) return null;
+    if (!Settings.plugins.PronounDB.showSelf && user.id === UserStore.getCurrentUser().id)
+        return null;
 
+    return <ProfilePronouns
+        userId={profileProps.userId}
+        Component={PronounsComponent}
+        leProps={props}
+    />;
+}
+
+function ProfilePronouns(
+    { userId, Component, leProps }: {
+        userId: string;
+        Component: React.ElementType<UserProfilePronounsProps>;
+        leProps: UserProfilePronounsProps;
+    }
+) {
     const [result, , isPending] = useAwaiter(
-        () => fetchPronouns(props.user.id),
+        () => fetchPronouns(userId),
         null,
         e => console.error("Fetching pronouns failed: ", e)
     );
 
-    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return a span with the pronouns
+    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then render
     if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
         // First child is the header, second is a div with the actual text
-        const [, pronounsBodyComponent] = pronounsComponent.props.children as [JSX.Element, JSX.Element];
-        pronounsBodyComponent.props.children = formatPronouns(result);
-        return pronounsComponent;
+        leProps.currentPronouns ||= formatPronouns(result);
+        return <Component {...leProps} />;
     }
-    // Otherwise, return null so nothing else is rendered
-    else return null;
+
+    return null;
 }

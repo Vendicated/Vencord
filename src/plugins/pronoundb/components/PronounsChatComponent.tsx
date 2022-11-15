@@ -27,12 +27,18 @@ import { PronounMapping } from "../types";
 
 const styles: Record<string, string> = lazyWebpack(filters.byProps("timestampInline"));
 
-export default function PronounsChatComponent({ message }: { message: Message; }) {
+export default function PronounsChatComponentWrapper({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
-    if (message.author.bot || message.author.system) return null;
+    if (message.author.bot || message.author.system)
+        return null;
     // Respect showSelf options
-    if (!Settings.plugins.PronounDB.showSelf && message.author.id === UserStore.getCurrentUser().id) return null;
+    if (!Settings.plugins.PronounDB.showSelf && message.author.id === UserStore.getCurrentUser().id)
+        return null;
 
+    return <PronounsChatComponent message={message} />;
+}
+
+function PronounsChatComponent({ message }: { message: Message; }) {
     const [result, , isPending] = useAwaiter(
         () => fetchPronouns(message.author.id),
         null,
@@ -47,6 +53,6 @@ export default function PronounsChatComponent({ message }: { message: Message; }
             >• {formatPronouns(result)}</span>
         );
     }
-    // Otherwise, return null so nothing else is rendered
-    else return null;
+
+    return null;
 }

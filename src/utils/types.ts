@@ -34,7 +34,10 @@ export interface Patch {
     plugin: string;
     find: string;
     replacement: PatchReplacement | PatchReplacement[];
+    /** Whether this patch should apply to multiple modules */
     all?: boolean;
+    /** Do not warn if this patch did no changes */
+    noWarn?: boolean;
     predicate?(): boolean;
 }
 
@@ -46,9 +49,10 @@ export interface PluginAuthor {
 export interface Plugin extends PluginDef {
     patches?: Patch[];
     started: boolean;
+    isDependency?: boolean;
 }
 
-interface PluginDef {
+export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];

@@ -17,7 +17,7 @@
 */
 
 import { WEBPACK_CHUNK } from "../utils/constants";
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { _initWebpack } from ".";
 
 let webpackChunk: any[];
@@ -141,7 +141,7 @@ function patchPush() {
 
                             try {
                                 const newCode = code.replace(replacement.match, replacement.replace);
-                                if (newCode === code) {
+                                if (newCode === code && !replacement.noWarn) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                     if (IS_DEV) {
                                         logger.debug("Function Source:\n", code);
