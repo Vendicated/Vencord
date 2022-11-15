@@ -19,7 +19,7 @@
 import type { KeyboardEvent } from "react";
 
 import { lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Margins, Text } from "../../../webpack/common";
+import { Forms, Text } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
@@ -66,7 +66,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 />
             )}
             {reviews?.length === 0 && (
-                <Forms.FormText className={Margins.marginTop8}>
+                <Forms.FormText style={{ paddingLeft: "12px", paddingRight: "12px" }}>
                     Looks like nobody reviewed this user, yet you can be the first!
                 </Forms.FormText>
             )}

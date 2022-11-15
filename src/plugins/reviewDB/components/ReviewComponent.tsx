@@ -17,7 +17,7 @@
 */
 
 import { classes, LazyComponent } from "../../../utils/misc";
-import { bulk, filters } from "../../../webpack";
+import { filters, findBulk } from "../../../webpack";
 import { Alerts, UserStore } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -34,7 +34,7 @@ export default LazyComponent(() => {
         { contents },
         buttonClasses,
         { defaultColor }
-    ] = bulk(
+    ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
