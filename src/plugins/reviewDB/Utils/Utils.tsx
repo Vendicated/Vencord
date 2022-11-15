@@ -18,10 +18,10 @@
 
 import { Devs } from "../../../utils/constants";
 import Logger from "../../../utils/Logger";
-import { ModalContent, ModalHeader, ModalRoot, openModal } from "../../../utils/modal";
+import { openModal } from "../../../utils/modal";
 import { Settings } from "../../../Vencord";
 import { findByProps } from "../../../webpack";
-import { FluxDispatcher, Forms, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
+import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 
 export async function openUserProfileModal(userId: string) {
@@ -36,45 +36,38 @@ export async function openUserProfileModal(userId: string) {
 }
 
 export function authorize(callback?: any) {
-    const settings = Settings.plugins.ReviewDB;
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
     openModal((props: any) =>
-        <ModalRoot {...props}>
-            <ModalHeader>
-                <Forms.FormText>Authorise</Forms.FormText>
-            </ModalHeader>
-            <ModalContent>
-                <OAuth2AuthorizeModal
-                    scopes={["identify"]}
-                    responseType="code"
-                    redirectUri="https://manti.vendicated.dev/URauth"
-                    permissions={0n}
-                    clientId="915703782174752809"
-                    cancelCompletesFlow={false}
-                    callback={async (u: string) => {
-                        try {
-                            const url = new URL(u);
-                            url.searchParams.append("returnType", "json");
-                            url.searchParams.append("clientMod", "vencord");
-                            const res = await fetch(url, {
-                                headers: new Headers({ Accept: "application/json" })
-                            });
-                            const { token, status } = await res.json();
-                            if (status === 0) {
-                                settings.token = token;
-                                showToast("Successfully logged in!");
-                                callback?.();
-                            } else if (res.status === 1) {
-                                showToast("An Error occurred while logging in.");
-                            }
-                        } catch (e) {
-                            new Logger("ReviewDB").error("Failed to authorise", e);
-                        }
-                    }}
-                />
-            </ModalContent>
-        </ModalRoot>
+        <OAuth2AuthorizeModal
+            {...props}
+            scopes={["identify"]}
+            responseType="code"
+            redirectUri="https://manti.vendicated.dev/URauth"
+            permissions={0n}
+            clientId="915703782174752809"
+            cancelCompletesFlow={false}
+            callback={async (u: string) => {
+                try {
+                    const url = new URL(u);
+                    url.searchParams.append("returnType", "json");
+                    url.searchParams.append("clientMod", "vencord");
+                    const res = await fetch(url, {
+                        headers: new Headers({ Accept: "application/json" })
+                    });
+                    const { token, status } = await res.json();
+                    if (status === 0) {
+                        Settings.plugins.ReviewDB.token = token;
+                        showToast("Successfully logged in!");
+                        callback?.();
+                    } else if (res.status === 1) {
+                        showToast("An Error occurred while logging in.");
+                    }
+                } catch (e) {
+                    new Logger("ReviewDB").error("Failed to authorise", e);
+                }
+            }}
+        />
     );
 }
 

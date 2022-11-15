@@ -25,11 +25,11 @@ import { Settings } from "../../Vencord";
 import { Button, UserStore } from "../../webpack/common";
 import ReviewsView from "./components/ReviewsView";
 import { getLastReviewID } from "./Utils/ReviewDBAPI";
-import { showToast } from "./Utils/Utils";
+import { authorize, showToast } from "./Utils/Utils";
 
 export default definePlugin({
     name: "ReviewDB",
-    description: "See reviews of other people",
+    description: "Review other users (Adds a new settings to profiles)",
     authors: [Devs.mantikafasi, Devs.Ven],
 
     patches: [
@@ -43,26 +43,19 @@ export default definePlugin({
     ],
 
     options: {
+        authorize: {
+            type: OptionType.COMPONENT,
+            description: "Authorise with ReviewDB",
+            component: () => (
+                <Button onClick={authorize}>
+                    Authorise with ReviewDB
+                </Button>
+            )
+        },
         notifyReviews: {
             type: OptionType.BOOLEAN,
             description: "Notify about new reviews on startup",
             default: true,
-        },
-        token: {
-            type: OptionType.STRING,
-            description: "Your OAUTH token for the ReviewDB API",
-            default: "",
-        },
-        authorize: {
-            type: OptionType.COMPONENT,
-            description: "Authorize your account",
-            component: () => (
-                <Button onClick={() =>
-                    window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify")
-                }>
-                    Get OAUTH2 Token
-                </Button>
-            )
         }
     },
 
