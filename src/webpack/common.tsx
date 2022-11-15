@@ -142,8 +142,8 @@ waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
 
-waitFor(m => filters.byCode("errorSeparator")(m), m => Forms.FormTitle = m);
-waitFor(m => filters.byCode("titleClassName", "sectionTitle")(m), m => Forms.FormSection = m);
+waitFor(filters.byCode("errorSeparator"), m => Forms.FormTitle = m);
+waitFor(filters.byCode("titleClassName", "sectionTitle"), m => Forms.FormSection = m);
 waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 
 waitFor(m => {
