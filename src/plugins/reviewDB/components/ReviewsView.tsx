@@ -67,7 +67,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             )}
             {reviews?.length === 0 && (
                 <Forms.FormText style={{ paddingLeft: "12px", paddingRight: "12px" }}>
-                    Looks like nobody reviewed this user, yet you can be the first!
+                    Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
             <textarea
