@@ -20,8 +20,9 @@ import { Settings } from "../../../Vencord";
 import { Review } from "../entities/Review";
 import { authorize, showToast } from "./Utils";
 
-const settings = Settings.plugins.ReviewDB;
 const API_URL = "https://manti.vendicated.dev";
+
+const getToken = () => Settings.plugins.ReviewDB.token;
 
 enum Response {
     "Added your review" = 0,
@@ -35,7 +36,7 @@ export async function getReviews(id: string): Promise<Review[]> {
 }
 
 export async function addReview(review: any): Promise<Response> {
-    review.token = settings.token;
+    review.token = getToken();
 
     if (!review.token) {
         showToast("Please authorize to add a review.");
@@ -65,7 +66,7 @@ export function deleteReview(id: number): Promise<any> {
             Accept: "application/json",
         }),
         body: JSON.stringify({
-            token: settings.token,
+            token: getToken(),
             reviewid: id
         })
     }).then(r => r.json());
@@ -80,7 +81,7 @@ export async function reportReview(id: number) {
         }),
         body: JSON.stringify({
             reviewid: id,
-            token: settings.token
+            token: getToken()
         })
     });
     showToast(await res.text());
