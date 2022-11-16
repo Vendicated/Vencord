@@ -19,6 +19,8 @@
 import { User } from "discord-types/general";
 import { HTMLProps } from "react";
 
+import Plugins from "~plugins";
+
 export enum BadgePosition {
     START,
     END
@@ -72,6 +74,8 @@ export function inject(badgeArray: ProfileBadge[], args: BadgeUserArgs) {
                 : badgeArray.push(badge);
         }
     }
+    (Plugins.BadgeAPI as any).addDonorBadge(badgeArray, args.user.id);
+
     return badgeArray;
 }
 
