@@ -29,7 +29,7 @@ import { get } from "../simpleGet";
 import { calculateHashes, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, Buffer][];
+let PendingUpdates = [] as [string, string][];
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
@@ -46,6 +46,9 @@ async function githubGet(endpoint: string) {
 }
 
 async function calculateGitChanges() {
+    const isOutdated = await fetchUpdates();
+    if (!isOutdated) return [];
+
     const res = await githubGet(`/compare/${gitHash}...HEAD`);
 
     const data = JSON.parse(res.toString("utf-8"));
@@ -63,18 +66,20 @@ async function fetchUpdates() {
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
     if (hash === gitHash)
-        return true;
+        return false;
 
-    await Promise.all(data.assets.map(async ({ name, browser_download_url }) => {
+    data.assets.forEach(({ name, browser_download_url }) => {
         if (["patcher.js", "preload.js", "renderer.js"].some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, await get(browser_download_url)]);
+            PendingUpdates.push([name, browser_download_url]);
         }
-    }));
+    });
     return true;
 }
 
 async function applyUpdates() {
-    await Promise.all(PendingUpdates.map(([name, data]) => writeFile(join(__dirname, name), data)));
+    await Promise.all(PendingUpdates.map(
+        async ([name, data]) => writeFile(join(__dirname, name), await get(data)))
+    );
     PendingUpdates = [];
     return true;
 }

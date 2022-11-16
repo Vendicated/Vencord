@@ -152,6 +152,5 @@ if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
         return loadModule.apply(this, arguments);
     };
 } else {
-    console.log(require.main!.filename);
     require(require.main!.filename);
 }
