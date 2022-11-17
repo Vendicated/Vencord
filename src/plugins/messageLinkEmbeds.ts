@@ -292,44 +292,50 @@ var messageEmbed={MessageEmbed:$1};"
         const channel = ChannelStore.getChannel(channelID);
         if (!channel) return [...existingEmbeds];
 
-        const firstEmbed = message.embeds[0] as Embed;
-        const hasActualEmbed = !!(message.author.bot && firstEmbed?.type === "rich" && firstEmbed.id.match(/embed_\d+/));
-        if (hasActualEmbed && message.content) return [...existingEmbeds, { ...firstEmbed, _messageEmbed: "rich" }];
-
         const usernameAndDiscriminator = `${message.author.username}#${message.author.discriminator}`;
         const channelAndServer = guildID === "@me" ? "Direct Message" :
             "#" + channel.name + ` (${GuildStore.getGuild(guildID).name})`;
 
-        const embeds = [...existingEmbeds, {
+        const firstEmbed = message.embeds[0] as Embed;
+        const hasActualEmbed = !!(message.author.bot && firstEmbed?.type === "rich" && firstEmbed.id.match(/embed_\d+/));
+        const avatarURL = `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${message.author.id}/${message.author.avatar}`;
+
+        if (hasActualEmbed && message.content) return [...existingEmbeds, { ...firstEmbed, _messageEmbed: "rich" }];
+        if (hasActualEmbed) return [...existingEmbeds, {
+            ...firstEmbed,
             author: {
-                iconProxyURL: `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${message.author.id}/${message.author.avatar}`,
-                iconURL: `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${message.author.id}/${message.author.avatar}`,
-                name: hasActualEmbed ?
-                    `${usernameAndDiscriminator}${firstEmbed.author ? ` | ${firstEmbed.author.name}` : ""}`
-                    : usernameAndDiscriminator,
-                url: hasActualEmbed ? firstEmbed.author?.url! : undefined,
+                iconProxyURL: avatarURL,
+                iconURL: avatarURL,
+                name: `${usernameAndDiscriminator}${firstEmbed.author ? ` | ${firstEmbed.author.name}` : ""}`,
+                url: firstEmbed.author?.url!,
             },
-            color: hasActualEmbed ? firstEmbed.color :
-                GuildMemberStore.getMember(guildID, message.author.id)?.colorString,
-            image: getImages(message)[0],
-            rawDescription: hasActualEmbed && firstEmbed.rawDescription.length ? firstEmbed.rawDescription :
-                message.content.length ? message.content :
-                    noContent(message.attachments.length, message.embeds.length),
             footer: {
-                text: hasActualEmbed
-                    ? `${channelAndServer}${firstEmbed.footer ? ` | ${firstEmbed.footer.text}` : ""}`
-                    : channelAndServer,
-                iconURL: hasActualEmbed ? firstEmbed.footer?.iconURL : undefined,
+                text: `${channelAndServer}${firstEmbed.footer ? ` | ${firstEmbed.footer.text}` : ""}`,
+                iconURL: firstEmbed.footer?.iconURL
+            },
+            timestamp: message.timestamp,
+            id: `messageLinkEmbeds-${messageID}-embedClone`,
+            _messageEmbed: "rich"
+        }];
+        return [...existingEmbeds, {
+            author: {
+                iconProxyURL: avatarURL,
+                iconURL: avatarURL,
+                name: usernameAndDiscriminator,
+            },
+            color: GuildMemberStore.getMember(guildID, message.author.id)?.colorString,
+            image: getImages(message)[0],
+            rawDescription: message.content.length ? message.content :
+                noContent(message.attachments.length, message.embeds.length),
+            footer: {
+                text: channelAndServer,
             },
             rawTitle: hasActualEmbed ? firstEmbed.rawTitle : undefined,
-            thumbnail: hasActualEmbed && firstEmbed.thumbnail ? { ...firstEmbed.thumbnail } : undefined,
             timestamp: message.timestamp,
             id: `messageLinkEmbeds-${messageID}`,
             fields: [],
             type: "rich",
             _messageEmbed: "rich"
         }] as Embed[];
-
-        return embeds;
     }
 });
