@@ -31,24 +31,6 @@ import {
     Text
 } from "../webpack/common";
 
-const replacement = `
-const msgLink = $2.message.content?.match(Vencord.Plugins.plugins.MessageLinkEmbeds.messageLinkRegex)?.[1];
-
-if (msgLink) {
-    $2.message.embeds = [
-        ...Vencord.Plugins.plugins.MessageLinkEmbeds
-        .generateRichEmbed(msgLink, $2.message.embeds,
-            { channelID: $2.message.channel_id, messageID: $2.message.id }
-        )
-    ].filter(item => item);
-};
-
-var
-  $1 = $2.channel,
-  $3 = $2.message,
-  $4 = $2.renderSuppressEmbeds /* Don't add a semicolon here, there are more definitions after this. */
-`.trim().replace(/(?<=[^(?:const)|(?:var)])\s+/gm, "");
-
 const messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
 const elementCache: { [id: string]: { element: JSX.Element, shouldRenderRichEmbed: boolean; }; } = {};
 
@@ -169,8 +151,9 @@ export default definePlugin({
     patches: [{
         find: "_messageAttachmentToEmbedMedia",
         replacement: {
-            match: /var (.{1,2})=(.{1,2})\.channel,(.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.renderSuppressEmbeds/,
-            replace: replacement
+            match: /var .{1,2}=(.{1,2})\.channel,.{1,2}=.{1,2}\.message,.{1,2}=.{1,2}\.renderSuppressEmbeds/,
+            replace: (orig, props) =>
+                `${props}.message.embeds=Vencord.Plugins.plugins.MessageLinkEmbeds.generateRichEmbeds(${props}.message);${orig}`
         }
     },
     {
@@ -273,19 +256,23 @@ var messageEmbed={MessageEmbed:$1};"
         return MessageEmbedElement;
     },
 
-    generateRichEmbed(messageURL: string, existingEmbeds: Embed[], originalMessage: { channelID: string, messageID: string; }) {
+    generateRichEmbeds(origMessage: Message): Embed[] {
+        const messageURL = origMessage.content?.match(this.messageLinkRegex)?.[1];
+        if (!messageURL) return origMessage.embeds;
+        let existingEmbeds = origMessage.embeds as Embed[];
         const [guildID, channelID, messageID] = messageURL.split("/");
+
         if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed)
-            return [...existingEmbeds.filter(i => !i._messageEmbed)];
-        if (existingEmbeds.find(i => i._messageEmbed === "rich")) return [...existingEmbeds];
+            return existingEmbeds.filter(i => !i._messageEmbed);
+        if (existingEmbeds.find(i => i._messageEmbed === "rich")) return existingEmbeds;
 
         const message = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
         if (existingEmbeds.find(i => i._messageEmbed === "clyde")) {
-            if (!message) return [...existingEmbeds];
+            if (!message) return existingEmbeds;
             else existingEmbeds = existingEmbeds.filter(i => i._messageEmbed !== "clyde");
         }
         if (!message) {
-            getMessage(channelID, messageID, originalMessage);
+            getMessage(channelID, messageID, { channelID: origMessage.channel_id, messageID: origMessage.id });
             return [...existingEmbeds, {
                 author: {
                     name: "Clyde#0000",
