@@ -179,7 +179,8 @@ var messageEmbed={MessageEmbed:$1};"
         removeAccessory("messageLinkEmbed");
     },
 
-    messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19})/,
+    // the > is kept to be checked for later; cause i have no idea how to make the whole regex fail if it's there
+    messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19}(?:>)?)/,
 
     messageEmbedAccessory(props: Record<string, any>): JSX.Element {
         const { message } = props;
@@ -261,6 +262,8 @@ var messageEmbed={MessageEmbed:$1};"
         if (!messageURL) return origMessage.embeds;
         let existingEmbeds = origMessage.embeds as Embed[];
         const [guildID, channelID, messageID] = messageURL.split("/");
+        if (messageID.endsWith(">") /* check if url is escaped */)
+            return origMessage.embeds;
 
         if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed)
             return existingEmbeds.filter(i => !i._messageEmbed);
