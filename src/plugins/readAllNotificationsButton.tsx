@@ -17,20 +17,40 @@
 */
 
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { Button, React } from "../webpack/common";
+import { filters } from "../webpack";
+import { Button, FluxDispatcher, GuildStore, React } from "../webpack/common";
 import { addElementInServerList, removeElementInServerList } from "./apiServerList";
 
-namespace Indicator {
+namespace ReadAllButton {
+    const GuildChannelStore = lazyWebpack(filters.byProps("getChannels"));
 
-    function sayHello() {
-        console.log("Bruh!");
+    function readAllServers() {
+        const channels: Array<any> = [];
+
+        Object.values(GuildStore.getGuilds()).forEach(guild => {
+            GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: any; lastMessageId: any; }; }) => {
+                channels.push({
+                    channelId: c.channel.id,
+                    messageId: c.channel?.lastMessageId,
+                    readStateType: 0
+                });
+            });
+        });
+
+        FluxDispatcher.dispatch({
+            type: "BULK_ACK",
+            context: "APP",
+            channels: channels
+        });
     }
 
     export const Element = () => {
         return <Button
-            onClick={sayHello}
+            onClick={readAllServers}
             size={Button.Sizes.MIN}
+            color={Button.Colors.BRAND}
             style={{ marginTop: "4px", marginBottom: "4px", marginLeft: "9px" }}
         > Read all </Button>;
     };
@@ -38,40 +58,23 @@ namespace Indicator {
 }
 
 export default definePlugin({
-    name: "ReadAll",
+    name: "ReadAllNotificationsButton",
 
     authors: [Devs.kemo],
 
-    description: "Read all notifications",
+    description: "Read all server notifications with a single button click!",
 
     dependencies: ["ServerListAPI"],
 
-    patches: [
-        {
-            find: ".Messages.MARK_GUILD_AS_READ",
-            replacement: {
-                match: /(.{6}INBOX_CHANNEL_ACKED,\{channel_id.{99}).{1}/,
-                replace: "$&;Vencord.Plugins.plugins?.ReadAll?.Init($1)"
-            }
-        }
-    ],
-
-    // id:"mark-channel-read",
-    // return\(.{7}\)\(.{4},\{id:"mark-channel-read",label:.{4}Messages.MARK_AS_READ
-    Init(arg1: any, arg2: any) {
-        console.log("Arg1", arg1);
-        console.log("Arg2", arg2);
-    },
-
-    renderIndicator: () => {
-        return <Indicator.Element />;
+    renderReadAllButton: () => {
+        return <ReadAllButton.Element />;
     },
 
     start() {
-        addElementInServerList(this.renderIndicator);
+        addElementInServerList(this.renderReadAllButton);
     },
 
     stop() {
-        removeElementInServerList(this.renderIndicator);
+        removeElementInServerList(this.renderReadAllButton);
     }
 });

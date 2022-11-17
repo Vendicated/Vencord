@@ -22,7 +22,7 @@ import { Devs } from "../utils/constants";
 import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { ChannelStore, FluxDispatcher, React, UserStore } from "../webpack/common";
+import { ChannelStore, ContextMenu, FluxDispatcher, Forms, Menu, React, UserStore } from "../webpack/common";
 import { addElementInServerList, removeElementInServerList } from "./apiServerList";
 
 interface ITyping {
@@ -39,8 +39,7 @@ interface IMessageCreate {
 }
 
 namespace Indicator {
-    // eslint-disable-next-line prefer-const
-    let typingUsers: Array<ITyping> = [];
+    const typingUsers: Array<ITyping> = [];
     let toolTipString: string = "";
 
     const dotsIcon = () => (
@@ -62,6 +61,33 @@ namespace Indicator {
     let buttonProps: any;
     let buttonChildren: any;
 
+    function ContextMenuElement() {
+
+        const buttons: Array<JSX.Element> = [];
+
+        for (let i = 0; i < typingUsers.length; i++) {
+            const user = UserStore.getUser(typingUsers[i].userId);
+            if (user) {
+                buttons.push(
+                    <Menu.MenuItem
+                        label={user.username}
+                        action={() => {
+                            openPrivateChannel(user.id);
+                        }}
+                    />
+                );
+            }
+        }
+
+        return React.createElement(
+            Menu.ContextMenu,
+            {
+                onClose: () => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })
+            },
+            buttons
+        );
+    }
+
     export const Init = (type: any, props: any, ...childern: any) => {
         if (!buttonType && type) {
             buttonType = type;
@@ -73,9 +99,13 @@ namespace Indicator {
             buttonProps.id = "dm-typing-indicator";
 
             buttonProps.onClick = () => {
-                if (typingUsers.length === 1) {
+                if (typingUsers.length > 0) {
                     openPrivateChannel(typingUsers[0].userId);
                 }
+            };
+
+            buttonProps.onContextMenu = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+                ContextMenu.open(e, () => ContextMenuElement());
             };
 
             buttonProps.icon = dotsIcon;
@@ -253,4 +283,16 @@ export default definePlugin({
             restartNeeded: false,
         }
     },
+
+    settingsAboutComponent: () => {
+        return (
+            <React.Fragment>
+                <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
+                <Forms.FormText variant="text-md/normal">
+                    Clicking the indicator will open the DMs of the respective user.
+                    If multiple users are typing, left clicking will open the DMs of the first user and right clicking will open a context menu with all the users.
+                </Forms.FormText>
+            </React.Fragment>
+        );
+    }
 });
