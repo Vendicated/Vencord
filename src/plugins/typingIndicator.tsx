@@ -23,6 +23,7 @@ import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { ChannelStore, FluxDispatcher, React, UserStore } from "../webpack/common";
+import { addElementInServerList, removeElementInServerList } from "./apiServerList";
 
 interface ITyping {
     channelId: string;
@@ -61,7 +62,7 @@ namespace Indicator {
     let buttonProps: any;
     let buttonChildren: any;
 
-    export const Setup = (type: any, props: any, ...childern: any) => {
+    export const Init = (type: any, props: any, ...childern: any) => {
         if (!buttonType && type) {
             buttonType = type;
         }
@@ -171,19 +172,14 @@ export default definePlugin({
 
     description: "Typing indicator but outside channels!",
 
+    dependencies: ["ServerListAPI"],
+
     patches: [
-        {
-            find: "Messages.DISCODO_DISABLED",
-            replacement: {
-                match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2, Vencord.Plugins.plugins?.TypingIndicator.renderIndicator()]"
-            }
-        },
         {
             find: "id:\"create-join-button\"",
             replacement: {
                 match: /(\(.{7}\)\((.{16}id:"create-join-button".*Messages.ADD_A_SERVER,icon:.{4}\})\))/,
-                replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.Setup($2)]"
+                replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.Init($2)]"
             }
         }
     ],
@@ -192,8 +188,8 @@ export default definePlugin({
         return <Indicator.Element />;
     },
 
-    Setup(type: any, props: any, ...childern: any) {
-        Indicator.Setup(type, props, ...childern);
+    Init(type: any, props: any, ...childern: any) {
+        Indicator.Init(type, props, ...childern);
     },
 
     async onMessage(e: IMessageCreate) {
@@ -225,12 +221,16 @@ export default definePlugin({
     },
 
     start() {
+        addElementInServerList(this.renderIndicator);
+
         FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.subscribe("TYPING_START", this.onTypingStart);
         FluxDispatcher.subscribe("TYPING_STOP", this.onTypingStop);
     },
 
     stop() {
+        removeElementInServerList(this.renderIndicator);
+
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("TYPING_START", this.onTypingStart);
         FluxDispatcher.unsubscribe("TYPING_STOP", this.onTypingStop);
