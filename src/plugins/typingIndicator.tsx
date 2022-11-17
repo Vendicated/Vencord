@@ -17,6 +17,7 @@
 */
 
 import { Message } from "discord-types/general";
+import { Devs } from "../utils/constants";
 
 import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
@@ -39,7 +40,7 @@ interface IMessageCreate {
 namespace Indicator {
     // eslint-disable-next-line prefer-const
     let typingUsers: Array<ITyping> = [];
-    let toolTipString: string = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
+    let toolTipString: string = "";
 
     const dotsIcon = () => (
         <svg
@@ -77,6 +78,8 @@ namespace Indicator {
             };
 
             buttonProps.icon = dotsIcon;
+
+            toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
         }
 
         if (!buttonChildren && childern) {
@@ -138,6 +141,7 @@ namespace Indicator {
     };
 
     export const Element = () => {
+
         const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
         forceRenderIndicator = forceUpdate;
@@ -161,15 +165,11 @@ namespace Indicator {
 export default definePlugin({
     name: "TypingIndicator",
 
-    authors: [{
-        name: "kemo",
-        id: 299693897859465228n
-    }],
+    authors: [Devs.kemo],
 
     description: "Typing indicator but outside channels!",
 
     patches: [
-        // Vencord.Plugins.plugins.TypingIndicator.renderIndecator()
         {
             find: "Messages.DISCODO_DISABLED",
             replacement: {
@@ -200,7 +200,6 @@ export default definePlugin({
         if (e.message.state === "SENDING") return;
 
         Indicator.removeUser(e.channelId, e.message.author.id);
-
     },
 
     async onTypingStart(e: ITyping) {
@@ -240,7 +239,7 @@ export default definePlugin({
             description: "Always show the indicator",
             type: OptionType.BOOLEAN,
             default: false,
-            restartNeeded: false,
+            restartNeeded: true,
         },
         emptyMessage: {
             disabled() {
@@ -249,7 +248,7 @@ export default definePlugin({
             description: "Text to show when no one is typing",
             type: OptionType.STRING,
             default: "No DMs?",
-            restartNeeded: true,
+            restartNeeded: false,
         }
     },
 });
