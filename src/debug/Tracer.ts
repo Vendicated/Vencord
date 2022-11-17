@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 
 if (IS_DEV) {
     var traces = {} as Record<string, [number, any[]]>;
@@ -55,9 +55,10 @@ export const traceFunction = !IS_DEV
             const traceName = mapper?.(...args) ?? name;
 
             beginTrace(traceName, ...arguments);
-            const result = f.apply(this, args);
-            finishTrace(traceName);
-
-            return result;
+            try {
+                return f.apply(this, args);
+            } finally {
+                finishTrace(traceName);
+            }
         } as F;
     };

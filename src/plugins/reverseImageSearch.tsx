@@ -30,9 +30,9 @@ const Engines = {
 
 export default definePlugin({
     name: "ReverseImageSearch",
-    description: "yes",
+    description: "Adds ImageSearch to image context menus",
     authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorApi"],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [{
         find: "open-native-link",
         replacement: {
@@ -56,7 +56,7 @@ export default definePlugin({
     }],
 
     makeMenu(src: string, target: HTMLElement) {
-        if (target && target.attributes["data-role"]?.value !== "img")
+        if (target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
             return null;
 
         return (

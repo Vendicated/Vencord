@@ -22,7 +22,7 @@ import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 import { ChangeList } from "../../utils/ChangeList";
-import Logger from "../../utils/logger";
+import Logger from "../../utils/Logger";
 import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
 import { openModalLazy } from "../../utils/modal";
 import { Plugin } from "../../utils/types";
@@ -31,6 +31,7 @@ import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, Te
 import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";
+import { handleComponentFailed } from "../handleComponentFailed";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 
@@ -312,6 +313,9 @@ export default ErrorBoundary.wrap(function Settings() {
             </div>
         </Forms.FormSection >
     );
+}, {
+    message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
+    onError: handleComponentFailed,
 });
 
 function makeDependencyList(deps: string[]) {

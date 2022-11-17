@@ -21,7 +21,7 @@ import Plugins from "~plugins";
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
@@ -30,11 +30,36 @@ export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
+const settings = Settings.plugins;
+
 export function isPluginEnabled(p: string) {
-    return (Settings.plugins[p]?.enabled || Plugins[p]?.required) ?? false;
+    return (
+        Plugins[p]?.required ||
+        Plugins[p]?.isDependency ||
+        settings[p]?.enabled
+    ) ?? false;
 }
 
-for (const p of Object.values(Plugins))
+const pluginsValues = Object.values(Plugins);
+
+// First roundtrip to mark and force enable dependencies
+for (const p of pluginsValues) {
+    p.dependencies?.forEach(d => {
+        const dep = Plugins[d];
+        if (dep) {
+            settings[d].enabled = true;
+            dep.isDependency = true;
+        }
+        else {
+            const error = new Error(`Plugin ${p.name} has unresolved dependency ${d}`);
+            if (IS_DEV)
+                throw error;
+            logger.warn(error);
+        }
+    });
+}
+
+for (const p of pluginsValues)
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;

@@ -1,4 +1,4 @@
-/*!
+/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -16,15 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./ChangeList";
-export * as Constants from "./constants";
-export * from "./debounce";
-export * as Discord from "./discord";
-export { default as IpcEvents } from "./IpcEvents";
-export { default as Logger } from "./Logger";
-export * from "./misc";
-export * as Modals from "./modal";
-export * from "./onceDefined";
-export * from "./proxyLazy";
-export * from "./Queue";
-
+export interface Review {
+    comment: string,
+    id: number,
+    senderdiscordid: string,
+    senderuserid: number,
+    star: number,
+    username: string,
+    profile_photo: string;
+}

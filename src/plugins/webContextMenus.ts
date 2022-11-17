@@ -16,28 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findOption, OptionalMessageOption } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
-    name: "moarKaomojis",
-    description: "Adds more Kaomojis to discord. ヽ(´▽`)/",
-    authors: [Devs.JacobTm],
-    dependencies: ["CommandsAPI"],
-    commands: [
-        { name: "dissatisfaction", description: " ＞﹏＜" },
-        { name: "smug", description: " ಠ_ಠ" },
-        { name: "happy", description: " ヽ(´▽`)/" },
-        { name: "crying", description: " ಥ_ಥ" },
-        { name: "angry", description: " ヽ(｀Д´)ﾉ" },
-        { name: "anger", description: " ヽ(ｏ`皿′ｏ)ﾉ" },
-        { name: "joy", description: " <(￣︶￣)>" },
-    ].map(data => ({
-        ...data,
-        options: [OptionalMessageOption],
-        execute: opts => ({
-            content: findOption(opts, "message", "") + data.description
-        })
-    }))
+    name: "WebContextMenus",
+    description: "Re-adds some of context menu items missing on the web version of Discord, namely Copy/Open Link",
+    authors: [Devs.Ven],
+    target: "WEB",
+
+    patches: [{
+        // There is literally no reason for Discord to make this Desktop only.
+        // The only thing broken is copy, but they already have a different copy function
+        // with web support????
+        find: "open-native-link",
+        replacement: [
+            {
+                // if (isNative || null ==
+                match: /if\(!\w\..{1,3}\|\|null==/,
+                replace: "if(null=="
+            },
+            // Fix silly Discord calling the non web support copy
+            {
+                match: /\w\.default\.copy/,
+                replace: "Vencord.Webpack.Common.Clipboard.copy"
+            }
+        ]
+    }]
 });

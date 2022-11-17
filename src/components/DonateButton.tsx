@@ -1,4 +1,4 @@
-/*!
+/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -16,15 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./ChangeList";
-export * as Constants from "./constants";
-export * from "./debounce";
-export * as Discord from "./discord";
-export { default as IpcEvents } from "./IpcEvents";
-export { default as Logger } from "./Logger";
-export * from "./misc";
-export * as Modals from "./modal";
-export * from "./onceDefined";
-export * from "./proxyLazy";
-export * from "./Queue";
+import IpcEvents from "../utils/IpcEvents";
+import { Button } from "../webpack/common";
+import { Heart } from "./Heart";
 
+export default function DonateButton(props: any) {
+    return (
+        <Button
+            {...props}
+            look={Button.Looks.LINK}
+            color={Button.Colors.TRANSPARENT}
+            onClick={() =>
+                VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated")
+            }
+        >
+            <Heart />
+            Donate
+        </Button>
+    );
+}

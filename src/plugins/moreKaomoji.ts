@@ -16,31 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findOption, OptionalMessageOption } from "../api/Commands";
 import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
-migratePluginSettings("NoticesAPI", "NoticesApi");
-
+migratePluginSettings("MoreKaomoji", "moarKaomojis");
 export default definePlugin({
-    name: "NoticesAPI",
-    description: "Fixes notices being automatically dismissed",
-    authors: [Devs.Ven],
-    required: true,
-    patches: [
-        {
-            find: "updateNotice:",
-            replacement: [
-                {
-                    match: /;(.{1,2}=null;)(?=.{0,50}updateNotice)/g,
-                    replace:
-                        ";if(Vencord.Api.Notices.currentNotice)return !1;$1"
-                },
-                {
-                    match: /(?<=NOTICE_DISMISS:function.+?){(?=if\(null==(.+?)\))/,
-                    replace: '{if($1?.id=="VencordNotice")return ($1=null,Vencord.Api.Notices.nextNotice(),true);'
-                }
-            ]
-        }
-    ],
+    name: "MoreKaomoji",
+    description: "Adds more Kaomoji to discord. ヽ(´▽`)/",
+    authors: [Devs.JacobTm],
+    dependencies: ["CommandsAPI"],
+    commands: [
+        { name: "dissatisfaction", description: " ＞﹏＜" },
+        { name: "smug", description: " ಠ_ಠ" },
+        { name: "happy", description: " ヽ(´▽`)/" },
+        { name: "crying", description: " ಥ_ಥ" },
+        { name: "angry", description: " ヽ(｀Д´)ﾉ" },
+        { name: "anger", description: " ヽ(ｏ`皿′ｏ)ﾉ" },
+        { name: "joy", description: " <(￣︶￣)>" },
+    ].map(data => ({
+        ...data,
+        options: [OptionalMessageOption],
+        execute: opts => ({
+            content: findOption(opts, "message", "") + data.description
+        })
+    }))
 });

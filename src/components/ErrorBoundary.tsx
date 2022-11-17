@@ -16,14 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { LazyComponent } from "../utils/misc";
 import { Margins, React } from "../webpack/common";
 import { ErrorCard } from "./ErrorCard";
 
 interface Props {
+    /** Render nothing if an error occurs */
+    noop?: boolean;
+    /** Fallback component to render if an error occurs */
     fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; }>>;
+    /** called when an error occurs */
     onError?(error: Error, errorInfo: React.ErrorInfo): void;
+    /** Custom error message */
     message?: string;
 }
 
@@ -67,6 +72,8 @@ const ErrorBoundary = LazyComponent(() => {
         render() {
             if (this.state.error === NO_ERROR) return this.props.children;
 
+            if (this.props.noop) return null;
+
             if (this.props.fallback)
                 return <this.props.fallback
                     children={this.props.children}
@@ -95,11 +102,11 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends JSX.IntrinsicAttributes = any>(Component: React.ComponentType<T>): React.ComponentType<T>;
+        wrap<T extends JSX.IntrinsicAttributes = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Props): React.ComponentType<T>;
     };
 
-ErrorBoundary.wrap = Component => props => (
-    <ErrorBoundary>
+ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
+    <ErrorBoundary {...errorBoundaryProps}>
         <Component {...props} />
     </ErrorBoundary>
 );

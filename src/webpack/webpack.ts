@@ -19,7 +19,7 @@
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/logger";
+import Logger from "../utils/Logger";
 import { proxyLazy } from "../utils/proxyLazy";
 
 const logger = new Logger("Webpack");
@@ -139,11 +139,11 @@ export function findAll(filter: FilterFn, getDefault = true) {
 
 /**
  * Same as {@link find} but in bulk
- * @param filterFns Arry of filters. Please note that this array will be modified in place, so if you still
+ * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
  */
-export function bulk(...filterFns: FilterFn[]) {
+export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -216,7 +216,7 @@ export function bulk(...filterFns: FilterFn[]) {
     }
 
     return results;
-}
+});
 
 /**
  * Find the id of a module by its code
