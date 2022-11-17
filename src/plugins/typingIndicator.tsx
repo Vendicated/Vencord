@@ -39,7 +39,7 @@ interface IMessageCreate {
 namespace Indicator {
     // eslint-disable-next-line prefer-const
     let typingUsers: Array<ITyping> = [];
-    let toolTipString: string = Settings.plugins.TypingIndicator?.alwaysShow ? Settings.plugins.TypingIndicator?.emptyMessage : "";
+    let toolTipString: string = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
 
     const dotsIcon = () => (
         <svg
@@ -112,7 +112,7 @@ namespace Indicator {
             return;
 
         if (typingUsers.length === 0) {
-            toolTipString = Settings.plugins.TypingIndicator?.alwaysShow ? Settings.plugins.TypingIndicator?.emptyMessage : "";
+            toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
             forceRenderIndicator();
             return;
         }
@@ -144,7 +144,7 @@ namespace Indicator {
 
         if (buttonType && buttonProps && buttonChildren) {
 
-            if (!Settings.plugins.TypingIndicator?.alwaysShow && toolTipString.length === 0) {
+            if (!Settings.plugins?.TypingIndicator?.alwaysShow && toolTipString.length === 0) {
                 return null;
             }
 
@@ -174,14 +174,14 @@ export default definePlugin({
             find: "Messages.DISCODO_DISABLED",
             replacement: {
                 match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2, Vencord.Plugins.plugins.TypingIndicator.renderIndicator()]"
+                replace: "$1[$2, Vencord.Plugins.plugins?.TypingIndicator.renderIndicator()]"
             }
         },
         {
             find: "id:\"create-join-button\"",
             replacement: {
                 match: /(\(.{7}\)\((.{16}id:"create-join-button".*Messages.ADD_A_SERVER,icon:.{4}\})\))/,
-                replace: "[$&, Vencord.Plugins.plugins.TypingIndicator.Setup($2)]"
+                replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.Setup($2)]"
             }
         }
     ],
@@ -244,7 +244,7 @@ export default definePlugin({
         },
         emptyMessage: {
             disabled() {
-                return !Settings.plugins.TypingIndicator?.alwaysShow;
+                return !Settings.plugins?.TypingIndicator?.alwaysShow;
             },
             description: "Text to show when no one is typing",
             type: OptionType.STRING,
