@@ -106,7 +106,7 @@ function getImages(message: Message): Attachment[] {
         });
     });
     message.embeds?.forEach(e => {
-        if (e.type === "image" || (e.type === "rich" && e.image)) attachments.push(
+        if (e.type === "image") attachments.push(
             e.image ? { ...e.image } : { ...e.thumbnail! }
         );
         if (e.type === "gifv" && !e.url!.match(/https:\/\/(?:www.)?tenor\.com/)) {
