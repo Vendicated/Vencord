@@ -170,7 +170,7 @@ export default definePlugin({
 
     authors: [Devs.kemo],
 
-    description: "Typing indicator but outside channels!",
+    description: "Typing indicator but for your DMs!",
 
     dependencies: ["ServerListAPI"],
 
