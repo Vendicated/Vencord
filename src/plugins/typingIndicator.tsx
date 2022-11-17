@@ -17,8 +17,8 @@
 */
 
 import { Message } from "discord-types/general";
-import { Devs } from "../utils/constants";
 
+import { Devs } from "../utils/constants";
 import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
@@ -78,6 +78,8 @@ namespace Indicator {
             };
 
             buttonProps.icon = dotsIcon;
+
+            buttonProps.showPill = true;
 
             toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
         }
