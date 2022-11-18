@@ -75,6 +75,13 @@ export default definePlugin({
                 replace: "$1[$2].concat(Vencord.Plugins.plugins.ServerListAPI.renderAllAbove())"
             }
         },
+        {
+            find: "Messages.SERVERS",
+            replacement: {
+                match: /(Messages\.SERVERS,children:)(.*default:return null\}\}\)\))/,
+                replace: "$1Vencord.Plugins.plugins.ServerListAPI.renderAllIn().concat($2)"
+            }
+        }
     ],
 
     renderAllAbove: () => {

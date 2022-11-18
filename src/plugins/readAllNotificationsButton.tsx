@@ -19,7 +19,7 @@
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "../webpack/common";
-import { AboveServerList } from "./apiServerList";
+import { InServerList } from "./apiServerList";
 
 namespace ReadAllButton {
 
@@ -54,7 +54,7 @@ namespace ReadAllButton {
             onClick={onClick}
             size={Button.Sizes.MIN}
             color={Button.Colors.BRAND}
-            style={{ marginTop: "4px", marginBottom: "8px", marginLeft: "9px" }}
+            style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
         > Read all </Button>;
     };
 
@@ -74,10 +74,10 @@ export default definePlugin({
     },
 
     start() {
-        AboveServerList.addElement(this.renderReadAllButton);
+        InServerList.addElement(this.renderReadAllButton);
     },
 
     stop() {
-        AboveServerList.removeElement(this.renderReadAllButton);
+        InServerList.removeElement(this.renderReadAllButton);
     }
 });
