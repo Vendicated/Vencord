@@ -43,7 +43,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\w)\){var \w=\w\.channelId,\w=\w\.message,\w=\w\.isPushNotification,\w=\w\.\w\.getOrCreate\(\w\));/,
-                    replace: ";if(Vencord.Plugins.plugins.IgnoreBlockedUsers.isBlocked(n))return;"
+                    replace: ";if(Vencord.Plugins.plugins.NoBlockedMessages.isBlocked(n))return;"
                 }
             ]
         }
