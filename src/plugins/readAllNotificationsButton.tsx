@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addElement, removeElement,RenderPosition } from "../api/ServerList";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "../webpack/common";
-import { InServerList } from "./apiServerList";
 
 namespace ReadAllButton {
 
@@ -74,10 +74,10 @@ export default definePlugin({
     },
 
     start() {
-        InServerList.addElement(this.renderReadAllButton);
+        addElement(RenderPosition.In, this.renderReadAllButton);
     },
 
     stop() {
-        InServerList.removeElement(this.renderReadAllButton);
+        removeElement(RenderPosition.In, this.renderReadAllButton);
     }
 });

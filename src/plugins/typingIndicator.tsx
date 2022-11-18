@@ -18,12 +18,12 @@
 
 import { Message } from "discord-types/general";
 
+import { addElement, removeElement,RenderPosition } from "../api/ServerList";
 import { Devs } from "../utils/constants";
 import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { ChannelStore, ContextMenu, FluxDispatcher, Forms, Menu, React, UserStore } from "../webpack/common";
-import { AboveServerList } from "./apiServerList";
 
 interface ITyping {
     channelId: string;
@@ -253,7 +253,7 @@ export default definePlugin({
     },
 
     start() {
-        AboveServerList.addElement(this.renderIndicator);
+        addElement(RenderPosition.Above, this.renderIndicator);
 
         FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.subscribe("TYPING_START", this.onTypingStart);
@@ -261,7 +261,7 @@ export default definePlugin({
     },
 
     stop() {
-        AboveServerList.removeElement(this.renderIndicator);
+        removeElement(RenderPosition.Above, this.renderIndicator);
 
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("TYPING_START", this.onTypingStart);
