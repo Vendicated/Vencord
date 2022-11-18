@@ -19,50 +19,6 @@
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
-export namespace AboveServerList {
-    const renderFunctions = new Set<Function>();
-
-    export function addElement(renderFunction: Function) {
-        renderFunctions.add(renderFunction);
-    }
-
-    export function removeElement(renderFunction: Function) {
-        return renderFunctions.delete(renderFunction);
-    }
-
-    export const renderAll = () => {
-        const ret: Array<JSX.Element> = [];
-
-        for (const renderFunction of renderFunctions) {
-            ret.unshift(renderFunction());
-        }
-
-        return ret;
-    };
-}
-
-export namespace InServerList {
-    const renderFunctions = new Set<Function>();
-
-    export function addElement(renderFunction: Function) {
-        renderFunctions.add(renderFunction);
-    }
-
-    export function removeElement(renderFunction: Function) {
-        return renderFunctions.delete(renderFunction);
-    }
-
-    export const renderAll = () => {
-        const ret: Array<JSX.Element> = [];
-
-        for (const renderFunction of renderFunctions) {
-            ret.unshift(renderFunction());
-        }
-
-        return ret;
-    };
-}
-
 export default definePlugin({
     name: "ServerListAPI",
     authors: [Devs.kemo],
@@ -72,23 +28,15 @@ export default definePlugin({
             find: "Messages.DISCODO_DISABLED",
             replacement: {
                 match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2].concat(Vencord.Plugins.plugins.ServerListAPI.renderAllAbove())"
+                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.Above))"
             }
         },
         {
             find: "Messages.SERVERS",
             replacement: {
                 match: /(Messages\.SERVERS,children:)(.*default:return null\}\}\)\))/,
-                replace: "$1Vencord.Plugins.plugins.ServerListAPI.renderAllIn().concat($2)"
+                replace: "$1Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.In).concat($2)"
             }
         }
-    ],
-
-    renderAllAbove: () => {
-        return AboveServerList.renderAll();
-    },
-
-    renderAllIn: () => {
-        return InServerList.renderAll();
-    }
+    ]
 });
