@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { lazyWebpack } from "../utils/misc";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
