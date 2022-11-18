@@ -243,7 +243,7 @@ var messageEmbed={MessageEmbed:$1};"
             </Text>}
             compact={false}
             content={[
-                ...(linkedMessage.content
+                ...(linkedMessage.content || !(linkedMessage.attachments.length > images.length)
                     ? parse(linkedMessage.content)
                     : [noContent(linkedMessage.attachments.length, linkedMessage.embeds.length)]
                 ),
