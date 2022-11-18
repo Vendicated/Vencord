@@ -30,22 +30,10 @@ export default definePlugin({
         find: "().versionHash",
         replacement: [
             {
-                match: /\w\.createElement\(.{1,2}.Fragment,.{0,30}\{[^}]+\},"Host ".+?\):null/,
-                replace: m => {
-                    const idx = m.indexOf("Host") - 1;
-                    const template = m.slice(0, idx);
-                    const additionalInfo = IS_WEB
-                        ? " (Web)"
-                        : IS_STANDALONE
-                            ? " (Standalone)"
-                            : "";
-
-                    let r = `${m}, ${template}"Vencord ", "${gitHash}${additionalInfo}"), " ")`;
-                    if (!IS_WEB) {
-                        r += `,${template} "Electron ",VencordNative.getVersions().electron)," "),`;
-                        r += `${template} "Chrome ",VencordNative.getVersions().chrome)," ")`;
-                    }
-                    return r;
+                match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}\(\)\.versionHash,.+?\})\)," "/,
+                replace: (m, component, props) => {
+                    props = props.replace(/children:\[.+\]/, "");
+                    return `${m},Vencord.Plugins.plugins.Settings.makeInfoElements(${component}, ${props})`;
                 }
             }
         ]
@@ -66,5 +54,39 @@ export default definePlugin({
                 );
             }
         }
-    }]
+    }],
+
+    get electronVersion() {
+        return VencordNative.getVersions().electron || window.armcord?.electron || null;
+    },
+
+    get chromiumVersion() {
+        try {
+            return VencordNative.getVersions().chrome
+                // @ts-ignore Typescript will add userAgentData IMMEDIATELY
+                || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
+                || null;
+        } catch { // inb4 some stupid browser throws unsupported error for navigator.userAgentData, it's only in chromium
+            return null;
+        }
+    },
+
+    get additionalInfo() {
+        if (IS_DEV) return " (Dev)";
+        if (IS_WEB) return " (Web)";
+        if (IS_STANDALONE) return " (Standalone)";
+        return "";
+    },
+
+    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+        const { electronVersion, chromiumVersion, additionalInfo } = this;
+
+        return (
+            <>
+                <Component {...props}>Vencord {gitHash}{additionalInfo}</Component>
+                {electronVersion && <Component {...props}>Electron {electronVersion}</Component>}
+                {chromiumVersion && <Component {...props}>Chromium {chromiumVersion}</Component>}
+            </>
+        );
+    }
 });

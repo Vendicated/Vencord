@@ -18,8 +18,11 @@
 
 import type { WebpackInstance } from "discord-types/other";
 
-import Logger from "../utils/logger";
+import { traceFunction } from "../debug/Tracer";
+import Logger from "../utils/Logger";
 import { proxyLazy } from "../utils/proxyLazy";
+
+const logger = new Logger("Webpack");
 
 export let _resolveReady: () => void;
 /**
@@ -51,7 +54,6 @@ export const filters = {
     },
 };
 
-const logger = new Logger("Webpack");
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
@@ -65,7 +67,15 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     instance.pop();
 }
 
-export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
+if (IS_DEV && !IS_WEB) {
+    var devToolsOpen = false;
+    // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
+    setTimeout(() => {
+        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+    }, 0);
+}
+
+export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -91,14 +101,16 @@ export function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (!isWaitFor) {
         const err = new Error("Didn't find module matching this filter");
         if (IS_DEV) {
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        } else {
+            logger.warn(err);
         }
-        logger.warn(err);
     }
 
     return null;
-}
+});
 
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
@@ -126,51 +138,147 @@ export function findAll(filter: FilterFn, getDefault = true) {
 }
 
 /**
-     * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
-     * then maps it into an easily usable module via the specified mappers
-     * @param code Code snippet
-     * @param mappers Mappers to create the non mangled exports
-     * @returns Unmangled exports as specified in mappers
-     *
-     * @example mapMangledModule("headerIdIsManaged:", {
-     *             openModal: filters.byCode("headerIdIsManaged:"),
-     *             closeModal: filters.byCode("key==")
-     *          })
-     */
-export function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
+ * Same as {@link find} but in bulk
+ * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
+ *                need it afterwards, pass a copy.
+ * @returns Array of results in the same order as the passed filters
+ */
+export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+    if (!Array.isArray(filterFns))
+        throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
-    // search every factory function
-    for (const id in wreq.m) {
-        const src = wreq.m[id].toString() as string;
-        if (src.includes(code)) {
-            const mod = wreq(id as any as number);
-            outer:
-            for (const key in mod) {
-                const member = mod[key];
-                for (const newName in mappers) {
-                    // if the current mapper matches this module
-                    if (mappers[newName](member)) {
-                        exports[newName] = member;
+    const { length } = filterFns;
+
+    if (length === 0)
+        throw new Error("Expected at least two filters.");
+
+    if (length === 1) {
+        if (IS_DEV) {
+            throw new Error("bulk called with only one filter. Use find");
+        }
+        return find(filterFns[0]);
+    }
+
+    const filters = filterFns as Array<FilterFn | undefined>;
+
+    let found = 0;
+    const results = Array(length);
+
+    outer:
+    for (const key in cache) {
+        const mod = cache[key];
+        if (!mod?.exports) continue;
+
+        for (let j = 0; j < length; j++) {
+            const filter = filters[j];
+            // Already done
+            if (filter === undefined) continue;
+
+            if (filter(mod.exports)) {
+                results[j] = mod.exports;
+                filters[j] = undefined;
+                if (++found === length) break outer;
+                break;
+            }
+
+            if (typeof mod.exports !== "object")
+                continue;
+
+            if (mod.exports.default && filter(mod.exports.default)) {
+                results[j] = mod.exports.default;
+                filters[j] = undefined;
+                if (++found === length) break outer;
+                break;
+            }
+
+            for (const nestedMod in mod.exports)
+                if (nestedMod.length <= 3) {
+                    const nested = mod.exports[nestedMod];
+                    if (nested && filter(nested)) {
+                        results[j] = nested;
+                        filters[j] = undefined;
+                        if (++found === length) break outer;
                         continue outer;
                     }
                 }
-            }
-            return exports;
         }
     }
 
-    const err = new Error("Didn't find module matching this code:\n" + code);
-    if (IS_DEV)
-        throw err;
+    if (found !== length) {
+        const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
+        if (IS_DEV) {
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        } else {
+            logger.warn(err);
+        }
+    }
 
-    logger.warn(err);
-    return exports;
-}
+    return results;
+});
 
 /**
-     * Same as {@link mapMangledModule} but lazy
-     */
+ * Find the id of a module by its code
+ * @param code Code
+ * @returns number or null
+ */
+export const findModuleId = traceFunction("findModuleId", function findModuleId(code: string) {
+    for (const id in wreq.m) {
+        if (wreq.m[id].toString().includes(code)) {
+            return Number(id);
+        }
+    }
+
+    const err = new Error("Didn't find module with code:\n" + code);
+    if (IS_DEV) {
+        if (!devToolsOpen)
+            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            throw err;
+    } else {
+        logger.warn(err);
+    }
+
+    return null;
+});
+
+/**
+ * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
+ * then maps it into an easily usable module via the specified mappers
+ * @param code Code snippet
+ * @param mappers Mappers to create the non mangled exports
+ * @returns Unmangled exports as specified in mappers
+ *
+ * @example mapMangledModule("headerIdIsManaged:", {
+ *             openModal: filters.byCode("headerIdIsManaged:"),
+ *             closeModal: filters.byCode("key==")
+ *          })
+ */
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    const exports = {} as Record<S, any>;
+
+    const id = findModuleId(code);
+    if (id === null)
+        return exports;
+
+    const mod = wreq(id);
+    outer:
+    for (const key in mod) {
+        const member = mod[key];
+        for (const newName in mappers) {
+            // if the current mapper matches this module
+            if (mappers[newName](member)) {
+                exports[newName] = member;
+                continue outer;
+            }
+        }
+    }
+    return exports;
+});
+
+/**
+ * Same as {@link mapMangledModule} but lazy
+ */
 export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
@@ -181,6 +289,10 @@ export function findByProps(...props: string[]) {
 
 export function findAllByProps(...props: string[]) {
     return findAll(filters.byProps(...props));
+}
+
+export function findByCode(...code: string[]) {
+    return find(filters.byCode(...code));
 }
 
 export function findByDisplayName(deezNuts: string) {
@@ -210,11 +322,11 @@ export function removeListener(callback: CallbackFn) {
 }
 
 /**
-     * Search modules by keyword. This searches the factory methods,
-     * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
-     * @param filters One or more strings or regexes
-     * @returns Mapping of found modules
-     */
+ * Search modules by keyword. This searches the factory methods,
+ * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
+ * @param filters One or more strings or regexes
+ * @returns Mapping of found modules
+ */
 export function search(...filters: Array<string | RegExp>) {
     const results = {} as Record<number, Function>;
     const factories = wreq.m;
@@ -233,13 +345,13 @@ export function search(...filters: Array<string | RegExp>) {
 }
 
 /**
-     * Extract a specific module by id into its own Source File. This has no effect on
-     * the code, it is only useful to be able to look at a specific module without having
-     * to view a massive file. extract then returns the extracted module so you can jump to it.
-     * As mentioned above, note that this extracted module is not actually used,
-     * so putting breakpoints or similar will have no effect.
-     * @param id The id of the module to extract
-     */
+ * Extract a specific module by id into its own Source File. This has no effect on
+ * the code, it is only useful to be able to look at a specific module without having
+ * to view a massive file. extract then returns the extracted module so you can jump to it.
+ * As mentioned above, note that this extracted module is not actually used,
+ * so putting breakpoints or similar will have no effect.
+ * @param id The id of the module to extract
+ */
 export function extract(id: number) {
     const mod = wreq.m[id] as Function;
     if (!mod) return null;

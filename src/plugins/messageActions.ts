@@ -17,26 +17,30 @@
 */
 
 import { addClickListener, removeClickListener } from "../api/MessageEvents";
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { find, findByProps } from "../webpack";
+import { filters } from "../webpack";
 import { UserStore } from "../webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
+migratePluginSettings("MessageClickActions", "MessageQuickActions");
+
 export default definePlugin({
-    name: "MessageQuickActions",
-    description: "Quick Delete, Quick edit",
+    name: "MessageClickActions",
+    description: "Hold Delete and click to delete, double click to edit",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
     start() {
-        const { deleteMessage, startEditMessage } = findByProps("deleteMessage", "startEditMessage");
-        const { can } = findByProps("can", "initialize");
-        const { MANAGE_MESSAGES } = find(m => typeof m.MANAGE_MESSAGES === "bigint");
-        const { isEditing } = findByProps("isEditing", "isEditingAny");
+        const MessageActions = lazyWebpack(filters.byProps("deleteMessage", "startEditMessage"));
+        const PermissionStore = lazyWebpack(filters.byProps("can", "initialize"));
+        const Permissions = lazyWebpack(m => typeof m.MANAGE_MESSAGES === "bigint");
+        const EditStore = lazyWebpack(filters.byProps("isEditing", "isEditingAny"));
 
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
@@ -44,12 +48,12 @@ export default definePlugin({
         this.onClick = addClickListener((msg, chan, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
-                if (isMe && event.detail >= 2 && !isEditing(chan.id, msg.id)) {
-                    startEditMessage(chan.id, msg.id, msg.content);
+                if (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id)) {
+                    MessageActions.startEditMessage(chan.id, msg.id, msg.content);
                     event.preventDefault();
                 }
-            } else if (isMe || can(MANAGE_MESSAGES, chan)) {
-                deleteMessage(chan.id, msg.id);
+            } else if (isMe || PermissionStore.can(Permissions.MANAGE_MESSAGES, chan)) {
+                MessageActions.deleteMessage(chan.id, msg.id);
                 event.preventDefault();
             }
         });

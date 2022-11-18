@@ -21,10 +21,11 @@ import { Constructor } from "type-fest";
 
 import { generateId } from "../../api/Commands";
 import { useSettings } from "../../api/settings";
-import { lazyWebpack, proxyLazy } from "../../utils";
+import { LazyComponent, lazyWebpack } from "../../utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
+import { proxyLazy } from "../../utils/proxyLazy";
 import { OptionType, Plugin } from "../../utils/types";
-import { filters } from "../../webpack";
+import { filters, findByCode } from "../../webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
@@ -38,7 +39,7 @@ import {
     SettingTextComponent
 } from "./components";
 
-const UserSummaryItem = lazyWebpack(filters.byCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 

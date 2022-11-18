@@ -21,14 +21,19 @@ import { User } from "discord-types/general";
 import type Other from "discord-types/other";
 import type Stores from "discord-types/stores";
 
-import { lazyWebpack } from "../utils/misc";
-import { _resolveReady, filters, mapMangledModuleLazy, waitFor } from "./webpack";
+import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { proxyLazy } from "../utils/proxyLazy";
+import { _resolveReady, filters, findByCode, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
+
 export const Margins = lazyWebpack(filters.byProps("marginTop20"));
 
 export let FluxDispatcher: Other.FluxDispatcher;
+export const Flux = lazyWebpack(filters.byProps("connectStores"));
 export let React: typeof import("react");
 export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 
+export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
+export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
@@ -48,8 +53,8 @@ export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 
-export const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-export const Slider = lazyWebpack(filters.byCode("closestMarkerIndex", "stickToMarkers"));
+export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
 
 export let Parser: any;
 export let Alerts: {
@@ -137,14 +142,14 @@ waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
 
-waitFor(m => m.Tags && filters.byCode("errorSeparator")(m), m => Forms.FormTitle = m);
-waitFor(m => m.Tags && filters.byCode("titleClassName", "sectionTitle")(m), m => Forms.FormSection = m);
+waitFor(filters.byCode("errorSeparator"), m => Forms.FormTitle = m);
+waitFor(filters.byCode("titleClassName", "sectionTitle"), m => Forms.FormSection = m);
 waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 
 waitFor(m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
-    return s.length < 200 && s.includes("divider");
+    return s.length < 200 && s.includes("().divider");
 }, m => Forms.FormDivider = m);
 
 // This is the same module but this is easier
@@ -167,7 +172,7 @@ export type TextProps = React.PropsWithChildren & {
     variant: TextVariant;
     style?: React.CSSProperties;
     color?: string;
-    tag?: "div" | "span" | "p" | "strong";
+    tag?: "div" | "span" | "p" | "strong" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
     selectable?: boolean;
     lineClamp?: number;
     id?: string;
@@ -175,3 +180,80 @@ export type TextProps = React.PropsWithChildren & {
 };
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-md" | "display-lg" | "code";
+
+type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
+interface Menu {
+    ContextMenu: RC<{
+        navId: string;
+        onClose(): void;
+        className?: string;
+        style?: React.CSSProperties;
+        hideScroller?: boolean;
+        onSelect?(): void;
+    }>;
+    MenuSeparator: React.ComponentType;
+    MenuGroup: RC<any>;
+    MenuItem: RC<{
+        id: string;
+        label: string;
+        render?: React.ComponentType;
+        onChildrenScroll?: Function;
+        childRowHeight?: number;
+        listClassName?: string;
+    }>;
+    MenuCheckboxItem: RC<{
+        id: string;
+    }>;
+    MenuRadioItem: RC<{
+        id: string;
+    }>;
+    MenuControlItem: RC<{
+        id: string;
+        interactive?: boolean;
+    }>;
+}
+
+/**
+ * Discord's Context menu items.
+ * To use anything but Menu.ContextMenu, your plugin HAS TO
+ * depend on MenuItemDeobfuscatorAPI. Otherwise they will throw
+ */
+export const Menu = proxyLazy(() => {
+    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
+    const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
+
+    const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
+        ContextMenu: filters.byCode("getContainerProps"),
+        ...Object.fromEntries((hasDeobfuscator ? menuItems : []).map(s => [s, (m: any) => m.name === s]))
+    }) as Menu;
+
+    if (!hasDeobfuscator) {
+        for (const m of menuItems)
+            Object.defineProperty(map, m, {
+                get() {
+                    throw new Error("MenuItemDeobfuscator must be enabled to use this.");
+                }
+            });
+    }
+
+    return map;
+});
+
+export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
+    open: filters.byCode("stopPropagation"),
+    openLazy: m => m.toString().length < 50,
+    close: filters.byCode("CONTEXT_MENU_CLOSE")
+}) as {
+    close(): void;
+    open(
+        event: React.UIEvent,
+        render?: Menu["ContextMenu"],
+        options?: { enableSpellCheck?: boolean; },
+        renderLazy?: () => Promise<Menu["ContextMenu"]>
+    ): void;
+    openLazy(
+        event: React.UIEvent,
+        renderLazy?: () => Promise<Menu["ContextMenu"]>,
+        options?: { enableSpellCheck?: boolean; }
+    ): void;
+};

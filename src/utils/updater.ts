@@ -19,7 +19,7 @@
 import gitHash from "~git-hash";
 
 import IpcEvents from "./IpcEvents";
-import Logger from "./logger";
+import Logger from "./Logger";
 import { IpcRes } from "./types";
 
 export const UpdateLogger = new Logger("Updater", "white");

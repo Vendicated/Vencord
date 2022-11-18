@@ -21,25 +21,26 @@ import Plugins from "~plugins";
 import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import { Logger, Modals } from "../../utils";
 import { ChangeList } from "../../utils/ChangeList";
-import { classes, lazyWebpack } from "../../utils/misc";
+import Logger from "../../utils/Logger";
+import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
+import { openModalLazy } from "../../utils/modal";
 import { Plugin } from "../../utils/types";
-import { filters } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
+import { filters, findByCode } from "../../webpack";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";
+import { handleComponentFailed } from "../handleComponentFailed";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const Select = lazyWebpack(filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 const InputStyles = lazyWebpack(filters.byProps("inputDefault", "inputWrapper"));
 
-const CogWheel = lazyWebpack(filters.byCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
-const InfoIcon = lazyWebpack(filters.byCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
+const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
+const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -89,7 +90,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     function openModal() {
-        Modals.openModalLazy(async () => {
+        openModalLazy(async () => {
             return modalProps => {
                 return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => onRestartNeeded(plugin.name)} />;
             };
@@ -312,6 +313,9 @@ export default ErrorBoundary.wrap(function Settings() {
             </div>
         </Forms.FormSection >
     );
+}, {
+    message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
+    onError: handleComponentFailed,
 });
 
 function makeDependencyList(deps: string[]) {

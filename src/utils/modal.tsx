@@ -56,12 +56,12 @@ interface ModalRootProps {
 
 type RenderFunction = (props: ModalProps) => React.ReactNode;
 
-export const Modals = mapMangledModuleLazy(".onAnimationEnd,", {
-    ModalRoot: filters.byCode("headerIdIsManaged:"),
-    ModalHeader: filters.byCode("children", "separator", "wrap", "NO_WRAP", "grow", "shrink", "id", "header"),
-    ModalContent: filters.byCode("scrollerRef", "content", "className", "children"),
-    ModalFooter: filters.byCode("HORIZONTAL_REVERSE", "START", "STRETCH", "NO_WRAP", "footerSeparator"),
-    ModalCloseButton: filters.byCode("closeWithCircleBackground", "hideOnFullscreen"),
+export const Modals = mapMangledModuleLazy("().closeWithCircleBackground", {
+    ModalRoot: filters.byCode("().root"),
+    ModalHeader: filters.byCode("().header"),
+    ModalContent: filters.byCode("().content"),
+    ModalFooter: filters.byCode("().footerSeparator"),
+    ModalCloseButton: filters.byCode("().closeWithCircleBackground"),
 });
 
 export const ModalRoot = (props: ModalRootProps) => <Modals.ModalRoot {...props} />;

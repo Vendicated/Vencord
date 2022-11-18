@@ -20,9 +20,11 @@ import { useSettings } from "../api/settings";
 import { ChangeList } from "../utils/ChangeList";
 import IpcEvents from "../utils/IpcEvents";
 import { useAwaiter } from "../utils/misc";
-import { Alerts, Button, Forms, Margins, Parser, React, Switch } from "../webpack/common";
+import { Alerts, Button, Card, Forms, Margins, Parser, React, Switch } from "../webpack/common";
+import DonateButton from "./DonateButton";
 import ErrorBoundary from "./ErrorBoundary";
 import { Flex } from "./Flex";
+import { handleComponentFailed } from "./handleComponentFailed";
 
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
@@ -51,15 +53,36 @@ export default ErrorBoundary.wrap(function Settings() {
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
+            <Card style={{
+                padding: "1em",
+                display: "flex",
+                flexDirection: "row",
+                marginBottom: "1em"
+            }}>
+                <div>
+                    <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
+                    <Forms.FormText>
+                        Please consider supporting the Development of Vencord by donating!
+                    </Forms.FormText>
+                    <DonateButton style={{ transform: "translateX(-1em)" }} />
+                </div>
+                <img
+                    role="presentation"
+                    src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                    alt=""
+                    style={{ marginLeft: "auto", transform: "rotate(10deg)" }}
+                />
+            </Card>
+
             <Forms.FormTitle tag="h5">
                 Settings
             </Forms.FormTitle>
 
-            <Forms.FormText>
+            <Forms.FormText className={Margins.marginBottom8}>
                 Settings Directory: <code style={{ userSelect: "text", cursor: "text" }}>{settingsDir}</code>
             </Forms.FormText>
 
-            {!IS_WEB && <Flex className={Margins.marginBottom20} style={{ marginTop: 8 }}>
+            {!IS_WEB && <Flex className={Margins.marginBottom20}>
                 <Button
                     onClick={() => window.DiscordNative.app.relaunch()}
                     size={Button.Sizes.SMALL}
@@ -115,4 +138,7 @@ export default ErrorBoundary.wrap(function Settings() {
             </Switch>}
         </Forms.FormSection >
     );
+}, {
+    message: "Failed to render the Settings. If this persists, try using the installer to reinstall!",
+    onError: handleComponentFailed,
 });

@@ -20,7 +20,8 @@ import Plugins from "~plugins";
 
 import { registerCommand, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
-import Logger from "../utils/logger";
+import { traceFunction } from "../debug/Tracer";
+import Logger from "../utils/Logger";
 import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
@@ -29,11 +30,36 @@ export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
+const settings = Settings.plugins;
+
 export function isPluginEnabled(p: string) {
-    return (Settings.plugins[p]?.enabled || Plugins[p]?.required) ?? false;
+    return (
+        Plugins[p]?.required ||
+        Plugins[p]?.isDependency ||
+        settings[p]?.enabled
+    ) ?? false;
 }
 
-for (const p of Object.values(Plugins))
+const pluginsValues = Object.values(Plugins);
+
+// First roundtrip to mark and force enable dependencies
+for (const p of pluginsValues) {
+    p.dependencies?.forEach(d => {
+        const dep = Plugins[d];
+        if (dep) {
+            settings[d].enabled = true;
+            dep.isDependency = true;
+        }
+        else {
+            const error = new Error(`Plugin ${p.name} has unresolved dependency ${d}`);
+            if (IS_DEV)
+                throw error;
+            logger.warn(error);
+        }
+    });
+}
+
+for (const p of pluginsValues)
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
@@ -43,12 +69,12 @@ for (const p of Object.values(Plugins))
         }
     }
 
-export function startAllPlugins() {
+export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
     for (const name in Plugins)
         if (isPluginEnabled(name)) {
             startPlugin(Plugins[name]);
         }
-}
+});
 
 export function startDependenciesRecursive(p: Plugin) {
     let restartNeeded = false;
@@ -70,7 +96,7 @@ export function startDependenciesRecursive(p: Plugin) {
     return { restartNeeded, failures };
 }
 
-export function startPlugin(p: Plugin) {
+export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     if (p.start) {
         logger.info("Starting plugin", p.name);
         if (p.started) {
@@ -100,9 +126,9 @@ export function startPlugin(p: Plugin) {
     }
 
     return true;
-}
+}, p => `startPlugin ${p.name}`);
 
-export function stopPlugin(p: Plugin) {
+export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     if (p.stop) {
         logger.info("Stopping plugin", p.name);
         if (!p.started) {
@@ -131,4 +157,4 @@ export function stopPlugin(p: Plugin) {
     }
 
     return true;
-}
+}, p => `stopPlugin ${p.name}`);

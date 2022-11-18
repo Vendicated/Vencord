@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "../../utils/constants";
 import definePlugin, { OptionType } from "../../utils/types";
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import PronounsChatComponent from "./components/PronounsChatComponent";
@@ -28,29 +29,42 @@ export enum PronounsFormat {
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [{
-        name: "Tyman",
-        id: 487443883127472129n
-    }],
+    authors: [Devs.Tyman],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
         // Patch the chat timestamp element
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(?<=return\s+\w{1,3}\.createElement\(.+!\w{1,3}&&)(\w{1,3}.createElement\(.+?\{.+?\}\))/,
+                match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\))/,
                 replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsChatComponent(e)]"
             }
         },
         // Hijack the discord pronouns section (hidden without experiment) and add a wrapper around the text section
         {
-            find: ".headerTagUsernameNoNickname",
+            find: "currentPronouns:",
+            all: true,
+            noWarn: true,
             replacement: {
-                match: /""!==(.{1,2})&&(r\.createElement\(r\.Fragment.+?\.Messages\.USER_POPOUT_PRONOUNS.+?pronounsText.+?\},\1\)\))/,
-                replace: (_, __, fragment) => `Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(e, ${fragment})`
+                match: /\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^[}]*currentPronouns:[^}]*(\w)\.pronouns[^}]*\})\)/,
+                replace: (original, PronounComponent, pronounProps, fullProps) => {
+                    // UserSettings
+                    if (pronounProps.includes("onPronounsChange")) return original;
+
+                    return `${fullProps}&&Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(${PronounComponent}, ${pronounProps}, ${fullProps})`;
+                }
+            }
+        },
+        // Make pronouns experiment be enabled by default
+        {
+            find: "2022-01_pronouns",
+            replacement: {
+                match: "!1", // false
+                replace: "!0"
             }
         }
     ],
+
     options: {
         pronounsFormat: {
             type: OptionType.SELECT,

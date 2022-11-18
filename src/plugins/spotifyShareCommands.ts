@@ -17,8 +17,9 @@
 */
 
 import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
-import { lazyWebpack } from "../utils";
+import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
 import { filters } from "../webpack";
 import { FluxDispatcher } from "../webpack/common";
@@ -74,9 +75,10 @@ function sendMessage(channelId, message) {
         });
 }
 
+migratePluginSettings("SpotifyShareCommands", "Sendify");
 export default definePlugin({
-    name: "Sendify",
-    description: "Send your current Spotify music to chat",
+    name: "SpotifyShareCommands",
+    description: "Share your current Spotify track, album or artist via slash command (/track, /album, /artist)",
     authors: [Devs.katlyn],
     dependencies: ["CommandsAPI"],
     commands: [
