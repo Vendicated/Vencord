@@ -57,5 +57,5 @@ export default definePlugin({
         },
     },
     isBlocked: message =>
-        RelationshipStore.isBlocked(message.author.id);
+        RelationshipStore.isBlocked(message.author.id)
 });
