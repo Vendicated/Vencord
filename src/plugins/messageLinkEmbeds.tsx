@@ -19,6 +19,7 @@
 import { Embed as _Embed, Message } from "discord-types/general";
 
 import { addAccessory, removeAccessory } from "../api/MessageAccessories";
+import { Queue } from "../utils/Queue";
 import definePlugin from "../utils/types";
 import { waitFor } from "../webpack";
 import {
@@ -27,24 +28,23 @@ import {
     GuildMemberStore,
     GuildStore,
     MessageStore,
-    React,
+    Parser,
     Text
 } from "../webpack/common";
 
 const messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
-const elementCache: { [id: string]: { element: JSX.Element, shouldRenderRichEmbed: boolean; }; } = {};
+const elementCache: { [id: string]: { element: JSX.Element | null, shouldRenderRichEmbed: boolean; }; } = {};
 
 let get: (...query) => Promise<any>,
     MessageEmbed: (...props) => JSX.Element,
-    parse: (content: string) => any[] /* (JSX.Element | string)[] i think */,
     Endpoints: Record<string, any>;
 waitFor(["get", "getAPIBaseURL"], _ => ({ get } = _));
 waitFor(["MessageEmbed"], _ => ({ MessageEmbed } = _));
-waitFor(["parse", "parseTopic"], _ => ({ parse } = _));
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
 
+const messageFetchQueue = new Queue();
 function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
-    function callback(message: any) {
+    function callback(message: Message | undefined) {
         if (!message) return;
         const actualMessage: Message = (MessageStore.getMessages(message.channel_id) as any).receiveMessage(message).get(message.id);
         messageCache[message.id] = {
@@ -53,10 +53,12 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
         };
         if (originalMessage) dispatchBlankUpdate(originalMessage.channelID, originalMessage.messageID);
     }
+
     if (messageID in messageCache && !messageCache[messageID].fetched) return null;
     if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
+
     messageCache[messageID] = { fetched: false };
-    return get({
+    return messageFetchQueue.add(() => get({
         url: Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
@@ -65,14 +67,14 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
         retries: 2
     }).then(res =>
         callback(res.body?.[0])
-    ).catch(console.log);
+    ).catch(console.log));
 }
 
 function dispatchBlankUpdate(channelID: string, messageID: string): void {
     FluxDispatcher.dispatch({
         type: "MESSAGE_UPDATE",
         message: {
-            guild_id: ChannelStore.getChannel(channelID).guild_id,
+            guild_id: ChannelStore.getChannel(channelID)?.guild_id,
             channel_id: channelID,
             id: messageID,
         }
@@ -106,10 +108,11 @@ function getImages(message: Message): Attachment[] {
         });
     });
     message.embeds?.forEach(e => {
+        const isTenorGif = /https:\/\/(?:www.)?tenor\.com/;
         if (e.type === "image") attachments.push(
             e.image ? { ...e.image } : { ...e.thumbnail! }
         );
-        if (e.type === "gifv" && !e.url!.match(/https:\/\/(?:www.)?tenor\.com/)) {
+        if (e.type === "gifv" && !isTenorGif.test(e.url!)) {
             attachments.push({
                 height: e.thumbnail!.height,
                 width: e.thumbnail!.width,
@@ -169,40 +172,50 @@ var messageEmbed={MessageEmbed:$1};"
     }],
 
     start() {
+        // @ts-expect-error: addAccessory wants an element and messageEmbedAccessory can return null
         addAccessory("messageLinkEmbed", props => this.messageEmbedAccessory(props), 4 /* just above rich embeds*/);
     },
 
     stop() {
-        // requires a restart to remove the rich embeds because that's not an accessory
-        // and even if they were removed all messages keep their embeds until rerendered
-        // is there a point in having a stop function?
+        // which does not work, as vencord does not call stop() since the plugin has patches
         removeAccessory("messageLinkEmbed");
+        Object.entries(messageCache).forEach(([id, value]) => {
+            messageCache[id] = {
+                fetched: true
+            };
+            elementCache[id] = {
+                element: null,
+                shouldRenderRichEmbed: false
+            };
+            dispatchBlankUpdate(value.message?.channel_id!, id);
+        });
     },
 
-    // the > is kept to be checked for later; cause i have no idea how to make the whole regex fail if it's there
-    messageLinkRegex: /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/((?:\d{17,19}|@me)\/\d{17,19}\/\d{17,19}(?:>)?)/,
+    messageLinkRegex: /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/,
 
-    messageEmbedAccessory(props: Record<string, any>): JSX.Element {
+    messageEmbedAccessory(props: Record<string, any>): JSX.Element | null {
         const { message } = props;
-        const Nothing = React.createElement("Fragment");
 
-        const msgLink = message.content?.match(this.messageLinkRegex)?.[1];
-        if (!msgLink) return Nothing;
-        const [guildID, channelID, messageID] = msgLink.split("/");
+        const [_, guildID, channelID, messageID] = message.content?.match(this.messageLinkRegex) ?? [];
+        if (!messageID) return null;
         if (messageID in elementCache) return elementCache[messageID].element;
 
-        const linkedMessage = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
+        let linkedMessage = messageCache[messageID]?.message;
         if (!linkedMessage) {
-            getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
-            return Nothing;
+            linkedMessage ??= MessageStore.getMessage(channelID, messageID);
+            if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
+            else {
+                getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
+                return null;
+            }
         }
         const linkedChannel = ChannelStore.getChannel(channelID);
         if (!linkedChannel) {
             elementCache[messageID] = {
-                element: Nothing,
+                element: null,
                 shouldRenderRichEmbed: true
             };
-            return Nothing;
+            return null;
         }
         const isDM = guildID === "@me";
         const images = getImages(linkedMessage);
@@ -213,40 +226,37 @@ var messageEmbed={MessageEmbed:$1};"
 
         if (hasActualEmbed && !linkedMessage.content) {
             elementCache[linkedMessage.id] = {
-                element: Nothing,
+                element: null,
                 shouldRenderRichEmbed: true
             };
-            return Nothing;
+            return null;
         }
 
-        const MessageEmbedElement = React.createElement(MessageEmbed, {
-            channel: linkedChannel,
-            childrenAccessories: React.createElement(Text, {
-                color: "text-muted",
-                tag: "span",
-                variant: "text-xs/medium"
-            }, [
-                ...(isDM ? parse(`<@${ChannelStore.getChannel(linkedChannel.id).recipients[0]}>`) : parse(`<#${linkedChannel.id}>`)),
-                React.createElement("span", {}, isDM ? " - Direct Message" : " - " + GuildStore.getGuild(linkedChannel.guild_id)?.name)
-            ]),
-            compact: false,
-            content: [
-                ...(linkedMessage.content ?
-                    parse(linkedMessage.content) :
-                    [noContent(linkedMessage.attachments.length, linkedMessage.embeds.length)]
+        const { parse } = Parser;
+        const MessageEmbedElement = <MessageEmbed
+            channel={linkedChannel}
+            childrenAccessories={<Text color="text-muted" variant="text-xs/medium" tag="span">
+                {[
+                    ...(isDM ? parse(`<@${ChannelStore.getChannel(linkedChannel.id).recipients[0]}>`) : parse(`<#${linkedChannel.id}>`)),
+                    <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(linkedChannel.guild_id)?.name}</span>
+                ]}
+            </Text>}
+            compact={false}
+            content={[
+                ...(linkedMessage.content
+                    ? parse(linkedMessage.content)
+                    : [noContent(linkedMessage.attachments.length, linkedMessage.embeds.length)]
                 ),
-                ...(images.map<JSX.Element>(a =>
-                    React.createElement("div", {}, React.createElement("img", {
-                        src: a.url,
-                        width: computeWidthAndHeight(a.width, a.height).width,
-                        height: computeWidthAndHeight(a.width, a.height).height
-                    }))
+                ...(images.map<JSX.Element>(a => {
+                    const { width, height } = computeWidthAndHeight(a.width, a.height);
+                    return <div><img src={a.url} width={width} height={height} /></div>;
+                }
                 ))
-            ],
-            hideTimestamp: false,
-            message: linkedMessage,
-            _messageEmbed: "automod"
-        });
+            ]}
+            hideTimestamp={false}
+            message={linkedMessage}
+            _messageEmbed="automod"
+        />;
 
         elementCache[linkedMessage.id] = {
             element: MessageEmbedElement,
@@ -258,39 +268,42 @@ var messageEmbed={MessageEmbed:$1};"
     },
 
     generateRichEmbeds(origMessage: Message): Embed[] {
-        const messageURL = origMessage.content?.match(this.messageLinkRegex)?.[1];
-        if (!messageURL) return origMessage.embeds;
-        let existingEmbeds = origMessage.embeds as Embed[];
-        const [guildID, channelID, messageID] = messageURL.split("/");
-        if (messageID.endsWith(">") /* check if url is escaped */)
-            return origMessage.embeds;
+        const { content } = origMessage;
+        let existingEmbeds = (origMessage.embeds ?? []) as Embed[];
+        if (!content) return existingEmbeds;
+        const [_, guildID, channelID, messageID] = content.match(this.messageLinkRegex) ?? [];
+        if (!messageID) return existingEmbeds;
 
         if (elementCache[messageID] && !elementCache[messageID]?.shouldRenderRichEmbed)
             return existingEmbeds.filter(i => !i._messageEmbed);
         if (existingEmbeds.find(i => i._messageEmbed === "rich")) return existingEmbeds;
 
-        const message = MessageStore.getMessage(channelID, messageID) || messageCache[messageID]?.message;
+        let message = messageCache[messageID]?.message;
         if (existingEmbeds.find(i => i._messageEmbed === "clyde")) {
             if (!message) return existingEmbeds;
             else existingEmbeds = existingEmbeds.filter(i => i._messageEmbed !== "clyde");
         }
         if (!message) {
-            getMessage(channelID, messageID, { channelID: origMessage.channel_id, messageID: origMessage.id });
-            return [...existingEmbeds, {
-                author: {
-                    name: "Clyde#0000",
-                    // the only place where this is found in discord's code is a webpack module
-                    // with the sole purpose of exporting the image
-                    // there is absolutely nothing to find it by other than the randomized string
-                    iconURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png",
-                    iconProxyURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png"
-                },
-                rawDescription: "Failed to fetch message",
-                id: "messageLinkEmbeds-1",
-                fields: [],
-                type: "rich",
-                _messageEmbed: "clyde"
-            }] as Embed[];
+            message ??= MessageStore.getMessage(channelID, messageID);
+            if (message) messageCache[messageID] = { message, fetched: true };
+            else {
+                getMessage(channelID, messageID, { channelID: origMessage.channel_id, messageID: origMessage.id });
+                return [...existingEmbeds, {
+                    author: {
+                        name: "Clyde#0000",
+                        // the only place where this is found in discord's code is a webpack module
+                        // with the sole purpose of exporting the image
+                        // there is absolutely nothing to find it by other than the randomized string
+                        iconURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png",
+                        iconProxyURL: "https://discord.com/assets/18126c8a9aafeefa76bbb770759203a9.png"
+                    },
+                    rawDescription: "Failed to fetch message",
+                    id: "messageLinkEmbeds-1",
+                    fields: [],
+                    type: "rich",
+                    _messageEmbed: "clyde"
+                }] as Embed[];
+            }
         }
         const channel = ChannelStore.getChannel(channelID);
         if (!channel) return [...existingEmbeds];
