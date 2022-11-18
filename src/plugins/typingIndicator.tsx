@@ -23,7 +23,7 @@ import { openPrivateChannel } from "../utils/discord";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { ChannelStore, ContextMenu, FluxDispatcher, Forms, Menu, React, UserStore } from "../webpack/common";
-import { addElementInServerList, removeElementInServerList } from "./apiServerList";
+import { AboveServerList } from "./apiServerList";
 
 interface ITyping {
     channelId: string;
@@ -70,6 +70,7 @@ namespace Indicator {
             if (user) {
                 buttons.push(
                     <Menu.MenuItem
+                        id={`typing-${i}`}
                         label={user.username}
                         action={() => {
                             openPrivateChannel(user.id);
@@ -82,6 +83,7 @@ namespace Indicator {
         return React.createElement(
             Menu.ContextMenu,
             {
+                navId: "typing-indicator-menu",
                 onClose: () => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })
             },
             buttons
@@ -251,7 +253,7 @@ export default definePlugin({
     },
 
     start() {
-        addElementInServerList(this.renderIndicator);
+        AboveServerList.addElement(this.renderIndicator);
 
         FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.subscribe("TYPING_START", this.onTypingStart);
@@ -259,7 +261,7 @@ export default definePlugin({
     },
 
     stop() {
-        removeElementInServerList(this.renderIndicator);
+        AboveServerList.removeElement(this.renderIndicator);
 
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("TYPING_START", this.onTypingStart);

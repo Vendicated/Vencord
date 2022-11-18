@@ -19,14 +19,48 @@
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
-const renderFunctions = new Set<Function>();
+export namespace AboveServerList {
+    const renderFunctions = new Set<Function>();
 
-export function addElementInServerList(renderFunction: Function) {
-    renderFunctions.add(renderFunction);
+    export function addElement(renderFunction: Function) {
+        renderFunctions.add(renderFunction);
+    }
+
+    export function removeElement(renderFunction: Function) {
+        return renderFunctions.delete(renderFunction);
+    }
+
+    export const renderAll = () => {
+        const ret: Array<JSX.Element> = [];
+
+        for (const renderFunction of renderFunctions) {
+            ret.unshift(renderFunction());
+        }
+
+        return ret;
+    };
 }
 
-export function removeElementInServerList(renderFunction: Function) {
-    return renderFunctions.delete(renderFunction);
+export namespace InServerList {
+    const renderFunctions = new Set<Function>();
+
+    export function addElement(renderFunction: Function) {
+        renderFunctions.add(renderFunction);
+    }
+
+    export function removeElement(renderFunction: Function) {
+        return renderFunctions.delete(renderFunction);
+    }
+
+    export const renderAll = () => {
+        const ret: Array<JSX.Element> = [];
+
+        for (const renderFunction of renderFunctions) {
+            ret.unshift(renderFunction());
+        }
+
+        return ret;
+    };
 }
 
 export default definePlugin({
@@ -38,18 +72,16 @@ export default definePlugin({
             find: "Messages.DISCODO_DISABLED",
             replacement: {
                 match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2].concat(Vencord.Plugins.plugins.ServerListAPI.renderAll())"
+                replace: "$1[$2].concat(Vencord.Plugins.plugins.ServerListAPI.renderAllAbove())"
             }
         },
     ],
 
-    renderAll: () => {
-        const ret: Array<JSX.Element> = [];
+    renderAllAbove: () => {
+        return AboveServerList.renderAll();
+    },
 
-        for (const renderFunction of renderFunctions) {
-            ret.unshift(renderFunction());
-        }
-
-        return ret;
+    renderAllIn: () => {
+        return InServerList.renderAll();
     }
 });

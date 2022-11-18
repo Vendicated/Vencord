@@ -17,23 +17,26 @@
 */
 
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
-import { Button, FluxDispatcher, GuildStore, React } from "../webpack/common";
-import { addElementInServerList, removeElementInServerList } from "./apiServerList";
+import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "../webpack/common";
+import { AboveServerList } from "./apiServerList";
 
 namespace ReadAllButton {
-    const GuildChannelStore = lazyWebpack(filters.byProps("getChannels"));
 
-    function readAllServers() {
+    function onClick() {
         const channels: Array<any> = [];
 
         Object.values(GuildStore.getGuilds()).forEach(guild => {
-            GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: any; lastMessageId: any; }; }) => {
+
+            GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: string; }; }) => {
+                // PrivateChannelsStore.preload(guildId, channelId, false);
+
+                if (!ReadStateStore.hasUnread(c.channel.id)) return;
+
                 channels.push({
                     channelId: c.channel.id,
-                    messageId: c.channel?.lastMessageId,
+                    // messageId: c.channel?.lastMessageId,
+                    messageId: ReadStateStore.lastMessageId(c.channel.id),
                     readStateType: 0
                 });
             });
@@ -48,10 +51,10 @@ namespace ReadAllButton {
 
     export const Element = () => {
         return <Button
-            onClick={readAllServers}
+            onClick={onClick}
             size={Button.Sizes.MIN}
             color={Button.Colors.BRAND}
-            style={{ marginTop: "4px", marginBottom: "4px", marginLeft: "9px" }}
+            style={{ marginTop: "4px", marginBottom: "8px", marginLeft: "9px" }}
         > Read all </Button>;
     };
 
@@ -71,10 +74,10 @@ export default definePlugin({
     },
 
     start() {
-        addElementInServerList(this.renderReadAllButton);
+        AboveServerList.addElement(this.renderReadAllButton);
     },
 
     stop() {
-        removeElementInServerList(this.renderReadAllButton);
+        AboveServerList.removeElement(this.renderReadAllButton);
     }
 });
