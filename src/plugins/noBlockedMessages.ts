@@ -56,8 +56,6 @@ export default definePlugin({
             restartNeeded: true,
         },
     },
-    isBlocked(message) {
-        if (RelationshipStore.isBlocked(message.author.id)) return true;
-        else return false;
-    }
+    isBlocked: message =>
+        RelationshipStore.isBlocked(message.author.id);
 });
