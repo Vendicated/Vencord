@@ -34,7 +34,7 @@ export default definePlugin({
         {
             find: "Messages.SERVERS",
             replacement: {
-                match: /(Messages\.SERVERS,children:)(.*default:return null\}\}\)\))/,
+                match: /(Messages\.SERVERS,children:)(.+?default:return null\}\}\)\))/,
                 replace: "$1Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.In).concat($2)"
             }
         }
