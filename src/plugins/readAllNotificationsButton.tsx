@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addElement, removeElement,RenderPosition } from "../api/ServerList";
+import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "../api/ServerList";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "../webpack/common";
@@ -62,10 +62,10 @@ export default definePlugin({
     renderReadAllButton: () => <ReadAllButton />,
 
     start() {
-        addElement(RenderPosition.In, this.renderReadAllButton);
+        addServerListElement(ServerListRenderPosition.In, this.renderReadAllButton);
     },
 
     stop() {
-        removeElement(RenderPosition.In, this.renderReadAllButton);
+        removeServerListElement(ServerListRenderPosition.In, this.renderReadAllButton);
     }
 });
