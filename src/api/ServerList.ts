@@ -40,7 +40,11 @@ export const renderAll = (position: RenderPosition) => {
     const ret: Array<JSX.Element> = [];
 
     for (const renderFunction of getRenderFunctions(position)) {
-        ret.unshift(renderFunction());
+        try {
+            ret.unshift(renderFunction());
+        } catch (e) {
+            throw new Error(`Failed to render server list element: ${e}`);
+        }
     }
 
     return ret;
