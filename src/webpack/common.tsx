@@ -34,6 +34,9 @@ export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps(
 
 export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
 export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
+export const PrivateChannelsStore = lazyWebpack(filters.byProps("openPrivateChannel"));
+export const GuildChannelStore = lazyWebpack(filters.byProps("getChannels"));
+export const ReadStateStore = lazyWebpack(filters.byProps("lastMessageId"));
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
