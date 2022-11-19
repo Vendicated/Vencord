@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Link } from "../components/Link";
 import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings, Webpack } from "../Vencord";
 import { FluxDispatcher, Forms } from "../webpack/common";
-import { Link } from "../components/Link";
 
 interface ActivityAssets {
     large_image?: string
