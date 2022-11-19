@@ -141,6 +141,10 @@ export const Devs = Object.freeze({
         name: "kemo",
         id: 299693897859465228n
     },
+    dzshn: {
+        name: "dzshn",
+        id: 310449948011528192n
+    },
     jewdev: {
         name: "jewdev",
         id: 222369866529636353n
