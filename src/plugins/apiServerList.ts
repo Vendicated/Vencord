@@ -28,14 +28,14 @@ export default definePlugin({
             find: "Messages.DISCODO_DISABLED",
             replacement: {
                 match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.Above))"
+                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
         {
             find: "Messages.SERVERS",
             replacement: {
                 match: /(Messages\.SERVERS,children:)(.*default:return null\}\}\)\))/,
-                replace: "$1Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.In).concat($2)"
+                replace: "$1Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($2)"
             }
         }
     ]

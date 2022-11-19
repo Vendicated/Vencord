@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export enum RenderPosition {
+export enum ServerListRenderPosition {
     Above,
     In,
 }
@@ -24,23 +24,27 @@ export enum RenderPosition {
 const renderFunctionsAbove = new Set<Function>();
 const renderFunctionsIn = new Set<Function>();
 
-function getRenderFunctions(position: RenderPosition) {
-    return position === RenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
+function getRenderFunctions(position: ServerListRenderPosition) {
+    return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
 }
 
-export function addElement(position: RenderPosition, renderFunction: Function) {
+export function addServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
     getRenderFunctions(position).add(renderFunction);
 }
 
-export function removeElement(position: RenderPosition, renderFunction: Function) {
+export function removeServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
     getRenderFunctions(position).delete(renderFunction);
 }
 
-export const renderAll = (position: RenderPosition) => {
+export const renderAll = (position: ServerListRenderPosition) => {
     const ret: Array<JSX.Element> = [];
 
     for (const renderFunction of getRenderFunctions(position)) {
-        ret.unshift(renderFunction());
+        try {
+            ret.unshift(renderFunction());
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     return ret;
