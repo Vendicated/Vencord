@@ -22,6 +22,7 @@ import * as $DataStore from "./DataStore";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $Notices from "./Notices";
+import * as $ServerList from "./ServerList";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
@@ -62,5 +63,9 @@ const MessageAccessories = $MessageAccessories;
  * An API allowing you to add badges to user profiles
  */
 const Badges = $Badges;
+/**
+ * An API allowing you to add custom elements to the server list
+ */
+const ServerList = $ServerList;
 
-export { Badges, Commands, DataStore, MessageAccessories, MessageEvents, Notices };
+export { Badges, Commands, DataStore, MessageAccessories, MessageEvents, Notices, ServerList };
