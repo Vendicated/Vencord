@@ -43,6 +43,8 @@ interface Activity {
     metadata?: {
         button_urls?: Array<string>
     }
+    type: Number
+    flags: Number
 }
 
 interface TrackData {
@@ -78,12 +80,7 @@ async function getApplicationAsset(key: string): Promise<string> {
 }
 
 function setActivity(activity?: Activity) {
-    FluxDispatcher.dispatch({
-        type: "LOCAL_ACTIVITY_UPDATE",
-        activity: activity && Object.assign(
-            activity, { flags: ActivityFlag.INSTANCE, type: ActivityType.PLAYING }
-        )
-    });
+    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: activity });
 }
 
 export default definePlugin({
@@ -120,6 +117,11 @@ export default definePlugin({
             description: "hide last.fm presence if spotify is running",
             type: OptionType.BOOLEAN,
             default: true,
+        },
+        useListeningStatus: {
+            description: "show \"Listening to\" status instead of \"Playing\"",
+            type: OptionType.BOOLEAN,
+            default: false,
         }
     },
 
@@ -197,7 +199,10 @@ export default definePlugin({
             buttons: [ "Open in Last.fm" ],
             metadata: {
                 button_urls: [ trackData.url ]
-            }
+            },
+
+            type: this.settings.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
+            flags: ActivityFlag.INSTANCE,
         });
     }
 });
