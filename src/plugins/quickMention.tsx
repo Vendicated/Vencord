@@ -43,11 +43,7 @@ export default definePlugin({
                         icon: Vencord.Plugins.plugins.QuickMention.Icon,
                         channel: ${channelVar},
                         message: ${messageVar},
-                        onClick:
-                            function()
-                            {
-                                Vencord.Plugins.plugins.QuickMention.onClick(${messageVar});
-                            }
+                        onClick: ()=> Vencord.Plugins.plugins.QuickMention.onClick(${messageVar})
                     })`;
 
                     return `${post}${functionSig},${og}`;
