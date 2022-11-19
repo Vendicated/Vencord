@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "../utils/Logger";
+
+const logger = new Logger("ServerListAPI");
+
 export enum ServerListRenderPosition {
     Above,
     In,
@@ -43,7 +47,7 @@ export const renderAll = (position: ServerListRenderPosition) => {
         try {
             ret.unshift(renderFunction());
         } catch (e) {
-            throw new Error(`Failed to render server list element: ${e}`);
+            logger.error("Failed to render server list element:", e);
         }
     }
 
