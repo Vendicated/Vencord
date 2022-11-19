@@ -90,6 +90,7 @@ export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
     authors: [Devs.dzshn],
+
     settingsAboutComponent: () => (
         <>
             <Forms.FormTitle tag="h3">How to get an API key</Forms.FormTitle>
@@ -105,6 +106,7 @@ export default definePlugin({
             </Forms.FormText>
         </>
     ),
+
     options: {
         username: {
             description: "last.fm username",
@@ -120,14 +122,17 @@ export default definePlugin({
             default: true,
         }
     },
+
     start() {
         this.settings = Settings.plugins.LastFMRichPresence;
 
         this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
+
     stop() {
         clearInterval(this.updateInterval);
     },
+
     async fetchTrackData(): Promise<TrackData | null> {
         if (!this.settings.username || !this.settings.apiKey) return null;
 
@@ -145,6 +150,7 @@ export default definePlugin({
             imageUrl: (trackData.image || []).filter(x => x.size === "large")[0]?.["#text"]
         };
     },
+
     async updatePresence() {
         if (this.settings.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
