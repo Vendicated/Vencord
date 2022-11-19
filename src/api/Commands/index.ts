@@ -17,7 +17,7 @@
 */
 
 import { makeCodeblock } from "../../utils/misc";
-import { generateId, sendBotMessage } from "./commandHelpers";
+import { sendBotMessage } from "./commandHelpers";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
 
 export * from "./commandHelpers";
@@ -136,7 +136,7 @@ export function registerCommand<C extends Command>(command: C, plugin: string) {
         throw new Error(`Command '${command.name}' already exists.`);
 
     command.isVencordCommand = true;
-    command.id ??= generateId();
+    command.id ??= `-${BUILT_IN.length + 1}`;
     command.applicationId ??= "-1"; // BUILT_IN;
     command.type ??= ApplicationCommandType.CHAT_INPUT;
     command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
