@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "../utils/constants";
 import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings, Webpack } from "../Vencord";
+import { FluxDispatcher, Forms } from "../webpack/common";
+import { Link } from "../components/Link";
 
 interface ActivityAssets {
     large_image?: string
@@ -62,7 +65,6 @@ enum ActivityFlag {
 
 const applicationId = "1043533871037284423";
 
-const rpcServer = lazyWebpack(Webpack.filters.byProps("dispatch", "_subscriptions"));
 const presenceStore = lazyWebpack(Webpack.filters.byProps("getLocalPresence"));
 const assetManager = Webpack.mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
@@ -76,7 +78,7 @@ async function getApplicationAsset(key: string): Promise<string> {
 }
 
 function setActivity(activity?: Activity) {
-    rpcServer.dispatch({
+    FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
         activity: activity && Object.assign(
             activity, { flags: ActivityFlag.INSTANCE, type: ActivityType.PLAYING }
@@ -87,22 +89,30 @@ function setActivity(activity?: Activity) {
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [
-        {
-            name: "dzshn",
-            id: 310449948011528192n,
-        },
-    ],
+    authors: [Devs.dzshn],
+    settingsAboutComponent: () => (
+        <>
+            <Forms.FormTitle tag="h3">How to get an API key</Forms.FormTitle>
+            <Forms.FormText>
+                An API key is required to fetch your current track. To get one, you can
+                visit <Link href="https://www.last.fm/api/account/create">this page</Link> and
+                fill in the following information: <br /> <br />
+
+                Application name: Discord Rich Presence <br />
+                Application description: (personal use) <br /> <br />
+
+                And copy the API key (not the shared secret!)
+            </Forms.FormText>
+        </>
+    ),
     options: {
         username: {
             description: "last.fm username",
             type: OptionType.STRING,
-            placeholder: "dimdendev",
         },
         apiKey: {
             description: "last.fm api key",
             type: OptionType.STRING,
-            placeholder: "686f6765686f6765686f6765686f6765",
         },
         hideWithSpotify: {
             description: "hide last.fm presence if spotify is running",
@@ -113,9 +123,11 @@ export default definePlugin({
     start() {
         this.settings = Settings.plugins.LastFMRichPresence;
 
-        setInterval(() => { this.updatePresence(); }, 16000);
+        this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
-    stop() {},
+    stop() {
+        clearInterval(this.updateInterval);
+    },
     async fetchTrackData(): Promise<TrackData | null> {
         if (!this.settings.username || !this.settings.apiKey) return null;
 
@@ -136,7 +148,7 @@ export default definePlugin({
     async updatePresence() {
         if (this.settings.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
-                if (activity.type === ActivityType.LISTENING) {
+                if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
                     // there is already music status (probably only spotify can do this currently)
                     setActivity();
                     return;
