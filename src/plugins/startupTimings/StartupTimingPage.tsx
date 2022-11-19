@@ -89,7 +89,7 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
     });
 
     return (
-        <Forms.FormSection title={title} tag={Forms.FormTitle.Tags.H1}>
+        <Forms.FormSection title={title} tag="h1">
             <code>
                 {traceEnd && (
                     <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
@@ -118,7 +118,7 @@ function ServerTrace({ trace }: ServerTraceProps) {
     const lines = trace.split("\n");
 
     return (
-        <Forms.FormSection title="Server Trace" tag={Forms.FormTitle.Tags.H2}>
+        <Forms.FormSection title="Server Trace" tag="h2">
             <code>
                 <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
                     {lines.map(line => (
