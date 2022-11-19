@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: "Messages.DISCODO_DISABLED",
             replacement: {
-                match: /(Messages\.DISCODO_DISABLED\);return)(.*homeIcon}\)}\)\)}\)}\)]}\)\)}\)}\))/,
-                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.Above))"
+                match: /(Messages\.DISCODO_DISABLED\);return)(.*?homeIcon.*?)(\}function)/,
+                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.RenderPosition.Above))$3"
             }
         },
         {
