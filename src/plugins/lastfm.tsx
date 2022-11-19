@@ -119,7 +119,7 @@ export default definePlugin({
             default: true,
         },
         useListeningStatus: {
-            description: "show \"Listening to\" status instead of \"Playing\"",
+            description: 'show "Listening to" status instead of "Playing"',
             type: OptionType.BOOLEAN,
             default: false,
         }
