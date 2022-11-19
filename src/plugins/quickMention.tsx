@@ -33,7 +33,7 @@ export default definePlugin({
         {
             find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
             replacement: {
-                match: /(null,)(.{1}&&!.{1}\?(.{2})\(\{key:"reply",label:.{4}\.Messages\.MESSAGE_ACTION_REPLY,icon:.{4},channel:(.*?),message:(.*?),onClick:.*?\}\))/,
+                match: /(null,)(.{1,3}&&!.{1,3}\?(.{1,3})\(\{key:"reply",label:.{1,10}\.Messages\.MESSAGE_ACTION_REPLY,icon:.{1,10},channel:(.+?),message:(.+?),onClick:.+?\}\))/,
                 replace: (m, post, og, functionName, channelVar, messageVar) => {
 
                     const functionSig =
