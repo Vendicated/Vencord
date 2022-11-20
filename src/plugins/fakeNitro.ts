@@ -60,8 +60,8 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven],
-    description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity],
+    description: "Allows you to stream in nitro quality and send fake emotes/stickers.",
     dependencies: ["MessageEventsAPI"],
 
     patches: [
@@ -119,11 +119,17 @@ export default definePlugin({
     ],
 
     options: {
-        enableEmojiBypass: {
-            description: "Allow sending fake emojis",
+        enableEmoteBypass: {
+            description: "Allow sending fake emotes",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
+        },
+        emoteSize: {
+            description: "Size of the emotes when sending",
+            type: OptionType.SLIDER,
+            default: 48,
+            markers: [32, 48, 64, 128, 160, 256, 512],
         },
         enableStickerBypass: {
             description: "Allow sending fake stickers",
@@ -215,11 +221,11 @@ export default definePlugin({
 
     start() {
         const settings = Settings.plugins.FakeNitro;
-        if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
+        if (!settings.enableEmoteBypass && !settings.enableStickerBypass) {
             return;
         }
 
-        const EmojiStore = lazyWebpack(filters.byProps("getCustomEmojiById"));
+        const EmoteStore = lazyWebpack(filters.byProps("getCustomEmojiById"));
         const StickerStore = lazyWebpack(filters.byProps("getAllGuildStickers")) as {
             getPremiumPacks(): StickerPack[];
             getAllGuildStickers(): Map<string, Sticker[]>;
@@ -264,14 +270,14 @@ export default definePlugin({
                 }
             }
 
-            if (!this.canUseEmotes && settings.enableEmojiBypass) {
-                for (const emoji of messageObj.validNonShortcutEmojis) {
-                    if (!emoji.require_colons) continue;
-                    if (emoji.guildId === guildId && !emoji.animated) continue;
+            if (!this.canUseEmotes && settings.enableEmoteBypass) {
+                for (const emote of messageObj.validNonShortcutEmojis) {
+                    if (!emote.require_colons) continue;
+                    if (emote.guildId === guildId && !emote.animated) continue;
 
-                    const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
-                    messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
+                    const emoteString = `<${emote.animated ? "a" : ""}:${emote.originalName || emote.name}:${emote.id}>`;
+                    const url = emote.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emoteSize}`);
+                    messageObj.content = messageObj.content.replace(emoteString, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
@@ -280,17 +286,17 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        if (!this.canUseEmotes && settings.enableEmojiBypass) {
+        if (!this.canUseEmotes && settings.enableEmoteBypass) {
             this.preEdit = addPreEditListener((_, __, messageObj) => {
                 const { guildId } = this;
 
-                for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
-                    const emoji = EmojiStore.getCustomEmojiById(emojiId);
-                    if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
-                    if (!emoji.require_colons) continue;
+                for (const [emoteStr, _, emoteId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
+                    const emote = EmoteStore.getCustomEmojiById(emoteId);
+                    if (emote == null || (emote.guildId === guildId && !emote.animated)) continue;
+                    if (!emote.require_colons) continue;
 
-                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
-                    messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
+                    const url = emote.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emoteSize}`);
+                    messageObj.content = messageObj.content.replace(emoteStr, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
