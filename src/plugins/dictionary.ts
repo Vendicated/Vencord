@@ -43,6 +43,9 @@ export default definePlugin({
                 try {
                     const json = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${args[0].value}`)).json();
 
+                    if (!json.list.length)
+                        return void sendBotMessage(ctx.channel.id, { content: "No results found." });
+
                     return void sendBotMessage(ctx.channel.id, {
                         embeds: [
                             {
