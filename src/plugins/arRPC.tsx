@@ -31,7 +31,7 @@ const assetManager = mapMangledModuleLazy(
     }
 );
 
-const rpcManager = lazyWebpack(filters.byCode(".APPLICATION_RPC("))
+const rpcManager = lazyWebpack(filters.byCode(".APPLICATION_RPC("));
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
