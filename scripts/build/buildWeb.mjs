@@ -20,8 +20,8 @@
 
 import esbuild from "esbuild";
 import { zip } from "fflate";
-import { readFileSync, writeFileSync } from "fs";
-import { readFile } from "fs/promises";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { copyFile, readFile } from "fs/promises";
 import { join } from "path";
 
 // wtf is this assert syntax
@@ -72,20 +72,32 @@ await Promise.all(
     ]
 );
 
-zip({
-    dist: {
-        "Vencord.js": readFileSync("dist/browser.js")
-    },
-    ...Object.fromEntries(await Promise.all(["modifyResponseHeaders.json", "content.js", "manifest.json"].map(async f => [
-        f,
-        await readFile(join("browser", f))
-    ]))),
-}, {}, (err, data) => {
-    if (err) {
-        console.error(err);
-        process.exitCode = 1;
-    } else {
-        writeFileSync("dist/extension.zip", data);
-        console.info("Extension written to dist/extension.zip");
-    }
-});
+mkdirSync("dist/extension-unpacked", { recursive: true });
+const files = ["modifyResponseHeaders.json", "background.js", "content.js", "manifest.json"];
+
+await Promise.all([
+    ...files.map(f => copyFile(join("browser", f), join("dist", "extension-unpacked", f))),
+    copyFile("dist/Vencord.js", "dist/extension-unpacked/dist/Vencord.js")
+]);
+
+console.info("Extension built to dist/extension-unpacked");
+
+if (process.argv.includes("--zip")) {
+    zip({
+        dist: {
+            "Vencord.js": readFileSync("dist/extension-unpacked/browser.js")
+        },
+        ...Object.fromEntries(await Promise.all(files.map(async f => [
+            f,
+            await readFile(join("browser", f))
+        ]))),
+    }, {}, (err, data) => {
+        if (err) {
+            console.error(err);
+            process.exitCode = 1;
+        } else {
+            writeFileSync("dist/extension-unsigned.zip", data);
+            console.info("Extension written to dist/extension-unsigned.zip");
+        }
+    });
+}

@@ -21,14 +21,7 @@ If you're a power user who wants to contribute and make plugins or just want to 
 
 Install [the browser extension](https://github.com/Vendicated/Vencord/releases/latest/download/extension.zip) or [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js). Please note that they aren't automatically updated for now, so you will regularely have to reinstall it.
 
-You may also build them from source, to do that do the same steps as in the manual regular install method,
-except run `pnpm buildWeb` instead of `pnpm build`, and your outputs will be in the dist folder
-
-```sh
-pnpm buildWeb
-```
-
-You will find the built extension at dist/extension.zip. Now just install this extension in your Browser
+You may also build them from source, to do that, see [rushii's Web Installation & Development Guide!](docs/2_INSTALLING_WEB.md)
 
 ## Installing Plugins
 
