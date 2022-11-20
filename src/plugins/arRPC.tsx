@@ -40,7 +40,7 @@ export default definePlugin({
 
     async start() {
         if (ws) ws.close();
-        ws = new WebSocket('ws://127.0.0.1:1337'); // try to open WebSocket
+        ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
         const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
         if (!connectionSuccessful) {
