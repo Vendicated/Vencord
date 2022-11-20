@@ -42,6 +42,11 @@ export default definePlugin({
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
+        ws.onmessage = e => { // on message, set status to data
+            const data = JSON.parse(e.data);
+            FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
+        };
+
         const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
         if (!connectionSuccessful) {
             showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
@@ -50,11 +55,6 @@ export default definePlugin({
             });
             return;
         }
-
-        ws.onmessage = e => { // on message, set status to data
-            const data = JSON.parse(e.data);
-            FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
-        };
 
         Toasts.show({ // show toast on success
             message: "Connected to arRPC",
