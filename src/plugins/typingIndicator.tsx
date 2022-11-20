@@ -78,14 +78,11 @@ function ContextMenuElement() {
         }
     }
 
-    return React.createElement(
-        Menu.ContextMenu,
-        {
-            navId: "typing-indicator-menu",
-            onClose: () => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })
-        },
-        buttons
-    );
+    return <Menu.ContextMenu
+        navId="typing-indicator-menu"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}>
+        {buttons}
+    </Menu.ContextMenu>;
 }
 
 let forceRenderIndicator: React.DispatchWithoutAction;
