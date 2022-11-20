@@ -56,8 +56,8 @@ export default definePlugin({
     patches: [{
         find: ",reactionRef:",
         replacement: {
-            match: /(=(.{1,3})\.hideEmoji),(.+?)\?null:\(0,.{1,3}\.jsxs?\)\(.{1,10},\{.{0,20}reactionCount.+?\}\)/,
-            replace: "$1,whoReactedProps=$2,$3?null:Vencord.Plugins.plugins.WhoReacted.renderUsers(whoReactedProps)"
+            match: /((.)=(.{1,3})\.hideCount)(,.+?reactionCount.+?\}\))/,
+            replace: "$1,whoReactedProps=$3$4,$2?null:Vencord.Plugins.plugins.WhoReacted.renderUsers(whoReactedProps)"
         }
     }],
 
