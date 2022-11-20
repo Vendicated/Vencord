@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { popNotice,showNotice } from "../api/Notices";
 import { Link } from "../components/Link";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { FluxDispatcher, Forms, Toasts } from "../webpack/common";
-import { showNotice, popNotice } from "../api/Notices";
 
 let ws: WebSocket;
 export default definePlugin({
