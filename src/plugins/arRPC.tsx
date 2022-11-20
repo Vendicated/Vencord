@@ -16,11 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { popNotice,showNotice } from "../api/Notices";
+import { popNotice, showNotice } from "../api/Notices";
 import { Link } from "../components/Link";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
+import { Webpack } from "../Vencord";
 import { FluxDispatcher, Forms, Toasts } from "../webpack/common";
+
+const assetManager = Webpack.mapMangledModuleLazy(
+    "getAssetImage: size must === [number, number] for Twitch",
+    {
+        getAsset: Webpack.filters.byCode("apply("),
+    }
+);
+
+async function lookupAsset(applicationId: string, key: string): Promise<string> {
+    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+}
 
 let ws: WebSocket;
 export default definePlugin({
@@ -42,8 +54,12 @@ export default definePlugin({
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
-        ws.onmessage = e => { // on message, set status to data
+        ws.onmessage = async e => { // on message, set status to data
             const data = JSON.parse(e.data);
+
+            if (data.activity?.assets?.large_image) data.activity.assets.large_image = await lookupAsset(data.activity.application_id, data.activity.assets.large_image);
+            if (data.activity?.assets?.small_image) data.activity.assets.small_image = await lookupAsset(data.activity.application_id, data.activity.assets.small_image);
+
             FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
         };
 
