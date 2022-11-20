@@ -36,5 +36,11 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
+    },
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "vencord@vencord.vendicated.dev"
+        }
     }
 }
