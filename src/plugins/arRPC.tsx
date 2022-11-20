@@ -19,23 +19,19 @@
 import { popNotice, showNotice } from "../api/Notices";
 import { Link } from "../components/Link";
 import { Devs } from "../utils/constants";
+import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { Webpack } from "../Vencord";
+import { filters, mapMangledModuleLazy } from "../webpack";
 import { FluxDispatcher, Forms, Toasts } from "../webpack/common";
 
-const assetManager = Webpack.mapMangledModuleLazy(
+const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
-        getAsset: Webpack.filters.byCode("apply("),
+        getAsset: filters.byCode("apply("),
     }
 );
 
-const rpcManager = Webpack.mapMangledModuleLazy(
-    "e.application={",
-    {
-        lookupApp: Webpack.filters.byCode("e.application={"),
-    }
-);
+const rpcManager = lazyWebpack(filters.byCode(".APPLICATION_RPC("))
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
