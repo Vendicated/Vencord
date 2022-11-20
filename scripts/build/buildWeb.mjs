@@ -72,12 +72,12 @@ await Promise.all(
     ]
 );
 
-mkdirSync("dist/extension-unpacked", { recursive: true });
-const files = ["modifyResponseHeaders.json", "background.js", "content.js", "manifest.json"];
+mkdirSync("dist/extension-unpacked/dist", { recursive: true });
+const files = ["modifyResponseHeaders.json", "content.js", "manifest.json"];
 
 await Promise.all([
     ...files.map(f => copyFile(join("browser", f), join("dist", "extension-unpacked", f))),
-    copyFile("dist/Vencord.js", "dist/extension-unpacked/dist/Vencord.js")
+    copyFile("dist/browser.js", "dist/extension-unpacked/dist/Vencord.js")
 ]);
 
 console.info("Extension built to dist/extension-unpacked");
@@ -85,7 +85,7 @@ console.info("Extension built to dist/extension-unpacked");
 if (process.argv.includes("--zip")) {
     zip({
         dist: {
-            "Vencord.js": readFileSync("dist/extension-unpacked/browser.js")
+            "Vencord.js": readFileSync("dist/browser.js")
         },
         ...Object.fromEntries(await Promise.all(files.map(async f => [
             f,
