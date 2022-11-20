@@ -171,7 +171,7 @@ export default definePlugin({
         {
             find: "id:\"create-join-button\"",
             replacement: {
-                match: /(\(.{7}\)\((.{16}id:"create-join-button".*Messages.ADD_A_SERVER,icon:.{1,3}\})\))/,
+                match: /(\(.{1,7}\)\((.{15,18}id:"create-join-button".*Messages.ADD_A_SERVER,icon:.{1,7}\})\))/,
                 replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.Init($2)]"
             }
         }
@@ -262,9 +262,7 @@ export default definePlugin({
             restartNeeded: true,
         },
         emptyMessage: {
-            disabled() {
-                return !Settings.plugins?.TypingIndicator?.alwaysShow;
-            },
+            disabled: () => !Settings.plugins?.TypingIndicator?.alwaysShow,
             description: "Text to show when no one is typing",
             type: OptionType.STRING,
             default: "No DMs?",
