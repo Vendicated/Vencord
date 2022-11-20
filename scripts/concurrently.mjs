@@ -23,7 +23,6 @@ const commands = process.argv.slice(2);
 for (const command of commands) {
     console.info("[concurrently] Spawning", command);
     const [cmd, ...args] = command.split(" ");
-    console.log(cmd, args);
     spawn(cmd, args, {
         stdio: "inherit"
     });
