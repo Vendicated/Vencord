@@ -20,7 +20,7 @@ import { Settings } from "../api/settings";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
-import { Forms, PresenceStore, React, Tooltip } from "../webpack/common";
+import { PresenceStore, React, Tooltip } from "../webpack/common";
 
 const DesktopIcon = props => (
     <svg onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave} height="18" width="18" viewBox="0 0 24 24" fill={props.color}><path d="M4 2.5c-1.103 0-2 .897-2 2v11c0 1.104.897 2 2 2h7v2H7v2h10v-2h-4v-2h7c1.103 0 2-.896 2-2v-11c0-1.103-.897-2-2-2H4Zm16 2v9H4v-9h16Z" /></svg>
