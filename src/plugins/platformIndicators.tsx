@@ -75,11 +75,13 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
         />
     ));
 
+    if (!icons.length) return null;
+
     return (
         <div
             className="vc-platform-indicator"
             style={{
-                display: "flex", alignItems: "center", marginLeft: "4px"
+                display: "flex", alignItems: "center", marginLeft: "4px", gap: "4px"
             }}
         >
             {icons}
