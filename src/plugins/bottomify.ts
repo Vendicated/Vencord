@@ -101,7 +101,8 @@ export default definePlugin({
                 content: encode(findOption(opts, "message", "")),
             }),
         },
-        {   name: "debottomify",
+        {   
+            name: "debottomify",
             description: "👉👈",
             options: [RequiredMessageOption],
 
