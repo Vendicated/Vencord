@@ -65,7 +65,7 @@ export async function downloadSettingsBackup() {
 
 const toastSuccess = () => Toasts.show({
     type: Toasts.Type.SUCCESS,
-    message: "Settings successfully imported",
+    message: "Settings successfully imported. Restart to apply changes!",
     id: Toasts.genId()
 });
 
