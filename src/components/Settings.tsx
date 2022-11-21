@@ -20,6 +20,7 @@ import { useSettings } from "../api/settings";
 import { ChangeList } from "../utils/ChangeList";
 import IpcEvents from "../utils/IpcEvents";
 import { useAwaiter } from "../utils/misc";
+import { downloadSettingsBackup, uploadSettingsBackup } from "../utils/settingsSync";
 import { Alerts, Button, Card, Forms, Margins, Parser, React, Switch } from "../webpack/common";
 import DonateButton from "./DonateButton";
 import ErrorBoundary from "./ErrorBoundary";
@@ -136,6 +137,23 @@ export default ErrorBoundary.wrap(function Settings() {
             >
                 Get notified about new Updates
             </Switch>}
+
+            <Forms.FormDivider />
+            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+            <Flex>
+                <Button
+                    onClick={uploadSettingsBackup}
+                    size={Button.Sizes.SMALL}
+                >
+                    Import Settings
+                </Button>
+                <Button
+                    onClick={downloadSettingsBackup}
+                    size={Button.Sizes.SMALL}
+                >
+                    Export Settings
+                </Button>
+            </Flex>
         </Forms.FormSection >
     );
 }, {
