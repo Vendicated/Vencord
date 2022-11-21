@@ -22,16 +22,16 @@ import Logger from "./Logger";
 
 export async function importSettings(data: string) {
     try {
-        var { quickCss, settings } = JSON.parse(data);
+        var parsed = JSON.parse(data);
     } catch (err) {
         throw new Error("Failed to parse JSON");
     }
 
-    if (!settings || !quickCss)
+    if ("settings" in parsed && "quickCss" in parsed) {
+        await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(parsed.settings, null, 4));
+        await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, parsed.quickCss);
+    } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
-
-    await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(settings, null, 4));
-    await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, quickCss);
 }
 
 export async function exportSettings() {
