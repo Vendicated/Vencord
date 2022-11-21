@@ -24,7 +24,8 @@ export async function importSettings(data: string) {
     try {
         var parsed = JSON.parse(data);
     } catch (err) {
-        throw new Error("Failed to parse JSON");
+        console.log(data);
+        throw new Error("Failed to parse JSON: " + String(err));
     }
 
     if ("settings" in parsed && "quickCss" in parsed) {
@@ -110,7 +111,8 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 
         if (file) {
             try {
-                await importSettings(new TextDecoder().decode(file.content));
+                console.log(file);
+                await importSettings(new TextDecoder().decode(file.data));
                 if (showToast) toastSuccess();
             } catch (err) {
                 new Logger("SettingsSync").error(err);
