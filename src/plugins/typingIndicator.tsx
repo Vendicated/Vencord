@@ -53,7 +53,7 @@ const dotsIcon = () => (
     </svg>
 );
 
-const typingUsers: Array<ITyping> = [];
+const typingUsers: Set<ITyping> = new Set();
 let toolTipString: string = "";
 
 let buttonType: any;
@@ -61,27 +61,27 @@ let buttonProps: any;
 let buttonChildren: any;
 
 function ContextMenuElement() {
-    const buttons: Array<JSX.Element> = [];
+    const items: Set<JSX.Element> = new Set();
 
-    for (let i = 0; i < typingUsers.length; i++) {
-        const user = UserStore.getUser(typingUsers[i].userId);
-        if (user) {
-            buttons.push(
-                <Menu.MenuItem
-                    id={`typing-${i}`}
-                    label={user.username}
-                    action={() => {
-                        openPrivateChannel(user.id);
-                    }}
-                />
-            );
-        }
-    }
+    typingUsers.forEach(u => {
+        const user = UserStore.getUser(u.userId);
+        if (!user) return;
+
+        items.add(
+            <Menu.MenuItem
+                id={user.id}
+                key={user.id}
+                label={user.username}
+                action={() => {
+                    openPrivateChannel(user.id);
+                }}
+            />);
+    });
 
     return <Menu.ContextMenu
         navId="typing-indicator-menu"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}>
-        {buttons}
+        {items}
     </Menu.ContextMenu>;
 }
 
@@ -89,22 +89,17 @@ let forceRenderIndicator: React.DispatchWithoutAction;
 
 const addUser = (channelId: string, userId: string) => {
 
-    const user = typingUsers.find(o => o.channelId === channelId && o.userId === userId);
-
-    if (!user) {
-        typingUsers.push({ channelId, userId });
+    if (typingUsers.add({ channelId, userId })) {
         UpdateElement();
     }
 };
 
 const removeUser = (channelId: string, userId: string) => {
 
-    const userIndex = typingUsers.findIndex(o => {
-        return o.channelId === channelId && o.userId === userId;
-    });
+    const userRef = [...typingUsers].find(o => o.channelId === channelId && o.userId === userId);
+    if (!userRef) return;
 
-    if (userIndex !== -1) {
-        typingUsers.splice(userIndex, 1);
+    if (typingUsers.delete(userRef)) {
         UpdateElement();
     }
 };
@@ -114,14 +109,14 @@ const UpdateElement = () => {
     if (!buttonProps || !forceRenderIndicator)
         return;
 
-    if (typingUsers.length === 0) {
+    if (typingUsers.size === 0) {
         toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
         forceRenderIndicator();
         return;
     }
 
-    if (typingUsers.length === 1) {
-        const user = UserStore.getUser(typingUsers[0].userId);
+    if (typingUsers.size === 1) {
+        const user = UserStore.getUser(typingUsers.values().next().value.userId);
         toolTipString = `${user.username} is typing...`;
         forceRenderIndicator();
         return;
@@ -169,26 +164,23 @@ export default definePlugin({
             find: "id:\"create-join-button\"",
             replacement: {
                 match: /(\(.{1,7}\)\((.{15,18}id:"create-join-button".*Messages.ADD_A_SERVER,icon:.{1,7}\})\))/,
-                replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.Init($2)]"
+                replace: "[$&, Vencord.Plugins.plugins?.TypingIndicator.init($2)]"
             }
         }
     ],
 
     renderIndicator: () => <Element />,
 
-    Init(type: any, props: any, ...childern: any) {
-        if (!buttonType && type) {
-            buttonType = type;
-        }
+    init(type: any, props: any, ...childern: any) {
+        buttonType ??= type;
+        buttonChildren ??= childern;
 
         if (!buttonProps && props) {
-            buttonProps = props;
+            buttonProps ??= props;
             buttonProps.id = "dm-typing-indicator";
 
             buttonProps.onClick = () => {
-                if (typingUsers.length > 0) {
-                    openPrivateChannel(typingUsers[0].userId);
-                }
+                openPrivateChannel(typingUsers.values().next().value?.userId);
             };
 
             buttonProps.onContextMenu = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
@@ -201,16 +193,10 @@ export default definePlugin({
 
             toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
         }
-
-        if (!buttonChildren && childern) {
-            buttonChildren = childern;
-        }
     },
 
     async onMessage(e: IMessageCreate) {
         if (e.message.author.id === UserStore.getCurrentUser().id) return;
-        if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
-        if (e.message.state === "SENDING") return;
 
         removeUser(e.channelId, e.message.author.id);
     },
@@ -219,8 +205,7 @@ export default definePlugin({
 
         const channel = ChannelStore.getChannel(e.channelId);
 
-        if (!channel) return;
-        if (!channel.isPrivate()) return;
+        if (!channel?.isPrivate()) return;
 
         addUser(e.channelId, e.userId);
     },
@@ -229,8 +214,7 @@ export default definePlugin({
 
         const channel = ChannelStore.getChannel(e.channelId);
 
-        if (!channel) return;
-        if (!channel.isPrivate()) return;
+        if (!channel?.isPrivate()) return;
 
         removeUser(e.channelId, e.userId);
     },
