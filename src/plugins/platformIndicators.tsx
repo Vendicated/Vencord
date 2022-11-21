@@ -75,6 +75,8 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
         />
     ));
 
+    if (icons.length === 0) return null;
+
     return (
         <div
             className="vc-platform-indicator"
