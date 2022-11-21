@@ -248,28 +248,18 @@ export default ErrorBoundary.wrap(function Settings() {
     };
 
     const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
-        logger.info("called func");
         const dateNow: number = Date.now() / 1000;
-        logger.debug("dateNow", dateNow);
         let Vencord_existingPlugins: Record<string, number> = {};
         let newPlugins: Array<string> = [];
-        logger.info("sortedPlugins", sortedPlugins);
-        logger.info("existingPlugins (or list)", existingPlugins ? existingPlugins : []);
-        logger.info("Object.keys(existingPlugins ? existingPlugins : [])", Object.keys(existingPlugins ? existingPlugins : []));
         sortedPlugins.forEach(plugin => {
-            logger.debug(plugin.name);
             Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins ? existingPlugins : []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
-            logger.debug("1");
             if ((Vencord_existingPlugins[plugin.name] + 172800) > dateNow) {
                 newPlugins.push(plugin.name);
             }
         });
-        DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins).then(() => { logger.info("set Vencord_existingPlugins"); }).catch((err) => { logger.info("set Vencord_existingPlugins raised", err); });
+        DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins);
         return newPlugins;
     }));
-
-    logger.debug("newPlugins", newPlugins);
-    logger.debug("error", error);
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
