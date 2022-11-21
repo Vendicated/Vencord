@@ -29,7 +29,7 @@ export interface ISettingElementProps<T extends PluginOptionBase> {
     onError(hasError: boolean): void;
 }
 
-export * from "./NewBadgeComponent";
+export * from "./BadgeComponent";
 export * from "./SettingBooleanComponent";
 export * from "./SettingCustomComponent";
 export * from "./SettingNumericComponent";
