@@ -49,7 +49,7 @@ export const SettingsIcon: React.CSSProperties = {
     marginRight: 8
 };
 
-export const Badge: React.CSSProperties = {
+export const BadgeStyle: React.CSSProperties = {
     paddingTop: "0",
     paddingBottom: "0",
     paddingRight: "6px",
