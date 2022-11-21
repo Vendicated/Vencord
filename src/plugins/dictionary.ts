@@ -35,31 +35,31 @@ export default definePlugin({
                 {
                     type: ApplicationCommandOptionType.STRING,
                     name: "word",
-                    description: "The word you want to define.",
+                    description: "The word to search for on Urban Dictionary",
                     required: true
                 }
             ],
             execute: async (args, ctx) => {
                 try {
-                    const json = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${args[0].value}`)).json();
+                    const { list: [definition] } = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${args[0].value}`)).json();
 
-                    if (!json.list.length)
+                    if (!definition)
                         return void sendBotMessage(ctx.channel.id, { content: "No results found." });
 
                     return void sendBotMessage(ctx.channel.id, {
                         embeds: [
                             {
                                 author: {
-                                    name: json.list[0].word,
-                                    url: json.list[0].permalink
+                                    name: definition.word,
+                                    url: definition.permalink
                                 },
-                                title: json.list[0].definition,
-                                description: `Example:\n${json.list[0].example}`,
+                                title: definition.definition,
+                                description: `Example:\n${definition.example}`,
                                 color: 0xFF9900,
-                                footer: { text: `👍 ${json.list[0].thumbs_up} | 👎 ${json.list[0].thumbs_down}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
-                                timestamp: new Date(json.list[0].written_on).toISOString()
+                                footer: { text: `👍 ${definition.thumbs_up} | 👎 ${definition.thumbs_down}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
+                                timestamp: new Date(definition.written_on).toISOString()
                             }
-                        ]
+                        ] as any
                     });
                 } catch (error) {
                     return void sendBotMessage(ctx.channel.id, {
