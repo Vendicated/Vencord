@@ -221,7 +221,6 @@ export default definePlugin({
 
     start() {
         const settings = Settings.plugins.FakeNitro;
-
         if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
             return;
         }
