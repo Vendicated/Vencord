@@ -172,7 +172,6 @@ export const SpotifyStore = proxyLazy(() => {
                             ids: this.track.id
                         }
                     }).then((res: any) => {
-                        console.log("SPOTIFY IS SAVED", res);
                         if (res && res.body && Array.isArray(res.body)) {
                             this.savedTrackIds.set(track.id, res.body[0]);
                             this.emitChange();
@@ -192,7 +191,6 @@ export const SpotifyStore = proxyLazy(() => {
                             ids: this.track.id
                         }
                     }).then((res: any) => {
-                        console.log("SPOTIFY SAVED", res);
                         if (res.ok) {
                             this.savedTrackIds.set(track.id, !current);
                             this.emitChange();
