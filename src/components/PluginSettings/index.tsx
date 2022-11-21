@@ -247,7 +247,7 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number> | null) => {
+    const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         logger.info("called func");
         const dateNow: number = Date.now() / 1000;
         logger.debug("dateNow", dateNow);
@@ -260,7 +260,7 @@ export default ErrorBoundary.wrap(function Settings() {
             logger.debug(plugin.name);
             Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins ? existingPlugins : []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
             logger.debug("1");
-            if (Vencord_existingPlugins[plugin.name] < (dateNow + 172800)) {
+            if ((Vencord_existingPlugins[plugin.name] + 172800) > dateNow) {
                 newPlugins.push(plugin.name);
             }
         });
