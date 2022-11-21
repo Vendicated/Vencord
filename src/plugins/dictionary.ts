@@ -61,10 +61,20 @@ export default definePlugin({
                                     {
                                         name: "Example",
                                         value: linkify(definition.example)
+                                    },
+                                    {
+                                        name: "👍",
+                                        value: definition.thumbs_up.toString(),
+                                        inline: true
+                                    },
+                                    {
+                                        name: "👎",
+                                        value: definition.thumbs_down.toString(),
+                                        inline: true
                                     }
                                 ],
                                 color: 0xFF9900,
-                                footer: { text: `👍 ${definition.thumbs_up} | 👎 ${definition.thumbs_down}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
+                                footer: { text: `Submitted by ${definition.author}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
                                 timestamp: new Date(definition.written_on).toISOString()
                             }
                         ] as any
