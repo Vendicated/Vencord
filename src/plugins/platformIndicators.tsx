@@ -97,7 +97,7 @@ export default definePlugin({
             // Server member list decorators
             find: "this.renderPremium()",
             replacement: {
-                match: /this.renderPremium\(\).+?\]/,
+                match: /this.renderPremium\(\)[^\]]*?\]/,
                 replace: "$&.concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(this.props))"
             }
         },
