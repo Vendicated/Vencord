@@ -148,5 +148,9 @@ export const Devs = Object.freeze({
     Ducko: {
         name: "Ducko",
         id: 506482395269169153n
+    },
+        bandit: {
+        name: "TheKfcBandit",
+        id: 79427255851298816n
     }
 });
