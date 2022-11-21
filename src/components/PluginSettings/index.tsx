@@ -31,8 +31,10 @@ import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
+import { DataStore } from "../../api";
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
+import { NewBadge } from "./components/NewBadgeComponent";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 
@@ -78,9 +80,10 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
     onRestartNeeded(name: string): void;
+    isNew?: boolean;
 }
 
-function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave }: PluginCardProps) {
+function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
 
@@ -162,8 +165,8 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 </Text>}
                 hideBorder={true}
             >
-                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
-                    <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
+                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
+                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>{plugin.name}{(isNew) && <NewBadge />}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options
                             ? <CogWheel
@@ -224,6 +227,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
+    const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: "all" });
 
@@ -242,6 +246,30 @@ export default ErrorBoundary.wrap(function Settings() {
             )
         );
     };
+
+    const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number> | null) => {
+        logger.info("called func");
+        const dateNow: number = Date.now() / 1000;
+        logger.debug("dateNow", dateNow);
+        let Vencord_existingPlugins: Record<string, number> = {};
+        let newPlugins: Array<string> = [];
+        logger.info("sortedPlugins", sortedPlugins);
+        logger.info("existingPlugins (or list)", existingPlugins ? existingPlugins : []);
+        logger.info("Object.keys(existingPlugins ? existingPlugins : [])", Object.keys(existingPlugins ? existingPlugins : []));
+        sortedPlugins.forEach(plugin => {
+            logger.debug(plugin.name);
+            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins ? existingPlugins : []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
+            logger.debug("1");
+            if (Vencord_existingPlugins[plugin.name] < (dateNow + 172800)) {
+                newPlugins.push(plugin.name);
+            }
+        });
+        DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins).then(() => { logger.info("set Vencord_existingPlugins"); }).catch((err) => { logger.info("set Vencord_existingPlugins raised", err); });
+        return newPlugins;
+    }));
+
+    logger.debug("newPlugins", newPlugins);
+    logger.debug("error", error);
 
     return (
         <Forms.FormSection>
@@ -281,7 +309,6 @@ export default ErrorBoundary.wrap(function Settings() {
                             onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
-                            key={plugin.name}
                         />;
                     })
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
