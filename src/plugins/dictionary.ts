@@ -46,15 +46,23 @@ export default definePlugin({
                     if (!definition)
                         return void sendBotMessage(ctx.channel.id, { content: "No results found." });
 
+                    const linkify = text => text.replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)})`);
+
                     return void sendBotMessage(ctx.channel.id, {
                         embeds: [
                             {
+                                type: "rich",
                                 author: {
-                                    name: definition.word,
+                                    name: `Definition of ${definition.word}`,
                                     url: definition.permalink
                                 },
-                                title: definition.definition,
-                                description: `Example:\n${definition.example}`,
+                                description: linkify(definition.definition),
+                                fields: [
+                                    {
+                                        name: "Example",
+                                        value: linkify(definition.example)
+                                    }
+                                ],
                                 color: 0xFF9900,
                                 footer: { text: `👍 ${definition.thumbs_up} | 👎 ${definition.thumbs_down}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
                                 timestamp: new Date(definition.written_on).toISOString()
