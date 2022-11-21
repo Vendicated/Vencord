@@ -43,7 +43,7 @@ export default definePlugin({
             predicate: () => Settings.plugins.SpotifyControls.manageSavedSongs === true,
             replacement:{
                 match: /return (\w+)\.(\w+)\.get\(\{url:(\w+),oldFormErrors:!0\}\)/,
-                replace: "return Vencord.Plugins.plugins.SpotifyControls.modifyAuthUrl($3, $1.$2.get({url:$3,oldFormErrors:!0}))"
+                replace: "return Vencord.Plugins.plugins.SpotifyControls.modifyAuthUrl($3,$1.$2.get({url:$3,oldFormErrors:!0}))"
             },
         },
         // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
