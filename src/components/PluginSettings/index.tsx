@@ -246,7 +246,7 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
+    let [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
         const Vencord_existingPlugins: Record<string, number> = {};
         const newPlugins: Array<string> = [];
@@ -259,6 +259,10 @@ export default ErrorBoundary.wrap(function Settings() {
         DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins);
         return newPlugins;
     }));
+
+    if (JSON.stringify(newPlugins) === JSON.stringify(sortedPluginNames)) {
+        newPlugins = [];
+    }
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">
