@@ -53,7 +53,7 @@ const dotsIcon = () => (
     </svg>
 );
 
-const typingUsers: Set<ITyping> = new Set();
+const typingUsers: Array<ITyping> = [];
 let toolTipString: string = "";
 
 let buttonType: any;
@@ -61,21 +61,18 @@ let buttonProps: any;
 let buttonChildren: any;
 
 function ContextMenuElement() {
-    const items: Set<JSX.Element> = new Set();
-
-    typingUsers.forEach(u => {
+    const items: Array<JSX.Element> = typingUsers.map(u => {
         const user = UserStore.getUser(u.userId);
-        if (!user) return;
+        if (!user) return <></>;
 
-        items.add(
-            <Menu.MenuItem
-                id={user.id}
-                key={user.id}
-                label={user.username}
-                action={() => {
-                    openPrivateChannel(user.id);
-                }}
-            />);
+        return <Menu.MenuItem
+            id={user.id}
+            key={user.id}
+            label={user.username}
+            action={() => {
+                openPrivateChannel(user.id);
+            }}
+        />;
     });
 
     return <Menu.ContextMenu
@@ -89,17 +86,22 @@ let forceRenderIndicator: React.DispatchWithoutAction;
 
 const addUser = (channelId: string, userId: string) => {
 
-    if (typingUsers.add({ channelId, userId })) {
+    const hasUser = typingUsers.some(o => o.channelId === channelId && o.userId === userId);
+
+    if (!hasUser) {
+        typingUsers.push({ channelId, userId });
         UpdateElement();
     }
 };
 
 const removeUser = (channelId: string, userId: string) => {
 
-    const userRef = [...typingUsers].find(o => o.channelId === channelId && o.userId === userId);
-    if (!userRef) return;
+    const userIndex = typingUsers.findIndex(o => {
+        return o.channelId === channelId && o.userId === userId;
+    });
 
-    if (typingUsers.delete(userRef)) {
+    if (userIndex !== -1) {
+        typingUsers.splice(userIndex, 1);
         UpdateElement();
     }
 };
@@ -109,13 +111,13 @@ const UpdateElement = () => {
     if (!buttonProps || !forceRenderIndicator)
         return;
 
-    if (typingUsers.size === 0) {
+    if (typingUsers.length === 0) {
         toolTipString = Settings.plugins?.TypingIndicator?.alwaysShow ? Settings.plugins?.TypingIndicator?.emptyMessage : "";
         forceRenderIndicator();
         return;
     }
 
-    if (typingUsers.size === 1) {
+    if (typingUsers.length === 1) {
         const user = UserStore.getUser(typingUsers.values().next().value.userId);
         toolTipString = `${user.username} is typing...`;
         forceRenderIndicator();
@@ -180,7 +182,7 @@ export default definePlugin({
             buttonProps.id = "dm-typing-indicator";
 
             buttonProps.onClick = () => {
-                openPrivateChannel(typingUsers.values().next().value?.userId);
+                openPrivateChannel(typingUsers[0]?.userId);
             };
 
             buttonProps.onContextMenu = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
