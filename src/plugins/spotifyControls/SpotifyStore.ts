@@ -184,7 +184,7 @@ export const SpotifyStore = proxyLazy(() => {
                 const { track } = this;
                 if (this.savedTrackIds.has(track.id)) {
                     const current = this.savedTrackIds.get(track.id);
-                    this.req(current ? "put" : "put", "/tracks", { // TODO: needs delete
+                    this.req(current ? "delete" : "put", "/tracks", {
                         query: {
                             ids: this.track.id
                         }
@@ -217,7 +217,7 @@ export const SpotifyStore = proxyLazy(() => {
             });
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}) {
+        private req(method: "post" | "get" | "put" | "delete", route: string, data: any = {}) {
             if (this.device?.is_active && route.includes("/player"))
                 (data.query ??= {}).device_id = this.device.id;
 

@@ -46,12 +46,12 @@ export default definePlugin({
                 replace: "return Vencord.Plugins.plugins.SpotifyControls.modifyAuthUrl($3,$1.$2.get({url:$3,oldFormErrors:!0}))"
             },
         },
-        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
+        // Adds POST, DELETE and a Marker to the SpotifyAPI (so we can easily find it)
         {
             find: ".PLAYER_DEVICES",
             replacement: {
                 match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
-                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
+                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),delete:$1.bind(null,$2.delete),$&"
             }
         },
         // Discord doesn't give you the repeat kind, only a boolean
