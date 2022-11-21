@@ -31,10 +31,28 @@ import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
-import { DataStore } from "../../api";
 
+<<<<<<< HEAD
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 import { NewBadge } from "./components/NewBadgeComponent";
+=======
+import { DataStore } from "../../api";
+import { showNotice } from "../../api/Notices";
+import { Settings, useSettings } from "../../api/settings";
+import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
+import { ChangeList } from "../../utils/ChangeList";
+import Logger from "../../utils/Logger";
+import { classes, LazyComponent, lazyWebpack, useAwaiter } from "../../utils/misc";
+import { openModalLazy } from "../../utils/modal";
+import { Plugin } from "../../utils/types";
+import { filters, findByCode } from "../../webpack";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
+import ErrorBoundary from "../ErrorBoundary";
+import { ErrorCard } from "../ErrorCard";
+import { Flex } from "../Flex";
+import { handleComponentFailed } from "../handleComponentFailed";
+import { NewBadge } from "./components";
+>>>>>>> 3a2e6a6 (Autofix lint)
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 
@@ -249,10 +267,10 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
-        let Vencord_existingPlugins: Record<string, number> = {};
-        let newPlugins: Array<string> = [];
+        const Vencord_existingPlugins: Record<string, number> = {};
+        const newPlugins: Array<string> = [];
         sortedPlugins.forEach(plugin => {
-            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins ? existingPlugins : []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
+            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins || []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
             if ((Vencord_existingPlugins[plugin.name] + 172800) > dateNow) {
                 newPlugins.push(plugin.name);
             }
