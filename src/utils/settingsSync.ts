@@ -35,7 +35,7 @@ export async function importSettings(data: string) {
 }
 
 export async function exportSettings() {
-    const settings = VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS);
+    const settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS));
     const quickCss = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
     return JSON.stringify({ settings, quickCss }, null, 4);
 }
@@ -48,12 +48,11 @@ export async function downloadSettingsBackup() {
     if (IS_WEB) {
         const file = new File([data], filename, { type: "application/json" });
         const a = document.createElement("a");
-        a.style.display = "none";
         a.href = URL.createObjectURL(file);
         a.download = filename;
+
         document.body.appendChild(a);
         a.click();
-
         setImmediate(() => {
             URL.revokeObjectURL(a.href);
             document.body.removeChild(a);
