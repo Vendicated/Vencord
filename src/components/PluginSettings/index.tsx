@@ -246,7 +246,7 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    let [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
+    let [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
         const Vencord_existingPlugins: Record<string, number> = {};
         const newPlugins: Array<string> = [];
