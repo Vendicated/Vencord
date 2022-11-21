@@ -244,6 +244,7 @@ export const SpotifyStore = proxyLazy(() => {
                                     <Text variant="text-md/normal">You need to re-authenticate your Spotify account with Discord!</Text>
                                     <Text variant="text-sm/normal">This is required for it to be able to read and modify your liked songs.</Text>
                                     <Text variant="text-sm/normal" style={{ marginTop: 8 }}>Go to Settings - Connections - Spotify</Text>
+                                    <Text variant="text-sm/normal" style={{ marginTop: 3 }}>Connect your account again, then reload Discord</Text>
                                 </ModalContent>
                                 <ModalFooter>
                                     <Flex>
