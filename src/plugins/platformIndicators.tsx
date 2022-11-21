@@ -75,7 +75,7 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
         />
     ));
 
-    if (icons.length === 0) return null;
+    if (!icons.length) return null;
 
     return (
         <div
