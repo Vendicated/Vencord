@@ -81,7 +81,7 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
         <div
             className="vc-platform-indicator"
             style={{
-                display: "flex", alignItems: "center", marginLeft: "4px"
+                display: "flex", alignItems: "center", marginLeft: "4px", gap: "4px"
             }}
         >
             {icons}
