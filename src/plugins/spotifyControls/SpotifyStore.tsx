@@ -19,11 +19,13 @@
 import cssText from "~fileContent/spotifyStyles.css";
 
 import { Settings } from "../../api/settings";
+import { Flex } from "../../components/Flex";
 import IpcEvents from "../../utils/IpcEvents";
 import { lazyWebpack } from "../../utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../../utils/modal";
 import { proxyLazy } from "../../utils/proxyLazy";
 import { filters } from "../../webpack";
-import { Flux, FluxDispatcher } from "../../webpack/common";
+import { Button, Flux, FluxDispatcher, Text } from "../../webpack/common";
 
 export interface Track {
     id: string;
@@ -101,6 +103,7 @@ export const SpotifyStore = proxyLazy(() => {
         public volume = 0;
 
         public isSettingPosition = false;
+        public showInsufficientPermissionsModal = true;
 
         public openExternal(path: string) {
             VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://open.spotify.com" + path);
@@ -221,12 +224,54 @@ export const SpotifyStore = proxyLazy(() => {
             if (this.device?.is_active && route.includes("/player"))
                 (data.query ??= {}).device_id = this.device.id;
 
-            // TODO: if request fails with code 401, show a modal to tell the user to re-authenticate
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            const spotifyPromise = SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });
+            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && spotifyPromise.catch) {
+                spotifyPromise.catch((e: any) => {
+                    // insufficient client scope
+                    if (this.showInsufficientPermissionsModal && e?.body?.error?.status === 403) {
+                        openModal(modalProps => (
+                            <ModalRoot size={ModalSize.SMALL} {...modalProps}>
+                                <ModalHeader>
+                                    <Flex>
+                                        <Text variant="heading-md/bold">Reconnect Spotify</Text>
+                                    </Flex>
+                                </ModalHeader>
+                                <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
+                                    <Text variant="text-md/normal">You need to re-authenticate your Spotify account with Discord!</Text>
+                                    <Text variant="text-sm/normal">This is required for it to be able to read and modify your liked songs.</Text>
+                                    <Text variant="text-sm/normal" style={{ marginTop: 8 }}>Go to Settings - Connections - Spotify</Text>
+                                </ModalContent>
+                                <ModalFooter>
+                                    <Flex>
+                                        <Button
+                                            onClick={modalProps.onClose}
+                                            size={Button.Sizes.SMALL}
+                                            color={Button.Colors.PRIMARY}
+                                        >
+                                            OK
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                this.showInsufficientPermissionsModal = false;
+                                                modalProps.onClose();
+                                            }}
+                                            size={Button.Sizes.SMALL}
+                                            color={Button.Colors.PRIMARY}
+                                        >
+                                            OK, don't show again
+                                        </Button>
+                                    </Flex>
+                                </ModalFooter>
+                            </ModalRoot>
+                        ));
+                    }
+                });
+            }
+            return spotifyPromise;
         }
     }
 
