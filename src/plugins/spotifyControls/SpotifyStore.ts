@@ -18,6 +18,7 @@
 
 import cssText from "~fileContent/spotifyStyles.css";
 
+import { Settings } from "../../api/settings";
 import IpcEvents from "../../utils/IpcEvents";
 import { lazyWebpack } from "../../utils/misc";
 import { proxyLazy } from "../../utils/proxyLazy";
@@ -81,7 +82,7 @@ export const SpotifyStore = proxyLazy(() => {
     const SpotifySocket = lazyWebpack(filters.byProps("getActiveSocketAndDevice"));
     const SpotifyAPI = lazyWebpack(filters.byProps("SpotifyAPIMarker"));
 
-    const API_BASE = "https://api.spotify.com/v1/me/player";
+    const API_BASE = "https://api.spotify.com/v1/me";
 
     class SpotifyStore extends Store {
         constructor(dispatcher: any, handlers: any) {
@@ -92,6 +93,7 @@ export const SpotifyStore = proxyLazy(() => {
         private start = 0;
 
         public track: Track | null = null;
+        public savedTrackIds: Map<string, boolean> = new Map();
         public device: Device | null = null;
         public isPlaying = false;
         public repeat: Repeat = "off";
@@ -119,15 +121,15 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         prev() {
-            this.req("post", "/previous");
+            this.req("post", "/player/previous");
         }
 
         next() {
-            this.req("post", "/next");
+            this.req("post", "/player/next");
         }
 
         setVolume(percent: number) {
-            this.req("put", "/volume", {
+            this.req("put", "/player/volume", {
                 query: {
                     volume_percent: Math.round(percent)
                 }
@@ -139,17 +141,17 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         setPlaying(playing: boolean) {
-            this.req("put", playing ? "/play" : "/pause");
+            this.req("put", playing ? "/player/play" : "/player/pause");
         }
 
         setRepeat(state: Repeat) {
-            this.req("put", "/repeat", {
+            this.req("put", "/player/repeat", {
                 query: { state }
             });
         }
 
         setShuffle(state: boolean) {
-            this.req("put", "/shuffle", {
+            this.req("put", "/player/shuffle", {
                 query: { state }
             }).then(() => {
                 this.shuffle = state;
@@ -157,12 +159,55 @@ export const SpotifyStore = proxyLazy(() => {
             });
         }
 
+        checkSaved() {
+            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && SpotifySocket.getActiveSocketAndDevice() && this.track?.id) {
+                const { track } = this;
+
+                if (!this.savedTrackIds.has(track.id)) {
+                    this.req("get", "/tracks/contains", {
+                        query: {
+                            ids: this.track.id
+                        }
+                    }).then((res: any) => {
+                        console.log("SPOTIFY IS SAVED", res);
+                        if (res && res.body && Array.isArray(res.body)) {
+                            this.savedTrackIds.set(track.id, res.body[0]);
+                            this.emitChange();
+                        }
+                    });
+                }
+            }
+        }
+
+        saveTrack() {
+            if (this.track?.id) {
+                const { track } = this;
+                if (this.savedTrackIds.has(track.id)) {
+                    const current = this.savedTrackIds.get(track.id);
+                    this.req(current ? "put" : "put", "/tracks", { // TODO: needs delete
+                        query: {
+                            ids: this.track.id
+                        }
+                    }).then((res: any) => {
+                        console.log("SPOTIFY SAVED", res);
+                        if (res.ok) {
+                            this.savedTrackIds.set(track.id, !current);
+                            this.emitChange();
+                        }
+                    });
+                } else {
+                    // should never happen as the indicator is only displayed if the track is in the map
+                    console.warn("[SpotifyControls] Tried to save track that wasn't checked yet");
+                }
+            }
+        }
+
         seek(ms: number) {
             if (this.isSettingPosition) return Promise.resolve();
 
             this.isSettingPosition = true;
 
-            return this.req("put", "/seek", {
+            return this.req("put", "/player/seek", {
                 query: {
                     position_ms: Math.round(ms)
                 }
@@ -173,9 +218,10 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         private req(method: "post" | "get" | "put", route: string, data: any = {}) {
-            if (this.device?.is_active)
+            if (this.device?.is_active && route.includes("/player"))
                 (data.query ??= {}).device_id = this.device.id;
 
+            // TODO: if request fails with code 401, show a modal to tell the user to re-authenticate
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
             return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
@@ -194,6 +240,7 @@ export const SpotifyStore = proxyLazy(() => {
             store.position = e.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
+            store.checkSaved(); // TODO: this is not a good spot as SpotifySocket.getActiveSocketAndDevice() might not be ready yet
         },
         SPOTIFY_SET_DEVICES({ devices }: { devices: Device[]; }) {
             store.device = devices.find(d => d.is_active) ?? devices[0] ?? null;

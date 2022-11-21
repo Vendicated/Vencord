@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "../../api/settings";
 import { Devs } from "../../utils/constants";
-import definePlugin from "../../utils/types";
+import definePlugin, { OptionType } from "../../utils/types";
 import { Player } from "./PlayerComponent";
 
 export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.D3SOX],
     dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [
         {
@@ -34,6 +35,16 @@ export default definePlugin({
                 // return [Player, Panel]
                 replace: "return [Vencord.Plugins.plugins.SpotifyControls.renderPlayer(),$1]"
             }
+        },
+        {
+            // Patches Spotify auth link to add scopes required for liking songs (user-library-modify+user-library-read)
+            // https://discord.com/api/v9/connections/spotify/authorize
+            find: "authorize:function",
+            predicate: () => Settings.plugins.SpotifyControls.manageSavedSongs === true,
+            replacement:{
+                match: /return (\w+)\.(\w+)\.get\(\{url:(\w+),oldFormErrors:!0\}\)/,
+                replace: "return Vencord.Plugins.plugins.SpotifyControls.modifyAuthUrl($3, $1.$2.get({url:$3,oldFormErrors:!0}))"
+            },
         },
         // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
         {
@@ -52,6 +63,26 @@ export default definePlugin({
             }
         }
     ],
+
+    options: {
+        manageSavedSongs: {
+            description: "Show a button to manage your saved songs (You need to re-authenticate Spotify for it to work)",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
+    },
+
+    async modifyAuthUrl(url: string, promise: Promise<any>) {
+        if (url.includes("/connections/spotify/authorize")) {
+            const test = await promise;
+            if (test?.body?.url) {
+                test.body.url = test.body.url.replace("&scope=", "&scope=user-library-modify+user-library-read+");
+            }
+            return test;
+        }
+        return promise;
+    },
 
     renderPlayer: () => <Player />
 });
