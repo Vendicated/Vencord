@@ -72,10 +72,10 @@ export default definePlugin({
 
             if (data.activity) {
                 const appId = data.activity.application_id;
-                if (!apps[appId]) apps[appId] = await lookupApp(appId);
+                apps[appId] ||= await lookupApp(appId);
 
                 const app = apps[appId];
-                if (!data.activity.name) data.activity.name = app.name;
+                data.activity.name ||= app.name;
             }
 
             FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
