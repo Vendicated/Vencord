@@ -278,6 +278,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
+                            key={plugin.name}
                         />;
                     })
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
@@ -296,7 +297,7 @@ export default ErrorBoundary.wrap(function Settings() {
                         const tooltipText = plugin.required
                             ? "This plugin is required for Vencord to function."
                             : makeDependencyList(dependencyCheck(plugin.name, depMap));
-                        return <Tooltip text={tooltipText}>
+                        return <Tooltip text={tooltipText} key={plugin.name}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <PluginCard
                                     onMouseLeave={onMouseLeave}
