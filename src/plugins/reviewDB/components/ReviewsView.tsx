@@ -51,7 +51,6 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 tag="h2"
                 variant="eyebrow"
                 style={{
-                    paddingLeft: "12px",
                     marginBottom: "12px",
                     color: "var(--header-primary)"
                 }}
@@ -66,16 +65,19 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 />
             )}
             {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingLeft: "12px", paddingRight: "12px" }}>
+                <Forms.FormText style={{ padding: "12px", paddingTop: "0px", paddingLeft: "4px", fontWeight: "bold", fontStyle: "italic" }}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
             <textarea
-                className={Classes.textarea}
+                className={Classes.textarea.replace("textarea", "")}
+                // this produces something like '-_59yqs ...' but since no class exists with that name its fine
                 placeholder="Enter a comment"
                 onKeyDown={onKeyPress}
                 style={{
-                    padding: "12px",
+                    marginTop: "6px",
+                    resize: "none",
+                    marginBottom: "12px",
                 }}
             />
         </>

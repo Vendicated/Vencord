@@ -16,21 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "../../../utils/misc";
+import { classes, LazyComponent, lazyWebpack } from "../../../utils/misc";
 import { filters, findBulk } from "../../../webpack";
 import { Alerts, UserStore } from "../../../webpack/common";
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
+import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
     // this is terrible, blame mantika
     const p = filters.byProps;
     const [
-        { cozyMessage, buttons, message, groupStart },
+        { cozyMessage, buttons },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, messageContent, wrapper, cozy },
         { contents },
         buttonClasses,
         { defaultColor }
@@ -77,23 +78,32 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, message, groupStart, wrapper, cozy)}>
-                <div className={contents}>
+            <div className={classes(cozyMessage, wrapper)} style={
+                {
+                    marginLeft: "0px",
+                    paddingLeft: "52px",
+                    paddingRight: "16px"
+                }
+            }>
+
+                <div className={contents} style={{ paddingLeft: "0px" }}>
                     <img
                         className={classes(avatar, clickable)}
                         onClick={openModal}
                         src={review.profile_photo || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                        style={{ left: "0px" }}
                     />
                     <span
-                        className={classes(username, clickable)}
-                        style={{ color: "var(--text-muted)" }}
+                        className={classes(clickable)}
+                        style={{ color: "var(--channels-default)", fontSize: "14px" }}
                         onClick={() => openModal()}
                     >
                         {review.username}
                     </span>
+                    {review.badges.map(badge => <ReviewBadge {...badge} />)}
                     <p
                         className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4 }}
+                        style={{ fontSize: 15, marginTop: 4, marginRight: "0px" }}
                     >
                         {review.comment}
                     </p>
