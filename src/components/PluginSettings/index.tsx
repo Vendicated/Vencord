@@ -17,12 +17,11 @@
 */
 
 import Plugins from "~plugins";
-import { DataStore } from "../../api";
 
+import { DataStore } from "../../api";
 import { showNotice } from "../../api/Notices";
 import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import consoleShortcuts from "../../plugins/consoleShortcuts";
 import { ChangeList } from "../../utils/ChangeList";
 import Logger from "../../utils/Logger";
 import { classes, LazyComponent, lazyWebpack, useAwaiter } from "../../utils/misc";
@@ -249,10 +248,10 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const [newPlugins, error, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
-        let Vencord_existingPlugins: Record<string, number> = {};
-        let newPlugins: Array<string> = [];
+        const Vencord_existingPlugins: Record<string, number> = {};
+        const newPlugins: Array<string> = [];
         sortedPlugins.forEach(plugin => {
-            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins ? existingPlugins : []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
+            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins || []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
             if ((Vencord_existingPlugins[plugin.name] + 172800) > dateNow) {
                 newPlugins.push(plugin.name);
             }
