@@ -1,3 +1,6 @@
+> **Warning**
+> These instructions are only for advanced users. If you're not a Developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead. 
+
 # Installation Guide
 
 Welcome to Megu's Installation Guide! In this file, you will learn about how to download, install, and uninstall Vencord!
