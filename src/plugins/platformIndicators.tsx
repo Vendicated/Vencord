@@ -43,7 +43,7 @@ const PlatformIcon = ({ platform, status }) => {
     // Thanks copilot for this pile of shit
     const color = status === "online" ? "#43b581" : status === "idle" ? "#faa61a" : status === "dnd" ? "#f04747" : "#747f8d";
 
-    const tooltip = platform === "desktop" ? "Desktop" : platform === "web" ? "Web" : platform === "mobile" ? "Mobile" : "Embedded";
+    const tooltip = platform[0].toUpperCase() + platform.slice(1);
 
     const Icon = platform === "desktop" ? DesktopIcon : platform === "web" ? WebIcon : platform === "mobile" ? MobileIcon : ConsoleIcon;
 
