@@ -62,7 +62,7 @@ await Promise.all(
             ...commonOptions,
             outfile: "dist/Vencord.user.js",
             banner: {
-                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", PackageJSON.version)
+                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${PackageJSON.version}.${new Date().getTime()}`)
             },
             footer: {
                 // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
