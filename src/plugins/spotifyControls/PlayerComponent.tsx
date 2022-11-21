@@ -122,7 +122,7 @@ function Controls() {
                 {repeat === "track" && <span className={cl("repeat-1")}>1</span>}
                 <Repeat />
             </Button>
-            {Settings.plugins.SpotifyControls.manageSavedSongs === true && track?.id && savedTrackIds.has(track.id) && (
+            {Settings.plugins.SpotifyControls.manageSavedSongs === true && Settings.plugins.SpotifyControls.savedSongsDisplay === "icon" && track?.id && savedTrackIds.has(track.id) && (
                 <Button
                     className={classes(cl("button"), cl(savedTrackIds.get(track.id) ? "saved-on" : "saved-off"))}
                     onClick={() => SpotifyStore.saveTrack()}
@@ -199,6 +199,10 @@ function SeekBar() {
 
 function AlbumContextMenu({ track }: { track: Track; }) {
     const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
+    const [savedTrackIds] = useStateFromStores(
+        [SpotifyStore],
+        () => [SpotifyStore.savedTrackIds]
+    );
 
     return (
         <Menu.ContextMenu
@@ -219,6 +223,16 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 // trolley
                 action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
             />
+            {Settings.plugins.SpotifyControls.manageSavedSongs === true && Settings.plugins.SpotifyControls.savedSongsDisplay === "context" && savedTrackIds.has(track.id) && (
+                <Menu.MenuCheckboxItem
+                    key="like-song"
+                    id="like-song"
+                    label="Like Song"
+                    checked={savedTrackIds.get(track.id)}
+                    action={() => SpotifyStore.saveTrack()}
+                />
+            )}
+            <Menu.MenuSeparator />
             <Menu.MenuControlItem
                 id="spotify-volume"
                 key="spotify-volume"

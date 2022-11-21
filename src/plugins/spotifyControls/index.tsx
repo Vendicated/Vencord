@@ -71,6 +71,15 @@ export default definePlugin({
             default: false,
             restartNeeded: true,
         },
+        savedSongsDisplay: {
+            description: "Where to show the saved songs button",
+            type: OptionType.SELECT,
+            default: "context",
+            options: [
+                { label: "Context menu", value: "context", default: true },
+                { label: "Extra icon", value: "icon" }
+            ],
+        },
     },
 
     async modifyAuthUrl(url: string, promise: Promise<any>) {
