@@ -91,6 +91,18 @@ export interface PluginDef {
      * plugin's settings page
      */
     settingsAboutComponent?: React.ComponentType;
+    /**
+     * If this plugin is an external / user plugin, this link will point to
+     * the external webpage responsible for this plugin. Local plugins should
+     * not have this set, however, not every UserPlugin will have this set to
+     * a link.
+     */
+    externalLink?: string;
+    /**
+     * Signifies whether this plugin is a UserPlugin or not.
+     * This value is set using a build time script in globPlugins.
+     */
+    isUserPlugin?: boolean;
 }
 
 export enum OptionType {

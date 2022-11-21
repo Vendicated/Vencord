@@ -34,6 +34,7 @@ import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";
 import { handleComponentFailed } from "../handleComponentFailed";
 import { Badge } from "./components";
+import UserPluginBadge from "./components/UserPluginBadge";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 
@@ -165,7 +166,9 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
-                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>{plugin.name}{(isNew) && <Badge text="New" color="#ED4245" />}</Text>
+                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>
+                        {plugin.name}{isNew && <Badge text="New" color="#ed4245" />}{plugin.isUserPlugin && <UserPluginBadge plugin={plugin} />}
+                    </Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options
                             ? <CogWheel

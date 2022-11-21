@@ -60,19 +60,23 @@ export const globPlugins = {
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = [
+                { dir: "plugins", official: true },
+                { dir: "userplugins", official: false },
+            ];
             let code = "";
             let plugins = "\n";
             let i = 0;
-            for (const dir of pluginDirs) {
-                if (!existsSync(`./src/${dir}`)) continue;
-                const files = await readdir(`./src/${dir}`);
-                for (const file of files) {
+            for (const pluginDirectory of pluginDirs) {
+                const pluginPath = `./src/${pluginDirectory.dir}`;
+                if (!existsSync(pluginPath)) continue;
+                for (const file of await readdir(pluginPath)) {
                     if (file === "index.ts") {
                         continue;
                     }
                     const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/.tsx?$/, "")}";\n`;
+                    code += `import ${mod} from "./${pluginDirectory.dir}/${file.replace(/.tsx?$/, "")}";\n`;
+                    code += `${mod}['isUserPlugin'] = ${!pluginDirectory.official};`;
                     plugins += `[${mod}.name]:${mod},\n`;
                     i++;
                 }
