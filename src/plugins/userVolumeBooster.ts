@@ -34,8 +34,8 @@ export default definePlugin({
                 replace: (_, restOfFunction, isStream, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
                     + restOfFunction
                     + `maxValue:${defaultMaxVolumePredicate}`
-                    + `?(${isStream}?${higherMaxVolume}:${higherMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier)`
-                    + `:(${isStream}?${minorMaxVolume}:${minorMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier),`
+                    + `?(${isStream}?${higherMaxVolume}:${higherMaxVolume}*Vencord.Settings.plugins.UserVolumeBooster.multiplier)`
+                    + `:(${isStream}?${minorMaxVolume}:${minorMaxVolume}*Vencord.Settings.plugins.UserVolumeBooster.multiplier),`
             }
         }
     ],
