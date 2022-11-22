@@ -75,7 +75,6 @@ export default definePlugin({
             disabled: () => Settings.plugins.SpotifyControls.manageSavedSongs === false,
             description: "Where to show the saved songs button",
             type: OptionType.SELECT,
-            default: "context",
             options: [
                 { label: "Context menu", value: "context", default: true },
                 { label: "Extra icon", value: "icon" }
