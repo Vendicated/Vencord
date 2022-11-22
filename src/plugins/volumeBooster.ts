@@ -20,22 +20,30 @@ import { makeRange } from "../components/PluginSettings/components/SettingSlider
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 
-
 export default definePlugin({
-    name: "UserVolumeBooster",
+    name: "VolumeBooster",
     authors: [Devs.Nuckyz],
-    description: "Allows you to set the user volume above the default maximum.",
+    description: "Allows you to set the user and stream volume above the default maximum.",
 
     patches: [
         {
             find: ".Messages.USER_VOLUME",
             replacement: {
-                match: /(:(.{1,2})\?.{1,2}\..{1,2}\.Messages\.STREAM_VOLUME.+?)maxValue:(.{1,2}\..{1,2})\?(\d+?):(\d+?),/,
-                replace: (_, restOfFunction, isStream, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
-                    + restOfFunction
+                match: /maxValue:(.{1,2}\..{1,2})\?(\d+?):(\d+?),/,
+                replace: (_, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
                     + `maxValue:${defaultMaxVolumePredicate}`
-                    + `?(${isStream}?${higherMaxVolume}:${higherMaxVolume}*Vencord.Settings.plugins.UserVolumeBooster.multiplier)`
-                    + `:(${isStream}?${minorMaxVolume}:${minorMaxVolume}*Vencord.Settings.plugins.UserVolumeBooster.multiplier),`
+                    + `?${higherMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier`
+                    + `:${minorMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier,`
+            }
+        },
+        {
+            find: "currentVolume:",
+            replacement: {
+                match: /maxValue:(.{1,2}\..{1,2})\?(\d+?):(\d+?),/,
+                replace: (_, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
+                    + `maxValue:${defaultMaxVolumePredicate}`
+                    + `?${higherMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier`
+                    + `:${minorMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier,`
             }
         }
     ],
@@ -45,7 +53,7 @@ export default definePlugin({
             description: "Volume Multiplier",
             type: OptionType.SLIDER,
             markers: makeRange(1, 5, 1),
-            default: 2,
+            default: 1,
             stickToMarkers: true,
         }
     }
