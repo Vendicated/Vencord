@@ -223,7 +223,7 @@ export const SpotifyStore = proxyLazy(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            const spotifyPromise = SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            const spotifyPromise: Promise<any> = SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });
