@@ -53,7 +53,7 @@ export default definePlugin({
             description: "Volume Multiplier",
             type: OptionType.SLIDER,
             markers: makeRange(1, 5, 1),
-            default: 1,
+            default: 2,
             stickToMarkers: true,
         }
     }
