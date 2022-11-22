@@ -227,7 +227,7 @@ export const SpotifyStore = proxyLazy(() => {
                 url: API_BASE + route,
                 ...data
             });
-            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && spotifyPromise.catch) {
+            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && route.includes("/tracks") && spotifyPromise.catch) {
                 spotifyPromise.catch((e: any) => {
                     // insufficient client scope
                     if (this.showInsufficientPermissionsModal && e?.body?.error?.status === 403) {
