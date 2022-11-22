@@ -81,7 +81,7 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
         <div
             className="vc-platform-indicator"
             style={{
-                display: "flex", alignItems: "center", marginLeft: "4px"
+                display: "flex", alignItems: "center", marginLeft: "4px", gap: "4px"
             }}
         >
             {icons}
@@ -98,6 +98,7 @@ export default definePlugin({
         {
             // Server member list decorators
             find: "this.renderPremium()",
+            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /this.renderPremium\(\)[^\]]*?\]/,
                 replace: "$&.concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(this.props))"
@@ -106,6 +107,7 @@ export default definePlugin({
         {
             // Dm list decorators
             find: "PrivateChannel.renderAvatar",
+            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /(subText:(.{1,3})\..+?decorators:)(.+?:null)/,
                 replace: "$1[$3].concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators($2.props))"
@@ -114,7 +116,7 @@ export default definePlugin({
         {
             // User badges
             find: "Messages.PROFILE_USER_BADGES",
-            predicate: () => Settings.plugins.PlatformIndicators.showAsBadges,
+            predicate: () => ["both", "badges"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /(Messages\.PROFILE_USER_BADGES,role:"group",children:)(.+?\.key\)\}\)\))/,
                 replace: "$1[Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(e)].concat($2)"
@@ -129,11 +131,25 @@ export default definePlugin({
     ),
 
     options: {
-        showAsBadges: {
-            description: "Show platform icons in user badges",
-            type: OptionType.BOOLEAN,
-            default: true,
+        displayMode: {
+            type: OptionType.SELECT,
+            description: "Where to display the platform indicators",
             restartNeeded: true,
-        }
+            options: [
+                {
+                    label: "Member List & Badges",
+                    value: "both",
+                    default: true
+                },
+                {
+                    label: "Member List Only",
+                    value: "list"
+                },
+                {
+                    label: "Badges Only",
+                    value: "badges"
+                }
+            ]
+        },
     }
 });
