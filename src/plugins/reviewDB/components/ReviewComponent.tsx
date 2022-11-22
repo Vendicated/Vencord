@@ -31,7 +31,7 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons },
         { container, isHeader },
-        { avatar, clickable, messageContent, wrapper, cozy },
+        { avatar, clickable, username, messageContent, wrapper, cozy },
         { contents },
         buttonClasses,
         { defaultColor }
@@ -94,7 +94,7 @@ export default LazyComponent(() => {
                         style={{ left: "0px" }}
                     />
                     <span
-                        className={classes(clickable)}
+                        className={classes(clickable, username)}
                         style={{ color: "var(--channels-default)", fontSize: "14px" }}
                         onClick={() => openModal()}
                     >

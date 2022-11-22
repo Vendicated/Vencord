@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Badge from "../entities/Badge";
 import IpcEvents from "../../../utils/IpcEvents";
 import { Tooltip } from "../../../webpack/common";
+import Badge from "../entities/Badge";
 
 export default function ReviewBadge(badge: Badge) {
     return (
