@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "../api";
 import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 import { ChannelStore, FluxDispatcher, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "../webpack/common";
@@ -36,13 +37,19 @@ interface PreviousChannel {
     channelId: string | null;
 }
 
+
 export default definePlugin({
     name: "KeepCurrentChannel",
-    description: "Attempt to navigate the channel you were in before switching accounts.",
+    description: "Attempt to navigate the channel you were in before switching accounts or loading Discord.",
     authors: [Devs.Nuckyz],
 
     isSwitchingAccount: false,
-    previous: {} as PreviousChannel,
+    previousCache: {} as PreviousChannel,
+
+    attemptToNavigateToChannel(guildId: string | null, channelId: string) {
+        if (!ChannelStore.hasChannel(channelId)) return;
+        NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}`);
+    },
 
     onLogout(e: LogoutEvent) {
         this.isSwitchingAccount = e.isSwitchingAccount;
@@ -50,28 +57,34 @@ export default definePlugin({
 
     onConnectionOpen() {
         if (!this.isSwitchingAccount) return;
-
-        if (this.previous.guildId && this.previous.channelId && ChannelStore.hasChannel(this.previous.channelId)) {
-            NavigationRouter.transitionTo(`/channels/${this.previous.guildId}/${this.previous.channelId}`);
-        }
-
         this.isSwitchingAccount = false;
+
+        if (this.previousCache.channelId) this.attemptToNavigateToChannel(this.previousCache.guildId, this.previousCache.channelId);
     },
 
-    onChannelSelect({ guildId, channelId }: ChannelSelectEvent) {
+    async onChannelSelect({ guildId, channelId }: ChannelSelectEvent) {
         if (this.isSwitchingAccount) return;
 
-        this.previous = {
+        this.previousCache = {
             guildId,
             channelId
         };
+        await DataStore.set("KeepCurrentChannel_previousData", this.previousCache);
     },
 
-    start() {
-        this.previous = {
-            guildId: SelectedGuildStore.getGuildId(),
-            channelId: SelectedChannelStore.getChannelId() ?? null
-        };
+    async start() {
+        const previousData = await DataStore.get<PreviousChannel>("KeepCurrentChannel_previousData");
+        if (previousData) {
+            this.previousCache = previousData;
+
+            if (this.previousCache.channelId) this.attemptToNavigateToChannel(this.previousCache.guildId, this.previousCache.channelId);
+        } else {
+            this.previousCache = {
+                guildId: SelectedGuildStore.getGuildId(),
+                channelId: SelectedChannelStore.getChannelId() ?? null
+            };
+            await DataStore.set("KeepCurrentChannel_previousData", this.previousCache);
+        }
 
         FluxDispatcher.subscribe("LOGOUT", this.onLogout.bind(this));
         FluxDispatcher.subscribe("CONNECTION_OPEN", this.onConnectionOpen.bind(this));
