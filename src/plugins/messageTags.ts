@@ -18,15 +18,15 @@
 
 import { DataStore } from "../api";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, Option, prepareOption, registerCommand, sendBotMessage, unregisterCommand } from "../api/Commands";
-import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../api/settings";
+import definePlugin, { OptionType } from "../utils/types";
 
 const settings = Settings.plugins.MessageTags;
-const emote = '<:luna:1035316192220553236>';
+const emote = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";
 const MessageTagsMarker = Symbol("MessageTags");
 const author = {
-    id: '821472922140803112',
+    id: "821472922140803112",
     bot: false
 };
 
@@ -34,9 +34,9 @@ interface Tag {
     name: string;
     message: string;
     enabled: boolean;
-};
+}
 
-const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>((t) => t ?? []);
+const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>(t => t ?? []);
 const getTag = (name: string) => DataStore.get(DATA_KEY).then<Tag | null>((t: Tag[]) => (t ?? []).find((tt: Tag) => tt.name === name) ?? null);
 const addTag = async (tag: Tag) => {
     const tags = await getTags();
@@ -62,18 +62,18 @@ function createTagCommand(tag: Tag) {
                     author,
                     content: `${emote} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
                 });
-                return;
-            };
+                return { content: `/${tag.name}` };
+            }
 
             if (settings.clyde) sendBotMessage(ctx.channel.id, {
                 author,
                 content: `${emote} The tag **${tag.name}** has been send!`
             });
-            return { content: tag.message.replaceAll('\\n', '\n') };
+            return { content: tag.message.replaceAll("\\n", "\n") };
         },
         [MessageTagsMarker]: true,
     }, "CustomTags");
-};
+}
 
 
 export default definePlugin({
@@ -81,7 +81,7 @@ export default definePlugin({
     description: "Allows you to save messages and to use them with a simple command.",
     authors: [
         {
-            name: 'Luny#8888',
+            name: "Luny#8888",
             id: 821472922140803112n
         }
     ],
@@ -190,7 +190,7 @@ export default definePlugin({
                             content: `${emote} Successfully created the tag **${name}**!`
                         });
                         break; // end 'create'
-                    };
+                    }
                     case "delete": {
                         const name: string = findOption(args[0].options, "tag-name", "");
 
@@ -208,26 +208,26 @@ export default definePlugin({
                             content: `${emote} Successfully deleted the tag **${name}**!`
                         });
                         break; // end 'delete'
-                    };
+                    }
                     case "list": {
                         sendBotMessage(ctx.channel.id, {
                             author,
                             embeds: [
                                 {
-                                    //@ts-ignore
-                                    title: 'All Tags:',
-                                    //@ts-ignore
+                                    // @ts-ignore
+                                    title: "All Tags:",
+                                    // @ts-ignore
                                     description: (await getTags())
-                                        .map((tag) => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll('\\n', ' ')}${tag.message.length > 72 ? "..." : ""}`)
+                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${emote} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    //@ts-ignore
+                                    // @ts-ignore
                                     color: 0xd77f7f,
-                                    type: 'rich',
+                                    type: "rich",
                                 }
                             ]
                         });
                         break; // end 'list'
-                    };
+                    }
                     case "preview": {
                         const name: string = findOption(args[0].options, "tag-name", "");
                         const tag = await getTag(name);
@@ -240,11 +240,16 @@ export default definePlugin({
 
                         sendBotMessage(ctx.channel.id, {
                             author,
-                            content: tag.message.replaceAll('\\n', '\n')
+                            content: tag.message.replaceAll("\\n", "\n")
                         });
                         break; // end 'preview'
-                    };
-                };
+                    }
+                }
+
+                return sendBotMessage(ctx.channel.id, {
+                    author,
+                    content: "Invalid sub-command"
+                });
             }
         }
     ]
