@@ -81,10 +81,10 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     );
 }
 
-function Controls() {
-    const [isPlaying, shuffle, repeat, track, savedTrackIds] = useStateFromStores(
+function Controls({ track }: { track: Track; }) {
+    const [isPlaying, shuffle, repeat, savedTrackIds] = useStateFromStores(
         [SpotifyStore],
-        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat, SpotifyStore.track, SpotifyStore.savedTrackIds]
+        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat, SpotifyStore.savedTrackIds]
     );
 
     const [nextRepeat, repeatClassName] = (() => {
@@ -375,7 +375,7 @@ export function Player() {
             <div id={cl("player")}>
                 <Info track={track} />
                 <SeekBar />
-                <Controls />
+                <Controls track={track} />
             </div>
         </ErrorBoundary>
     );
