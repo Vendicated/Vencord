@@ -72,6 +72,7 @@ export default definePlugin({
             restartNeeded: true,
         },
         savedSongsDisplay: {
+            disabled: () => Settings.plugins.SpotifyControls.manageSavedSongs === false,
             description: "Where to show the saved songs button",
             type: OptionType.SELECT,
             default: "context",
