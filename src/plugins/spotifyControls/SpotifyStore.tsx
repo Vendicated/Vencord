@@ -163,16 +163,16 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         checkSaved() {
-            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && SpotifySocket.getActiveSocketAndDevice() && this.track?.id) {
-                const { track } = this;
+            const { track } = this;
+            if (Settings.plugins.SpotifyControls.manageSavedSongs === true && SpotifySocket.getActiveSocketAndDevice() && track?.id) {
 
                 if (!this.savedTrackIds.has(track.id)) {
                     this.req("get", "/tracks/contains", {
                         query: {
-                            ids: this.track.id
+                            ids: track.id
                         }
                     }).then((res: any) => {
-                        if (res && res.body && Array.isArray(res.body)) {
+                        if (res?.body && Array.isArray(res.body)) {
                             this.savedTrackIds.set(track.id, res.body[0]);
                             this.emitChange();
                         }
@@ -182,16 +182,16 @@ export const SpotifyStore = proxyLazy(() => {
         }
 
         saveTrack() {
-            if (this.track?.id) {
-                const { track } = this;
+            const { track } = this;
+            if (track?.id) {
                 if (this.savedTrackIds.has(track.id)) {
                     const current = this.savedTrackIds.get(track.id);
                     this.req(current ? "delete" : "put", "/tracks", {
                         query: {
-                            ids: this.track.id
+                            ids: track.id
                         }
                     }).then((res: any) => {
-                        if (res.ok) {
+                        if (res?.ok) {
                             this.savedTrackIds.set(track.id, !current);
                             this.emitChange();
                         }
