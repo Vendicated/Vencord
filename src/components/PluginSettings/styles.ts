@@ -29,7 +29,7 @@ export const PluginsGridItem: React.CSSProperties = {
     borderRadius: 3,
     cursor: "pointer",
     display: "block",
-    height: "min-content",
+    height: "100%",
     padding: 10,
     width: "100%",
 };
