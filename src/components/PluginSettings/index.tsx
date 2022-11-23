@@ -165,7 +165,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
-                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>{plugin.name}{(isNew) && <Badge text="New" color="#ED4245" />}</Text>
+                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>{plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options
                             ? <CogWheel
@@ -246,23 +246,23 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    let [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
+    const [newPlugins, newpluginsError, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
         const Vencord_existingPlugins: Record<string, number> = {};
-        const newPlugins: Array<string> = [];
-        sortedPlugins.forEach(plugin => {
+        let newPlugins: Array<string> = [];
+        sortedPlugins.map(plugin => {
             Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins || []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
-            if ((Vencord_existingPlugins[plugin.name] + 172800) > dateNow) {
+            if ((Vencord_existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
                 newPlugins.push(plugin.name);
             }
         });
         DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins);
+
+        if (window._.isEqual(newPlugins, sortedPluginNames)) {
+            newPlugins = [];
+        }
         return newPlugins;
     }));
-
-    if (JSON.stringify(newPlugins) === JSON.stringify(sortedPluginNames)) {
-        newPlugins = [];
-    }
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">

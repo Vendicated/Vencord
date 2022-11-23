@@ -50,21 +50,13 @@ export const SettingsIcon: React.CSSProperties = {
 };
 
 export const BadgeStyle: React.CSSProperties = {
-    paddingTop: "0",
-    paddingBottom: "0",
-    paddingRight: "6px",
-    paddingLeft: "6px",
+    padding: "0 6px",
     fontFamily: "var(--font-display)",
-    fontWeight: "500px",
-    textTransform: "uppercase",
+    fontWeight: "500",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
     borderRadius: "8px",
     height: "16px",
-    minWidth: "16px",
-    minHeight: "16px",
     fontSize: "12px",
     lineHeight: "16px",
-    color: "white",
+    color: "var(--white-500)",
 };
