@@ -22,7 +22,6 @@ import { Settings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 
-const settings = Settings.plugins.MessageTags;
 const EMOTE = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";
 const MessageTagsMarker = Symbol("MessageTags");
@@ -66,7 +65,7 @@ function createTagCommand(tag: Tag) {
                 return { content: `/${tag.name}` };
             }
 
-            if (settings.clyde) sendBotMessage(ctx.channel.id, {
+            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
                 author,
                 content: `${EMOTE} The tag **${tag.name}** has been sent!`
             });
