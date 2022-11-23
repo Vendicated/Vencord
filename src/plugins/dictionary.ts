@@ -64,7 +64,7 @@ export default definePlugin({
                                     }
                                 ],
                                 color: 0xFF9900,
-                                footer: { text: `👍 ${definition.thumbs_up.toString()} | 👎 ${definition.thumbs_down.toString()}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
+                                footer: { text: `👍 ${definition.thumbs_up.toString()} | 👎 ${definition.thumbs_down.toString()} | Uploaded by ${definition.author}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
                                 timestamp: new Date(definition.written_on).toISOString()
                             }
                         ] as any
