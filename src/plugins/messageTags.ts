@@ -152,7 +152,7 @@ export default definePlugin({
                         }
                     ]
                 }
-            ].map(prepareOption),
+            ]
 
             async execute(args, ctx) {
 
