@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { LoDashWrapper } from "lodash";
+
 
 declare global {
     /**
@@ -54,6 +56,7 @@ declare global {
             push(chunk: any): any;
             pop(): any;
         };
+        _: LoDashWrapper<any>;
         [k: string]: any;
     }
 }
