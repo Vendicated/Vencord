@@ -53,7 +53,6 @@ export const BadgeStyle: React.CSSProperties = {
     padding: "0 6px",
     fontFamily: "var(--font-display)",
     fontWeight: "500",
-    whiteSpace: "nowrap",
     borderRadius: "8px",
     height: "16px",
     fontSize: "12px",
