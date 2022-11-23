@@ -214,7 +214,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             size={Button.Sizes.SMALL}
                             color={Button.Colors.RED}
                         >
-                            Exit Without Saving
+                            Cancel
                         </Button>
                         <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -226,7 +226,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onMouseLeave={onMouseLeave}
                                     disabled={!canSubmit()}
                                 >
-                                    Save & Exit
+                                    Save & Close
                                 </Button>
                             )}
                         </Tooltip>
