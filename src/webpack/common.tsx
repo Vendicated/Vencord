@@ -41,6 +41,7 @@ export const PresenceStore = lazyWebpack(filters.byProps("setCurrentUserOnConnec
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
+export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
 
 export const Forms = {} as {
@@ -125,6 +126,13 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
+export const NavigationRouter = mapMangledModuleLazy("Transitioning to external path", {
+    transitionTo: filters.byCode("Transitioning to external path"),
+    transitionToGuild: filters.byCode("transitionToGuild"),
+    goBack: filters.byCode("goBack()"),
+    goForward: filters.byCode("goForward()"),
+});
+
 waitFor("useState", m => React = m);
 
 waitFor(["dispatch", "subscribe"], m => {
@@ -139,6 +147,7 @@ waitFor(["dispatch", "subscribe"], m => {
 waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
 waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
+waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
