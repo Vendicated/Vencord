@@ -18,7 +18,7 @@
 
 import type { KeyboardEvent } from "react";
 
-import { lazyWebpack, useAwaiter } from "../../../utils/misc";
+import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
 import { Forms, Text } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
@@ -51,7 +51,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 tag="h2"
                 variant="eyebrow"
                 style={{
-                    paddingLeft: "12px",
+                    paddingLeft: "0px",
                     marginBottom: "12px",
                     color: "var(--header-primary)"
                 }}
@@ -66,16 +66,18 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 />
             )}
             {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingLeft: "12px", paddingRight: "12px" }}>
+                <Forms.FormText style={{ paddingLeft: "0px", paddingRight: "12px", marginBottom: "12px" }}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
             <textarea
-                className={Classes.textarea}
+                className={classes(Classes.textarea, "enter-comment")}
                 placeholder="Enter a comment"
                 onKeyDown={onKeyPress}
                 style={{
                     padding: "12px",
+                    marginBottom: "12px",
+                    color: "var(--text-normal)"
                 }}
             />
         </>

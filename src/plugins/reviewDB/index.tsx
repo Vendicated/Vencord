@@ -45,10 +45,11 @@ export default definePlugin({
     options: {
         authorize: {
             type: OptionType.COMPONENT,
-            description: "Authorise with ReviewDB",
+            description: "Authorize with ReviewDB",
             component: () => (
                 <Button onClick={authorize}>
-                    Authorise with ReviewDB
+                    Authorize with ReviewDB
+                    {/* un-britishes (https://www.merriam-webster.com/dictionary/authorise) */}
                 </Button>
             )
         },
