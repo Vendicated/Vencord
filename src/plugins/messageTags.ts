@@ -68,7 +68,7 @@ function createTagCommand(tag: Tag) {
 
             if (settings.clyde) sendBotMessage(ctx.channel.id, {
                 author,
-                content: `${EMOTE} The tag **${tag.name}** has been send!`
+                content: `${EMOTE} The tag **${tag.name}** has been sent!`
             });
             return { content: tag.message.replaceAll("\\n", "\n") };
         },
