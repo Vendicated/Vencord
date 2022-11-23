@@ -17,7 +17,7 @@
 */
 
 import { DataStore } from "../api";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, prepareOption, registerCommand, sendBotMessage, unregisterCommand } from "../api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "../api/Commands";
 import { Settings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
