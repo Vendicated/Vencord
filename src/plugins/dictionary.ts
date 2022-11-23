@@ -22,7 +22,7 @@ import { Devs } from "../utils/constants";
 import definePlugin from "../utils/types";
 
 export default definePlugin({
-    name: "Urban Dictionary",
+    name: "UrbanDictionary",
     description: "Searches for a word on Urban Dictionary",
     authors: [Devs.jewdev],
     dependencies: ["CommandsAPI"],
@@ -30,7 +30,7 @@ export default definePlugin({
         {
             name: "urban",
             description: "Returns the definition of a word from Urban Dictionary",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
                     type: ApplicationCommandOptionType.STRING,
@@ -61,20 +61,10 @@ export default definePlugin({
                                     {
                                         name: "Example",
                                         value: linkify(definition.example)
-                                    },
-                                    {
-                                        name: "👍",
-                                        value: definition.thumbs_up.toString(),
-                                        inline: true
-                                    },
-                                    {
-                                        name: "👎",
-                                        value: definition.thumbs_down.toString(),
-                                        inline: true
                                     }
                                 ],
                                 color: 0xFF9900,
-                                footer: { text: `Submitted by ${definition.author}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
+                                footer: { text: `👍 ${definition.thumbs_up.toString()} | 👎 ${definition.thumbs_down.toString()}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
                                 timestamp: new Date(definition.written_on).toISOString()
                             }
                         ] as any
