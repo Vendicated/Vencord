@@ -71,34 +71,37 @@ export default LazyComponent(() => {
                 body: "Do you really you want to report this review?",
                 confirmText: "Report",
                 cancelText: "Nevermind",
-                confirmColor: "red",
+                // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: () => reportReview(review.id)
             });
         }
 
         return (
-            <div className={classes(cozyMessage, message, groupStart, wrapper, cozy)}>
+            <div className={classes(cozyMessage, message, groupStart, wrapper, cozy, "user-review")}>
                 <div className={contents}>
                     <img
                         className={classes(avatar, clickable)}
+                        style={{ left: "8px" }}
                         onClick={openModal}
                         src={review.profile_photo || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                     />
                     <span
                         className={classes(username, clickable)}
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--text-normal)", right: "8px" }}
                         onClick={() => openModal()}
                     >
                         {review.username}
                     </span>
                     <p
                         className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4 }}
+                        style={{ fontSize: 15, marginTop: 4, right: "8px" }}
                     >
                         {review.comment}
                     </p>
-                    <div className={classes(container, isHeader, buttons)}>
-                        <div className={buttonClasses.wrapper}>
+                    <div className={classes(container, isHeader, buttons)} style={{
+                        padding: "0px",
+                    }}>
+                        <div className={buttonClasses.wrapper} >
                             <MessageButton type="report" callback={reportRev} />
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (
                                 <MessageButton type="delete" callback={delReview} />
