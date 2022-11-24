@@ -48,7 +48,8 @@ export default definePlugin({
         hide: {
             type: OptionType.BOOLEAN,
             description: "Hide notes",
-            default: false
+            default: false,
+            restartNeeded: true
         },
         noSpellCheck: {
             type: OptionType.BOOLEAN,
