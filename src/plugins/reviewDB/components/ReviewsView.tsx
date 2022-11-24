@@ -73,7 +73,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 )}
                 <textarea
                     className={classes(Classes.textarea, "enter-comment")}
-                    placeholder={"Review @" + UserStore.getUser(userId)}
+                    placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
                     onKeyDown={onKeyPress}
                     style={{
                         padding: "12px",
