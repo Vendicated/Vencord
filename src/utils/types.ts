@@ -211,3 +211,13 @@ export interface PluginOptionComponent extends PluginOptionBase {
 }
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
+
+export function defineLocale<L extends LocaleDef>(l: L & Record<string, any>) {
+    return l;
+}
+
+export interface LocaleDef {
+    code: string;
+    name: string;
+    messages?: Record<string, string>;
+}
