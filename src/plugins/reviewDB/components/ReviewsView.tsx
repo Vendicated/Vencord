@@ -19,7 +19,7 @@
 import type { KeyboardEvent } from "react";
 
 import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Text } from "../../../webpack/common";
+import { Forms, Text, UserUtils } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
@@ -72,12 +72,15 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             )}
             <textarea
                 className={classes(Classes.textarea, "enter-comment")}
-                placeholder="Enter a comment"
+                placeholder={"Review " + UserUtils.fetchUser(userId)}
                 onKeyDown={onKeyPress}
                 style={{
                     padding: "12px",
                     marginBottom: "12px",
-                    color: "var(--text-normal)"
+                    color: "var(--text-normal)",
+                    border: "1px solid var(--profile-message-input-border-color)",
+                    fontSize: "14px",
+                    borderRadius: "3px",
                 }}
             />
         </>
