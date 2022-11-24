@@ -87,7 +87,7 @@ export default LazyComponent(() => {
                     />
                     <span
                         className={classes(username, clickable)}
-                        style={{ color: "var(--text-muted)", right: "8px" }}
+                        style={{ color: "var(--text-normal)", right: "8px" }}
                         onClick={() => openModal()}
                     >
                         {review.username}
