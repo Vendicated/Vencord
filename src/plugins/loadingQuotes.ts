@@ -46,7 +46,7 @@ const quotes = [
     "Ynw$v`&cg`dl fml`%rhlhs*",
     "Dnl$p%qhz{s' hv$w%hh|aceg!;#gpvt(fl+cndea`&dg|fon&v#wjjqm(",
     "\ud83d)pft`gs(ec`e!13$qojmz#",
-    "a!njcmr'ide~nu\"wkh`hgeoyy!kp$jmfq",
+    "a!njcmr'ide~nu\"lb%rheoedldpz$lu'gbkr",
     "dn\"zkp&kgo4",
     "hnpqkw",
     "sn\"fau",
