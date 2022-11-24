@@ -18,8 +18,8 @@
 
 import type { KeyboardEvent } from "react";
 
-import { lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Text } from "../../../webpack/common";
+import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
+import { Forms, Text, UserStore } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
@@ -46,38 +46,45 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     }
 
     return (
-        <>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{
-                    paddingLeft: "12px",
-                    marginBottom: "12px",
-                    color: "var(--header-primary)"
-                }}
-            >
-                User Reviews
-            </Text>
-            {reviews?.map(review =>
-                <ReviewComponent
-                    key={review.id}
-                    review={review}
-                    refetch={refetch}
+        <div className="ReviewDB">
+            <>
+                <Text
+                    tag="h2"
+                    variant="eyebrow"
+                    style={{
+                        paddingLeft: "0px",
+                        marginBottom: "12px",
+                        color: "var(--header-primary)"
+                    }}
+                >
+                    User Reviews
+                </Text>
+                {reviews?.map(review =>
+                    <ReviewComponent
+                        key={review.id}
+                        review={review}
+                        refetch={refetch}
+                    />
+                )}
+                {reviews?.length === 0 && (
+                    <Forms.FormText style={{ paddingLeft: "0px", paddingRight: "12px", marginBottom: "12px" }}>
+                        Looks like nobody reviewed this user yet. You could be the first!
+                    </Forms.FormText>
+                )}
+                <textarea
+                    className={classes(Classes.textarea, "enter-comment")}
+                    placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
+                    onKeyDown={onKeyPress}
+                    style={{
+                        padding: "12px",
+                        marginBottom: "12px",
+                        color: "var(--text-normal)",
+                        border: "1px solid var(--profile-message-input-border-color)",
+                        fontSize: "14px",
+                        borderRadius: "3px",
+                    }}
                 />
-            )}
-            {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingLeft: "12px", paddingRight: "12px" }}>
-                    Looks like nobody reviewed this user yet. You could be the first!
-                </Forms.FormText>
-            )}
-            <textarea
-                className={Classes.textarea}
-                placeholder="Enter a comment"
-                onKeyDown={onKeyPress}
-                style={{
-                    padding: "12px",
-                }}
-            />
-        </>
+            </>
+        </div>
     );
 }
