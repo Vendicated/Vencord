@@ -302,7 +302,7 @@ export default ErrorBoundary.wrap(function Settings() {
                                 <PluginCard
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    onRestartNeeded={name => changes.add(name)}
+                                    onRestartNeeded={name => changes.handleChange(name)}
                                     disabled={plugin.required || !!dependency}
                                     plugin={plugin}
                                 />

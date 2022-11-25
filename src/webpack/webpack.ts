@@ -42,8 +42,6 @@ export const filters = {
             ? m => m[props[0]] !== void 0
             : m => props.every(p => m[p] !== void 0),
 
-    byDisplayName: (deezNuts: string): FilterFn => m => m.default?.displayName === deezNuts,
-
     byCode: (...code: string[]): FilterFn => m => {
         if (typeof m !== "function") return false;
         const s = Function.prototype.toString.call(m);
@@ -75,6 +73,9 @@ if (IS_DEV && !IS_WEB) {
     }, 0);
 }
 
+/**
+ * Find the first module that matches the filter
+ */
 export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
@@ -283,22 +284,31 @@ export function mapMangledModuleLazy<S extends string>(code: string, mappers: Re
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
 
+/**
+ * Find the first module that has the specified properties
+ */
 export function findByProps(...props: string[]) {
     return find(filters.byProps(...props));
 }
 
+/**
+ * Find all modules that have the specified properties
+ */
 export function findAllByProps(...props: string[]) {
     return findAll(filters.byProps(...props));
 }
 
+/**
+ * Find a function by its code
+ */
 export function findByCode(...code: string[]) {
     return find(filters.byCode(...code));
 }
 
-export function findByDisplayName(deezNuts: string) {
-    return find(filters.byDisplayName(deezNuts));
-}
-
+/**
+ * Wait for a module that matches the provided filter to be registered,
+ * then call the callback with the module as the first argument
+ */
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
     if (typeof filter === "string")
         filter = filters.byProps(filter);
