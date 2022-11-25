@@ -109,7 +109,7 @@ export default definePlugin({
     },
 
     stop() {
-        FluxDispatcher.unsubscribe("RCT_CONNECTION_STATE", this.handleRtcConnectionState);
+        FluxDispatcher.unsubscribe("RTC_CONNECTION_STATE", this.handleRtcConnectionState);
         this.style?.remove();
         clearInterval(this.interval);
     }
