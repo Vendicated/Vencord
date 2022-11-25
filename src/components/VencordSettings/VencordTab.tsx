@@ -37,7 +37,7 @@ function VencordSettings() {
                 <Card className={st("QuickActionCard")}>
                     {IS_WEB ? (
                         <Button
-                            onClick={() => require("./Monaco").launchMonacoEditor()}
+                            onClick={() => require("../Monaco").launchMonacoEditor()}
                             size={Button.Sizes.SMALL}
                             disabled={settingsDir === "Loading..."}>
                             Open QuickCSS File
