@@ -17,16 +17,25 @@
 */
 
 import { downloadSettingsBackup, uploadSettingsBackup } from "../../utils/settingsSync";
-import { Button, Forms, Margins, Text } from "../../webpack/common";
+import { Button, Card, Forms, Margins, Text } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 
 function BackupRestoreTab() {
     return (
         <Forms.FormSection title="Settings Sync">
-            <Text variant="text-md/normal" className={Margins.marginBottom8}>
-                <b>Warning:</b> Importing a settings file will overwrite your current settings.
-            </Text>
+            <Card style={{
+                backgroundColor: "var(--info-warning-background)",
+                borderColor: "var(--info-warning-foreground)",
+                color: "var(--info-warning-text)",
+                padding: "1em",
+                marginBottom: "0.5em",
+            }}>
+                <Flex flexDirection="column">
+                    <strong>Warning</strong>
+                    <span>Importing a settings file will overwrite your current settings.</span>
+                </Flex>
+            </Card>
             <Text variant="text-md/normal" className={Margins.marginBottom8}>
                 You can import and export your Vencord settings as a JSON file.
                 This allows you to easily transfer your settings to another device,
