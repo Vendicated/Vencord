@@ -22,12 +22,7 @@ import { Devs } from "../utils/constants";
 import { LazyComponent } from "../utils/misc";
 import definePlugin from "../utils/types";
 
-let SettingsComponent;
-
-function loadSettingsTab(tabName: string) {
-    SettingsComponent ??= LazyComponent(() => require("../components/VencordSettings").default);
-    return SettingsComponent ? <SettingsComponent tab={tabName} /> : null;
-}
+const SettingsComponent = LazyComponent(() => require("../components/VencordSettings").default);
 
 export default definePlugin({
     name: "Settings",
@@ -67,11 +62,11 @@ export default definePlugin({
     }],
 
     tabs: {
-        vencord: () => loadSettingsTab("VencordSettings"),
-        plugins: () => loadSettingsTab("VencordPlugins"),
-        themes: () => loadSettingsTab("VencordThemes"),
-        updater: () => loadSettingsTab("VencordUpdater"),
-        sync: () => loadSettingsTab("VencordSettingsSync")
+        vencord: () => <SettingsComponent tab="VencordSettings" />,
+        plugins: () => <SettingsComponent tab="VencordPlugins" />,
+        themes: () => <SettingsComponent tab="VencordThemes" />,
+        updater: () => <SettingsComponent tab="VencordUpdater" />,
+        sync: () => <SettingsComponent tab="VencordSettingsSync" />
     },
 
     get electronVersion() {
