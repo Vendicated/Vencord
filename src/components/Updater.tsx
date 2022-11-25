@@ -192,7 +192,7 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord Updater">
+        <Forms.FormSection>
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
             <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
