@@ -17,6 +17,7 @@ specifiers:
   eslint-plugin-simple-import-sort: ^8.0.0
   eslint-plugin-unused-imports: ^2.0.0
   fflate: ^0.7.4
+  moment: ^2.29.4
   puppeteer-core: ^19.2.2
   standalone-electron-types: ^1.0.0
   type-fest: ^3.1.0
@@ -41,6 +42,7 @@ devDependencies:
   eslint-plugin-header: 3.1.1_eslint@8.24.0
   eslint-plugin-simple-import-sort: 8.0.0_eslint@8.24.0
   eslint-plugin-unused-imports: 2.0.0_5yz3upex2kb6hbdwaq7bihlxnq
+  moment: 2.29.4
   puppeteer-core: 19.2.2
   standalone-electron-types: 1.0.0
   type-fest: 3.1.0
