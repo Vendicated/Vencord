@@ -17,11 +17,10 @@
 */
 
 import { useSettings } from "../api/settings";
-import { ChangeList } from "../utils/ChangeList";
 import IpcEvents from "../utils/IpcEvents";
 import { useAwaiter } from "../utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "../utils/settingsSync";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Switch } from "../webpack/common";
+import { Button, Card, Forms, Margins, React, Switch } from "../webpack/common";
 import DonateButton from "./DonateButton";
 import ErrorBoundary from "./ErrorBoundary";
 import { Flex } from "./Flex";
@@ -30,27 +29,6 @@ import { handleComponentFailed } from "./handleComponentFailed";
 export default ErrorBoundary.wrap(function Settings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>(), []);
-
-    React.useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>The following plugins require a restart:</p>
-                    <div>{changes.map((s, i) => (
-                        <>
-                            {i > 0 && ", "}
-                            {Parser.parse("`" + s + "`")}
-                        </>
-                    ))}</div>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
-    }, []);
 
     return (
         <Forms.FormSection tag="h1" title="Vencord">

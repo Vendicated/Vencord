@@ -16,6 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/**
+ * Returns a new function that will call the wrapped function
+ * after the specified delay. If the function is called again
+ * within the delay, the timer will be reset.
+ * @param func The function to wrap
+ * @param delay The delay in milliseconds
+ */
 export function debounce<T extends Function>(func: T, delay = 300): T {
     let timeout: NodeJS.Timeout;
     return function (...args: any[]) {

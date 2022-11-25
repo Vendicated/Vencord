@@ -18,14 +18,18 @@
 
 import { Promisable } from "type-fest";
 
+/**
+ * A queue that can be used to run tasks consecutively.
+ * Highly recommended for things like fetching data from Discord
+ */
 export class Queue {
     /**
      * @param maxSize The maximum amount of functions that can be queued at once.
-     *              If the queue is full, the oldest function will be removed.
+     *                If the queue is full, the oldest function will be removed.
      */
     constructor(public maxSize = Infinity) { }
 
-    queue = [] as Array<() => Promisable<unknown>>;
+    private queue = [] as Array<() => Promisable<unknown>>;
 
     private promise?: Promise<any>;
 
@@ -34,7 +38,7 @@ export class Queue {
         if (func)
             this.promise = Promise.resolve()
                 .then(func)
-                .then(() => this.next());
+                .finally(() => this.next());
         else
             this.promise = undefined;
     }
@@ -44,6 +48,11 @@ export class Queue {
             this.next();
     }
 
+    /**
+     * Append a task at the end of the queue. This task will be executed after all other tasks
+     * If the queue exceeds the specified maxSize, the first task in queue will be removed.
+     * @param func Task
+     */
     push<T>(func: () => Promisable<T>) {
         if (this.size >= this.maxSize)
             this.queue.shift();
@@ -52,6 +61,11 @@ export class Queue {
         this.run();
     }
 
+    /**
+     * Prepend a task at the beginning of the queue. This task will be executed next
+     * If the queue exceeds the specified maxSize, the last task in queue will be removed.
+     * @param func Task
+     */
     unshift<T>(func: () => Promisable<T>) {
         if (this.size >= this.maxSize)
             this.queue.pop();
@@ -60,6 +74,9 @@ export class Queue {
         this.run();
     }
 
+    /**
+     * The amount of tasks in the queue
+     */
     get size() {
         return this.queue.length;
     }
