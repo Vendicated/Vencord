@@ -22,9 +22,9 @@ import { lazyWebpack } from "../../utils/misc";
 import { filters } from "../../webpack";
 import { Forms, React, Router, Text } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
-import Updater from "../Updater";
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
+import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
 
 const style = document.createElement("style");
