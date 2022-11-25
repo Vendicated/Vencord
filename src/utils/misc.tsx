@@ -70,6 +70,11 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
     return [state.value, state.error, state.pending, () => setSignal(signal + 1)];
 }
 
+export function useForceUpdater() {
+    const [, set] = React.useState(0);
+    return () => set(s => s + 1);
+}
+
 /**
  * A lazy component. The factory method is called on first render. For example useful
  * for const Component = LazyComponent(() => findByDisplayName("...").default)

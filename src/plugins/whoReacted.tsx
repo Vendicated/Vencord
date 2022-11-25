@@ -16,19 +16,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { User } from "discord-types/general";
+import { ReactionEmoji, User } from "discord-types/general";
 
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Devs } from "../utils/constants";
-import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { LazyComponent, lazyWebpack, sleep, useForceUpdater } from "../utils/misc";
+import { Queue } from "../utils/Queue";
 import definePlugin from "../utils/types";
 import { filters, findByCode } from "../webpack";
-import { ChannelStore, React, Tooltip } from "../webpack/common";
+import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "../webpack/common";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
 
 const ReactionStore = lazyWebpack(filters.byProps("getReactions"));
+
+const queue = new Queue();
+
+function fetchReactions(msg: Message, emoji: ReactionEmoji) {
+    const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
+    return RestAPI.get({
+        url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${key}`,
+        query: {
+            limit: 100
+        },
+        oldFormErrors: true
+    })
+        .then(res => FluxDispatcher.dispatch({
+            type: "MESSAGE_REACTION_ADD_USERS",
+            channelId: msg.channel_id,
+            messageId: msg.id,
+            users: res.body,
+            emoji
+        }))
+        .catch(console.error)
+        .finally(() => sleep(250));
+}
+
+function getReactionsWithQueue(msg: Message, e: ReactionEmoji) {
+    const key = `${msg.id}:${e.name}:${e.id ?? ""}`;
+    const cache = ReactionStore.__getLocalVars().reactions[key] ??= { fetched: false, users: {} };
+    if (!cache.fetched) {
+        queue.unshift(() =>
+            fetchReactions(msg, e)
+        );
+        cache.fetched = true;
+    }
+
+    return cache.users;
+}
 
 function makeRenderMoreUsers(users: User[]) {
     return function renderMoreUsers(_label: string, _count: number) {
@@ -62,7 +98,7 @@ export default definePlugin({
     }],
 
     renderUsers(props: RootObject) {
-        return (
+        return props.message.reactions.length > 10 ? null : (
             <ErrorBoundary noop>
                 <this._renderUsers {...props} />
             </ErrorBoundary>
@@ -70,8 +106,19 @@ export default definePlugin({
     },
 
     _renderUsers({ message, emoji }: RootObject) {
-        const reactions = ReactionStore.getReactions(message.channel_id, message.id, emoji);
-        const users = Object.values(reactions) as User[];
+        const forceUpdate = useForceUpdater();
+        React.useEffect(() => {
+            const cb = (e: any) => {
+                if (e.messageId === message.id)
+                    forceUpdate();
+            };
+            FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
+
+            return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
+        }, [message.id]);
+
+        const reactions = getReactionsWithQueue(message, emoji);
+        const users = Object.values(reactions).filter(Boolean) as User[];
 
         return (
             <div
@@ -79,7 +126,6 @@ export default definePlugin({
             >
                 <UserSummaryItem
                     users={users}
-                    count={users.length}
                     guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
                     renderIcon={false}
                     max={5}
