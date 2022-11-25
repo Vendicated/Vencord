@@ -70,6 +70,9 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
     return [state.value, state.error, state.pending, () => setSignal(signal + 1)];
 }
 
+/**
+ * Returns a function that can be used to force rerender react components
+ */
 export function useForceUpdater() {
     const [, set] = React.useState(0);
     return () => set(s => s + 1);
@@ -144,6 +147,9 @@ export function classes(...classes: string[]) {
     return classes.join(" ");
 }
 
+/**
+ * Returns a promise that resolves after the specified amount of time
+ */
 export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
 }
