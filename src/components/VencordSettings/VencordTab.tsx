@@ -39,8 +39,7 @@ function VencordSettings() {
                         <Button
                             onClick={() => require("./Monaco").launchMonacoEditor()}
                             size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}
-                        >
+                            disabled={settingsDir === "Loading..."}>
                             Open QuickCSS File
                         </Button>
                     ) : (
@@ -79,8 +78,7 @@ function VencordSettings() {
                 <Switch
                     value={settings.useQuickCss}
                     onChange={(v: boolean) => settings.useQuickCss = v}
-                    note="Loads styles from your QuickCss file"
-                >
+                    note="Loads styles from your QuickCss file">
                     Use QuickCss
                 </Switch>
                 {!IS_WEB && (
@@ -88,14 +86,14 @@ function VencordSettings() {
                         <Switch
                             value={settings.enableReactDevtools}
                             onChange={(v: boolean) => settings.enableReactDevtools = v}
-                            note="Requires a full restart"
-                        >Enable React Developer Tools
+                            note="Requires a full restart">
+                            Enable React Developer Tools
                         </Switch>
                         <Switch
                             value={settings.notifyAboutUpdates}
                             onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                            note="Shows a Toast on StartUp"
-                        >Get notified about new Updates
+                            note="Shows a Toast on StartUp">
+                            Get notified about new Updates
                         </Switch>
                     </React.Fragment>
                 )}

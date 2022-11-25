@@ -39,25 +39,19 @@ interface SettingsProps {
     tab: string;
 }
 
-interface SettingsTab {
-    name: string;
-    predicate?: () => boolean;
-    component: JSX.Element | null;
-}
-
 const SettingsTabs = {
-    VencordSettings: { name: "Vencord", component: <VencordSettings /> },
-    VencordPlugins: { name: "Plugins", component: <PluginsTab /> },
-    VencordThemes: { name: "Themes", component: <Text variant="text-md/medium">Coming soon to a Vencord near you!</Text> },
-    VencordUpdater: { name: "Updater", component: Updater ? <Updater /> : null },
-    VencordSettingsSync: { name: "Backup & Restore", component: <BackupRestoreTab /> },
+    VencordSettings: { name: "Vencord", component: () => <VencordSettings /> },
+    VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
+    VencordThemes: { name: "Themes", component: () => <Text variant="text-md/medium">Coming soon to a Vencord near you!</Text> },
+    VencordUpdater: { name: "Updater", component: () => Updater ? <Updater /> : null },
+    VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
 };
 
 
 function Settings(props: SettingsProps) {
     const { tab = "VencordSettings" } = props;
 
-    const currentTab = SettingsTabs[tab]?.component ?? null;
+    const CurrentTab = SettingsTabs[tab]?.component ?? null;
 
     return <Forms.FormSection>
         <Text variant="heading-md/normal" tag="h2">Vencord Settings</Text>
@@ -79,7 +73,7 @@ function Settings(props: SettingsProps) {
             })}
         </TabBar>
         <Forms.FormDivider />
-        {currentTab}
+        <CurrentTab />
     </Forms.FormSection >;
 }
 
