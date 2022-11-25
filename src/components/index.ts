@@ -18,6 +18,5 @@
 
 export { default as PatchHelper } from "./PatchHelper";
 export { default as PluginSettings } from "./PluginSettings";
-export { default as Settings } from "./Settings";
 export { default as Updater } from "./Updater";
 export { default as VencordSettings } from "./VencordSettings";
