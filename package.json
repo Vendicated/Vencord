@@ -24,6 +24,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm lint && pnpm build && pnpm testTsc",
+        "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
         "testTsc": "tsc --noEmit",
         "uninject": "node scripts/patcher/uninstall.js",
         "watch": "node scripts/build/build.mjs --watch"
