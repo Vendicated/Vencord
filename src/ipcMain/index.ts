@@ -66,14 +66,14 @@ const settingsWriteQueue = new Queue();
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    cssWriteQueue.add(() => writeFile(QUICKCSS_PATH, css))
+    cssWriteQueue.push(() => writeFile(QUICKCSS_PATH, css))
 );
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
 
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
-    settingsWriteQueue.add(() => writeFile(SETTINGS_FILE, s));
+    settingsWriteQueue.push(() => writeFile(SETTINGS_FILE, s));
 });
 
 

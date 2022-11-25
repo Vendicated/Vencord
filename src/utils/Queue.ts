@@ -19,9 +19,48 @@
 import { Promisable } from "type-fest";
 
 export class Queue {
-    private promise: Promise<any> = Promise.resolve();
+    /**
+     * @param maxSize The maximum amount of functions that can be queued at once.
+     *              If the queue is full, the oldest function will be removed.
+     */
+    constructor(public maxSize = Infinity) { }
 
-    add<T>(func: (lastValue: unknown) => Promisable<T>): Promise<T> {
-        return (this.promise = this.promise.then(func));
+    queue = [] as Array<() => Promisable<unknown>>;
+
+    private promise?: Promise<any>;
+
+    private next() {
+        const func = this.queue.shift();
+        if (func)
+            this.promise = Promise.resolve()
+                .then(func)
+                .then(() => this.next());
+        else
+            this.promise = undefined;
+    }
+
+    private run() {
+        if (!this.promise)
+            this.next();
+    }
+
+    push<T>(func: () => Promisable<T>) {
+        if (this.size >= this.maxSize)
+            this.queue.shift();
+
+        this.queue.push(func);
+        this.run();
+    }
+
+    unshift<T>(func: () => Promisable<T>) {
+        if (this.size >= this.maxSize)
+            this.queue.pop();
+
+        this.queue.unshift(func);
+        this.run();
+    }
+
+    get size() {
+        return this.queue.length;
     }
 }

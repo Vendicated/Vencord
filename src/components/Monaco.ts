@@ -25,7 +25,7 @@ import { find } from "../webpack/webpack";
 
 const queue = new Queue();
 const setCss = debounce((css: string) => {
-    queue.add(() => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, css));
+    queue.push(() => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, css));
 });
 
 export async function launchMonacoEditor() {
