@@ -70,24 +70,16 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 </Forms.FormText>
             )}
             <textarea
-                className={classes(Classes.textarea.replace("textarea", ""),"enter-comment")}
+                className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder= {"Review @" + UserStore.getUser(userId)?.username ?? ""}
+                placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
                 onKeyDown={onKeyPress}
                 style={{
                     marginTop: "6px",
                     resize: "none",
                     marginBottom: "12px",
-
-                    padding: "12px",
-                    marginBottom: "12px",
-                    color: "var(--text-normal)",
-                    border: "1px solid var(--profile-message-input-border-color)",
-                    fontSize: "14px",
-                    borderRadius: "3px",
                 }}
             />
-        <div/>
+        </div>
     );
-
 }

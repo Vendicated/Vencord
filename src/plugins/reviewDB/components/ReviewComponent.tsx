@@ -29,7 +29,7 @@ export default LazyComponent(() => {
     // this is terrible, blame mantika
     const p = filters.byProps;
     const [
-        { cozyMessage, buttons },
+        { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
         { avatar, clickable, username, messageContent, wrapper, cozy },
         { contents },
@@ -78,7 +78,7 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, wrapper,message, groupStart, cozy, "user-review")} style={
+            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
                 {
                     marginLeft: "0px",
                     paddingLeft: "52px",
@@ -89,7 +89,6 @@ export default LazyComponent(() => {
                 <div className={contents} style={{ paddingLeft: "0px" }}>
                     <img
                         className={classes(avatar, clickable)}
-                        style={{ left: "8px" }}
                         onClick={openModal}
                         src={review.profile_photo || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                         style={{ left: "0px" }}
