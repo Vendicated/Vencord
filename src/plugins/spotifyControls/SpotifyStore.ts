@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import cssText from "~fileContent/styles.css";
+import cssText from "~fileContent/spotifyStyles.css";
 
 import IpcEvents from "../../utils/IpcEvents";
 import { lazyWebpack } from "../../utils/misc";

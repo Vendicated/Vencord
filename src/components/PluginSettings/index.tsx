@@ -243,9 +243,9 @@ export default ErrorBoundary.wrap(function Settings() {
     };
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord">
+        <Forms.FormSection>
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
-                Plugins
+                Filters
             </Forms.FormTitle>
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
@@ -267,6 +267,8 @@ export default ErrorBoundary.wrap(function Settings() {
                     />
                 </div>
             </div>
+
+            <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
 
             <div style={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
