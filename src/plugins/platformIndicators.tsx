@@ -58,7 +58,7 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={getStatusColor(status)} tooltip={tooltip} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
 const PlatformIndicator = ({ user }: { user: User; }) => {

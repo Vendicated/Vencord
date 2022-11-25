@@ -18,8 +18,8 @@
 
 import type { KeyboardEvent } from "react";
 
-import { lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Text } from "../../../webpack/common";
+import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
+import { Forms, Text, UserStore } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
@@ -46,7 +46,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     }
 
     return (
-        <>
+        <div className="ReviewDB">
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -70,16 +70,24 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 </Forms.FormText>
             )}
             <textarea
-                className={Classes.textarea.replace("textarea", "")}
+                className={classes(Classes.textarea.replace("textarea", ""),"enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder="Enter a comment"
+                placeholder= {"Review @" + UserStore.getUser(userId)?.username ?? ""}
                 onKeyDown={onKeyPress}
                 style={{
                     marginTop: "6px",
                     resize: "none",
                     marginBottom: "12px",
+
+                    padding: "12px",
+                    marginBottom: "12px",
+                    color: "var(--text-normal)",
+                    border: "1px solid var(--profile-message-input-border-color)",
+                    fontSize: "14px",
+                    borderRadius: "3px",
                 }}
             />
-        </>
+        <div/>
     );
+
 }
