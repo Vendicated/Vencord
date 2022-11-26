@@ -243,9 +243,9 @@ export default ErrorBoundary.wrap(function Settings() {
     };
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord">
+        <Forms.FormSection>
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
-                Plugins
+                Filters
             </Forms.FormTitle>
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
@@ -268,6 +268,8 @@ export default ErrorBoundary.wrap(function Settings() {
                 </div>
             </div>
 
+            <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
+
             <div style={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
@@ -278,6 +280,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
+                            key={plugin.name}
                         />;
                     })
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
@@ -296,12 +299,12 @@ export default ErrorBoundary.wrap(function Settings() {
                         const tooltipText = plugin.required
                             ? "This plugin is required for Vencord to function."
                             : makeDependencyList(dependencyCheck(plugin.name, depMap));
-                        return <Tooltip text={tooltipText}>
+                        return <Tooltip text={tooltipText} key={plugin.name}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <PluginCard
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    onRestartNeeded={name => changes.add(name)}
+                                    onRestartNeeded={name => changes.handleChange(name)}
                                     disabled={plugin.required || !!dependency}
                                     plugin={plugin}
                                 />

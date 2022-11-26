@@ -71,6 +71,14 @@ export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null
 }
 
 /**
+ * Returns a function that can be used to force rerender react components
+ */
+export function useForceUpdater() {
+    const [, set] = React.useState(0);
+    return () => set(s => s + 1);
+}
+
+/**
  * A lazy component. The factory method is called on first render. For example useful
  * for const Component = LazyComponent(() => findByDisplayName("...").default)
  * @param factory Function returning a Component
@@ -139,6 +147,9 @@ export function classes(...classes: string[]) {
     return classes.join(" ");
 }
 
+/**
+ * Returns a promise that resolves after the specified amount of time
+ */
 export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
 }

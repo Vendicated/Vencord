@@ -32,11 +32,19 @@ export const Flux = lazyWebpack(filters.byProps("connectStores"));
 export let React: typeof import("react");
 export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
 
+export const RestAPI = lazyWebpack(filters.byProps("getAPIBaseURL", "get"));
+export const moment: typeof import("moment") = lazyWebpack(filters.byProps("parseTwoDigitYear"));
+
 export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
 export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
+export const PrivateChannelsStore = lazyWebpack(filters.byProps("openPrivateChannel"));
+export const GuildChannelStore = lazyWebpack(filters.byProps("getChannels"));
+export const ReadStateStore = lazyWebpack(filters.byProps("lastMessageId"));
+export const PresenceStore = lazyWebpack(filters.byProps("setCurrentUserOnConnectionOpen"));
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
+export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
 export let GuildMemberStore: Stores.GuildMemberStore;
 
@@ -122,6 +130,13 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
+export const NavigationRouter = mapMangledModuleLazy("Transitioning to external path", {
+    transitionTo: filters.byCode("Transitioning to external path"),
+    transitionToGuild: filters.byCode("transitionToGuild"),
+    goBack: filters.byCode("goBack()"),
+    goForward: filters.byCode("goForward()"),
+});
+
 waitFor("useState", m => React = m);
 
 waitFor(["dispatch", "subscribe"], m => {
@@ -136,6 +151,7 @@ waitFor(["dispatch", "subscribe"], m => {
 waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
 waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
+waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
 waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 
@@ -181,7 +197,7 @@ export type TextProps = React.PropsWithChildren & {
     className?: string;
 };
 
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-md" | "display-lg" | "code";
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 
 type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
 interface Menu {

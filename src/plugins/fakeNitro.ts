@@ -60,7 +60,7 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity],
     description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
     dependencies: ["MessageEventsAPI"],
 
@@ -124,6 +124,12 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
+        },
+        emojiSize: {
+            description: "Size of the emojis when sending",
+            type: OptionType.SLIDER,
+            default: 48,
+            markers: [32, 48, 64, 128, 160, 256, 512],
         },
         enableStickerBypass: {
             description: "Allow sending fake stickers",
@@ -270,7 +276,7 @@ export default definePlugin({
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
+                    const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`);
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
@@ -289,7 +295,7 @@ export default definePlugin({
                     if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
                     if (!emoji.require_colons) continue;
 
-                    const url = emoji.url.replace(/\?size=\d+/, "?size=48");
+                    const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`);
                     messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
