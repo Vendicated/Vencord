@@ -46,7 +46,7 @@ const messageFetchQueue = new Queue();
 function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
     function callback(message: Message | undefined) {
         if (!message) return;
-        const actualMessage: Message = (MessageStore.getMessages(message.channel_id) as any).receiveMessage(message).get(message.id);
+        const actualMessage: Message = MessageStore.getMessages(message.channel_id).receiveMessage(message).get(message.id);
         messageCache[message.id] = {
             message: actualMessage,
             fetched: true
@@ -58,7 +58,7 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
     if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
 
     messageCache[messageID] = { fetched: false };
-    return messageFetchQueue.add(() => get({
+    return messageFetchQueue.push(() => get({
         url: Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
