@@ -58,6 +58,5 @@ ${p.description}
         list += "\n\n";
     }
 
-    const data = new TextEncoder().encode(header + tableOfContents + list);
-    DiscordNative.fileManager.saveWithDialog(data, "plugins.md");
+    copy(header + tableOfContents + list);
 })();
