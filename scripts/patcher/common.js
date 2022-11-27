@@ -59,6 +59,7 @@ const LINUX_DISCORD_DIRS = [
     "/usr/lib64",
     "/opt",
     `${process.env.HOME}/.local/share`,
+    `${process.env.HOME}/.dvm`,
     "/var/lib/flatpak/app",
     `${process.env.HOME}/.local/share/flatpak/app`,
 ];
