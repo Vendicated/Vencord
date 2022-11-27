@@ -39,7 +39,7 @@ interface DecoratorProps {
     user: User;
     [key: string]: any;
 }
-export type Decorator = (props: DecoratorProps) => JSX.Element;
+export type Decorator = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
 export const decorators = new Map<string, { decorator: Decorator, onlyIn?: OnlyIn; }>();

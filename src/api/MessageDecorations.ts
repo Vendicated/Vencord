@@ -42,8 +42,9 @@ interface DecorationProps {
         1: JSX.Element[];
     };
     message: Message;
+    [key: string]: any;
 }
-export type Decoration = (props: DecorationProps) => JSX.Element;
+export type Decoration = (props: DecorationProps) => JSX.Element | null;
 
 export const decorations = new Map<string, Decoration>();
 
@@ -55,7 +56,7 @@ export function removeDecoration(identifier: string) {
     decorations.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: DecorationProps): JSX.Element[] {
+export function __addDecorationsToMessage(props: DecorationProps): (JSX.Element | null)[] {
     return [...decorations].map(([_, decoration]) => {
         return decoration(props);
     });
