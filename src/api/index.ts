@@ -19,6 +19,7 @@
 import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
 import * as $DataStore from "./DataStore";
+import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
@@ -72,5 +73,9 @@ const ServerList = $ServerList;
  * An API allowing you to add components as message accessories
  */
 const MessageDecorations = $MessageDecorations;
+/**
+ * An API allowing you to add components to member list users, in both DM's and servers
+ */
+const MemberListDecorators = $MemberListDecorators;
 
-export { Badges, Commands, DataStore, MessageAccessories, MessageDecorations, MessageEvents, Notices, ServerList };
+export { Badges, Commands, DataStore, MemberListDecorators, MessageAccessories, MessageDecorations, MessageEvents, Notices, ServerList };
