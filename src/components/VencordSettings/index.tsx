@@ -39,11 +39,17 @@ interface SettingsProps {
     tab: string;
 }
 
-const SettingsTabs = {
+interface SettingsTab {
+    name: string;
+    component: () => JSX.Element | null;
+    predicate?(): boolean;
+}
+
+const SettingsTabs: Record<string, SettingsTab> = {
     VencordSettings: { name: "Vencord", component: () => <VencordSettings /> },
     VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
     VencordThemes: { name: "Themes", component: () => <Text variant="text-md/medium">Coming soon to a Vencord near you!</Text> },
-    VencordUpdater: { name: "Updater", component: () => Updater ? <Updater /> : null },
+    VencordUpdater: { name: "Updater", component: () => Updater ? <Updater /> : null, predicate: () => !IS_WEB },
     VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
 };
 
@@ -63,7 +69,8 @@ function Settings(props: SettingsProps) {
             selectedItem={tab}
             onItemSelect={Router.open}
         >
-            {Object.entries(SettingsTabs).map(([key, { name }]) => {
+            {Object.entries(SettingsTabs).map(([key, { name, predicate }]) => {
+                if (predicate && !predicate()) return null;
                 return <TabBar.Item
                     id={key}
                     className={st("TabBarItem")}
