@@ -41,23 +41,23 @@ interface SettingsProps {
 
 interface SettingsTab {
     name: string;
-    component: () => JSX.Element | null;
-    predicate?(): boolean;
+    component?: React.ComponentType;
 }
 
 const SettingsTabs: Record<string, SettingsTab> = {
     VencordSettings: { name: "Vencord", component: () => <VencordSettings /> },
     VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
     VencordThemes: { name: "Themes", component: () => <Text variant="text-md/medium">Coming soon to a Vencord near you!</Text> },
-    VencordUpdater: { name: "Updater", component: () => Updater ? <Updater /> : null, predicate: () => !IS_WEB },
+    VencordUpdater: { name: "Updater" }, // Only show updater is IS_WEB is false
     VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
 };
 
+if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater />;
 
 function Settings(props: SettingsProps) {
     const { tab = "VencordSettings" } = props;
 
-    const CurrentTab = SettingsTabs[tab]?.component ?? null;
+    const CurrentTab = SettingsTabs[tab]?.component;
 
     return <Forms.FormSection>
         <Text variant="heading-md/normal" tag="h2">Vencord Settings</Text>
@@ -69,8 +69,8 @@ function Settings(props: SettingsProps) {
             selectedItem={tab}
             onItemSelect={Router.open}
         >
-            {Object.entries(SettingsTabs).map(([key, { name, predicate }]) => {
-                if (predicate && !predicate()) return null;
+            {Object.entries(SettingsTabs).map(([key, { name, component }]) => {
+                if (!component) return null;
                 return <TabBar.Item
                     id={key}
                     className={st("TabBarItem")}
@@ -80,7 +80,7 @@ function Settings(props: SettingsProps) {
             })}
         </TabBar>
         <Forms.FormDivider />
-        <CurrentTab />
+        {CurrentTab && <CurrentTab />}
     </Forms.FormSection >;
 }
 
