@@ -20,6 +20,20 @@ import { Settings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import definePlugin, { OptionType } from "../utils/types";
 
+let style: HTMLStyleElement;
+
+function setCss() {
+    style.textContent = `
+        .vc-nsfw-img [class^=imageWrapper] img {
+            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            transition: filter 0.2s;
+        }
+        .vc-nsfw-img [class^=imageWrapper]:hover img {
+            filter: unset;
+        }
+        `;
+}
+
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
@@ -43,30 +57,19 @@ export default definePlugin({
             type: OptionType.NUMBER,
             description: "Blur Amount",
             default: 10,
+            onChange: setCss
         }
     },
 
     start() {
-        const style = this.style = document.createElement("style");
+        style = document.createElement("style");
         style.id = "VcBlurNsfw";
         document.head.appendChild(style);
 
-        this.setCss();
-    },
-
-    setCss() {
-        this.style.textContent = `
-        .vc-nsfw-img [class^=imageWrapper] img {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
-            transition: filter 0.2s;
-        }
-        .vc-nsfw-img [class^=imageWrapper] img:hover {
-            filter: unset;
-        }
-        `;
+        setCss();
     },
 
     stop() {
-        this.style?.remove();
+        style?.remove();
     }
 });
