@@ -48,7 +48,7 @@ const SettingsTabs: Record<string, SettingsTab> = {
     VencordSettings: { name: "Vencord", component: () => <VencordSettings /> },
     VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
     VencordThemes: { name: "Themes", component: () => <Text variant="text-md/medium">Coming soon to a Vencord near you!</Text> },
-    VencordUpdater: { name: "Updater" }, // Only show updater is IS_WEB is false
+    VencordUpdater: { name: "Updater" }, // Only show updater if IS_WEB is false
     VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
 };
 
