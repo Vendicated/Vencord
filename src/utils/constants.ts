@@ -156,5 +156,9 @@ export const Devs = Object.freeze({
     Luna: {
         name: "Luny",
         id: 821472922140803112n
+    },
+    TheSun: {
+        name: "ActuallyTheSun",
+        id: 406028027768733696n
     }
 });
