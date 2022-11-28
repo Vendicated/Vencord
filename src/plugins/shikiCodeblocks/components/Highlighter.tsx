@@ -24,6 +24,7 @@ import { shiki } from "../api/shiki";
 import { useCopyCooldown } from "../hooks/useCopyCooldown";
 import { useIntersectionEffect } from "../hooks/useIntersectionEffect";
 import { useShikiSettings } from "../hooks/useShikiSettings";
+import { useTheme } from "../hooks/useTheme";
 import { DeviconSetting, HljsSetting, ShikiSettings } from "../types";
 
 // TODO: break this file up and make it actually readable
@@ -66,7 +67,7 @@ export const Highlighter = ({
     const preRef = React.useRef<HTMLPreElement>(null);
 
     const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
-    const { currentTheme, currentThemeUrl } = shiki;
+    const currentTheme = useTheme();
 
     const useHljs = shouldUseHLJS({ lang, tryHljs });
 
@@ -75,7 +76,7 @@ export const Highlighter = ({
             .tokenizeCode(content, lang!)
             .then(tokens => setTokens(tokens))
             .catch(console.error);
-    }, [lang, content, currentThemeUrl], () => !!(lang && !useHljs));
+    }, [lang, content, currentTheme], () => !!(lang && !useHljs));
 
     const shikiLang = lang ? resolveLang(lang) : null;
     let langName = shikiLang?.name;
@@ -87,7 +88,7 @@ export const Highlighter = ({
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
             currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
-    }), [useHljs, currentThemeUrl]);
+    }), [useHljs, currentTheme]);
 
     let lines!: JSX.Element[];
 
