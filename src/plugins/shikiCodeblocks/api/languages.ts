@@ -47,12 +47,13 @@ export const languages: Record<string, Language> = {};
 
 export const loadLanguages = async () => {
     const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.json());
-    Object.fromEntries(
+    const loadedLanguages = Object.fromEntries(
         langsJson.map(lang => [lang.id, {
             ...lang,
             grammarUrl: vpcRepoGrammar(lang.fileName),
         }])
     );
+    Object.assign(languages, loadedLanguages);
 };
 
 export const getGrammar = (lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> => {

@@ -71,12 +71,14 @@ export const Highlighter = ({
 
     const useHljs = shouldUseHLJS({ lang, tryHljs });
 
+    console.log(currentThemeId, currentTheme);
+
     useIntersectionEffect(preRef, () => {
         shiki
             .tokenizeCode(content, lang!)
             .then(tokens => setTokens(tokens))
             .catch(console.error);
-    }, [lang, content, currentThemeId], () => !!(lang && !useHljs));
+    }, [lang, content, currentThemeId], !!(lang && !useHljs));
 
     const shikiLang = lang ? resolveLang(lang) : null;
     let langName = shikiLang?.name;

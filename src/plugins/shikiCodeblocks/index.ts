@@ -54,8 +54,7 @@ export default definePlugin({
         document.head.appendChild(mainStyle);
         if (shikiSettings.useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
 
-        await shiki.init();
-        await shiki.setTheme(shikiSettings.customTheme || shikiSettings.theme);
+        await shiki.init(shikiSettings.customTheme || shikiSettings.theme);
     },
     stop: () => {
         shiki.destroy();

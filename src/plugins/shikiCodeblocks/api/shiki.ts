@@ -42,7 +42,7 @@ export const shiki = {
     loadedLangs: new Set<string>(),
     clientPromise: new Promise<WorkerClient<ShikiSpec>>(resolve => resolveClient = resolve),
 
-    init: async () => {
+    init: async (initThemeUrl: string | undefined) => {
         const { debugBuild } = Settings.plugins.ShikiCodeblocks;
 
         const shikiWorkerSrc = debugBuild ? shikiWorkerSrcDev : shikiWorkerSrcProd;
@@ -55,12 +55,15 @@ export const shiki = {
             "shiki-host",
             workerBlob,
         );
-        await loadLanguages();
         await client.init();
+
+        const themeUrl = initThemeUrl || themeUrls[0];
+
+        await loadLanguages();
         await client.run("setOnigasm", { wasm: shikiOnigasmSrc });
-        await client.run("setHighlighter", { theme: themeUrls[0], langs: [] });
-        shiki.loadedThemes.add(themeUrls[0]);
-        await shiki._setTheme(themeUrls[0]);
+        await client.run("setHighlighter", { theme: themeUrl, langs: [] });
+        shiki.loadedThemes.add(themeUrl);
+        await shiki._setTheme(themeUrl);
         resolveClient(client);
     },
     _setTheme: async (themeUrl: string) => {

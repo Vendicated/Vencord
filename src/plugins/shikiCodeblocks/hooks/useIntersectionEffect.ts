@@ -28,7 +28,7 @@ export const useIntersectionEffect = (
     elementRef: React.RefObject<HTMLElement>,
     callback: () => void,
     deps?: React.DependencyList | undefined,
-    ready?: () => boolean | undefined,
+    ready?: boolean | undefined,
 ) => {
     const observerRef = React.useRef<IntersectionObserver | null>(null);
 
@@ -41,9 +41,11 @@ export const useIntersectionEffect = (
             callback();
             destroy();
         };
-        if (ready?.() === false) return destroy;
+        console.log(elementRef.current, ready, deps);
+        if (ready === false) return destroy;
         if (!elementRef.current) return destroy;
 
+        console.log(isInsterecting(elementRef.current));
         if (isInsterecting(elementRef.current)) return onIntersect();
 
         observerRef.current = new IntersectionObserver(entries => {
