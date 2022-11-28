@@ -1,0 +1,891 @@
+[
+  {
+    "name": "ABAP",
+    "id": "abap",
+    "fileName": "abap",
+    "scopeName": "source.abap"
+  },
+  {
+    "name": "ActionScript",
+    "id": "actionscript-3",
+    "fileName": "actionscript-3",
+    "scopeName": "source.actionscript.3",
+    "aliases": [
+      "as",
+      "actionscript"
+    ]
+  },
+  {
+    "name": "Ada",
+    "id": "ada",
+    "fileName": "ada",
+    "scopeName": "source.ada"
+  },
+  {
+    "name": "Apex",
+    "id": "apex",
+    "fileName": "apex",
+    "scopeName": "source.apex"
+  },
+  {
+    "name": "AppleScript",
+    "id": "applescript",
+    "fileName": "applescript",
+    "scopeName": "source.applescript"
+  },
+  {
+    "name": "AsciiDoc",
+    "id": "asciidoc",
+    "fileName": "asciidoc",
+    "scopeName": "text.asciidoc"
+  },
+  {
+    "name": "Assembly x64",
+    "id": "asm",
+    "fileName": "asm",
+    "scopeName": "source.asm.x86_64"
+  },
+  {
+    "name": "ASP.NET Razor",
+    "id": "asp-net-razor",
+    "fileName": "asp-net-razor",
+    "devicon": "dot-net-plain",
+    "scopeName": "text.aspnetcorerazor",
+    "aliases": [
+      "razor"
+    ]
+  },
+  {
+    "name": "AWK",
+    "id": "awk",
+    "fileName": "awk",
+    "scopeName": "source.awk"
+  },
+  {
+    "name": "Batchfile",
+    "id": "bat",
+    "fileName": "bat",
+    "scopeName": "source.batchfile",
+    "aliases": [
+      "batch"
+    ]
+  },
+  {
+    "name": "C",
+    "id": "c",
+    "fileName": "c",
+    "devicon": "c-plain",
+    "scopeName": "source.c"
+  },
+  {
+    "name": "Clojure",
+    "id": "clojure",
+    "fileName": "clojure",
+    "devicon": "clojure-line",
+    "scopeName": "source.clojure",
+    "aliases": [
+      "clj"
+    ]
+  },
+  {
+    "name": "Cobol",
+    "id": "cobol",
+    "fileName": "cobol",
+    "scopeName": "source.cobol"
+  },
+  {
+    "name": "CoffeeScript",
+    "id": "coffee",
+    "fileName": "coffee",
+    "devicon": "coffeescript-original",
+    "scopeName": "source.coffee"
+  },
+  {
+    "name": "C++ Embedded Macro",
+    "id": "cpp.embedded.macro",
+    "fileName": "cpp.embedded.macro",
+    "devicon": "cplusplus-plain",
+    "scopeName": "source.cpp.embedded.macro"
+  },
+  {
+    "name": "C++",
+    "id": "cpp",
+    "fileName": "cpp",
+    "devicon": "cplusplus-plain",
+    "scopeName": "source.cpp"
+  },
+  {
+    "name": "Crystal",
+    "id": "crystal",
+    "fileName": "crystal",
+    "scopeName": "source.crystal"
+  },
+  {
+    "name": "C#",
+    "id": "csharp",
+    "fileName": "csharp",
+    "devicon": "csharp-plain",
+    "scopeName": "source.cs",
+    "aliases": [
+      "c#",
+      "cs"
+    ]
+  },
+  {
+    "name": "CSS",
+    "id": "css",
+    "fileName": "css",
+    "devicon": "css3-plain",
+    "scopeName": "source.css"
+  },
+  {
+    "name": "D",
+    "id": "d",
+    "fileName": "d",
+    "scopeName": "source.d"
+  },
+  {
+    "name": "Dart",
+    "id": "dart",
+    "fileName": "dart",
+    "scopeName": "source.dart"
+  },
+  {
+    "name": "Diff",
+    "id": "diff",
+    "fileName": "diff",
+    "scopeName": "source.diff"
+  },
+  {
+    "name": "Dockerfile",
+    "id": "dockerfile",
+    "fileName": "dockerfile",
+    "devicon": "docker-plain",
+    "scopeName": "source.dockerfile"
+  },
+  {
+    "name": "Elixir",
+    "id": "elixir",
+    "fileName": "elixir",
+    "devicon": "elixir-plain",
+    "scopeName": "source.elixir"
+  },
+  {
+    "name": "Elm",
+    "id": "elm",
+    "fileName": "elm",
+    "devicon": "elm-plain",
+    "scopeName": "source.elm"
+  },
+  {
+    "name": "Erlang",
+    "id": "erlang",
+    "fileName": "erlang",
+    "devicon": "erlang-plain",
+    "scopeName": "source.erlang"
+  },
+  {
+    "name": "F#",
+    "id": "fsharp",
+    "fileName": "fsharp",
+    "devicon": "fsharp-plain",
+    "scopeName": "source.fsharp",
+    "aliases": [
+      "f#"
+    ]
+  },
+  {
+    "name": "Git Commit",
+    "id": "git-commit",
+    "fileName": "git-commit",
+    "scopeName": "text.git-commit"
+  },
+  {
+    "name": "Git Rebase",
+    "id": "git-rebase",
+    "fileName": "git-rebase",
+    "scopeName": "text.git-rebase"
+  },
+  {
+    "name": "GNU Plot",
+    "id": "gnuplot",
+    "fileName": "gnuplot",
+    "scopeName": "source.gnuplot"
+  },
+  {
+    "name": "GDScript",
+    "id": "gdscript",
+    "fileName": "GDScript",
+    "scopeName": "source.gdscript",
+    "aliases": [
+      "godot",
+      "gds",
+      "gd"
+    ]
+  },
+  {
+    "name": "Go",
+    "id": "go",
+    "fileName": "go",
+    "devicon": "go-plain",
+    "scopeName": "source.go"
+  },
+  {
+    "name": "GraphQL",
+    "id": "graphql",
+    "fileName": "graphql",
+    "scopeName": "source.graphql"
+  },
+  {
+    "name": "Groovy",
+    "id": "groovy",
+    "fileName": "groovy",
+    "devicon": "groovy-plain",
+    "scopeName": "source.groovy"
+  },
+  {
+    "name": "Hack",
+    "id": "hack",
+    "fileName": "hack",
+    "scopeName": "source.hack"
+  },
+  {
+    "name": "Haml",
+    "id": "haml",
+    "fileName": "haml",
+    "scopeName": "text.haml"
+  },
+  {
+    "name": "Handlebars",
+    "id": "handlebars",
+    "fileName": "handlebars",
+    "devicon": "handlebars-plain",
+    "scopeName": "text.html.handlebars",
+    "aliases": [
+      "hbs"
+    ]
+  },
+  {
+    "name": "Haskell",
+    "id": "haskell",
+    "fileName": "haskell",
+    "devicon": "haskell-plain",
+    "scopeName": "source.haskell",
+    "aliases": [
+      "hs"
+    ]
+  },
+  {
+    "name": "HCL",
+    "id": "hcl",
+    "fileName": "hcl",
+    "scopeName": "source.hcl"
+  },
+  {
+    "name": "High-Level Shading Language",
+    "id": "hlsl",
+    "fileName": "hlsl",
+    "scopeName": "source.hlsl"
+  },
+  {
+    "name": "eRuby",
+    "id": "html-ruby-erb",
+    "fileName": "html-ruby-erb",
+    "scopeName": "text.html.erb",
+    "aliases": [
+      "erb"
+    ]
+  },
+  {
+    "name": "HTML",
+    "id": "html",
+    "fileName": "html",
+    "devicon": "html5-plain",
+    "scopeName": "text.html.basic"
+  },
+  {
+    "name": "HTTP",
+    "id": "http",
+    "fileName": "http",
+    "scopeName": "source.http",
+    "aliases": [
+      "rest"
+    ]
+  },
+  {
+    "name": "INI",
+    "id": "ini",
+    "fileName": "ini",
+    "scopeName": "source.ini"
+  },
+  {
+    "name": "Java",
+    "id": "java",
+    "fileName": "java",
+    "devicon": "java-plain",
+    "scopeName": "source.java"
+  },
+  {
+    "name": "JavaScript",
+    "id": "javascript",
+    "fileName": "javascript",
+    "devicon": "javascript-plain",
+    "scopeName": "source.js",
+    "aliases": [
+      "js",
+      "esm",
+      "cjs"
+    ]
+  },
+  {
+    "name": "Jinja Template",
+    "id": "jinja-html",
+    "fileName": "jinja-html",
+    "scopeName": "text.html.jinja",
+    "aliases": [
+      "jhtml"
+    ]
+  },
+  {
+    "name": "Jinja",
+    "id": "jinja",
+    "fileName": "jinja",
+    "scopeName": "source.jinja",
+    "aliases": [
+      "j2"
+    ]
+  },
+  {
+    "name": "JSON",
+    "id": "json",
+    "fileName": "json",
+    "scopeName": "source.json"
+  },
+  {
+    "name": "JSON5",
+    "id": "json5",
+    "fileName": "json5",
+    "scopeName": "source.json5"
+  },
+  {
+    "name": "JSON-C",
+    "id": "jsonc",
+    "fileName": "jsonc",
+    "scopeName": "source.json.comments"
+  },
+  {
+    "name": "Jsonnet",
+    "id": "jsonnet",
+    "fileName": "jsonnet",
+    "scopeName": "source.jsonnet"
+  },
+  {
+    "name": "JSX",
+    "id": "jsx",
+    "fileName": "javascript",
+    "devicon": "react-original",
+    "scopeName": "source.js"
+  },
+  {
+    "name": "Julia",
+    "id": "julia",
+    "fileName": "julia",
+    "scopeName": "source.julia",
+    "aliases": [
+      "jl"
+    ]
+  },
+  {
+    "name": "Kotlin",
+    "id": "kotlin",
+    "fileName": "kotlin",
+    "devicon": "kotlin-plain",
+    "scopeName": "source.kotlin",
+    "aliases": [
+      "kt",
+      "kts"
+    ]
+  },
+  {
+    "name": "LaTeX",
+    "id": "latex",
+    "fileName": "latex",
+    "scopeName": "text.tex.latex",
+    "aliases": [
+      "tex"
+    ]
+  },
+  {
+    "name": "Less",
+    "id": "less",
+    "fileName": "less",
+    "devicon": "less-plain-wordmark",
+    "scopeName": "source.css.less"
+  },
+  {
+    "name": "Lisp",
+    "id": "lisp",
+    "fileName": "lisp",
+    "scopeName": "source.lisp"
+  },
+  {
+    "name": "Logo",
+    "id": "logo",
+    "fileName": "logo",
+    "scopeName": "source.logo"
+  },
+  {
+    "name": "Lua",
+    "id": "lua",
+    "fileName": "lua",
+    "scopeName": "source.lua"
+  },
+  {
+    "name": "Luau",
+    "id": "luau",
+    "fileName": "luau",
+    "scopeName": "source.luau"
+  },
+  {
+    "name": "Makefile",
+    "id": "makefile",
+    "fileName": "makefile",
+    "scopeName": "source.makefile"
+  },
+  {
+    "name": "Markdown",
+    "id": "markdown",
+    "fileName": "markdown",
+    "scopeName": "text.html.markdown",
+    "aliases": [
+      "md"
+    ]
+  },
+  {
+    "name": "MATLAB",
+    "id": "matlab",
+    "fileName": "matlab",
+    "devicon": "matlab-plain",
+    "scopeName": "source.matlab"
+  },
+  {
+    "name": "MC Function",
+    "id": "mcfunction",
+    "fileName": "mcfunction",
+    "scopeName": "source.mcfunction"
+  },
+  {
+    "name": "Multidimensional Expression",
+    "id": "mdx",
+    "fileName": "mdx",
+    "scopeName": "text.html.markdown.jsx"
+  },
+  {
+    "name": "MoonScript",
+    "id": "moonscript",
+    "fileName": "moonscript",
+    "scopeName": "source.moonscript",
+    "aliases": [
+      "moon"
+    ]
+  },
+  {
+    "name": "Nim",
+    "id": "nim",
+    "fileName": "nim",
+    "scopeName": "source.nim"
+  },
+  {
+    "name": "Nimble",
+    "id": "nimble",
+    "fileName": "nimble",
+    "scopeName": "source.nimble"
+  },
+  {
+    "name": "Nix",
+    "id": "nix",
+    "fileName": "nix",
+    "scopeName": "source.nix"
+  },
+  {
+    "name": "Objective C",
+    "id": "objective-c",
+    "fileName": "objective-c",
+    "devicon": "objectivec-plain",
+    "scopeName": "source.objcpp",
+    "aliases": [
+      "objc"
+    ]
+  },
+  {
+    "name": "OCaml",
+    "id": "ocaml",
+    "fileName": "ocaml",
+    "devicon": "ocaml-plain",
+    "scopeName": "source.ocaml"
+  },
+  {
+    "name": "Pascal",
+    "id": "pascal",
+    "fileName": "pascal",
+    "scopeName": "source.pascal",
+    "aliases": [
+      "pas"
+    ]
+  },
+  {
+    "name": "PEG.js",
+    "id": "pegjs",
+    "fileName": "pegjs",
+    "scopeName": "source.pegjs"
+  },
+  {
+    "name": "Perl",
+    "id": "perl",
+    "fileName": "perl",
+    "scopeName": "source.perl"
+  },
+  {
+    "name": "Raku",
+    "id": "perl6",
+    "fileName": "perl6",
+    "scopeName": "source.perl.6",
+    "aliases": [
+      "raku",
+      "p6"
+    ]
+  },
+  {
+    "name": "PHP Template",
+    "id": "php-html",
+    "fileName": "php-html",
+    "devicon": "php-plain",
+    "scopeName": "text.html.php",
+    "aliases": [
+      "phtml"
+    ]
+  },
+  {
+    "name": "PHP",
+    "id": "php",
+    "fileName": "php",
+    "devicon": "php-plain",
+    "scopeName": "source.php"
+  },
+  {
+    "name": "PL/SQL",
+    "id": "pls",
+    "fileName": "pls",
+    "scopeName": "source.plsql.oracle"
+  },
+  {
+    "name": "PostCSS",
+    "id": "postcss",
+    "fileName": "postcss",
+    "scopeName": "source.css.postcss"
+  },
+  {
+    "name": "PowerShell",
+    "id": "powershell",
+    "fileName": "powershell",
+    "scopeName": "source.powershell",
+    "aliases": [
+      "ps",
+      "ps1"
+    ]
+  },
+  {
+    "name": "Prolog",
+    "id": "prolog",
+    "fileName": "prolog",
+    "scopeName": "source.prolog"
+  },
+  {
+    "name": "Protocol Buffer 3",
+    "id": "proto",
+    "fileName": "proto3",
+    "scopeName": "source.proto"
+  },
+  {
+    "name": "Pug",
+    "id": "pug",
+    "fileName": "pug",
+    "scopeName": "text.pug",
+    "aliases": [
+      "jade"
+    ]
+  },
+  {
+    "name": "Puppet",
+    "id": "puppet",
+    "fileName": "puppet",
+    "scopeName": "source.puppet"
+  },
+  {
+    "name": "PureScript",
+    "id": "purescript",
+    "fileName": "purescript",
+    "scopeName": "source.purescript",
+    "aliases": [
+      "purs"
+    ]
+  },
+  {
+    "name": "Python",
+    "id": "python",
+    "fileName": "python",
+    "devicon": "python-plain",
+    "scopeName": "source.python",
+    "aliases": [
+      "py"
+    ]
+  },
+  {
+    "name": "R",
+    "id": "r",
+    "fileName": "r",
+    "devicon": "r-original",
+    "scopeName": "source.r"
+  },
+  {
+    "name": "ASP.NET Razor",
+    "id": "razor",
+    "fileName": "razor",
+    "devicon": "dot-net-plain",
+    "scopeName": "text.html.cshtml",
+    "aliases": [
+      "cshtml"
+    ]
+  },
+  {
+    "name": "Ruby",
+    "id": "ruby",
+    "fileName": "ruby",
+    "devicon": "ruby-plain",
+    "scopeName": "source.ruby",
+    "aliases": [
+      "rb"
+    ]
+  },
+  {
+    "name": "Rust",
+    "id": "rust",
+    "fileName": "rust",
+    "devicon": "rust-plain",
+    "scopeName": "source.rust",
+    "aliases": [
+      "rs"
+    ]
+  },
+  {
+    "name": "SAS",
+    "id": "sas",
+    "fileName": "sas",
+    "scopeName": "source.sas"
+  },
+  {
+    "name": "Sass",
+    "id": "sass",
+    "fileName": "sass",
+    "devicon": "sass-original",
+    "scopeName": "source.sass"
+  },
+  {
+    "name": "Scala",
+    "id": "scala",
+    "fileName": "scala",
+    "devicon": "scala-plain",
+    "scopeName": "source.scala"
+  },
+  {
+    "name": "Scheme",
+    "id": "scheme",
+    "fileName": "scheme",
+    "scopeName": "source.scheme"
+  },
+  {
+    "name": "SCSS",
+    "id": "scss",
+    "fileName": "scss",
+    "devicon": "sass-original",
+    "scopeName": "source.css.scss"
+  },
+  {
+    "name": "ShaderLab",
+    "id": "shaderlab",
+    "fileName": "shaderlab",
+    "scopeName": "source.shaderlab",
+    "aliases": [
+      "shader"
+    ]
+  },
+  {
+    "name": "Shell",
+    "id": "shellscript",
+    "fileName": "shellscript",
+    "devicon": "bash-plain",
+    "scopeName": "source.shell",
+    "aliases": [
+      "shell",
+      "bash",
+      "sh",
+      "zsh"
+    ]
+  },
+  {
+    "name": "Smalltalk",
+    "id": "smalltalk",
+    "fileName": "smalltalk",
+    "scopeName": "source.smalltalk"
+  },
+  {
+    "name": "SourcePawn",
+    "id": "sp",
+    "fileName": "sourcepawn",
+    "scopeName": "source.sourcepawn"
+  },
+  {
+    "name": "SQL",
+    "id": "sql",
+    "fileName": "sql",
+    "scopeName": "source.sql"
+  },
+  {
+    "name": "SSH Config",
+    "id": "ssh-config",
+    "fileName": "ssh-config",
+    "scopeName": "source.ssh-config"
+  },
+  {
+    "name": "Stylus",
+    "id": "stylus",
+    "fileName": "stylus",
+    "devicon": "stylus-original",
+    "scopeName": "source.stylus",
+    "aliases": [
+      "styl"
+    ]
+  },
+  {
+    "name": "Swift",
+    "id": "swift",
+    "fileName": "swift",
+    "devicon": "swift-plain",
+    "scopeName": "source.swift"
+  },
+  {
+    "name": "Tcl",
+    "id": "tcl",
+    "fileName": "tcl",
+    "scopeName": "source.tcl"
+  },
+  {
+    "name": "TOML",
+    "id": "toml",
+    "fileName": "toml",
+    "scopeName": "source.toml"
+  },
+  {
+    "name": "TypeScript Doc",
+    "id": "ts-doc",
+    "fileName": "ts",
+    "devicon": "typescript-plain",
+    "scopeName": "documentation.injection.ts"
+  },
+  {
+    "name": "TSX",
+    "id": "tsx",
+    "fileName": "tsx",
+    "devicon": "react-original",
+    "scopeName": "source.tsx"
+  },
+  {
+    "name": "TypeScript",
+    "id": "typescript",
+    "fileName": "typescript",
+    "devicon": "typescript-plain",
+    "scopeName": "source.ts",
+    "aliases": [
+      "ts"
+    ]
+  },
+  {
+    "name": "VHDL",
+    "id": "vhdl",
+    "fileName": "vhdl",
+    "scopeName": "source.vhdl"
+  },
+  {
+    "name": "Visual Basic .NET",
+    "id": "vb",
+    "fileName": "vb",
+    "devicon": "dot-net-plain",
+    "scopeName": "source.asp.vb.net",
+    "aliases": [
+      "cmd"
+    ]
+  },
+  {
+    "name": "VimL",
+    "id": "viml",
+    "fileName": "viml",
+    "devicon": "vim-plain",
+    "scopeName": "source.viml",
+    "aliases": [
+      "vim"
+    ]
+  },
+  {
+    "name": "Vue HTML",
+    "id": "vue-html",
+    "fileName": "vue-html",
+    "devicon": "vuejs-plain",
+    "scopeName": "text.html.vue-html"
+  },
+  {
+    "name": "Vue",
+    "id": "vue",
+    "fileName": "vue",
+    "devicon": "vuejs-plain",
+    "scopeName": "source.vue"
+  },
+  {
+    "name": "WebAssembly",
+    "id": "wasm",
+    "fileName": "wasm",
+    "scopeName": "source.wat",
+    "aliases": [
+      "wat"
+    ]
+  },
+  {
+    "name": "XML",
+    "id": "xml",
+    "fileName": "xml",
+    "scopeName": "text.xml"
+  },
+  {
+    "name": "XSL",
+    "id": "xsl",
+    "fileName": "xsl",
+    "scopeName": "text.xml.xsl"
+  },
+  {
+    "name": "YAML",
+    "id": "yaml",
+    "fileName": "yaml",
+    "scopeName": "source.yaml",
+    "aliases": [
+      "yml"
+    ]
+  },
+  {
+    "name": "Wenyan",
+    "id": "文言",
+    "fileName": "文言",
+    "scopeName": "source.wenyan",
+    "aliases": [
+      "wenyan"
+    ]
+  }
+]

@@ -189,3 +189,15 @@ export function makeCodeblock(text: string, language?: string) {
     const chars = "```";
     return `${chars}${language || ""}\n${text}\n${chars}`;
 }
+
+/**
+ * Returns null if value is not a URL, otherwise return URL object.
+ * Avoids having to wrap url checks in a try/catch
+ */
+export function parseUrl(urlString: string): URL | null {
+    try {
+        return new URL(urlString);
+    } catch {
+        return null;
+    }
+}

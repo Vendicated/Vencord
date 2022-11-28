@@ -35,6 +35,8 @@ export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps(
 export const RestAPI = lazyWebpack(filters.byProps("getAPIBaseURL", "get"));
 export const moment: typeof import("moment") = lazyWebpack(filters.byProps("parseTwoDigitYear"));
 
+export const hljs: typeof import("highlight.js") = lazyWebpack(filters.byProps("highlight"));
+
 export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
 export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
 export const PrivateChannelsStore = lazyWebpack(filters.byProps("openPrivateChannel"));

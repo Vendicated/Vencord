@@ -16,29 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="standalone-electron-types"/>
+import { Clipboard, React } from "../../../webpack/common";
 
-declare module "~plugins" {
-    const plugins: Record<string, import("./utils/types").Plugin>;
-    export default plugins;
-}
+export const useCopyCooldown = (cooldown: number) => {
+    const [copyCooldown, setCopyCooldown] = React.useState(false);
 
-declare module "~git-hash" {
-    const hash: string;
-    export default hash;
-}
-declare module "~git-remote" {
-    const remote: string;
-    export default remote;
-}
+    const copy = (text: string) => {
+        Clipboard.copy(text);
+        setCopyCooldown(true);
 
-declare module "~fileContent/*" {
-    const content: string;
-    export default content;
-}
+        setTimeout(() => {
+            setCopyCooldown(false);
+        }, cooldown);
+    };
 
-declare module "*.txt" {
-    const content: string;
-    export default content;
-}
+    return [copyCooldown, copy] as const;
+};

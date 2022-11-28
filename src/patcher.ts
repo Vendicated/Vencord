@@ -111,7 +111,7 @@ electron.app.whenReady().then(() => {
     function patchCsp(headers: Record<string, string[]>, header: string) {
         if (header in headers) {
             let patchedHeader = headers[header][0];
-            for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src"]) {
+            for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
                 patchedHeader = patchedHeader.replace(new RegExp(`${directive}.+?;`), `${directive} * blob: data: 'unsafe-inline';`);
             }
             // TODO: Restrict this to only imported packages with fixed version.
