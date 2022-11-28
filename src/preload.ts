@@ -19,7 +19,7 @@
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
 import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 import VencordNative from "./VencordNative";
@@ -44,7 +44,28 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 if (location.protocol !== "data:") {
     // Discord
     webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-    webFrame.insertCSS(readFileSync(join(__dirname, "renderer.css"), "utf-8"));
+    const rendererCss = join(__dirname, "renderer.css");
+    try {
+        const css = readFileSync(rendererCss, "utf-8");
+        webFrame.insertCSS(css);
+    } catch (err) {
+        // hack: the pre update updater does not download this file, so manually
+        // download it
+        // TODO: remove this in a future version
+        if ((err as NodeJS.ErrnoException)?.code === "ENOENT") {
+            const https = require("https") as typeof import("https");
+            https.get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css", res => {
+                res.setEncoding("utf8");
+                let data = "";
+                res.on("data", (chunk: string) => data += chunk);
+                res.on("end", async () => {
+                    webFrame.insertCSS(data);
+                    writeFileSync(rendererCss, data);
+                });
+                res.on("error", console.error);
+            });
+        } else throw err;
+    }
     require(process.env.DISCORD_PRELOAD!);
 } else {
     // Monaco Popout
