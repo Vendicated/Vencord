@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "../../../webpack/common";
+import { React } from "@webpack/common";
 
 export const isInsterecting = (el: HTMLElement) => {
     const elementBox = el.getBoundingClientRect();
