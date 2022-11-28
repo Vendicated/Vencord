@@ -18,41 +18,41 @@
 
 import { Link } from "../components/Link";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings, Webpack } from "../Vencord";
 import { FluxDispatcher, Forms } from "../webpack/common";
+import { findByPropsLazy } from "../webpack/webpack";
 
 interface ActivityAssets {
-    large_image?: string
-    large_text?: string
-    small_image?: string
-    small_text?: string
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
 }
 
 interface Activity {
-    state: string
-    details?: string
+    state: string;
+    details?: string;
     timestamps?: {
-        start?: Number
-    }
-    assets?: ActivityAssets
-    buttons?: Array<string>
-    name: string
-    application_id: string
+        start?: Number;
+    };
+    assets?: ActivityAssets;
+    buttons?: Array<string>;
+    name: string;
+    application_id: string;
     metadata?: {
-        button_urls?: Array<string>
-    }
-    type: Number
-    flags: Number
+        button_urls?: Array<string>;
+    };
+    type: Number;
+    flags: Number;
 }
 
 interface TrackData {
-    name: string
-    album: string
-    artist: string
-    url: string
-    imageUrl?: string
+    name: string;
+    album: string;
+    artist: string;
+    url: string;
+    imageUrl?: string;
 }
 
 // only relevant enum values
@@ -67,7 +67,7 @@ enum ActivityFlag {
 
 const applicationId = "1043533871037284423";
 
-const presenceStore = lazyWebpack(Webpack.filters.byProps("getLocalPresence"));
+const presenceStore = findByPropsLazy("getLocalPresence");
 const assetManager = Webpack.mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
@@ -196,9 +196,9 @@ export default definePlugin({
             state: hideAlbumName ? trackData.artist : `${trackData.artist} - ${trackData.album}`,
             assets,
 
-            buttons: [ "Open in Last.fm" ],
+            buttons: ["Open in Last.fm"],
             metadata: {
-                button_urls: [ trackData.url ]
+                button_urls: [trackData.url]
             },
 
             type: this.settings.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,

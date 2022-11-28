@@ -21,26 +21,28 @@ import { User } from "discord-types/general";
 import type Other from "discord-types/other";
 import type Stores from "discord-types/stores";
 
-import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { LazyComponent } from "../utils/misc";
 import { proxyLazy } from "../utils/proxyLazy";
-import { _resolveReady, filters, findByCode, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
+import { _resolveReady, filters, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
 
-export const Margins = lazyWebpack(filters.byProps("marginTop20"));
+export const Margins = findByPropsLazy("marginTop20");
 
 export let FluxDispatcher: Other.FluxDispatcher;
-export const Flux = lazyWebpack(filters.byProps("connectStores"));
+export const Flux = findByPropsLazy("connectStores");
 export let React: typeof import("react");
-export const ReactDOM: typeof import("react-dom") = lazyWebpack(filters.byProps("createPortal", "render"));
+export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
 
-export const RestAPI = lazyWebpack(filters.byProps("getAPIBaseURL", "get"));
-export const moment: typeof import("moment") = lazyWebpack(filters.byProps("parseTwoDigitYear"));
+export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
+export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const MessageStore = lazyWebpack(filters.byProps("getRawMessages")) as Omit<Stores.MessageStore, "getMessages"> & { getMessages(chanId: string): any; };
-export const PermissionStore = lazyWebpack(filters.byProps("can", "getGuildPermissions"));
-export const PrivateChannelsStore = lazyWebpack(filters.byProps("openPrivateChannel"));
-export const GuildChannelStore = lazyWebpack(filters.byProps("getChannels"));
-export const ReadStateStore = lazyWebpack(filters.byProps("lastMessageId"));
-export const PresenceStore = lazyWebpack(filters.byProps("setCurrentUserOnConnectionOpen"));
+export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
+    getMessages(chanId: string): any;
+};
+export const PermissionStore = findByPropsLazy("can", "getGuildPermissions");
+export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
+export const GuildChannelStore = findByPropsLazy("getChannels");
+export const ReadStateStore = findByPropsLazy("lastMessageId");
+export const PresenceStore = findByPropsLazy("setCurrentUserOnConnectionOpen");
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
@@ -121,7 +123,7 @@ export const Toasts = {
 };
 
 export const UserUtils = {
-    fetchUser: lazyWebpack(filters.byCode(".USER(", "getUser")) as (id: string) => Promise<User>,
+    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
 };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {

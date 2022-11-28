@@ -19,10 +19,9 @@
 import { addClickListener, removeClickListener } from "../api/MessageEvents";
 import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
 import { UserStore } from "../webpack/common";
+import { findByPropsLazy, findLazy } from "../webpack/webpack";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -37,10 +36,10 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     start() {
-        const MessageActions = lazyWebpack(filters.byProps("deleteMessage", "startEditMessage"));
-        const PermissionStore = lazyWebpack(filters.byProps("can", "initialize"));
-        const Permissions = lazyWebpack(m => typeof m.MANAGE_MESSAGES === "bigint");
-        const EditStore = lazyWebpack(filters.byProps("isEditing", "isEditingAny"));
+        const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
+        const PermissionStore = findByPropsLazy("can", "initialize");
+        const Permissions = findLazy(m => typeof m.MANAGE_MESSAGES === "bigint");
+        const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);

@@ -19,9 +19,9 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "../api/Commands";
 import { Devs } from "../utils/constants";
 import { getGifEncoder } from "../utils/dependencies";
-import { lazyWebpack, makeLazy } from "../utils/misc";
+import { makeLazy } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
+import { findByCodeLazy, findByPropsLazy } from "../webpack/webpack";
 
 const DRAFT_TYPE = 0;
 const DEFAULT_DELAY = 20;
@@ -35,9 +35,9 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const fetchUser = lazyWebpack(filters.byCode(".USER("));
-const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
-const UploadStore = lazyWebpack(filters.byProps("getUploads"));
+const fetchUser = findByCodeLazy(".USER(");
+const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+const UploadStore = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;

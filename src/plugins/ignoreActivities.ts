@@ -18,9 +18,8 @@
 
 import { DataStore } from "../api";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
+import { findByPropsLazy } from "../webpack/webpack";
 
 interface MatchAndReplace {
     match: RegExp;
@@ -28,7 +27,7 @@ interface MatchAndReplace {
 }
 
 /** Used to re-render the Registered Games tab to update how our button looks like */
-const RunningGameStoreModule = lazyWebpack(filters.byProps("IgnoreActivities_reRenderGames"));
+const RunningGameStoreModule = findByPropsLazy("IgnoreActivities_reRenderGames");
 
 let ignoredActivitiesCache: string[] = [];
 

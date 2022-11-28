@@ -20,14 +20,14 @@ import { addPreEditListener, addPreSendListener, removePreEditListener, removePr
 import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
 import { filters } from "../webpack";
 import { ChannelStore, UserStore } from "../webpack/common";
+import { findByCodeLazy } from "../webpack/webpack";
 
 const DRAFT_TYPE = 0;
-const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
+const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 
 interface BaseSticker {
     available: boolean;

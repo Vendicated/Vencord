@@ -19,12 +19,13 @@
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
-import { lazyWebpack, mergeDefaults } from "../../utils/misc";
-import { filters, waitFor } from "../../webpack";
+import { mergeDefaults } from "../../utils/misc";
+import { waitFor } from "../../webpack";
+import { findByCodeLazy, findByPropsLazy } from "../../webpack/webpack";
 import { Argument } from "./types";
 
-const createBotMessage = lazyWebpack(filters.byCode('username:"Clyde"'));
-const MessageSender = lazyWebpack(filters.byProps("receiveMessage"));
+const createBotMessage = findByCodeLazy('username:"Clyde"');
+const MessageSender = findByPropsLazy("receiveMessage");
 
 let SnowflakeUtils: any;
 waitFor("fromTimestamp", m => SnowflakeUtils = m);

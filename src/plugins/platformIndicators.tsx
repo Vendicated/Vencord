@@ -21,10 +21,9 @@ import { User } from "discord-types/general";
 import { Settings } from "../api/settings";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
-import { filters } from "../webpack";
 import { PresenceStore, Tooltip } from "../webpack/common";
+import { findByCodeLazy } from "../webpack/webpack";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -52,7 +51,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = lazyWebpack(filters.byCode("STATUS_YELLOW", "TWITCH", "STATUS_GREY"));
+const getStatusColor = findByCodeLazy("STATUS_YELLOW", "TWITCH", "STATUS_GREY");
 
 const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);

@@ -17,13 +17,12 @@
 */
 
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { filters } from "../webpack";
 import { Forms, React } from "../webpack/common";
+import { findByPropsLazy } from "../webpack/webpack";
 
-const KbdStyles = lazyWebpack(filters.byProps("key", "removeBuildOverride"));
+const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
 
 export default definePlugin({
     name: "Experiments",

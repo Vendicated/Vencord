@@ -20,16 +20,16 @@ import { migratePluginSettings, Settings } from "../api/settings";
 import { CheckedTextInput } from "../components/CheckedTextInput";
 import { Devs } from "../utils/constants";
 import Logger from "../utils/Logger";
-import { lazyWebpack, makeLazy } from "../utils/misc";
+import { makeLazy } from "../utils/misc";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "../utils/modal";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
 import { Forms, GuildStore, Margins, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "../webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "../webpack/webpack";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
-const GuildEmojiStore = lazyWebpack(filters.byProps("getGuilds", "getGuildEmoji"));
-const uploadEmoji = lazyWebpack(filters.byCode('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS("));
+const GuildEmojiStore = findByPropsLazy("getGuilds", "getGuildEmoji");
+const uploadEmoji = findByCodeLazy('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS(");
 
 function getGuildCandidates(isAnimated: boolean) {
     const meId = UserStore.getCurrentUser().id;
