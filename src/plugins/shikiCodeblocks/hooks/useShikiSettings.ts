@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "../../../api/settings";
+import { useSettings } from "@api/settings";
+
 import { ShikiSettings } from "../types";
 
 export const useShikiSettings = (settings: (keyof ShikiSettings)[]) => {

@@ -17,8 +17,8 @@
 */
 
 import { IShikiTheme } from "@vap/shiki";
+import { React } from "@webpack/common";
 
-import { React } from "../../../webpack/common";
 import { shiki } from "../api/shiki";
 
 const themeDispatchers = new Set<React.DispatchWithoutAction>();

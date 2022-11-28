@@ -17,10 +17,10 @@
 */
 
 
+import { shikiOnigasmSrc, shikiWorkerSrcDev, shikiWorkerSrcProd } from "@utils/dependencies";
 import { WorkerClient } from "@vap/core/ipc";
 import type { IShikiTheme, IThemedToken } from "@vap/shiki";
 
-import { shikiOnigasmSrc, shikiWorkerSrcDev, shikiWorkerSrcProd } from "../../../utils/dependencies";
 import { Settings } from "../../../Vencord";
 import { dispatchTheme } from "../hooks/useTheme";
 import type { ShikiSpec } from "../types";

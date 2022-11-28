@@ -17,8 +17,8 @@
 */
 
 import type { IThemedToken } from "@vap/shiki";
+import { Clipboard, hljs, React } from "@webpack/common";
 
-import { Clipboard, hljs, React } from "../../../webpack/common";
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
 import { useCopyCooldown } from "../hooks/useCopyCooldown";

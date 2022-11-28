@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
+import { parseUrl } from "@utils/misc";
+import { fromPascal, toTitle } from "@utils/text";
+import definePlugin, { OptionType } from "@utils/types";
+
 import cssText from "~fileContent/style.css";
 
-import { Devs } from "../../utils/constants";
-import { parseUrl } from "../../utils/misc";
-import { fromPascal, toTitle } from "../../utils/text";
-import definePlugin, { OptionType } from "../../utils/types";
 import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
 import { themes } from "./api/themes";
