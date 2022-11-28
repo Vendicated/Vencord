@@ -30,9 +30,15 @@ function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
 
+    const [donateImage] = React.useState(
+        Math.random() > 0.5
+            ? "https://cdn.discordapp.com/emojis/1026533090627174460.png"
+            : "https://media.discordapp.net/stickers/1039992459209490513.png"
+    );
+
     return (
         <React.Fragment>
-            <DonateCard />
+            <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={st("QuickActionCard")}>
                     {IS_WEB ? (
@@ -104,8 +110,11 @@ function VencordSettings() {
 }
 
 
+interface DonateCardProps {
+    image: string;
+}
 
-function DonateCard() {
+function DonateCard({ image }: DonateCardProps) {
     return (
         <Card style={{
             padding: "1em",
@@ -123,8 +132,9 @@ function DonateCard() {
             </div>
             <img
                 role="presentation"
-                src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                src={image}
                 alt=""
+                height={128}
                 style={{ marginLeft: "auto", transform: "rotate(10deg)" }}
             />
         </Card>
