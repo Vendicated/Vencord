@@ -18,11 +18,11 @@
 
 import { ILanguageRegistration } from "@vap/shiki";
 
-import langsJson from "./languages.json.txt";
-
 export const VPC_REPO = "Vap0r1ze/vapcord";
-export const VPC_REPO_COMMIT = "de6b2e24e7cdf4854c8264e2e2f0694e6ae9f988";
-export const vpcRepoGrammar = (name: string) => `https://raw.githubusercontent.com/${VPC_REPO}/${VPC_REPO_COMMIT}/assets/shiki-codeblocks/grammars/${name}.tmLanguage.json`;
+export const VPC_REPO_COMMIT = "88a7032a59cca40da170926651b08201ea3b965a";
+export const vpcRepoAssets = `https://raw.githubusercontent.com/${VPC_REPO}/${VPC_REPO_COMMIT}/assets/shiki-codeblocks`;
+export const vpcRepoGrammar = (fileName: string) => `${vpcRepoAssets}/${fileName}`;
+export const vpcRepoLanguages = `${vpcRepoAssets}/languages.json`;
 
 export type Language = {
     name: string;
@@ -43,13 +43,17 @@ export type LanguageJson = {
     aliases?: string[];
 };
 
-export const languages: Record<string, Language> = Object.fromEntries(
-    (JSON.parse(langsJson) as LanguageJson[])
-        .map(lang => [lang.id, {
+export const languages: Record<string, Language> = {};
+
+export const loadLanguages = async () => {
+    const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.json());
+    Object.fromEntries(
+        langsJson.map(lang => [lang.id, {
             ...lang,
             grammarUrl: vpcRepoGrammar(lang.fileName),
         }])
-);
+    );
+};
 
 export const getGrammar = (lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> => {
     if (lang.grammar) return Promise.resolve(lang.grammar);

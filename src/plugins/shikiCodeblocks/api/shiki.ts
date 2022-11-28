@@ -24,7 +24,7 @@ import type { IShikiTheme, IThemedToken } from "@vap/shiki";
 import { Settings } from "../../../Vencord";
 import { dispatchTheme } from "../hooks/useTheme";
 import type { ShikiSpec } from "../types";
-import { getGrammar, languages, resolveLang } from "./languages";
+import { getGrammar, languages, loadLanguages, resolveLang } from "./languages";
 import { themes } from "./themes";
 
 const themeUrls = Object.values(themes);
@@ -55,6 +55,7 @@ export const shiki = {
             "shiki-host",
             workerBlob,
         );
+        await loadLanguages();
         await client.init();
         await client.run("setOnigasm", { wasm: shikiOnigasmSrc });
         await client.run("setHighlighter", { theme: themeUrls[0], langs: [] });
