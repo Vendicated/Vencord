@@ -20,4 +20,5 @@
     flex-grow: 1;
     flex-direction: row;
     margin-bottom: 1em;
+    background-color: var(--primary-dark-700);
 }

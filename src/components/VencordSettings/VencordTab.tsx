@@ -121,7 +121,8 @@ function DonateCard({ image }: DonateCardProps) {
             display: "flex",
             flexDirection: "row",
             marginBottom: "1em",
-            marginTop: "1em"
+            marginTop: "1em",
+            backgroundColor: "var(--primary-dark-700)"
         }}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
