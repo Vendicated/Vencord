@@ -18,6 +18,8 @@
 
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { LazyComponent } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { proxyLazy } from "@utils/proxyLazy";
@@ -27,8 +29,6 @@ import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUti
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import ErrorBoundary from "../ErrorBoundary";
-import { Flex } from "../Flex";
 import {
     ISettingElementProps,
     SettingBooleanComponent,
