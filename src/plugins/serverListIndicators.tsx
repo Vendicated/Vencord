@@ -39,7 +39,7 @@ function FriendsIndicator() {
     forceUpdateFriendCount = useForceUpdater();
 
     return (
-        <span style={{
+        <span id="vc-friendcount" style={{
             display: "inline-block",
             width: "100%",
             fontSize: "12px",
@@ -57,7 +57,7 @@ function ServersIndicator() {
     forceUpdateGuildCount = useForceUpdater();
 
     return (
-        <span style={{
+        <span id="vc-guildcount" style={{
             display: "inline-block",
             width: "100%",
             fontSize: "12px",
@@ -104,6 +104,7 @@ export default definePlugin({
         const relations = RelationshipStore.getRelationships();
         for (const id of Object.keys(relations)) {
             const type = relations[id];
+            // FRIEND relationship type
             if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
                 onlineFriends += 1;
             }
@@ -127,5 +128,8 @@ export default definePlugin({
 
     stop() {
         removeServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
+        FluxDispatcher.unsubscribe("PRESENCE_UPDATES", this.handlePresenceUpdate);
+        FluxDispatcher.unsubscribe("GUILD_CREATE", this.handleGuildUpdate);
+        FluxDispatcher.unsubscribe("GUILD_DELETE", this.handleGuildUpdate);
     }
 });
