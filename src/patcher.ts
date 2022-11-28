@@ -108,16 +108,36 @@ electron.app.whenReady().then(() => {
 
 
     // Remove CSP
+    type PolicyResult = Record<string, string[]>;
+
+    const parsePolicy = (policy: string): PolicyResult => {
+        const result: PolicyResult = {};
+        policy.split(";").forEach(directive => {
+            const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/g);
+            if (directiveKey && !Object.prototype.hasOwnProperty.call(result, directiveKey)) {
+                result[directiveKey] = directiveValue;
+            }
+        });
+        return result;
+    };
+    const stringifyPolicy = (policy: PolicyResult): string =>
+        Object.entries(policy)
+            .filter(([, values]) => values?.length)
+            .map(directive => directive.flat().join(" "))
+            .join("; ");
+
     function patchCsp(headers: Record<string, string[]>, header: string) {
         if (header in headers) {
-            let patchedHeader = headers[header][0];
+            const csp = parsePolicy(headers[header][0]);
+
             for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                patchedHeader = patchedHeader.replace(new RegExp(`${directive}.+?;`), `${directive} * blob: data: 'unsafe-inline';`);
+                csp[directive] = ["*", "blob:", "data:", "'unsafe-inline'"];
             }
             // TODO: Restrict this to only imported packages with fixed version.
             // Perhaps auto generate with esbuild
-            patchedHeader = patchedHeader.replace(/script-src.+?(?=;)/, "$& 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com");
-            headers[header] = [patchedHeader];
+            csp["script-src"] ??= [];
+            csp["script-src"].push("'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com");
+            headers[header] = [stringifyPolicy(csp)];
         }
     }
 
