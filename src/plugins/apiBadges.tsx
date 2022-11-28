@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BadgePosition, ProfileBadge } from "../api/Badges";
-import DonateButton from "../components/DonateButton";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Flex } from "../components/Flex";
-import { Heart } from "../components/Heart";
-import { Devs } from "../utils/constants";
-import IpcEvents from "../utils/IpcEvents";
-import Logger from "../utils/Logger";
-import { closeModal, Modals, openModal } from "../utils/modal";
-import definePlugin from "../utils/types";
-import { Forms, Margins } from "../webpack/common";
+import { BadgePosition, ProfileBadge } from "@api/Badges";
+import DonateButton from "@components/DonateButton";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { Heart } from "@components/Heart";
+import { Devs } from "@utils/constants";
+import IpcEvents from "@utils/IpcEvents";
+import Logger from "@utils/Logger";
+import { closeModal, Modals, openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
+import { Forms, Margins } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
 

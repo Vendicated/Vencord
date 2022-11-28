@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../api/settings";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { React } from "../webpack/common";
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { React } from "@webpack/common";
 
 function formatDuration(ms: number) {
     // here be dragons (moment fucking sucks)

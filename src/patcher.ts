@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions } from "electron";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -23,7 +24,6 @@ import { dirname, join } from "path";
 import { initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
-import { onceDefined } from "./utils/onceDefined";
 
 console.log("[Vencord] Starting up...");
 

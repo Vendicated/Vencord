@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType } from "../api/Commands";
-import { makeRange } from "../components/PluginSettings/components";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
+import { ApplicationCommandOptionType } from "@api/Commands";
+import { Settings } from "@api/settings";
+import { makeRange } from "@components/PluginSettings/components";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "Fart2",

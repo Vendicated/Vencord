@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSelect } from "../../../utils/types";
-import { Forms, React, Select } from "../../../webpack/common";
+import { PluginOptionSelect } from "@utils/types";
+import { Forms, React, Select } from "@webpack/common";
+
 import { ISettingElementProps } from ".";
 
 export function SettingSelectComponent({ option, pluginSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {

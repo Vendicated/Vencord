@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters } from "../webpack";
-import { mapMangledModuleLazy } from "../webpack/webpack";
+import { filters, mapMangledModuleLazy } from "@webpack";
 
 export enum ModalSize {
     SMALL = "small",

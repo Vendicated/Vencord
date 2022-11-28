@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useAwaiter } from "../../../utils/misc";
-import { Settings } from "../../../Vencord";
-import { UserStore } from "../../../webpack/common";
+import { Settings } from "@api/settings";
+import { useAwaiter } from "@utils/misc";
+import { UserStore } from "@webpack/common";
+
 import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
 
