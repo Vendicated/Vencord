@@ -22,9 +22,8 @@ import { Devs } from "../utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
 import definePlugin, { OptionType } from "../utils/types";
 import { Settings } from "../Vencord";
-import { filters } from "../webpack";
 import { ChannelStore, UserStore } from "../webpack/common";
-import { findByCodeLazy } from "../webpack/webpack";
+import { findByCodeLazy, findByPropsLazy } from "../webpack/webpack";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -225,8 +224,8 @@ export default definePlugin({
             return;
         }
 
-        const EmojiStore = lazyWebpack(filters.byProps("getCustomEmojiById"));
-        const StickerStore = lazyWebpack(filters.byProps("getAllGuildStickers")) as {
+        const EmojiStore = findByPropsLazy("getCustomEmojiById");
+        const StickerStore = findByPropsLazy("getAllGuildStickers") as {
             getPremiumPacks(): StickerPack[];
             getAllGuildStickers(): Map<string, Sticker[]>;
             getStickerById(id: string): Sticker | undefined;
