@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ChannelStore, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
 import { Guild } from "discord-types/general";
-
-import { ChannelStore, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "../webpack/common";
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());

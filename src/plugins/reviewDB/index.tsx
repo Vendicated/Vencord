@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { Button, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import ErrorBoundary from "../../components/ErrorBoundary";
-import { Devs } from "../../utils/constants";
-import definePlugin, { OptionType } from "../../utils/types";
-import { Settings } from "../../Vencord";
-import { Button, UserStore } from "../../webpack/common";
 import ReviewsView from "./components/ReviewsView";
 import { getLastReviewID } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findByCodeLazy } from "@webpack";
+import { Forms, Router, Text } from "@webpack/common";
+
 import cssText from "~fileContent/settingsStyles.css";
 
-import { lazyWebpack } from "../../utils/misc";
-import { filters } from "../../webpack";
-import { Forms, React, Router, Text } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
@@ -33,7 +33,7 @@ document.head.appendChild(style);
 
 const st = (style: string) => `vcSettings${style}`;
 
-const TabBar = lazyWebpack(filters.byCode('[role="tab"][aria-disabled="false"]'));
+const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
 interface SettingsProps {
     tab: string;

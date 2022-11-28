@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../../api/settings";
-import ErrorBoundary from "../../components/ErrorBoundary";
-import { Devs } from "../../utils/constants";
-import Logger from "../../utils/Logger";
-import { lazyWebpack } from "../../utils/misc";
-import definePlugin, { OptionType } from "../../utils/types";
-import { filters } from "../../webpack";
-import { Parser, UserStore } from "../../webpack/common";
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Parser, UserStore } from "@webpack/common";
 
 function addDeleteStyleClass() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -74,8 +73,8 @@ export default definePlugin({
     `,
 
     start() {
-        this.moment = lazyWebpack(filters.byProps("relativeTimeRounding", "relativeTimeThreshold"));
-        this.timestampModule = lazyWebpack(filters.byProps("messageLogger_TimestampComponent"));
+        this.moment = findByPropsLazy("relativeTimeRounding", "relativeTimeThreshold");
+        this.timestampModule = findByPropsLazy("messageLogger_TimestampComponent");
 
         const style = this.style = document.createElement("style");
         style.textContent = this.css;

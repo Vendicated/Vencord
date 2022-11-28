@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreSendListener, MessageObject, removePreSendListener } from "../api/MessageEvents";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
+import { addPreSendListener, MessageObject, removePreSendListener } from "@api/MessageEvents";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "NoCanaryMessageLinks",

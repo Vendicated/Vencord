@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionString } from "../../../utils/types";
-import { Forms, React, TextInput } from "../../../webpack/common";
+import { PluginOptionString } from "@utils/types";
+import { Forms, React, TextInput } from "@webpack/common";
+
 import { ISettingElementProps } from ".";
 
 export function SettingTextComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {

@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { VENCORD_USER_AGENT } from "../../utils/constants";
-import { debounce } from "../../utils/debounce";
-import { Settings } from "../../Vencord";
+import { Settings } from "@api/settings";
+import { VENCORD_USER_AGENT } from "@utils/constants";
+import { debounce } from "@utils/debounce";
+
 import { PronounsFormat } from ".";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 

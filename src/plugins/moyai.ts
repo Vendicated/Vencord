@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
+import { Devs } from "@utils/constants";
+import { sleep } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
+import { FluxDispatcher, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, ReactionEmoji } from "discord-types/general";
-
-import { makeRange } from "../components/PluginSettings/components/SettingSliderComponent";
-import { Devs } from "../utils/constants";
-import { sleep } from "../utils/misc";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
-import { FluxDispatcher, SelectedChannelStore, UserStore } from "../webpack/common";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";

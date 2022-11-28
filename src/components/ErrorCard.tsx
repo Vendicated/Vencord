@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Card } from "../webpack/common";
+import { Card } from "@webpack/common";
 
 interface Props {
     style?: React.CSSProperties;

@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin from "../utils/types";
-import { filters } from "../webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "../webpack/common";
-
-const Kangaroo = lazyWebpack(filters.byProps("jumpToMessage"));
+const Kangaroo = findByPropsLazy("jumpToMessage");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;

@@ -17,9 +17,9 @@
 */
 
 
-import { Devs } from "../../utils/constants";
-import { LazyComponent } from "../../utils/misc";
-import definePlugin from "../../utils/types";
+import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "StartupTimings",

@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { waitFor } from "../webpack";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { waitFor } from "@webpack";
 
 let GuildStore;
 waitFor(["getGuild"], m => GuildStore = m);

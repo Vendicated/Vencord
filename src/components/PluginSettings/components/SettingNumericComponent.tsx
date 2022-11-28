@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { OptionType, PluginOptionNumber } from "../../../utils/types";
-import { Forms, React, TextInput } from "../../../webpack/common";
+import { OptionType, PluginOptionNumber } from "@utils/types";
+import { Forms, React, TextInput } from "@webpack/common";
+
 import { ISettingElementProps } from ".";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);

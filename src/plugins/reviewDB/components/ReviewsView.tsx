@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classes, useAwaiter } from "@utils/misc";
+import { findLazy } from "@webpack";
+import { Forms, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
-import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Text, UserStore } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = lazyWebpack(m => typeof m.textarea === "string");
+const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const [reviews, _, isLoading, refetch] = useAwaiter(() => getReviews(userId), []);

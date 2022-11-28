@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitFor } from "../webpack";
+import { waitFor } from "@webpack";
 
 let NoticesModule: any;
 waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
+import { proxyLazy } from "@utils/proxyLazy";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/Logger";
-import { proxyLazy } from "../utils/proxyLazy";
 
 const logger = new Logger("Webpack");
 
@@ -112,6 +112,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
 
     return null;
 });
+
+/**
+ * find but lazy
+ */
+export function findLazy(filter: FilterFn, getDefault = true) {
+    return proxyLazy(() => find(filter, getDefault));
+}
 
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
@@ -292,6 +299,13 @@ export function findByProps(...props: string[]) {
 }
 
 /**
+ * findByProps but lazy
+ */
+export function findByPropsLazy(...props: string[]) {
+    return findLazy(filters.byProps(...props));
+}
+
+/**
  * Find all modules that have the specified properties
  */
 export function findAllByProps(...props: string[]) {
@@ -303,6 +317,13 @@ export function findAllByProps(...props: string[]) {
  */
 export function findByCode(...code: string[]) {
     return find(filters.byCode(...code));
+}
+
+/**
+ * findByCode but lazy
+ */
+export function findByCodeLazy(...code: string[]) {
+    return findLazy(filters.byCode(...code));
 }
 
 /**

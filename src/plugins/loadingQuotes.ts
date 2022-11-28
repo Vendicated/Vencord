@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
 // don't worry about it :P

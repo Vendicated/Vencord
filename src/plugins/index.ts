@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { registerCommand, unregisterCommand } from "@api/Commands";
+import { Settings } from "@api/settings";
+import Logger from "@utils/Logger";
+import { Patch, Plugin } from "@utils/types";
+
 import Plugins from "~plugins";
 
-import { registerCommand, unregisterCommand } from "../api/Commands";
-import { Settings } from "../api/settings";
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/Logger";
-import { Patch, Plugin } from "../utils/types";
 
 const logger = new Logger("PluginManager", "#a6d189");
 

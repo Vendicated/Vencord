@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin from "../utils/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findLazy } from "@webpack";
 
-const ComponentDispatch = lazyWebpack(m => m.emitter?._events?.INSERT_TEXT);
+const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export default definePlugin({
     name: "QuickMention",

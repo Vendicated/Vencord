@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../../../Vencord";
+import { Settings } from "@api/settings";
+
 import { Review } from "../entities/Review";
 import { authorize, showToast } from "./Utils";
 

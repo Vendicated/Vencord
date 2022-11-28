@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "../api";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "../api/Commands";
-import { Settings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
+import * as DataStore from "@api/DataStore";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 
 const EMOTE = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";

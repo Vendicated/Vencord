@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FilterFn, find } from "../webpack";
-import { React } from "../webpack/common";
-import { proxyLazy } from "./proxyLazy";
+import { React } from "@webpack/common";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
@@ -28,16 +26,6 @@ import { proxyLazy } from "./proxyLazy";
 export function makeLazy<T>(factory: () => T): () => T {
     let cache: T;
     return () => cache ?? (cache = factory());
-}
-export const lazy = makeLazy;
-
-/**
- * Do a lazy webpack search. Searches the module on first property access
- * @param filter Filter function
- * @returns A proxy to the webpack module. Not all traps are implemented, may produce unexpected results.
- */
-export function lazyWebpack<T = any>(filter: FilterFn): T {
-    return proxyLazy(() => find(filter));
 }
 
 type AwaiterRes<T> = [T, any, boolean, () => void];
