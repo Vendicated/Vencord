@@ -51,11 +51,11 @@ export default definePlugin({
         },
     ],
     start: async () => {
+        document.head.appendChild(mainStyle);
+        if (shikiSettings.useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
+
         await shiki.init();
         await shiki.setTheme(shikiSettings.customTheme || shikiSettings.theme);
-        document.head.appendChild(mainStyle);
-
-        if (shikiSettings.useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
     },
     stop: () => {
         shiki.destroy();
