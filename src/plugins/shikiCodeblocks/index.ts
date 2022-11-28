@@ -27,10 +27,15 @@ import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
 import { themes } from "./api/themes";
 import { createHighlighter } from "./components/Highlighter";
-import { DeviconSetting, HljsSetting } from "./types";
+import { DeviconSetting, HljsSetting, ShikiSettings } from "./types";
 
 const themeNames = Object.keys(themes);
-let style: HTMLStyleElement | null;
+const mainStyle: HTMLStyleElement = document.createElement("style");
+const devIconStyle: HTMLStyleElement = document.createElement("style");
+mainStyle.innerText = cssText;
+devIconStyle.innerHTML = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
+
+const shikiSettings = Settings.plugins.ShikiCodeblocks as ShikiSettings;
 
 export default definePlugin({
     name: "ShikiCodeblocks",
@@ -47,15 +52,15 @@ export default definePlugin({
     ],
     start: async () => {
         await shiki.init();
-        await shiki.setTheme(Settings.plugins.ShikiCodeblocks.customTheme || Settings.plugins.ShikiCodeblocks.theme);
-        style = document.createElement("style");
-        style.innerText = cssText;
-        document.head.appendChild(style);
+        await shiki.setTheme(shikiSettings.customTheme || shikiSettings.theme);
+        document.head.appendChild(mainStyle);
+
+        if (shikiSettings.useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
     },
     stop: () => {
         shiki.destroy();
-        style?.remove();
-        style = null;
+        mainStyle?.remove();
+        devIconStyle?.remove();
     },
     options: {
         theme: {
@@ -66,7 +71,7 @@ export default definePlugin({
                 value: themes[themeName],
                 default: themes[themeName] === themes.DarkPlus,
             })),
-            disabled: () => Settings.plugins.ShikiCodeblocks.customTheme,
+            disabled: () => !!shikiSettings.customTheme,
             onChange: shiki.setTheme,
         },
         customTheme: {
@@ -82,7 +87,7 @@ export default definePlugin({
 
                 return true;
             },
-            onChange: value => shiki.setTheme(value || Settings.plugins.ShikiCodeblocks.theme),
+            onChange: value => shiki.setTheme(value || shikiSettings.theme),
         },
         tryHljs: {
             type: OptionType.SELECT,
@@ -125,6 +130,12 @@ export default definePlugin({
                     value: DeviconSetting.Color,
                 },
             ],
+            onChange: (newValue: DeviconSetting) => {
+                if (newValue === DeviconSetting.Disabled && devIconStyle.isConnected)
+                    devIconStyle.remove();
+                else if (newValue === DeviconSetting.Disabled && !devIconStyle.isConnected)
+                    document.head.appendChild(devIconStyle);
+            },
         },
         bgOpacity: {
             type: OptionType.SLIDER,
@@ -147,10 +158,7 @@ export default definePlugin({
         return createHighlighter({
             lang,
             content,
-            // bgOpacity: Settings.plugins.ShikiCodeblocks.bgOpacity,
             isPreview: false,
-            // tryHljs: Settings.plugins.ShikiCodeblocks.tryHljs,
-            // useDevIcon: Settings.plugins.ShikiCodeblocks.useDevIcon,
         });
     },
 });

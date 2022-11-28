@@ -60,7 +60,14 @@ export const shiki = {
         await client.run("setOnigasm", { wasm: shikiOnigasmSrc });
         await client.run("setHighlighter", { theme: themeUrls[0], langs: [] });
         shiki.loadedThemes.add(themeUrls[0]);
+        await shiki._setTheme(themeUrls[0]);
         resolveClient(client);
+    },
+    _setTheme: async (themeUrl: string) => {
+        shiki.currentThemeUrl = themeUrl;
+        const { themeData } = await shiki.client!.run("getTheme", { theme: themeUrl });
+        shiki.currentTheme = JSON.parse(themeData);
+        dispatchTheme({ id: themeUrl, theme: shiki.currentTheme });
     },
     loadTheme: async (themeUrl: string) => {
         const client = await shiki.clientPromise;
@@ -71,14 +78,11 @@ export const shiki = {
         shiki.loadedThemes.add(themeUrl);
     },
     setTheme: async (themeUrl: string) => {
-        const client = await shiki.clientPromise;
+        await shiki.clientPromise;
         if (!themeUrl) themeUrl = themeUrls[0];
         if (!shiki.loadedThemes.has(themeUrl)) await shiki.loadTheme(themeUrl);
 
-        shiki.currentThemeUrl = themeUrl;
-        const { themeData } = await client.run("getTheme", { theme: themeUrl });
-        shiki.currentTheme = JSON.parse(themeData);
-        dispatchTheme({ id: themeUrl, theme: shiki.currentTheme });
+        await shiki._setTheme(themeUrl);
     },
     loadLang: async (langId: string) => {
         const client = await shiki.clientPromise;
