@@ -42,51 +42,14 @@ export default definePlugin({
     timestampModule: null as any,
     moment: null as Function | null,
 
-    css: `
-        .messagelogger-red-overlay .messageLogger-deleted {
-            background-color: rgba(240, 71, 71, 0.15);
-        }
-        .messagelogger-red-text .messageLogger-deleted div {
-            color: #f04747;
-        }
-
-        .messageLogger-deleted [class^="buttons"] {
-            display: none;
-        }
-
-        .messageLogger-deleted-attachment {
-            filter: grayscale(1);
-        }
-
-        .messageLogger-deleted-attachment:hover {
-            filter: grayscale(0);
-            transition: 250ms filter linear;
-        }
-
-        .theme-dark .messageLogger-edited {
-            filter: brightness(80%);
-        }
-
-        .theme-light .messageLogger-edited {
-            opacity: 0.5;
-        }
-    `,
-
     start() {
         this.moment = findByPropsLazy("relativeTimeRounding", "relativeTimeThreshold");
         this.timestampModule = findByPropsLazy("messageLogger_TimestampComponent");
-
-        const style = this.style = document.createElement("style");
-        style.textContent = this.css;
-        style.id = "MessageLogger-css";
-        document.head.appendChild(style);
 
         addDeleteStyleClass();
     },
 
     stop() {
-        this.style?.remove();
-
         document.querySelectorAll(".messageLogger-deleted").forEach(e => e.remove());
         document.querySelectorAll(".messageLogger-edited").forEach(e => e.remove());
         document.body.classList.remove("messagelogger-red-overlay");

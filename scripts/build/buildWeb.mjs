@@ -74,7 +74,8 @@ await Promise.all(
 
 zip({
     dist: {
-        "Vencord.js": readFileSync("dist/browser.js")
+        "Vencord.js": readFileSync("dist/browser.js"),
+        "Vencord.css": readFileSync("dist/browser.css"),
     },
     ...Object.fromEntries(await Promise.all(["modifyResponseHeaders.json", "content.js", "manifest.json"].map(async f => [
         f,

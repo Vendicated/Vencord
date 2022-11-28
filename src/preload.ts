@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 if (location.protocol !== "data:") {
     // Discord
     webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+    webFrame.insertCSS(readFileSync(join(__dirname, "renderer.css"), "utf-8"));
     require(process.env.DISCORD_PRELOAD!);
 } else {
     // Monaco Popout
