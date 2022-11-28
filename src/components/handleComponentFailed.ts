@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { isOutdated, rebuild, update } from "../utils/updater";
+import { isOutdated, rebuild, update } from "@utils/updater";
 
 export async function handleComponentFailed() {
     if (isOutdated) {

@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../../../utils/constants";
-import Logger from "../../../utils/Logger";
-import { openModal } from "../../../utils/modal";
-import { Settings } from "../../../Vencord";
-import { findByProps } from "../../../webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "../../../webpack/common";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import { openModal } from "@utils/modal";
+import { findByProps } from "@webpack";
+import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
+
 import { Review } from "../entities/Review";
 
 export async function openUserProfileModal(userId: string) {

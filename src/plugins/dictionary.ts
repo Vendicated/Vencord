@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType, sendBotMessage } from "../api/Commands";
-import { ApplicationCommandInputType } from "../api/Commands/types";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType } from "@api/Commands/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "UrbanDictionary",

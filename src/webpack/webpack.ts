@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
+import { proxyLazy } from "@utils/proxyLazy";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
-import Logger from "../utils/Logger";
-import { proxyLazy } from "../utils/proxyLazy";
 
 const logger = new Logger("Webpack");
 
@@ -41,8 +41,6 @@ export const filters = {
         props.length === 1
             ? m => m[props[0]] !== void 0
             : m => props.every(p => m[p] !== void 0),
-
-    byDisplayName: (deezNuts: string): FilterFn => m => m.default?.displayName === deezNuts,
 
     byCode: (...code: string[]): FilterFn => m => {
         if (typeof m !== "function") return false;
@@ -75,6 +73,9 @@ if (IS_DEV && !IS_WEB) {
     }, 0);
 }
 
+/**
+ * Find the first module that matches the filter
+ */
 export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
@@ -111,6 +112,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
 
     return null;
 });
+
+/**
+ * find but lazy
+ */
+export function findLazy(filter: FilterFn, getDefault = true) {
+    return proxyLazy(() => find(filter, getDefault));
+}
 
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
@@ -283,22 +291,45 @@ export function mapMangledModuleLazy<S extends string>(code: string, mappers: Re
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
 
+/**
+ * Find the first module that has the specified properties
+ */
 export function findByProps(...props: string[]) {
     return find(filters.byProps(...props));
 }
 
+/**
+ * findByProps but lazy
+ */
+export function findByPropsLazy(...props: string[]) {
+    return findLazy(filters.byProps(...props));
+}
+
+/**
+ * Find all modules that have the specified properties
+ */
 export function findAllByProps(...props: string[]) {
     return findAll(filters.byProps(...props));
 }
 
+/**
+ * Find a function by its code
+ */
 export function findByCode(...code: string[]) {
     return find(filters.byCode(...code));
 }
 
-export function findByDisplayName(deezNuts: string) {
-    return find(filters.byDisplayName(deezNuts));
+/**
+ * findByCode but lazy
+ */
+export function findByCodeLazy(...code: string[]) {
+    return findLazy(filters.byCode(...code));
 }
 
+/**
+ * Wait for a module that matches the provided filter to be registered,
+ * then call the callback with the module as the first argument
+ */
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
     if (typeof filter === "string")
         filter = filters.byProps(filter);

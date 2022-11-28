@@ -14,7 +14,16 @@
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
-        "jsx": "preserve"
+        "jsx": "preserve",
+
+        "baseUrl": "./src/",
+        "paths": {
+            "@webpack": ["./webpack"],
+            "@webpack/common": ["./webpack/common"],
+            "@utils/*": ["./utils/*"],
+            "@api/*": ["./api/*"],
+            "@components/*": ["./components/*"]
+        }
     },
     "include": ["src/**/*"]
 }

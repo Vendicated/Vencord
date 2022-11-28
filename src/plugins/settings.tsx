@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
+import definePlugin from "@utils/types";
+
 import gitHash from "~git-hash";
 
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+const SettingsComponent = LazyComponent(() => require("../components/VencordSettings").default);
 
 export default definePlugin({
     name: "Settings",
@@ -42,19 +45,29 @@ export default definePlugin({
         replacement: {
             match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
             replace: (m, mod) => {
-                const updater = !IS_WEB ? '{section:"VencordUpdater",label:"Updater",element:Vencord.Components.Updater},' : "";
-                const patchHelper = IS_DEV ? '{section:"VencordPatchHelper",label:"PatchHelper",element:Vencord.Components.PatchHelper},' : "";
+                const updater = !IS_WEB ? '{section:"VencordUpdater",label:"Updater",element:Vencord.Plugins.plugins.Settings.tabs.updater},' : "";
+                const patchHelper = IS_DEV ? '{section:"VencordPatchHelper",label:"Patch Helper",element:Vencord.Components.PatchHelper},' : "";
                 return (
                     `{section:${mod}.ID.HEADER,label:"Vencord"},` +
-                    '{section:"VencordSetting",label:"Vencord",element:Vencord.Components.Settings},' +
-                    '{section:"VencordPlugins",label:"Plugins",element:Vencord.Components.PluginSettings},' +
+                    '{section:"VencordSettings",label:"Vencord",element:Vencord.Plugins.plugins.Settings.tabs.vencord},' +
+                    '{section:"VencordPlugins",label:"Plugins",element:Vencord.Plugins.plugins.Settings.tabs.plugins},' +
+                    '{section:"VencordThemes",label:"Themes",element:Vencord.Plugins.plugins.Settings.tabs.themes},' +
                     updater +
+                    '{section:"VencordSettingsSync",label:"Backup & Restore",element:Vencord.Plugins.plugins.Settings.tabs.sync},' +
                     patchHelper +
                     `{section:${mod}.ID.DIVIDER},${m}`
                 );
             }
         }
     }],
+
+    tabs: {
+        vencord: () => <SettingsComponent tab="VencordSettings" />,
+        plugins: () => <SettingsComponent tab="VencordPlugins" />,
+        themes: () => <SettingsComponent tab="VencordThemes" />,
+        updater: () => <SettingsComponent tab="VencordUpdater" />,
+        sync: () => <SettingsComponent tab="VencordSettingsSync" />
+    },
 
     get electronVersion() {
         return VencordNative.getVersions().electron || window.armcord?.electron || null;

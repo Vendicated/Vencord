@@ -17,13 +17,13 @@
 */
 
 
-import { Flex } from "../components/Flex";
-import { Devs } from "../utils/constants";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "../utils/modal";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
-import { waitFor } from "../webpack";
-import { Button, ChannelStore, Text } from "../webpack/common";
+import { Settings } from "@api/settings";
+import { Flex } from "@components/Flex";
+import { Devs } from "@utils/constants";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import definePlugin, { OptionType } from "@utils/types";
+import { waitFor } from "@webpack";
+import { Button, ChannelStore, Text } from "@webpack/common";
 
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;

@@ -63,7 +63,7 @@ handler.getOwnPropertyDescriptor = (target, p) => {
  * @param factory lazy factory
  * @returns Proxy
  *
- * Note that the example below exists already as an api, see {@link lazyWebpack}
+ * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazy<T>(factory: () => T): T {

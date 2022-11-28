@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { get, set } from "@api/DataStore";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import definePlugin from "@utils/types";
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
 import { Message } from "discord-types/general";
-
-import { get, set } from "../api/DataStore";
-import { Devs } from "../utils/constants";
-import Logger from "../utils/Logger";
-import definePlugin from "../utils/types";
-import { ChannelStore, FluxDispatcher } from "../webpack/common";
 
 let style: HTMLStyleElement;
 
@@ -99,7 +98,7 @@ export default definePlugin({
                 icon: isHidden ? ImageVisible : ImageInvisible,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.toggleHide(msg)
+                onClick: () => this.toggleHide(msg.id)
             });
         } catch (err) {
             new Logger("HideAttachments").error(err);
@@ -107,10 +106,10 @@ export default definePlugin({
         }
     },
 
-    async toggleHide(message: Message) {
+    async toggleHide(id: string) {
         const ids = await getHiddenMessages();
-        if (!ids.delete(message.id))
-            ids.add(message.id);
+        if (!ids.delete(id))
+            ids.add(id);
 
         await saveHiddenMessages(ids);
         await this.buildCss();
@@ -118,7 +117,7 @@ export default definePlugin({
         // update is necessary to rerender the PopOver
         FluxDispatcher.dispatch({
             type: "MESSAGE_UPDATE",
-            message
+            message: { id }
         });
     }
 });
