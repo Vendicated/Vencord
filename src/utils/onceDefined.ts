@@ -27,7 +27,7 @@ import type { LiteralUnion } from "type-fest";
  *
  * @example onceDefined(window, "webpackChunkdiscord_app", wpInstance => wpInstance.push(...));
  */
-export function onceDefined<T, P extends LiteralUnion<keyof T, PropertyKey>>(
+export function onceDefined<T extends object, P extends LiteralUnion<keyof T, PropertyKey>>(
     target: T, property: P, callback: (v: P extends keyof T ? T[P] : any) => void
 ): void {
     const propertyAsAny = property as any;
