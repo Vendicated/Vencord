@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+
 import { Player } from "./PlayerComponent";
 
 export default definePlugin({

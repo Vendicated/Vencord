@@ -19,7 +19,6 @@
 import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
 import { SelectedChannelStore } from "@webpack/common";
 
 const timers = {} as Record<string, {

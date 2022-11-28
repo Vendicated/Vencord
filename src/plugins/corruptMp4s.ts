@@ -21,7 +21,6 @@ import { findOption } from "@api/Commands/commandHelpers";
 import { ApplicationCommandInputType } from "@api/Commands/types";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
 import { findByCode, findByProps } from "@webpack";
 
 const DRAFT_TYPE = 0;

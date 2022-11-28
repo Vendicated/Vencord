@@ -19,7 +19,6 @@
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 
 function onClick() {

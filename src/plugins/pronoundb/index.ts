@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import PronounsChatComponent from "./components/PronounsChatComponent";
 import PronounsProfileWrapper from "./components/PronounsProfileWrapper";

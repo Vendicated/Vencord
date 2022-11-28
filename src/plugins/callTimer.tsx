@@ -17,10 +17,9 @@
 */
 
 import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import ErrorBoundary from "@components/ErrorBoundary";
 import { React } from "@webpack/common";
 
 function formatDuration(ms: number) {

@@ -17,6 +17,7 @@
 */
 
 import { addSettingsListener, Settings } from "@api/settings";
+
 import IpcEvents from "./IpcEvents";
 
 let style: HTMLStyleElement;

@@ -20,9 +20,8 @@ import { get, set } from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Message } from "discord-types/general";
-
 import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 let style: HTMLStyleElement;
 

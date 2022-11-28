@@ -18,6 +18,7 @@
 
 import IpcEvents from "@utils/IpcEvents";
 import { Button } from "@webpack/common";
+
 import { Heart } from "./Heart";
 
 export default function DonateButton(props: any) {

@@ -18,8 +18,9 @@
 
 import { debounce } from "@utils/debounce";
 import { makeCodeblock } from "@utils/misc";
-import { Button, Clipboard, Forms, Margins, Parser, React, Switch, Text, TextInput } from "@webpack/common";
 import { search } from "@webpack";
+import { Button, Clipboard, Forms, Margins, Parser, React, Switch, Text, TextInput } from "@webpack/common";
+
 import { CheckedTextInput } from "./CheckedTextInput";
 import ErrorBoundary from "./ErrorBoundary";
 

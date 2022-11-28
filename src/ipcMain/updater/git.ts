@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import IpcEvents from "@utils/IpcEvents";
 import { execFile as cpExecFile } from "child_process";
 import { ipcMain } from "electron";
 import { join } from "path";
 import { promisify } from "util";
 
-import IpcEvents from "@utils/IpcEvents";
 import { calculateHashes, serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");

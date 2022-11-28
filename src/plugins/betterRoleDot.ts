@@ -19,7 +19,6 @@
 import { migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
 import { Clipboard, Toasts } from "@webpack/common";
 
 migratePluginSettings("BetterRoleDot", "ClickableRoleDot");
