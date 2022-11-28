@@ -78,7 +78,7 @@ export const shiki = {
         shiki.currentThemeUrl = themeUrl;
         const { themeData } = await client.run("getTheme", { theme: themeUrl });
         shiki.currentTheme = JSON.parse(themeData);
-        dispatchTheme();
+        dispatchTheme({ id: themeUrl, theme: shiki.currentTheme });
     },
     loadLang: async (langId: string) => {
         const client = await shiki.clientPromise;
@@ -110,7 +110,7 @@ export const shiki = {
     destroy() {
         shiki.currentTheme = null;
         shiki.currentThemeUrl = null;
-        dispatchTheme();
+        dispatchTheme({ id: null, theme: null });
         shiki.client?.destroy();
     }
 };

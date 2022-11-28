@@ -67,7 +67,7 @@ export const Highlighter = ({
     const preRef = React.useRef<HTMLPreElement>(null);
 
     const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
-    const currentTheme = useTheme();
+    const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const useHljs = shouldUseHLJS({ lang, tryHljs });
 
@@ -76,7 +76,7 @@ export const Highlighter = ({
             .tokenizeCode(content, lang!)
             .then(tokens => setTokens(tokens))
             .catch(console.error);
-    }, [lang, content, currentTheme], () => !!(lang && !useHljs));
+    }, [lang, content, currentThemeId], () => !!(lang && !useHljs));
 
     const shikiLang = lang ? resolveLang(lang) : null;
     let langName = shikiLang?.name;
@@ -88,7 +88,7 @@ export const Highlighter = ({
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
             currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
-    }), [useHljs, currentTheme]);
+    }), [useHljs, currentThemeId]);
 
     let lines!: JSX.Element[];
 

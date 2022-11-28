@@ -16,15 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { IShikiTheme } from "@vap/shiki";
 import { React } from "@webpack/common";
 
-import { shiki } from "../api/shiki";
+type Shiki = typeof import("../api/shiki").shiki;
+type ThemeId = Shiki["currentThemeUrl"];
+type Theme = Shiki["currentTheme"];
+
+type ThemeState = {
+    id: ThemeId,
+    theme: Theme,
+};
+
+const memoState: ThemeState = {
+    id: null,
+    theme: null,
+};
 
 const themeDispatchers = new Set<React.DispatchWithoutAction>();
-let themeUrlMemo = shiki.currentThemeUrl;
 
-export const useTheme = (): IShikiTheme | null => {
+export const useTheme = (): ThemeState => {
     const [, dispatch] = React.useReducer(() => { }, void 0);
 
     React.useEffect(() => {
@@ -32,11 +42,11 @@ export const useTheme = (): IShikiTheme | null => {
         return () => void themeDispatchers.delete(dispatch);
     }, []);
 
-    return shiki.currentTheme;
+    return memoState;
 };
 
-export const dispatchTheme = () => {
-    if (themeUrlMemo === shiki.currentThemeUrl) return;
+export const dispatchTheme = (state: ThemeState) => {
+    if (memoState.id === state.id) return;
+    Object.assign(memoState, state);
     themeDispatchers.forEach(dispatch => dispatch());
-    themeUrlMemo = shiki.currentThemeUrl;
 };
