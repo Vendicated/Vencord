@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "../src/utils/IpcEvents";
 import * as DataStore from "../src/api/DataStore";
+import IpcEvents from "../src/utils/IpcEvents";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;

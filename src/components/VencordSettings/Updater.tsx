@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classes, useAwaiter } from "@utils/misc";
+import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
+import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "@webpack/common";
+
 import gitHash from "~git-hash";
 
-import { classes, useAwaiter } from "../../utils/misc";
-import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "../../utils/updater";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";

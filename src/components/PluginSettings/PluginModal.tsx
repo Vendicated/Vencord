@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { generateId } from "@api/Commands";
+import { useSettings } from "@api/settings";
+import { LazyComponent } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
+import { OptionType, Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import { generateId } from "../../api/Commands";
-import { useSettings } from "../../api/settings";
-import { LazyComponent, lazyWebpack } from "../../utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { proxyLazy } from "../../utils/proxyLazy";
-import { OptionType, Plugin } from "../../utils/types";
-import { filters, findByCode } from "../../webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
@@ -40,7 +40,7 @@ import {
 } from "./components";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {

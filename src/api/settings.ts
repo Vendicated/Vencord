@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import plugins from "~plugins";
+import IpcEvents from "@utils/IpcEvents";
+import Logger from "@utils/Logger";
+import { mergeDefaults } from "@utils/misc";
+import { OptionType } from "@utils/types";
+import { React } from "@webpack/common";
 
-import IpcEvents from "../utils/IpcEvents";
-import Logger from "../utils/Logger";
-import { mergeDefaults } from "../utils/misc";
-import { OptionType } from "../utils/types";
-import { React } from "../webpack/common";
+import plugins from "~plugins";
 
 const logger = new Logger("Settings");
 export interface Settings {

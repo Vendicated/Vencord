@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { migratePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 migratePluginSettings("NoticesAPI", "NoticesApi");
 

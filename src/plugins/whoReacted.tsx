@@ -16,20 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import { LazyComponent, sleep, useForceUpdater } from "@utils/misc";
+import { Queue } from "@utils/Queue";
+import definePlugin from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 import { ReactionEmoji, User } from "discord-types/general";
 
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import { LazyComponent, lazyWebpack, sleep, useForceUpdater } from "../utils/misc";
-import { Queue } from "../utils/Queue";
-import definePlugin from "../utils/types";
-import { filters, findByCode } from "../webpack";
-import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "../webpack/common";
-
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
-const ReactionStore = lazyWebpack(filters.byProps("getReactions"));
+const ReactionStore = findByPropsLazy("getReactions");
 
 const queue = new Queue();
 

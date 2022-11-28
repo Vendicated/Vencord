@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Toasts } from "../webpack/common";
+import { Toasts } from "@webpack/common";
+
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
+import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
+import definePlugin from "@utils/types";
 
-import { Devs } from "../utils/constants";
-import { LazyComponent } from "../utils/misc";
-import definePlugin from "../utils/types";
+import gitHash from "~git-hash";
 
 const SettingsComponent = LazyComponent(() => require("../components/VencordSettings").default);
 
