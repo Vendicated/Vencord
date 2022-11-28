@@ -19,7 +19,7 @@
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
 import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join } from "path";
 
 import VencordNative from "./VencordNative";
@@ -49,22 +49,13 @@ if (location.protocol !== "data:") {
         const css = readFileSync(rendererCss, "utf-8");
         webFrame.insertCSS(css);
     } catch (err) {
-        // hack: the pre update updater does not download this file, so manually
-        // download it
+        if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
+            throw err;
+
+        // hack: the pre update updater does not download this file, so manually download it
         // TODO: remove this in a future version
-        if ((err as NodeJS.ErrnoException)?.code === "ENOENT") {
-            const https = require("https") as typeof import("https");
-            https.get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css", res => {
-                res.setEncoding("utf8");
-                let data = "";
-                res.on("data", (chunk: string) => data += chunk);
-                res.on("end", async () => {
-                    webFrame.insertCSS(data);
-                    writeFileSync(rendererCss, data);
-                });
-                res.on("error", console.error);
-            });
-        } else throw err;
+        ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
+            .then(css => webFrame.insertCSS(css));
     }
     require(process.env.DISCORD_PRELOAD!);
 } else {
