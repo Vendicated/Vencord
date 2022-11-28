@@ -18,12 +18,11 @@
 
 
 import { useSettings } from "@api/settings";
+import DonateButton from "@components/DonateButton";
+import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, React, Switch } from "@webpack/common";
-
-import DonateButton from "../DonateButton";
-import ErrorBoundary from "../ErrorBoundary";
 
 const st = (style: string) => `vcSettings${style}`;
 

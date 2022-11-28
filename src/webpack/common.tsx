@@ -18,12 +18,14 @@
 
 import { LazyComponent } from "@utils/misc";
 import { proxyLazy } from "@utils/proxyLazy";
+import {
+    _resolveReady,
+    filters, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModule, mapMangledModuleLazy, waitFor
+} from "@webpack";
 import type Components from "discord-types/components";
 import { User } from "discord-types/general";
 import type Other from "discord-types/other";
 import type Stores from "discord-types/stores";
-
-import { _resolveReady, filters, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModule, mapMangledModuleLazy, waitFor } from "./webpack";
 
 export const Margins = findByPropsLazy("marginTop20");
 

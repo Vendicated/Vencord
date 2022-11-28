@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
 import { Forms, Router, Text } from "@webpack/common";
 
 import cssText from "~fileContent/settingsStyles.css";
 
-import ErrorBoundary from "../ErrorBoundary";
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
 import Updater from "./Updater";

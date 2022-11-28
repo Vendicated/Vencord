@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "../ErrorBoundary";
-import PluginSettings from "../PluginSettings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import PluginSettings from "@components/PluginSettings";
 
 export default ErrorBoundary.wrap(PluginSettings);

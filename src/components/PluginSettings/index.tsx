@@ -18,6 +18,10 @@
 
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { ErrorCard } from "@components/ErrorCard";
+import { Flex } from "@components/Flex";
+import { handleComponentFailed } from "@components/handleComponentFailed";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
 import { classes, LazyComponent } from "@utils/misc";
@@ -29,10 +33,6 @@ import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, Te
 import Plugins from "~plugins";
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import ErrorBoundary from "../ErrorBoundary";
-import { ErrorCard } from "../ErrorCard";
-import { Flex } from "../Flex";
-import { handleComponentFailed } from "../handleComponentFailed";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
 

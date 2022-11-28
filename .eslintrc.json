@@ -6,8 +6,22 @@
         "@typescript-eslint",
         "header",
         "simple-import-sort",
-        "unused-imports"
+        "unused-imports",
+        "path-alias"
     ],
+    "settings": {
+        "import/resolver": {
+            "alias": {
+                "map": [
+                    ["@webpack", "./src/webpack"],
+                    ["@webpack/common", "./src/webpack/common"],
+                    ["@utils", "./src/utils"],
+                    ["@api", "./src/api"],
+                    ["@components", "./src/components"]
+                ]
+            }
+        }
+    },
     "rules": {
         // Since it's only been a month and Vencord has already been stolen
         // by random skids who rebranded it to "AlphaCord" and erased all license
@@ -94,6 +108,8 @@
         "simple-import-sort/exports": "error",
 
         "unused-imports/no-unused-imports": "error",
+
+        "path-alias/no-relative": "error",
 
         "@typescript-eslint/no-restricted-imports": [
             "error",
