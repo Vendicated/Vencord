@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, Tooltip } from "@webpack/common";
 
 const counts = {} as Record<string, [number, number]>;
 let forceUpdate: () => void;
@@ -49,33 +49,41 @@ function MemberCount() {
             alignContent: "center",
             gap: 0
         }}>
-            <div>
-                <span
-                    style={{
-                        backgroundColor: "var(--status-green-600)",
-                        width: "12px",
-                        height: "12px",
-                        borderRadius: "50%",
-                        display: "inline-block",
-                        marginRight: "0.5em"
-                    }}
-                />
-                <span style={{ color: "var(--status-green-600)" }}>{c[1]}</span>
-            </div>
-            <div>
-                <span
-                    style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        border: "3px solid var(--status-grey-500)",
-                        display: "inline-block",
-                        marginRight: "0.5em",
-                        marginLeft: "1em"
-                    }}
-                />
-                <span style={{ color: "var(--status-grey-500)" }}>{total}</span>
-            </div>
+            <Tooltip text={`${c[1]} Online`} position="bottom">
+                {props => (
+                    <div {...props}>
+                        <span
+                            style={{
+                                backgroundColor: "var(--status-green-600)",
+                                width: "12px",
+                                height: "12px",
+                                borderRadius: "50%",
+                                display: "inline-block",
+                                marginRight: "0.5em"
+                            }}
+                        />
+                        <span style={{ color: "var(--status-green-600)" }}>{c[1]}</span>
+                    </div>
+                )}
+            </Tooltip>
+            <Tooltip text={`${c[0] || "?"} Total Members`} position="bottom">
+                {props => (
+                    <div {...props}>
+                        <span
+                            style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                border: "3px solid var(--status-grey-500)",
+                                display: "inline-block",
+                                marginRight: "0.5em",
+                                marginLeft: "1em"
+                            }}
+                        />
+                        <span style={{ color: "var(--status-grey-500)" }}>{total}</span>
+                    </div>
+                )}
+            </Tooltip>
         </Flex>
     );
 }
@@ -93,7 +101,12 @@ export default definePlugin({
         }
     }],
 
-    onGuildMemberListUpdate({ guildId, groups, memberCount }) {
+    onGuildMemberListUpdate({ guildId, groups, memberCount, id }) {
+        // eeeeeh - sometimes it has really wrong counts??? like 10 times less than actual
+        // but if we only listen to everyone updates, sometimes we never get the count?
+        // this seems to work but isn't optional
+        if (id !== "everyone" && counts[guildId]) return;
+
         let count = 0;
         for (const group of groups) {
             if (group.id !== "offline")
