@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "../../../utils/IpcEvents";
-import { Tooltip } from "../../../webpack/common";
-import Badge from "../entities/Badge";
+import { MaskedLinkStore, Tooltip } from "../../../webpack/common";
+import { Badge } from "../entities/Badge";
 
 export default function ReviewBadge(badge: Badge) {
     return (
@@ -33,7 +32,9 @@ export default function ReviewBadge(badge: Badge) {
                     src={badge.badge_icon}
                     style={{ verticalAlign: "middle", marginLeft: "4px" }}
                     onClick={() =>
-                        VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, badge.redirect_url)
+                        MaskedLinkStore.openUntrustedLink({
+                            href: badge.redirect_url,
+                        })
                     }
                 />
             )}
