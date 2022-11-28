@@ -17,10 +17,10 @@
 */
 
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
+import { findLazy } from "../webpack/webpack";
 
-const ComponentDispatch = lazyWebpack(m => m.emitter?._events?.INSERT_TEXT);
+const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export default definePlugin({
     name: "QuickMention",

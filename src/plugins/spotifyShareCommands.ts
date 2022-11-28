@@ -19,10 +19,9 @@
 import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
 import { migratePluginSettings } from "../api/settings";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin from "../utils/types";
-import { filters } from "../webpack";
 import { FluxDispatcher } from "../webpack/common";
+import { findByPropsLazy } from "../webpack/webpack";
 
 interface Album {
     id: string;
@@ -54,9 +53,9 @@ interface Track {
     name: string;
 }
 
-const Spotify = lazyWebpack(filters.byProps("getPlayerState"));
-const MessageCreator = lazyWebpack(filters.byProps("getSendMessageOptionsForReply", "sendMessage"));
-const PendingReplyStore = lazyWebpack(filters.byProps("getPendingReply"));
+const Spotify = findByPropsLazy("getPlayerState");
+const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
+const PendingReplyStore = findByPropsLazy("getPendingReply");
 
 function sendMessage(channelId, message) {
     message = {

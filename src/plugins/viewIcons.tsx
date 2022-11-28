@@ -19,16 +19,16 @@
 import type { Guild } from "discord-types/general";
 
 import { Devs } from "../utils/constants";
-import { LazyComponent, lazyWebpack } from "../utils/misc";
+import { LazyComponent } from "../utils/misc";
 import { ModalRoot, ModalSize, openModal } from "../utils/modal";
 import { PluginDef } from "../utils/types";
-import { filters, find } from "../webpack";
+import { find, findByPropsLazy } from "../webpack";
 import { Menu } from "../webpack/common";
 
 const ImageModal = LazyComponent(() => find(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE")));
 const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 
-const GuildBannerStore = lazyWebpack(filters.byProps("getGuildBannerURL"));
+const GuildBannerStore = findByPropsLazy("getGuildBannerURL");
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
 export default new class ViewIcons implements PluginDef {

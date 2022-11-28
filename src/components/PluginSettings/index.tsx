@@ -23,11 +23,12 @@ import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 import { ChangeList } from "../../utils/ChangeList";
 import Logger from "../../utils/Logger";
-import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
+import { classes, LazyComponent } from "../../utils/misc";
 import { openModalLazy } from "../../utils/modal";
 import { Plugin } from "../../utils/types";
-import { filters, findByCode } from "../../webpack";
+import { findByCode } from "../../webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
+import { findByPropsLazy } from "../../webpack/webpack";
 import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";
@@ -37,7 +38,7 @@ import * as styles from "./styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = lazyWebpack(filters.byProps("inputDefault", "inputWrapper"));
+const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
 
 const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));

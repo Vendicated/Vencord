@@ -113,6 +113,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
     return null;
 });
 
+/**
+ * find but lazy
+ */
+export function findLazy(filter: FilterFn, getDefault = true) {
+    return proxyLazy(() => find(filter, getDefault));
+}
+
 export function findAll(filter: FilterFn, getDefault = true) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
@@ -292,6 +299,13 @@ export function findByProps(...props: string[]) {
 }
 
 /**
+ * findByProps but lazy
+ */
+export function findByPropsLazy(...props: string[]) {
+    return findLazy(filters.byProps(...props));
+}
+
+/**
  * Find all modules that have the specified properties
  */
 export function findAllByProps(...props: string[]) {
@@ -303,6 +317,13 @@ export function findAllByProps(...props: string[]) {
  */
 export function findByCode(...code: string[]) {
     return find(filters.byCode(...code));
+}
+
+/**
+ * findByCode but lazy
+ */
+export function findByCodeLazy(...code: string[]) {
+    return findLazy(filters.byCode(...code));
 }
 
 /**

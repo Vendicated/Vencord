@@ -18,12 +18,13 @@
 
 import type { KeyboardEvent } from "react";
 
-import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
+import { classes, useAwaiter } from "../../../utils/misc";
 import { Forms, Text, UserStore } from "../../../webpack/common";
+import { findLazy } from "../../../webpack/webpack";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = lazyWebpack(m => typeof m.textarea === "string");
+const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const [reviews, _, isLoading, refetch] = useAwaiter(() => getReviews(userId), []);

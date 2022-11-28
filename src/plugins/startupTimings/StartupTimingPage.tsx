@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
-import { lazyWebpack } from "../../utils/misc";
 import { Forms, React } from "../../webpack/common";
-import { filters } from "../../webpack/webpack";
+import { findByPropsLazy } from "../../webpack/webpack";
 
 interface AppStartPerformance {
     prefix: string;
@@ -46,7 +45,7 @@ interface Log {
     delta?: number;
 }
 
-const AppStartPerformance = lazyWebpack(filters.byProps("markWithDelta", "markAndLog", "markAt")) as AppStartPerformance;
+const AppStartPerformance = findByPropsLazy("markWithDelta", "markAndLog", "markAt") as AppStartPerformance;
 
 interface TimerItemProps extends Log {
     instance: {

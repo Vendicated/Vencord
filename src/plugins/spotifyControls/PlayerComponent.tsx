@@ -20,9 +20,9 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 import { Flex } from "../../components/Flex";
 import { Link } from "../../components/Link";
 import { debounce } from "../../utils/debounce";
-import { classes, LazyComponent, lazyWebpack } from "../../utils/misc";
+import { classes, LazyComponent } from "../../utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "../../webpack/common";
-import { filters, find } from "../../webpack/webpack";
+import { filters, find, findByCodeLazy } from "../../webpack/webpack";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = (className: string) => `vc-spotify-${className}`;
@@ -40,7 +40,7 @@ const useStateFromStores: <T>(
     idk?: null,
     compare?: (old: T, newer: T) => boolean
 ) => T
-    = lazyWebpack(filters.byCode("useStateFromStores"));
+    = findByCodeLazy("useStateFromStores");
 
 function Svg(path: string, label: string) {
     return () => (

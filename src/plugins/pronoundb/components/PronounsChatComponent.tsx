@@ -18,14 +18,14 @@
 
 import { Message } from "discord-types/general";
 
-import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
+import { classes, useAwaiter } from "../../../utils/misc";
 import { Settings } from "../../../Vencord";
-import { filters } from "../../../webpack";
 import { UserStore } from "../../../webpack/common";
+import { findByPropsLazy } from "../../../webpack/webpack";
 import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping } from "../types";
 
-const styles: Record<string, string> = lazyWebpack(filters.byProps("timestampInline"));
+const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
 export default function PronounsChatComponentWrapper({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users

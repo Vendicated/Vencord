@@ -19,10 +19,9 @@
 import cssText from "~fileContent/spotifyStyles.css";
 
 import IpcEvents from "../../utils/IpcEvents";
-import { lazyWebpack } from "../../utils/misc";
 import { proxyLazy } from "../../utils/proxyLazy";
-import { filters } from "../../webpack";
 import { Flux, FluxDispatcher } from "../../webpack/common";
+import { findByPropsLazy } from "../../webpack/webpack";
 
 export interface Track {
     id: string;
@@ -78,8 +77,8 @@ export const SpotifyStore = proxyLazy(() => {
     // For some reason ts hates extends Flux.Store
     const { Store } = Flux;
 
-    const SpotifySocket = lazyWebpack(filters.byProps("getActiveSocketAndDevice"));
-    const SpotifyAPI = lazyWebpack(filters.byProps("SpotifyAPIMarker"));
+    const SpotifySocket = findByPropsLazy("getActiveSocketAndDevice");
+    const SpotifyAPI = findByPropsLazy("SpotifyAPIMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
