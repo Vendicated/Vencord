@@ -166,18 +166,19 @@ export const SpotifyStore = proxyLazy(() => {
             const { track } = this;
             if (Settings.plugins.SpotifyControls.manageSavedSongs === true && SpotifySocket.getActiveSocketAndDevice() && track?.id) {
 
-                if (!this.savedTrackIds.has(track.id)) {
-                    this.req("get", "/tracks/contains", {
-                        query: {
-                            ids: track.id
-                        }
-                    }).then((res: any) => {
-                        if (res?.body && Array.isArray(res.body)) {
-                            this.savedTrackIds.set(track.id, res.body[0]);
-                            this.emitChange();
-                        }
-                    });
-                }
+                // Always fetch again as the user might have changed the save status via Spotify
+                // if (!this.savedTrackIds.has(track.id)) {
+                this.req("get", "/tracks/contains", {
+                    query: {
+                        ids: track.id
+                    }
+                }).then((res: any) => {
+                    if (res?.body && Array.isArray(res.body)) {
+                        this.savedTrackIds.set(track.id, res.body[0]);
+                        this.emitChange();
+                    }
+                });
+                // }
             }
         }
 

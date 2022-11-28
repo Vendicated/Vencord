@@ -196,6 +196,21 @@ function SeekBar() {
     );
 }
 
+function MyCustomItem({ saved }: {saved?: boolean}) {
+    return (
+        <Flex>
+            <Forms.FormText>Like song</Forms.FormText>
+            {/* <div className={classes(cl(saved ? "saved-on" : "saved-off"))}>
+                <Heart />
+            </div>*/}
+            <Button
+                className={classes(cl("button"), cl(saved ? "saved-on" : "saved-off"))}
+            >
+                <Heart />
+            </Button>
+        </Flex>
+    );
+}
 
 function AlbumContextMenu({ track }: { track: Track; }) {
     const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
@@ -224,12 +239,14 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
             />
             {Settings.plugins.SpotifyControls.manageSavedSongs === true && Settings.plugins.SpotifyControls.savedSongsDisplay === "context" && savedTrackIds.has(track.id) && (
-                <Menu.MenuCheckboxItem
+                <Menu.MenuItem
+                // <Menu.MenuCheckboxItem
                     key="like-song"
                     id="like-song"
                     label="Like Song"
-                    checked={savedTrackIds.get(track.id)}
+                    // checked={savedTrackIds.get(track.id)}
                     action={() => SpotifyStore.saveTrack()}
+                    render={MyCustomItem}
                 />
             )}
             <Menu.MenuSeparator />
