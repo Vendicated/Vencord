@@ -24,11 +24,13 @@ let style: HTMLStyleElement;
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class^=imageWrapper] img {
+        .vc-nsfw-img [class^=imageWrapper] img,
+        .vc-nsfw-img [class^=wrapperPaused] video {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
         }
-        .vc-nsfw-img [class^=imageWrapper]:hover img {
+        .vc-nsfw-img [class^=imageWrapper]:hover img,
+        .vc-nsfw-img [class^=wrapperPaused]:hover video {
             filter: unset;
         }
         `;
