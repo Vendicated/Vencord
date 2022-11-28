@@ -22,6 +22,7 @@ import type { IShikiTheme, IThemedToken } from "@vap/shiki";
 
 import { shikiOnigasmSrc, shikiWorkerSrcDev, shikiWorkerSrcProd } from "../../../utils/dependencies";
 import { Settings } from "../../../Vencord";
+import { dispatchTheme } from "../hooks/useTheme";
 import type { ShikiSpec } from "../types";
 import { getGrammar, languages, resolveLang } from "./languages";
 import { themes } from "./themes";
@@ -76,7 +77,7 @@ export const shiki = {
         shiki.currentThemeUrl = themeUrl;
         const { themeData } = await client.run("getTheme", { theme: themeUrl });
         shiki.currentTheme = JSON.parse(themeData);
-        console.log(shiki.currentTheme);
+        dispatchTheme();
     },
     loadLang: async (langId: string) => {
         const client = await shiki.clientPromise;
@@ -105,4 +106,10 @@ export const shiki = {
             theme: shiki.currentThemeUrl ?? themeUrls[0],
         });
     },
+    destroy() {
+        shiki.currentTheme = null;
+        shiki.currentThemeUrl = null;
+        dispatchTheme();
+        shiki.client?.destroy();
+    }
 };

@@ -52,10 +52,9 @@ export default definePlugin({
         document.head.appendChild(style);
     },
     stop: () => {
-        shiki.client?.worker?.terminate();
+        shiki.destroy();
         style?.remove();
         style = null;
-        // shiki.client.channel.destroy();
     },
     options: {
         theme: {
