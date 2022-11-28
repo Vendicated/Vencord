@@ -109,46 +109,6 @@
 
         "unused-imports/no-unused-imports": "error",
 
-        "path-alias/no-relative": "error",
-
-        "@typescript-eslint/no-restricted-imports": [
-            "error",
-            {
-                "paths": [
-                    // shrug, couldn't find a better way since the pattern one doesn't work:
-                    // ["utils", "!utils/*"]
-                    {
-                        "name": "./utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "../utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "../../utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "../../../utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "../../../../utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "../../../../../utils",
-                        "message": "Do not import from index. This might cause issues. Import from the specific file instead.",
-                        "allowTypeImports": true
-                    }
-                ]
-            }
-        ]
+        "path-alias/no-relative": "error"
     }
 }
