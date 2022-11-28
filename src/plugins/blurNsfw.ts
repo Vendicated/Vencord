@@ -16,11 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "../api/settings";
 import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import definePlugin, { OptionType } from "../utils/types";
+
+let style: HTMLStyleElement;
+
+function setCss() {
+    style.textContent = `
+        .vc-nsfw-img [class^=imageWrapper] img,
+        .vc-nsfw-img [class^=wrapperPaused] video {
+            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            transition: filter 0.2s;
+        }
+        .vc-nsfw-img [class^=imageWrapper]:hover img,
+        .vc-nsfw-img [class^=wrapperPaused]:hover video {
+            filter: unset;
+        }
+        `;
+}
 
 export default definePlugin({
-    name: "BlurNsfw",
+    name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
 
@@ -37,23 +54,24 @@ export default definePlugin({
         }
     ],
 
+    options: {
+        blurAmount: {
+            type: OptionType.NUMBER,
+            description: "Blur Amount",
+            default: 10,
+            onChange: setCss
+        }
+    },
+
     start() {
-        const style = this.style = document.createElement("style");
+        style = document.createElement("style");
         style.id = "VcBlurNsfw";
         document.head.appendChild(style);
 
-        style.textContent = `
-        .vc-nsfw-img img {
-            filter: blur(5px);
-            transition: filter 0.2s ease-in;
-        }
-        .vc-nsfw-img:hover img {
-            filter: unset;
-        }
-        `;
+        setCss();
     },
 
     stop() {
-        this.style?.remove();
+        style?.remove();
     }
 });
