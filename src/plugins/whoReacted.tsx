@@ -23,9 +23,8 @@ import { Devs } from "../utils/constants";
 import { LazyComponent, sleep, useForceUpdater } from "../utils/misc";
 import { Queue } from "../utils/Queue";
 import definePlugin from "../utils/types";
-import { findByCode } from "../webpack";
 import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "../webpack/common";
-import { findByPropsLazy } from "../webpack/webpack";
+import { findByCode, findByPropsLazy } from "../webpack/webpack";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
