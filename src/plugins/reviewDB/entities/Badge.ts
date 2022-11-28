@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* eslint-disable semi */
 
-export default interface Badge {
-    badge_name: string,
-    badge_icon: string,
-    redirect_url: string,
+export interface Badge {
+    badge_name: string;
+    badge_icon: string;
+    redirect_url: string;
     badge_type: number;
 }

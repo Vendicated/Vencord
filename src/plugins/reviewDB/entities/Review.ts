@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Badge from "./Badge";
+import { Badge } from "./Badge";
 
 export interface Review {
     comment: string,
