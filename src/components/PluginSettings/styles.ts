@@ -24,7 +24,7 @@ export const PluginsGrid: React.CSSProperties = {
 };
 
 export const PluginsGridItem: React.CSSProperties = {
-    backgroundColor: "var(--background-modifier-selected)",
+    backgroundColor: "var(--primary-dark-530)",
     color: "var(--interactive-active)",
     borderRadius: 3,
     cursor: "pointer",
