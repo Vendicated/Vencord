@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findByCodeLazy } from "@webpack";
+import { Forms, Router, Text } from "@webpack/common";
+
 import cssText from "~fileContent/settingsStyles.css";
 
-import { Forms, Router, Text } from "../../webpack/common";
-import { findByCodeLazy } from "../../webpack/webpack";
 import ErrorBoundary from "../ErrorBoundary";
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";

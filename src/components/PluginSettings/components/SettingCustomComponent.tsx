@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionComponent } from "../../../utils/types";
+import { PluginOptionComponent } from "@utils/types";
+
 import { ISettingElementProps } from ".";
 
 export function SettingCustomComponent({ option, onChange, onError }: ISettingElementProps<PluginOptionComponent>) {

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classes, useAwaiter } from "@utils/misc";
+import { findLazy } from "@webpack";
+import { Forms, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
-import { classes, useAwaiter } from "../../../utils/misc";
-import { Forms, Text, UserStore } from "../../../webpack/common";
-import { findLazy } from "../../../webpack/webpack";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 

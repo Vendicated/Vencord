@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
-import { Forms, React } from "../webpack/common";
-import { findByPropsLazy } from "../webpack/webpack";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Forms, React } from "@webpack/common";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
 

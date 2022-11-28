@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType, sendBotMessage } from "../api/Commands";
-import { findOption } from "../api/Commands/commandHelpers";
-import { ApplicationCommandInputType } from "../api/Commands/types";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { findByCode, findByProps } from "../webpack";
+import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { findOption } from "@api/Commands/commandHelpers";
+import { ApplicationCommandInputType } from "@api/Commands/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+import { findByCode, findByProps } from "@webpack";
 
 const DRAFT_TYPE = 0;
 

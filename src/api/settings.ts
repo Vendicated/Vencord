@@ -18,11 +18,11 @@
 
 import plugins from "~plugins";
 
-import IpcEvents from "../utils/IpcEvents";
-import Logger from "../utils/Logger";
-import { mergeDefaults } from "../utils/misc";
-import { OptionType } from "../utils/types";
-import { React } from "../webpack/common";
+import IpcEvents from "@utils/IpcEvents";
+import Logger from "@utils/Logger";
+import { mergeDefaults } from "@utils/misc";
+import { OptionType } from "@utils/types";
+import { React } from "@webpack/common";
 
 const logger = new Logger("Settings");
 export interface Settings {

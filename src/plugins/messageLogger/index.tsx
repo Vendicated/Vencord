@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../../api/settings";
-import ErrorBoundary from "../../components/ErrorBoundary";
-import { Devs } from "../../utils/constants";
-import Logger from "../../utils/Logger";
-import definePlugin, { OptionType } from "../../utils/types";
-import { Parser, UserStore } from "../../webpack/common";
-import { findByPropsLazy } from "../../webpack/webpack";
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Parser, UserStore } from "@webpack/common";
 
 function addDeleteStyleClass() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {

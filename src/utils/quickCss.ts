@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addSettingsListener, Settings } from "../api/settings";
+import { addSettingsListener, Settings } from "@api/settings";
 import IpcEvents from "./IpcEvents";
 
 let style: HTMLStyleElement;

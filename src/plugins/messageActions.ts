@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addClickListener, removeClickListener } from "../api/MessageEvents";
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { UserStore } from "../webpack/common";
-import { findByPropsLazy, findLazy } from "../webpack/webpack";
+import { addClickListener, removeClickListener } from "@api/MessageEvents";
+import { migratePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);

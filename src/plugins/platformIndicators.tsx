@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
+import { PresenceStore, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
-
-import { Settings } from "../api/settings";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { PresenceStore, Tooltip } from "../webpack/common";
-import { findByCodeLazy } from "../webpack/webpack";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (

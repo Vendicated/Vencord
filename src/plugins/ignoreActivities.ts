@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "../api";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { findByPropsLazy } from "../webpack/webpack";
+import * as DataStore from "@api/DataStore";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 
 interface MatchAndReplace {
     match: RegExp;

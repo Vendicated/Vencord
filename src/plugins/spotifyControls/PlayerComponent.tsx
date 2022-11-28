@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "../../components/ErrorBoundary";
-import { Flex } from "../../components/Flex";
-import { Link } from "../../components/Link";
-import { debounce } from "../../utils/debounce";
-import { classes, LazyComponent } from "../../utils/misc";
-import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "../../webpack/common";
-import { filters, find, findByCodeLazy } from "../../webpack/webpack";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { Link } from "@components/Link";
+import { debounce } from "@utils/debounce";
+import { classes, LazyComponent } from "@utils/misc";
+import { filters, find, findByCodeLazy } from "@webpack";
+import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "@webpack/common";
+
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = (className: string) => `vc-spotify-${className}`;

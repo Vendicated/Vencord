@@ -18,7 +18,7 @@
 
 import { Promisable } from "type-fest";
 
-import { Command } from "../api/Commands";
+import { Command } from "@api/Commands";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {

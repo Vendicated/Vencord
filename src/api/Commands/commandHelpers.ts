@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { mergeDefaults } from "@utils/misc";
+import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
-import { mergeDefaults } from "../../utils/misc";
-import { waitFor } from "../../webpack";
-import { findByCodeLazy, findByPropsLazy } from "../../webpack/webpack";
 import { Argument } from "./types";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');

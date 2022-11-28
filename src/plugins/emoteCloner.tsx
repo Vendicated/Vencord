@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings, Settings } from "../api/settings";
-import { CheckedTextInput } from "../components/CheckedTextInput";
-import { Devs } from "../utils/constants";
-import Logger from "../utils/Logger";
-import { makeLazy } from "../utils/misc";
-import { ModalContent, ModalHeader, ModalRoot, openModal } from "../utils/modal";
-import definePlugin from "../utils/types";
-import { Forms, GuildStore, Margins, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "../webpack/common";
-import { findByCodeLazy, findByPropsLazy } from "../webpack/webpack";
+import { migratePluginSettings, Settings } from "@api/settings";
+import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import { makeLazy } from "@utils/misc";
+import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Forms, GuildStore, Margins, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 

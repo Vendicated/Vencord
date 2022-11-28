@@ -16,15 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import { LazyComponent, sleep, useForceUpdater } from "@utils/misc";
+import { Queue } from "@utils/Queue";
+import definePlugin from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 import { ReactionEmoji, User } from "discord-types/general";
-
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import { LazyComponent, sleep, useForceUpdater } from "../utils/misc";
-import { Queue } from "../utils/Queue";
-import definePlugin from "../utils/types";
-import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "../webpack/common";
-import { findByCode, findByPropsLazy } from "../webpack/webpack";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");

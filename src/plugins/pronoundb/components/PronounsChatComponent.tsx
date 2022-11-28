@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import { classes, useAwaiter } from "@utils/misc";
+import { findByPropsLazy } from "@webpack";
+import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { classes, useAwaiter } from "../../../utils/misc";
-import { Settings } from "../../../Vencord";
-import { UserStore } from "../../../webpack/common";
-import { findByPropsLazy } from "../../../webpack/webpack";
 import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping } from "../types";
 

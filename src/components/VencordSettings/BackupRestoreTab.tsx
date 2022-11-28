@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { downloadSettingsBackup, uploadSettingsBackup } from "../../utils/settingsSync";
-import { Button, Card, Forms, Margins, Text } from "../../webpack/common";
+import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
+import { Button, Card, Forms, Margins, Text } from "@webpack/common";
+
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 

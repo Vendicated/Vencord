@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import cssText from "~fileContent/spotifyStyles.css";
+import IpcEvents from "@utils/IpcEvents";
+import { proxyLazy } from "@utils/proxyLazy";
+import { findByPropsLazy } from "@webpack";
+import { Flux, FluxDispatcher } from "@webpack/common";
 
-import IpcEvents from "../../utils/IpcEvents";
-import { proxyLazy } from "../../utils/proxyLazy";
-import { Flux, FluxDispatcher } from "../../webpack/common";
-import { findByPropsLazy } from "../../webpack/webpack";
+import cssText from "~fileContent/spotifyStyles.css";
 
 export interface Track {
     id: string;

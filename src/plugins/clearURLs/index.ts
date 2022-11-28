@@ -22,10 +22,10 @@ import {
     MessageObject,
     removePreEditListener,
     removePreSendListener
-} from "../../api/MessageEvents";
-import { migratePluginSettings } from "../../api/settings";
-import { Devs } from "../../utils/constants";
-import definePlugin from "../../utils/types";
+} from "@api/MessageEvents";
+import { migratePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 import { defaultRules } from "./defaultRules";
 
 // From lodash

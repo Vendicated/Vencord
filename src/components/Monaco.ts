@@ -18,10 +18,10 @@
 
 import monacoHtml from "~fileContent/monacoWin.html";
 
-import { debounce } from "../utils/debounce";
-import IpcEvents from "../utils/IpcEvents";
-import { Queue } from "../utils/Queue";
-import { find } from "../webpack/webpack";
+import { debounce } from "@utils/debounce";
+import IpcEvents from "@utils/IpcEvents";
+import { Queue } from "@utils/Queue";
+import { find } from "@webpack";
 
 const queue = new Queue();
 const setCss = debounce((css: string) => {

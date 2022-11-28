@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "../utils/Logger";
-import { LazyComponent } from "../utils/misc";
-import { Margins, React } from "../webpack/common";
+import Logger from "@utils/Logger";
+import { LazyComponent } from "@utils/misc";
+import { Margins, React } from "@webpack/common";
 import { ErrorCard } from "./ErrorCard";
 
 interface Props {

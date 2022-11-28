@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { get, set } from "@api/DataStore";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import definePlugin from "@utils/types";
 import { Message } from "discord-types/general";
 
-import { get, set } from "../api/DataStore";
-import { Devs } from "../utils/constants";
-import Logger from "../utils/Logger";
-import definePlugin from "../utils/types";
-import { ChannelStore, FluxDispatcher } from "../webpack/common";
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
 
 let style: HTMLStyleElement;
 

@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { popNotice, showNotice } from "../api/Notices";
-import { Link } from "../components/Link";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { filters, mapMangledModuleLazy } from "../webpack";
-import { FluxDispatcher, Forms, Toasts } from "../webpack/common";
-import { findByCodeLazy } from "../webpack/webpack";
+import { popNotice, showNotice } from "@api/Notices";
+import { Link } from "@components/Link";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
+import { FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
 const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",

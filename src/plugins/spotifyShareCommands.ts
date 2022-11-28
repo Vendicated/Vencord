@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, sendBotMessage } from "../api/Commands";
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { FluxDispatcher } from "../webpack/common";
-import { findByPropsLazy } from "../webpack/webpack";
+import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
+import { migratePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { FluxDispatcher } from "@webpack/common";
 
 interface Album {
     id: string;

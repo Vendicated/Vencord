@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "../../components/ErrorBoundary";
-import { Flex } from "../../components/Flex";
-import { Forms, React } from "../../webpack/common";
-import { findByPropsLazy } from "../../webpack/webpack";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { findByPropsLazy } from "@webpack";
+import { Forms, React } from "@webpack/common";
 
 interface AppStartPerformance {
     prefix: string;

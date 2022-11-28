@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Link } from "../components/Link";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings, Webpack } from "../Vencord";
-import { FluxDispatcher, Forms } from "../webpack/common";
-import { findByPropsLazy } from "../webpack/webpack";
+import { Settings } from "@api/settings";
+import { Link } from "@components/Link";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { FluxDispatcher, Forms } from "@webpack/common";
 
 interface ActivityAssets {
     large_image?: string;
@@ -68,10 +68,10 @@ enum ActivityFlag {
 const applicationId = "1043533871037284423";
 
 const presenceStore = findByPropsLazy("getLocalPresence");
-const assetManager = Webpack.mapMangledModuleLazy(
+const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
-        getAsset: Webpack.filters.byCode("apply("),
+        getAsset: filters.byCode("apply("),
     }
 );
 

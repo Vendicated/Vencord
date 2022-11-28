@@ -21,7 +21,7 @@ import { ipcMain } from "electron";
 import { join } from "path";
 import { promisify } from "util";
 
-import IpcEvents from "../../utils/IpcEvents";
+import IpcEvents from "@utils/IpcEvents";
 import { calculateHashes, serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");

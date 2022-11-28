@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotice } from "@api/Notices";
+import { Settings, useSettings } from "@api/settings";
+import { ChangeList } from "@utils/ChangeList";
+import Logger from "@utils/Logger";
+import { classes, LazyComponent } from "@utils/misc";
+import { openModalLazy } from "@utils/modal";
+import { Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+
 import Plugins from "~plugins";
 
-import { showNotice } from "../../api/Notices";
-import { Settings, useSettings } from "../../api/settings";
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import { ChangeList } from "../../utils/ChangeList";
-import Logger from "../../utils/Logger";
-import { classes, LazyComponent } from "../../utils/misc";
-import { openModalLazy } from "../../utils/modal";
-import { Plugin } from "../../utils/types";
-import { findByCode } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
-import { findByPropsLazy } from "../../webpack/webpack";
 import ErrorBoundary from "../ErrorBoundary";
 import { ErrorCard } from "../ErrorCard";
 import { Flex } from "../Flex";

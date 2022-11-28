@@ -16,18 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { generateId } from "@api/Commands";
+import { useSettings } from "@api/settings";
+import { LazyComponent } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
+import { OptionType, Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import { generateId } from "../../api/Commands";
-import { useSettings } from "../../api/settings";
-import { LazyComponent } from "../../utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { proxyLazy } from "../../utils/proxyLazy";
-import { OptionType, Plugin } from "../../utils/types";
-import { findByCode } from "../../webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
-import { findByPropsLazy } from "../../webpack/webpack";
 import ErrorBoundary from "../ErrorBoundary";
 import { Flex } from "../Flex";
 import {
