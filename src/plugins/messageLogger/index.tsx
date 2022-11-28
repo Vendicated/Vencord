@@ -123,7 +123,6 @@ export default definePlugin({
         deleteStyle: {
             type: OptionType.SELECT,
             description: "The style of deleted messages",
-            default: "text",
             options: [
                 { label: "Red text", value: "text", default: true },
                 { label: "Red overlay", value: "overlay" }
