@@ -21,8 +21,9 @@ import { Clipboard, hljs, React } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
+import { useAsyncMemo } from "../hooks/useAsyncMemo";
 import { useCopyCooldown } from "../hooks/useCopyCooldown";
-import { useIntersectionEffect } from "../hooks/useIntersectionEffect";
+import { useIntersection } from "../hooks/useIntersection";
 import { useShikiSettings } from "../hooks/useShikiSettings";
 import { useTheme } from "../hooks/useTheme";
 import { DeviconSetting, HljsSetting, ShikiSettings } from "../types";
@@ -50,9 +51,6 @@ export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
-    // tryHljs: HljsSetting;
-    // useDevIcon: DeviconSetting;
-    // bgOpacity: number;
 }
 export const createHighlighter = (props: HighlighterProps) => (
     <Highlighter {...props} />
@@ -63,22 +61,18 @@ export const Highlighter = ({
     isPreview,
 }: HighlighterProps) => {
     const [copyCooldown, copy] = useCopyCooldown(1000);
-    const [tokens, setTokens] = React.useState<IThemedToken[][] | null>(null);
-    const preRef = React.useRef<HTMLPreElement>(null);
 
     const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const useHljs = shouldUseHLJS({ lang, tryHljs });
 
-    console.log(currentThemeId, currentTheme);
+    const [preRef, isIntersecting] = useIntersection();
 
-    useIntersectionEffect(preRef, () => {
-        shiki
-            .tokenizeCode(content, lang!)
-            .then(tokens => setTokens(tokens))
-            .catch(console.error);
-    }, [lang, content, currentThemeId], !!(lang && !useHljs));
+    const tokens = useAsyncMemo<IThemedToken[][] | null>(async () => {
+        if (!lang || useHljs || !isIntersecting) return null;
+        return await shiki.tokenizeCode(content, lang!);
+    }, [lang, content, currentThemeId, isIntersecting], null);
 
     const shikiLang = lang ? resolveLang(lang) : null;
     let langName = shikiLang?.name;

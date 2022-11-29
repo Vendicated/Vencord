@@ -18,35 +18,20 @@
 
 import { React } from "@webpack/common";
 
-type Shiki = typeof import("../api/shiki").shiki;
-type ThemeId = Shiki["currentThemeUrl"];
-type Theme = Shiki["currentTheme"];
-
-type ThemeState = {
-    id: ThemeId,
-    theme: Theme,
-};
-
-const currentTheme: ThemeState = {
-    id: null,
-    theme: null,
-};
-
-const themeSetters = new Set<React.Dispatch<React.SetStateAction<ThemeState>>>();
-
-export const useTheme = (): ThemeState => {
-    const [, setTheme] = React.useState<ThemeState>(currentTheme);
+export function useAsyncMemo<V>(factory: () => Promise<V>, deps: unknown[], initialValue: V) {
+    const [value, setValue] = React.useState<V>(initialValue);
 
     React.useEffect(() => {
-        themeSetters.add(setTheme);
-        return () => void themeSetters.delete(setTheme);
-    }, []);
+        let isDestroyed = false;
+        const promise = factory();
 
-    return currentTheme;
-};
+        promise.then(newValue => {
+            if (!isDestroyed) setValue(newValue);
+        });
 
-export const dispatchTheme = (state: ThemeState) => {
-    if (currentTheme.id === state.id) return;
-    Object.assign(currentTheme, state);
-    themeSetters.forEach(setTheme => setTheme(state));
-};
+        // eslint-disable-next-line consistent-return
+        return () => { isDestroyed = true; };
+    }, deps);
+
+    return value;
+}

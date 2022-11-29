@@ -18,47 +18,39 @@
 
 import { React } from "@webpack/common";
 
-export const isInsterecting = (el: HTMLElement) => {
+export const checkIntersecting = (el: Element) => {
     const elementBox = el.getBoundingClientRect();
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
 };
 
-export const useIntersectionEffect = (
-    elementRef: React.RefObject<HTMLElement>,
-    callback: () => void,
-    deps?: React.DependencyList | undefined,
-    ready?: boolean | undefined,
-) => {
+export const useIntersection = () => {
     const observerRef = React.useRef<IntersectionObserver | null>(null);
+    const [isIntersecting, setIntersecting] = React.useState(false);
 
-    React.useEffect(() => {
-        const destroy = () => {
-            observerRef.current?.disconnect();
-            observerRef.current = null;
-        };
-        const onIntersect = () => {
-            callback();
-            destroy();
-        };
-        console.log(elementRef.current, ready, deps);
-        if (ready === false) return destroy;
-        if (!elementRef.current) return destroy;
+    const refCallback = (element: Element | null) => {
+        observerRef.current?.disconnect();
+        observerRef.current = null;
 
-        console.log(isInsterecting(elementRef.current));
-        if (isInsterecting(elementRef.current)) return onIntersect();
+        if (!element) return;
+
+        if (checkIntersecting(element)) {
+            setIntersecting(true);
+            return;
+        }
 
         observerRef.current = new IntersectionObserver(entries => {
             for (const entry of entries) {
-                if (entry.isIntersecting && entry.target === elementRef.current) {
-                    onIntersect();
-                    break;
+                if (entry.isIntersecting && entry.target === element) {
+                    setIntersecting(true);
+                    observerRef.current?.disconnect();
+                    observerRef.current = null;
+                    return;
                 }
             }
         });
+        observerRef.current.observe(element);
+    };
 
-        observerRef.current.observe(elementRef.current);
-
-        return destroy;
-    }, deps);
+    return [refCallback, isIntersecting] as const;
 };
