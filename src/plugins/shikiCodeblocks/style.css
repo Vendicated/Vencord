@@ -34,7 +34,7 @@
     opacity: 0;
 }
 
-.shiki-root:not(.shiki-preview):hover .shiki-btns {
+.shiki-root:hover .shiki-btns {
     opacity: 1;
 }
 

@@ -17,36 +17,26 @@
 */
 
 import type { IThemedToken } from "@vap/shiki";
-import { Clipboard, hljs, React } from "@webpack/common";
+import { hljs, React } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
 import { useAsyncMemo } from "../hooks/useAsyncMemo";
-import { useCopyCooldown } from "../hooks/useCopyCooldown";
 import { useIntersection } from "../hooks/useIntersection";
 import { useShikiSettings } from "../hooks/useShikiSettings";
 import { useTheme } from "../hooks/useTheme";
-import { DeviconSetting, HljsSetting, ShikiSettings } from "../types";
+import { hex2Rgb } from "../utils/color";
+import { cl, shouldUseHljs } from "../utils/misc";
+import { ButtonRow } from "./Buttons";
+import { Code } from "./Code";
+import { Header } from "./Header";
 
-// TODO: break this file up and make it actually readable
-
-const cl = (className: string) => `shiki-${className}`;
-
-const hex2Rgb = (hex: string) => {
-    hex = hex.slice(1);
-    if (hex.length < 6)
-        hex = hex
-            .split("")
-            .map(c => c + c)
-            .join("");
-    if (hex.length === 6) hex += "ff";
-    if (hex.length > 6) hex = hex.slice(0, 6);
-    return hex
-        .split(/(..)/)
-        .filter(Boolean)
-        .map(c => parseInt(c, 16));
-};
-
+export interface ThemeBase {
+    plainColor: string;
+    accentBgColor: string;
+    accentFgColor: string;
+    backgroundColor: string;
+}
 export interface HighlighterProps {
     lang?: string;
     content: string;
@@ -60,13 +50,11 @@ export const Highlighter = ({
     content,
     isPreview,
 }: HighlighterProps) => {
-    const [copyCooldown, copy] = useCopyCooldown(1000);
-
     const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;
-    const useHljs = shouldUseHLJS({ lang, tryHljs });
+    const useHljs = shouldUseHljs({ lang, tryHljs });
 
     const [preRef, isIntersecting] = useIntersection();
 
@@ -75,8 +63,7 @@ export const Highlighter = ({
         return await shiki.tokenizeCode(content, lang!);
     }, [lang, content, currentThemeId, isIntersecting], null);
 
-
-    const theme = React.useMemo(() => ({
+    const themeBase: ThemeBase = React.useMemo(() => ({
         plainColor: currentTheme?.fg || "var(--text-normal)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
@@ -85,78 +72,8 @@ export const Highlighter = ({
             currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
     }), [useHljs, currentThemeId]);
 
-    let langName = shikiLang?.name;
-
-    let lines!: JSX.Element[];
-
-    if (useHljs) {
-        const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
-        langName = hljsLang?.name;
-        try {
-            const { value: hljsHtml } = hljs.highlight(lang!, content, true);
-            lines = hljsHtml
-                .split("\n")
-                .map(line => <span dangerouslySetInnerHTML={{ __html: line }} />);
-        } catch {
-            lines = content.split("\n").map(line => <span>{line}</span>);
-        }
-    } else {
-        const renderTokens =
-            tokens ??
-            content
-                .split("\n")
-                .map(line => [{ color: theme.plainColor, content: line } as IThemedToken]);
-
-        lines = renderTokens.map(line => {
-            // [Cynthia] this makes it so when you highlight the codeblock
-            // empty lines are also selected and copied when you Ctrl+C.
-            if (line.length === 0) {
-                return <span>{"\n"}</span>;
-            }
-
-            return (
-                <>
-                    {line.map(({ content, color, fontStyle }) => (
-                        <span
-                            style={{
-                                color,
-                                fontStyle: (fontStyle ?? 0) & 1 ? "italic" : undefined,
-                                fontWeight: (fontStyle ?? 0) & 2 ? "bold" : undefined,
-                                textDecoration: (fontStyle ?? 0) & 4 ? "underline" : undefined,
-                            }}
-                        >
-                            {content}
-                        </span>
-                    ))}
-                </>
-            );
-        });
-    }
-
-    const codeTableRows = lines.map((line, i) => (
-        <tr>
-            <td style={{ color: theme.plainColor }}>{i + 1}</td>
-            <td>{line}</td>
-        </tr>
-    ));
-
-    const buttons: JSX.Element[] = [];
-
-    if (Clipboard.SUPPORTS_COPY) {
-        buttons.push(
-            <button
-                className={cl("btn")}
-                onClick={() => copy(content)}
-                style={{
-                    backgroundColor: theme.accentBgColor,
-                    color: theme.accentFgColor,
-                    cursor: copyCooldown ? "default" : undefined,
-                }}
-            >
-                {copyCooldown ? "Copied!" : "Copy"}
-            </button>
-        );
-    }
+    let langName;
+    if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;
 
     const preClasses = [cl("root")];
     if (!langName) preClasses.push(cl("plain"));
@@ -168,52 +85,32 @@ export const Highlighter = ({
             className={preClasses.join(" ")}
             style={{
                 backgroundColor: useHljs
-                    ? theme.backgroundColor
-                    : `rgba(${hex2Rgb(theme.backgroundColor)
+                    ? themeBase.backgroundColor
+                    : `rgba(${hex2Rgb(themeBase.backgroundColor)
                         .concat(bgOpacity / 100)
                         .join(", ")})`,
-                color: theme.plainColor,
+                color: themeBase.plainColor,
             }}
         >
             <code>
-                {langName && (
-                    <div className={cl("lang")}>
-                        {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
-                            <i
-                                className={`devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
-                            />
-                        )}
-                        {langName}
-                    </div>
-                )}
-                <table className={cl("table")}>{...codeTableRows}</table>
-                <div className={cl("btns")}>{buttons}</div>
+                <Header
+                    langName={langName}
+                    useDevIcon={useDevIcon}
+                    shikiLang={shikiLang}
+                />
+                <Code
+                    theme={themeBase}
+                    useHljs={useHljs}
+                    lang={lang}
+                    content={content}
+                    tokens={tokens}
+                />
+                {!isPreview && <ButtonRow
+                    content={content}
+                    theme={themeBase}
+                />}
             </code>
         </pre>
     );
 };
 
-const shouldUseHLJS = ({
-    lang,
-    tryHljs,
-}: {
-    lang: HighlighterProps["lang"],
-    tryHljs: ShikiSettings["tryHljs"],
-}) => {
-    const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
-    const shikiLang = lang ? resolveLang(lang) : null;
-    const langName = shikiLang?.name;
-
-    switch (tryHljs) {
-        case HljsSetting.Always:
-            return true;
-        case HljsSetting.Primary:
-            return !!hljsLang || lang === "";
-        case HljsSetting.Secondary:
-            return !langName && !!hljsLang;
-        case HljsSetting.Never:
-            return false;
-    }
-
-    return false;
-};
