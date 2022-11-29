@@ -15,7 +15,7 @@ You don't need to run `pnpm build` every time you make a change. Instead, use `p
 3. In `index.ts`, copy-paste the following template code:
 
 ```ts
-import definePlugin from "../../utils/types";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "Epic Plugin",

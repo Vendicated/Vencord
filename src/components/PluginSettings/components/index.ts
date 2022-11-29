@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionBase } from "../../../utils/types";
+import { PluginOptionBase } from "@utils/types";
 
 export interface ISettingElementProps<T extends PluginOptionBase> {
     option: T;
@@ -35,3 +35,4 @@ export * from "./SettingNumericComponent";
 export * from "./SettingSelectComponent";
 export * from "./SettingSliderComponent";
 export * from "./SettingTextComponent";
+

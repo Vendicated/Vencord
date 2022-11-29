@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { downloadSettingsBackup, uploadSettingsBackup } from "../../utils/settingsSync";
-import { Button, Card, Forms, Margins, Text } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { Flex } from "../Flex";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
+import { Button, Card, Forms, Margins, Text } from "@webpack/common";
 
 function BackupRestoreTab() {
     return (

@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "../../../utils/misc";
-import { filters, findBulk } from "../../../webpack";
-import { Alerts, UserStore } from "../../../webpack/common";
+import { classes, LazyComponent } from "@utils/misc";
+import { filters, findBulk } from "@webpack";
+import { Alerts, UserStore } from "@webpack/common";
+
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";

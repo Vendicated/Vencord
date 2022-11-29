@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { ErrorCard } from "@components/ErrorCard";
+import { Flex } from "@components/Flex";
+import { handleComponentFailed } from "@components/handleComponentFailed";
+import { Link } from "@components/Link";
+import { classes, useAwaiter } from "@utils/misc";
+import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
+import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "@webpack/common";
 
-import { classes, useAwaiter } from "../../utils/misc";
-import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "../../utils/updater";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { ErrorCard } from "../ErrorCard";
-import { Flex } from "../Flex";
-import { handleComponentFailed } from "../handleComponentFailed";
-import { Link } from "../Link";
+import gitHash from "~git-hash";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {

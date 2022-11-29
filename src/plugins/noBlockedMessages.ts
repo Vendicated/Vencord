@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
-import { filters } from "../webpack";
-const RelationshipStore = lazyWebpack(filters.byProps("getRelationships", "isBlocked"));
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+
+const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 export default definePlugin({
     name: "NoBlockedMessages",

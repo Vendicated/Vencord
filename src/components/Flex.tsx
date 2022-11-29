@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { React } from "../webpack/common";
+import type { React } from "@webpack/common";
 
 export function Flex(props: React.PropsWithChildren<{
     flexDirection?: React.CSSProperties["flexDirection"];
