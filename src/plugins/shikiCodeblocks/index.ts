@@ -35,7 +35,7 @@ const devIconStyle: HTMLStyleElement = document.createElement("style");
 mainStyle.innerText = cssText;
 devIconStyle.innerHTML = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
 
-const shikiSettings = Settings.plugins.ShikiCodeblocks as ShikiSettings;
+const getSettings = () => Settings.plugins.ShikiCodeblocks as ShikiSettings;
 
 export default definePlugin({
     name: "ShikiCodeblocks",
@@ -52,9 +52,9 @@ export default definePlugin({
     ],
     start: async () => {
         document.head.appendChild(mainStyle);
-        if (shikiSettings.useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
+        if (getSettings().useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
 
-        await shiki.init(shikiSettings.customTheme || shikiSettings.theme);
+        await shiki.init(getSettings().customTheme || getSettings().theme);
     },
     stop: () => {
         shiki.destroy();
@@ -70,7 +70,7 @@ export default definePlugin({
                 value: themes[themeName],
                 default: themes[themeName] === themes.DarkPlus,
             })),
-            disabled: () => !!shikiSettings.customTheme,
+            disabled: () => !!getSettings().customTheme,
             onChange: shiki.setTheme,
         },
         customTheme: {
@@ -86,7 +86,7 @@ export default definePlugin({
 
                 return true;
             },
-            onChange: value => shiki.setTheme(value || shikiSettings.theme),
+            onChange: value => shiki.setTheme(value || getSettings().theme),
         },
         tryHljs: {
             type: OptionType.SELECT,
