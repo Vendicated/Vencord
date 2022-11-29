@@ -63,7 +63,7 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
     return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
-const PlatformIndicator = ({ user, div }: { user: User, div?: boolean; }) => {
+const PlatformIndicator = ({ user, span }: { user: User, span?: boolean; }) => {
     if (!user || user.bot) return null;
 
     const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
@@ -79,17 +79,16 @@ const PlatformIndicator = ({ user, div }: { user: User, div?: boolean; }) => {
 
     if (!icons.length) return null;
 
-    if (typeof div === "boolean" && !div) return <>{icons}</>;
-    return (
-        <div
+    const indicator =
+        <span
             className="vc-platform-indicator"
-            style={{
-                display: "flex", alignItems: "center", marginLeft: "4px", gap: "4px"
-            }}
+            style={{ marginLeft: "4px", gap: "4px" }}
         >
             {icons}
-        </div>
-    );
+        </span>;
+
+    if (span) return indicator;
+    return <div style={{ display: "flex", alignItems: "center" }}>{indicator}</div>;
 };
 
 function accountForOldSettings(value: string) {
@@ -125,7 +124,7 @@ const indicatorLocations = {
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop><PlatformIndicator user={
                 props.decorations[1].find(i => i.key === "new-member")?.props.message?.author
-            } div={false} /></ErrorBoundary>
+            } span /></ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
     }
