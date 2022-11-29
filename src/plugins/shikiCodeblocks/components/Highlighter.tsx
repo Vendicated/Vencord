@@ -65,17 +65,16 @@ export const Highlighter = ({
     const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
+    const shikiLang = lang ? resolveLang(lang) : null;
     const useHljs = shouldUseHLJS({ lang, tryHljs });
 
     const [preRef, isIntersecting] = useIntersection();
 
     const tokens = useAsyncMemo<IThemedToken[][] | null>(async () => {
-        if (!lang || useHljs || !isIntersecting) return null;
+        if (!shikiLang || useHljs || !isIntersecting) return null;
         return await shiki.tokenizeCode(content, lang!);
     }, [lang, content, currentThemeId, isIntersecting], null);
 
-    const shikiLang = lang ? resolveLang(lang) : null;
-    let langName = shikiLang?.name;
 
     const theme = React.useMemo(() => ({
         plainColor: currentTheme?.fg || "var(--text-normal)",
@@ -85,6 +84,8 @@ export const Highlighter = ({
         backgroundColor:
             currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
     }), [useHljs, currentThemeId]);
+
+    let langName = shikiLang?.name;
 
     let lines!: JSX.Element[];
 
