@@ -56,7 +56,6 @@ await Promise.all(
         esbuild.build({
             ...commonOptions,
             outfile: "dist/browser.js",
-            sourcemap: process.argv.slice(2).includes("--sourcemap") ? "inline" : false,
             footer: { js: "//# sourceURL=VencordWeb" },
         }),
         esbuild.build({
