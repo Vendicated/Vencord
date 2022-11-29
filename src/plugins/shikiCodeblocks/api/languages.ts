@@ -63,7 +63,7 @@ export const getGrammar = (lang: Language): Promise<NonNullable<ILanguageRegistr
 
 const aliasCache = new Map<string, Language>();
 export const resolveLang = (idOrAlias: string) => {
-    if (Object.hasOwn(languages, idOrAlias)) return languages[idOrAlias];
+    if (Object.prototype.hasOwnProperty.call(languages, idOrAlias)) return languages[idOrAlias];
 
     const lang = Object.values(languages).find(lang => lang.aliases?.includes(idOrAlias));
 
