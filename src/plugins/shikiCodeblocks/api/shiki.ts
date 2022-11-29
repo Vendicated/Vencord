@@ -17,11 +17,10 @@
 */
 
 
-import { shikiOnigasmSrc, shikiWorkerSrcDev, shikiWorkerSrcProd } from "@utils/dependencies";
+import { shikiOnigasmSrc, shikiWorkerSrc } from "@utils/dependencies";
 import { WorkerClient } from "@vap/core/ipc";
 import type { IShikiTheme, IThemedToken } from "@vap/shiki";
 
-import { Settings } from "../../../Vencord";
 import { dispatchTheme } from "../hooks/useTheme";
 import type { ShikiSpec } from "../types";
 import { getGrammar, languages, loadLanguages, resolveLang } from "./languages";
@@ -43,10 +42,6 @@ export const shiki = {
     clientPromise: new Promise<WorkerClient<ShikiSpec>>(resolve => resolveClient = resolve),
 
     init: async (initThemeUrl: string | undefined) => {
-        const { debugBuild } = Settings.plugins.ShikiCodeblocks;
-
-        const shikiWorkerSrc = debugBuild ? shikiWorkerSrcDev : shikiWorkerSrcProd;
-
         /** https://stackoverflow.com/q/58098143 */
         const workerBlob = await fetch(shikiWorkerSrc).then(res => res.blob());
 

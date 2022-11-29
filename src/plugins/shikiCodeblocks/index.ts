@@ -142,12 +142,6 @@ export default definePlugin({
             markers: [0, 20, 40, 60, 80, 100],
             default: 100,
         },
-        debugBuild: {
-            type: OptionType.BOOLEAN,
-            description: "Use slower, but easier to debug build",
-            default: false,
-            restartNeeded: true,
-        },
     },
 
     // exports

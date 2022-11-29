@@ -68,7 +68,6 @@ export type ShikiSettings = {
     tryHljs: HljsSetting;
     useDevIcon: DeviconSetting;
     bgOpacity: number;
-    debugBuild: boolean;
 } & {
         [K in keyof CommonSettings as K extends `${infer V}` ? K : never]: CommonSettings[K];
     };

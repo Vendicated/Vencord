@@ -76,6 +76,5 @@ export interface ApngFrameData {
 }
 
 const shikiWorkerDist = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
-export const shikiWorkerSrcProd = `${shikiWorkerDist}/index.min.js`; // 90kb
-export const shikiWorkerSrcDev = `${shikiWorkerDist}/index.js`; // ~600kb (not minified + inline sourcemap)
+export const shikiWorkerSrc = `${shikiWorkerDist}/${IS_DEV ? "index.js" : "index.min.js"}`;
 export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
