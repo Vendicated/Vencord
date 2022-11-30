@@ -39,6 +39,7 @@ const {
     getDarwinDirs,
     getLinuxDirs,
     ENTRYPOINT,
+    question
 } = require("./common");
 
 switch (process.platform) {
@@ -62,15 +63,14 @@ async function install(installations) {
     // Attempt to give flatpak perms
     if (selected.isFlatpak) {
         try {
-            const { branch } = selected;
             const cwd = process.cwd();
-            const globalCmd = `flatpak override ${branch} --filesystem=${cwd}`;
-            const userCmd = `flatpak override --user ${branch} --filesystem=${cwd}`;
+            const globalCmd = `flatpak override ${selected.branch} --filesystem=${cwd}`;
+            const userCmd = `flatpak override --user ${selected.branch} --filesystem=${cwd}`;
             const cmd = selected.location.startsWith("/home")
                 ? userCmd
                 : globalCmd;
             execSync(cmd);
-            console.log("Successfully gave write perms to Discord Flatpak.");
+            console.log("Gave write perms to Discord Flatpak.");
         } catch (e) {
             console.log("Failed to give write perms to Discord Flatpak.");
             console.log(
@@ -78,6 +78,26 @@ async function install(installations) {
                 "sudo pnpm inject"
             );
             process.exit(1);
+        }
+
+        const answer = await question(
+            `The installer will give full host access to ${selected.branch} in order to enable updating using Git. Proceed? [Y/n]: `
+        );
+
+        if (["y", "yes", "yeah", ""].includes(answer.toLowerCase())) {
+            try {
+                const globalCmd = `flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`;
+                const userCmd = `flatpak override --user ${selected.branch} --talk-name=org.freedesktop.Flatpak`;
+                const cmd = selected.location.startsWith("/home")
+                    ? userCmd
+                    : globalCmd;
+                execSync(cmd);
+                console.log("Sucessfully gave full host access permissions");
+            } catch (err) {
+                throw err;
+            }
+        } else {
+            console.log(`Not giving full host access. If you change your mind later, you can run: flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`);
         }
     }
 

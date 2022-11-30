@@ -338,5 +338,5 @@ module.exports = {
     getMenuItem,
     getWindowsDirs,
     getDarwinDirs,
-    getLinuxDirs,
+    getLinuxDirs
 };
