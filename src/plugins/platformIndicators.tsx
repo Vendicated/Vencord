@@ -111,22 +111,25 @@ const indicatorLocations = {
         onEnable: () => addDecorator("platform-indicator", props =>
             <ErrorBoundary noop><PlatformIndicator user={props.user} /></ErrorBoundary>
         ),
-        onDisable: () => removeDecorator("platform-indicator")
+        onDisable: () => removeDecorator("platform-indicator"),
+        requiresRestart: false
     },
     badges: {
         description: "In user profiles, as badges",
         // TODO: use BadgeAPI
         onEnable: () => { },
-        onDisable: () => { }
+        onDisable: () => { },
+        requiresRestart: true
     },
     messages: {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop><PlatformIndicator user={
-                props.decorations[1].find(i => i.key === "new-member")?.props.message?.author
+                props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
             } span /></ErrorBoundary>
         ),
-        onDisable: () => removeDecoration("platform-indicator")
+        onDisable: () => removeDecoration("platform-indicator"),
+        requiresRestart: false
     }
 };
 
@@ -171,9 +174,8 @@ export default definePlugin({
                 return [key, {
                     type: OptionType.BOOLEAN,
                     description: `Show indicators ${value.description.toLowerCase()}`,
-                    // TODO: maybe don't require restart
+                    // onChange doesn't give any way to know which setting was changed, so restart required
                     restartNeeded: true,
-                    // cannot call accountForOldSettings here, hence why it's done in start()
                     default: false
                 }];
             })
