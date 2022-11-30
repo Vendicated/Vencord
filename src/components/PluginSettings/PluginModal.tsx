@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { generateId } from "@api/Commands";
+import { useSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { LazyComponent } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
+import { OptionType, Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import { generateId } from "../../api/Commands";
-import { useSettings } from "../../api/settings";
-import { LazyComponent, lazyWebpack } from "../../utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { proxyLazy } from "../../utils/proxyLazy";
-import { OptionType, Plugin } from "../../utils/types";
-import { filters, findByCode } from "../../webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { Flex } from "../Flex";
 import {
     ISettingElementProps,
     SettingBooleanComponent,
@@ -40,7 +40,7 @@ import {
 } from "./components";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {
@@ -214,7 +214,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             size={Button.Sizes.SMALL}
                             color={Button.Colors.RED}
                         >
-                            Exit Without Saving
+                            Cancel
                         </Button>
                         <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -226,7 +226,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onMouseLeave={onMouseLeave}
                                     disabled={!canSubmit()}
                                 >
-                                    Save & Exit
+                                    Save & Close
                                 </Button>
                             )}
                         </Tooltip>

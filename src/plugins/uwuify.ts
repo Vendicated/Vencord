@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findOption, RequiredMessageOption } from "../api/Commands";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { findOption, RequiredMessageOption } from "@api/Commands";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 const endings = [
     "owo", "UwU", ">w<", "^w^", "●w●", "☆w☆", "𝗨𝘄𝗨", "(ᗒᗨᗕ)", "(▰˘v˘▰)",

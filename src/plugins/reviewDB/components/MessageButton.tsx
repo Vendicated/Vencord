@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "../../../utils/misc";
-import { findByProps } from "../../../webpack";
+import { classes, LazyComponent } from "@utils/misc";
+import { findByProps } from "@webpack";
 
 export default LazyComponent(() => {
     const { button, dangerous } = findByProps("button", "wrapper", "disabled");

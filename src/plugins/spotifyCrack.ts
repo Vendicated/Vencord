@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
+import { migratePluginSettings, Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 
 migratePluginSettings("SpotifyCrack", "Ify");
 export default definePlugin({

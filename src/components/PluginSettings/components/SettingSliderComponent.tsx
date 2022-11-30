@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSlider } from "../../../utils/types";
-import { Forms, React, Slider } from "../../../webpack/common";
+import { PluginOptionSlider } from "@utils/types";
+import { Forms, React, Slider } from "@webpack/common";
+
 import { ISettingElementProps } from ".";
 
 export function makeRange(start: number, end: number, step = 1) {

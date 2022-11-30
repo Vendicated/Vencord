@@ -16,6 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotice } from "@api/Notices";
+import { Settings, useSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { ErrorCard } from "@components/ErrorCard";
+import { Flex } from "@components/Flex";
+import { handleComponentFailed } from "@components/handleComponentFailed";
+import { ChangeList } from "@utils/ChangeList";
+import Logger from "@utils/Logger";
+import { classes, LazyComponent } from "@utils/misc";
+import { openModalLazy } from "@utils/modal";
+import { Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+
 import Plugins from "~plugins";
 
 import { DataStore } from "../../api";
@@ -39,7 +53,7 @@ import * as styles from "./styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = lazyWebpack(filters.byProps("inputDefault", "inputWrapper"));
+const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
 
 const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
@@ -265,9 +279,9 @@ export default ErrorBoundary.wrap(function Settings() {
     }));
 
     return (
-        <Forms.FormSection tag="h1" title="Vencord">
+        <Forms.FormSection>
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
-                Plugins
+                Filters
             </Forms.FormTitle>
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
@@ -289,6 +303,8 @@ export default ErrorBoundary.wrap(function Settings() {
                     />
                 </div>
             </div>
+
+            <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
 
             <div style={styles.PluginsGrid}>
                 {sortedPlugins?.length ? sortedPlugins
@@ -325,7 +341,7 @@ export default ErrorBoundary.wrap(function Settings() {
                                 <PluginCard
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    onRestartNeeded={name => changes.add(name)}
+                                    onRestartNeeded={name => changes.handleChange(name)}
                                     disabled={plugin.required || !!dependency}
                                     plugin={plugin}
                                 />

@@ -18,6 +18,9 @@
 
 import "./updater";
 
+import { debounce } from "@utils/debounce";
+import IpcEvents from "@utils/IpcEvents";
+import { Queue } from "@utils/Queue";
 import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
@@ -25,9 +28,6 @@ import { join } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { debounce } from "../utils/debounce";
-import IpcEvents from "../utils/IpcEvents";
-import { Queue } from "../utils/Queue";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
@@ -66,14 +66,14 @@ const settingsWriteQueue = new Queue();
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    cssWriteQueue.add(() => writeFile(QUICKCSS_PATH, css))
+    cssWriteQueue.push(() => writeFile(QUICKCSS_PATH, css))
 );
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
 
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
-    settingsWriteQueue.add(() => writeFile(SETTINGS_FILE, s));
+    settingsWriteQueue.push(() => writeFile(SETTINGS_FILE, s));
 });
 
 

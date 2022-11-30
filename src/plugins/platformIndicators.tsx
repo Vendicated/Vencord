@@ -16,15 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
+import { PresenceStore, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
-
-import { Settings } from "../api/settings";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin, { OptionType } from "../utils/types";
-import { filters } from "../webpack";
-import { PresenceStore, Tooltip } from "../webpack/common";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -52,13 +50,13 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = lazyWebpack(filters.byCode("STATUS_YELLOW", "TWITCH", "STATUS_GREY"));
+const getStatusColor = findByCodeLazy("STATUS_YELLOW", "TWITCH", "STATUS_GREY");
 
 const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={getStatusColor(status)} tooltip={tooltip} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
 const PlatformIndicator = ({ user }: { user: User; }) => {
@@ -98,6 +96,7 @@ export default definePlugin({
         {
             // Server member list decorators
             find: "this.renderPremium()",
+            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /this.renderPremium\(\)[^\]]*?\]/,
                 replace: "$&.concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(this.props))"
@@ -106,6 +105,7 @@ export default definePlugin({
         {
             // Dm list decorators
             find: "PrivateChannel.renderAvatar",
+            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /(subText:(.{1,3})\..+?decorators:)(.+?:null)/,
                 replace: "$1[$3].concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators($2.props))"
@@ -114,7 +114,7 @@ export default definePlugin({
         {
             // User badges
             find: "Messages.PROFILE_USER_BADGES",
-            predicate: () => Settings.plugins.PlatformIndicators.showAsBadges,
+            predicate: () => ["both", "badges"].includes(Settings.plugins.PlatformIndicators.displayMode),
             replacement: {
                 match: /(Messages\.PROFILE_USER_BADGES,role:"group",children:)(.+?\.key\)\}\)\))/,
                 replace: "$1[Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(e)].concat($2)"
@@ -129,11 +129,25 @@ export default definePlugin({
     ),
 
     options: {
-        showAsBadges: {
-            description: "Show platform icons in user badges",
-            type: OptionType.BOOLEAN,
-            default: true,
+        displayMode: {
+            type: OptionType.SELECT,
+            description: "Where to display the platform indicators",
             restartNeeded: true,
-        }
+            options: [
+                {
+                    label: "Member List & Badges",
+                    value: "both",
+                    default: true
+                },
+                {
+                    label: "Member List Only",
+                    value: "list"
+                },
+                {
+                    label: "Badges Only",
+                    value: "badges"
+                }
+            ]
+        },
     }
 });

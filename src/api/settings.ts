@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import plugins from "~plugins";
+import IpcEvents from "@utils/IpcEvents";
+import Logger from "@utils/Logger";
+import { mergeDefaults } from "@utils/misc";
+import { OptionType } from "@utils/types";
+import { React } from "@webpack/common";
 
-import IpcEvents from "../utils/IpcEvents";
-import Logger from "../utils/Logger";
-import { mergeDefaults } from "../utils/misc";
-import { OptionType } from "../utils/types";
-import { React } from "../webpack/common";
+import plugins from "~plugins";
 
 const logger = new Logger("Settings");
 export interface Settings {
@@ -48,16 +48,18 @@ try {
     var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
     mergeDefaults(settings, DefaultSettings);
 } catch (err) {
-    console.error("Corrupt settings file. ", err);
     var settings = mergeDefaults({} as Settings, DefaultSettings);
+    logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
 }
 
 type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
 const subscriptions = new Set<SubscriptionCallback>();
 
+const proxyCache = {} as Record<string, any>;
+
 // Wraps the passed settings object in a Proxy to nicely handle change listeners and default values
 function makeProxy(settings: any, root = settings, path = ""): Settings {
-    return new Proxy(settings, {
+    return proxyCache[path] ??= new Proxy(settings, {
         get(target, p: string) {
             const v = target[p];
 
@@ -67,7 +69,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 if (path === "plugins" && p in plugins)
                     return target[p] = makeProxy({
                         enabled: plugins[p].required ?? false
-                    }, root, `plugins/${p}`);
+                    }, root, `plugins.${p}`);
 
                 // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
                 // the default value.
