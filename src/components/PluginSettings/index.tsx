@@ -251,7 +251,7 @@ export default ErrorBoundary.wrap(function Settings() {
         const existingPlugins: Record<string, number> = {};
         let newPlugins: Array<string> = [];
         sortedPlugins.map(plugin => {
-            Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins || []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
+            Vencord_existingPlugins[plugin.name] = existingPlugins[plugin.name] ?? dateNow;
             if ((Vencord_existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
                 newPlugins.push(plugin.name);
             }
