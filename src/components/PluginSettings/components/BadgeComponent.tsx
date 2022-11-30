@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BadgeStyle } from "../styles";
+import { BadgeStyle } from "@components/PluginSettings/styles";
 
 export function Badge({ text, color }): JSX.Element {
     return (
