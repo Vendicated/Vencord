@@ -64,6 +64,8 @@ pnpm inject
 
 Then fully close Discord from your taskbar or task manager, and restart it. Vencord should be injected - you can check this by looking for the Vencord section in Discord settings.
 
+**NOTE:** If you installed Discord using Flatpak, run `sudo flatpak override com.discordapp.Discord --talk-name=org.freedesktop.Flatpak` to give permissions for Discord to use Portals.
+
 ## Updating Vencord
 
 If you're using Discord already, go into the `Updater` tab in settings.
