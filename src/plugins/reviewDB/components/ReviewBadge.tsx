@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MaskedLinkStore, Tooltip } from "../../../webpack/common";
+import { MaskedLinkStore, Tooltip } from "@webpack/common";
+
 import { Badge } from "../entities/Badge";
 
 export default function ReviewBadge(badge: Badge) {
