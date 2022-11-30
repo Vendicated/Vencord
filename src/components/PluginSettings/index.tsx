@@ -16,12 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { Badge } from "@components/PluginSettings/components";
+import PluginModal from "@components/PluginSettings/PluginModal";
+import * as styles from "@components/PluginSettings/styles";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
 import { classes, LazyComponent, useAwaiter } from "@utils/misc";
@@ -32,11 +36,6 @@ import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, Te
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
-
-import * as DataStore from "@api/DataStore";
-import { Badge } from "@components/PluginSettings/components";
-import PluginModal from "@components/PluginSettings/PluginModal";
-import * as styles from "@components/PluginSettings/styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
