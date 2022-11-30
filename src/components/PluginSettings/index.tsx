@@ -33,10 +33,10 @@ import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
 
-import { DataStore } from "../../api";
-import { Badge } from "./components";
-import PluginModal from "./PluginModal";
-import * as styles from "./styles";
+import * as DataStore from "@api/DataStore";
+import { Badge } from "@components/PluginSettings/components";
+import PluginModal from "@components/PluginSettings/PluginModal";
+import * as styles from "@components/PluginSettings/styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
