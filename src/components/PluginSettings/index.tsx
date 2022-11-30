@@ -24,29 +24,16 @@ import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
 
 import { DataStore } from "../../api";
-import { showNotice } from "../../api/Notices";
-import { Settings, useSettings } from "../../api/settings";
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import { ChangeList } from "../../utils/ChangeList";
-import Logger from "../../utils/Logger";
-import { classes, LazyComponent, lazyWebpack, useAwaiter } from "../../utils/misc";
-import { openModalLazy } from "../../utils/modal";
-import { Plugin } from "../../utils/types";
-import { filters, findByCode } from "../../webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { ErrorCard } from "../ErrorCard";
-import { Flex } from "../Flex";
-import { handleComponentFailed } from "../handleComponentFailed";
 import { Badge } from "./components";
 import PluginModal from "./PluginModal";
 import * as styles from "./styles";
@@ -260,17 +247,17 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    const [newPlugins, newpluginsError, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
+    const [newPlugins, newpluginsError, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
         const existingPlugins: Record<string, number> = {};
         let newPlugins: Array<string> = [];
         sortedPlugins.map(plugin => {
-            Vencord_existingPlugins[plugin.name] = existingPlugins[plugin.name] ?? dateNow;
-            if ((Vencord_existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
+            existingPlugins[plugin.name] = cachedPlugins[plugin.name] ?? dateNow;
+            if ((existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
                 newPlugins.push(plugin.name);
             }
         });
-        DataStore.set("Vencord_existingPlugins", Vencord_existingPlugins);
+        DataStore.set("Vencord_existingPlugins", existingPlugins);
 
         if (window._.isEqual(newPlugins, sortedPluginNames)) {
             newPlugins = [];
