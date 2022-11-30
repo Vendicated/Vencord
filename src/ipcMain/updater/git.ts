@@ -28,7 +28,7 @@ const VENCORD_SRC_DIR = join(__dirname, "..");
 
 const execFile = promisify(cpExecFile);
 
-const isFlatpak = Boolean(process.env.SANDBOX_TMPDIR?.includes("com.discordapp.Discord"));
+const isFlatpak = Boolean(process.env.FLATPAK_ID?.includes("discordapp") || process.env.FLATPAK_ID?.includes("Discord"));
 
 function git(...args: string[]) {
     const opts = { cwd: VENCORD_SRC_DIR };
