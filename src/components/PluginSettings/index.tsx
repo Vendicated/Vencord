@@ -248,7 +248,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const [newPlugins, newpluginsError, newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((existingPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
-        const Vencord_existingPlugins: Record<string, number> = {};
+        const existingPlugins: Record<string, number> = {};
         let newPlugins: Array<string> = [];
         sortedPlugins.map(plugin => {
             Vencord_existingPlugins[plugin.name] = Object.keys(existingPlugins || []).includes(plugin.name) ? existingPlugins[plugin.name] : dateNow;
