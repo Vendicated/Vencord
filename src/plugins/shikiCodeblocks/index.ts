@@ -95,12 +95,12 @@ export default definePlugin({
                     value: HljsSetting.Never,
                 },
                 {
-                    label: "Use Shiki over Highlight.js",
+                    label: "Prefer Shiki instead of Highlight.js",
                     value: HljsSetting.Secondary,
                     default: true,
                 },
                 {
-                    label: "Use Highlight.js over Shiki",
+                    label: "Prefer Highlight.js instead of Shiki",
                     value: HljsSetting.Primary,
                 },
                 {
