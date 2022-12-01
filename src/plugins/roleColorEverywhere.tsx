@@ -23,7 +23,6 @@ import { getCurrentChannel } from "@utils/discord";
 import { UserStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
-const currentUser = UserStore.getCurrentUser();
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -69,6 +68,8 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);;
     },
     typingUsers(users, userIds, SEVERAL_USERS_TYPING) { // todo: work with i18n
+        const currentUser = UserStore.getCurrentUser();
+
         const locale = findByProps("getLocale").getLocale();
         const fmt = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' })
 
