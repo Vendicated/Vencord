@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A Discord client mod that does things differently",
     "keywords": [],
     "homepage": "https://github.com/Vendicated/Vencord#readme",
@@ -61,5 +61,12 @@
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch"
         }
+    },
+    "webExt": {
+        "artifactsDir": "./dist",
+        "build": {
+            "overwriteDest": true
+        },
+        "sourceDir": "./dist/extension-v2-unpacked"
     }
 }
