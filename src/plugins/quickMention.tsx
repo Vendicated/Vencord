@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findLazy } from "@webpack";
+import { ChannelStore } from "@webpack/common";
 
 const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
@@ -26,29 +28,22 @@ export default definePlugin({
     name: "QuickMention",
     authors: [Devs.kemo],
     description: "Adds a quick mention button to the message actions bar",
+    dependencies: ["MessagePopoverAPI"],
 
-    patches: [
-        {
-            find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-            replacement: {
-                match: /(null,)(.{1,3}&&!.{1,3}\?(.{1,3})\(\{key:"reply",label:.{1,10}\.Messages\.MESSAGE_ACTION_REPLY,icon:.{1,10},channel:(.+?),message:(.+?),onClick:.+?\}\))/,
-                replace: (m, post, og, functionName, channelVar, messageVar) => {
-
-                    const functionSig =
-                        `${functionName}({
-                        key: "QuickMention",
-                        label: "Mention",
-                        icon: Vencord.Plugins.plugins.QuickMention.Icon,
-                        channel: ${channelVar},
-                        message: ${messageVar},
-                        onClick: ()=> Vencord.Plugins.plugins.QuickMention.onClick(${messageVar})
-                    })`;
-
-                    return `${post}${functionSig},${og}`;
-                }
+    start() {
+        addButton('QuickMention', (msg) => {
+            return {
+                label: "Quick Mention",
+                icon: this.Icon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: () => ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: `<@${msg.author.id}> ` })
             }
-        }
-    ],
+        });
+    },
+    stop() {
+        removeButton('QuickMention');
+    },
 
     Icon: () => (
         <svg
@@ -63,6 +58,4 @@ export default definePlugin({
             />
         </svg>
     ),
-
-    onClick: (message: any) => ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: `<@${message.author.id}> ` })
 });
