@@ -47,7 +47,7 @@ jobs:
               run: |
                 mv dist/*.xpi dist/Vencord-for-Firefox.xpi
                 mv dist/extension-v3.zip dist/Vencord-for-Chrome-and-Edge.zip
-
+                rm -rf dist/extension-v2-unpacked
 
             - name: Get some values needed for the release
               id: release_values
