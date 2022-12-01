@@ -22,7 +22,7 @@ import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
-import { Button, Card, Forms, React, Switch } from "@webpack/common";
+import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
 const st = (style: string) => `vcSettings${style}`;
 
@@ -83,6 +83,9 @@ function VencordSettings() {
             <Forms.FormDivider />
 
             <Forms.FormSection title="Settings">
+                <Forms.FormText className={Margins.marginBottom20}>
+                    Hint: You can change the position of this settings section in the settings of the "Settings" plugin!
+                </Forms.FormText>
                 <Switch
                     value={settings.useQuickCss}
                     onChange={(v: boolean) => settings.useQuickCss = v}
