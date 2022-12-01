@@ -33,6 +33,12 @@ jobs:
             - name: Build web
               run: pnpm buildWeb --standalone
 
+            - name: Sign firefox extension
+              run: pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET
+              env:
+                WEBEXT_USER: ${{ secrets.WEBEXT_USER }}
+                WEBEXT_SECRET: ${{ secrets.WEBEXT_SECRET }}
+
             - name: Build
               run: pnpm build --standalone
 
