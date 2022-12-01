@@ -18,10 +18,12 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps, findByPropsLazy } from "@webpack";
 import { getCurrentChannel } from "@utils/discord";
+import { UserStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
+const currentUser = UserStore.getCurrentUser();
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -34,7 +36,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(.),channelId:(.).{0,300}?"@".concat\(.+?\)/,
-                    replace: "$&,color:Vencord.Plugins.plugins.roleColorEverywhere.getUserColor($1, $2)"
+                    replace: "$&,color:Vencord.Plugins.plugins.RoleColorEverywhere.getUserColor($1, $2)"
                 }
             ],
         },
@@ -44,7 +46,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /((\w)=\w\.typingUsers.+?)(\w),\w=(\w+?\(\w+?,\d+?\)).+?(\w\.\w\.Messages.SEVERAL_USERS_TYPING);/,
-                    replace: "$1$3=Vencord.Plugins.plugins.roleColorEverywhere.typingUsers($4,$2,$5);"
+                    replace: "$1$3=Vencord.Plugins.plugins.RoleColorEverywhere.typingUsers($4,$2,$5);"
                 }
             ],
         },
@@ -67,15 +69,27 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);;
     },
     typingUsers(users, userIds, SEVERAL_USERS_TYPING) { // todo: work with i18n
-        const several = Object.keys(userIds).length > 3;
-        userIds = Object.keys(userIds).slice(0,3);
+        const locale = findByProps("getLocale").getLocale();
+        const fmt = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' })
 
-        return userIds.length === 0 ? null : (!several ? <>
-            {userIds.map((id, i) => <>
-                <strong style={{color: this.getColor(id, getCurrentChannel().id)}}>
-                    {users[i]}
-                </strong>{userIds.length === 2 && i == 0 ? ' and ' : userIds[i+2] ? ', ' : !userIds[i+2] && userIds[i+1] ? ', and ' : ''}
-            </>)} {users.length > 1 ? 'are' : 'is'} typing...
+        userIds = Object.keys(userIds).filter(m => m != currentUser.id);
+        const several = userIds.length > 3;
+        userIds = fmt.formatToParts(userIds.slice(0, 3));
+
+        const stuff = userIds.length === 0 ? null : (!several ? <>
+            {userIds.map(({ value: id, type }, i) => {
+                const channel = getCurrentChannel();
+                const member = MemberStore.getMember(channel.guild_id, id);
+
+                return type === 'element' ?
+                    <strong style={{color: member.colorString}}>
+                        {member.nick || UserStore.getUser(id).username}
+                    </strong>
+                : id
+            })} {users.length > 1 ? 'are' : 'is'} typing...
         </> : SEVERAL_USERS_TYPING)
+
+        console.log("stuff", stuff);
+        return stuff;
     }
 });
