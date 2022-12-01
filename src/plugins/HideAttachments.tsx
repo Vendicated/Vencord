@@ -17,6 +17,7 @@
 */
 
 import { get, set } from "@api/DataStore";
+import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
@@ -49,14 +50,7 @@ export default definePlugin({
     name: "HideAttachments",
     description: "Hide attachments and Embeds for individual messages via hover button",
     authors: [Devs.Ven],
-    patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-        replacement: {
-            match: /(message:(.).{0,100}Fragment,\{children:\[)(.{0,40}renderPopout:.{0,200}message_reaction_emoji_picker.+?return (.{1,3})\(.{0,30}"add-reaction")/,
-            replace: "$1Vencord.Plugins.plugins.HideAttachments.renderButton($2, $4),$3"
-        }
-    }],
-
+    
     async start() {
         style = document.createElement("style");
         style.id = "VencordHideAttachments";
@@ -64,11 +58,27 @@ export default definePlugin({
 
         await getHiddenMessages();
         await this.buildCss();
+
+
+        addButton('HideAttachments', (msg) => {
+            if (!msg.attachments.length && !msg.embeds.length) return null;
+
+            const isHidden = hiddenMessages.has(msg.id);
+
+            return {
+                label: isHidden ? "Show Attachments" : "Hide Attachments",
+                icon: isHidden ? ImageVisible : ImageInvisible,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: () => this.toggleHide(msg.id)
+            };
+        });
     },
 
     stop() {
         style.remove();
         hiddenMessages.clear();
+        removeButton('HideAttachments');
     },
 
     async buildCss() {
@@ -84,26 +94,6 @@ export default definePlugin({
             font-size: 80%;
         }
         `;
-    },
-
-    renderButton(msg: Message, makeItem: (data: any) => React.ComponentType) {
-        try {
-            if (!msg.attachments.length && !msg.embeds.length) return null;
-
-            const isHidden = hiddenMessages.has(msg.id);
-
-            return makeItem({
-                key: "HideAttachments",
-                label: isHidden ? "Show Attachments" : "Hide Attachments",
-                icon: isHidden ? ImageVisible : ImageInvisible,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.toggleHide(msg.id)
-            });
-        } catch (err) {
-            new Logger("HideAttachments").error(err);
-            return null;
-        }
     },
 
     async toggleHide(id: string) {

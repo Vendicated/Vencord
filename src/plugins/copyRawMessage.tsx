@@ -17,10 +17,9 @@
 */
 
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Clipboard, React, ChannelStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { addButton, removeButton } from "@api/MessagePopover";
 
 const CopyIcon = () => {
     return <svg viewBox="0 0 512.002 512.002" fill="currentColor" aria-hidden="true" width="22" height="22">
@@ -39,26 +38,19 @@ export default definePlugin({
     name: "CopyRawMessage",
     description: "Copy and view the raw content of any message.",
     authors: [Devs.KingFish],
-    patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-        replacement: {
-            match: /(message:(.).{0,100}Fragment,\{children:\[)(.{0,40}renderPopout:.{0,200}message_reaction_emoji_picker.+?return (.{1,3})\(.{0,30}"add-reaction")/,
-            replace: "$1Vencord.Plugins.plugins.CopyRawMessage.renderButton($2, $4),$3"
-        }
-    }],
-    renderButton(msg: Message, makeItem: (data: any) => React.ComponentType) {
-        try {
-            return makeItem({
-                key: "CopyRawMessage",
-                label: "(R) Copy Raw",
+    start() {
+        addButton('CopyRawMessage', (msg) => {
+            return {
+                label: "Copy Raw",
                 icon: CopyIcon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => Clipboard.copy(msg.content)
-            });
-        } catch (err) {
-            new Logger("CopyRawMessage").error(err);
-            return null;
-        }
+                onClick: () => Clipboard.copy(msg.content),
+                onContextMenu: () => console.log('hi')
+            }
+        });
+    },
+    stop() {
+        removeButton('CopyRawMessage');
     }
 });
