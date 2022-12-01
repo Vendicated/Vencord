@@ -79,6 +79,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                     marginTop: "6px",
                     resize: "none",
                     marginBottom: "12px",
+                    overflow: "hidden",
                 }}
             />
         </div>
