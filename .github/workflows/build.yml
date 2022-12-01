@@ -33,8 +33,21 @@ jobs:
             - name: Build web
               run: pnpm buildWeb --standalone
 
+            - name: Sign firefox extension
+              run: |
+                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET
+              env:
+                WEBEXT_USER: ${{ secrets.WEBEXT_USER }}
+                WEBEXT_SECRET: ${{ secrets.WEBEXT_SECRET }}
+
             - name: Build
               run: pnpm build --standalone
+
+            - name: Rename extensions for more user friendliness
+              run: |
+                mv dist/*.xpi dist/Vencord-for-Firefox.xpi
+                mv dist/extension-v3.zip dist/Vencord-for-Chrome-and-Edge.zip
+
 
             - name: Get some values needed for the release
               id: release_values
