@@ -48,6 +48,11 @@ export type ShikiSpec = {
     }) => Promise<IThemedToken[][]>;
 };
 
+export enum StyleSheets {
+    Main = "MAIN",
+    DevIcons = "DEVICONS",
+}
+
 export enum HljsSetting {
     Never = "NEVER",
     Secondary = "SECONDARY",
@@ -60,14 +65,14 @@ export enum DeviconSetting {
     Color = "COLOR"
 }
 
-type CommonSettings = Settings["plugins"][string];
+type CommonSettings = {
+    [K in keyof Settings["plugins"][string]as K extends `${infer V}` ? K : never]: Settings["plugins"][string][K];
+};
 
-export type ShikiSettings = {
+export interface ShikiSettings extends CommonSettings {
     theme: string;
     customTheme: string;
     tryHljs: HljsSetting;
     useDevIcon: DeviconSetting;
     bgOpacity: number;
-} & {
-        [K in keyof CommonSettings as K extends `${infer V}` ? K : never]: CommonSettings[K];
-    };
+}

@@ -18,7 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { parseUrl } from "@utils/misc";
-import { fromPascal, toTitle } from "@utils/text";
+import { wordsFromPascal, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 
 import cssText from "~fileContent/style.css";
@@ -27,13 +27,11 @@ import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
 import { themes } from "./api/themes";
 import { createHighlighter } from "./components/Highlighter";
-import { DeviconSetting, HljsSetting, ShikiSettings } from "./types";
+import { DeviconSetting, HljsSetting, ShikiSettings, StyleSheets } from "./types";
+import { clearStyles, removeStyle, setStyle } from "./utils/createStyle";
 
 const themeNames = Object.keys(themes);
-const mainStyle: HTMLStyleElement = document.createElement("style");
-const devIconStyle: HTMLStyleElement = document.createElement("style");
-mainStyle.innerText = cssText;
-devIconStyle.innerHTML = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
+const devIconCss = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
 
 const getSettings = () => Settings.plugins.ShikiCodeblocks as ShikiSettings;
 
@@ -51,22 +49,22 @@ export default definePlugin({
         },
     ],
     start: async () => {
-        document.head.appendChild(mainStyle);
-        if (getSettings().useDevIcon !== DeviconSetting.Disabled) document.head.appendChild(devIconStyle);
+        setStyle(cssText, StyleSheets.Main);
+        if (getSettings().useDevIcon !== DeviconSetting.Disabled)
+            setStyle(devIconCss, StyleSheets.DevIcons);
 
         await shiki.init(getSettings().customTheme || getSettings().theme);
     },
     stop: () => {
         shiki.destroy();
-        mainStyle?.remove();
-        devIconStyle?.remove();
+        clearStyles();
     },
     options: {
         theme: {
             type: OptionType.SELECT,
             description: "Default themes",
             options: themeNames.map(themeName => ({
-                label: toTitle(fromPascal(themeName)),
+                label: wordsToTitle(wordsFromPascal(themeName)),
                 value: themes[themeName],
                 default: themes[themeName] === themes.DarkPlus,
             })),
@@ -130,10 +128,8 @@ export default definePlugin({
                 },
             ],
             onChange: (newValue: DeviconSetting) => {
-                if (newValue === DeviconSetting.Disabled && devIconStyle.isConnected)
-                    devIconStyle.remove();
-                else if (newValue === DeviconSetting.Disabled && !devIconStyle.isConnected)
-                    document.head.appendChild(devIconStyle);
+                if (newValue === DeviconSetting.Disabled) removeStyle(StyleSheets.DevIcons);
+                else setStyle(devIconCss, StyleSheets.DevIcons);
             },
         },
         bgOpacity: {

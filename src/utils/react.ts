@@ -18,13 +18,17 @@
 
 import { React } from "@webpack/common";
 
-export const checkIntersecting = (el: Element) => {
-    const elementBox = el.getBoundingClientRect();
-    const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-    return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
-};
+import { checkIntersecting } from "./misc";
 
-export const useIntersection = () => {
+/**
+ * Check if an element is on screen
+ * @param intersectOnly If `true`, will only update the state when the element comes into view
+ * @returns [refCallback, isIntersecting]
+ */
+export const useIntersection = (intersectOnly = false): [
+    refCallback: React.RefCallback<Element>,
+    isIntersecting: boolean,
+] => {
     const observerRef = React.useRef<IntersectionObserver | null>(null);
     const [isIntersecting, setIntersecting] = React.useState(false);
 
@@ -36,21 +40,23 @@ export const useIntersection = () => {
 
         if (checkIntersecting(element)) {
             setIntersecting(true);
-            return;
+            if (intersectOnly) return;
         }
 
         observerRef.current = new IntersectionObserver(entries => {
             for (const entry of entries) {
-                if (entry.isIntersecting && entry.target === element) {
+                if (entry.target !== element) continue;
+                if (entry.isIntersecting && intersectOnly) {
                     setIntersecting(true);
                     observerRef.current?.disconnect();
                     observerRef.current = null;
-                    return;
+                } else {
+                    setIntersecting(entry.isIntersecting);
                 }
             }
         });
         observerRef.current.observe(element);
     };
 
-    return [refCallback, isIntersecting] as const;
+    return [refCallback, isIntersecting];
 };

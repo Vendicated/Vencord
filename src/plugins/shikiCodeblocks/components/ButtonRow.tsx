@@ -21,12 +21,12 @@ import { Clipboard } from "@webpack/common";
 import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
 
-export type ButtonRowProps = {
+export interface ButtonRowProps {
     theme: import("./Highlighter").ThemeBase;
     content: string;
-};
+}
 
-export const ButtonRow = ({ content, theme }: ButtonRowProps) => {
+export function ButtonRow({ content, theme }: ButtonRowProps) {
     const buttons: JSX.Element[] = [];
 
     if (Clipboard.SUPPORTS_COPY) {
@@ -43,4 +43,4 @@ export const ButtonRow = ({ content, theme }: ButtonRowProps) => {
     }
 
     return <div className={cl("btns")}>{buttons}</div>;
-};
+}

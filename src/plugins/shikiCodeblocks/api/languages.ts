@@ -24,7 +24,7 @@ export const vpcRepoAssets = `https://raw.githubusercontent.com/${VPC_REPO}/${VP
 export const vpcRepoGrammar = (fileName: string) => `${vpcRepoAssets}/${fileName}`;
 export const vpcRepoLanguages = `${vpcRepoAssets}/languages.json`;
 
-export type Language = {
+export interface Language {
     name: string;
     id: string;
     devicon?: string;
@@ -33,15 +33,15 @@ export type Language = {
     scopeName: string;
     aliases?: string[];
     custom?: boolean;
-};
-export type LanguageJson = {
+}
+export interface LanguageJson {
     name: string;
     id: string;
     fileName: string;
     devicon?: string;
     scopeName: string;
     aliases?: string[];
-};
+}
 
 export const languages: Record<string, Language> = {};
 
@@ -62,7 +62,7 @@ export const getGrammar = (lang: Language): Promise<NonNullable<ILanguageRegistr
 };
 
 const aliasCache = new Map<string, Language>();
-export const resolveLang = (idOrAlias: string) => {
+export function resolveLang(idOrAlias: string) {
     if (Object.prototype.hasOwnProperty.call(languages, idOrAlias)) return languages[idOrAlias];
 
     const lang = Object.values(languages).find(lang => lang.aliases?.includes(idOrAlias));
@@ -71,4 +71,4 @@ export const resolveLang = (idOrAlias: string) => {
 
     aliasCache.set(idOrAlias, lang);
     return lang;
-};
+}

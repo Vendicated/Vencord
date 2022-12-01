@@ -20,12 +20,13 @@ import { Language } from "../api/languages";
 import { DeviconSetting } from "../types";
 import { cl } from "../utils/misc";
 
-export type HeaderProps = {
+export interface HeaderProps {
     langName?: string;
     useDevIcon: DeviconSetting;
     shikiLang: Language | null;
-};
-export const Header = ({ langName, useDevIcon, shikiLang }: HeaderProps) => {
+}
+
+export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
     if (!langName) return <></>;
 
     return (
@@ -38,4 +39,4 @@ export const Header = ({ langName, useDevIcon, shikiLang }: HeaderProps) => {
             {langName}
         </div>
     );
-};
+}

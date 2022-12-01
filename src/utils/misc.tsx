@@ -28,7 +28,12 @@ export function makeLazy<T>(factory: () => T): () => T {
     return () => cache ?? (cache = factory());
 }
 
-type AwaiterRes<T> = [T, any, boolean, () => void];
+type AwaiterRes<T> = [T, any, boolean];
+interface AwaiterOpts<T> {
+    fallbackValue: T,
+    deps?: unknown[],
+    onError?: (e: unknown) => unknown,
+}
 /**
  * Await a promise
  * @param factory Factory
@@ -36,26 +41,31 @@ type AwaiterRes<T> = [T, any, boolean, () => void];
  * @returns [value, error, isPending]
  */
 export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T): AwaiterRes<T>;
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: null, onError: (e: unknown) => unknown): AwaiterRes<T>;
-export function useAwaiter<T>(factory: () => Promise<T>, fallbackValue: T | null = null, onError?: (e: unknown) => unknown): AwaiterRes<T | null> {
+export function useAwaiter<T>(factory: () => Promise<T>, providedOpts: AwaiterOpts<T>): AwaiterRes<T>;
+export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterOpts<T | null>): AwaiterRes<T | null> {
+    const opts: Required<AwaiterOpts<T | null>> = Object.assign({
+        fallbackValue: null,
+        deps: [],
+        onError: null,
+    }, providedOpts);
     const [state, setState] = React.useState({
-        value: fallbackValue,
+        value: opts.fallbackValue,
         error: null,
         pending: true
     });
-    const [signal, setSignal] = React.useState(0);
 
     React.useEffect(() => {
         let isAlive = true;
+        if (!state.pending) setState({ ...state, pending: true });
+
         factory()
             .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && (setState({ value: null, error, pending: false }), onError?.(error)));
+            .catch(error => isAlive && (setState({ value: null, error, pending: false }), opts.onError?.(error)));
 
         return () => void (isAlive = false);
-    }, [signal]);
+    }, opts.deps);
 
-    return [state.value, state.error, state.pending, () => setSignal(signal + 1)];
+    return [state.value, state.error, state.pending];
 }
 
 /**
@@ -189,3 +199,12 @@ export function parseUrl(urlString: string): URL | null {
         return null;
     }
 }
+
+/**
+ * Checks whether an element is on screen
+ */
+export const checkIntersecting = (el: Element) => {
+    const elementBox = el.getBoundingClientRect();
+    const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
+};

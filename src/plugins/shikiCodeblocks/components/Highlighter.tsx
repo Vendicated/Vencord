@@ -16,18 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { IThemedToken } from "@vap/shiki";
+import { useAwaiter } from "@utils/misc";
+import { useIntersection } from "@utils/react";
 import { hljs, React } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
-import { useAsyncMemo } from "../hooks/useAsyncMemo";
-import { useIntersection } from "../hooks/useIntersection";
 import { useShikiSettings } from "../hooks/useShikiSettings";
 import { useTheme } from "../hooks/useTheme";
 import { hex2Rgb } from "../utils/color";
 import { cl, shouldUseHljs } from "../utils/misc";
-import { ButtonRow } from "./Buttons";
+import { ButtonRow } from "./ButtonRow";
 import { Code } from "./Code";
 import { Header } from "./Header";
 
@@ -37,11 +36,13 @@ export interface ThemeBase {
     accentFgColor: string;
     backgroundColor: string;
 }
+
 export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
 }
+
 export const createHighlighter = (props: HighlighterProps) => (
     <Highlighter {...props} />
 );
@@ -56,21 +57,24 @@ export const Highlighter = ({
     const shikiLang = lang ? resolveLang(lang) : null;
     const useHljs = shouldUseHljs({ lang, tryHljs });
 
-    const [preRef, isIntersecting] = useIntersection();
+    const [preRef, isIntersecting] = useIntersection(true);
 
-    const tokens = useAsyncMemo<IThemedToken[][] | null>(async () => {
+    const tokens = useAwaiter(async () => {
         if (!shikiLang || useHljs || !isIntersecting) return null;
         return await shiki.tokenizeCode(content, lang!);
-    }, [lang, content, currentThemeId, isIntersecting], null);
+    }, {
+        fallbackValue: null,
+        deps: [lang, content, currentThemeId, isIntersecting],
+    });
 
-    const themeBase: ThemeBase = React.useMemo(() => ({
+    const themeBase: ThemeBase = {
         plainColor: currentTheme?.fg || "var(--text-normal)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
             currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
-    }), [useHljs, currentThemeId]);
+    };
 
     let langName;
     if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;

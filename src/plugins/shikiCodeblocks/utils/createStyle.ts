@@ -16,22 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+const styles = new Map<string, HTMLStyleElement>();
 
-export function useAsyncMemo<V>(factory: () => Promise<V>, deps: unknown[], initialValue: V) {
-    const [value, setValue] = React.useState<V>(initialValue);
-
-    React.useEffect(() => {
-        let isDestroyed = false;
-        const promise = factory();
-
-        promise.then(newValue => {
-            if (!isDestroyed) setValue(newValue);
-        });
-
-        // eslint-disable-next-line consistent-return
-        return () => { isDestroyed = true; };
-    }, deps);
-
-    return value;
+export function setStyle(css: string, id: string) {
+    const style = document.createElement("style");
+    style.innerText = css;
+    document.head.appendChild(style);
+    styles.set(id, style);
 }
+
+export function removeStyle(id: string) {
+    styles.get(id)?.remove();
+    return styles.delete(id);
+}
+
+export const clearStyles = () => {
+    styles.forEach(style => style.remove());
+    styles.clear();
+};

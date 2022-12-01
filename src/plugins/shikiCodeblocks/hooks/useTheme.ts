@@ -19,13 +19,10 @@
 import { React } from "@webpack/common";
 
 type Shiki = typeof import("../api/shiki").shiki;
-type ThemeId = Shiki["currentThemeUrl"];
-type Theme = Shiki["currentTheme"];
-
-type ThemeState = {
-    id: ThemeId,
-    theme: Theme,
-};
+interface ThemeState {
+    id: Shiki["currentThemeUrl"],
+    theme: Shiki["currentTheme"],
+}
 
 const currentTheme: ThemeState = {
     id: null,
@@ -45,8 +42,8 @@ export const useTheme = (): ThemeState => {
     return currentTheme;
 };
 
-export const dispatchTheme = (state: ThemeState) => {
+export function dispatchTheme(state: ThemeState) {
     if (currentTheme.id === state.id) return;
     Object.assign(currentTheme, state);
     themeSetters.forEach(setTheme => setTheme(state));
-};
+}

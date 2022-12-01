@@ -21,13 +21,14 @@ import type { IThemedToken } from "@vap/shiki";
 import { cl } from "../utils/misc";
 import { ThemeBase } from "./Highlighter";
 
-export type CodeProps = {
+export interface CodeProps {
     theme: ThemeBase;
     useHljs: boolean;
     lang?: string;
     content: string;
     tokens: IThemedToken[][] | null;
-};
+}
+
 export const Code = ({
     theme,
     useHljs,
@@ -42,7 +43,7 @@ export const Code = ({
             const { value: hljsHtml } = hljs.highlight(lang!, content, true);
             lines = hljsHtml
                 .split("\n")
-                .map(line => <span dangerouslySetInnerHTML={{ __html: line }} />);
+                .map((line, i) => <span key={i} dangerouslySetInnerHTML={{ __html: line }} />);
         } catch {
             lines = content.split("\n").map(line => <span>{line}</span>);
         }
@@ -62,8 +63,9 @@ export const Code = ({
 
             return (
                 <>
-                    {line.map(({ content, color, fontStyle }) => (
+                    {line.map(({ content, color, fontStyle }, i) => (
                         <span
+                            key={i}
                             style={{
                                 color,
                                 fontStyle: (fontStyle ?? 0) & 1 ? "italic" : undefined,
@@ -80,7 +82,7 @@ export const Code = ({
     }
 
     const codeTableRows = lines.map((line, i) => (
-        <tr>
+        <tr key={i}>
             <td style={{ color: theme.plainColor }}>{i + 1}</td>
             <td>{line}</td>
         </tr>

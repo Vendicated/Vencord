@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const hex2Rgb = (hex: string) => {
+export function hex2Rgb(hex: string) {
     hex = hex.slice(1);
     if (hex.length < 6)
         hex = hex
@@ -29,4 +29,4 @@ export const hex2Rgb = (hex: string) => {
         .split(/(..)/)
         .filter(Boolean)
         .map(c => parseInt(c, 16));
-};
+}

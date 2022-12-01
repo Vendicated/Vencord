@@ -19,18 +19,18 @@
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words
-export const fromCamel = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
-export const fromConst = (text: string) => text.toLowerCase().split("_");
-export const fromKebab = (text: string) => text.toLowerCase().split("-");
-export const fromPascal = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
-export const fromTitle = (text: string) => text.toLowerCase().split(" ");
+export const wordsFromCamel = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
+export const wordsFromSnake = (text: string) => text.toLowerCase().split("_");
+export const wordsFromKebab = (text: string) => text.toLowerCase().split("-");
+export const wordsFromPascal = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
+export const wordsFromTitle = (text: string) => text.toLowerCase().split(" ");
 
 // Words to case style
-export const toCamel = (words: string[]) =>
+export const wordsToCamel = (words: string[]) =>
     words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join("");
-export const toConst = (words: string[]) => words.join("_").toUpperCase();
-export const toKebab = (words: string[]) => words.join("-").toLowerCase();
-export const toPascal = (words: string[]) =>
+export const wordsToSnake = (words: string[]) => words.join("_").toUpperCase();
+export const wordsToKebab = (words: string[]) => words.join("-").toLowerCase();
+export const wordsToPascal = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
-export const toTitle = (words: string[]) =>
+export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");

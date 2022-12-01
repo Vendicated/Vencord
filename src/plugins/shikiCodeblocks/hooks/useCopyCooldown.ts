@@ -18,17 +18,17 @@
 
 import { Clipboard, React } from "@webpack/common";
 
-export const useCopyCooldown = (cooldown: number) => {
+export function useCopyCooldown(cooldown: number) {
     const [copyCooldown, setCopyCooldown] = React.useState(false);
 
-    const copy = (text: string) => {
+    function copy(text: string) {
         Clipboard.copy(text);
         setCopyCooldown(true);
 
         setTimeout(() => {
             setCopyCooldown(false);
         }, cooldown);
-    };
+    }
 
     return [copyCooldown, copy] as const;
-};
+}

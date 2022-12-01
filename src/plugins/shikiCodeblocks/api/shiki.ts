@@ -77,7 +77,7 @@ export const shiki = {
     },
     setTheme: async (themeUrl: string) => {
         await shiki.clientPromise;
-        if (!themeUrl) themeUrl = themeUrls[0];
+        themeUrl ||= themeUrls[0];
         if (!shiki.loadedThemes.has(themeUrl)) await shiki.loadTheme(themeUrl);
 
         await shiki._setTheme(themeUrl);

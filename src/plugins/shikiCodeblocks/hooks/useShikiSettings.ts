@@ -20,6 +20,6 @@ import { useSettings } from "@api/settings";
 
 import { ShikiSettings } from "../types";
 
-export const useShikiSettings = (settings: (keyof ShikiSettings)[]) => {
+export function useShikiSettings(settings: (keyof ShikiSettings)[]) {
     return useSettings(settings.map(setting => `plugins.ShikiCodeblocks.${setting}`)).plugins.ShikiCodeblocks as ShikiSettings;
-};
+}
