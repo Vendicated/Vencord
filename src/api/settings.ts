@@ -29,6 +29,7 @@ export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
+    themeLinks: string[];
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -40,6 +41,7 @@ export interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     useQuickCss: true,
+    themeLinks: [],
     enableReactDevtools: false,
     plugins: {}
 };

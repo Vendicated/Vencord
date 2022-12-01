@@ -22,7 +22,7 @@ import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
-import { Button, Card, Forms, React, Switch } from "@webpack/common";
+import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
 const st = (style: string) => `vcSettings${style}`;
 
@@ -30,9 +30,15 @@ function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
     const settings = useSettings();
 
+    const [donateImage] = React.useState(
+        Math.random() > 0.5
+            ? "https://cdn.discordapp.com/emojis/1026533090627174460.png"
+            : "https://media.discordapp.net/stickers/1039992459209490513.png"
+    );
+
     return (
         <React.Fragment>
-            <DonateCard />
+            <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={st("QuickActionCard")}>
                     {IS_WEB ? (
@@ -75,6 +81,9 @@ function VencordSettings() {
             <Forms.FormDivider />
 
             <Forms.FormSection title="Settings">
+                <Forms.FormText className={Margins.marginBottom20}>
+                    Hint: You can change the position of this settings section in the settings of the "Settings" plugin!
+                </Forms.FormText>
                 <Switch
                     value={settings.useQuickCss}
                     onChange={(v: boolean) => settings.useQuickCss = v}
@@ -104,8 +113,11 @@ function VencordSettings() {
 }
 
 
+interface DonateCardProps {
+    image: string;
+}
 
-function DonateCard() {
+function DonateCard({ image }: DonateCardProps) {
     return (
         <Card style={{
             padding: "1em",
@@ -123,8 +135,9 @@ function DonateCard() {
             </div>
             <img
                 role="presentation"
-                src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                src={image}
                 alt=""
+                height={128}
                 style={{ marginLeft: "auto", transform: "rotate(10deg)" }}
             />
         </Card>
