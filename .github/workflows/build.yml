@@ -35,7 +35,7 @@ jobs:
 
             - name: Sign firefox extension
               run: |
-                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET
+                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET --channel=listed
               env:
                 WEBEXT_USER: ${{ secrets.WEBEXT_USER }}
                 WEBEXT_SECRET: ${{ secrets.WEBEXT_SECRET }}

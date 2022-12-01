@@ -14,20 +14,18 @@
     "content_scripts": [
         {
             "run_at": "document_start",
-            "matches": [
-                "*://*.discord.com/*"
-            ],
-            "js": [
-                "content.js"
-            ]
+            "matches": ["*://*.discord.com/*"],
+            "js": ["content.js"]
         }
     ],
-    "web_accessible_resources": [
-        "dist/Vencord.js"
-    ],
+    "web_accessible_resources": ["dist/Vencord.js"],
     "background": {
-        "scripts": [
-            "background.js"
-        ]
+        "scripts": ["background.js"]
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "vencord-firefox@vendicated.dev",
+            "strict_min_version": "92.0"
+        }
     }
 }
