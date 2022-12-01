@@ -32,7 +32,7 @@ type AwaiterRes<T> = [T, any, boolean];
 interface AwaiterOpts<T> {
     fallbackValue: T,
     deps?: unknown[],
-    onError?: (e: unknown) => unknown,
+    onError?(e: any): void,
 }
 /**
  * Await a promise

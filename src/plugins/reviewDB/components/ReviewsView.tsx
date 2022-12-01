@@ -29,7 +29,8 @@ const Classes = findLazy(m => typeof m.textarea === "string");
 export default function ReviewsView({ userId }: { userId: string; }) {
     const [refetchCount, setRefetchCount] = React.useState(0);
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
-        fallbackValue: []
+        fallbackValue: [],
+        deps: [refetchCount],
     });
 
     const dirtyRefetch = () => setRefetchCount(refetchCount + 1);

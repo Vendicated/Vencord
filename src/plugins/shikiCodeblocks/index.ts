@@ -95,12 +95,12 @@ export default definePlugin({
                     value: HljsSetting.Never,
                 },
                 {
-                    label: "Secondary",
+                    label: "Use Shiki over Highlight.js",
                     value: HljsSetting.Secondary,
                     default: true,
                 },
                 {
-                    label: "Primary",
+                    label: "Use Highlight.js over Shiki",
                     value: HljsSetting.Primary,
                 },
                 {
@@ -111,7 +111,7 @@ export default definePlugin({
         },
         useDevIcon: {
             type: OptionType.SELECT,
-            description: "How to show devicons on codeblocks",
+            description: "How to show language icons on codeblocks",
             options: [
                 {
                     label: "Disabled",
