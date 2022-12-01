@@ -81,7 +81,7 @@ async function install(installations) {
         }
 
         const answer = await question(
-            `The installer will give full host access to ${selected.branch} in order to enable updating using Git. Proceed? [Y/n]: `
+            `Would you like to give full host access to ${selected.branch} in order to enable updating using Git? Note that this will be comparable as to disabling sandboxing on this Flatpak. [Y/n]: `
         );
 
         if (["y", "yes", "yeah", ""].includes(answer.toLowerCase())) {
@@ -94,7 +94,7 @@ async function install(installations) {
                 execSync(cmd);
                 console.log("Sucessfully gave full host access permissions");
             } catch (err) {
-                throw err;
+                console.error("An error happened and we couldn't give the permissions", err, "\nSkipping giving full host access");
             }
         } else {
             console.log(`Not giving full host access. If you change your mind later, you can run: flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`);
