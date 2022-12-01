@@ -21,6 +21,7 @@ import { addSettingsListener, Settings } from "@api/settings";
 import IpcEvents from "./IpcEvents";
 
 let style: HTMLStyleElement;
+let themesStyle: HTMLStyleElement;
 
 export async function toggle(isEnabled: boolean) {
     if (!style) {
@@ -35,7 +36,22 @@ export async function toggle(isEnabled: boolean) {
         style.disabled = !isEnabled;
 }
 
+async function initThemes() {
+    if (!themesStyle) {
+        themesStyle = document.createElement("style");
+        themesStyle.id = "vencord-themes";
+        document.head.appendChild(themesStyle);
+    }
+
+    const { themeLinks } = Settings;
+    const links = themeLinks.map(link => `@import url("${link.trim()}");`).join("\n");
+    themesStyle.textContent = links;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     toggle(Settings.useQuickCss);
     addSettingsListener("useQuickCss", toggle);
+
+    initThemes();
+    addSettingsListener("themeLinks", initThemes);
 });
