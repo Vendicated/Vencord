@@ -1,0 +1,33 @@
+{
+    "manifest_version": 2,
+    "name": "Vencord Web",
+    "description": "The Vencord Client Mod for Discord Web.",
+    "version": "1.0.0",
+    "author": "Vendicated",
+    "homepage_url": "https://github.com/Vendicated/Vencord",
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "*://*.discord.com/*",
+        "https://raw.githubusercontent.com/*"
+    ],
+    "content_scripts": [
+        {
+            "run_at": "document_start",
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "dist/Vencord.js"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    }
+}
