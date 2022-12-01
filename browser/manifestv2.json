@@ -5,13 +5,11 @@
     "version": "1.0.0",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
-    "host_permissions": [
-        "*://*.discord.com/*",
-        "https://raw.githubusercontent.com/*"
-    ],
     "permissions": [
         "webRequest",
-        "webRequestBlocking"
+        "webRequestBlocking",
+        "*://*.discord.com/*",
+        "https://raw.githubusercontent.com/*"
     ],
     "content_scripts": [
         {
