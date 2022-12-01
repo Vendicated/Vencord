@@ -50,7 +50,8 @@ export default definePlugin({
     name: "HideAttachments",
     description: "Hide attachments and Embeds for individual messages via hover button",
     authors: [Devs.Ven],
-    
+    dependencies: ["MessagePopoverAPI"],
+
     async start() {
         style = document.createElement("style");
         style.id = "VencordHideAttachments";

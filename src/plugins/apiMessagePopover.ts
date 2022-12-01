@@ -23,7 +23,6 @@ export default definePlugin({
     name: "MessagePopoverAPI",
     description: "API to add buttons to message popovers.",
     authors: [Devs.KingFish],
-    required: true,
     patches: [{
         find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
         replacement: {
