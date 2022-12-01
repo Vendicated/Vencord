@@ -72,20 +72,26 @@ await Promise.all(
     ]
 );
 
-zip({
-    dist: {
-        "Vencord.js": readFileSync("dist/browser.js")
-    },
-    ...Object.fromEntries(await Promise.all(["modifyResponseHeaders.json", "content.js", "manifest.json"].map(async f => [
-        f,
-        await readFile(join("browser", f))
-    ]))),
-}, {}, (err, data) => {
-    if (err) {
-        console.error(err);
-        process.exitCode = 1;
-    } else {
-        writeFileSync("dist/extension.zip", data);
-        console.info("Extension written to dist/extension.zip");
-    }
-});
+async function buildPluginZip(target, files) {
+    zip({
+        dist: {
+            "Vencord.js": readFileSync("dist/browser.js")
+        },
+        ...Object.fromEntries(await Promise.all(files.map(async f => [
+            (f.startsWith("manifest") ? "manifest.json" : f),
+            await readFile(join("browser", f))
+        ]))),
+    }, {}, (err, data) => {
+        if (err) {
+            console.error(err);
+            process.exitCode = 1;
+        } else {
+            writeFileSync("dist/" + target, data);
+            console.info("Extension written to dist/" + target);
+        }
+    });
+}
+
+await buildPluginZip("extension-v3.zip", ["modifyResponseHeaders.json", "content.js", "manifestv3.json"]);
+await buildPluginZip("extension-v2.xpi", ["background.js", "content.js", "manifestv2.json"]);
+
