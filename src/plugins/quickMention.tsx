@@ -31,18 +31,18 @@ export default definePlugin({
     dependencies: ["MessagePopoverAPI"],
 
     start() {
-        addButton('QuickMention', (msg) => {
+        addButton("QuickMention", msg => {
             return {
                 label: "Quick Mention",
                 icon: this.Icon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: () => ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: `<@${msg.author.id}> ` })
-            }
+            };
         });
     },
     stop() {
-        removeButton('QuickMention');
+        removeButton("QuickMention");
     },
 
     Icon: () => (

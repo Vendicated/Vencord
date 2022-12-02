@@ -73,4 +73,4 @@ const Badges = $Badges;
  */
 const ServerList = $ServerList;
 
-export { Badges, Commands, DataStore, MessageAccessories, MessagePopover, MessageEvents, Notices, ServerList };
+export { Badges, Commands, DataStore, MessageAccessories, MessageEvents, MessagePopover, Notices, ServerList };

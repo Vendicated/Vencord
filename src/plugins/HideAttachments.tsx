@@ -19,10 +19,8 @@
 import { get, set } from "@api/DataStore";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { ChannelStore, FluxDispatcher } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 let style: HTMLStyleElement;
 
@@ -61,7 +59,7 @@ export default definePlugin({
         await this.buildCss();
 
 
-        addButton('HideAttachments', (msg) => {
+        addButton("HideAttachments", msg => {
             if (!msg.attachments.length && !msg.embeds.length) return null;
 
             const isHidden = hiddenMessages.has(msg.id);
@@ -79,7 +77,7 @@ export default definePlugin({
     stop() {
         style.remove();
         hiddenMessages.clear();
-        removeButton('HideAttachments');
+        removeButton("HideAttachments");
     },
 
     async buildCss() {
