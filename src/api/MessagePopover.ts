@@ -17,18 +17,19 @@
 */
 
 import { Channel, Message } from "discord-types/general";
+import type { MouseEventHandler } from "react";
 
-export type ButtonItem = {
+export interface ButtonItem {
     key?: string,
     label: string,
-    icon: React.ComponentType,
+    icon: React.ComponentType<any>,
     message: Message,
     channel: Channel,
-    onClick?: () => void,
-    onContextMenu?: () => void
+    onClick?: MouseEventHandler<HTMLButtonElement>,
+    onContextMenu?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export type getButtonItem = (message: Message) => ButtonItem | null
+export type getButtonItem = (message: Message) => ButtonItem | null;
 
 export const buttons = new Map<string, getButtonItem>();
 
@@ -49,11 +50,11 @@ export function _modifyPopover(
 ) {
     const btns = Array();
 
-    for (const [ identifier, getItem ] of buttons.entries()) {
+    for (const [identifier, getItem] of buttons.entries()) {
         const item = getItem(msg);
         if (item) {
-            item.key ??= identifier
-            btns.push(makeButton(item))
+            item.key ??= identifier;
+            btns.push(makeButton(item));
         }
     }
 
