@@ -20,15 +20,6 @@ import { generateId } from "@api/Commands";
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { LazyComponent } from "@utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { proxyLazy } from "@utils/proxyLazy";
-import { OptionType, Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
-import { User } from "discord-types/general";
-import { Constructor } from "type-fest";
-
 import {
     ISettingElementProps,
     SettingBooleanComponent,
@@ -37,7 +28,15 @@ import {
     SettingSelectComponent,
     SettingSliderComponent,
     SettingTextComponent
-} from "./components";
+} from "@components/PluginSettings/components";
+import { LazyComponent } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
+import { OptionType, Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { User } from "discord-types/general";
+import { Constructor } from "type-fest";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
@@ -195,7 +194,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 {!!plugin.settingsAboutComponent && (
                     <div style={{ marginBottom: 8 }}>
                         <Forms.FormSection>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
+                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent.">
                                 <plugin.settingsAboutComponent />
                             </ErrorBoundary>
                         </Forms.FormSection>

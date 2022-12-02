@@ -40,10 +40,10 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                 const { code, path, cmd, stderr } = e;
 
                 if (code === "ENOENT")
-                    var err = `Command \`${path}\` not found.\nPlease install it and try again`;
+                    var err = `Command \`${path}\` not found.\nPlease install it and try again.`;
                 else {
                     var err = `An error occured while running \`${cmd}\`:\n`;
-                    err += stderr || `Code \`${code}\`. See the console for more info`;
+                    err += stderr || `Code \`${code}\`. See the console for more info.`;
                 }
 
             } else {
