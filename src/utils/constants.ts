@@ -160,5 +160,9 @@ export const Devs = Object.freeze({
     Vap: {
         name: "Vap0r1ze",
         id: 454072114492866560n
-    }
+    },
+    KingFish: {
+        name: "King Fish",
+        id: 499400512559382538n
+    },
 });
