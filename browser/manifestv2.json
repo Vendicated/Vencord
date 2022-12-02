@@ -21,11 +21,5 @@
     "web_accessible_resources": ["dist/Vencord.js"],
     "background": {
         "scripts": ["background.js"]
-    },
-    "browser_specific_settings": {
-        "gecko": {
-            "id": "vencord-firefox@vendicated.dev",
-            "strict_min_version": "92.0"
-        }
     }
 }
