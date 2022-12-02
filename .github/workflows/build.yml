@@ -1,4 +1,4 @@
-name: Build latest
+name: Build DevBuild
 on:
     push:
         branches:
@@ -9,6 +9,7 @@ on:
             - browser/**
             - scripts/build/**
             - package.json
+            - pnpm-lock.yaml
 env:
     FORCE_COLOR: true
 
@@ -21,7 +22,7 @@ jobs:
 
             - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
-            - name: Use Node.js 18
+            - name: Use Node.js 19
               uses: actions/setup-node@v3
               with:
                   node-version: 19
@@ -35,7 +36,7 @@ jobs:
 
             - name: Sign firefox extension
               run: |
-                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET --channel=listed
+                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET --channel=unlisted
               env:
                 WEBEXT_USER: ${{ secrets.WEBEXT_USER }}
                 WEBEXT_SECRET: ${{ secrets.WEBEXT_SECRET }}
