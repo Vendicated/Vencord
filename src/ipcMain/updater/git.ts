@@ -28,10 +28,13 @@ const VENCORD_SRC_DIR = join(__dirname, "..");
 
 const execFile = promisify(cpExecFile);
 
+const isFlatpak = Boolean(process.env.FLATPAK_ID?.includes("discordapp") || process.env.FLATPAK_ID?.includes("Discord"));
+
 function git(...args: string[]) {
-    return execFile("git", args, {
-        cwd: VENCORD_SRC_DIR
-    });
+    const opts = { cwd: VENCORD_SRC_DIR };
+
+    if (isFlatpak) return execFile("flatpak-spawn", ["--host", "git", ...args], opts);
+    else return execFile("git", args, opts);
 }
 
 async function getRepo() {
@@ -61,9 +64,13 @@ async function pull() {
 }
 
 async function build() {
-    const res = await execFile("node", ["scripts/build/build.mjs"], {
-        cwd: VENCORD_SRC_DIR
-    });
+    const opts = { cwd: VENCORD_SRC_DIR };
+
+    let res;
+
+    if (isFlatpak) res = await execFile("flatpak-spawn", ["--host", "node", "scripts/build/build.mjs"], opts);
+    else res = await execFile("node", ["scripts/build/build.mjs"], opts);
+
     return !res.stderr.includes("Build failed");
 }
 
