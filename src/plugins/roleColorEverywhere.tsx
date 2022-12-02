@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByProps, findByPropsLazy } from "@webpack";
 import { getCurrentChannel } from "@utils/discord";
-import { UserStore } from "@webpack/common";
+import { GuildStore, UserStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
 
@@ -46,6 +46,16 @@ export default definePlugin({
                 {
                     match: /((\w)=\w\.typingUsers.+?)(\w),\w=(\w+?\(\w+?,\d+?\)).+?(\w\.\w\.Messages.SEVERAL_USERS_TYPING);/,
                     replace: "$1$3=Vencord.Plugins.plugins.RoleColorEverywhere.typingUsers($4,$2,$5);"
+                }
+            ],
+        },
+        // Member List Role Names
+        {
+            find: '.memberGroupsPlaceholder',
+            replacement: [
+                {
+                    match: /(function\((.)\).+?roleIcon.{5,20}null,).," — ",.\]/,
+                    replace: "$1Vencord.Plugins.plugins.RoleColorEverywhere.roleGroupColor(e)]"
                 }
             ],
         },
@@ -91,5 +101,11 @@ export default definePlugin({
         </> : SEVERAL_USERS_TYPING)
 
         return stuff;
+    },
+    roleGroupColor({ id, count, title, guildId, ...args }) {
+        const guild = GuildStore.getGuild(guildId);
+        const role = guild?.roles[id]
+
+        return <span style={{color: role?.colorString}}>{title} — {count}</span>;
     }
 });
