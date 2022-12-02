@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+import { Clipboard, React, Toasts } from "@webpack/common";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
@@ -175,5 +175,25 @@ export function suppressErrors<F extends Function>(name: string, func: F, thisOb
  */
 export function makeCodeblock(text: string, language?: string) {
     const chars = "```";
-    return `${chars}${language || ""}\n${text}\n${chars}`;
+    return `${chars}${language || ""}\n${text.replaceAll("```", "\\`\\`\\`")}\n${chars}`;
+}
+
+export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
+    if (Clipboard.SUPPORTS_COPY) {
+        Clipboard.copy(text);
+    } else {
+        toastMessage = "Your browser does not support copying to clipboard";
+    }
+    Toasts.show({
+        message: toastMessage,
+        id: Toasts.genId(),
+        type: Toasts.Type.SUCCESS
+    });
+}
+
+/**
+ * Check if obj is a true object: of type "object" and not null or array
+ */
+export function isObject(obj: unknown): obj is object {
+    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
 }
