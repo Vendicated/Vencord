@@ -190,3 +190,10 @@ export function copyWithToast(text: string, toastMessage = "Copied to clipboard!
         type: Toasts.Type.SUCCESS
     });
 }
+
+/**
+ * Check if obj is a true object: of type "object" and not null or array
+ */
+export function isObject(obj: unknown): obj is object {
+    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+}

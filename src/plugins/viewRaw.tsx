@@ -40,8 +40,12 @@ const CopyIcon = () => {
     </svg>;
 };
 
+function sortObject<T extends object>(obj: T): T {
+    return Object.fromEntries(Object.entries(obj).sort(([k1], [k2]) => k1.localeCompare(k2))) as T;
+}
+
 function cleanMessage(msg: Message) {
-    const clone: Message = JSON.parse(JSON.stringify(msg));
+    const clone = sortObject(JSON.parse(JSON.stringify(msg)));
     for (const key in clone.author) {
         switch (key) {
             case "id":
