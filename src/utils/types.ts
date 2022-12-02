@@ -27,6 +27,7 @@ export default function definePlugin<P extends PluginDef>(p: P & Record<string, 
 export interface PatchReplacement {
     match: string | RegExp;
     replace: string | ((match: string, ...groups: string[]) => string);
+    predicate?(): boolean;
 }
 
 export interface Patch {
