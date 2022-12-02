@@ -49,6 +49,7 @@ export const shiki = {
             "shiki-client",
             "shiki-host",
             workerBlob,
+            { name: "ShikiWorker" },
         );
         await client.init();
 
