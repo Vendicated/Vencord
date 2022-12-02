@@ -81,10 +81,13 @@ async function install(installations) {
         }
 
         const answer = await question(
-            `Would you like to give full host access to ${selected.branch} in order to enable updating using Git? Note that this will be comparable as to disabling sandboxing on this Flatpak. [Y/n]: `
+            "Would you like to allow ${selected.branch} to talk to org.freedesktop.Flatpak?\n" +
+            "This is essentially full host access but necessary to spawn git. Without it, the updater will not work\n" +
+            "Consider using the http based updater (using the gui installer) instead if you want to maintain the sandbox.\n" +
+            "[y/N]:"
         );
 
-        if (["y", "yes", "yeah", ""].includes(answer.toLowerCase())) {
+        if (["y", "yes", "yeah"].includes(answer.toLowerCase())) {
             try {
                 const globalCmd = `flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`;
                 const userCmd = `flatpak override --user ${selected.branch} --talk-name=org.freedesktop.Flatpak`;
@@ -92,9 +95,9 @@ async function install(installations) {
                     ? userCmd
                     : globalCmd;
                 execSync(cmd);
-                console.log("Sucessfully gave full host access permissions");
+                console.log("Sucessfully gave talk permission");
             } catch (err) {
-                console.error("An error happened and we couldn't give the permissions", err, "\nSkipping giving full host access");
+                console.error("Failed to give talk permission\n", err);
             }
         } else {
             console.log(`Not giving full host access. If you change your mind later, you can run: flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`);
