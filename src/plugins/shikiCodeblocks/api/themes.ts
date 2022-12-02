@@ -23,8 +23,13 @@ export const SHIKI_REPO_COMMIT = "0b28ad8ccfbf2615f2d9d38ea8255416b8ac3043";
 export const shikiRepoTheme = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/shiki/themes/${name}.json`;
 
 export const themes = {
-    // From shiki repo
+    // Default
     DarkPlus: shikiRepoTheme("dark-plus"),
+
+    // Dev Choices
+    MaterialCandy: "https://raw.githubusercontent.com/millsp/material-candy/master/material-candy.json",
+
+    // More from Shiki repo
     DraculaSoft: shikiRepoTheme("dracula-soft"),
     Dracula: shikiRepoTheme("dracula"),
     GithubDarkDimmed: shikiRepoTheme("github-dark-dimmed"),
@@ -52,9 +57,6 @@ export const themes = {
     VitesseDark: shikiRepoTheme("vitesse-dark"),
     VitesseLight: shikiRepoTheme("vitesse-light"),
     CssVariables: shikiRepoTheme("css-variables"),
-
-    // Mine
-    MaterialCandy: "https://raw.githubusercontent.com/millsp/material-candy/master/material-candy.json",
 };
 
 export const themeCache = new Map<string, IShikiTheme>();

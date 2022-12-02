@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { useAwaiter } from "@utils/misc";
 import { useIntersection } from "@utils/react";
 import { hljs, React } from "@webpack/common";
@@ -44,7 +45,9 @@ export interface HighlighterProps {
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
-    <Highlighter {...props} />
+    <ErrorBoundary>
+        <Highlighter {...props} />
+    </ErrorBoundary>
 );
 export const Highlighter = ({
     lang,
@@ -59,7 +62,7 @@ export const Highlighter = ({
 
     const [preRef, isIntersecting] = useIntersection(true);
 
-    const tokens = useAwaiter(async () => {
+    const [tokens] = useAwaiter(async () => {
         if (!shikiLang || useHljs || !isIntersecting) return null;
         return await shiki.tokenizeCode(content, lang!);
     }, {
