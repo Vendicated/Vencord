@@ -61,11 +61,11 @@ export default definePlugin({
             return null;
         }
 
-        return member.colorString
+        return member?.colorString
     },
     getUserColor({ id: userId }, channelId) {
         const colorString = this.getColor(userId, channelId);
-        return colorString && parseInt(colorString.slice(1), 16);;
+        return colorString && parseInt(colorString.slice(1), 16);
     },
     typingUsers(users, userIds, SEVERAL_USERS_TYPING) { // todo: work with i18n
         const currentUser = UserStore.getCurrentUser();
@@ -90,7 +90,6 @@ export default definePlugin({
             })} {users.length > 1 ? 'are' : 'is'} typing...
         </> : SEVERAL_USERS_TYPING)
 
-        console.log("stuff", stuff);
         return stuff;
     }
 });
