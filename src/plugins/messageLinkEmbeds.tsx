@@ -269,8 +269,8 @@ var messageEmbed={mle_AutomodEmbed:$1};"
 
         const isDM = guildID === "@me";
         const images = getImages(message);
-
         const { parse } = Parser;
+
         return <AutomodEmbed
             channel={channel}
             childrenAccessories={<Text color="text-muted" variant="text-xs/medium" tag="span">
