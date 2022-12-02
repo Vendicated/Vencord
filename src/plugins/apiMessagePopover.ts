@@ -27,7 +27,7 @@ export default definePlugin({
         find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
         replacement: {
             match: /(message:(.).{0,100}Fragment,\{children:\[)(.{0,90}renderPopout:.{0,200}message_reaction_emoji_picker.+?return (.{1,3})\(.{0,30}"add-reaction")/,
-            replace: "$1...Vencord.Api.MessagePopover._modifyPopover($2, $4),$3"
+            replace: "$1...Vencord.Api.MessagePopover._buildPopoverElements($2,$4),$3"
         }
     }],
 });

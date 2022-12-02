@@ -58,7 +58,6 @@ export default definePlugin({
         await getHiddenMessages();
         await this.buildCss();
 
-
         addButton("HideAttachments", msg => {
             if (!msg.attachments.length && !msg.embeds.length) return null;
 

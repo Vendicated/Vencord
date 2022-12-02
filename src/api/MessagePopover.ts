@@ -16,8 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
 import { Channel, Message } from "discord-types/general";
 import type { MouseEventHandler } from "react";
+
+const logger = new Logger("MessagePopover");
 
 export interface ButtonItem {
     key?: string,
@@ -44,19 +47,23 @@ export function removeButton(identifier: string) {
     buttons.delete(identifier);
 }
 
-export function _modifyPopover(
+export function _buildPopoverElements(
     msg: Message,
     makeButton: (item: ButtonItem) => React.ComponentType
 ) {
-    const btns = Array();
+    const items = [] as React.ComponentType[];
 
     for (const [identifier, getItem] of buttons.entries()) {
-        const item = getItem(msg);
-        if (item) {
-            item.key ??= identifier;
-            btns.push(makeButton(item));
+        try {
+            const item = getItem(msg);
+            if (item) {
+                item.key ??= identifier;
+                items.push(makeButton(item));
+            }
+        } catch (err) {
+            logger.error(`[${identifier}]`, err);
         }
     }
 
-    return btns;
+    return items;
 }
