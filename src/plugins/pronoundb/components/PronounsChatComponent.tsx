@@ -39,11 +39,10 @@ export default function PronounsChatComponentWrapper({ message }: { message: Mes
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const [result, , isPending] = useAwaiter(
-        () => fetchPronouns(message.author.id),
-        null,
-        e => console.error("Fetching pronouns failed: ", e)
-    );
+    const [result, , isPending] = useAwaiter(() => fetchPronouns(message.author.id), {
+        fallbackValue: null,
+        onError: e => console.error("Fetching pronouns failed: ", e)
+    });
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return a span with the pronouns
     if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
