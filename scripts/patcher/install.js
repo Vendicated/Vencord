@@ -81,10 +81,10 @@ async function install(installations) {
         }
 
         const answer = await question(
-            "Would you like to allow ${selected.branch} to talk to org.freedesktop.Flatpak?\n" +
+            `Would you like to allow ${selected.branch} to talk to org.freedesktop.Flatpak?\n` +
             "This is essentially full host access but necessary to spawn git. Without it, the updater will not work\n" +
             "Consider using the http based updater (using the gui installer) instead if you want to maintain the sandbox.\n" +
-            "[y/N]:"
+            "[y/N]: "
         );
 
         if (["y", "yes", "yeah"].includes(answer.toLowerCase())) {
@@ -100,7 +100,7 @@ async function install(installations) {
                 console.error("Failed to give talk permission\n", err);
             }
         } else {
-            console.log(`Not giving full host access. If you change your mind later, you can run: flatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`);
+            console.log(`Not giving full host access. If you change your mind later, you can run:\nflatpak override ${selected.branch} --talk-name=org.freedesktop.Flatpak`);
         }
     }
 
