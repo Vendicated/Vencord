@@ -37,6 +37,8 @@ export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPorta
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
 export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };

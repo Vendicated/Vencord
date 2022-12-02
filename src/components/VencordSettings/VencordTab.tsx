@@ -27,7 +27,9 @@ import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 const st = (style: string) => `vcSettings${style}`;
 
 function VencordSettings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), "Loading...");
+    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), {
+        fallbackValue: "Loading..."
+    });
     const settings = useSettings();
 
     const [donateImage] = React.useState(

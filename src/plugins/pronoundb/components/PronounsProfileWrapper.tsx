@@ -45,11 +45,10 @@ function ProfilePronouns(
         leProps: UserProfilePronounsProps;
     }
 ) {
-    const [result, , isPending] = useAwaiter(
-        () => fetchPronouns(userId),
-        null,
-        e => console.error("Fetching pronouns failed: ", e)
-    );
+    const [result, , isPending] = useAwaiter(() => fetchPronouns(userId), {
+        fallbackValue: null,
+        onError: e => console.error("Fetching pronouns failed: ", e),
+    });
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then render
     if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
