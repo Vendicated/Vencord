@@ -96,6 +96,7 @@ interface Attachment {
     proxyURL?: string;
 }
 
+const isTenorGif = /https:\/\/(?:www.)?tenor\.com/;
 function getImages(message: Message): Attachment[] {
     const attachments: Attachment[] = [];
     message.attachments?.forEach(a => {
@@ -107,7 +108,6 @@ function getImages(message: Message): Attachment[] {
         });
     });
     message.embeds?.forEach(e => {
-        const isTenorGif = /https:\/\/(?:www.)?tenor\.com/;
         if (e.type === "image") attachments.push(
             e.image ? { ...e.image } : { ...e.thumbnail! }
         );
@@ -128,6 +128,15 @@ const noContent = (attachments: number, embeds: number): string => {
     if (!embeds) return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""}]`;
     return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""} and ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
 };
+
+function requiresRichEmbed(message: Message) {
+    console.log(message.attachments, message.embeds, message.components);
+    if (message.attachments.every(a => a.content_type?.startsWith("image/"))
+        && message.embeds.every(e => e.type === "image" || (e.type === "gifv" && !isTenorGif.test(e.url!)))
+        && !message.components.length
+    ) return false;
+    return true;
+}
 
 const computeWidthAndHeight = (width: number, height: number) => {
     const maxWidth = 400, maxHeight = 300;
@@ -169,13 +178,22 @@ var messageEmbed={mle_AutomodEmbed:$1};"
     options: {
         messageBackgroundColor: {
             description: "Background color for messages in rich embeds",
-            type: OptionType.BOOLEAN,
-            restartRequired: false
+            type: OptionType.BOOLEAN
         },
-        useAutomodEmbeds: {
+        automodEmbeds: {
             description: "Use automod embeds instead of rich embeds (smaller but less info)",
-            type: OptionType.BOOLEAN,
-            restartNeeded: true
+            type: OptionType.SELECT,
+            options: [{
+                label: "Always use automod embeds",
+                value: "always"
+            }, {
+                label: "Prefer automod embeds, but use rich embeds if some content can't be shown",
+                value: "prefer"
+            }, {
+                label: "Never use automod embeds",
+                value: "never",
+                default: true
+            }]
         },
         clearMessageCache: {
             type: OptionType.COMPONENT,
@@ -218,8 +236,16 @@ var messageEmbed={mle_AutomodEmbed:$1};"
             guildID
         };
         setTimeout(() => dispatchBlankUpdate(channelID, messageID), 100);
-        if (Settings.plugins[this.name].useAutomodEmbeds) return this.automodEmbedAccessory(meProps);
-        else return this.channelMessageEmbedAccessory(meProps);
+        switch (Settings.plugins[this.name].automodEmbeds) {
+            case "always":
+                return this.automodEmbedAccessory(meProps);
+            case "prefer":
+                if (requiresRichEmbed(meProps.message)) return this.channelMessageEmbedAccessory(meProps);
+                else return this.automodEmbedAccessory(meProps);
+            case "never":
+            default:
+                return this.channelMessageEmbedAccessory(meProps);
+        }
     },
 
     channelMessageEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
@@ -227,7 +253,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
 
         const isDM = guildID === "@me";
         const guild = !isDM && GuildStore.getGuild(channel.guild_id);
-        const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients[0]);
+        const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
         const classNames = [SearchResultClasses.message];
         if (Settings.plugins[this.name].messageBackgroundColor) classNames.push(SearchResultClasses.searchResult);
 
@@ -244,7 +270,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                                 : Parser.parse(`<#${channel.id}>`)
                             )
                         ]}
-                    </Text> as any,
+                    </Text>,
                     iconProxyURL: guild
                         ? `https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild.id}/${guild.icon}.png?size=32`
                         : `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${dmReceiver.id}/${dmReceiver.avatar}`
