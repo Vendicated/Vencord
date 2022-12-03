@@ -103,7 +103,7 @@ function ToggleActivityComponent({ activity }: { activity: IgnoredActivity; }) {
                     onClick={e => handleActivityToggle(e, activity, forceUpdate)}
                 >
                     {
-                        ignoredActivitiesCache.some(ignoredActivity => ignoredActivity.id === activity.id)
+                        ignoredActivitiesCache.has(activity.id)
                             ? <ToggleIconOff />
                             : <ToggleIconOn />
                     }
@@ -126,8 +126,8 @@ function ToggleActivityComponentWithBackground({ activity }: { activity: Ignored
 
 function handleActivityToggle(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activity: IgnoredActivity, forceUpdateComponent: () => void) {
     e.stopPropagation();
-    if (ignoredActivitiesCache.some(ignoredActivity => ignoredActivity.id === activity.id)) ignoredActivitiesCache.splice(ignoredActivitiesCache.findIndex(ignoredActivity => ignoredActivity.id === activity.id, 1));
-    else ignoredActivitiesCache.push(activity);
+    if (ignoredActivitiesCache.has(activity.id)) ignoredActivitiesCache.delete(activity.id);
+    else ignoredActivitiesCache.set(activity.id, activity);
     forceUpdateComponent();
     saveCacheToDatastore();
 }
@@ -136,7 +136,7 @@ async function saveCacheToDatastore() {
     await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
 }
 
-let ignoredActivitiesCache: IgnoredActivity[] = [];
+let ignoredActivitiesCache = new Map<IgnoredActivity["id"], IgnoredActivity>();
 
 export default definePlugin({
     name: "IgnoreActivities",
@@ -163,19 +163,25 @@ export default definePlugin({
     }],
 
     async start() {
-        const ignoredActivitiesData = (await DataStore.get<(string | IgnoredActivity)[]>("IgnoreActivities_ignoredActivities")) ?? [];
+        const ignoredActivitiesData = await DataStore.get<string[] | Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities") ?? new Map<IgnoredActivity["id"], IgnoredActivity>();
         /** Migrate old data */
-        ignoredActivitiesCache = ignoredActivitiesData.map(activity => typeof activity === "object" ? activity : { id: activity, type: ActivitiesTypes.Game });
+        if (Array.isArray(ignoredActivitiesData)) {
+            for (const id of ignoredActivitiesData) {
+                ignoredActivitiesCache.set(id, { id, type: ActivitiesTypes.Game });
+            }
 
-        if (ignoredActivitiesCache.length !== 0) {
+            saveCacheToDatastore();
+        }
+
+        if (ignoredActivitiesCache.size !== 0) {
             const gamesSeen: { id?: string; exePath: string; }[] = RunningGameStore.getGamesSeen();
 
-            for (const [index, ignoredActivity] of ignoredActivitiesCache.entries()) {
+            for (const ignoredActivity of ignoredActivitiesCache.values()) {
                 if (ignoredActivity.type !== ActivitiesTypes.Game) continue;
 
                 if (!gamesSeen.some(game => (game.id !== undefined && game.id === ignoredActivity.id) || game.exePath === ignoredActivity.id)) {
                     /** Custom added game which no longer exists */
-                    ignoredActivitiesCache.splice(index, 1);
+                    ignoredActivitiesCache.delete(ignoredActivity.id);
                 }
             }
 
@@ -203,10 +209,10 @@ export default definePlugin({
 
     isActivityEnabled(props: { type: number; application_id?: string; name?: string; }) {
         if (props.type === 0) {
-            if (props.application_id !== undefined) return !ignoredActivitiesCache.some(activity => activity.id === props.application_id);
+            if (props.application_id !== undefined) return !ignoredActivitiesCache.has(props.application_id);
             else {
                 const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
-                if (exePath) return !ignoredActivitiesCache.some(activity => activity.id === exePath);
+                if (exePath) return !ignoredActivitiesCache.has(exePath);
             }
         }
         return true;
