@@ -93,7 +93,7 @@ function MemberCount() {
 export default definePlugin({
     name: "MemberCount",
     description: "Shows the amount of online & total members in the server member list",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Commandtechno],
 
     patches: [{
         find: ".isSidebarVisible,",
