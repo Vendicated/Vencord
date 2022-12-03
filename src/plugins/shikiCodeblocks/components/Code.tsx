@@ -17,6 +17,7 @@
 */
 
 import type { IThemedToken } from "@vap/shiki";
+import { hljs } from "@webpack/common";
 
 import { cl } from "../utils/misc";
 import { ThemeBase } from "./Highlighter";
