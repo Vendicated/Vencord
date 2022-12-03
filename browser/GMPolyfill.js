@@ -1,12 +1,28 @@
-// File containing polyfills for the userscript
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 function fetchOptions(url) {
     return new Promise((resolve, reject) => {
-        let opt = {
+        const opt = {
             method: "OPTIONS",
             url: url,
         };
-        opt.onload = (resp) => resolve(resp.responseHeaders);
+        opt.onload = resp => resolve(resp.responseHeaders);
         opt.ontimeout = () => reject("fetch timeout");
         opt.onerror = () => reject("fetch error");
         opt.onabort = () => reject("fetch abort");
@@ -17,15 +33,15 @@ function fetchOptions(url) {
 function parseHeaders(headers) {
     if (!headers)
         return {};
-    let result = {};
-    let headersArr = headers.trim().split('\n');
+    const result = {};
+    const headersArr = headers.trim().split("\n");
     for (var i = 0; i < headersArr.length; i++) {
         var row = headersArr[i];
-        var index = row.indexOf(':')
+        var index = row.indexOf(":")
             , key = row.slice(0, index).trim().toLowerCase()
             , value = row.slice(index + 1).trim();
 
-        if (typeof (result[key]) === 'undefined') {
+        if (result[key] === undefined) {
             result[key] = value;
         } else if (Array.isArray(result[key])) {
             result[key].push(value);
@@ -38,24 +54,24 @@ function parseHeaders(headers) {
 
 // returns true if CORS permits request
 async function checkCors(url, method) {
-    let headers = parseHeaders(await fetchOptions(url));
+    const headers = parseHeaders(await fetchOptions(url));
 
-    let origin = headers['access-control-allow-origin'];
+    const origin = headers["access-control-allow-origin"];
     if (origin !== "*" && origin !== window.location.origin) return false;
 
-    let methods = headers['access-control-allow-methods']?.split(/,\s/g);
+    const methods = headers["access-control-allow-methods"]?.split(/,\s/g);
     if (methods && !methods.includes(method)) return false;
 
     return true;
 }
 
 function blobTo(to, blob) {
-    if (to == "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
+    if (to === "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
     return new Promise((resolve, reject) => {
         var fileReader = new FileReader();
-        fileReader.onload = (event) => resolve(event.target.result);
-        if (to == "arrayBuffer") fileReader.readAsArrayBuffer(blob);
-        else if (to == "text") fileReader.readAsText(blob, "utf-8");
+        fileReader.onload = event => resolve(event.target.result);
+        if (to === "arrayBuffer") fileReader.readAsArrayBuffer(blob);
+        else if (to === "text") fileReader.readAsText(blob, "utf-8");
         else reject("unknown to");
     });
 }
@@ -66,11 +82,11 @@ function GM_fetch(url, opt) {
             .then(can => {
                 if (can) {
                     // https://www.tampermonkey.net/documentation.php?ext=dhdg#GM_xmlhttpRequest
-                    let options = opt || {};
+                    const options = opt || {};
                     options.url = url;
                     options.data = options.body;
                     options.responseType = "blob";
-                    options.onload = (resp) => {
+                    options.onload = resp => {
                         var blob = resp.response;
                         resp.blob = () => Promise.resolve(blob);
                         resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
