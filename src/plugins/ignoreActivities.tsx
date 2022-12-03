@@ -171,7 +171,7 @@ export default definePlugin({
             }
 
             await saveCacheToDatastore();
-        }
+        } else ignoredActivitiesCache = ignoredActivitiesData;
 
         if (ignoredActivitiesCache.size !== 0) {
             const gamesSeen: { id?: string; exePath: string; }[] = RunningGameStore.getGamesSeen();
