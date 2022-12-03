@@ -170,7 +170,7 @@ export default definePlugin({
                 ignoredActivitiesCache.set(id, { id, type: ActivitiesTypes.Game });
             }
 
-            saveCacheToDatastore();
+            await saveCacheToDatastore();
         }
 
         if (ignoredActivitiesCache.size !== 0) {
@@ -179,13 +179,13 @@ export default definePlugin({
             for (const ignoredActivity of ignoredActivitiesCache.values()) {
                 if (ignoredActivity.type !== ActivitiesTypes.Game) continue;
 
-                if (!gamesSeen.some(game => (game.id !== undefined && game.id === ignoredActivity.id) || game.exePath === ignoredActivity.id)) {
+                if (!gamesSeen.some(game => game.id === ignoredActivity.id || game.exePath === ignoredActivity.id)) {
                     /** Custom added game which no longer exists */
                     ignoredActivitiesCache.delete(ignoredActivity.id);
                 }
             }
 
-            saveCacheToDatastore();
+            await saveCacheToDatastore();
         }
     },
 
