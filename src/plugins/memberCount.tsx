@@ -39,8 +39,8 @@ function MemberCount() {
     if (total === "0" && c[1] > 0) {
         total = "Loading...";
     }
-    
-    let online = c[1].toLocaleString();
+
+    const online = c[1].toLocaleString();
 
     return (
         <Flex id="vc-membercount" style={{
