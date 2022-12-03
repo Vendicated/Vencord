@@ -19,7 +19,11 @@ If you're a power user who wants to contribute and make plugins or just want to 
 
 ## Installing on Browser
 
-Install the browser extension for [![Chrome](https://img.shields.io/badge/chrome-ext-brightgreen)](https://github.com/Vendicated/Vencord/releases/latest/download/Vencord-for-Chrome-and-Edge.zip), [![Firefox](https://img.shields.io/badge/firefox-ext-brightgreen)](https://github.com/Vendicated/Vencord/releases/latest/download/Vencord-for-Firefox.xpi) or [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js). Please note that they aren't automatically updated for now, so you will regularely have to reinstall it.
+[![Get the Firefox extension](https://blog.mozilla.org/addons/files/2015/11/get-the-addon-small.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/)
+
+Or install the browser extension for
+- [![Chrome](https://img.shields.io/badge/chrome-ext-brightgreen)](https://github.com/Vendicated/Vencord/releases/latest/download/Vencord-for-Chrome-and-Edge.zip)
+- [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js) - Please note that QuickCSS, shiki and other plugins making use of external resources will not work with the UserScript.
 
 
 You may also build them from source, to do that do the same steps as in the manual regular install method,
