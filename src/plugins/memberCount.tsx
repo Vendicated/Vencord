@@ -40,7 +40,7 @@ function MemberCount() {
         total = "Loading...";
     }
     
-    let online = c[1].toLocaleString()
+    let online = c[1].toLocaleString();
 
     return (
         <Flex id="vc-membercount" style={{
