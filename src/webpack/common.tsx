@@ -37,6 +37,8 @@ export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPorta
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
 export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };
@@ -65,6 +67,7 @@ export let Tooltip: Components.Tooltip;
 export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
+export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.ComponentType<React.PropsWithRef<any>>;
 
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));

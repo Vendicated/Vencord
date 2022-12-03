@@ -29,6 +29,7 @@ export interface Settings {
     notifyAboutUpdates: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
+    themeLinks: string[];
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -40,6 +41,7 @@ export interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     useQuickCss: true,
+    themeLinks: [],
     enableReactDevtools: false,
     plugins: {}
 };
@@ -139,14 +141,19 @@ export const Settings = makeProxy(settings);
  * Settings hook for React components. Returns a smart settings
  * object that automagically triggers a rerender if any properties
  * are altered
+ * @param paths An optional list of paths to whitelist for rerenders
  * @returns Settings
  */
-export function useSettings() {
+export function useSettings(paths?: string[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
+    const onUpdate: SubscriptionCallback = paths
+        ? (value, path) => paths.includes(path) && forceUpdate()
+        : forceUpdate;
+
     React.useEffect(() => {
-        subscriptions.add(forceUpdate);
-        return () => void subscriptions.delete(forceUpdate);
+        subscriptions.add(onUpdate);
+        return () => void subscriptions.delete(onUpdate);
     }, []);
 
     return Settings;
