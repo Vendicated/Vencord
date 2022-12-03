@@ -41,7 +41,7 @@ async function checkCors(url, method) {
     let headers = parseHeaders(await fetchOptions(url));
 
     let origin = headers['access-control-allow-origin'];
-    if (origin !== "*" && origin !== "https://discord.com") return false;
+    if (origin !== "*" && origin !== window.location.origin) return false;
 
     let methods = headers['access-control-allow-methods']?.split(/,\s/g);
     if (methods && !methods.includes(method)) return false;
@@ -53,9 +53,8 @@ function blobTo(to, blob) {
     if (to == "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
     return new Promise((resolve, reject) => {
         var fileReader = new FileReader();
-        fileReader.onload = function (event) { if (to == "base64") resolve(event.target.result); else resolve(event.target.result); };
+        fileReader.onload = (event) => resolve(event.target.result);
         if (to == "arrayBuffer") fileReader.readAsArrayBuffer(blob);
-        else if (to == "base64") fileReader.readAsDataURL(blob); // "data:*/*;base64,......"
         else if (to == "text") fileReader.readAsText(blob, "utf-8");
         else reject("unknown to");
     });
