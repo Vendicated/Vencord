@@ -60,6 +60,10 @@ await Promise.all(
         }),
         esbuild.build({
             ...commonOptions,
+            inject: ["browser/GMPolyfill.js"],
+            define: {
+                "window": "unsafeWindow"
+            },
             outfile: "dist/Vencord.user.js",
             banner: {
                 js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${PackageJSON.version}.${new Date().getTime()}`)
