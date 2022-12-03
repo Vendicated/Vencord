@@ -60,9 +60,10 @@ await Promise.all(
         }),
         esbuild.build({
             ...commonOptions,
-            inject: ["browser/GMPolyfill.js"],
+            inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
             define: {
-                "window": "unsafeWindow"
+                "window": "unsafeWindow",
+                ...(commonOptions?.define)
             },
             outfile: "dist/Vencord.user.js",
             banner: {
@@ -70,7 +71,7 @@ await Promise.all(
             },
             footer: {
                 // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
-                js: "Object.defineProperty(window,'Vencord',{get:()=>Vencord});"
+                js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
             },
         })
     ]
