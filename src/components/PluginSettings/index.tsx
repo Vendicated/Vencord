@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { generateId } from "@api/Commands";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -27,8 +28,12 @@ import Logger from "@utils/Logger";
 import { classes, LazyComponent } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
+import { proxyLazy } from "@utils/proxyLazy";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip, UserStore, FluxDispatcher, UserUtils } from "@webpack/common";
+import { User } from "discord-types/general";
+import { Constructor } from "type-fest";
+
 
 import Plugins from "~plugins";
 
@@ -42,6 +47,7 @@ const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
 
 const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
+const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -74,6 +80,23 @@ function ReloadRequiredCard({ plugins, ...props }: ReloadRequiredCardProps) {
     );
 }
 
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+
+const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+/** To stop discord making unwanted requests... */
+function makeDummyUser(user: { name: string, id: BigInt; }) {
+    const newUser = new UserRecord({
+        username: user.name,
+        id: generateId(),
+        bot: true,
+    });
+    FluxDispatcher.dispatch({
+        type: "USER_UPDATE",
+        user: newUser,
+    });
+    return newUser;
+}
+
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
@@ -81,10 +104,23 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave }: PluginCardProps) {
+    const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
+
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
 
     const [iconHover, setIconHover] = React.useState(false);
+
+    React.useEffect(() => {
+        (async () => {
+            for (const user of plugin.authors.slice(0, 6)) {
+                const author = user.id
+                    ? await UserUtils.fetchUser(`${user.id}`).catch(() => makeDummyUser(user))
+                    : makeDummyUser(user);
+                setAuthors(a => [...a, author]);
+            }
+        })();
+    }, []);
 
     function isEnabled() {
         return pluginSettings?.enabled || plugin.started;
@@ -141,14 +177,35 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         pluginSettings.enabled = !wasEnabled;
     }
 
+    function renderMoreUsers(_label: string, count: number) {
+        const sliceCount = plugin.authors.length - count;
+        const sliceStart = plugin.authors.length - sliceCount;
+        const sliceEnd = sliceStart + plugin.authors.length - count;
+
+        return (
+            <Tooltip text={plugin.authors.slice(sliceStart, sliceEnd).map(u => u.name).join(", ")}>
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <div
+                        className={AvatarStyles.moreUsers}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                    >
+                        +{sliceCount}
+                    </div>
+                )}
+            </Tooltip>
+        );
+    }
+
     return (
         <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
+                hideBorder={true}
                 note={<Text variant="text-md/normal" style={{
-                    height: 40,
+                    minHeight: 40,
                     overflow: "hidden",
                     // mfw css is so bad you need whatever this is to get multi line overflow ellipsis to work
                     textOverflow: "ellipsis",
@@ -156,30 +213,34 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     WebkitLineClamp: 2,
                     lineClamp: 2,
                     WebkitBoxOrient: "vertical",
-                    boxOrient: "vertical"
+                    boxOrient: "vertical",
                 }}>
                     {plugin.description}
                 </Text>}
-                hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
                     <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
-                        {plugin.options
-                            ? <CogWheel
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />
-                            : <InfoIcon
-                                width="24" height="24"
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />}
+                        {plugin.options && <CogWheel
+                            style={{ color: iconHover ? "" : "var(--text-muted)" }}
+                            onMouseEnter={() => setIconHover(true)}
+                            onMouseLeave={() => setIconHover(false)}
+                        />}
                     </button>
                 </Flex>
             </Switch>
+            <div style={{ marginTop: "auto" }}>
+                <UserSummaryItem
+                    users={authors}
+                    count={plugin.authors.length}
+                    guildId={undefined}
+                    renderIcon={false}
+                    max={6}
+                    showDefaultAvatarsForNullUsers
+                    showUserPopout
+                    renderMoreUsers={renderMoreUsers}
+                />
+            </div>
         </Flex>
     );
 }
@@ -324,10 +385,10 @@ export default ErrorBoundary.wrap(function Settings() {
 
 function makeDependencyList(deps: string[]) {
     return (
-        <React.Fragment>
+        <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
             {deps.map((dep: string) => <Forms.FormText style={{ margin: "0 auto" }}>{dep}</Forms.FormText>)}
-        </React.Fragment>
+        </>
     );
 }
 

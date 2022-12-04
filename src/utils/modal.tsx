@@ -64,10 +64,10 @@ export const Modals = mapMangledModuleLazy("().closeWithCircleBackground", {
 });
 
 export const ModalRoot = (props: ModalRootProps) => <Modals.ModalRoot {...props} />;
-export const ModalHeader = (props: any) => <Modals.ModalHeader {...props} />;
-export const ModalContent = (props: any) => <Modals.ModalContent {...props} />;
-export const ModalFooter = (props: any) => <Modals.ModalFooter {...props} />;
-export const ModalCloseButton = (props: any) => <Modals.ModalCloseButton {...props} />;
+export const ModalHeader = (props: { children: React.ReactNode, className?: string, separator?: boolean; }) => <Modals.ModalHeader {...props} />;
+export const ModalContent = (props: { children?: React.ReactNode, className?: string, scrollerRef?: (element: Element) => void, style: React.CSSProperties; }) => <Modals.ModalContent {...props} />;
+export const ModalFooter = (props: { children?: React.ReactNode, className?: string; }) => <Modals.ModalFooter {...props} />;
+export const ModalCloseButton = (props: { children?: React.ReactElement; focusProps?: any, onClick: (event: React.MouseEvent) => void, className?: string, hideOnFullscreen?: boolean; }) => <Modals.ModalCloseButton {...props} />;
 
 const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
     openModal: filters.byCode("onCloseRequest:null!="),
