@@ -27,13 +27,12 @@ import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
 import { classes, LazyComponent } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
-import { Plugin } from "@utils/types";
 import { proxyLazy } from "@utils/proxyLazy";
+import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip, UserStore, FluxDispatcher, UserUtils } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
-
 
 import Plugins from "~plugins";
 
