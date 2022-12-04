@@ -121,7 +121,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold">{plugin.name}</Text>
             </ModalHeader>
-            <ModalContent style={{ marginBottom: 8, minWidth: "30vw", minHeight: "20vh" }}>
+            <ModalContent style={{ marginBottom: 8, minWidth: "30vw", minHeight: "15vh" }}>
                 {!!plugin.settingsAboutComponent && (
                     <div style={{ marginBottom: 8 }}>
                         <Forms.FormSection>
@@ -141,7 +141,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Button
                             onClick={onClose}
                             size={Button.Sizes.SMALL}
-                            color={Button.Colors.RED}
+                            color={Button.Colors.PRIMARY}
+                            look={Button.Looks.LINK}
                         >
                             Cancel
                         </Button>
