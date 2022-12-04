@@ -24,6 +24,19 @@ import { Settings, Webpack } from "Vencord";
 
 const DRAFT_TYPE = 0;
 
+const defaultSharexConfig = "{\n      \"Version\": \"13.0.1\",\n      \"Name\": \"file.coffee\",\n      \"DestinationType\": \"ImageUploader, TextUploader, FileUploader\",\n      \"RequestMethod\": \"POST\",\n      \"RequestURL\": \"https://file.coffee/api/file/upload\",\n      \"Body\": \"MultipartFormData\",\n      \"FileFormName\": \"file\",\n      \"URL\": \"$json:url$\"\n    }";
+
+const urlRegex = /(?<!")https:\/\//g;
+
+async function makeReq(method: string, url: string, body: XMLHttpRequestBodyInit | null) {
+    const httpReq = new XMLHttpRequest();
+
+    httpReq.open(method, `https://cors-bypass.efu-cors-bypass.workers.dev/${url}`);
+    await httpReq.send(body);
+
+    return httpReq;
+}
+
 export default definePlugin({
     name: "ExternalFileUpload",
     description: "Allow for you to upload files to various file upload servers using a slash command (/upload)",
@@ -43,7 +56,11 @@ export default definePlugin({
                 {
                     label: "Gofile.io",
                     value: "gofileio"
-                }
+                },
+                {
+                    label: "ShareX",
+                    value: "sharex"
+                },
             ]
         },
         loginWarning: {
@@ -58,6 +75,11 @@ export default definePlugin({
         gofileiotok: {
             type: OptionType.STRING,
             description: "https://gofile.io/myProfile",
+        },
+        sharexConfig: {
+            type: OptionType.STRING,
+            description: "Paste your .sxcu configs content in here",
+            default: defaultSharexConfig
         }
     },
     async start() {
@@ -149,6 +171,60 @@ export default definePlugin({
                                 console.error("Error:", error);
                                 sendBotMessage(ctx.channel.id, { content: "There was an error during upload! Check console" });
                             });
+                    },
+                }, "ExternalFileUpload");
+                break;
+            case "sharex":
+                registerCommand({
+                    name: "upload",
+                    description: "Upload a file to your own ShareX server and add a link to your clipboard",
+                    inputType: ApplicationCommandInputType.BUILT_IN,
+                    options: [
+                        {
+                            name: "file",
+                            description: "The file to upload",
+                            type: ApplicationCommandOptionType.ATTACHMENT,
+                            required: true
+                        }
+                    ],
+                    // eslint-disable-next-line consistent-return
+                    async execute(args, ctx) {
+                        if (Settings.plugins.ExternalFileUpload.sharexConfig === defaultSharexConfig && Settings.plugins.ExternalFileUpload.loginWarning === true) {
+                            sendBotMessage(ctx.channel.id, { content: "ShareX config is set as default. We recommend you edit the configuration to your likings (and your preferred host). Right now you are using file.coffee You can disable this message in plugin settings" });
+                        }
+
+                        const UploadStore = findByProps("getUploads");
+                        const upload = UploadStore.getUploads(ctx.channel.id, DRAFT_TYPE)[0];
+
+                        const uploadedFile = upload?.item?.file as File;
+
+                        let { sharexConfig } = Settings.plugins.ExternalFileUpload;
+
+                        const sharexUrl = (/(?<=\$json:).*(?=\$",)/.exec(sharexConfig));
+                        if (sharexUrl === null) return sendBotMessage(ctx.channel.id, { content: "Make sure config returns proper return" });
+
+                        sharexConfig = JSON.parse(sharexConfig);
+
+                        if (sharexConfig.Body === "MultipartFormData") {
+                            const body = new FormData();
+                            body.append(sharexConfig.FileFormName, uploadedFile);
+
+                            const res = await makeReq(sharexConfig.RequestMethod, sharexConfig.RequestURL, body);
+
+                            res.onload = event => {
+                                if (urlRegex.test(res.response)) {
+                                    Webpack.Common.Clipboard.copy(res.response);
+                                    sendBotMessage(ctx.channel.id, { content: `Successfully uploaded! Copied link to clipboard. ||${res.response}||` });
+                                    return;
+                                } else {
+                                    const resJson = JSON.parse(res.response);
+
+                                    Webpack.Common.Clipboard.copy((sharexConfig.URL).replace(/\$.*?\$/g, "") + resJson[sharexUrl[0]]);
+                                    sendBotMessage(ctx.channel.id, { content: `Successfully uploaded! Copied link to clipboard. ||${resJson[sharexUrl[0]]}||` });
+                                }
+                            };
+                        }
+                        else return sendBotMessage(ctx.channel.id, { content: "Couldnt complete request. Possibly unsupported Body type?" });
                     },
                 }, "ExternalFileUpload");
                 break;
