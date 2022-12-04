@@ -40,7 +40,7 @@ interface PreviousChannel {
 
 export default definePlugin({
     name: "KeepCurrentChannel",
-    description: "Attempt to navigate the channel you were in before switching accounts or loading Discord.",
+    description: "Attempt to navigate to the channel you were in before switching accounts or loading Discord.",
     authors: [Devs.Nuckyz],
 
     isSwitchingAccount: false,
