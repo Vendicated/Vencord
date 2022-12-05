@@ -169,4 +169,8 @@ export const Devs = Object.freeze({
         name: "Commandtechno",
         id: 296776625432035328n,
     },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n,
+    },
 });
