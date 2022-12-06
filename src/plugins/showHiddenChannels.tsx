@@ -19,6 +19,7 @@
 
 import { Settings } from "@api/settings";
 import { Flex } from "@components/Flex";
+import { Badge } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -97,7 +98,7 @@ export default definePlugin({
     shouldShow(channel, category, isMuted) {
         if (!this.isHiddenChannel(channel)) return false;
         if (!category) return false;
-        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
+        if ((channel.type === 0 || channel.type === 15) && category.guild?.hideMutedChannels && isMuted) return false;
 
         return !category.isCollapsed;
     },
@@ -116,17 +117,18 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if (channel.type === 0 && isHidden) {
-            const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
+        if ((channel.type === 0 || channel.type === 15) && isHidden) {
+            const lastActiveDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
-                        <Flex>
+                        <Flex style={{ width: "100%" }}>
                             <Text variant="heading-md/bold">{channel.name}</Text>
                             {(channel.isNSFW() && (
-                                <Text style={{ backgroundColor: "var(--status-danger)", borderRadius: "8px", paddingLeft: 4, paddingRight: 4 }} variant="heading-md/normal">
-                                    NSFW
-                                </Text>
+                                <Badge text="NSFW" color="var(--status-danger)" />
+                            ))}
+                            {(channel.type === 15 && (
+                                <Badge text="FORUM" color="var(--brand-experiment)" />
                             ))}
                         </Flex>
                     </ModalHeader>
@@ -135,17 +137,17 @@ export default definePlugin({
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Topic:
+                                    {channel.type === 15 ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <Text variant="code">{channel.topic}</Text>
                             </>
                         )}
-                        {lastMessageDate && (
+                        {lastActiveDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Last message sent:
+                                    {channel.type === 15 ? "Last Post Created:" : "Last message sent:"}
                                 </Text>
-                                <Text variant="code">{lastMessageDate}</Text>
+                                <Text variant="code">{lastActiveDate}</Text>
                             </>
                         )}
                     </ModalContent>
