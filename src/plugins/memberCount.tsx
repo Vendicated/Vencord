@@ -35,10 +35,12 @@ function MemberCount() {
 
     if (!c) return null;
 
-    let total = String(c[0]);
+    let total = c[0].toLocaleString();
     if (total === "0" && c[1] > 0) {
         total = "Loading...";
     }
+
+    const online = c[1].toLocaleString();
 
     return (
         <Flex id="vc-membercount" style={{
@@ -49,7 +51,7 @@ function MemberCount() {
             alignContent: "center",
             gap: 0
         }}>
-            <Tooltip text={`${c[1]} Online`} position="bottom">
+            <Tooltip text={`${online} Online`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -62,11 +64,11 @@ function MemberCount() {
                                 marginRight: "0.5em"
                             }}
                         />
-                        <span style={{ color: "var(--status-green-600)" }}>{c[1]}</span>
+                        <span style={{ color: "var(--status-green-600)" }}>{online}</span>
                     </div>
                 )}
             </Tooltip>
-            <Tooltip text={`${c[0] || "?"} Total Members`} position="bottom">
+            <Tooltip text={`${total} Total Members`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -91,7 +93,7 @@ function MemberCount() {
 export default definePlugin({
     name: "MemberCount",
     description: "Shows the amount of online & total members in the server member list",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Commandtechno],
 
     patches: [{
         find: ".isSidebarVisible,",
