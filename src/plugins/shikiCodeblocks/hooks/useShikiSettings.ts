@@ -18,8 +18,19 @@
 
 import { useSettings } from "@api/settings";
 
+import { shiki } from "../api/shiki";
 import { ShikiSettings } from "../types";
 
-export function useShikiSettings(settings: (keyof ShikiSettings)[]) {
-    return useSettings(settings.map(setting => `plugins.ShikiCodeblocks.${setting}`)).plugins.ShikiCodeblocks as ShikiSettings;
+export function useShikiSettings(settingKeys: (keyof ShikiSettings)[], overrides?: Record<string, any>) {
+    const settings = useSettings(settingKeys.map(key => `plugins.ShikiCodeblocks.${key}`)).plugins.ShikiCodeblocks as ShikiSettings;
+
+    const withOverrides = { ...settings, ...overrides };
+
+    const themeUrl = withOverrides.customTheme || withOverrides.theme;
+    if (themeUrl !== shiki.currentThemeUrl) shiki.setTheme(themeUrl);
+
+    return {
+        ...withOverrides,
+        isThemeLoading: themeUrl !== shiki.currentThemeUrl,
+    };
 }
