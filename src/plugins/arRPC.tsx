@@ -30,7 +30,7 @@ const assetManager = mapMangledModuleLazy(
     }
 );
 
-const rpcManager = findByCodeLazy(".APPLICATION_RPC(");
+const lookupRpcApp = findByCodeLazy(".APPLICATION_RPC(");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
@@ -39,7 +39,7 @@ async function lookupAsset(applicationId: string, key: string): Promise<string> 
 const apps: any = {};
 async function lookupApp(applicationId: string): Promise<string> {
     const socket: any = {};
-    await rpcManager.lookupApp(socket, applicationId);
+    await lookupRpcApp(socket, applicationId);
     return socket.application;
 }
 

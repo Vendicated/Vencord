@@ -165,8 +165,12 @@ export const Devs = Object.freeze({
         name: "King Fish",
         id: 499400512559382538n
     },
+    Commandtechno: {
+        name: "Commandtechno",
+        id: 296776625432035328n,
+    },
     TheSun: {
         name: "ActuallyTheSun",
         id: 406028027768733696n
-    }
+    },
 });

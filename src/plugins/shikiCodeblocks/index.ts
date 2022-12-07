@@ -21,6 +21,7 @@ import { parseUrl } from "@utils/misc";
 import { wordsFromPascal, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 
+import previewExampleText from "~fileContent/previewExample.tsx";
 import cssText from "~fileContent/style.css";
 
 import { Settings } from "../../Vencord";
@@ -59,6 +60,12 @@ export default definePlugin({
         shiki.destroy();
         clearStyles();
     },
+    settingsAboutComponent: ({ tempSettings }) => createHighlighter({
+        lang: "tsx",
+        content: previewExampleText,
+        isPreview: true,
+        tempSettings,
+    }),
     options: {
         theme: {
             type: OptionType.SELECT,
@@ -137,7 +144,10 @@ export default definePlugin({
             description: "Background opacity",
             markers: [0, 20, 40, 60, 80, 100],
             default: 100,
-            stickToMarkers: false,
+            componentProps: {
+                stickToMarkers: false,
+                onValueRender: null, // Defaults to percentage
+            },
         },
     },
 
