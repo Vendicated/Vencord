@@ -57,7 +57,8 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                 {themeLinks.map(link => (
                     <Card style={{
                         padding: ".5em",
-                        marginBottom: ".5em"
+                        marginBottom: ".5em",
+                        marginTop: ".5em"
                     }} key={link}>
                         <Forms.FormTitle tag="h5" style={{
                             overflowWrap: "break-word"
@@ -95,21 +96,21 @@ export default ErrorBoundary.wrap(function () {
             }}>
                 <Forms.FormTitle tag="h5">Paste links to .css / .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
-                <Forms.FormText>Be careful to use the raw links or github.io links!</Forms.FormText>
+                <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
                 <Forms.FormDivider />
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                <div>
+                <div style={{ marginBottom: ".5em" }}>
                     <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
                         BetterDiscord Themes
                     </Link>
-                    <Link href="https://github.com/search?q=discord+theme">Github</Link>
+                    <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                 </div>
                 <Forms.FormText>If using the BD site, click on "Source" somewhere below the Download button</Forms.FormText>
                 <Forms.FormText>In the GitHub repository of your theme, find X.theme.css / X.css, click on it, then click the "Raw" button</Forms.FormText>
                 <Forms.FormText>
                     If the theme has configuration that requires you to edit the file:
                     <ul>
-                        <li>• Make a github account</li>
+                        <li>• Make a <Link href="https://github.com/signup">GitHub</Link> account</li>
                         <li>• Click the fork button on the top right</li>
                         <li>• Edit the file</li>
                         <li>• Use the link to your own repository instead</li>
