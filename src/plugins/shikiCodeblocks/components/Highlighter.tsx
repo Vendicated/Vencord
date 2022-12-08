@@ -46,9 +46,11 @@ export interface HighlighterProps {
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
-    <ErrorBoundary>
-        <Highlighter {...props} />
-    </ErrorBoundary>
+    <pre className={cl("container")}>
+        <ErrorBoundary>
+            <Highlighter {...props} />
+        </ErrorBoundary>
+    </pre>
 );
 export const Highlighter = ({
     lang,
@@ -66,7 +68,7 @@ export const Highlighter = ({
     const shikiLang = lang ? resolveLang(lang) : null;
     const useHljs = shouldUseHljs({ lang, tryHljs });
 
-    const [preRef, isIntersecting] = useIntersection(true);
+    const [rootRef, isIntersecting] = useIntersection(true);
 
     const [tokens] = useAwaiter(async () => {
         if (!shikiLang || useHljs || !isIntersecting) return null;
@@ -93,8 +95,8 @@ export const Highlighter = ({
     if (isPreview) preClasses.push(cl("preview"));
 
     return (
-        <pre
-            ref={preRef}
+        <div
+            ref={rootRef}
             className={preClasses.join(" ")}
             style={{
                 backgroundColor: useHljs
@@ -123,7 +125,7 @@ export const Highlighter = ({
                     theme={themeBase}
                 />}
             </code>
-        </pre>
+        </div>
     );
 };
 

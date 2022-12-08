@@ -1,5 +1,8 @@
 .shiki-root {
     border-radius: 4px;
+
+    /* fallback background */
+    background-color: var(--background-secondary);
 }
 
 .shiki-root code {

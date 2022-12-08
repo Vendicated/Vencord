@@ -17,17 +17,28 @@
 */
 
 import { useSettings } from "@api/settings";
+import { React } from "@webpack/common";
 
 import { shiki } from "../api/shiki";
 import { ShikiSettings } from "../types";
 
 export function useShikiSettings(settingKeys: (keyof ShikiSettings)[], overrides?: Record<string, any>) {
     const settings = useSettings(settingKeys.map(key => `plugins.ShikiCodeblocks.${key}`)).plugins.ShikiCodeblocks as ShikiSettings;
+    const [isLoading, setLoading] = React.useState(false);
 
     const withOverrides = { ...settings, ...overrides };
-
     const themeUrl = withOverrides.customTheme || withOverrides.theme;
-    if (themeUrl !== shiki.currentThemeUrl) shiki.setTheme(themeUrl);
+
+    if (overrides) {
+        const willChangeTheme = shiki.currentThemeUrl && themeUrl !== shiki.currentThemeUrl;
+        const noOverrides = Object.keys(overrides).length === 0;
+
+        if (isLoading && (!willChangeTheme || noOverrides)) setLoading(false);
+        if ((!isLoading && willChangeTheme)) {
+            setLoading(true);
+            shiki.setTheme(themeUrl);
+        }
+    }
 
     return {
         ...withOverrides,
