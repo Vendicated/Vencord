@@ -196,7 +196,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <div style={{ marginBottom: 8 }}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
-                                <plugin.settingsAboutComponent />
+                                <plugin.settingsAboutComponent tempSettings={tempSettings} />
                             </ErrorBoundary>
                         </Forms.FormSection>
                     </div>
