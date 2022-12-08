@@ -89,8 +89,8 @@ function VencordSettings() {
                 <Switch
                     value={settings.useQuickCss}
                     onChange={(v: boolean) => settings.useQuickCss = v}
-                    note="Loads styles from your QuickCss file">
-                    Use QuickCss
+                    note="Loads styles from your QuickCSS file">
+                    Use QuickCSS
                 </Switch>
                 {!IS_WEB && (
                     <React.Fragment>
@@ -103,8 +103,8 @@ function VencordSettings() {
                         <Switch
                             value={settings.notifyAboutUpdates}
                             onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                            note="Shows a Toast on StartUp">
-                            Get notified about new Updates
+                            note="Shows a toast on startup">
+                            Get notified about new updates
                         </Switch>
                     </React.Fragment>
                 )}
@@ -131,7 +131,7 @@ function DonateCard({ image }: DonateCardProps) {
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>
-                    Please consider supporting the Development of Vencord by donating!
+                    Please consider supporting the development of Vencord by donating!
                 </Forms.FormText>
                 <DonateButton style={{ transform: "translateX(-1em)" }} />
             </div>
