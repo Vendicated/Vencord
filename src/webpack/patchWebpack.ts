@@ -137,6 +137,7 @@ function patchPush() {
 
                         // @ts-ignore we change all patch.replacement to array in plugins/index
                         for (const replacement of patch.replacement) {
+                            if (replacement.predicate && !replacement.predicate()) continue;
                             const lastMod = mod;
                             const lastCode = code;
 
