@@ -52,7 +52,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
     return (
         <>
             <Forms.FormTitle className={Margins.marginTop20} tag="h5">Validator</Forms.FormTitle>
-            <Forms.FormText>This section will tell you if your themes can be loaded successfully</Forms.FormText>
+            <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
             <div>
                 {themeLinks.map(link => (
                     <Card style={{
