@@ -156,5 +156,17 @@ export const Devs = Object.freeze({
     Luna: {
         name: "Luny",
         id: 821472922140803112n
-    }
+    },
+    Vap: {
+        name: "Vap0r1ze",
+        id: 454072114492866560n
+    },
+    KingFish: {
+        name: "King Fish",
+        id: 499400512559382538n
+    },
+    Commandtechno: {
+        name: "Commandtechno",
+        id: 296776625432035328n,
+    },
 });

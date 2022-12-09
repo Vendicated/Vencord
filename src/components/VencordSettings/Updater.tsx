@@ -179,7 +179,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const [repo, err, repoPending] = useAwaiter(getRepo, "Loading...");
+    const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
     React.useEffect(() => {
         if (err)

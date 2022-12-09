@@ -27,6 +27,7 @@ export default function definePlugin<P extends PluginDef>(p: P & Record<string, 
 export interface PatchReplacement {
     match: string | RegExp;
     replace: string | ((match: string, ...groups: string[]) => string);
+    predicate?(): boolean;
 }
 
 export interface Patch {
@@ -89,7 +90,9 @@ export interface PluginDef {
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType;
+    settingsAboutComponent?: React.ComponentType<{
+        tempSettings?: Record<string, any>;
+    }>;
 }
 
 export enum OptionType {

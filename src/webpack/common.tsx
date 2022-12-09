@@ -37,6 +37,8 @@ export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPorta
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
 export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };
@@ -50,7 +52,10 @@ export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
-export let RelationshipStore: Stores.RelationshipStore;
+export let RelationshipStore: Stores.RelationshipStore & {
+    /** Get the date (as a string) that the relationship was created */
+    getSince(userId: string): string;
+};
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
