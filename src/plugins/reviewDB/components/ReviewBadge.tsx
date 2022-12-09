@@ -26,11 +26,12 @@ export default function ReviewBadge(badge: Badge) {
             text={badge.badge_name}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <img
-                    width="22px"
-                    height="22px"
+                    width="24px"
+                    height="24px"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     src={badge.badge_icon}
+                    alt={badge.badge_description}
                     style={{ verticalAlign: "middle", marginLeft: "4px" }}
                     onClick={() =>
                         MaskedLinkStore.openUntrustedLink({
