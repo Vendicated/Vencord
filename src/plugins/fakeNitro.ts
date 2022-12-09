@@ -71,8 +71,8 @@ export default definePlugin({
                 "canUseEmojisEverywhere"
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function(e){return true;}`
+                    match: new RegExp(`${func}:function\\(.+?\\{`),
+                    replace: "$&return true;"
                 };
             })
         },
@@ -80,8 +80,8 @@ export default definePlugin({
             find: "canUseAnimatedEmojis:function",
             predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
-                match: /canUseStickersEverywhere:function\(.+?}/,
-                replace: "canUseStickersEverywhere:function(e){return true;}"
+                match: /canUseStickersEverywhere:function\(.+?\{/,
+                replace: "$&return true;"
             },
         },
         {
@@ -101,8 +101,8 @@ export default definePlugin({
                 "canStreamMidQuality"
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function(e){return true;}`
+                    match: new RegExp(`${func}:function\\(.+?\\{`),
+                    replace: "$&return true;"
                 };
             })
         },
