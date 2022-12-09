@@ -35,6 +35,11 @@ export default definePlugin({
         { name: "angry", description: " ヽ(｀Д´)ﾉ" },
         { name: "anger", description: " ヽ(ｏ`皿′ｏ)ﾉ" },
         { name: "joy", description: " <(￣︶￣)>" },
+        { name: "blush", description: "૮ ˶ᵔ ᵕ ᵔ˶ ა" },
+        { name: "confused", description: "(•ิ_•ิ)?" },
+        { name: "sleeping", description: "(ᴗ_ᴗ)" },
+        { name: "laughing", description: "o(≧▽≦)o" },
+
     ].map(data => ({
         ...data,
         options: [OptionalMessageOption],
