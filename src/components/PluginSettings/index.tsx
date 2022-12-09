@@ -226,7 +226,6 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
-    const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: "all" });
 
@@ -249,8 +248,10 @@ export default ErrorBoundary.wrap(function Settings() {
     const [newPlugins, , newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number>) => {
         const dateNow: number = Date.now() / 1000;
         const existingPlugins: Record<string, number> = {};
+        const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
+
         let newPlugins: Array<string> = [];
-        sortedPlugins.map(plugin => {
+        sortedPlugins.forEach(plugin => {
             existingPlugins[plugin.name] = cachedPlugins[plugin.name] ?? dateNow;
             if ((existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
                 newPlugins.push(plugin.name);
