@@ -28,6 +28,7 @@ const useEffect = makeLazy(() => React.useEffect);
 const useState = makeLazy(() => React.useState);
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 const DeleteIcon = LazyComponent(() => wreq(findModuleId("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z")!!).Z);
+const soundsModule = makeLazy(() => findModuleId("call_ringing.mp3"));
 
 type SoundsChanged = {
     name: string;
@@ -40,14 +41,15 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
     const [soundsChanged, setSoundsChanged] = useState()<SoundsChanged>([]);
 
     useEffect()(() => {
-        const modId = findModuleId("call_ringing.mp3");
-        if (modId == null) return;
+        const modId = soundsModule();
+        if (modId == null) return; // Should never happen, but oh well
 
         setSounds(JSON.parse(`${wreq.m[modId]}`.match(/\w=(\{(?:.|\n)*?\})/)!![1]));
         setSoundsChanged((Settings.plugins.SoundChanger.soundsChanged || []) as SoundsChanged);
     }, []);
 
     const save = (a: SoundsChanged) => {
+        // I hate my saving mechanism, but hey, it works!
         setValue(a.filter(s => s.new_link.trim().length > 0));
     };
 
@@ -70,13 +72,13 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                     <td style={{ width: "45%" }}>
                                         <TextArea
                                             className={TextAreaProps.textarea}
-                                            placeholder="Link to an mp3"
+                                            placeholder="A link to an audio file!"
                                             spellCheck={false}
                                             onChange={e => {
                                                 for (const s of soundsChanged) {
                                                     if (s.name === sound.name) {
                                                         s.new_link = e.nativeEvent.target.value;
-                                                        setSoundsChanged(old => { save(soundsChanged); return soundsChanged; });
+                                                        setSoundsChanged(_ => { save(soundsChanged); return soundsChanged; });
                                                         break;
                                                     }
                                                 }
@@ -88,7 +90,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                         style={{ transform: "translateY(-40%)", width: "5%" }}
                                         onClick={() => {
                                             const newSounds = soundsChanged.filter(s => s.name !== sound.name);
-                                            setSoundsChanged(old => { save(newSounds); return newSounds; });
+                                            setSoundsChanged(_ => { save(newSounds); return newSounds; });
                                         }}>
                                         <span style={{ cursor: "pointer" }}>
                                             <DeleteIcon width="24" height="24" color="var(--status-danger)" />
@@ -123,7 +125,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                     select={(sound: string) => {
                         const filename = `${wreq.m[sounds[sound]]}`.match(/"(.*?\.mp3)"/)!![1];
                         const newSounds = soundsChanged.concat([{ name: sound, original_link: filename, new_link: "" }]);
-                        setSoundsChanged(old => { save(newSounds); return newSounds; });
+                        setSoundsChanged(_ => { save(newSounds); return newSounds; });
                     }}
                 />
             </div>
@@ -134,7 +136,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
 export default definePlugin({
     name: "SoundChanger",
     authors: [Devs.Arjix],
-    description: "Allows you to modify any discord sound.",
+    description: "Allows you to modify any discord sound. (God, please forgive me for making this sin)",
     options: {
         soundsChanged: {
             description: "",
