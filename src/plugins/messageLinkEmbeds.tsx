@@ -19,7 +19,6 @@
 import { addAccessory } from "@api/MessageAccessories";
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants.js";
-import { classes } from "@utils/misc.jsx";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByPropsLazy, waitFor } from "@webpack";
@@ -41,12 +40,14 @@ let http: { [key: string]: (...query) => Promise<any>; },
     AutomodEmbed: (...props) => JSX.Element,
     Embed: (...props) => JSX.Element,
     ChannelMessage: (...props) => JSX.Element,
-    Endpoints: Record<string, any>;
+    Endpoints: Record<string, any>,
+    can: (permission: bigint, channel: Channel) => boolean;
 waitFor(["get", "getAPIBaseURL"], m => (http = m));
 waitFor(["mle_AutomodEmbed"], m => (AutomodEmbed = m.mle_AutomodEmbed));
 waitFor(filters.byCode("().inlineMediaEmbed"), m => Embed = m);
 waitFor(m => m.type?.toString()?.includes('["message","compact","className",'), m => ChannelMessage = m);
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
+waitFor(m => m.can && m.initialize, m => ({ can } = m));
 // does not work with waitFor
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 
@@ -216,6 +217,10 @@ var messageEmbed={mle_AutomodEmbed:$1};"
         const [_, guildID, channelID, messageID] = message.content?.match(this.messageLinkRegex) ?? [];
         if (!messageID) return null;
 
+        const linkedChannel = ChannelStore.getChannel(channelID);
+        if (!linkedChannel || !can(1024n /* view channel */, linkedChannel)) {
+            return null;
+        }
         let linkedMessage = messageCache[messageID]?.message as Message;
         if (!linkedMessage) {
             linkedMessage ??= MessageStore.getMessage(channelID, messageID);
@@ -225,16 +230,11 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                 return null;
             }
         }
-        const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel) {
-            return null;
-        }
         const meProps: MessageEmbedProps = {
             message: linkedMessage,
             channel: linkedChannel,
             guildID
         };
-        setTimeout(() => dispatchBlankUpdate(channelID, messageID), 100);
         switch (Settings.plugins[this.name].automodEmbeds) {
             case "always":
                 return this.automodEmbedAccessory(meProps);
@@ -271,20 +271,19 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                         ]}
                     </Text>,
                     iconProxyURL: guild
-                        ? `https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild.id}/${guild.icon}.png?size=32`
+                        ? `https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild.id}/${guild.icon}.png`
                         : `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${dmReceiver.id}/${dmReceiver.avatar}`
                 }
             }}
             renderDescription={() => {
-                return <div key={message.id} className={classes(...classNames)}>
+                return <div key={message.id} className={classNames.join(" ")} >
                     <ChannelMessage
                         id={`message-link-embeds-${message.id}`}
                         message={message}
                         channel={channel}
-                        animateAvatar={false}
                         subscribeToComponentDispatch={false}
                     />
-                </div>;
+                </div >;
             }}
         />;
     },
