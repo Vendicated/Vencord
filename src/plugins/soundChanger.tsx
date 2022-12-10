@@ -86,13 +86,13 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                             value={soundsChanged.find(s => s.name === sound.name)?.new_link}
                                         />
                                     </td>
-                                    <td
-                                        style={{ transform: "translateY(-40%)", width: "5%" }}
-                                        onClick={() => {
-                                            const newSounds = soundsChanged.filter(s => s.name !== sound.name);
-                                            setSoundsChanged(_ => { save(newSounds); return newSounds; });
+                                    <td style={{ transform: "translateY(-40%)", width: "5%" }}>
+                                        <span
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => {
+                                                const newSounds = soundsChanged.filter(s => s.name !== sound.name);
+                                                setSoundsChanged(_ => { save(newSounds); return newSounds; });
                                         }}>
-                                        <span style={{ cursor: "pointer" }}>
                                             <DeleteIcon width="24" height="24" color="var(--status-danger)" />
                                         </span>
                                     </td>
