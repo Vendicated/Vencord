@@ -125,7 +125,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                     select={(sound: string) => {
                         const filename = `${wreq.m[sounds[sound]]}`.match(/"(.*?\.mp3)"/)!![1];
                         const newSounds = soundsChanged.concat([{ name: sound, original_link: filename, new_link: "" }]);
-                        setSoundsChanged(_ => { save(newSounds); return newSounds; });
+                        setSoundsChanged(newSounds);
                     }}
                 />
             </div>
