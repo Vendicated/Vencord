@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022 exhq
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,32 +14,59 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
+ */
 
 import {
     addPreSendListener,
     MessageObject,
     removePreSendListener,
 } from "@api/MessageEvents";
+import { findOption, RequiredMessageOption } from "@api/Commands";
+import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "bypasser",
     description: "uses unnoticeable characters to bypass most automods",
     authors: [Devs.echo],
     dependencies: ["MessageEventsAPI"],
+    options: {
+        ignoreBlockedMessages: {
+            description:
+                "always active (if disabled, messages will not bypass automatically, and you have to use the command to bypass)",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
+    },
+    commands: [
+        {
+            name: "bypass",
+            description: "bypass automod",
+            options: [RequiredMessageOption],
+            execute: (opts) => ({
+                content: findOption(opts, "message", "").replaceAll(
+                    /(.)/g,
+                    "$1​‍‍⁤"
+                ),
+            }),
+        },
+    ],
 
     addPrefix(msg: MessageObject) {
         msg.content = msg.content.replaceAll(/(.)/g, "$1​‍‍⁤");
     },
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => this.addPrefix(msg));
+        if (Settings.plugins.bypasser.linkPrefix) {
+            this.preSend = addPreSendListener((_, msg) => this.addPrefix(msg));
+        }
     },
 
     stop() {
-        removePreSendListener(this.preSend);
+        if (Settings.plugins.bypasser.linkPrefix) {
+            removePreSendListener(this.preSend);
+        }
     },
 });
