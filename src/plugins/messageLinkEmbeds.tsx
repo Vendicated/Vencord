@@ -159,7 +159,7 @@ interface MessageEmbedProps {
 
 export default definePlugin({
     name: "MessageLinkEmbeds",
-    description: "Embeds message links",
+    description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun],
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
