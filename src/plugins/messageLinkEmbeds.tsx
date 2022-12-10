@@ -130,7 +130,6 @@ const noContent = (attachments: number, embeds: number): string => {
 };
 
 function requiresRichEmbed(message: Message) {
-    console.log(message.attachments, message.embeds, message.components);
     if (message.attachments.every(a => a.content_type?.startsWith("image/"))
         && message.embeds.every(e => e.type === "image" || (e.type === "gifv" && !isTenorGif.test(e.url!)))
         && !message.components.length
