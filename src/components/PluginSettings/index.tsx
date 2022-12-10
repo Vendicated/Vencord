@@ -262,7 +262,7 @@ export default ErrorBoundary.wrap(function Settings() {
         if (window._.isEqual(newPlugins, sortedPluginNames)) {
             newPlugins = [];
         }
-        return newPlugins;
+        return newPlugins || [];
     }));
 
     return (
