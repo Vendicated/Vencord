@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 exhq
+ * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
+
+import { findOption, RequiredMessageOption } from "@api/Commands";
 import {
     addPreSendListener,
     MessageObject,
     removePreSendListener,
 } from "@api/MessageEvents";
-import { findOption, RequiredMessageOption } from "@api/Commands";
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -45,7 +46,7 @@ export default definePlugin({
             name: "bypass",
             description: "bypass automod",
             options: [RequiredMessageOption],
-            execute: (opts) => ({
+            execute: opts => ({
                 content: findOption(opts, "message", "").replaceAll(
                     /(.)/g,
                     "$1​‍‍⁤"
