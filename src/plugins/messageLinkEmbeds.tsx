@@ -38,9 +38,9 @@ import { Channel, Guild, Message } from "discord-types/general";
 
 let messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
 
-let AutomodEmbed: (...props) => JSX.Element,
-    Embed: (...props) => JSX.Element,
-    ChannelMessage: (...props) => JSX.Element,
+let AutomodEmbed: React.ComponentType<any>,
+    Embed: React.ComponentType<any>,
+    ChannelMessage: React.ComponentType<any>,
     Endpoints: Record<string, any>;
 
 waitFor(["mle_AutomodEmbed"], m => (AutomodEmbed = m.mle_AutomodEmbed));
@@ -204,45 +204,48 @@ var messageEmbed={mle_AutomodEmbed:$1};"
     },
 
     start() {
-        addAccessory("messageLinkEmbed", props => this.messageEmbedAccessory(props) as JSX.Element, 4 /* just above rich embeds*/);
+        addAccessory("messageLinkEmbed", props => this.messageEmbedAccessory(props), 4 /* just above rich embeds*/);
     },
 
-    messageLinkRegex: /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/,
+    messageLinkRegex: /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/g,
 
     messageEmbedAccessory(props) {
         const { message } = props;
 
-        const [_, guildID, channelID, messageID] = message.content?.match(this.messageLinkRegex) ?? [];
-        if (!messageID) return null;
+        const accessories = [] as (JSX.Element | null)[];
 
-        const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
-            return null;
-        }
-        let linkedMessage = messageCache[messageID]?.message as Message;
-        if (!linkedMessage) {
-            linkedMessage ??= MessageStore.getMessage(channelID, messageID);
-            if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
-            else {
-                getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
-                return null;
+        let match = null as RegExpMatchArray | null;
+        while ((match = this.messageLinkRegex.exec(message.content!)) !== null) {
+            const [_, guildID, channelID, messageID] = match;
+
+            const linkedChannel = ChannelStore.getChannel(channelID);
+            if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
+                continue;
             }
+
+            let linkedMessage = messageCache[messageID]?.message as Message;
+            if (!linkedMessage) {
+                linkedMessage ??= MessageStore.getMessage(channelID, messageID);
+                if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
+                else {
+                    getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
+                    continue;
+                }
+            }
+            const messageProps: MessageEmbedProps = {
+                message: linkedMessage,
+                channel: linkedChannel,
+                guildID
+            };
+
+            const type = Settings.plugins[this.name].automodEmbeds;
+            accessories.push(
+                type === "always" || (type === "prefer" && !requiresRichEmbed(linkedMessage))
+                    ? this.automodEmbedAccessory(messageProps)
+                    : this.channelMessageEmbedAccessory(messageProps)
+            );
         }
-        const meProps: MessageEmbedProps = {
-            message: linkedMessage,
-            channel: linkedChannel,
-            guildID
-        };
-        switch (Settings.plugins[this.name].automodEmbeds) {
-            case "always":
-                return this.automodEmbedAccessory(meProps);
-            case "prefer":
-                if (requiresRichEmbed(meProps.message)) return this.channelMessageEmbedAccessory(meProps);
-                else return this.automodEmbedAccessory(meProps);
-            case "never":
-            default:
-                return this.channelMessageEmbedAccessory(meProps);
-        }
+        return accessories;
     },
 
     channelMessageEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
