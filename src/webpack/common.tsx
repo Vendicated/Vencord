@@ -53,7 +53,10 @@ export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
 export let GuildMemberStore: Stores.GuildMemberStore;
-export let RelationshipStore: Stores.RelationshipStore;
+export let RelationshipStore: Stores.RelationshipStore & {
+    /** Get the date (as a string) that the relationship was created */
+    getSince(userId: string): string;
+};
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
