@@ -92,7 +92,8 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                             onClick={() => {
                                                 const newSounds = soundsChanged.filter(s => s.name !== sound.name);
                                                 setSoundsChanged(_ => { save(newSounds); return newSounds; });
-                                        }}>
+                                            }}
+                                        >
                                             <DeleteIcon width="24" height="24" color="var(--status-danger)" />
                                         </span>
                                     </td>
