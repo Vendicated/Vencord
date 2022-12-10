@@ -29,6 +29,8 @@ import {
     GuildStore,
     MessageStore,
     Parser,
+    PermissionStore,
+    RestAPI,
     Text,
     UserStore
 } from "@webpack/common";
@@ -36,19 +38,15 @@ import { Channel, Guild, Message } from "discord-types/general";
 
 let messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
 
-let http: { [key: string]: (...query) => Promise<any>; },
-    AutomodEmbed: (...props) => JSX.Element,
+let AutomodEmbed: (...props) => JSX.Element,
     Embed: (...props) => JSX.Element,
     ChannelMessage: (...props) => JSX.Element,
-    Endpoints: Record<string, any>,
-    can: (permission: bigint, channel: Channel) => boolean;
-waitFor(["get", "getAPIBaseURL"], m => (http = m));
+    Endpoints: Record<string, any>;
+
 waitFor(["mle_AutomodEmbed"], m => (AutomodEmbed = m.mle_AutomodEmbed));
 waitFor(filters.byCode("().inlineMediaEmbed"), m => Embed = m);
 waitFor(m => m.type?.toString()?.includes('["message","compact","className",'), m => ChannelMessage = m);
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
-waitFor(m => m.can && m.initialize, m => ({ can } = m));
-// does not work with waitFor
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 
 const messageFetchQueue = new Queue();
@@ -67,7 +65,7 @@ function getMessage(channelID: string, messageID: string, originalMessage?: { ch
     if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
 
     messageCache[messageID] = { fetched: false };
-    return messageFetchQueue.push(() => http.get({
+    return messageFetchQueue.push(() => RestAPI.get({
         url: Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
@@ -218,7 +216,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
         if (!messageID) return null;
 
         const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel || !can(1024n /* view channel */, linkedChannel)) {
+        if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
             return null;
         }
         let linkedMessage = messageCache[messageID]?.message as Message;
