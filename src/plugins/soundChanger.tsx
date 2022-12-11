@@ -142,8 +142,7 @@ export default definePlugin({
         soundsChanged: {
             description: "",
             type: OptionType.COMPONENT,
-            component: SoundChangerSettings,
-            restartNeeded: true
+            component: SoundChangerSettings
         }
     },
     patches: [{
