@@ -50,42 +50,26 @@ waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 
 const messageFetchQueue = new Queue();
-function getMessage(channelID: string, messageID: string, originalMessage?: { channelID: string, messageID: string; }): unknown {
-    function callback(message: Message | undefined) {
-        if (!message) return;
-        const actualMessage: Message = MessageStore.getMessages(message.channel_id).receiveMessage(message).get(message.id);
-        messageCache[message.id] = {
-            message: actualMessage,
-            fetched: true
-        };
-        if (originalMessage) dispatchBlankUpdate(originalMessage.channelID, originalMessage.messageID);
-    }
-
-    if (messageID in messageCache && !messageCache[messageID].fetched) return null;
-    if (messageCache[messageID]?.fetched) return callback(messageCache[messageID].message);
+async function fetchMessage(channelID: string, messageID: string): Promise<Message | void> {
+    if (messageID in messageCache && !messageCache[messageID].fetched) return Promise.resolve();
+    if (messageCache[messageID]?.fetched) return Promise.resolve(messageCache[messageID].message);
 
     messageCache[messageID] = { fetched: false };
-    return messageFetchQueue.push(() => RestAPI.get({
+    const res = await RestAPI.get({
         url: Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
         },
         retries: 2
-    }).then(res =>
-        callback(res.body?.[0])
-    ).catch(() => { }));
-}
-
-function dispatchBlankUpdate(channelID: string, messageID: string): void {
-    FluxDispatcher.dispatch({
-        type: "MESSAGE_UPDATE",
-        message: {
-            guild_id: ChannelStore.getChannel(channelID)?.guild_id,
-            channel_id: channelID,
-            id: messageID,
-        }
-    });
+    }).catch(() => { });
+    const apiMessage = res.body?.[0];
+    const message: Message = MessageStore.getMessages(apiMessage.channel_id).receiveMessage(apiMessage).get(apiMessage.id);
+    messageCache[message.id] = {
+        message: message,
+        fetched: true
+    };
+    return Promise.resolve(message);
 }
 
 interface Attachment {
@@ -210,7 +194,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
     messageLinkRegex: /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/g,
 
     messageEmbedAccessory(props) {
-        const { message } = props;
+        const { message }: { message: Message; } = props;
 
         const accessories = [] as (JSX.Element | null)[];
 
@@ -228,7 +212,12 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                 linkedMessage ??= MessageStore.getMessage(channelID, messageID);
                 if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
                 else {
-                    getMessage(channelID, messageID, { channelID: message.channel_id, messageID: message.id });
+                    messageFetchQueue.push(() => fetchMessage(channelID, messageID)
+                        .then(m => m && FluxDispatcher.dispatch({
+                            type: "MESSAGE_UPDATE",
+                            message
+                        }))
+                    );
                     continue;
                 }
             }
