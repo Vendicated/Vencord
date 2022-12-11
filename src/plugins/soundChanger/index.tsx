@@ -24,10 +24,13 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findLazy, findModuleId, wreq } from "@webpack";
 import { React, Select, Text, TextArea } from "@webpack/common";
 
+import cssText from "~fileContent/soundChangerStyles.css";
+
 const useEffect = makeLazy(() => React.useEffect);
 const useState = makeLazy(() => React.useState);
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 const DeleteIcon = LazyComponent(() => wreq(findModuleId("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z")!!).Z);
+const SoundIcon = LazyComponent(() => wreq(findModuleId("M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6")!!).Z);
 const soundsModule = makeLazy(() => findModuleId("call_ringing.mp3"));
 
 type SoundsChanged = {
@@ -39,6 +42,7 @@ type SoundsChanged = {
 const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void; }) => {
     const [sounds, setSounds] = useState()({});
     const [soundsChanged, setSoundsChanged] = useState()<SoundsChanged>([]);
+    const [audioPreviews, setAudioPreviews] = useState()<{ [key: string]: HTMLAudioElement; }>({});
 
     useEffect()(() => {
         const modId = soundsModule();
@@ -66,8 +70,37 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                         soundsChanged.map(sound => {
                             return (
                                 <tr key={sound.name} style={{ marginTop: "5%" }}>
-                                    <td style={{ textAlign: "left", top: "50%", transform: "translateY(-50%)", width: "50%" }} >
-                                        <Text variant="text-sm/normal">{sound.name.replace("./", "")}</Text>
+                                    <td style={{ top: "50%", transform: "translateY(-50%)", width: "50%" }} >
+                                        <div className="SC sound-label" style={{ display: "flex", flexDirection: "row", textAlign: "left", rowGap: "10px", columnGap: "10px", justifyItems: "center" }}>
+                                            <Text style={{ marginTop: "0.8%" }} variant="text-sm/normal">{sound.name.replace("./", "")}</Text>
+                                            <span
+                                                onClick={e => {
+                                                    const revTreePath = (e as any).nativeEvent.path as HTMLElement[];
+                                                    const svg = revTreePath.find(e => e.tagName.toLowerCase() === "svg");
+                                                    const isNowPlaying = svg?.classList.toggle("audio-preview-playing");
+
+                                                    // Lol, discord can't even do this in their notification settings where you can preview audio...
+                                                    // JK, discord please hire me
+                                                    // ~ ArjixWasTaken
+                                                    if (audioPreviews[sound.name] && !audioPreviews[sound.name].paused) {
+                                                        audioPreviews[sound.name].pause();
+                                                        return;
+                                                    }
+
+                                                    const audio = new Audio();
+                                                    audio.src = !sound.new_link.trim().length ? `https://discord.com/assets/${sound.original_link}` : sound.new_link;
+                                                    setAudioPreviews(old => { old[sound.name] = audio; return old; });
+
+                                                    audio.play();
+                                                    audio.onended = () => {
+                                                        svg?.classList.toggle("audio-preview-playing");
+                                                        audio.onended = function () { };
+                                                    };
+                                                }}
+                                            >
+                                                <SoundIcon color="black" />
+                                            </span>
+                                        </div>
                                     </td>
                                     <td style={{ width: "45%" }}>
                                         <TextArea
@@ -130,7 +163,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                     }}
                 />
             </div>
-        </ErrorBoundary>
+        </ErrorBoundary >
     );
 };
 
@@ -151,5 +184,14 @@ export default definePlugin({
             match: /(function \w\((\w)\){)(.*?return \w\(\w\)})/,
             replace: (m, r, e, o) => `${r};if(Vencord.Settings.plugins.SoundChanger.enabled && (sound_=Vencord.Settings.plugins.SoundChanger.soundsChanged.find(a=>a.name===${e}))) return sound_.new_link;${o}`
         }
-    }]
+    }],
+    start() {
+        this.style = document.createElement("style");
+        this.style.id = "SoundChanger";
+        this.style.innerHTML = cssText;
+        document.head.appendChild(this.style);
+    },
+    stop() {
+        document.head.removeChild(this.style);
+    }
 });

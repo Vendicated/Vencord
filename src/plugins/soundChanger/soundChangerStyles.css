@@ -1,0 +1,22 @@
+.SC.sound-label svg:not(.audio-preview-playing) {
+    display: none;
+}
+
+.SC.sound-label:hover svg {
+    display: inherit;
+}
+
+.SC.sound-label:hover svg:hover path {
+    fill: var(--white-660);
+}
+
+.SC.sound-label svg:hover path,
+.SC.sound-label svg.audio-preview-playing path {
+    transition: fill linear 100ms;
+    fill: var(--white-560) !important;
+    /* cursor: pointer; */
+}
+
+.SC.sound-label span:hover {
+    cursor: pointer;
+}
