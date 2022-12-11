@@ -39,6 +39,13 @@ type SoundsChanged = {
     new_link: string;
 }[];
 
+const snakeToTitleCase = txt => txt.split(/_+/).map((w: string) => {
+    const word = w.trim();
+    return word[0].toUpperCase() + word.slice(1).toLowerCase();
+}).join(" ");
+
+const filenameToTitleCase = txt => snakeToTitleCase(txt.replace(".mp3", "").replace("./", ""));
+
 const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void; }) => {
     const [sounds, setSounds] = useState()({});
     const [soundsChanged, setSoundsChanged] = useState()<SoundsChanged>([]);
@@ -72,7 +79,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                 <tr key={sound.name} style={{ marginTop: "5%" }}>
                                     <td style={{ top: "50%", transform: "translateY(-50%)", width: "50%" }} >
                                         <div className="SC sound-label" style={{ display: "flex", flexDirection: "row", textAlign: "left", rowGap: "10px", columnGap: "10px", justifyItems: "center" }}>
-                                            <Text style={{ marginTop: "0.8%" }} variant="text-sm/normal">{sound.name.replace("./", "")}</Text>
+                                            <Text style={{ marginTop: "0.8%" }} variant="text-sm/normal">{filenameToTitleCase(sound.name)}</Text>
                                             <span
                                                 onClick={e => {
                                                     const revTreePath = (e as any).nativeEvent.path as HTMLElement[];
@@ -149,7 +156,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                     options={
                         Object.keys(sounds)
                             .filter(sound => soundsChanged.find(a => a.name === sound) === undefined)
-                            .map(sound => ({ label: sound.replace("./", ""), value: sound }))
+                            .map(sound => ({ label: filenameToTitleCase(sound), value: sound }))
                     }
                     placeholder="Change a sound"
                     maxVisibleItems={5}
