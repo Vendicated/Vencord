@@ -46,6 +46,16 @@ const snakeToTitleCase = txt => txt.split(/_+/).map((w: string) => {
 
 const filenameToTitleCase = txt => snakeToTitleCase(txt.replace(".mp3", "").replace("./", ""));
 
+const isAudioValid = (src: string) => {
+    const a = new Audio(src);
+    return new Promise(resolve => {
+        a.addEventListener("error", () => resolve(false));
+        a.addEventListener("canplay", () => resolve(true));
+        setTimeout(() => resolve(false), 2000);
+        a.load();
+    });
+};
+
 const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void; }) => {
     const [sounds, setSounds] = useState()({});
     const [soundsChanged, setSoundsChanged] = useState()<SoundsChanged>([]);
@@ -92,7 +102,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                                 onClick={e => {
                                                     const revTreePath = (e as any).nativeEvent.path as HTMLElement[];
                                                     const svg = revTreePath.find(e => e.tagName.toLowerCase() === "svg");
-                                                    const isNowPlaying = svg?.classList.toggle("audio-preview-playing");
+                                                    svg?.classList.toggle("audio-preview-playing");
 
                                                     // Lol, discord can't even do this in their notification settings where you can preview audio...
                                                     // JK, discord please hire me
@@ -125,10 +135,23 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                             onChange={e => {
                                                 for (const s of soundsChanged) {
                                                     if (s.name === sound.name) {
-                                                        s.new_link = e.nativeEvent.target.value;
+                                                        s.new_link = e.nativeEvent.target.value.trim();
                                                         setSoundsChanged(_ => { save(soundsChanged); return soundsChanged; });
                                                         break;
                                                     }
+                                                }
+                                            }}
+                                            onBlur={async e => {
+                                                const link = e.nativeEvent.target.value.trim();
+                                                if (!link.length) return;
+
+                                                // TODO: Do more than just toasting an error message...
+                                                if (!await isAudioValid(link)) {
+                                                    Toasts.show({
+                                                        type: Toasts.Type.FAILURE,
+                                                        message: "Link points to an ivalid audio file!",
+                                                        id: Toasts.genId()
+                                                    });
                                                 }
                                             }}
                                             value={soundsChanged.find(s => s.name === sound.name)?.new_link}
