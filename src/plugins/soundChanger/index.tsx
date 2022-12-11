@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { LazyComponent, makeLazy } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findLazy, findModuleId, wreq } from "@webpack";
-import { React, Select, Text, TextArea } from "@webpack/common";
+import { React, Select, Text, TextArea, Toasts } from "@webpack/common";
 
 import cssText from "~fileContent/soundChangerStyles.css";
 
@@ -53,7 +53,15 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
 
     useEffect()(() => {
         const modId = soundsModule();
-        if (modId == null) return; // Should never happen, but oh well
+        if (modId == null) {
+            // Should never happen, but you never know...
+            Toasts.show({
+                type: Toasts.Type.FAILURE,
+                message: "Couldn't find the module responsible for managing the sound links.",
+                id: Toasts.genId()
+            });
+            return;
+        }
 
         setSounds(JSON.parse(`${wreq.m[modId]}`.match(/\w=(\{(?:.|\n)*?\})/)!![1]));
         setSoundsChanged((Settings.plugins.SoundChanger.soundsChanged || []) as SoundsChanged);
