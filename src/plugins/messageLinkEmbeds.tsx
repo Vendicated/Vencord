@@ -212,10 +212,12 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                 linkedMessage ??= MessageStore.getMessage(channelID, messageID);
                 if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
                 else {
+                    const msg = { ...message } as any;
+                    delete msg.embeds;
                     messageFetchQueue.push(() => fetchMessage(channelID, messageID)
                         .then(m => m && FluxDispatcher.dispatch({
                             type: "MESSAGE_UPDATE",
-                            message
+                            message: msg
                         }))
                     );
                     continue;
