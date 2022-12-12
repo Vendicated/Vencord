@@ -21,7 +21,7 @@ import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { LazyComponent } from "@utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { proxyLazy } from "@utils/proxyLazy";
 import { OptionType, Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
@@ -84,6 +84,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
+    const hasSettings = Boolean(pluginSettings && plugin.options);
+
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
@@ -121,33 +123,33 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     function renderSettings() {
-        if (!pluginSettings || !plugin.options) {
+        if (!hasSettings || !plugin.options) { //had plans to merge in a single boolean but typescript hates me
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+        } else {
+            const options = Object.entries(plugin.options).map(([key, setting]) => {
+                function onChange(newValue: any) {
+                    setTempSettings(s => ({ ...s, [key]: newValue }));
+                }
+
+                function onError(hasError: boolean) {
+                    setErrors(e => ({ ...e, [key]: hasError }));
+                }
+
+                const Component = Components[setting.type];
+                return (
+                    <Component
+                        id={key}
+                        key={key}
+                        option={setting}
+                        onChange={onChange}
+                        onError={onError}
+                        pluginSettings={pluginSettings}
+                    />
+                );
+            });
+
+            return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
         }
-
-        const options = Object.entries(plugin.options).map(([key, setting]) => {
-            function onChange(newValue: any) {
-                setTempSettings(s => ({ ...s, [key]: newValue }));
-            }
-
-            function onError(hasError: boolean) {
-                setErrors(e => ({ ...e, [key]: hasError }));
-            }
-
-            const Component = Components[setting.type];
-            return (
-                <Component
-                    id={key}
-                    key={key}
-                    option={setting}
-                    onChange={onChange}
-                    onError={onError}
-                    pluginSettings={pluginSettings}
-                />
-            );
-        });
-
-        return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
     }
 
     function renderMoreUsers(_label: string, count: number) {
@@ -172,8 +174,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-md/bold">{plugin.name}</Text>
+            <ModalHeader separator={false}>
+                <Text variant="heading-lg/medium" style={{ flexGrow: 1 }}>{plugin.name}</Text>
+                <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
                 <Forms.FormSection>
@@ -212,9 +215,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Button
                             onClick={onClose}
                             size={Button.Sizes.SMALL}
-                            color={Button.Colors.RED}
+                            color={Button.Colors.WHITE}
+                            look={Button.Looks.LINK}
                         >
-                            Cancel
+                            {hasSettings ? "Cancel" : "Close"}
                         </Button>
                         <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -224,7 +228,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onClick={saveAndClose}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
+                                    disabled={!canSubmit() || !hasSettings}
                                 >
                                     Save & Close
                                 </Button>
