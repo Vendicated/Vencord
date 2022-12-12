@@ -89,7 +89,7 @@ function openViewRawModal(msg: Message) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/medium" style={{ flexGrow: 1 }}>View Raw</Text>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>
