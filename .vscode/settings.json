@@ -12,5 +12,6 @@
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",
-    "javascript.preferences.quoteStyle": "double"
+    "javascript.preferences.quoteStyle": "double",
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
