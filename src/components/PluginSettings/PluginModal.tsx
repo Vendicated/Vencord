@@ -123,7 +123,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     function renderSettings() {
-        if (!hasSettings || !plugin.options) { // typescript hates me, so that's why i've checked for plugin.options twice
+        if (!hasSettings || !plugin.options) {
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
