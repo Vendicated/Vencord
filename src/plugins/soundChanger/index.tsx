@@ -62,6 +62,8 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
     const [audioPreviews, setAudioPreviews] = useState()<{ [key: string]: HTMLAudioElement; }>({});
 
     useEffect()(() => {
+        ensureCss();
+
         const modId = soundsModule();
         if (modId == null) {
             // Should never happen, but you never know...
@@ -205,6 +207,14 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
     );
 };
 
+const ensureCss = () => {
+    if (document.querySelector("style#SoundChanger")) return;
+    const style = document.createElement("style");
+    style.id = "SoundChanger";
+    style.innerHTML = cssText;
+    document.head.appendChild(style);
+};
+
 export default definePlugin({
     name: "SoundChanger",
     authors: [Devs.Arjix],
@@ -223,13 +233,4 @@ export default definePlugin({
             replace: (m, r, e, o) => `${r};if(Vencord.Settings.plugins.SoundChanger.enabled && (sound_=Vencord.Settings.plugins.SoundChanger.soundsChanged.find(a=>a.name===${e}))) return sound_.new_link;${o}`
         }
     }],
-    start() {
-        this.style = document.createElement("style");
-        this.style.id = "SoundChanger";
-        this.style.innerHTML = cssText;
-        document.head.appendChild(this.style);
-    },
-    stop() {
-        document.head.removeChild(this.style);
-    }
 });
