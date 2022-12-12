@@ -182,7 +182,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
                     <Forms.FormText>{plugin.description}</Forms.FormText>
-                    <div style={{ marginTop: 8, marginBottom: 8, width: "fit-content" }}>
+                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
+                    <div style={{ width: "fit-content", marginBottom: 8 }}>
                         <UserSummaryItem
                             users={authors}
                             count={plugin.authors.length}
@@ -209,7 +210,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
-            <ModalFooter>
+            {hasSettings && <ModalFooter>
                 <Flex flexDirection="column" style={{ width: "100%" }}>
                     <Flex style={{ marginLeft: "auto" }}>
                         <Button
@@ -218,7 +219,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             color={Button.Colors.WHITE}
                             look={Button.Looks.LINK}
                         >
-                            {hasSettings ? "Cancel" : "Close"}
+                            Cancel
                         </Button>
                         <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -228,7 +229,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onClick={saveAndClose}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit() || !hasSettings}
+                                    disabled={!canSubmit()}
                                 >
                                     Save & Close
                                 </Button>
@@ -237,7 +238,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </Flex>
                     {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
                 </Flex>
-            </ModalFooter>
+            </ModalFooter>}
         </ModalRoot>
     );
 }
