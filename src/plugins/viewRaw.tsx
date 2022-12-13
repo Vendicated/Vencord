@@ -21,9 +21,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
-import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, ChannelStore, Forms, Margins, Parser } from "@webpack/common";
+import { Button, ChannelStore, Forms, Margins, Parser, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -89,30 +89,33 @@ function openViewRawModal(msg: Message) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Forms.FormTitle tag="h1">View Raw</Forms.FormTitle>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
-                <ModalContent style={{ padding: "1em" }}>
-                    <Flex style={{ marginBottom: "1em", marginTop: "1em" }}>
-                        <Button onClick={() => copyWithToast(msg.content, "Content copied to clipboard!")}>
-                            Copy Raw Content
-                        </Button>
+                <ModalContent>
+                    <div style={{ padding: "16px 0" }}>
+                        {!!msg.content && (
+                            <>
+                                <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                                <CodeBlock content={msg.content} lang="" />
+                                <Forms.FormDivider classes={Margins.marginBottom20} />
+                            </>
+                        )}
+
+                        <Forms.FormTitle tag="h5">Message Data</Forms.FormTitle>
+                        <CodeBlock content={msgJson} lang="json" />
+                    </div>
+                </ModalContent >
+                <ModalFooter>
+                    <Flex cellSpacing={10}>
                         <Button onClick={() => copyWithToast(msgJson, "Message data copied to clipboard!")}>
                             Copy Message JSON
                         </Button>
+                        <Button onClick={() => copyWithToast(msg.content, "Content copied to clipboard!")}>
+                            Copy Raw Content
+                        </Button>
                     </Flex>
-
-                    {!!msg.content && (
-                        <>
-                            <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
-                            <CodeBlock content={msg.content} lang="" />
-                            <Forms.FormDivider classes={Margins.marginBottom20} />
-                        </>
-                    )}
-
-                    <Forms.FormTitle tag="h5">Message Data</Forms.FormTitle>
-                    <CodeBlock content={msgJson} lang="json" />
-                </ModalContent >
+                </ModalFooter>
             </ModalRoot >
         </ErrorBoundary >
     ));
