@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -29,10 +29,14 @@ function mock(input: string): string {
     return output;
 }
 
+function google(url): string {
+    return "<https://googlethatforyou.com?q=" + url + ">";
+}
+
 export default definePlugin({
     name: "MoreCommands",
     description: "echo, lenny, mock",
-    authors: [Devs.Arjix, Devs.echo, Devs.Samu],
+    authors: [Devs.Arjix, Devs.echo, Devs.Samu, Devs.Sambot],
     dependencies: ["CommandsAPI"],
     commands: [
         {
@@ -62,5 +66,19 @@ export default definePlugin({
                 content: mock(findOption(opts, "message", ""))
             }),
         },
+        {
+            name: "lmgt",
+            description: "For those who don't want to google it themselves.",
+            options: [
+                {
+                    name: "query",
+                    description: "What query you want to google.",
+                    type: ApplicationCommandOptionType.STRING,
+                },
+            ],
+            execute: opts => ({
+                content: google(findOption(opts, "query", "")),
+            })
+        }
     ]
 });
