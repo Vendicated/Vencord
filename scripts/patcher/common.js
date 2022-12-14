@@ -21,6 +21,20 @@ const readline = require("readline");
 const fs = require("fs");
 const menu = require("console-menu");
 
+function pathToBranch(dir) {
+    dir = dir.toLowerCase();
+    if (dir.endsWith("development")) {
+        return "development";
+    }
+    if (dir.endsWith("canary")) {
+        return "canary";
+    }
+    if (dir.endsWith("ptb")) {
+        return "ptb";
+    }
+    return "stable";
+}
+
 const BRANCH_NAMES = [
     "Discord",
     "DiscordPTB",
@@ -329,6 +343,7 @@ function getLinuxDirs() {
 }
 
 module.exports = {
+    pathToBranch,
     BRANCH_NAMES,
     MACOS_DISCORD_DIRS,
     LINUX_DISCORD_DIRS,
