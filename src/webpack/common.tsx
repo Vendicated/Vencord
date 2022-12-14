@@ -52,6 +52,7 @@ export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
+export let GuildMemberStore: Stores.GuildMemberStore;
 export let RelationshipStore: Stores.RelationshipStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
@@ -163,6 +164,7 @@ waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
 waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
+waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 waitFor("getRelationshipType", m => RelationshipStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);

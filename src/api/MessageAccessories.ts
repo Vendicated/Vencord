@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export type AccessoryCallback = (props: Record<string, any>) => JSX.Element;
+export type AccessoryCallback = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
 export type Accessory = {
     callback: AccessoryCallback;
     position?: number;
@@ -44,6 +44,15 @@ export function _modifyAccessories(
     props: Record<string, any>
 ) {
     for (const accessory of accessories.values()) {
+        let accessories = accessory.callback(props);
+        if (accessories == null)
+            continue;
+
+        if (!Array.isArray(accessories))
+            accessories = [accessories];
+        else if (accessories.length === 0)
+            continue;
+
         elements.splice(
             accessory.position != null
                 ? accessory.position < 0
@@ -51,7 +60,7 @@ export function _modifyAccessories(
                     : accessory.position
                 : elements.length,
             0,
-            accessory.callback(props)
+            ...accessories.filter(e => e != null) as JSX.Element[]
         );
     }
 
