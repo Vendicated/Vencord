@@ -71,7 +71,7 @@ type Repeat = "off" | "track" | "context";
 export const SpotifyStore = proxyLazy(() => {
     // TODO: Move this elsewhere
     const style = document.createElement("style");
-    style.innerHTML = cssText;
+    style.innerText = cssText;
     document.head.appendChild(style);
 
     // For some reason ts hates extends Flux.Store
