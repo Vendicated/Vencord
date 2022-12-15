@@ -14,20 +14,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
-// eslint-disable-next-line header/header
+
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-type Reply = {
+interface Reply {
     message: {
         author: {
             id: string;
         };
     };
-};
+}
 
 export default definePlugin({
     name: "NoReplyMention",
@@ -35,9 +35,10 @@ export default definePlugin({
     authors: [Devs.DustyAngel47, Devs.axyie],
     options: {
         exemptList: {
-            description: "List of users to exempt from this plugin",
+            description:
+                "List of users to exempt from this plugin (separated by commas)",
             type: OptionType.STRING,
-            default: "256075614493456567,256075614493456562",
+            default: "1234567890123445,1234567890123445",
         },
     },
     shouldMention(reply: Reply) {
