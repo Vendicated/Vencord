@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
+import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
+import { PresenceStore, Tooltip } from "@webpack/common";
 import User from "discord-types/general/User.js";
-
-import { addDecorator, removeDecorator } from "../api/MemberListDecorators";
-import { addDecoration, removeDecoration } from "../api/MessageDecorations";
-import { Settings } from "../api/settings";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { Devs } from "../utils/constants";
-import definePlugin, { OptionType } from "../utils/types";
-import { PresenceStore, Tooltip } from "../webpack/common";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -90,20 +89,6 @@ const PlatformIndicator = ({ user, span }: { user: User, span?: boolean; }) => {
     return <div style={{ display: "flex", alignItems: "center" }}>{indicator}</div>;
 };
 
-function accountForOldSettings(value: string) {
-    const settings = Settings.plugins.PlatformIndicators;
-    if (settings.displayMode) {
-        if (settings.displayMode !== "both") settings[settings.displayMode] = true;
-        else {
-            settings.list = true;
-            settings.badges = true;
-        }
-        settings.messages = true;
-        delete settings.displayMode;
-    }
-    return settings[value];
-}
-
 const indicatorLocations = {
     list: {
         description: "In the member list",
@@ -138,8 +123,21 @@ export default definePlugin({
     authors: [Devs.kemo, Devs.TheSun],
 
     start() {
+        const settings = Settings.plugins.PlatformIndicators,
+            { displayMode } = settings;
+        // transfer settings from the old ones, which had a select menu instead of booleans
+        if (displayMode) {
+            if (displayMode !== "both") settings[displayMode] = true;
+            else {
+                settings.list = true;
+                settings.badges = true;
+            }
+            settings.messages = true;
+            delete settings.displayMode;
+        }
+
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (accountForOldSettings(key)) value.onEnable();
+            if (settings[key]) value.onEnable();
         });
     },
 
@@ -153,7 +151,7 @@ export default definePlugin({
         {
             // User badges
             find: "Messages.PROFILE_USER_BADGES",
-            predicate: () => accountForOldSettings("badges"),
+            predicate: () => Settings.plugins.PlatformIndicators.badges,
             replacement: {
                 match: /(Messages\.PROFILE_USER_BADGES,role:"group",children:)(.+?\.key\)\}\)\))/,
                 replace: "$1[Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(e)].concat($2)"
