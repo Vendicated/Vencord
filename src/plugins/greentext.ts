@@ -20,16 +20,26 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "NoReplyMention",
-    description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47],
+    name: "Greentext",
+    description: "Bring greentext to Discord, for whatever reason.",
+    authors: [Devs.Nightdavisao, Devs.axyie],
+    css: {
+        id: "greentext-css",
+        content: ".greentext { color: #789922 }",
+    },
     patches: [
+        // Webpack Module 62741
         {
-            find: "CREATE_PENDING_REPLY:function",
-            replacement: {
-                match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
-                replace: "CREATE_PENDING_REPLY:function($1){$1.shouldMention=false;"
-            }
+            find: "",
         }
-    ]
+    ],
+    start() {
+        const style = this.style = document.createElement("style");
+        style.textContent = this.css.content;
+        style.id = this.css.id;
+        document.head.appendChild(style);
+    },
+    stop() {
+        this.style?.remove();
+    }
 });
