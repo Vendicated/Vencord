@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "SilentTyping",

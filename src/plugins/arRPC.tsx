@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { popNotice, showNotice } from "../api/Notices";
-import { Link } from "../components/Link";
-import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin from "../utils/types";
-import { filters, mapMangledModuleLazy } from "../webpack";
-import { FluxDispatcher, Forms, Toasts } from "../webpack/common";
+import { popNotice, showNotice } from "@api/Notices";
+import { Link } from "@components/Link";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
 const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
@@ -31,7 +30,7 @@ const assetManager = mapMangledModuleLazy(
     }
 );
 
-const rpcManager = lazyWebpack(filters.byCode(".APPLICATION_RPC("));
+const lookupRpcApp = findByCodeLazy(".APPLICATION_RPC(");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
@@ -40,7 +39,7 @@ async function lookupAsset(applicationId: string, key: string): Promise<string> 
 const apps: any = {};
 async function lookupApp(applicationId: string): Promise<string> {
     const socket: any = {};
-    await rpcManager.lookupApp(socket, applicationId);
+    await lookupRpcApp(socket, applicationId);
     return socket.application;
 }
 

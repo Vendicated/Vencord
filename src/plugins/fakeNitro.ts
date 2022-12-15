@@ -16,18 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "../api/MessageEvents";
-import { migratePluginSettings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import { ApngDisposeOp, getGifEncoder, importApngJs } from "../utils/dependencies";
-import { lazyWebpack } from "../utils/misc";
-import definePlugin, { OptionType } from "../utils/types";
-import { Settings } from "../Vencord";
-import { filters } from "../webpack";
-import { ChannelStore, UserStore } from "../webpack/common";
+import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { migratePluginSettings, Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { ChannelStore, UserStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
-const promptToUpload = lazyWebpack(filters.byCode("UPLOAD_FILE_LIMIT_ERROR"));
+const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 
 interface BaseSticker {
     available: boolean;
@@ -73,8 +71,8 @@ export default definePlugin({
                 "canUseEmojisEverywhere"
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function(e){return true;}`
+                    match: new RegExp(`${func}:function\\(.+?\\{`),
+                    replace: "$&return true;"
                 };
             })
         },
@@ -82,8 +80,8 @@ export default definePlugin({
             find: "canUseAnimatedEmojis:function",
             predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
-                match: /canUseStickersEverywhere:function\(.+?}/,
-                replace: "canUseStickersEverywhere:function(e){return true;}"
+                match: /canUseStickersEverywhere:function\(.+?\{/,
+                replace: "$&return true;"
             },
         },
         {
@@ -103,8 +101,8 @@ export default definePlugin({
                 "canStreamMidQuality"
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(.+?}`),
-                    replace: `${func}:function(e){return true;}`
+                    match: new RegExp(`${func}:function\\(.+?\\{`),
+                    replace: "$&return true;"
                 };
             })
         },
@@ -225,8 +223,8 @@ export default definePlugin({
             return;
         }
 
-        const EmojiStore = lazyWebpack(filters.byProps("getCustomEmojiById"));
-        const StickerStore = lazyWebpack(filters.byProps("getAllGuildStickers")) as {
+        const EmojiStore = findByPropsLazy("getCustomEmojiById");
+        const StickerStore = findByPropsLazy("getAllGuildStickers") as {
             getPremiumPacks(): StickerPack[];
             getAllGuildStickers(): Map<string, Sticker[]>;
             getStickerById(id: string): Sticker | undefined;

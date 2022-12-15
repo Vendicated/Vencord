@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "../api/settings";
-import { Devs } from "../utils/constants";
-import { makeLazy } from "../utils/misc";
-import definePlugin, { OptionType } from "../utils/types";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import { makeLazy } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "BetterNotesBox",

@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { generateId } from "@api/Commands";
+import { useSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { LazyComponent } from "@utils/misc";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
+import { OptionType, Plugin } from "@utils/types";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import { generateId } from "../../api/Commands";
-import { useSettings } from "../../api/settings";
-import { LazyComponent, lazyWebpack } from "../../utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "../../utils/modal";
-import { proxyLazy } from "../../utils/proxyLazy";
-import { OptionType, Plugin } from "../../utils/types";
-import { filters, findByCode } from "../../webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "../../webpack/common";
-import ErrorBoundary from "../ErrorBoundary";
-import { Flex } from "../Flex";
 import {
     ISettingElementProps,
     SettingBooleanComponent,
@@ -40,7 +40,7 @@ import {
 } from "./components";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = lazyWebpack(filters.byProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar"));
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {
@@ -84,6 +84,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
+    const hasSettings = Boolean(pluginSettings && plugin.options);
+
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
@@ -121,33 +123,33 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     function renderSettings() {
-        if (!pluginSettings || !plugin.options) {
+        if (!hasSettings || !plugin.options) {
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+        } else {
+            const options = Object.entries(plugin.options).map(([key, setting]) => {
+                function onChange(newValue: any) {
+                    setTempSettings(s => ({ ...s, [key]: newValue }));
+                }
+
+                function onError(hasError: boolean) {
+                    setErrors(e => ({ ...e, [key]: hasError }));
+                }
+
+                const Component = Components[setting.type];
+                return (
+                    <Component
+                        id={key}
+                        key={key}
+                        option={setting}
+                        onChange={onChange}
+                        onError={onError}
+                        pluginSettings={pluginSettings}
+                    />
+                );
+            });
+
+            return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
         }
-
-        const options = Object.entries(plugin.options).map(([key, setting]) => {
-            function onChange(newValue: any) {
-                setTempSettings(s => ({ ...s, [key]: newValue }));
-            }
-
-            function onError(hasError: boolean) {
-                setErrors(e => ({ ...e, [key]: hasError }));
-            }
-
-            const Component = Components[setting.type];
-            return (
-                <Component
-                    id={key}
-                    key={key}
-                    option={setting}
-                    onChange={onChange}
-                    onError={onError}
-                    pluginSettings={pluginSettings}
-                />
-            );
-        });
-
-        return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
     }
 
     function renderMoreUsers(_label: string, count: number) {
@@ -172,14 +174,16 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-md/bold">{plugin.name}</Text>
+            <ModalHeader separator={false}>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
+                <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
                     <Forms.FormText>{plugin.description}</Forms.FormText>
-                    <div style={{ marginTop: 8, marginBottom: 8, width: "fit-content" }}>
+                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
+                    <div style={{ width: "fit-content", marginBottom: 8 }}>
                         <UserSummaryItem
                             users={authors}
                             count={plugin.authors.length}
@@ -196,7 +200,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <div style={{ marginBottom: 8 }}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
-                                <plugin.settingsAboutComponent />
+                                <plugin.settingsAboutComponent tempSettings={tempSettings} />
                             </ErrorBoundary>
                         </Forms.FormSection>
                     </div>
@@ -206,13 +210,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
-            <ModalFooter>
+            {hasSettings && <ModalFooter>
                 <Flex flexDirection="column" style={{ width: "100%" }}>
                     <Flex style={{ marginLeft: "auto" }}>
                         <Button
                             onClick={onClose}
                             size={Button.Sizes.SMALL}
-                            color={Button.Colors.RED}
+                            color={Button.Colors.WHITE}
+                            look={Button.Looks.LINK}
                         >
                             Cancel
                         </Button>
@@ -233,7 +238,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </Flex>
                     {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
                 </Flex>
-            </ModalFooter>
+            </ModalFooter>}
         </ModalRoot>
     );
 }

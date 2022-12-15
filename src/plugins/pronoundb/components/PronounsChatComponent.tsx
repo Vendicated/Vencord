@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+import { classes, useAwaiter } from "@utils/misc";
+import { findByPropsLazy } from "@webpack";
+import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Settings } from "../../../Vencord";
-import { filters } from "../../../webpack";
-import { UserStore } from "../../../webpack/common";
 import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping } from "../types";
 
-const styles: Record<string, string> = lazyWebpack(filters.byProps("timestampInline"));
+const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
 export default function PronounsChatComponentWrapper({ message }: { message: Message; }) {
     // Don't bother fetching bot or system users
@@ -39,11 +39,10 @@ export default function PronounsChatComponentWrapper({ message }: { message: Mes
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const [result, , isPending] = useAwaiter(
-        () => fetchPronouns(message.author.id),
-        null,
-        e => console.error("Fetching pronouns failed: ", e)
-    );
+    const [result, , isPending] = useAwaiter(() => fetchPronouns(message.author.id), {
+        fallbackValue: null,
+        onError: e => console.error("Fetching pronouns failed: ", e)
+    });
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return a span with the pronouns
     if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {

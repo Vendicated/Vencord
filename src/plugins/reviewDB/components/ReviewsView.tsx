@@ -16,17 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classes, useAwaiter } from "@utils/misc";
+import { findLazy } from "@webpack";
+import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
-import { classes, lazyWebpack, useAwaiter } from "../../../utils/misc";
-import { Forms, Text, UserStore } from "../../../webpack/common";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = lazyWebpack(m => typeof m.textarea === "string");
+const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
-    const [reviews, _, isLoading, refetch] = useAwaiter(() => getReviews(userId), []);
+    const [refetchCount, setRefetchCount] = React.useState(0);
+    const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
+        fallbackValue: [],
+        deps: [refetchCount],
+    });
+
+    const dirtyRefetch = () => setRefetchCount(refetchCount + 1);
 
     if (isLoading) return null;
 
@@ -39,7 +46,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             }).then(res => {
                 if (res === 0 || res === 1) {
                     (target as HTMLInputElement).value = ""; // clear the input
-                    refetch();
+                    dirtyRefetch();
                 }
             });
         }
@@ -63,7 +70,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                     <ReviewComponent
                         key={review.id}
                         review={review}
-                        refetch={refetch}
+                        refetch={dirtyRefetch}
                     />
                 )}
                 {reviews?.length === 0 && (

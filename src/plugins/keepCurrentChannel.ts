@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "../api";
-import { Devs } from "../utils/constants";
-import definePlugin from "../utils/types";
-import { ChannelStore, FluxDispatcher, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "../webpack/common";
+import * as DataStore from "@api/DataStore";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { ChannelStore, FluxDispatcher, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export interface LogoutEvent {
     type: "LOGOUT";
@@ -40,7 +40,7 @@ interface PreviousChannel {
 
 export default definePlugin({
     name: "KeepCurrentChannel",
-    description: "Attempt to navigate the channel you were in before switching accounts or loading Discord.",
+    description: "Attempt to navigate to the channel you were in before switching accounts or loading Discord.",
     authors: [Devs.Nuckyz],
 
     isSwitchingAccount: false,

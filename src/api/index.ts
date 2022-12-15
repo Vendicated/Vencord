@@ -23,6 +23,7 @@ import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
+import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
 import * as $ServerList from "./ServerList";
 
@@ -62,6 +63,10 @@ const DataStore = $DataStore;
  */
 const MessageAccessories = $MessageAccessories;
 /**
+ * An API allowing you to add custom buttons in the message popover
+ */
+const MessagePopover = $MessagePopover;
+/**
  * An API allowing you to add badges to user profiles
  */
 const Badges = $Badges;
@@ -78,4 +83,4 @@ const MessageDecorations = $MessageDecorations;
  */
 const MemberListDecorators = $MemberListDecorators;
 
-export { Badges, Commands, DataStore, MemberListDecorators, MessageAccessories, MessageDecorations, MessageEvents, Notices, ServerList };
+export { Badges, Commands, DataStore, MemberListDecorators, MessageAccessories, MessageDecorations, MessageEvents, MessagePopover, Notices, ServerList };

@@ -18,6 +18,9 @@
 
 import "./updater";
 
+import { debounce } from "@utils/debounce";
+import IpcEvents from "@utils/IpcEvents";
+import { Queue } from "@utils/Queue";
 import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
@@ -25,9 +28,6 @@ import { join } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { debounce } from "../utils/debounce";
-import IpcEvents from "../utils/IpcEvents";
-import { Queue } from "../utils/Queue";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
@@ -89,8 +89,12 @@ export function initIpc(mainWindow: BrowserWindow) {
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     const win = new BrowserWindow({
         title: "QuickCss Editor",
+        autoHideMenuBar: true,
+        darkTheme: true,
         webPreferences: {
             preload: join(__dirname, "preload.js"),
+            contextIsolation: true,
+            nodeIntegration: false
         }
     });
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);

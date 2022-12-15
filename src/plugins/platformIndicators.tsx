@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { User } from "discord-types/general";
+import { findByCodeLazy } from "@webpack";
+import User from "discord-types/general/User.js";
 
 import { addDecorator, removeDecorator } from "../api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "../api/MessageDecorations";
 import { Settings } from "../api/settings";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Devs } from "../utils/constants";
-import { lazyWebpack } from "../utils/misc";
 import definePlugin, { OptionType } from "../utils/types";
-import { filters } from "../webpack";
 import { PresenceStore, Tooltip } from "../webpack/common";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
@@ -54,7 +53,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = lazyWebpack(filters.byCode("STATUS_YELLOW", "TWITCH", "STATUS_GREY"));
+const getStatusColor = findByCodeLazy("STATUS_YELLOW", "TWITCH", "STATUS_GREY");
 
 const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);

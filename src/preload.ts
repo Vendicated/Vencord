@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { debounce } from "@utils/debounce";
+import IpcEvents from "@utils/IpcEvents";
 import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { debounce } from "./utils/debounce";
-import IpcEvents from "./utils/IpcEvents";
 import VencordNative from "./VencordNative";
 
 if (electron.desktopCapturer === void 0) {

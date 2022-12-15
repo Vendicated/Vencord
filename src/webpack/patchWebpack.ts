@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { WEBPACK_CHUNK } from "../utils/constants";
-import Logger from "../utils/Logger";
+import { WEBPACK_CHUNK } from "@utils/constants";
+import Logger from "@utils/Logger";
+
 import { _initWebpack } from ".";
 
 let webpackChunk: any[];
@@ -136,6 +137,7 @@ function patchPush() {
 
                         // @ts-ignore we change all patch.replacement to array in plugins/index
                         for (const replacement of patch.replacement) {
+                            if (replacement.predicate && !replacement.predicate()) continue;
                             const lastMod = mod;
                             const lastCode = code;
 

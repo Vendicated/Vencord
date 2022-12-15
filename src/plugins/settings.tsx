@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
+import { LazyComponent } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
 
-import { Devs } from "../utils/constants";
-import { LazyComponent } from "../utils/misc";
-import definePlugin from "../utils/types";
+import gitHash from "~git-hash";
 
 const SettingsComponent = LazyComponent(() => require("../components/VencordSettings").default);
 
@@ -43,7 +45,23 @@ export default definePlugin({
     }, {
         find: "Messages.ACTIVITY_SETTINGS",
         replacement: {
-            match: /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/,
+            get match() {
+                switch (Settings.plugins.Settings.settingsLocation) {
+                    case "top": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.USER_SETTINGS\}/;
+                    case "aboveNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.BILLING_SETTINGS\}/;
+                    case "belowNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.APP_SETTINGS\}/;
+                    case "aboveActivity": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/;
+                    case "belowActivity": return /(?<=\{section:(.{1,2})\.ID\.DIVIDER},)\{section:"changelog"/;
+                    case "bottom": return /\{section:(.{1,2})\.ID\.CUSTOM,\s*element:.+?}/;
+                    default: {
+                        new Logger("Settings").error(
+                            new Error("No switch case matched????? Don't mess with the settings, silly")
+                        );
+                        // matches nothing
+                        return /(?!a)a/;
+                    }
+                }
+            },
             replace: (m, mod) => {
                 const updater = !IS_WEB ? '{section:"VencordUpdater",label:"Updater",element:Vencord.Plugins.plugins.Settings.tabs.updater},' : "";
                 const patchHelper = IS_DEV ? '{section:"VencordPatchHelper",label:"Patch Helper",element:Vencord.Components.PatchHelper},' : "";
@@ -60,6 +78,22 @@ export default definePlugin({
             }
         }
     }],
+
+    options: {
+        settingsLocation: {
+            type: OptionType.SELECT,
+            description: "Where to put the Vencord settings section",
+            options: [
+                { label: "At the very top", value: "top" },
+                { label: "Above the Nitro section", value: "aboveNitro" },
+                { label: "Below the Nitro section", value: "belowNitro" },
+                { label: "Above Activity Settings", value: "aboveActivity", default: true },
+                { label: "Below Activity Settings", value: "belowActivity" },
+                { label: "At the very bottom", value: "bottom" },
+            ],
+            restartNeeded: true
+        },
+    },
 
     tabs: {
         vencord: () => <SettingsComponent tab="VencordSettings" />,
