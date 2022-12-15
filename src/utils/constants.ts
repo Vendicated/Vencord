@@ -14,38 +14,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${
-    gitRemote ? ` (https://github.com/${gitRemote})` : ""
-}`;
+export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
 // Add yourself here if you made a plugin
 export const Devs = Object.freeze({
     Ven: {
         name: "Vendicated",
-        id: 343383572805058560n,
+        id: 343383572805058560n
     },
     Arjix: {
         name: "ArjixWasTaken",
-        id: 674710789138939916n,
+        id: 674710789138939916n
     },
     Cyn: {
         name: "Cynosphere",
-        id: 150745989836308480n,
+        id: 150745989836308480n
     },
     Megu: {
         name: "Megumin",
-        id: 545581357812678656n,
+        id: 545581357812678656n
     },
     botato: {
         name: "botato",
-        id: 440990343899643943n,
+        id: 440990343899643943n
     },
     obscurity: {
         name: "obscurity",
@@ -53,11 +51,11 @@ export const Devs = Object.freeze({
     },
     rushii: {
         name: "rushii",
-        id: 295190422244950017n,
+        id: 295190422244950017n
     },
     Glitch: {
         name: "Glitchy",
-        id: 269567451199569920n,
+        id: 269567451199569920n
     },
     Samu: {
         name: "Samu",
@@ -65,19 +63,19 @@ export const Devs = Object.freeze({
     },
     Animal: {
         name: "Animal",
-        id: 118437263754395652n,
+        id: 118437263754395652n
     },
     MaiKokain: {
         name: "Mai",
-        id: 722647978577363026n,
+        id: 722647978577363026n
     },
     echo: {
         name: "ECHO",
-        id: 712639419785412668n,
+        id: 712639419785412668n
     },
     katlyn: {
         name: "katlyn",
-        id: 250322741406859265n,
+        id: 250322741406859265n
     },
     nea: {
         name: "nea",
@@ -85,87 +83,87 @@ export const Devs = Object.freeze({
     },
     Nuckyz: {
         name: "Nuckyz",
-        id: 235834946571337729n,
+        id: 235834946571337729n
     },
     D3SOX: {
         name: "D3SOX",
-        id: 201052085641281538n,
+        id: 201052085641281538n
     },
     Nickyux: {
         name: "Nickyux",
-        id: 427146305651998721n,
+        id: 427146305651998721n
     },
     mantikafasi: {
         name: "mantikafasi",
-        id: 287555395151593473n,
+        id: 287555395151593473n
     },
     Xinto: {
         name: "Xinto",
-        id: 423915768191647755n,
+        id: 423915768191647755n
     },
     JacobTm: {
         name: "Jacob.Tm",
-        id: 302872992097107991n,
+        id: 302872992097107991n
     },
     DustyAngel47: {
         name: "DustyAngel47",
-        id: 714583473804935238n,
+        id: 714583473804935238n
     },
     BanTheNons: {
         name: "BanTheNons",
-        id: 460478012794863637n,
+        id: 460478012794863637n
     },
     BigDuck: {
         name: "BigDuck",
-        id: 1024588272623681609n,
+        id: 1024588272623681609n
     },
     AverageReactEnjoyer: {
         name: "Average React Enjoyer",
-        id: 1004904120056029256n,
+        id: 1004904120056029256n
     },
     adryd: {
         name: "adryd",
-        id: 0n,
+        id: 0n
     },
     Tyman: {
         name: "Tyman",
-        id: 487443883127472129n,
+        id: 487443883127472129n
     },
     afn: {
         name: "afn",
-        id: 420043923822608384n,
+        id: 420043923822608384n
     },
     KraXen72: {
         name: "KraXen72",
-        id: 379304073515499530n,
+        id: 379304073515499530n
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n,
+        id: 299693897859465228n
     },
     dzshn: {
         name: "dzshn",
-        id: 310449948011528192n,
+        id: 310449948011528192n
     },
     Ducko: {
         name: "Ducko",
-        id: 506482395269169153n,
+        id: 506482395269169153n
     },
     jewdev: {
         name: "jewdev",
-        id: 222369866529636353n,
+        id: 222369866529636353n
     },
     Luna: {
         name: "Luny",
-        id: 821472922140803112n,
+        id: 821472922140803112n
     },
     Vap: {
         name: "Vap0r1ze",
-        id: 454072114492866560n,
+        id: 454072114492866560n
     },
     KingFish: {
         name: "King Fish",
-        id: 499400512559382538n,
+        id: 499400512559382538n
     },
     Commandtechno: {
         name: "Commandtechno",
@@ -173,7 +171,7 @@ export const Devs = Object.freeze({
     },
     TheSun: {
         name: "ActuallyTheSun",
-        id: 406028027768733696n,
+        id: 406028027768733696n
     },
     axyie: {
         name: "'ax",
