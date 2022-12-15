@@ -42,7 +42,7 @@ export default definePlugin({
     }, {
         find: 'type:"user",revision',
         replacement: {
-            match: /(\w)\|\|"CONNECTION_OPEN".+?;/g,
+            match: /!(\w{1,3})&&"CONNECTION_OPEN".+?;/g,
             replace: "$1=!0;"
         },
     }, {
