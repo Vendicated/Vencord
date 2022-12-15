@@ -32,6 +32,7 @@ const {
     getWindowsDirs,
     getDarwinDirs,
     getLinuxDirs,
+    pathToBranch,
 } = require("./common");
 
 switch (process.platform) {
@@ -52,18 +53,55 @@ switch (process.platform) {
 async function uninstall(installations) {
     const selected = await getMenuItem(installations);
 
+    const useNewMethod = pathToBranch(selected.branch) !== "stable";
+
     for (const version of selected.versions) {
-        const dir = version.path;
+        const dir = useNewMethod ? path.join(version.path, "..") : version.path;
+
         // Check if we have write perms to the install directory...
         try {
             fs.accessSync(selected.location, fs.constants.W_OK);
         } catch (e) {
             console.error("No write access to", selected.location);
             console.error(
-                "Try running this script as an administrator:",
+                "Make sure Discord isn't running. If that doesn't work,",
+                "try running this script as an administrator:",
                 "sudo pnpm uninject"
             );
             process.exit(1);
+        }
+        if (useNewMethod) {
+            if (!fs.existsSync(path.join(dir, "_app.asar"))) {
+                console.error(
+                    "Original app.asar (_app.asar) doesn't exist.",
+                    "Is your Discord installation corrupt? Try reinstalling Discord."
+                );
+                process.exit(1);
+            }
+            if (fs.existsSync(path.join(dir, "app.asar"))) {
+                try {
+                    fs.rmSync(path.join(dir, "app.asar"), { force: true, recursive: true });
+                } catch (err) {
+                    console.error("Failed to delete app.asar folder");
+                    throw err;
+                }
+            }
+            try {
+                fs.renameSync(
+                    path.join(dir, "_app.asar"),
+                    path.join(dir, "app.asar")
+                );
+            } catch (err) {
+                console.error("Failed to rename _app.asar to app.asar");
+                throw err;
+            }
+            console.log(
+                "Successfully unpatched",
+                version.name
+                    ? `${selected.branch} ${version.name}`
+                    : selected.branch
+            );
+            return;
         }
         if (fs.existsSync(dir)) {
             fs.rmSync(dir, { recursive: true });

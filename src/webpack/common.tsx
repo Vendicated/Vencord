@@ -52,6 +52,7 @@ export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
+export let GuildMemberStore: Stores.GuildMemberStore;
 export let RelationshipStore: Stores.RelationshipStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
@@ -163,6 +164,7 @@ waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
 waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
+waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 waitFor("getRelationshipType", m => RelationshipStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
@@ -207,7 +209,7 @@ export type TextProps = React.PropsWithChildren & {
     className?: string;
 };
 
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 
 type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
 interface Menu {
