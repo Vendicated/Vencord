@@ -22,8 +22,8 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, waitFor } from "@webpack";
-import { Button, ChannelStore, Text } from "@webpack/common";
+import { waitFor } from "@webpack";
+import { Button, ChannelStore, SnowflakeUtils, Text } from "@webpack/common";
 
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
@@ -117,7 +117,7 @@ export default definePlugin({
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
         if (channel.type === 0 && isHidden) {
-            const lastMessageDate = channel.lastMessageId ? new Date(findByProps("extractTimestamp").extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
+            const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
