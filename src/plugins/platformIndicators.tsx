@@ -121,6 +121,7 @@ export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
     authors: [Devs.kemo, Devs.TheSun],
+    dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
         const settings = Settings.plugins.PlatformIndicators,
@@ -149,7 +150,6 @@ export default definePlugin({
 
     patches: [
         {
-            // User badges
             find: "Messages.PROFILE_USER_BADGES",
             predicate: () => Settings.plugins.PlatformIndicators.badges,
             replacement: {
