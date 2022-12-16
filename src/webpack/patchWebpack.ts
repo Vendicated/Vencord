@@ -142,7 +142,7 @@ function patchPush() {
                             const lastCode = code;
 
                             try {
-                                // @ts-ignore String#replace has no [string, function] overload
+                                // @ts-ignore - no idea what is wrong here
                                 const newCode = code.replace(replacement.match, replacement.replace);
                                 if (newCode === code && !patch.noWarn) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
