@@ -287,7 +287,7 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: "[\"className\",\"attachment\",\"inlineMedia\"]",
+            find: "[\"className\",\"attachment\",\"inlineMedia\"",
             replacement: [
                 {
                     match: /((\w)\.className,\w=\2\.attachment),/,
