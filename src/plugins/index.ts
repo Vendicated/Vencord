@@ -60,6 +60,35 @@ for (const p of pluginsValues) {
     });
 }
 
+const canonicalizeMatch = (match: RegExp | string) => {
+    if (typeof match === "string") return match;
+    const canonSource = match.source
+        .replace(/(?<=(?:^|[^\\])(?:\\\\)*)\\i/g, "[A-Za-z_$][\\w$]*");
+    return new RegExp(canonSource, match.flags);
+};
+const canonicalizeReplace = (
+    replace:
+        | string
+        | ((match: string, ...groups: string[]) => string),
+    pluginName: string,
+) => {
+    if (typeof replace === "function") return replace;
+    return replace.replace(
+        /(?<=(?:^|[^$])(?:\$\$)*)\$self/gi,
+        `Vencord.Plugins.plugins.${pluginName}`,
+    );
+};
+const canonicalizeDescriptor = <T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) => {
+    if (descriptor.get) {
+        const original = descriptor.get;
+        descriptor.get = function () {
+            return canonicalize(original.call(this));
+        };
+    } else if (descriptor.value) {
+        descriptor.value = canonicalize(descriptor.value);
+    }
+    return descriptor;
+};
 for (const p of pluginsValues)
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
@@ -70,17 +99,12 @@ for (const p of pluginsValues)
 
             for (const replacement of patch.replacement) {
                 const descriptors = Object.getOwnPropertyDescriptors(replacement);
-                if (!descriptors.match.get && replacement.match instanceof RegExp) {
-                    const canonSource = replacement.match.source
-                        .replace(/(?<=(?:^|[^\\])(?:\\\\)*)\\i/g, "[A-Za-z_$][\\w$]*");
-                    replacement.match = new RegExp(canonSource, replacement.match.flags);
-                }
-                if (!descriptors.replace.get && typeof replacement.replace === "string") {
-                    replacement.replace = replacement.replace.replace(
-                        /(?<=(?:^|[^$])(?:\$\$)*)\$self/gi,
-                        `Vencord.Plugins.plugins.${p.name}`,
-                    );
-                }
+                descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
+                descriptors.replace = canonicalizeDescriptor(
+                    descriptors.replace,
+                    replace => canonicalizeReplace(replace, p.name),
+                );
+                Object.defineProperties(replacement, descriptors);
             }
 
             patches.push(patch);
