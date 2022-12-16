@@ -94,15 +94,15 @@ export default definePlugin({
     },
     SnippetManager(props) {
         const { message }: { message: Message; } = props;
+
+        // TODO: Possibly make this configurable?
         if (message.channel_id !== "1028106818368589824") return <></>;
 
         const codeBlocks = parseCodeBlocks(message.content);
         if (codeBlocks.length !== 1) return <></>;
 
         const [code] = codeBlocks;
-        if (code.lang !== "css" && code.lang !== undefined) return <></>;
-
-        // console.log("ayo", { message, code, time: moment(message.timestamp).unix() });
+        if (code.lang !== "css") return <></>;
 
         const snippet = (Settings.plugins.CssSnippetManager?.cssSnippets as Snippet[] | undefined || [])
             .find(snippet => (
