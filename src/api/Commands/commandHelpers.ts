@@ -17,7 +17,8 @@
 */
 
 import { mergeDefaults } from "@utils/misc";
-import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
@@ -25,9 +26,6 @@ import { Argument } from "./types";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 const MessageSender = findByPropsLazy("receiveMessage");
-
-let SnowflakeUtils: any;
-waitFor("fromTimestamp", m => SnowflakeUtils = m);
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;

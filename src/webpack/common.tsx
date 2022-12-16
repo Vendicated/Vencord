@@ -76,6 +76,9 @@ export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.Comp
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
 
+export let SnowflakeUtils: { fromTimestamp: (timestamp: number) => string, extractTimestamp: (snowflake: string) => number };
+waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
+
 export let Parser: any;
 export let Alerts: {
     show(alert: {
