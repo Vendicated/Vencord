@@ -64,8 +64,25 @@ for (const p of pluginsValues)
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
+
             if (!Array.isArray(patch.replacement))
                 patch.replacement = [patch.replacement];
+
+            for (const replacement of patch.replacement) {
+                const descriptors = Object.getOwnPropertyDescriptors(replacement);
+                if (!descriptors.match.get && replacement.match instanceof RegExp) {
+                    const canonSource = replacement.match.source
+                        .replace(/(?<=(?:^|[^\\])(?:\\\\)*)\\i/g, "[A-Za-z_$][\\w$]*");
+                    replacement.match = new RegExp(canonSource, replacement.match.flags);
+                }
+                if (!descriptors.replace.get && typeof replacement.replace === "string") {
+                    replacement.replace = replacement.replace.replace(
+                        /(?<=(?:^|[^$])(?:\$\$)*)\$self/gi,
+                        `Vencord.Plugins.plugins.${p.name}`,
+                    );
+                }
+            }
+
             patches.push(patch);
         }
     }
