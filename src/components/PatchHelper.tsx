@@ -55,17 +55,17 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
+        const canonicalMatch = canonicalizeMatch(match);
         try {
-            const canonicalMatch = canonicalizeMatch(match);
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
-            // @ts-ignore - See plugins/index.ts for why this is necessary
+            // @ts-ignore
             var patched = src.replace(canonicalMatch, canonicalReplace);
             setReplacementError(void 0);
         } catch (e) {
             setReplacementError((e as Error).message);
             return ["", [], []];
         }
-        const m = src.match(match);
+        const m = src.match(canonicalMatch);
         return [patched, m, makeDiff(src, patched, m)];
     }, [id, match, replacement]);
 
