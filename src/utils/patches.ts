@@ -21,16 +21,13 @@ export type ReplaceFn = (match: string, ...groups: string[]) => string;
 export function canonicalizeMatch(match: RegExp | string) {
     if (typeof match === "string") return match;
     const canonSource = match.source
-        .replace(/(?<=(?:^|[^\\])(?:\\\\)*)\\i/g, "[A-Za-z_$][\\w$]*");
+        .replaceAll("\\i", "[A-Za-z_$][\\w$]*");
     return new RegExp(canonSource, match.flags);
 }
 
 export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string) {
     if (typeof replace === "function") return replace;
-    return replace.replace(
-        /(?<=(?:^|[^$])(?:\$\$)*)\$self/gi,
-        `Vencord.Plugins.plugins.${pluginName}`,
-    );
+    return replace.replaceAll("$self", `Vencord.Plugins.plugins.${pluginName}`);
 }
 
 export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {
