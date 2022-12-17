@@ -17,7 +17,7 @@
 */
 
 import { User } from "discord-types/general";
-import { HTMLProps } from "react";
+import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
 
@@ -27,20 +27,21 @@ export enum BadgePosition {
 }
 
 export interface ProfileBadge {
-    /** The tooltip to show on hover */
-    tooltip: string;
+    /** The tooltip to show on hover. Required for image badges */
+    tooltip?: string;
+    /** Custom component for the badge (tooltip not included) */
+    component?: ComponentType<BadgeUserArgs>;
     /** The custom image to use */
     image?: string;
     /** Action to perform when you click the badge */
     onClick?(): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
-    /** Optional props (e.g. style) for the badge */
+    /** Optional props (e.g. style) for the badge, ignored for component badges */
     props?: HTMLProps<HTMLImageElement>;
     /** Insert at start or end? */
     position?: BadgePosition;
-
-    /** The badge name to display. Discord uses this, but we don't. */
+    /** The badge name to display, Discord uses this. Required for component badges */
     key?: string;
 }
 
@@ -70,8 +71,8 @@ export function inject(badgeArray: ProfileBadge[], args: BadgeUserArgs) {
     for (const badge of Badges) {
         if (!badge.shouldShow || badge.shouldShow(args)) {
             badge.position === BadgePosition.START
-                ? badgeArray.unshift(badge)
-                : badgeArray.push(badge);
+                ? badgeArray.unshift({ ...badge, ...args })
+                : badgeArray.push({ ...badge, ...args });
         }
     }
     (Plugins.BadgeAPI as any).addDonorBadge(badgeArray, args.user.id);
