@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/settings";
@@ -89,21 +90,24 @@ const PlatformIndicator = ({ user, span }: { user: User, span?: boolean; }) => {
     return <div style={{ display: "flex", alignItems: "center" }}>{indicator}</div>;
 };
 
+const badge: ProfileBadge = {
+    component: PlatformIndicator,
+    position: BadgePosition.START,
+    key: "indicator"
+};
+
 const indicatorLocations = {
     list: {
         description: "In the member list",
         onEnable: () => addDecorator("platform-indicator", props =>
             <ErrorBoundary noop><PlatformIndicator user={props.user} /></ErrorBoundary>
         ),
-        onDisable: () => removeDecorator("platform-indicator"),
-        requiresRestart: false
+        onDisable: () => removeDecorator("platform-indicator")
     },
     badges: {
         description: "In user profiles, as badges",
-        // TODO: use BadgeAPI
-        onEnable: () => { },
-        onDisable: () => { },
-        requiresRestart: true
+        onEnable: () => addBadge(badge),
+        onDisable: () => removeBadge(badge)
     },
     messages: {
         description: "Inside messages",
@@ -112,8 +116,7 @@ const indicatorLocations = {
                 props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
             } span /></ErrorBoundary>
         ),
-        onDisable: () => removeDecoration("platform-indicator"),
-        requiresRestart: false
+        onDisable: () => removeDecoration("platform-indicator")
     }
 };
 
@@ -147,23 +150,6 @@ export default definePlugin({
             value.onDisable();
         });
     },
-
-    patches: [
-        {
-            find: "Messages.PROFILE_USER_BADGES",
-            predicate: () => Settings.plugins.PlatformIndicators.badges,
-            replacement: {
-                match: /(Messages\.PROFILE_USER_BADGES,role:"group",children:)(.+?\.key\)\}\)\))/,
-                replace: "$1[Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(e)].concat($2)"
-            }
-        }
-    ],
-
-    renderPlatformIndicators: ({ user }: { user: User; }) => (
-        <ErrorBoundary noop>
-            <PlatformIndicator user={user} />
-        </ErrorBoundary>
-    ),
 
     options: {
         ...Object.fromEntries(
