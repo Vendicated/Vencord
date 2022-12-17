@@ -54,7 +54,7 @@ export function removeDecorator(identifier: string) {
 
 export function __addDecoratorsToList(props: DecoratorProps): (JSX.Element | null)[] {
     const isInGuild = !!(props.guildId);
-    return [...decorators].map(([_, decoratorObj]) => {
+    return decorators.values().map((decoratorObj) => {
         const { decorator, onlyIn } = decoratorObj;
         // this can most likely be done cleaner
         if (!onlyIn || (onlyIn === "guilds" && isInGuild) || (onlyIn === "dms" && !isInGuild)) {
