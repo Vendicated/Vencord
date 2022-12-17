@@ -18,11 +18,12 @@
 
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
-import { makeLazy } from "@utils/misc";
+import { makeLazy, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
-import { Button, moment, React } from "@webpack/common";
+import { Button, moment, React, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 // regex for the win
@@ -48,6 +49,105 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
     return <>hi</>;
 };
 
+const SnippetManager = ({ message }: { message: Message; }) => {
+    const forceUpdate = useForceUpdater();
+
+    if (message.channel_id !== "1028106818368589824") return <></>;
+
+    const codeBlocks = parseCodeBlocks(message.content);
+    if (codeBlocks.length !== 1) return <></>;
+
+    const [code] = codeBlocks;
+    if (code.lang !== "css") return <></>;
+
+    let snippet = (Settings.plugins.CssSnippetManager?.cssSnippets as Snippet[] | undefined || [])
+        .find(snippet => (
+            snippet.messageId === message.id &&
+            snippet.authorId === message.author.id
+        ));
+
+    const timestamp = moment(message.editedTimestamp || message.timestamp).unix();
+
+    const applyOrUpdate = () => {
+        const snippets: Snippet[] = Settings.plugins.CssSnippetManager?.cssSnippets ?? [];
+
+        let isUpdate = false;
+        if (snippet !== undefined) {
+            isUpdate = true;
+            for (const snip of snippets) {
+                if (snip.messageId === message.id) {
+                    snip.code = code.code;
+                    snip.editedTimestamp = timestamp;
+                }
+            }
+        } else {
+            snippet = {
+                authorId: message.author.id,
+                messageId: message.id,
+                editedTimestamp: timestamp,
+                code: code.code
+            };
+            snippets.push(snippet);
+        }
+
+        Settings.plugins.CssSnippetManager.cssSnippets = snippets;
+        (Vencord.Plugins.plugins.CssSnippetManager as any)?.addStyles();
+        forceUpdate();
+
+        Toasts.show({
+            message: `Successfully ${isUpdate ? "updated" : "applied"} the snippet!`,
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId()
+        });
+    };
+    const removeSnippet = () => {
+        snippet && (Vencord.Plugins.plugins.CssSnippetManager as any)?.removeStyle(snippet);
+
+        const snippets: Snippet[] = Settings.plugins.CssSnippetManager?.cssSnippets ?? [];
+        Settings.plugins.CssSnippetManager.cssSnippets = snippets.filter(snip => snip.messageId !== message.id);
+        forceUpdate();
+
+        Toasts.show({
+            message: "Successfully deleted the snippet!",
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId()
+        });
+    };
+
+    return (
+        <div>{
+            snippet !== undefined ? (
+                <div style={{ display: "flex", flexDirection: "row", columnGap: "4%" }}>
+                    {timestamp !== snippet.editedTimestamp &&
+                        <Button
+                            className={getCssClassNames().colorGreen}
+                            onClick={applyOrUpdate}
+                            size={Button.Sizes.SMALL}
+                            style={{ paddingInline: "0" }} // Discord bad, the text does not fit due to the padding ;-;
+                        >
+                            Update
+                        </Button>}
+                    <Button
+                        className={getCssClassNames().colorRed}
+                        onClick={removeSnippet}
+                        size={Button.Sizes.SMALL}
+                        style={{ paddingInline: "0" }} // Discord bad, the text does not fit due to the padding ;-;
+                    >
+                        Remove
+                    </Button>
+                </div>
+            ) : (
+                <Button
+                    onClick={applyOrUpdate}
+                    size={Button.Sizes.SMALL}
+                >
+                    Apply
+                </Button>
+            )
+        }</div>
+    );
+};
+
 
 export default definePlugin({
     name: "CssSnippetManager",
@@ -63,7 +163,11 @@ export default definePlugin({
     },
     styles: [] as HTMLStyleElement[],
     start() {
-        addAccessory("cssSnippetMgr", this.SnippetManager, 0);
+        addAccessory("cssSnippetMgr", props => {
+            return <ErrorBoundary noop>
+                <SnippetManager message={props.message} />
+            </ErrorBoundary>;
+        }, 0);
 
         this.addStyles();
     },
@@ -91,86 +195,5 @@ export default definePlugin({
         const style = document.getElementById(`css_snippet_${snippet.authorId}_${snippet.messageId}`);
         if (style) this.styles = this.styles.filter(st => st.id !== style.id);
         style?.remove();
-    },
-    SnippetManager(props) {
-        const { message }: { message: Message; } = props;
-
-        // TODO: Possibly make this configurable?
-        if (message.channel_id !== "1028106818368589824") return <></>;
-
-        const codeBlocks = parseCodeBlocks(message.content);
-        if (codeBlocks.length !== 1) return <></>;
-
-        const [code] = codeBlocks;
-        if (code.lang !== "css") return <></>;
-
-        const snippet = (Settings.plugins.CssSnippetManager?.cssSnippets as Snippet[] | undefined || [])
-            .find(snippet => (
-                snippet.messageId === message.id &&
-                snippet.authorId === message.author.id
-            ));
-
-        const timestamp = moment(message.editedTimestamp || message.timestamp).unix();
-
-        const applyOrUpdate = () => {
-            const snippets = (Settings.plugins.CssSnippetManager?.cssSnippets as Snippet[] | undefined || []);
-            if (snippet !== undefined) {
-                for (const snip of snippets) {
-                    if (snip.messageId === message.id) {
-                        snip.code = code.code;
-                        snip.editedTimestamp = timestamp;
-                    }
-                }
-            } else {
-                snippets.push({
-                    authorId: message.author.id,
-                    messageId: message.id,
-                    editedTimestamp: timestamp,
-                    code: code.code
-                });
-            }
-
-            Settings.plugins.CssSnippetManager.cssSnippets = snippets;
-            (Vencord.Plugins.plugins.CssSnippetManager as any)?.addStyles();
-        };
-        const removeSnippet = () => {
-            snippet && (Vencord.Plugins.plugins.CssSnippetManager as any)?.removeStyle(snippet);
-
-            const snippets = (Settings.plugins.CssSnippetManager?.cssSnippets as Snippet[] | undefined || []);
-            Settings.plugins.CssSnippetManager.cssSnippets = snippets.filter(snip => snip.messageId !== message.id);
-        };
-
-        return (
-            <>{
-                snippet !== undefined ? (
-                    <div style={{ display: "flex", flexDirection: "row", columnGap: "4%" }}>
-                        {timestamp !== snippet.editedTimestamp &&
-                            <Button
-                                className={getCssClassNames().colorGreen}
-                                onClick={applyOrUpdate}
-                                size={Button.Sizes.SMALL}
-                                style={{ paddingInline: "0" }} // Discord bad, the text does not fit due to the padding ;-;
-                            >
-                                Update
-                            </Button>}
-                        <Button
-                            className={getCssClassNames().colorRed}
-                            onClick={removeSnippet}
-                            size={Button.Sizes.SMALL}
-                            style={{ paddingInline: "0" }} // Discord bad, the text does not fit due to the padding ;-;
-                        >
-                            Remove
-                        </Button>
-                    </div>
-                ) : (
-                    <Button
-                        onClick={applyOrUpdate}
-                        size={Button.Sizes.SMALL}
-                    >
-                        Apply
-                    </Button>
-                )
-            }</>
-        );
     },
 });
