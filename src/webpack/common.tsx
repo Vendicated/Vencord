@@ -290,3 +290,7 @@ export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
         options?: { enableSpellCheck?: boolean; }
     ): void;
 };
+
+export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
+    openUntrustedLink: filters.byCode(".apply(this,arguments)")
+});
