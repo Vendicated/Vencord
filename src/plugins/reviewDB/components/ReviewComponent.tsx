@@ -24,6 +24,7 @@ import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
+import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
     // this is terrible, blame mantika
@@ -78,24 +79,32 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, message, groupStart, wrapper, cozy, "user-review")}>
-                <div className={contents}>
+            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
+                {
+                    marginLeft: "0px",
+                    paddingLeft: "52px",
+                    paddingRight: "16px"
+                }
+            }>
+
+                <div className={contents} style={{ paddingLeft: "0px" }}>
                     <img
                         className={classes(avatar, clickable)}
-                        style={{ left: "8px" }}
                         onClick={openModal}
                         src={review.profile_photo || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                        style={{ left: "0px" }}
                     />
                     <span
-                        className={classes(username, clickable)}
-                        style={{ color: "var(--text-normal)", right: "8px" }}
+                        className={classes(clickable, username)}
+                        style={{ color: "var(--channels-default)", fontSize: "14px" }}
                         onClick={() => openModal()}
                     >
                         {review.username}
                     </span>
+                    {review.badges.map(badge => <ReviewBadge {...badge} />)}
                     <p
                         className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4, right: "8px" }}
+                        style={{ fontSize: 15, marginTop: 4 }}
                     >
                         {review.comment}
                     </p>
