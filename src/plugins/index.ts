@@ -19,7 +19,6 @@
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { Settings } from "@api/settings";
 import Logger from "@utils/Logger";
-import { canonicalizeDescriptor, canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { Patch, Plugin } from "@utils/types";
 
 import Plugins from "~plugins";
@@ -65,20 +64,8 @@ for (const p of pluginsValues)
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
-
             if (!Array.isArray(patch.replacement))
                 patch.replacement = [patch.replacement];
-
-            for (const replacement of patch.replacement) {
-                const descriptors = Object.getOwnPropertyDescriptors(replacement);
-                descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
-                descriptors.replace = canonicalizeDescriptor(
-                    descriptors.replace,
-                    replace => canonicalizeReplace(replace, p.name),
-                );
-                Object.defineProperties(replacement, descriptors);
-            }
-
             patches.push(patch);
         }
     }

@@ -18,6 +18,7 @@
 
 import { WEBPACK_CHUNK } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { canonicalizeDescriptor, canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 
 import { _initWebpack } from ".";
 
@@ -140,6 +141,15 @@ function patchPush() {
                             if (replacement.predicate && !replacement.predicate()) continue;
                             const lastMod = mod;
                             const lastCode = code;
+
+                            // Canonicalize the match and replace functions
+                            const descriptors = Object.getOwnPropertyDescriptors(replacement);
+                            descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
+                            descriptors.replace = canonicalizeDescriptor(
+                                descriptors.replace,
+                                replace => canonicalizeReplace(replace, patch.plugin),
+                            );
+                            Object.defineProperties(replacement, descriptors);
 
                             try {
                                 // @ts-ignore - no idea what is wrong here
