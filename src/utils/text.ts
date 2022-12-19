@@ -34,3 +34,11 @@ export const wordsToPascal = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
 export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+
+// All indexes of a substring in a string
+export const indexesOf = (text: string, sub: string) => {
+    const indexes: number[] = [];
+    let i = -1;
+    while ((i = text.indexOf(sub, i + 1)) !== -1) indexes.push(i);
+    return indexes;
+};
