@@ -31,7 +31,12 @@ export const Margins = findByPropsLazy("marginTop20");
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export const Flux = findByPropsLazy("connectStores");
+
 export let React: typeof import("react");
+export let useState: typeof React.useState;
+export let useEffect: typeof React.useEffect;
+export let useMemo: typeof React.useMemo;
+
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
 
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
@@ -76,7 +81,7 @@ export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.Comp
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
 
-export let SnowflakeUtils: { fromTimestamp: (timestamp: number) => string, extractTimestamp: (snowflake: string) => number };
+export let SnowflakeUtils: { fromTimestamp: (timestamp: number) => string, extractTimestamp: (snowflake: string) => number; };
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
 export let Parser: any;
@@ -151,7 +156,10 @@ export const NavigationRouter = mapMangledModuleLazy("Transitioning to external 
     goForward: filters.byCode("goForward()"),
 });
 
-waitFor("useState", m => React = m);
+waitFor("useState", m => {
+    React = m;
+    ({ useEffect, useState, useMemo } = React);
+});
 
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
