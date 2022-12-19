@@ -46,7 +46,7 @@ interface ReplacementComponentProps {
     module: [id: number, factory: Function];
     match: string | RegExp;
     replacement: string | ReplaceFn;
-    setReplacementError: (error: any) => void;
+    setReplacementError(error: any): void;
 }
 
 function ReplacementComponent({ module, match, replacement, setReplacementError }: ReplacementComponentProps) {
@@ -58,8 +58,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
         const canonicalMatch = canonicalizeMatch(match);
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
-            // @ts-ignore
-            var patched = src.replace(canonicalMatch, canonicalReplace);
+            var patched = src.replace(canonicalMatch, canonicalReplace as string);
             setReplacementError(void 0);
         } catch (e) {
             setReplacementError((e as Error).message);
