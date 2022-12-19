@@ -26,7 +26,7 @@ import { React, Select, Text, TextArea, Toasts } from "@webpack/common";
 
 import cssText from "~fileContent/soundChangerStyles.css";
 
-const useEffect = makeLazy(() => React.useEffect);
+const useEffect = (...args: Parameters<typeof React.useEffect>) => React.useEffect(...args);
 const useState = makeLazy(() => React.useState);
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 const DeleteIcon = LazyComponent(() => wreq(findModuleId("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z")!!).Z);
@@ -61,7 +61,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
     const [soundsChanged, setSoundsChanged] = useState()<SoundsChanged>([]);
     const [audioPreviews, setAudioPreviews] = useState()<{ [key: string]: HTMLAudioElement; }>({});
 
-    useEffect()(() => {
+    useEffect(() => {
         ensureCss();
 
         const modId = soundsModule();
@@ -101,6 +101,7 @@ const SoundChangerSettings = ({ setValue }: { setValue: (newValue: any) => void;
                                         <div className="SC sound-label" style={{ display: "flex", flexDirection: "row", textAlign: "left", rowGap: "10px", columnGap: "10px", justifyItems: "center" }}>
                                             <Text style={{ marginTop: "0.8%" }} variant="text-sm/normal">{filenameToTitleCase(sound.name)}</Text>
                                             <span
+                                                role="button"
                                                 onClick={e => {
                                                     const revTreePath = (e as any).nativeEvent.path as HTMLElement[];
                                                     const svg = revTreePath.find(e => e.tagName.toLowerCase() === "svg");
