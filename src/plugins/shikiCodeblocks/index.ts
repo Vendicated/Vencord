@@ -22,7 +22,7 @@ import { wordsFromPascal, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 
 import previewExampleText from "~fileContent/previewExample.tsx";
-import cssText from "~fileContent/style.css";
+import cssText from "~fileContent/shiki.css";
 
 import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
@@ -44,8 +44,8 @@ export default definePlugin({
         {
             find: "codeBlock:{react:function",
             replacement: {
-                match: /codeBlock:\{react:function\((.),(.),(.)\)\{/,
-                replace: "$&return Vencord.Plugins.plugins.ShikiCodeblocks.renderHighlighter($1,$2,$3);",
+                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
+                replace: "$&return $self.renderHighlighter($1,$2,$3);",
             },
         },
     ],

@@ -18,6 +18,7 @@
 
 import { debounce } from "@utils/debounce";
 import { makeCodeblock } from "@utils/misc";
+import { canonicalizeMatch, canonicalizeReplace, ReplaceFn } from "@utils/patches";
 import { search } from "@webpack";
 import { Button, Clipboard, Forms, Margins, Parser, React, Switch, Text, TextInput } from "@webpack/common";
 
@@ -41,20 +42,29 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
         setModule([keys[0], candidates[keys[0]]]);
 });
 
-function ReplacementComponent({ module, match, replacement, setReplacementError }) {
+interface ReplacementComponentProps {
+    module: [id: number, factory: Function];
+    match: string | RegExp;
+    replacement: string | ReplaceFn;
+    setReplacementError(error: any): void;
+}
+
+function ReplacementComponent({ module, match, replacement, setReplacementError }: ReplacementComponentProps) {
     const [id, fact] = module;
     const [compileResult, setCompileResult] = React.useState<[boolean, string]>();
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
+        const canonicalMatch = canonicalizeMatch(match);
         try {
-            var patched = src.replace(match, replacement);
+            const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
+            var patched = src.replace(canonicalMatch, canonicalReplace as string);
             setReplacementError(void 0);
         } catch (e) {
             setReplacementError((e as Error).message);
             return ["", [], []];
         }
-        const m = src.match(match);
+        const m = src.match(canonicalMatch);
         return [patched, m, makeDiff(src, patched, m)];
     }, [id, match, replacement]);
 
@@ -179,9 +189,10 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                     {Object.entries({
                         "$$": "Insert a $",
                         "$&": "Insert the entire match",
-                        "$`​": "Insert the substring before the match",
+                        "$`\u200b": "Insert the substring before the match",
                         "$'": "Insert the substring after the match",
-                        "$n": "Insert the nth capturing group ($1, $2...)"
+                        "$n": "Insert the nth capturing group ($1, $2...)",
+                        "$self": "Insert the plugin instance",
                     }).map(([placeholder, desc]) => (
                         <Forms.FormText key={placeholder}>
                             {Parser.parse("`" + placeholder + "`")}: {desc}
@@ -206,7 +217,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 function PatchHelper() {
     const [find, setFind] = React.useState<string>("");
     const [match, setMatch] = React.useState<string>("");
-    const [replacement, setReplacement] = React.useState<string | Function>("");
+    const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
 
     const [replacementError, setReplacementError] = React.useState<string>();
 
