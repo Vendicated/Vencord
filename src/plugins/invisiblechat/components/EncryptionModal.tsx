@@ -26,7 +26,7 @@ import {
     openModal,
 } from "@utils/modal";
 import { findLazy } from "@webpack";
-import { Button, React, TextInput } from "@webpack/common";
+import { Button, Forms, React, TextInput } from "@webpack/common";
 
 import { encrypt } from "../index";
 
@@ -43,20 +43,20 @@ function EncModal(props: ModalProps) {
     return (
         <ModalRoot {...props} size={ModalSize.DYNAMIC}>
             <ModalHeader>
-                <div style={{ color: "gray", fontSize: "30px" }}>Encrypt Message</div>
+                <Forms.FormTitle tag="h4">Encrypt Message</Forms.FormTitle>
             </ModalHeader>
             <ModalContent>
-                <div style={{ color: "gray" }}>Secret</div>
+                <Forms.FormText>Secret</Forms.FormText>
                 <TextInput
                     onChange={(e: string) => {
                         setSecret(e);
                     }}></TextInput>
-                <div style={{ color: "gray" }}>Cover (2 or more Words!!)</div>
+                <Forms.FormText>Cover (2 or more Words!!)</Forms.FormText>
                 <TextInput
                     onChange={(e: string) => {
                         setCover(e);
                     }}></TextInput>
-                <div style={{ color: "gray" }}>Password</div>
+                <Forms.FormText>Password</Forms.FormText>
                 <TextInput
                     defaultValue={"password"}
                     onChange={(e: string) => {
