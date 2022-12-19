@@ -43,17 +43,10 @@ export default definePlugin({
         },
         // Hijack the discord pronouns section (hidden without experiment) and add a wrapper around the text section
         {
-            find: "currentPronouns:",
-            all: true,
-            noWarn: true,
+            find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^[}]*currentPronouns:[^}]*(\w)\.pronouns[^}]*\})\)/,
-                replace: (original, PronounComponent, pronounProps, fullProps) => {
-                    // UserSettings
-                    if (pronounProps.includes("onPronounsChange")) return original;
-
-                    return `${fullProps}&&Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper(${PronounComponent}, ${pronounProps}, ${fullProps})`;
-                }
+                match: /\(0,.\.jsx\)\((?<PronounComponent>.{1,2}\..),(?<pronounProps>{currentPronouns.+?:(?<fullProps>.{1,2})\.pronouns.+?})\)/,
+                replace: "$<fullProps>&&Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
             }
         },
         // Make pronouns experiment be enabled by default
