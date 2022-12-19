@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { PatchReplacement } from "./types";
+
 export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export function canonicalizeMatch(match: RegExp | string) {
@@ -40,4 +42,14 @@ export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>
         descriptor.value = canonicalize(descriptor.value);
     }
     return descriptor;
+}
+
+export function canonicalizeReplacement(replacement: Pick<PatchReplacement, "match" | "replace">, plugin: string) {
+    const descriptors = Object.getOwnPropertyDescriptors(replacement);
+    descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
+    descriptors.replace = canonicalizeDescriptor(
+        descriptors.replace,
+        replace => canonicalizeReplace(replace, plugin),
+    );
+    Object.defineProperties(replacement, descriptors);
 }
