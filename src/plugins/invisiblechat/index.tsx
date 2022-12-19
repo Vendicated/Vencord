@@ -16,14 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getStegCloak } from "@utils/dependencies";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
-import StegCloak from "./lib/stegcloak";
 
-const steggo = new StegCloak(true, false);
+
+let StegCloak;
+let steggo;
+
 
 const PopoverIcon = () => {
     return (
@@ -108,8 +111,12 @@ export default definePlugin({
         buildDecModal({ message });
     },
 
-    start() {
+    async start() {
         console.log("%c [Invisible Chat] Started!", "color: aquamarine");
+
+        // Shitty Module initialization. Thanks Ven.
+        StegCloak = await getStegCloak;
+        steggo = new StegCloak.default(true, false);
     },
     stop() {
     },
