@@ -166,7 +166,8 @@ export default definePlugin({
 });
 
 export function encrypt(secret: string, password: string, cover: string): string {
-    return steggo.hide(secret, password, cover);
+    // \u200b appended to secret for detection of correct password
+    return steggo.hide(secret + "​", password, cover);
 }
 
 export function decrypt(secret: string, password: string): string {
