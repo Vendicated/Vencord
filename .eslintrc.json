@@ -84,7 +84,9 @@
         "no-extra-semi": "error",
         "consistent-return": ["warn", { "treatUndefinedAsUnspecified": true }],
         "dot-notation": "error",
-        "no-useless-escape": "error",
+        "no-useless-escape": ["error", {
+            "extra": "i"
+        }],
         "no-fallthrough": "error",
         "for-direction": "error",
         "no-async-promise-executor": "error",
