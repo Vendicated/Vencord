@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, React, Toasts } from "@webpack/common";
+import { Clipboard, React, Toasts, useEffect, useState } from "@webpack/common";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
@@ -48,13 +48,13 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
         deps: [],
         onError: null,
     }, providedOpts);
-    const [state, setState] = React.useState({
+    const [state, setState] = useState({
         value: opts.fallbackValue,
         error: null,
         pending: true
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         let isAlive = true;
         if (!state.pending) setState({ ...state, pending: true });
 
@@ -72,7 +72,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
  * Returns a function that can be used to force rerender react components
  */
 export function useForceUpdater() {
-    const [, set] = React.useState(0);
+    const [, set] = useState(0);
     return () => set(s => s + 1);
 }
 

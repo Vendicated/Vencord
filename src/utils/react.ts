@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+import { React, useState } from "@webpack/common";
 
 import { checkIntersecting } from "./misc";
 
@@ -30,7 +30,7 @@ export const useIntersection = (intersectOnly = false): [
     isIntersecting: boolean,
 ] => {
     const observerRef = React.useRef<IntersectionObserver | null>(null);
-    const [isIntersecting, setIntersecting] = React.useState(false);
+    const [isIntersecting, setIntersecting] = useState(false);
 
     const refCallback = (element: Element | null) => {
         observerRef.current?.disconnect();
