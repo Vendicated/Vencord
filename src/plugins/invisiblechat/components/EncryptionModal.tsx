@@ -38,7 +38,7 @@ function EncModal(props: ModalProps) {
     const [cover, setCover] = React.useState("");
     const [password, setPassword] = React.useState("password");
 
-    const valid = secret && cover && cover.match(/\w \w/);
+    const valid = secret && cover && /\w \w/.test(cover);
 
     return (
         <ModalRoot {...props} size={ModalSize.DYNAMIC}>
