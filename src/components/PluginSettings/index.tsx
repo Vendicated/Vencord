@@ -252,7 +252,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
         let newPlugins: Array<string> = [];
         sortedPlugins.forEach(plugin => {
-            existingPlugins[plugin.name] = cachedPlugins[plugin.name] ?? dateNow;
+            existingPlugins[plugin.name] = cachedPlugins?.[plugin.name] ?? dateNow;
             if ((existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
                 newPlugins.push(plugin.name);
             }
