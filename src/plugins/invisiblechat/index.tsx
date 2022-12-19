@@ -104,14 +104,6 @@ export default definePlugin({
             }
         },
     ],
-    options: {
-        defaultPassword: {
-            description: "The default password",
-            type: OptionType.STRING,
-            default: "password",
-            restartNeeded: false
-        }
-    },
     dependencies: ["MessageEventsAPI"],
     EMBED_URL: "https://embed.sammcheese.net",
     INV_DETECTION: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
