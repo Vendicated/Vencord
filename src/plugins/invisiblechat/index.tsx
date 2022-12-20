@@ -96,7 +96,7 @@ export default definePlugin({
             // Chatbar Lock
             find: ".activeCommandOption",
             replacement: {
-                match: /.=.\.activeCommand,.=.\.activeCommandOption,(.)=\[\];/,
+                match: /.=.\.activeCommand,.=.\.activeCommandOption,.{0,155}(.)=\[\];/,
                 replace: "$&;$1.push(Vencord.Plugins.plugins.InvisibleChat.chatbarIcon());",
             }
         },
