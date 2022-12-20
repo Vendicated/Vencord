@@ -30,7 +30,7 @@ export interface ProfileBadge {
     /** The tooltip to show on hover. Required for image badges */
     tooltip?: string;
     /** Custom component for the badge (tooltip not included) */
-    component?: ComponentType<BadgeUserArgs>;
+    component?: ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
     image?: string;
     /** Action to perform when you click the badge */

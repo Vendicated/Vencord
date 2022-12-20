@@ -74,8 +74,10 @@ export default definePlugin({
                 },
                 {
                     match: /spacing:(\d{1,2}),children:(.{1,40}(.{1,2})\.jsx.+(.{1,2})\.onClick.+\)})},/,
+                    // if the badge provides it's own component, render that instead of an image
+                    // the badge also includes info about the user that has it (type BadgeUserArgs), which is why it's passed as props
                     replace: (_, s, origBadgeComponent, React, badge) =>
-                        `spacing:${s},children:${badge}.component?()=>(0,${React}.jsx)(${badge}.component,{...${badge}}):${origBadgeComponent}},`
+                        `spacing:${s},children:${badge}.component ? () => (0,${React}.jsx)(${badge}.component, { ...${badge} }) : ${origBadgeComponent}},`
                 }
             ]
         }
