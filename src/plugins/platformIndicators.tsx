@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { PresenceStore, Tooltip } from "@webpack/common";
-import User from "discord-types/general/User.js";
+import { User } from "discord-types/general";
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
