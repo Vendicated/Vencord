@@ -62,7 +62,7 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
     return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
-const PlatformIndicator = ({ user, span }: { user: User, span?: boolean; }) => {
+const PlatformIndicator = ({ user }: { user: User; }) => {
     if (!user || user.bot) return null;
 
     const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
@@ -86,8 +86,7 @@ const PlatformIndicator = ({ user, span }: { user: User, span?: boolean; }) => {
             {icons}
         </span>;
 
-    if (span) return indicator;
-    return <div style={{ display: "flex", alignItems: "center" }}>{indicator}</div>;
+    return indicator;
 };
 
 const badge: ProfileBadge = {
@@ -100,7 +99,9 @@ const indicatorLocations = {
     list: {
         description: "In the member list",
         onEnable: () => addDecorator("platform-indicator", props =>
-            <ErrorBoundary noop><PlatformIndicator user={props.user} /></ErrorBoundary>
+            <ErrorBoundary noop>
+                <PlatformIndicator user={props.user} />
+            </ErrorBoundary>
         ),
         onDisable: () => removeDecorator("platform-indicator")
     },
@@ -112,9 +113,11 @@ const indicatorLocations = {
     messages: {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
-            <ErrorBoundary noop><PlatformIndicator user={
-                props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
-            } span /></ErrorBoundary>
+            <ErrorBoundary noop>
+                <PlatformIndicator user={
+                    props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
+                } />
+            </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
     }
