@@ -54,44 +54,40 @@ export default function ReviewsView({ userId }: { userId: string; }) {
 
     return (
         <div className="ReviewDB">
-            <>
-                <Text
-                    tag="h2"
-                    variant="eyebrow"
-                    style={{
-                        paddingLeft: "0px",
-                        marginBottom: "12px",
-                        color: "var(--header-primary)"
-                    }}
-                >
-                    User Reviews
-                </Text>
-                {reviews?.map(review =>
-                    <ReviewComponent
-                        key={review.id}
-                        review={review}
-                        refetch={dirtyRefetch}
-                    />
-                )}
-                {reviews?.length === 0 && (
-                    <Forms.FormText style={{ paddingLeft: "0px", paddingRight: "12px", marginBottom: "12px" }}>
-                        Looks like nobody reviewed this user yet. You could be the first!
-                    </Forms.FormText>
-                )}
-                <textarea
-                    className={classes(Classes.textarea, "enter-comment")}
-                    placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
-                    onKeyDown={onKeyPress}
-                    style={{
-                        padding: "12px",
-                        marginBottom: "12px",
-                        color: "var(--text-normal)",
-                        border: "1px solid var(--profile-message-input-border-color)",
-                        fontSize: "14px",
-                        borderRadius: "3px",
-                    }}
+            <Text
+                tag="h2"
+                variant="eyebrow"
+                style={{
+                    marginBottom: "12px",
+                    color: "var(--header-primary)"
+                }}
+            >
+                User Reviews
+            </Text>
+            {reviews?.map(review =>
+                <ReviewComponent
+                    key={review.id}
+                    review={review}
+                    refetch={dirtyRefetch}
                 />
-            </>
+            )}
+            {reviews?.length === 0 && (
+                <Forms.FormText style={{ padding: "12px", paddingTop: "0px", paddingLeft: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+                    Looks like nobody reviewed this user yet. You could be the first!
+                </Forms.FormText>
+            )}
+            <textarea
+                className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
+                // this produces something like '-_59yqs ...' but since no class exists with that name its fine
+                placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
+                onKeyDown={onKeyPress}
+                style={{
+                    marginTop: "6px",
+                    resize: "none",
+                    marginBottom: "12px",
+                    overflow: "hidden",
+                }}
+            />
         </div>
     );
 }

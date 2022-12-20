@@ -63,7 +63,8 @@
     "packageManager": "pnpm@7.13.4",
     "pnpm": {
         "patchedDependencies": {
-            "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch"
+            "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
+            "eslint@8.28.0": "patches/eslint@8.28.0.patch"
         }
     },
     "webExt": {

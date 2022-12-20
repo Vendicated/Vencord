@@ -22,7 +22,7 @@ import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
 import { classes, LazyComponent } from "@utils/misc";
 import { filters, find, findByCodeLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Forms, Menu, React } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState } from "@webpack/common";
 
 import { SpotifyStore, Track } from "./SpotifyStore";
 
@@ -142,10 +142,10 @@ function SeekBar() {
         () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
     );
 
-    const [position, setPosition] = React.useState(storePosition);
+    const [position, setPosition] = useState(storePosition);
 
     // eslint-disable-next-line consistent-return
-    React.useEffect(() => {
+    useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
             const interval = setInterval(() => {
@@ -232,7 +232,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
 function Info({ track }: { track: Track; }) {
     const img = track?.album?.image;
 
-    const [coverExpanded, setCoverExpanded] = React.useState(false);
+    const [coverExpanded, setCoverExpanded] = useState(false);
 
     const i = (
         <>
@@ -327,7 +327,7 @@ export function Player() {
     );
 
     const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
-    const [shouldHide, setShouldHide] = React.useState(false);
+    const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity
     // eslint-disable-next-line consistent-return
