@@ -17,15 +17,38 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { Settings } from "Vencord";
 
 import { Player } from "./PlayerComponent";
+
+const toggleHoverControls = (value: boolean) => {
+    const hoverControls = `
+    .vc-spotify-button-row { height: 0; opacity: 0; transition: height .2s, opacity .02s; }
+    #vc-spotify-player:hover .vc-spotify-button-row { height: 32px; opacity: 1; }
+    `;
+    if (document.getElementById("vc-spotify-hover-controls")) document.getElementById("vc-spotify-hover-controls")?.remove();
+    if (value) {
+        const style = document.createElement("style");
+        style.id = "vc-spotify-hover-controls";
+        style.innerHTML = hoverControls;
+        document.head.appendChild(style);
+    }
+};
 
 export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
     dependencies: ["MenuItemDeobfuscatorAPI"],
+    options: {
+        hoverControls: {
+            description: "Show controls on hover",
+            type: OptionType.BOOLEAN,
+            default: false,
+            onChange: (value) => toggleHoverControls(value)
+        },
+    },
     patches: [
         {
             find: "showTaglessAccountPanel:",
@@ -53,6 +76,6 @@ export default definePlugin({
             }
         }
     ],
-
+    start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
     renderPlayer: () => <Player />
 });
