@@ -18,11 +18,11 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Settings } from "Vencord";
+import { Settings } from "@api/settings";
 
 import { Player } from "./PlayerComponent";
 
-const toggleHoverControls = (value: boolean) => {
+function toggleHoverControls(value: boolean) {
     const hoverControls = `
     .vc-spotify-button-row { height: 0; opacity: 0; transition: height .2s, opacity .02s; }
     #vc-spotify-player:hover .vc-spotify-button-row { height: 32px; opacity: 1; }
