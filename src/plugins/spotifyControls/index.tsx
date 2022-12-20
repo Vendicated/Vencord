@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Settings } from "@api/settings";
 
 import { Player } from "./PlayerComponent";
 
@@ -34,7 +34,7 @@ function toggleHoverControls(value: boolean) {
         style.innerHTML = hoverControls;
         document.head.appendChild(style);
     }
-};
+}
 
 export default definePlugin({
     name: "SpotifyControls",
@@ -46,7 +46,7 @@ export default definePlugin({
             description: "Show controls on hover",
             type: OptionType.BOOLEAN,
             default: false,
-            onChange: (value) => toggleHoverControls(value)
+            onChange: v => toggleHoverControls(v)
         },
     },
     patches: [
