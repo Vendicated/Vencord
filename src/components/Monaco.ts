@@ -29,7 +29,12 @@ const setCss = debounce((css: string) => {
 });
 
 export async function launchMonacoEditor() {
-    const win = open("about:blank", void 0, "popup,width=1000,height=1000")!;
+    const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
+    const win = open("about:blank", "VencordQuickCss", features);
+    if (!win) {
+        alert("Failed to open QuickCSS popup. Make sure to allow popups!");
+        return;
+    }
 
     win.setCss = setCss;
     win.getCurrentCss = () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
@@ -41,4 +46,6 @@ export async function launchMonacoEditor() {
             : "vs-dark";
 
     win.document.write(monacoHtml);
+
+    window.__VENCORD_MONACO_WIN__ = new WeakRef(win);
 }
