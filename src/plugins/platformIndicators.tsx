@@ -127,8 +127,9 @@ export default definePlugin({
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
-        const settings = Settings.plugins.PlatformIndicators,
-            { displayMode } = settings;
+        const settings = Settings.plugins.PlatformIndicators;
+        const { displayMode } = settings;
+
         // transfer settings from the old ones, which had a select menu instead of booleans
         if (displayMode) {
             if (displayMode !== "both") settings[displayMode] = true;
