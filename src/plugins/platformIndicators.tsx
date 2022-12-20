@@ -62,10 +62,12 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
     return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
+const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
+
 const PlatformIndicator = ({ user }: { user: User; }) => {
     if (!user || user.bot) return null;
 
-    const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
+    const status = getStatus(user.id);
     if (!status) return null;
 
     const icons = Object.entries(status).map(([platform, status]) => (
@@ -92,6 +94,7 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
 const badge: ProfileBadge = {
     component: PlatformIndicator,
     position: BadgePosition.START,
+    shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
 };
 
