@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "MemberListDecoratorsAPI",
-    description: "API to add decorators to member list (both in servers and DM's)",
+    description: "API to add decorators to member list (both in servers and DMs)",
     authors: [Devs.TheSun],
     patches: [
         {
