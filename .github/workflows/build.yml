@@ -55,10 +55,29 @@ jobs:
               run: |
                 echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-            - name: Upload Devbuild
+            - name: Upload Devbuild as release
               run: |
                 gh release upload devbuild --clobber dist/*
                 gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 RELEASE_TAG: ${{ env.release_tag }}
+
+            - name: Upload Devbuild to builds repo
+              run: |
+                git config --global user.name "$USERNAME"
+                git config --global user.email actions@github.com
+
+                gh repo clone "$GH_REPO" upload
+                cd upload
+                rm -rf * .*
+                cp -r ../dist/* .
+
+                git add -A
+                git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git main
+              env:
+                API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
+                GLOBIGNORE: .git:.gitignore:README.md:LICENSE
+                GH_REPO: Vencord/builds
+                USERNAME: GitHub-Actions

@@ -23,7 +23,7 @@ If you're a power user who wants to contribute and make plugins or just want to 
 
 Or install the browser extension for
 - [![Chrome](https://img.shields.io/badge/chrome-ext-brightgreen)](https://github.com/Vendicated/Vencord/releases/latest/download/Vencord-for-Chrome-and-Edge.zip)
-- [UserScript](https://github.com/Vendicated/Vencord/releases/download/devbuild/Vencord.user.js) - Please note that QuickCSS, shiki and other plugins making use of external resources will not work with the UserScript.
+- [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that QuickCSS, shiki and other plugins making use of external resources will not work with the UserScript.
 
 
 You may also build them from source, to do that do the same steps as in the manual regular install method,
