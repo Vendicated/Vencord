@@ -16,15 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Badge } from "./Badge";
 
-export interface Review {
-    comment: string,
-    id: number,
-    senderdiscordid: string,
-    senderuserid: number,
-    star: number,
-    username: string,
-    profile_photo: string;
-    badges: Badge[];
+export interface Badge {
+    badge_name: string;
+    badge_description: string;
+    badge_icon: string;
+    redirect_url: string;
+    badge_type: number;
 }

@@ -16,15 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Badge } from "./Badge";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
-export interface Review {
-    comment: string,
-    id: number,
-    senderdiscordid: string,
-    senderuserid: number,
-    star: number,
-    username: string,
-    profile_photo: string;
-    badges: Badge[];
-}
+export default definePlugin({
+    name: "DisableDMCallIdle",
+    description: "Disables automatically getting kicked from a DM voice call after 5 minutes.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
+            replacement: {
+                match: /function (?<functionName>.{1,3})\(\){.{1,100}\.Messages\.BOT_CALL_IDLE_DISCONNECT.+?}}/,
+                replace: "function $<functionName>(){}",
+            },
+        },
+    ],
+});
