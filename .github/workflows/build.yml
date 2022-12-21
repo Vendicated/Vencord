@@ -73,6 +73,6 @@ jobs:
                 git commit -a -m "Upload devbuild"
                 git push --force origin main
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.BUILDS_TOKEN }}
                 GLOBIGNORE: .git:.gitignore
                 GH_REPO: Vencord/builds
