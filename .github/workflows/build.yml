@@ -70,7 +70,7 @@ jobs:
                 cd upload
                 git add -A
                 git commit -a -m "Upload devbuild"
-                git push
+                git push --force origin main
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 GH_REPO: Vencord/builds
