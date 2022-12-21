@@ -66,11 +66,13 @@ jobs:
             - name: Upload Devbuild to builds repo
               run: |
                 gh repo clone $GH_REPO upload
-                cp -fr dist/ upload/
+                rm -rf upload/* upload/.*
+                cp -r dist/* upload
                 cd upload
                 git add -A
                 git commit -a -m "Upload devbuild"
                 git push --force origin main
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GLOBIGNORE: .git:.gitignore
                 GH_REPO: Vencord/builds
