@@ -78,6 +78,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const isDiscordTheme = colorStyle === ColorStyle.Discord;
     const isForeign = !Object.values(ResourceType).includes(resourceType as ResourceType);
     const noPalette = !artUrl || isDiscordTheme || isForeign;
+    const hasPlayer = resourceType !== ResourceType.User;
 
     const [palette, , artPending] = useAwaiter(async () => {
         if (noPalette) return null;
@@ -118,7 +119,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
                 selectedTrack={trackIndex}
                 onTrackSelect={setTrackIndex}
             />
-            <AudioControls mediaHref={previewUrl} />
+            {hasPlayer && <AudioControls mediaHref={previewUrl} />}
         </div>
     );
 }

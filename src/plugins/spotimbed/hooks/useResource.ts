@@ -38,6 +38,9 @@ export async function getResource(id: string, type: string): Promise<Resource | 
             artist.top_tracks ??= (await spotify.getArtistTopTracks(id, "US")).tracks;
             return artist;
         }
+        case ResourceType.User: {
+            return spotify.getUser(id);
+        }
     }
     return null;
 }

@@ -18,7 +18,7 @@
 
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 
-import { Album, Artist, Playlist, SpotifyHttp, SpotifyStore, Track } from "../types";
+import { Album, Artist, Playlist, SpotifyHttp, SpotifyStore, Track, User } from "../types";
 
 const API_BASE = "https://api.spotify.com/v1";
 
@@ -62,6 +62,9 @@ export const spotify = {
     },
     getArtistTopTracks(artistId: string, market: string): Promise<{ tracks: Track[]; }> {
         return this.getResource(`/artists/${artistId}/top-tracks?market=${market}`);
+    },
+    getUser(userId: string): Promise<User> {
+        return this.getResource(`/users/${userId}`);
     },
 
     // search(query, type = "track", limit = 20) {
