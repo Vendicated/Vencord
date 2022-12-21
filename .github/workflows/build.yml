@@ -70,7 +70,8 @@ jobs:
 
                 git clone "https://$USERNAME:$API_TOKEN@github.com/$GH_REPO" upload
                 cd upload
-                rm -rf * .*
+                shopt -s dotglob
+                rm -rf *
                 cp -r ../dist/* .
 
                 git add -A
