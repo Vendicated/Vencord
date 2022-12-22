@@ -177,4 +177,8 @@ export const Devs = Object.freeze({
         name: "'ax",
         id: 273562710745284628n,
     },
+    pointy: {
+        name: "pointy",
+        id: 99914384989519872n
+    }
 });
