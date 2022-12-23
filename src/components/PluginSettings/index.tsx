@@ -33,7 +33,6 @@ import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
 
@@ -235,7 +234,6 @@ export default ErrorBoundary.wrap(function Settings() {
 
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
-    const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: "all" });
 
@@ -254,6 +252,7 @@ export default ErrorBoundary.wrap(function Settings() {
             )
         );
     };
+
     const [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
         const now = Date.now() / 1000;
         const existingTimestamps: Record<string, number> = {};
