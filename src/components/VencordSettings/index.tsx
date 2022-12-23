@@ -16,21 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./settingsStyles.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
 import { Forms, Router, Text } from "@webpack/common";
-
-import cssText from "~fileContent/settingsStyles.css";
 
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
 import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
-
-const style = document.createElement("style");
-style.textContent = cssText;
-document.head.appendChild(style);
 
 const st = (style: string) => `vcSettings${style}`;
 
