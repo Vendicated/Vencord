@@ -19,7 +19,7 @@
 import { exec, execSync } from "child_process";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { join, relative } from "path";
 import { promisify } from "util";
 
 export const watch = process.argv.includes("--watch");
@@ -35,7 +35,7 @@ export const banner = {
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
- * @type {esbuild.Plugin}
+ * @type {import("esbuild").Plugin}
  */
 export const makeAllPackagesExternalPlugin = {
     name: "make-all-packages-external",
@@ -46,7 +46,7 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {esbuild.Plugin}
+ * @type {import("esbuild").Plugin}
  */
 export const globPlugins = {
     name: "glob-plugins",
@@ -87,7 +87,7 @@ export const globPlugins = {
 };
 
 /**
- * @type {esbuild.Plugin}
+ * @type {import("esbuild").Plugin}
  */
 export const gitHashPlugin = {
     name: "git-hash-plugin",
@@ -103,7 +103,7 @@ export const gitHashPlugin = {
 };
 
 /**
- * @type {esbuild.Plugin}
+ * @type {import("esbuild").Plugin}
  */
 export const gitRemotePlugin = {
     name: "git-remote-plugin",
@@ -125,7 +125,7 @@ export const gitRemotePlugin = {
 };
 
 /**
- * @type {esbuild.Plugin}
+ * @type {import("esbuild").Plugin}
  */
 export const fileIncludePlugin = {
     name: "file-include-plugin",
@@ -147,6 +147,31 @@ export const fileIncludePlugin = {
     }
 };
 
+const styleModule = await readFile("./scripts/build/module/style.js", "utf-8");
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const stylePlugin = {
+    name: "style-plugin",
+    setup: ({ onResolve, onLoad }) => {
+        onResolve({ filter: /\.css\?managed$/, namespace: "file" }, ({ path, resolveDir }) => ({
+            path: relative(process.cwd(), join(resolveDir, path.replace("?managed", ""))),
+            namespace: "managed-style",
+        }));
+        onLoad({ filter: /\.css$/, namespace: "managed-style" }, async ({ path }) => {
+            const css = await readFile(path, "utf-8");
+            const name = relative(process.cwd(), path).replaceAll("\\", "/");
+
+            return {
+                loader: "js",
+                contents: styleModule
+                    .replaceAll("STYLE_SOURCE", JSON.stringify(css))
+                    .replaceAll("STYLE_NAME", JSON.stringify(name))
+            };
+        });
+    }
+};
+
 /**
  * @type {import("esbuild").BuildOptions}
  */
@@ -158,7 +183,7 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
-    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin],
+    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     external: ["~plugins", "~git-hash", "~git-remote"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
