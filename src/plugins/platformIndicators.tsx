@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
+import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
+import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -61,6 +64,8 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
     return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
+const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
+
 const PlatformIndicator = ({ user }: { user: User; }) => {
     if (!user || user.bot) return null;
 
@@ -101,79 +106,95 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
 
     if (!icons.length) return null;
 
-    return (
-        <div
+    const indicator =
+        <span
             className="vc-platform-indicator"
-            style={{
-                display: "flex", alignItems: "center", marginLeft: "4px", gap: "4px"
-            }}
+            style={{ marginLeft: "4px", gap: "4px" }}
         >
             {icons}
-        </div>
-    );
+        </span>;
+
+    return indicator;
+};
+
+const badge: ProfileBadge = {
+    component: PlatformIndicator,
+    position: BadgePosition.START,
+    shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
+    key: "indicator"
+};
+
+const indicatorLocations = {
+    list: {
+        description: "In the member list",
+        onEnable: () => addDecorator("platform-indicator", props =>
+            <ErrorBoundary noop>
+                <PlatformIndicator user={props.user} />
+            </ErrorBoundary>
+        ),
+        onDisable: () => removeDecorator("platform-indicator")
+    },
+    badges: {
+        description: "In user profiles, as badges",
+        onEnable: () => addBadge(badge),
+        onDisable: () => removeBadge(badge)
+    },
+    messages: {
+        description: "Inside messages",
+        onEnable: () => addDecoration("platform-indicator", props =>
+            <ErrorBoundary noop>
+                <PlatformIndicator user={
+                    props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
+                } />
+            </ErrorBoundary>
+        ),
+        onDisable: () => removeDecoration("platform-indicator")
+    }
 };
 
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
-    authors: [Devs.kemo],
+    authors: [Devs.kemo, Devs.TheSun],
+    dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
-    patches: [
-        {
-            // Server member list decorators
-            find: "this.renderPremium()",
-            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
-            replacement: {
-                match: /this.renderPremium\(\)[^\]]*?\]/,
-                replace: "$&.concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(this.props))"
+    start() {
+        const settings = Settings.plugins.PlatformIndicators;
+        const { displayMode } = settings;
+
+        // transfer settings from the old ones, which had a select menu instead of booleans
+        if (displayMode) {
+            if (displayMode !== "both") settings[displayMode] = true;
+            else {
+                settings.list = true;
+                settings.badges = true;
             }
-        },
-        {
-            // Dm list decorators
-            find: "PrivateChannel.renderAvatar",
-            predicate: () => ["both", "list"].includes(Settings.plugins.PlatformIndicators.displayMode),
-            replacement: {
-                match: /(subText:(.{1,3})\..+?decorators:)(.+?:null)/,
-                replace: "$1[$3].concat(Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators($2.props))"
-            }
-        },
-        {
-            // User badges
-            find: "Messages.PROFILE_USER_BADGES",
-            predicate: () => ["both", "badges"].includes(Settings.plugins.PlatformIndicators.displayMode),
-            replacement: {
-                match: /(Messages\.PROFILE_USER_BADGES,role:"group",children:)(.+?\.key\)\}\)\))/,
-                replace: "$1[Vencord.Plugins.plugins.PlatformIndicators.renderPlatformIndicators(e)].concat($2)"
-            }
+            settings.messages = true;
+            delete settings.displayMode;
         }
-    ],
 
-    renderPlatformIndicators: ({ user }: { user: User; }) => (
-        <ErrorBoundary noop>
-            <PlatformIndicator user={user} />
-        </ErrorBoundary>
-    ),
+        Object.entries(indicatorLocations).forEach(([key, value]) => {
+            if (settings[key]) value.onEnable();
+        });
+    },
+
+    stop() {
+        Object.entries(indicatorLocations).forEach(([_, value]) => {
+            value.onDisable();
+        });
+    },
 
     options: {
-        displayMode: {
-            type: OptionType.SELECT,
-            description: "Where to display the platform indicators",
-            restartNeeded: true,
-            options: [
-                {
-                    label: "Member List & Badges",
-                    value: "both",
-                    default: true
-                },
-                {
-                    label: "Member List Only",
-                    value: "list"
-                },
-                {
-                    label: "Badges Only",
-                    value: "badges"
-                }
-            ]
-        },
+        ...Object.fromEntries(
+            Object.entries(indicatorLocations).map(([key, value]) => {
+                return [key, {
+                    type: OptionType.BOOLEAN,
+                    description: `Show indicators ${value.description.toLowerCase()}`,
+                    // onChange doesn't give any way to know which setting was changed, so restart required
+                    restartNeeded: true,
+                    default: false
+                }];
+            })
+        )
     }
 });

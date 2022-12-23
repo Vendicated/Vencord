@@ -16,6 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VencordFragment = /* #__PURE__*/ Symbol.for("react.fragment");
-export let VencordCreateElement =
-    (...args) => (VencordCreateElement = Vencord.Webpack.Common.React.createElement)(...args);
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+export default definePlugin({
+    name: "MessageDecorationsAPI",
+    description: "API to add decorations to messages",
+    authors: [Devs.TheSun],
+    patches: [
+        {
+            find: ".withMentionPrefix",
+            replacement: {
+                match: /(\(\).roleDot.{10,50}{children:.{1,2})}\)/,
+                replace: "$1.concat(Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0]))})"
+            }
+        }
+    ],
+});

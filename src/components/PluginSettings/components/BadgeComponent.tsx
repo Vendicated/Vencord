@@ -16,6 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VencordFragment = /* #__PURE__*/ Symbol.for("react.fragment");
-export let VencordCreateElement =
-    (...args) => (VencordCreateElement = Vencord.Webpack.Common.React.createElement)(...args);
+import { BadgeStyle } from "@components/PluginSettings/styles";
+
+export function Badge({ text, color }): JSX.Element {
+    return (
+        <div style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto",
+            ...BadgeStyle
+        }}>{text}</div>
+    );
+}
