@@ -39,3 +39,7 @@ declare module "~fileContent/*" {
 }
 
 declare module "*.css" { }
+declare module "*.css?managed" {
+    const name: string;
+    export default name;
+}
