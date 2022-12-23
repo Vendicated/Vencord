@@ -79,10 +79,8 @@ await Promise.all(
 
 async function buildPluginZip(target, files, shouldZip) {
     const entries = {
-        dist: {
-            "Vencord.js": readFileSync("dist/browser.js"),
-            "Vencord.css": readFileSync("dist/browser.css"),
-        },
+        "dist/Vencord.js": readFileSync("dist/browser.js"),
+        "dist/Vencord.css": readFileSync("dist/browser.css"),
         ...Object.fromEntries(await Promise.all(files.map(async f => [
             (f.startsWith("manifest") ? "manifest.json" : f),
             await readFile(join("browser", f))
