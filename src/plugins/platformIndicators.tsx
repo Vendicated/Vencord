@@ -35,8 +35,8 @@ function Icon(path: string, viewBox = "0 0 24 24") {
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height="18"
-                    width="18"
+                    height="20"
+                    width="20"
                     viewBox={viewBox}
                     fill={color}
                 >
@@ -66,7 +66,7 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user }: { user: User; }) => {
+const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user: User; inline?: boolean; marginLeft?: string; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -104,19 +104,24 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
 
     if (!icons.length) return null;
 
-    const indicator =
-        <span
+    return (
+        <div
             className="vc-platform-indicator"
-            style={{ marginLeft: "4px", gap: "4px" }}
+            style={{
+                marginLeft,
+                gap: "4px",
+                display: inline ? "inline-flex" : "flex",
+                alignItems: "center",
+                transform: inline ? "translateY(4px)" : undefined
+            }}
         >
             {icons}
-        </span>;
-
-    return indicator;
+        </div>
+    );
 };
 
 const badge: ProfileBadge = {
-    component: PlatformIndicator,
+    component: p => <PlatformIndicator {...p} marginLeft="" />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -143,7 +148,7 @@ const indicatorLocations = {
             <ErrorBoundary noop>
                 <PlatformIndicator user={
                     props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
-                } />
+                } inline />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
@@ -190,7 +195,7 @@ export default definePlugin({
                     description: `Show indicators ${value.description.toLowerCase()}`,
                     // onChange doesn't give any way to know which setting was changed, so restart required
                     restartNeeded: true,
-                    default: false
+                    default: true
                 }];
             })
         )
