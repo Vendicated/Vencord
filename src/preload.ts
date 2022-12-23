@@ -51,11 +51,15 @@ if (location.protocol !== "data:") {
         style.id = "vencord-css-core";
         style.textContent = css;
 
-        const listener = () => {
+        if (document.readyState === "complete") {
             document.documentElement.appendChild(style);
-            document.removeEventListener("DOMContentLoaded", listener);
-        };
-        document.addEventListener("DOMContentLoaded", listener);
+        } else {
+            const listener = () => {
+                document.documentElement.appendChild(style);
+                document.removeEventListener("DOMContentLoaded", listener);
+            };
+            document.addEventListener("DOMContentLoaded", listener);
+        }
     }
 
     try {
