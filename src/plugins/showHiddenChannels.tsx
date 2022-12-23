@@ -26,6 +26,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { Button, ChannelStore, SnowflakeUtils, Text } from "@webpack/common";
 
+const TEXT_CHANNEL = 0;
+const FORUM_CHANNEL = 15;
+
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
 
@@ -117,8 +120,8 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if (channel.type === 0 && isHidden) {
-            const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
+        if ((channel.type === TEXT_CHANNEL || channel.type === FORUM_CHANNEL) && isHidden) {
+            const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -127,7 +130,7 @@ export default definePlugin({
                             {(channel.isNSFW() && (
                                 <Badge text="NSFW" color="var(--status-danger)" />
                             ))}
-                            {(channel.type === 15 && (
+                            {(channel.type === FORUM_CHANNEL && (
                                 <Badge text="FORUM" color="var(--brand-experiment)" />
                             ))}
                         </Flex>
@@ -137,17 +140,17 @@ export default definePlugin({
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === 15 ? "Guidelines:" : "Topic:"}
+                                    {channel.type === FORUM_CHANNEL ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <Text variant="code">{channel.topic}</Text>
                             </>
                         )}
-                        {lastActiveDate && (
+                        {lastMessageDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Last message sent:
+                                    {channel.type === FORUM_CHANNEL ? "Last Post Created:" : "Last Message Sent:"}
                                 </Text>
-                                <Text variant="code">{lastActiveDate}</Text>
+                                <Text variant="code">{lastMessageDate}</Text>
                             </>
                         )}
                     </ModalContent>
