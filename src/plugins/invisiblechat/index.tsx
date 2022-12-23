@@ -69,7 +69,7 @@ function ChatbarIcon() {
 
 export default definePlugin({
     name: "InvisibleChat",
-    description: "Encrypt",
+    description: "Encrypt your Messages in a non-suspicious way! This plugin makes requests to >>https://embed.sammcheese.net<< to provide embeds to decrypted links!",
     authors: [Devs.SammCheese],
     patches: [
         {
