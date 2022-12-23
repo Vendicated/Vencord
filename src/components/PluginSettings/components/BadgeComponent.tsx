@@ -16,20 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { BadgeStyle } from "@components/PluginSettings/styles";
 
-export default definePlugin({
-    name: "NoReplyMention",
-    description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47],
-    patches: [
-        {
-            find: "CREATE_PENDING_REPLY:function",
-            replacement: {
-                match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
-                replace: "CREATE_PENDING_REPLY:function($1){$1.shouldMention=false;"
-            }
-        }
-    ]
-});
+export function Badge({ text, color }): JSX.Element {
+    return (
+        <div style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto",
+            ...BadgeStyle
+        }}>{text}</div>
+    );
+}

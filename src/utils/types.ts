@@ -19,6 +19,8 @@
 import { Command } from "@api/Commands";
 import { Promisable } from "type-fest";
 
+import type { ReplaceFn } from "./patches";
+
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
@@ -26,7 +28,8 @@ export default function definePlugin<P extends PluginDef>(p: P & Record<string, 
 
 export interface PatchReplacement {
     match: string | RegExp;
-    replace: string | ((match: string, ...groups: string[]) => string);
+    replace: string | ReplaceFn;
+    predicate?(): boolean;
 }
 
 export interface Patch {
@@ -89,7 +92,9 @@ export interface PluginDef {
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType;
+    settingsAboutComponent?: React.ComponentType<{
+        tempSettings?: Record<string, any>;
+    }>;
 }
 
 export enum OptionType {

@@ -7,7 +7,7 @@
 // @supportURL      https://github.com/Vendicated/Vencord
 // @license         GPL-3.0
 // @match           *://*.discord.com/*
-// @grant           none
+// @grant           GM_xmlhttpRequest
 // @run-at          document-start
 // @compatible      chrome Chrome + Tampermonkey or Violentmonkey
 // @compatible      firefox Firefox Tampermonkey

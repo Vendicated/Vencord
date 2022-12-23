@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 
 const Engines = {
-    Google: "https://www.google.com/searchbyimage?image_url=",
+    Google: "https://lens.google.com/uploadbyurl?url=",
     Yandex: "https://yandex.com/images/search?rpt=imageview&url=",
     SauceNAO: "https://saucenao.com/search.php?url=",
     IQDB: "https://iqdb.org/?url=",
