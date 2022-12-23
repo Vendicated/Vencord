@@ -145,7 +145,7 @@ export default definePlugin({
                         {lastActiveDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === 15 ? "Last Post Created:" : "Last message sent:"}
+                                    {channel.type === 15 ? "Last Post Created:" : "Last Message Sent:"}
                                 </Text>
                                 <Text variant="code">{lastActiveDate}</Text>
                             </>
