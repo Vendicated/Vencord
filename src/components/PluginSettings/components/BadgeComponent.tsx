@@ -20,6 +20,11 @@ import { BadgeStyle } from "@components/PluginSettings/styles";
 
 export function Badge({ text, color }): JSX.Element {
     return (
-        <div style={{ backgroundColor: color, justifySelf: "flex-end", marginLeft: "auto", ...BadgeStyle }}>{text}</div>
+        <div style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto",
+            ...BadgeStyle
+        }}>{text}</div>
     );
 }

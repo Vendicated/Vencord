@@ -165,7 +165,14 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 hideBorder={true}
             >
                 <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
-                    <Text variant="text-md/bold" style={{ display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px" }}>{plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}</Text>
+                    <Text
+                        variant="text-md/bold"
+                        style={{
+                            display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px"
+                        }}
+                    >
+                        {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
+                    </Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options
                             ? <CogWheel
@@ -245,24 +252,21 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
-    const [newPlugins, , newPluginsLoading] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
-        const dateNow: number = Date.now() / 1000;
-        const existingPlugins: Record<string, number> = {};
+    const [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
+        const now = Date.now() / 1000;
+        const existingTimestamps: Record<string, number> = {};
         const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
 
-        let newPlugins: Array<string> = [];
-        sortedPlugins.forEach(plugin => {
-            existingPlugins[plugin.name] = cachedPlugins?.[plugin.name] ?? dateNow;
-            if ((existingPlugins[plugin.name] + 60 * 60 * 24 * 2) > dateNow) {
-                newPlugins.push(plugin.name);
+        const newPlugins: string[] = [];
+        for (const { name: p } of sortedPlugins) {
+            const time = existingTimestamps[p] = cachedPlugins?.[p] ?? now;
+            if ((time + 60 * 60 * 24 * 2) > now) {
+                newPlugins.push(p);
             }
-        });
-        DataStore.set("Vencord_existingPlugins", existingPlugins);
-
-        if (window._.isEqual(newPlugins, sortedPluginNames)) {
-            newPlugins = [];
         }
-        return newPlugins || [];
+        DataStore.set("Vencord_existingPlugins", existingTimestamps);
+
+        return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
     return (
