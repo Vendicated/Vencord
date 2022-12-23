@@ -33,9 +33,10 @@ import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
+
+import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
