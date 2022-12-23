@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addButton, removeButton } from "@api/MessagePopover";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, ChannelStore } from "@webpack/common";
+import { Devs } from '@utils/constants';
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -27,11 +29,10 @@ import { buildEncModal } from "./components/EncryptionModal";
 let StegCloak;
 let steggo;
 
-
 const PopoverIcon = () => {
     return (
         <svg
-            fill="#EBEBEB"
+            fill={"var(--header-secondary)"}
             width={24} height={24}
             viewBox={"0 0 64 64"}
         >
@@ -43,7 +44,7 @@ const PopoverIcon = () => {
 
 function Indicator() {
     return (
-        <img src="https://cdn-icons-png.flaticon.com/32/3064/3064130.png" width={20} style={{ marginBottom: -4 }}>
+        <img src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png" width={20} style={{ marginBottom: -4 }}>
         </img>
     );
 
@@ -53,7 +54,7 @@ function ChatbarIcon() {
     return (
         <svg
             key="Encrypt Message"
-            fill="#EBEBEB"
+            fill={"var(--header-secondary)"}
             width="30"
             height="30"
             viewBox={"0 0 64 64"}
@@ -69,21 +70,8 @@ function ChatbarIcon() {
 export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt",
-    authors: [
-        {
-            id: 372148345894076416n,
-            name: "Samm-Cheese",
-        },
-    ],
+    authors: [Devs.SammCheese],
     patches: [
-        {
-            // Minipopover Lock
-            find: ".MESSAGE_TODOS_MARK_AS_DONE",
-            replacement: {
-                match: /.\?(..)\(\{key:"reply",label:.{1,40},icon:.{1,40},channel:(.{1,3}),message:(.{1,3}),onClick:.{1,5}\}\):null/gm,
-                replace: "$&,$3.content.match(Vencord.Plugins.plugins.InvisibleChat.INV_DETECTION)?$1({key:\"decrypt\",label:\"Decrypt Message\",icon:Vencord.Plugins.plugins.InvisibleChat.popoverIcon,channel:$2,message:$3,onClick:()=>Vencord.Plugins.plugins.InvisibleChat.receiver($3)}):null"
-            }
-        },
         {
             // Indicator
             find: ".Messages.MESSAGE_EDITED,",
@@ -93,10 +81,9 @@ export default definePlugin({
             }
         },
         {
-            // Chatbar Lock
             find: ".activeCommandOption",
             replacement: {
-                match: /.=.\.activeCommand,.=.\.activeCommandOption,.{0,155}(.)=\[\];/,
+                match: /.=.\.activeCommand,.=.\.activeCommandOption,.{1,133}(.)=\[\];/,
                 replace: "$&;$1.push(Vencord.Plugins.plugins.InvisibleChat.chatbarIcon());",
             }
         },
@@ -106,19 +93,24 @@ export default definePlugin({
     URL_DETECTION: new RegExp(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
-    // Grab the data from the above Plantext Patches
-    receiver(message: any,): void {
-        buildDecModal({ message });
-    },
-
     async start() {
-        console.log("%c [Invisible Chat] Started!", "color: aquamarine");
-
         // Shitty Module initialization. Thanks Ven.
-        StegCloak = await getStegCloak;
+        StegCloak = await getStegCloak();
         steggo = new StegCloak.default(true, false);
+
+        addButton("invDecrypt", message => {
+            return message?.content.match(this.INV_DETECTION) ?
+                {
+                    label: "Decrypt Message",
+                    icon: this.popoverIcon,
+                    message: message,
+                    channel: ChannelStore.getChannel(message.channel_id),
+                    onClick: () => buildDecModal({ message })
+                } : null;
+        });
     },
     stop() {
+        removeButton("invDecrypt");
     },
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
@@ -173,7 +165,7 @@ export default definePlugin({
 });
 
 export function encrypt(secret: string, password: string, cover: string): string {
-    // \u200b appended to secret for detection of correct password
+    // \u200b appended to secret for detection of string
     return steggo.hide(secret + "​", password, cover);
 }
 

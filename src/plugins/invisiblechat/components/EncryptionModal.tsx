@@ -30,7 +30,6 @@ import { Button, Forms, React, TextInput } from "@webpack/common";
 
 import { encrypt } from "../index";
 
-
 const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 function EncModal(props: ModalProps) {
@@ -46,7 +45,7 @@ function EncModal(props: ModalProps) {
                 <Forms.FormTitle tag="h4">Encrypt Message</Forms.FormTitle>
             </ModalHeader>
             <ModalContent>
-                <Forms.FormText>Secret</Forms.FormText>
+                <Forms.FormText style={{ paddingTop: "10px" }}>Secret</Forms.FormText>
                 <TextInput
                     onChange={(e: string) => {
                         setSecret(e);

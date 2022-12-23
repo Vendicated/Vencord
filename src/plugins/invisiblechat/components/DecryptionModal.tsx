@@ -38,8 +38,7 @@ export function DecModal(props: any) {
                 <Forms.FormTitle tag="h4">Decrypt Message</Forms.FormTitle>
             </ModalHeader>
             <ModalContent>
-                <div style={{ paddingTop: "10px" }} />
-                <Forms.FormText>Secret</Forms.FormText>
+                <Forms.FormText style={{ paddingTop: "10px" }}>Secret</Forms.FormText>
                 <TextInput defaultValue={secret} disabled={true}></TextInput>
                 <Forms.FormText>Password</Forms.FormText>
                 <TextInput
