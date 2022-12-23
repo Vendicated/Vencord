@@ -17,10 +17,10 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
+import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, ChannelStore } from "@webpack/common";
-import { Devs } from '@utils/constants';
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
