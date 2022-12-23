@@ -26,8 +26,20 @@ import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { Button, ChannelStore, SnowflakeUtils, Text } from "@webpack/common";
 
-const TEXT_CHANNEL = 0;
-const FORUM_CHANNEL = 15;
+enum ChannelTypes {
+    GUILD_TEXT = 0,
+    DM = 1,
+    GUILD_VOICE = 1,
+    GROUP_DM = 3,
+    GUILD_CATEGORY = 4,
+    GUILD_ANNOUNCEMENT = 5,
+    ANNOUNCEMENT_THREAD = 10,
+    PUBLIC_THREAD = 11,
+    PRIVATE_THREAD = 12,
+    GUILD_STAGE_VOICE = 13,
+    GUILD_DIRECTORY = 14,
+    GUILD_FORUM = 15
+}
 
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
@@ -120,7 +132,7 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if ((channel.type === TEXT_CHANNEL || channel.type === FORUM_CHANNEL) && isHidden) {
+        if ((channel.type === ChannelTypes.GUILD_TEXT || channel.type === ChannelTypes.GUILD_FORUM) && isHidden) {
             const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
@@ -130,7 +142,7 @@ export default definePlugin({
                             {(channel.isNSFW() && (
                                 <Badge text="NSFW" color="var(--status-danger)" />
                             ))}
-                            {(channel.type === FORUM_CHANNEL && (
+                            {(channel.type === ChannelTypes.GUILD_FORUM && (
                                 <Badge text="FORUM" color="var(--brand-experiment)" />
                             ))}
                         </Flex>
@@ -140,7 +152,7 @@ export default definePlugin({
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === FORUM_CHANNEL ? "Guidelines:" : "Topic:"}
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <Text variant="code">{channel.topic}</Text>
                             </>
@@ -148,7 +160,7 @@ export default definePlugin({
                         {lastMessageDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === FORUM_CHANNEL ? "Last Post Created:" : "Last Message Sent:"}
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Last Post Created:" : "Last Message Sent:"}
                                 </Text>
                                 <Text variant="code">{lastMessageDate}</Text>
                             </>
