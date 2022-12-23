@@ -26,7 +26,7 @@ import { join, resolve } from "path";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
-import { commonOpts, fileIncludePlugin, gitHashPlugin, gitRemotePlugin, globPlugins, watch } from "./common.mjs";
+import { commonOpts, globPlugins, watch } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -39,9 +39,7 @@ const commonOptions = {
     external: ["plugins", "git-hash"],
     plugins: [
         globPlugins,
-        gitHashPlugin,
-        gitRemotePlugin,
-        fileIncludePlugin
+        ...commonOpts.plugins,
     ],
     target: ["esnext"],
     define: {
