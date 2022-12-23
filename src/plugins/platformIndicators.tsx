@@ -23,11 +23,11 @@ import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByProps } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-let SessionStore = findByProps("getActiveSession");
+const SessionStore = findByPropsLazy("getActiveSession");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -70,22 +70,20 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
-        if (!SessionStore) SessionStore = findByProps("getActiveSession");
-        const sessions = SessionStore?.getSessions();
-        if (!sessions) return null;
-
+        const sessions = SessionStore.getSessions();
         if (typeof sessions !== "object") return null;
-        const sortedSessions = Object.values(sessions).sort((a: any, b: any) => {
-            if (a.status === "online" && b.status !== "online") return 1;
-            if (a.status !== "online" && b.status === "online") return -1;
-            if (a.status === "idle" && b.status !== "idle") return 1;
-            if (a.status !== "idle" && b.status === "idle") return -1;
+        const sortedSessions = Object.values(sessions).sort(({ status: a }: any, { status: b }: any) => {
+            if (a === b) return 0;
+            if (a === "online") return 1;
+            if (b === "online") return -1;
+            if (a === "idle") return 1;
+            if (b === "idle") return -1;
             return 0;
         });
 
         const ownStatus = Object.values(sortedSessions).reduce((acc: any, curr: any) => {
-            if (curr.clientInfo.client === "unknown") return {};
-            acc[curr.clientInfo.client] = curr.status;
+            if (curr.clientInfo.client !== "unknown")
+                acc[curr.clientInfo.client] = curr.status;
             return acc;
         }, {});
 
