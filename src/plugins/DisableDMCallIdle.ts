@@ -16,6 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VencordFragment = /* #__PURE__*/ Symbol.for("react.fragment");
-export let VencordCreateElement =
-    (...args) => (VencordCreateElement = Vencord.Webpack.Common.React.createElement)(...args);
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+export default definePlugin({
+    name: "DisableDMCallIdle",
+    description: "Disables automatically getting kicked from a DM voice call after 5 minutes.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
+            replacement: {
+                match: /function (?<functionName>.{1,3})\(\){.{1,100}\.Messages\.BOT_CALL_IDLE_DISCONNECT.+?}}/,
+                replace: "function $<functionName>(){}",
+            },
+        },
+    ],
+});

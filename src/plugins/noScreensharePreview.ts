@@ -16,6 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VencordFragment = /* #__PURE__*/ Symbol.for("react.fragment");
-export let VencordCreateElement =
-    (...args) => (VencordCreateElement = Vencord.Webpack.Common.React.createElement)(...args);
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+export default definePlugin({
+    name: "NoScreensharePreview",
+    description: "Disables screenshare previews from being sent.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: '("ApplicationStreamPreviewUploadManager")',
+            replacement: [
+                ".\\.default\\.makeChunkedRequest\\(",
+                ".{1,2}\\..\\.post\\({url:"
+            ].map(match => ({
+                match: new RegExp(`return\\[(?<code>\\d),${match}.\\..{1,3}\\.STREAM_PREVIEW.+?}\\)\\];`),
+                replace: 'return[$<code>,Promise.resolve({body:"",status:204})];'
+            }))
+        },
+    ],
+});
