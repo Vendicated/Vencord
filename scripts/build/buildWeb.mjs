@@ -20,9 +20,9 @@
 
 import esbuild from "esbuild";
 import { zip } from "fflate";
-import { readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
@@ -60,33 +60,59 @@ await Promise.all(
         }),
         esbuild.build({
             ...commonOptions,
+            inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
+            define: {
+                "window": "unsafeWindow",
+                ...(commonOptions?.define)
+            },
             outfile: "dist/Vencord.user.js",
             banner: {
                 js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${PackageJSON.version}.${new Date().getTime()}`)
             },
             footer: {
                 // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
-                js: "Object.defineProperty(window,'Vencord',{get:()=>Vencord});"
+                js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
             },
         })
     ]
 );
 
-zip({
-    dist: {
-        "Vencord.js": readFileSync("dist/browser.js"),
-        "Vencord.css": readFileSync("dist/browser.css"),
-    },
-    ...Object.fromEntries(await Promise.all(["modifyResponseHeaders.json", "content.js", "manifest.json"].map(async f => [
-        f,
-        await readFile(join("browser", f))
-    ]))),
-}, {}, (err, data) => {
-    if (err) {
-        console.error(err);
-        process.exitCode = 1;
+async function buildPluginZip(target, files, shouldZip) {
+    const entries = {
+        dist: {
+            "Vencord.js": readFileSync("dist/browser.js"),
+            "Vencord.css": readFileSync("dist/browser.css"),
+        },
+        ...Object.fromEntries(await Promise.all(files.map(async f => [
+            (f.startsWith("manifest") ? "manifest.json" : f),
+            await readFile(join("browser", f))
+        ]))),
+    };
+
+    if (shouldZip) {
+        zip(entries, {}, (err, data) => {
+            if (err) {
+                console.error(err);
+                process.exitCode = 1;
+            } else {
+                writeFileSync("dist/" + target, data);
+                console.info("Extension written to dist/" + target);
+            }
+        });
     } else {
-        writeFileSync("dist/extension.zip", data);
-        console.info("Extension written to dist/extension.zip");
+        if (existsSync(target))
+            rmSync(target, { recursive: true });
+        for (const entry in entries) {
+            const destination = "dist/" + target + "/" + entry;
+            const parentDirectory = resolve(destination, "..");
+            mkdirSync(parentDirectory, { recursive: true });
+            writeFileSync(destination, entries[entry]);
+        }
+        console.info("Unpacked Extension written to dist/" + target);
     }
-});
+}
+
+await buildPluginZip("extension-v3.zip", ["modifyResponseHeaders.json", "content.js", "manifestv3.json"], true);
+await buildPluginZip("extension-v2.zip", ["background.js", "content.js", "manifestv2.json"], true);
+await buildPluginZip("extension-v2-unpacked", ["background.js", "content.js", "manifestv2.json"], false);
+

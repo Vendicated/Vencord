@@ -90,8 +90,12 @@ export function initIpc(mainWindow: BrowserWindow) {
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     const win = new BrowserWindow({
         title: "QuickCss Editor",
+        autoHideMenuBar: true,
+        darkTheme: true,
         webPreferences: {
             preload: join(__dirname, "preload.js"),
+            contextIsolation: true,
+            nodeIntegration: false
         }
     });
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);

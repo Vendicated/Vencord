@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Badge } from "./Badge";
+
 export interface Review {
     comment: string,
     id: number,
@@ -24,4 +26,5 @@ export interface Review {
     star: number,
     username: string,
     profile_photo: string;
+    badges: Badge[];
 }
