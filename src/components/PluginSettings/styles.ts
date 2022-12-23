@@ -29,7 +29,7 @@ export const PluginsGridItem: React.CSSProperties = {
     borderRadius: 3,
     cursor: "pointer",
     display: "block",
-    height: "min-content",
+    height: "100%",
     padding: 10,
     width: "100%",
 };
@@ -47,4 +47,15 @@ export const SettingsIcon: React.CSSProperties = {
     padding: "0",
     background: "transparent",
     marginRight: 8
+};
+
+export const BadgeStyle: React.CSSProperties = {
+    padding: "0 6px",
+    fontFamily: "var(--font-display)",
+    fontWeight: "500",
+    borderRadius: "8px",
+    height: "16px",
+    fontSize: "12px",
+    lineHeight: "16px",
+    color: "var(--white-500)",
 };

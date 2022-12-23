@@ -16,24 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionBase } from "@utils/types";
+import { BadgeStyle } from "@components/PluginSettings/styles";
 
-export interface ISettingElementProps<T extends PluginOptionBase> {
-    option: T;
-    onChange(newValue: any): void;
-    pluginSettings: {
-        [setting: string]: any;
-        enabled: boolean;
-    };
-    id: string;
-    onError(hasError: boolean): void;
+export function Badge({ text, color }): JSX.Element {
+    return (
+        <div style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto",
+            ...BadgeStyle
+        }}>{text}</div>
+    );
 }
-
-export * from "./BadgeComponent";
-export * from "./SettingBooleanComponent";
-export * from "./SettingCustomComponent";
-export * from "./SettingNumericComponent";
-export * from "./SettingSelectComponent";
-export * from "./SettingSliderComponent";
-export * from "./SettingTextComponent";
-
