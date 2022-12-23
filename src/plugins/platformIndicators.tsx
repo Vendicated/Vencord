@@ -23,9 +23,11 @@ import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { PresenceStore, Tooltip } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
+
+const SessionStore = findByPropsLazy("getActiveSession");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -33,8 +35,8 @@ function Icon(path: string, viewBox = "0 0 24 24") {
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height="18"
-                    width="18"
+                    height="20"
+                    width="20"
                     viewBox={viewBox}
                     fill={color}
                 >
@@ -64,10 +66,32 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user }: { user: User; }) => {
+const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user: User; inline?: boolean; marginLeft?: string; }) => {
     if (!user || user.bot) return null;
 
-    const status = getStatus(user.id);
+    if (user.id === UserStore.getCurrentUser().id) {
+        const sessions = SessionStore.getSessions();
+        if (typeof sessions !== "object") return null;
+        const sortedSessions = Object.values(sessions).sort(({ status: a }: any, { status: b }: any) => {
+            if (a === b) return 0;
+            if (a === "online") return 1;
+            if (b === "online") return -1;
+            if (a === "idle") return 1;
+            if (b === "idle") return -1;
+            return 0;
+        });
+
+        const ownStatus = Object.values(sortedSessions).reduce((acc: any, curr: any) => {
+            if (curr.clientInfo.client !== "unknown")
+                acc[curr.clientInfo.client] = curr.status;
+            return acc;
+        }, {});
+
+        const { clientStatuses } = PresenceStore.getState();
+        clientStatuses[UserStore.getCurrentUser().id] = ownStatus;
+    }
+
+    const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
     if (!status) return null;
 
     const icons = Object.entries(status).map(([platform, status]) => (
@@ -80,19 +104,24 @@ const PlatformIndicator = ({ user }: { user: User; }) => {
 
     if (!icons.length) return null;
 
-    const indicator =
-        <span
+    return (
+        <div
             className="vc-platform-indicator"
-            style={{ marginLeft: "4px", gap: "4px" }}
+            style={{
+                marginLeft,
+                gap: "4px",
+                display: inline ? "inline-flex" : "flex",
+                alignItems: "center",
+                transform: inline ? "translateY(4px)" : undefined
+            }}
         >
             {icons}
-        </span>;
-
-    return indicator;
+        </div>
+    );
 };
 
 const badge: ProfileBadge = {
-    component: PlatformIndicator,
+    component: p => <PlatformIndicator {...p} marginLeft="" />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -119,7 +148,7 @@ const indicatorLocations = {
             <ErrorBoundary noop>
                 <PlatformIndicator user={
                     props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
-                } />
+                } inline />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
@@ -166,7 +195,7 @@ export default definePlugin({
                     description: `Show indicators ${value.description.toLowerCase()}`,
                     // onChange doesn't give any way to know which setting was changed, so restart required
                     restartNeeded: true,
-                    default: false
+                    default: true
                 }];
             })
         )
