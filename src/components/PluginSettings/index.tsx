@@ -16,25 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { Badge } from "@components/PluginSettings/components";
+import PluginModal from "@components/PluginSettings/PluginModal";
+import * as styles from "@components/PluginSettings/styles";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { startDependenciesRecursive, startPlugin, stopPlugin } from "plugins";
 
 import Plugins from "~plugins";
-
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-import PluginModal from "./PluginModal";
-import * as styles from "./styles";
 
 const logger = new Logger("PluginSettings", "#a6d189");
 
@@ -78,9 +79,10 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
     onRestartNeeded(name: string): void;
+    isNew?: boolean;
 }
 
-function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave }: PluginCardProps) {
+function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
 
@@ -162,8 +164,15 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 </Text>}
                 hideBorder={true}
             >
-                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center" }}>
-                    <Text variant="text-md/bold" style={{ flexGrow: "1" }}>{plugin.name}</Text>
+                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
+                    <Text
+                        variant="text-md/bold"
+                        style={{
+                            display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px"
+                        }}
+                    >
+                        {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
+                    </Text>
                     <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
                         {plugin.options
                             ? <CogWheel
@@ -243,6 +252,23 @@ export default ErrorBoundary.wrap(function Settings() {
         );
     };
 
+    const [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
+        const now = Date.now() / 1000;
+        const existingTimestamps: Record<string, number> = {};
+        const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
+
+        const newPlugins: string[] = [];
+        for (const { name: p } of sortedPlugins) {
+            const time = existingTimestamps[p] = cachedPlugins?.[p] ?? now;
+            if ((time + 60 * 60 * 24 * 2) > now) {
+                newPlugins.push(p);
+            }
+        }
+        DataStore.set("Vencord_existingPlugins", existingTimestamps);
+
+        return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
+    }));
+
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
@@ -281,6 +307,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
+                            isNew={newPlugins?.includes(plugin.name)}
                             key={plugin.name}
                         />;
                     })
