@@ -45,9 +45,22 @@ if (location.protocol !== "data:") {
     // Discord
     webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
     const rendererCss = join(__dirname, "renderer.css");
+
+    function insertCss(css: string) {
+        const style = document.createElement("style");
+        style.id = "vencord-css-core";
+        style.textContent = css;
+
+        const listener = () => {
+            document.documentElement.appendChild(style);
+            document.removeEventListener("DOMContentLoaded", listener);
+        };
+        document.addEventListener("DOMContentLoaded", listener);
+    }
+
     try {
         const css = readFileSync(rendererCss, "utf-8");
-        webFrame.insertCSS(css);
+        insertCss(css);
     } catch (err) {
         if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
             throw err;
@@ -55,7 +68,7 @@ if (location.protocol !== "data:") {
         // hack: the pre update updater does not download this file, so manually download it
         // TODO: remove this in a future version
         ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
-            .then(css => webFrame.insertCSS(css));
+            .then(insertCss);
     }
     require(process.env.DISCORD_PRELOAD!);
 } else {
