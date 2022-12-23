@@ -117,8 +117,8 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if ((channel.type === 0 || channel.type === 15) && isHidden) {
-            const lastActiveDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
+        if (channel.type === 0 && isHidden) {
+            const lastMessageDate = channel.lastActiveTimestamp ? new Date(channel.lastActiveTimestamp).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -145,7 +145,7 @@ export default definePlugin({
                         {lastActiveDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === 15 ? "Last Post Created:" : "Last Message Sent:"}
+                                    Last message sent:
                                 </Text>
                                 <Text variant="code">{lastActiveDate}</Text>
                             </>

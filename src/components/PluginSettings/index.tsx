@@ -302,6 +302,7 @@ export default ErrorBoundary.wrap(function Settings() {
                             onRestartNeeded={name => changes.add(name)}
                             disabled={plugin.required || !!dependency}
                             plugin={plugin}
+                            key={plugin.name}
                         />;
                     })
                     : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
