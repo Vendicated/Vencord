@@ -90,7 +90,7 @@ export const isStyleEnabled = (name: string) =>
  * const classNames = findByPropsLazy("thin", "scrollerBase"); // { thin: "thin-31rlnD scrollerBase-_bVAAt", ... }
  *
  * // Inside some plugin method like "start()"
- * setStyleVars(pluginStyle, classNames);
+ * setStyleClassNames(pluginStyle, classNames);
  * enableStyle(pluginStyle);
  * ```
  * ```scss
@@ -106,17 +106,17 @@ export const isStyleEnabled = (name: string) =>
  * @param recompile Whether to recompile the style after setting the variables, defaults to `true`
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export const setStyleClassnames = (name: string, classNames: Record<string, string>, recompile = true) => {
+export const setStyleClassNames = (name: string, classNames: Record<string, string>, recompile = true) => {
     const style = ensureStyle(name);
     style.classNames = classNames;
     if (isStyleEnabled(style.name) && recompile) compileStyle(style);
 };
 
 /**
- * Sets the DOM style after processing the source with the following steps:
- *   - Interpolates style classnames
+ * Updates the stylesheet after doing the following to the sourcecode:
+ *   - Interpolate style classnames
  * @param style **_Must_ be a style with a DOM element**
- * @see {@link setStyleClassnames} for more info on style classnames
+ * @see {@link setStyleClassNames} for more info on style classnames
  */
 export const compileStyle = (style: Style) => {
     if (!style.dom) throw new Error("Style has no DOM element");
@@ -124,7 +124,7 @@ export const compileStyle = (style: Style) => {
     style.dom.textContent = style.source
         .replace(/\[--(\w+)\]/g, (match, name) => {
             const className = style.classNames[name];
-            return className ? classnameToSelector(className) : match;
+            return className ? classNameToSelector(className) : match;
         });
 };
 
@@ -133,21 +133,21 @@ export const compileStyle = (style: Style) => {
  * @param prefix A prefix to add each class, defaults to `""`
  * @return A css selector for the classname
  * @example
- * classnameToSelector("foo bar") // => ".foo.bar"
+ * classNameToSelector("foo bar") // => ".foo.bar"
  */
-export const classnameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
+export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
 
-type ClassnameFactoryArg = string | string[] | Record<string, unknown>;
+type ClassNameFactoryArg = string | string[] | Record<string, unknown>;
 /**
  * @param prefix The prefix to add to each class, defaults to `""`
  * @returns A classname generator function
  * @example
- * const cl = classnameFactory("plugin-");
+ * const cl = classNameFactory("plugin-");
  *
  * cl("base", ["item", "editable"], { selected: null, disabled: true })
  * // => "plugin-base plugin-item plugin-editable plugin-disabled"
  */
-export const classnameFactory = (prefix: string = "") => (...args: ClassnameFactoryArg[]) => {
+export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
         if (typeof arg === "string") classNames.add(arg);

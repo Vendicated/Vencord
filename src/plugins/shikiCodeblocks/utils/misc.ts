@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classnameFactory } from "@api/Styles";
+import { classNameFactory } from "@api/Styles";
 import { hljs } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { HighlighterProps } from "../components/Highlighter";
 import { HljsSetting, ShikiSettings } from "../types";
 
-export const cl = classnameFactory("shiki-");
+export const cl = classNameFactory("shiki-");
 
 export const shouldUseHljs = ({
     lang,
