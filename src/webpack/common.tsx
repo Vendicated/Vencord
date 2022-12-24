@@ -159,7 +159,7 @@ export const NavigationRouter = mapMangledModuleLazy("Transitioning to external 
 
 waitFor("useState", m => {
     React = m;
-    ({ useEffect, useState, useMemo } = React);
+    ({ useEffect, useState, useMemo, useRef } = React);
 });
 
 waitFor(["dispatch", "subscribe"], m => {
