@@ -30,14 +30,13 @@ export const ensureStyle = (name: string) => {
 
 /**
  * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
- * ```ts
+ * @param name The name of the style
+ * @returns `false` if the style was already enabled, `true` otherwise
+ * @example
  * import pluginStyle from "./plugin.css?managed";
  *
  * // Inside some plugin method like "start()" or "[option].onChange()"
  * enableStyle(pluginStyle);
- * ```
- * @param name The name of the style
- * @returns `false` if the style was already enabled, `true` otherwise
  */
 export const enableStyle = (name: string) => {
     const style = ensureStyle(name);
@@ -90,7 +89,7 @@ export const isStyleEnabled = (name: string) =>
  * import { findByPropsLazy } from "@webpack";
  * const classNames = findByPropsLazy("thin", "scrollerBase"); // { thin: "thin-31rlnD scrollerBase-_bVAAt", ... }
  *
- * // Some plugin method like "start()"
+ * // Inside some plugin method like "start()"
  * setStyleVars(pluginStyle, classNames);
  * enableStyle(pluginStyle);
  * ```
@@ -104,7 +103,7 @@ export const isStyleEnabled = (name: string) =>
  * ```
  * @param name The name of the style
  * @param classNames An object where the keys are the variable names and the values are the variable values
- * @param recompile Whether to recompile the style after setting the variables
+ * @param recompile Whether to recompile the style after setting the variables, defaults to `true`
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
 export const setStyleClassnames = (name: string, classNames: Record<string, string>, recompile = true) => {
@@ -131,8 +130,29 @@ export const compileStyle = (style: Style) => {
 
 /**
  * @param name The classname
+ * @param prefix A prefix to add each class, defaults to `""`
  * @return A css selector for the classname
  * @example
  * classnameToSelector("foo bar") // => ".foo.bar"
  */
-export const classnameToSelector = (name: string) => name.split(" ").map(n => `.${n}`).join("");
+export const classnameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
+
+type ClassnameFactoryArg = string | string[] | Record<string, unknown>;
+/**
+ * @param prefix The prefix to add to each class, defaults to `""`
+ * @returns A classname generator function
+ * @example
+ * const cl = classnameFactory("plugin-");
+ *
+ * cl("base", ["item", "editable"], { selected: null, disabled: true })
+ * // => "plugin-base plugin-item plugin-editable plugin-disabled"
+ */
+export const classnameFactory = (prefix: string = "") => (...args: ClassnameFactoryArg[]) => {
+    const classNames = new Set<string>();
+    for (const arg of args) {
+        if (typeof arg === "string") classNames.add(arg);
+        else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
+        else if (typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));
+    }
+    return [...classNames].map(name => prefix + name).join(" ");
+};
