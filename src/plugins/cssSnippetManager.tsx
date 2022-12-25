@@ -358,6 +358,6 @@ export default definePlugin({
             `Last Modified at: ${snippet.editedTimestamp}`,
             `Guild ID: ${snippet.guildId}`,
             `Channel ID: ${snippet.channelId}`,
-        ].join("\n* ")) + `*/\n${snippet.code}`);
+        ].join("\n* ")) + `*/\n${snippet.code}`).join("\n\n");
     }
 });
