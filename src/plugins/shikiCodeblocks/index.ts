@@ -16,23 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./shiki.css";
+
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { parseUrl } from "@utils/misc";
 import { wordsFromPascal, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 
 import previewExampleText from "~fileContent/previewExample.tsx";
-import cssText from "~fileContent/shiki.css";
 
 import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
 import { themes } from "./api/themes";
 import { createHighlighter } from "./components/Highlighter";
-import { DeviconSetting, HljsSetting, ShikiSettings, StyleSheets } from "./types";
-import { clearStyles, removeStyle, setStyle } from "./utils/createStyle";
+import deviconStyle from "./devicon.css?managed";
+import { DeviconSetting, HljsSetting, ShikiSettings } from "./types";
+import { clearStyles } from "./utils/createStyle";
 
 const themeNames = Object.keys(themes);
-const devIconCss = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
 
 const getSettings = () => Settings.plugins.ShikiCodeblocks as ShikiSettings;
 
@@ -50,9 +52,8 @@ export default definePlugin({
         },
     ],
     start: async () => {
-        setStyle(cssText, StyleSheets.Main);
         if (getSettings().useDevIcon !== DeviconSetting.Disabled)
-            setStyle(devIconCss, StyleSheets.DevIcons);
+            enableStyle(deviconStyle);
 
         await shiki.init(getSettings().customTheme || getSettings().theme);
     },
@@ -135,8 +136,8 @@ export default definePlugin({
                 },
             ],
             onChange: (newValue: DeviconSetting) => {
-                if (newValue === DeviconSetting.Disabled) removeStyle(StyleSheets.DevIcons);
-                else setStyle(devIconCss, StyleSheets.DevIcons);
+                if (newValue === DeviconSetting.Disabled) disableStyle(deviconStyle);
+                else enableStyle(deviconStyle);
             },
         },
         bgOpacity: {

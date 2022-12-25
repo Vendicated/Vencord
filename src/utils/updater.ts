@@ -61,7 +61,7 @@ export function getRepo() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
 }
 
-type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js", string>;
+type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
 
 /**
  * @returns true if hard restart is required

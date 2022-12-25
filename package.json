@@ -65,6 +65,17 @@
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
             "eslint@8.28.0": "patches/eslint@8.28.0.patch"
+        },
+        "peerDependencyRules": {
+            "ignoreMissing": [
+                "eslint-plugin-import"
+            ]
+        },
+        "allowedDeprecatedVersions": {
+            "source-map-resolve": "*",
+            "resolve-url": "*",
+            "source-map-url": "*",
+            "urix": "*"
         }
     },
     "webExt": {

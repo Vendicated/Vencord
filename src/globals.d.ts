@@ -38,6 +38,12 @@ declare global {
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
+    export var VencordStyles: Map<string, {
+        name: string;
+        source: string;
+        classNames: Record<string, string>;
+        dom: HTMLStyleElement | null;
+    }>;
     export var appSettings: {
         set(setting: string, v: any): void;
     };

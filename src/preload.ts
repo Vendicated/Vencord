@@ -44,6 +44,34 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 if (location.protocol !== "data:") {
     // Discord
     webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+    const rendererCss = join(__dirname, "renderer.css");
+
+    function insertCss(css: string) {
+        const style = document.createElement("style");
+        style.id = "vencord-css-core";
+        style.textContent = css;
+
+        if (document.readyState === "complete") {
+            document.documentElement.appendChild(style);
+        } else {
+            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+                once: true
+            });
+        }
+    }
+
+    try {
+        const css = readFileSync(rendererCss, "utf-8");
+        insertCss(css);
+    } catch (err) {
+        if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
+            throw err;
+
+        // hack: the pre update updater does not download this file, so manually download it
+        // TODO: remove this in a future version
+        ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
+            .then(insertCss);
+    }
     require(process.env.DISCORD_PRELOAD!);
 } else {
     // Monaco Popout

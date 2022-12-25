@@ -90,14 +90,10 @@ export const Highlighter = ({
     let langName;
     if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;
 
-    const preClasses = [cl("root")];
-    if (!langName) preClasses.push(cl("plain"));
-    if (isPreview) preClasses.push(cl("preview"));
-
     return (
         <div
             ref={rootRef}
-            className={preClasses.join(" ")}
+            className={cl("root", { plain: !langName, preview: isPreview })}
             style={{
                 backgroundColor: useHljs
                     ? themeBase.backgroundColor

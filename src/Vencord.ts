@@ -18,7 +18,6 @@
 
 export * as Api from "./api";
 export * as Plugins from "./plugins";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";

@@ -18,7 +18,7 @@
             "js": ["content.js"]
         }
     ],
-    "web_accessible_resources": ["dist/Vencord.js"],
+    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
     "background": {
         "scripts": ["background.js"]
     }

@@ -21,8 +21,6 @@ import { proxyLazy } from "@utils/proxyLazy";
 import { findByPropsLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
-import cssText from "~fileContent/spotifyStyles.css";
-
 export interface Track {
     id: string;
     name: string;
@@ -69,11 +67,6 @@ type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazy(() => {
-    // TODO: Move this elsewhere
-    const style = document.createElement("style");
-    style.innerText = cssText;
-    document.head.appendChild(style);
-
     // For some reason ts hates extends Flux.Store
     const { Store } = Flux;
 

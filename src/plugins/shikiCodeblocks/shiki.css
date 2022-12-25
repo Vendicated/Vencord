@@ -1,6 +1,5 @@
 .shiki-container {
     border: 4px;
-    /* fallback background */
     background-color: var(--background-secondary);
 }
 
@@ -22,8 +21,7 @@
     border: none;
 }
 
-.shiki-root [class^='devicon-'],
-.shiki-root [class*=' devicon-'] {
+.shiki-devicon {
     margin-right: 8px;
     user-select: none;
 }

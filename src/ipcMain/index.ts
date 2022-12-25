@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./legacy";
 import "./updater";
 
 import { debounce } from "@utils/debounce";
