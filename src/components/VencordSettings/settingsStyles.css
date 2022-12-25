@@ -21,3 +21,11 @@
     flex-direction: row;
     margin-bottom: 1em;
 }
+
+.vcSettingsDonate {
+    padding: 1em;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1em;
+    margin-top: 1em;
+}
