@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { makeLazy, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByProps, useEffect, useState } from "@webpack";
 import { Button, ChannelStore, Forms, GuildChannelStore, GuildStore, moment, NavigationRouter, Parser, React, SelectedGuildStore, Toasts } from "@webpack/common";
 import { Channel, Guild, Message } from "discord-types/general";
 
@@ -35,9 +35,6 @@ Note:
 PS: regex for the win
 */
 const parseCodeBlocks = (text: string) => Array.from(text.matchAll(/```(\w+)?((?:.|\s)*?)```/g)).map(([_, lang, code]) => ({ lang, code }));
-
-const useEffect = (...args: Parameters<typeof React.useEffect>) => React.useEffect(...args);
-const useState = makeLazy(() => React.useState);
 const getCssClassNames = makeLazy(() => findByProps("colorRed"));
 
 
@@ -205,13 +202,14 @@ const SnippetManager = ({ message }: { message: Message; }) => {
     const channelsTxt: string = Vencord.PlainSettings.plugins.CssSnippetManager.channels || "";
     const channels = channelsTxt.split(",").map(ch => ch.trim());
 
-    if (!channels.includes(message.channel_id)) return <></>;
+    if (!channels.includes(message.channel_id)) return null;
 
     const codeBlocks = parseCodeBlocks(message.content);
-    if (codeBlocks.length !== 1) return <></>;
+    if (codeBlocks.length !== 1) return null;
 
     const [code] = codeBlocks;
-    if (code.lang !== "css") return <></>;
+    if (code.lang !== "css") return null;
+    if (code.code.trim().length === 0) return null;
 
     let snippet = getSnippets()
         .find(snippet => (
@@ -343,8 +341,7 @@ export default definePlugin({
         // Delete all the style nodes
         this.styles.forEach(style => style.remove());
 
-        // couldn't be bothered to get .clear() to work
-        while (this.styles.length) this.styles.pop();
+        this.styles = [];
     },
     addStyles() {
         const snippets = getSnippets();
@@ -366,9 +363,9 @@ export default definePlugin({
     },
     removeStyle(snippet: Snippet) {
         const style = document.getElementById(`css_snippet_${snippet.authorId}_${snippet.messageId}`);
-        if (style) {
-            this.styles = this.styles.filter(st => st.id !== style.id);
-            style.remove();
-        }
+        if (!style) return;
+
+        this.styles = this.styles.filter(st => st.id !== style.id);
+        style.remove();
     },
 });
