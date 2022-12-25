@@ -244,7 +244,7 @@ const SnippetManager = ({ message }: { message: Message; }) => {
         }
 
         Settings.plugins.CssSnippetManager.cssSnippets = snippets;
-        (Vencord.Plugins.plugins.CssSnippetManager as any)?.addStyles();
+        (Vencord.Plugins.plugins.CssSnippetManager as any)?.applySnippets();
         forceUpdate();
 
         Toasts.show({
@@ -255,10 +255,13 @@ const SnippetManager = ({ message }: { message: Message; }) => {
     };
 
     const removeSnippet = () => {
-        snippet && (Vencord.Plugins.plugins.CssSnippetManager as any)?.removeStyle(snippet);
-
         Settings.plugins.CssSnippetManager.cssSnippets = getSnippets().filter(snip => snip.messageId !== message.id);
         forceUpdate();
+
+        setTimeout(() => {
+            // A timeout just bc I'm paranoid that it won't be updated immediately.
+            (Vencord.Plugins.plugins.CssSnippetManager as any)?.applySnippets();
+        }, 50);
 
         Toasts.show({
             message: "Successfully deleted the snippet!",
@@ -333,39 +336,28 @@ export default definePlugin({
             </ErrorBoundary>;
         }, 0);
 
-        this.addStyles();
+        this.applySnippets();
     },
     stop() {
         removeAccessory("cssSnippetMgr");
-
-        // Delete all the style nodes
-        this.styles.forEach(style => style.remove());
-
-        this.styles = [];
+        document.querySelector("#css-snippet-manager")?.remove();
     },
-    addStyles() {
+    applySnippets() {
         const snippets = getSnippets();
 
-        for (const snippet of snippets) {
-            let style;
+        const style = document.querySelector("#css-snippet-manager") || (() => {
+            const elem = document.createElement("style");
+            elem.id = "css-snippet-manager";
 
-            // Attempt to find the style if it already exists, else create a new one.
-            if (!(style = document.getElementById(`css_snippet_${snippet.authorId}_${snippet.messageId}`))) {
-                style = document.createElement("style");
-                style.id = `css_snippet_${snippet.authorId}_${snippet.messageId}`;
-                document.head.appendChild(style);
-            }
-            style.innerHTML = snippet.code;
+            document.head.appendChild(elem);
+            return elem;
+        })();
 
-            // Add the style to an array so it can be easily removed later.
-            if (!this.styles.includes(style)) this.styles.push(style);
-        }
-    },
-    removeStyle(snippet: Snippet) {
-        const style = document.getElementById(`css_snippet_${snippet.authorId}_${snippet.messageId}`);
-        if (!style) return;
-
-        this.styles = this.styles.filter(st => st.id !== style.id);
-        style.remove();
-    },
+        style.innerHTML = snippets.map(snippet => ("/*\n* ") + ([
+            `Author ID: ${snippet.authorId}`,
+            `Last Modified at: ${snippet.editedTimestamp}`,
+            `Guild ID: ${snippet.guildId}`,
+            `Channel ID: ${snippet.channelId}`,
+        ].join("\n* ")) + `*/\n${snippet.code}`);
+    }
 });
