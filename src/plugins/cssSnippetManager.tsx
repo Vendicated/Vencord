@@ -22,8 +22,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { makeLazy, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, useEffect, useState } from "@webpack";
-import { Button, ChannelStore, Forms, GuildChannelStore, GuildStore, moment, NavigationRouter, Parser, React, SelectedGuildStore, Toasts } from "@webpack/common";
+import { findByProps } from "@webpack";
+import { Button, ChannelStore, Forms, GuildChannelStore, GuildStore, moment, NavigationRouter, Parser, React, SelectedGuildStore, Toasts, useEffect, useState } from "@webpack/common";
 import { Channel, Guild, Message } from "discord-types/general";
 
 /*
@@ -60,8 +60,8 @@ function CodeBlock(props: { content: string, lang: string; }) {
 }
 
 const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => void; }) => {
-    const [snippetsGrouped, setSnippetsGrouped] = useState()<{ [guild_id: string]: { [channel_id: string]: Snippet[]; }; }>({});
-    const [guilds, setGuilds] = useState()<{ [guild_id: string]: Guild & { channels: Channel[]; }; }>({});
+    const [snippetsGrouped, setSnippetsGrouped] = useState<{ [guild_id: string]: { [channel_id: string]: Snippet[]; }; }>({});
+    const [guilds, setGuilds] = useState<{ [guild_id: string]: Guild & { channels: Channel[]; }; }>({});
     const forceUpdate = useForceUpdater();
 
     useEffect(() => {
@@ -107,7 +107,7 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
                                     <Forms.FormText tag="h2">{guilds[guild_id].name}</Forms.FormText>
                                 </div>
 
-                                {Object.entries(channels).map(([channel_id, snippets]) => {
+                                {Object.entries(channels as {}).map(([channel_id, snippets]) => {
                                     return (
                                         <div style={{ marginLeft: "5%" }}>
                                             <div style={{ marginBottom: "2%" }}>
@@ -128,7 +128,7 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
                                                 </span>
                                             </div>
                                             <ul style={{ marginLeft: "5%" }}>
-                                                {snippets.map(s => (
+                                                {(snippets as Snippet[]).map(s => (
                                                     <li>
                                                         <div style={{
                                                             marginBottom: "1%",
@@ -172,7 +172,7 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
                                                                         }
 
                                                                         forceUpdate();
-                                                                        setValue(Object.values(snippets).map(channels => Object.values(channels)).flat(2));
+                                                                        setValue(Object.values(snippets).map(channels => Object.values(channels as {})).flat(2) as Snippet[]);
                                                                         return snippets;
                                                                     });
                                                                 }}
@@ -358,6 +358,6 @@ export default definePlugin({
             `Last Modified at: ${snippet.editedTimestamp}`,
             `Guild ID: ${snippet.guildId}`,
             `Channel ID: ${snippet.channelId}`,
-        ].join("\n* ")) + `*/\n${snippet.code}`).join("\n\n");
+        ].join("\n* ").trimEnd()) + `\n*/\n${snippet.code.trim()}`).join("\n\n");
     }
 });
