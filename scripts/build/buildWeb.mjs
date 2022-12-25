@@ -20,9 +20,9 @@
 
 import esbuild from "esbuild";
 import { zip } from "fflate";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
-import { readFile } from "fs/promises";
-import { join, resolve } from "path";
+import { readFileSync } from "fs";
+import { appendFile, mkdir, readFile, rm, writeFile } from "fs/promises";
+import { join } from "path";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
@@ -75,10 +75,13 @@ await Promise.all(
     ]
 );
 
+/**
+  * @type {(target: string, files: string[], shouldZip: boolean) => Promise<void>}
+ */
 async function buildPluginZip(target, files, shouldZip) {
     const entries = {
-        "dist/Vencord.js": readFileSync("dist/browser.js"),
-        "dist/Vencord.css": readFileSync("dist/browser.css"),
+        "dist/Vencord.js": await readFile("dist/browser.js"),
+        "dist/Vencord.css": await readFile("dist/browser.css"),
         ...Object.fromEntries(await Promise.all(files.map(async f => [
             (f.startsWith("manifest") ? "manifest.json" : f),
             await readFile(join("browser", f))
@@ -86,29 +89,47 @@ async function buildPluginZip(target, files, shouldZip) {
     };
 
     if (shouldZip) {
-        zip(entries, {}, (err, data) => {
-            if (err) {
-                console.error(err);
-                process.exitCode = 1;
-            } else {
-                writeFileSync("dist/" + target, data);
-                console.info("Extension written to dist/" + target);
-            }
+        return new Promise((resolve, reject) => {
+            zip(entries, {}, (err, data) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const out = join("dist", target);
+                    writeFile(out, data).then(() => {
+                        console.info("Extension written to " + out);
+                        resolve();
+                    }).catch(reject);
+                }
+            });
         });
     } else {
-        if (existsSync(target))
-            rmSync(target, { recursive: true });
-        for (const entry in entries) {
-            const destination = "dist/" + target + "/" + entry;
-            const parentDirectory = resolve(destination, "..");
-            mkdirSync(parentDirectory, { recursive: true });
-            writeFileSync(destination, entries[entry]);
-        }
+        await rm(target, { recursive: true, force: true });
+        await Promise.all(Object.entries(entries).map(async ([file, content]) => {
+            const dest = join("dist", target, file);
+            const parentDirectory = join(dest, "..");
+            await mkdir(parentDirectory, { recursive: true });
+            await writeFile(dest, content);
+        }));
+
         console.info("Unpacked Extension written to dist/" + target);
     }
 }
 
-await buildPluginZip("extension-v3.zip", ["modifyResponseHeaders.json", "content.js", "manifestv3.json"], true);
-await buildPluginZip("extension-v2.zip", ["background.js", "content.js", "manifestv2.json"], true);
-await buildPluginZip("extension-v2-unpacked", ["background.js", "content.js", "manifestv2.json"], false);
+const cssText = "`" + readFileSync("dist/Vencord.user.css", "utf-8").replaceAll("`", "\\`") + "`";
+const cssRuntime = `
+document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
+    Object.assign(document.createElement("style"), {
+        textContent: ${cssText},
+        id: "vencord-css-core"
+    }),
+    { once: true }
+));
+`;
+
+await Promise.all([
+    appendFile("dist/Vencord.user.js", cssRuntime),
+    buildPluginZip("extension-v3.zip", ["modifyResponseHeaders.json", "content.js", "manifestv3.json"], true),
+    buildPluginZip("extension-v2.zip", ["background.js", "content.js", "manifestv2.json"], true),
+    buildPluginZip("extension-v2-unpacked", ["background.js", "content.js", "manifestv2.json"], false),
+]);
 
