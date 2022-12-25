@@ -77,8 +77,8 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
 
             if (!guilds[snippet.guildId]) {
                 const guild = window._.cloneDeep(GuildStore.getGuild(snippet.guildId));
-                guild.channels = GuildChannelStore.getChannels(snippet.guildId).SELECTABLE.map(c => c.channel);
-                guilds[snippet.guildId] = guild;
+const channels = GuildChannelStore.getChannels(snippet.guildId).SELECTABLE.map(c => c.channel);
+guilds[snippet.guildId] = { ...guild, channels };
             }
         }
 
