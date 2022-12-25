@@ -48,7 +48,7 @@ interface Snippet {
 }
 
 // This should ensure that I am dealing with a copy, and not a proxy.
-const getSnippets = () => (PlainSettings.plugins.CssSnippetManager?.cssSnippets as Snippet[] ?? []).map(e => Object.assign({}, e) as Snippet);
+const getSnippets = () => window._.cloneDeep(PlainSettings.plugins.CssSnippetManager?.cssSnippets as Snippet[] ?? []);
 
 function CodeBlock(props: { content: string, lang: string; }) {
     return (
@@ -77,8 +77,8 @@ const SnippetMgrSettings = ({ setValue }: { setValue: (newValue: Snippet[]) => v
 
             if (!guilds[snippet.guildId]) {
                 const guild = window._.cloneDeep(GuildStore.getGuild(snippet.guildId));
-const channels = GuildChannelStore.getChannels(snippet.guildId).SELECTABLE.map(c => c.channel);
-guilds[snippet.guildId] = { ...guild, channels };
+                const channels = GuildChannelStore.getChannels(snippet.guildId).SELECTABLE.map(c => c.channel);
+                guilds[snippet.guildId] = { ...guild, channels };
             }
         }
 
