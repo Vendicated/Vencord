@@ -10,4 +10,10 @@ style.type = "text/css";
 style.rel = "stylesheet";
 style.href = browser.runtime.getURL("dist/Vencord.css");
 
-document.documentElement.append(script, style);
+document.documentElement.append(script);
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => document.documentElement.append(style),
+    { once: true }
+);

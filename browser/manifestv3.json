@@ -23,7 +23,7 @@
 
     "web_accessible_resources": [
         {
-            "resources": ["dist/Vencord.js"],
+            "resources": ["dist/Vencord.js", "dist/Vencord.css"],
             "matches": ["*://*.discord.com/*"]
         }
     ],
