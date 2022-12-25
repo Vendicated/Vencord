@@ -17,7 +17,7 @@
 */
 
 import { exec, execSync } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
@@ -147,7 +147,7 @@ export const fileIncludePlugin = {
     }
 };
 
-const styleModule = await readFile("./scripts/build/module/style.js", "utf-8");
+const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
 /**
  * @type {import("esbuild").Plugin}
  */
