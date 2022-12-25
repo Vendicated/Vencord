@@ -54,11 +54,9 @@ if (location.protocol !== "data:") {
         if (document.readyState === "complete") {
             document.documentElement.appendChild(style);
         } else {
-            const listener = () => {
-                document.documentElement.appendChild(style);
-                document.removeEventListener("DOMContentLoaded", listener);
-            };
-            document.addEventListener("DOMContentLoaded", listener);
+            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+                once: true
+            });
         }
     }
 
