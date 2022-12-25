@@ -117,7 +117,7 @@ async function buildPluginZip(target, files, shouldZip) {
 
 const cssText = "`" + readFileSync("dist/Vencord.user.css", "utf-8").replaceAll("`", "\\`") + "`";
 const cssRuntime = `
-document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
+;document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
     Object.assign(document.createElement("style"), {
         textContent: ${cssText},
         id: "vencord-css-core"
