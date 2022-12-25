@@ -1,0 +1,61 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+.vcPluginsGrid {
+    margin-top: 16px;
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vcPluginsCard {
+    background-color: var(--background-modifier-selected);
+    color: var(--interactive-active);
+    border-radius: 3px;
+    cursor: pointer;
+    display: block;
+    height: 100%;
+    padding: 10px;
+    width: 100%
+}
+
+.vcPluginsCard .vcPluginsInfoButton {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    margin-right: 8px;
+}
+
+.vcPluginsFilterControls {
+    display: grid;
+    height: 40px;
+    gap: 10px;
+    grid-template-columns: 1fr 150px;
+}
+
+.vcPluginsBadge {
+    padding: 0 6px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    border-radius: 8px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--white-500);
+}

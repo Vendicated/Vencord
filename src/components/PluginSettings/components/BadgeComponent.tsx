@@ -16,15 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BadgeStyle } from "@components/PluginSettings/styles";
-
 export function Badge({ text, color }): JSX.Element {
     return (
-        <div style={{
+        <div className="vcPluginsBadge" style={{
             backgroundColor: color,
             justifySelf: "flex-end",
-            marginLeft: "auto",
-            ...BadgeStyle
+            marginLeft: "auto"
         }}>{text}</div>
     );
 }
