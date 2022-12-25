@@ -52,6 +52,7 @@ export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export const GuildChannelStore = findByPropsLazy("getChannels");
 export const ReadStateStore = findByPropsLazy("lastMessageId");
 export const PresenceStore = findByPropsLazy("setCurrentUserOnConnectionOpen");
+export const UserSettingsProtoStore = findByPropsLazy("getGuildRecentsDismissedAt");
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
