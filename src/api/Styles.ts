@@ -22,11 +22,11 @@ export type Style = MapValue<typeof VencordStyles>;
 
 export const styleMap = window.VencordStyles ??= new Map();
 
-export const ensureStyle = (name: string) => {
+export function requireStyle(name: string) {
     const style = styleMap.get(name);
     if (!style) throw new Error(`Style "${name}" does not exist`);
     return style;
-};
+}
 
 /**
  * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
@@ -38,47 +38,50 @@ export const ensureStyle = (name: string) => {
  * // Inside some plugin method like "start()" or "[option].onChange()"
  * enableStyle(pluginStyle);
  */
-export const enableStyle = (name: string) => {
-    const style = ensureStyle(name);
+export function enableStyle(name: string) {
+    const style = requireStyle(name);
 
-    if (style.dom?.isConnected) return false;
+    if (style.dom?.isConnected)
+        return false;
 
-    style.dom ??= document.createElement("style");
+    if (!style.dom) {
+        style.dom = document.createElement("style");
+        style.dom.dataset.vencordName = style.name;
+    }
     compileStyle(style);
 
     document.head.appendChild(style.dom);
     return true;
-};
+}
 
 /**
  * @param name The name of the style
  * @returns `false` if the style was already disabled, `true` otherwise
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export const disableStyle = (name: string) => {
-    const style = ensureStyle(name);
-    if (!style.dom?.isConnected) return false;
+export function disableStyle(name: string) {
+    const style = requireStyle(name);
+    if (!style.dom?.isConnected)
+        return false;
 
     style.dom.remove();
     style.dom = null;
     return true;
-};
+}
 
 /**
  * @param name The name of the style
  * @returns `true` in most cases, may return `false` in some edge cases
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export const toggleStyle = (name: string) =>
-    ensureStyle(name).dom?.isConnected ? disableStyle(name) : enableStyle(name);
+export const toggleStyle = (name: string) => isStyleEnabled(name) ? disableStyle(name) : enableStyle(name);
 
 /**
  * @param name The name of the style
  * @returns Whether the style is enabled
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export const isStyleEnabled = (name: string) =>
-    ensureStyle(name).dom?.isConnected ?? false;
+export const isStyleEnabled = (name: string) => requireStyle(name).dom?.isConnected ?? false;
 
 /**
  * Sets the variables of a style
@@ -107,9 +110,10 @@ export const isStyleEnabled = (name: string) =>
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
 export const setStyleClassNames = (name: string, classNames: Record<string, string>, recompile = true) => {
-    const style = ensureStyle(name);
+    const style = requireStyle(name);
     style.classNames = classNames;
-    if (isStyleEnabled(style.name) && recompile) compileStyle(style);
+    if (recompile && isStyleEnabled(style.name))
+        compileStyle(style);
 };
 
 /**
@@ -154,5 +158,5 @@ export const classNameFactory = (prefix: string = "") => (...args: ClassNameFact
         else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
         else if (typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));
     }
-    return [...classNames].map(name => prefix + name).join(" ");
+    return Array.from(classNames, name => prefix + name).join(" ");
 };
