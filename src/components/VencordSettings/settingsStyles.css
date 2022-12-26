@@ -22,10 +22,13 @@
     margin-bottom: 1em;
 }
 
-.vcSettingsDonate {
+.vcSettingsCard {
     padding: 1em;
-    display: flex;
-    flex-direction: row;
     margin-bottom: 1em;
     margin-top: 1em;
+}
+
+.vcSettingsDonate {
+    display: flex;
+    flex-direction: row;
 }

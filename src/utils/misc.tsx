@@ -228,3 +228,9 @@ export const checkIntersecting = (el: Element) => {
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
 };
+
+
+/**
+ * Joins classNames
+ */
+export const joinClasses = (...classes: string[]) => classes.filter(c => typeof c === "string").join(" ");

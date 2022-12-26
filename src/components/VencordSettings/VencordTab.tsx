@@ -23,6 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
+import { joinClasses } from '../../utils/misc';
 
 const st = (style: string) => `vcSettings${style}`;
 
@@ -120,7 +121,7 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card className={st("Donate")}>
+        <Card className={joinClasses(st("Card"), st("Donate"))}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
