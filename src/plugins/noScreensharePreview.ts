@@ -16,27 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Language } from "../api/languages";
-import { DeviconSetting } from "../types";
-import { cl } from "../utils/misc";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
-export interface HeaderProps {
-    langName?: string;
-    useDevIcon: DeviconSetting;
-    shikiLang: Language | null;
-}
-
-export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
-    if (!langName) return <></>;
-
-    return (
-        <div className={cl("lang")}>
-            {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
-                <i
-                    className={`${cl("devicon")} devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
-                />
-            )}
-            {langName}
-        </div>
-    );
-}
+export default definePlugin({
+    name: "NoScreensharePreview",
+    description: "Disables screenshare previews from being sent.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: '("ApplicationStreamPreviewUploadManager")',
+            replacement: [
+                ".\\.default\\.makeChunkedRequest\\(",
+                ".{1,2}\\..\\.post\\({url:"
+            ].map(match => ({
+                match: new RegExp(`return\\[(?<code>\\d),${match}.\\..{1,3}\\.STREAM_PREVIEW.+?}\\)\\];`),
+                replace: 'return[$<code>,Promise.resolve({body:"",status:204})];'
+            }))
+        },
+    ],
+});
