@@ -89,7 +89,7 @@ export default ErrorBoundary.wrap(function () {
 
     return (
         <>
-            <Card className="vcSettingsCard">
+            <Card className="vcCard">
                 <Forms.FormTitle tag="h5">Paste links to .css / .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
                 <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
