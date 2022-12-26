@@ -142,7 +142,7 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
  * classes("one", "two") => "one two"
  */
 export function classes(...classes: string[]) {
-    return classes.join(" ");
+    return classes.filter(c => typeof c === "string").join(" ");
 }
 
 /**
@@ -228,9 +228,3 @@ export const checkIntersecting = (el: Element) => {
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
 };
-
-
-/**
- * Joins classNames
- */
-export const joinClasses = (...classes: string[]) => classes.filter(c => typeof c === "string").join(" ");
