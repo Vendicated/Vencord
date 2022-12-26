@@ -18,9 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Forms, Margins, Text } from "@webpack/common";
-import { classes } from '../../utils/misc';
 
 function BackupRestoreTab() {
     return (
