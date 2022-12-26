@@ -22,13 +22,19 @@
     margin-bottom: 1em;
 }
 
-.vcSettingsCard {
+.vcSettingsDonate {
+    display: flex;
+    flex-direction: row;
+}
+
+.vcCard {
     padding: 1em;
     margin-bottom: 1em;
     margin-top: 1em;
 }
 
-.vcSettingsDonate {
-    display: flex;
-    flex-direction: row;
+.vcBackupRestoreCard {
+    background-color: var(--info-warning-background);
+    border-color: var(--info-warning-foreground);
+    color: var(--info-warning-text)
 }

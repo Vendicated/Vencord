@@ -121,7 +121,7 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card className={joinClasses(st("Card"), st("Donate"))}>
+        <Card className={joinClasses("vcCard", st("Donate"))}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
