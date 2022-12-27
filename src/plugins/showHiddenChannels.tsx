@@ -19,11 +19,27 @@
 
 import { Settings } from "@api/settings";
 import { Flex } from "@components/Flex";
+import { Badge } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { Button, ChannelStore, SnowflakeUtils, Text } from "@webpack/common";
+
+enum ChannelTypes {
+    GUILD_TEXT = 0,
+    DM = 1,
+    GUILD_VOICE = 1,
+    GROUP_DM = 3,
+    GUILD_CATEGORY = 4,
+    GUILD_ANNOUNCEMENT = 5,
+    ANNOUNCEMENT_THREAD = 10,
+    PUBLIC_THREAD = 11,
+    PRIVATE_THREAD = 12,
+    GUILD_STAGE_VOICE = 13,
+    GUILD_DIRECTORY = 14,
+    GUILD_FORUM = 15
+}
 
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
@@ -34,7 +50,7 @@ waitFor(m => m.can && m.initialize, m => ({ can } = m));
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show hidden channels",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Nickyux],
     options: {
         hideUnreads: {
             description: "Hide unreads",
@@ -97,7 +113,7 @@ export default definePlugin({
     shouldShow(channel, category, isMuted) {
         if (!this.isHiddenChannel(channel)) return false;
         if (!category) return false;
-        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
+        if ((channel.type === 0 || channel.type === 15) && category.guild?.hideMutedChannels && isMuted) return false;
 
         return !category.isCollapsed;
     },
@@ -116,17 +132,18 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if (channel.type === 0 && isHidden) {
+        if ((channel.type === ChannelTypes.GUILD_TEXT || channel.type === ChannelTypes.GUILD_FORUM) && isHidden) {
             const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
-                        <Flex>
+                        <Flex style={{ width: "100%" }}>
                             <Text variant="heading-md/bold">{channel.name}</Text>
                             {(channel.isNSFW() && (
-                                <Text style={{ backgroundColor: "var(--status-danger)", borderRadius: "8px", paddingLeft: 4, paddingRight: 4 }} variant="heading-md/normal">
-                                    NSFW
-                                </Text>
+                                <Badge text="NSFW" color="var(--status-danger)" />
+                            ))}
+                            {(channel.type === ChannelTypes.GUILD_FORUM && (
+                                <Badge text="FORUM" color="var(--brand-experiment)" />
                             ))}
                         </Flex>
                     </ModalHeader>
@@ -135,7 +152,7 @@ export default definePlugin({
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Topic:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <Text variant="code">{channel.topic}</Text>
                             </>
@@ -143,7 +160,7 @@ export default definePlugin({
                         {lastMessageDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Last message sent:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Last Post Created:" : "Last Message Sent:"}
                                 </Text>
                                 <Text variant="code">{lastMessageDate}</Text>
                             </>

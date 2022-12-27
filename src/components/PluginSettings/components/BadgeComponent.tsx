@@ -24,6 +24,7 @@ export function Badge({ text, color }): JSX.Element {
             backgroundColor: color,
             justifySelf: "flex-end",
             marginLeft: "auto",
+            alignSelf: "center",
             ...BadgeStyle
         }}>{text}</div>
     );
