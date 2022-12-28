@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./styles.css"; const st = (style: string) => `vcPlugins${style}`;
+import "./styles.css";
+
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
@@ -35,6 +36,8 @@ import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
+
+const st = (style: string) => `vcPlugins${style}`;
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
