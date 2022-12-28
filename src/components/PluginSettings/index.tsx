@@ -21,6 +21,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -37,7 +38,7 @@ import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, Te
 
 import Plugins from "~plugins";
 
-const st = (style: string) => `vcPlugins${style}`;
+const cl = classNameFactory("vcPlugins");
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
@@ -148,7 +149,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex className={st("Card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <Flex className={cl("Card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
                 onChange={toggleEnabled}
                 disabled={disabled}
@@ -177,7 +178,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     >
                         {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
                     </Text>
-                    <button role="switch" onClick={() => openModal()} className={`button-12Fmur ${st("InfoButton")}`}>
+                    <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("InfoButton"))}>
                         {plugin.options
                             ? <CogWheel
                                 style={{ color: iconHover ? "" : "var(--text-muted)" }}
@@ -281,7 +282,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
 
-            <div className={st("FilterControls")}>
+            <div className={cl("FilterControls")}>
                 <TextInput value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} style={{ marginBottom: 24 }} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
@@ -301,7 +302,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
 
-            <div className={st("Grid")}>
+            <div className={cl("Grid")}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
@@ -322,7 +323,7 @@ export default ErrorBoundary.wrap(function Settings() {
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>
-            <div className={st("Grid")}>
+            <div className={cl("Grid")}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => a.required || dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {

@@ -18,13 +18,14 @@
 
 
 import { useSettings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
-import { classes,useAwaiter } from "@utils/misc";
+import { classes, useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
-const st = (style: string) => `vcSettings${style}`;
+const cl = classNameFactory("vcSettings");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -41,7 +42,7 @@ function VencordSettings() {
         <React.Fragment>
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
-                <Card className={st("QuickActionCard")}>
+                <Card className={cl("QuickActionCard")}>
                     {IS_WEB ? (
                         <Button
                             onClick={() => require("../Monaco").launchMonacoEditor()}
@@ -120,7 +121,7 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card className={classes("vcCard", st("Donate"))}>
+        <Card className={classes("vcCard", cl("Donate"))}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
