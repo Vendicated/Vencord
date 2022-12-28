@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
+import { find, waitFor } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
 import { Settings } from "../Vencord";
-import { find, waitFor } from '../webpack/webpack';
-import { proxyLazy } from '../utils/proxyLazy';
-import { migratePluginSettings } from '../api/settings';
 
 let Permissions: Record<string, bigint>, computePermissions: ({ ...args }) => bigint;
 waitFor(["SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS"], m => Permissions = m);
@@ -53,7 +53,6 @@ const tags: Tag[] = [{
     description: "Owns the server",
     botAndOpCases: true,
     condition: (_, user, channel) => GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id
-
 }, {
     name: "ADMINISTRATOR",
     displayName: "Admin",
@@ -134,21 +133,26 @@ export default definePlugin({
                     replace: (orig, types) =>
                         // e[e.BOT=0]="BOT";
                         `${tags.map((t, i) =>
-                            `${types}[${types}.${t.name}=${i * 100 + 100}]="${t.name}";\
-${t.botAndOpCases ? `${types}[${types}.${t.name}_OP=${i * 100 + 101}]="${t.name}_OP";\
-${types}[${types}.${t.name}_BOT=${i * 100 + 102}]="${t.name}_BOT";` : ""}`
+                            `${types}[${types}.${t.name}=${i * 10 + 100}]="${t.name}";\
+${t.botAndOpCases ? `${types}[${types}.${t.name}_OP=${i * 10 + 101}]="${t.name}_OP";\
+${types}[${types}.${t.name}_BOT=${i * 10 + 102}]="${t.name}_BOT";` : ""}`
                         ).join("")}${orig}`
                 },
                 {
                     match: /case (\i)\.BOT:default:(\i)=(.{1,20})\.BOT/,
                     replace: (orig, types, text, strings) =>
                         `${tags.map(t =>
-                            // case r.SERVER:T = c.Z.Messages.BOT_TAG_SERVER;break;
+                            // case r.SERVER: T = c.Z.Messages.BOT_TAG_SERVER; break;
                             `case ${types}.${t.name}:${text}="${t.displayName}";break;\
 ${t.botAndOpCases ? `case ${types}.${t.name}_OP:${text}=${strings}.BOT_TAG_FORUM_ORIGINAL_POSTER+" • ${t.displayName}";break;\
 case ${types}.${t.name}_BOT:${text}=${strings}.BOT_TAG_BOT+" • ${t.displayName}";break;` : ""}`
                         ).join("")}${orig}`
                 },
+                // show OP tags correctly
+                {
+                    match: /(\i)=(\i)===\i\.ORIGINAL_POSTER/,
+                    replace: "$1=$self.isOPTag($2)"
+                }
             ],
         },
         // in messages
@@ -190,9 +194,14 @@ return type!==null?$2().botTag,type"
         ).filter(i => i);
     },
 
+    // custom tags have id's of minimum 100, being xx0 for normal, xx1 for op and xx2 for bot
+    // for example: 100 101 102, 110 111 112, 120 121 122, etc.
+    isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || (tag >= 100 && tag % 10 === 1),
+
     getTag(args: any): number | null {
         // note: everything other than user and location can be undefined
-        let { message, user, channel, channelId, origType, location } = args;
+        const { message, user, channelId, origType, location } = args;
+        let { channel } = args;
         let type = typeof origType === "number" ? origType : null;
         // "as any" cast because the Channel type doesn't have .isForumPost() yet
         channel ??= ChannelStore.getChannel(channelId) as any;
