@@ -56,6 +56,10 @@ export default definePlugin({
                 {
                     match: /(function\((.)\).+?roleIcon.{5,20}null,).," — ",.\]/,
                     replace: "$1Vencord.Plugins.plugins.RoleColorEverywhere.roleGroupColor(e)]"
+                },
+                {
+                    match: /n\.isShown;/,
+                    replace: "$&Vencord.Plugins.plugins.RoleColorEverywhere.testing(e,n,f,h,c,s);"
                 }
             ],
         },
@@ -93,8 +97,8 @@ export default definePlugin({
                 const member = MemberStore.getMember(channel.guild_id, id);
 
                 return type === 'element' ?
-                    <strong style={{color: member.colorString}}>
-                        {member.nick || UserStore.getUser(id).username}
+                    <strong style={{color: member?.colorString}}>
+                        {member?.nick || UserStore.getUser(id).username}
                     </strong>
                 : id
             })} {users.length > 1 ? 'are' : 'is'} typing...
@@ -106,6 +110,10 @@ export default definePlugin({
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id]
 
-        return <span style={{color: role?.colorString}}>{title} — {count}</span>;
+        return <span style={{
+            color: role?.colorString,
+            fontWeight: "unset",
+            letterSpacing: ".05em"
+        }}>{title} — {count}</span>;
     }
 });
