@@ -68,15 +68,14 @@ jobs:
                 git config --global user.name "$USERNAME"
                 git config --global user.email actions@github.com
 
-                git clone "https://oauth2:$API_TOKEN@github.com/$GH_REPO" upload
+                git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
                 cd upload
-                shopt -s dotglob
                 rm -rf *
                 cp -r ../dist/* .
 
                 git add -A
                 git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-                git push --force https://oauth2:$API_TOKEN@github.com/$GH_REPO.git main
+                git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
               env:
                 API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
                 GLOBIGNORE: .git:.gitignore:README.md:LICENSE

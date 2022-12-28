@@ -16,27 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Language } from "../api/languages";
-import { DeviconSetting } from "../types";
-import { cl } from "../utils/misc";
+import IpcEvents from "@utils/IpcEvents";
+import { ipcMain } from "electron";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
-export interface HeaderProps {
-    langName?: string;
-    useDevIcon: DeviconSetting;
-    shikiLang: Language | null;
-}
+import { get } from "./simpleGet";
 
-export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
-    if (!langName) return <></>;
+ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
+    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
+    await writeFile(join(__dirname, "renderer.css"), buf);
+    return buf.toString("utf-8");
+});
 
-    return (
-        <div className={cl("lang")}>
-            {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
-                <i
-                    className={`${cl("devicon")} devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
-                />
-            )}
-            {langName}
-        </div>
-    );
-}

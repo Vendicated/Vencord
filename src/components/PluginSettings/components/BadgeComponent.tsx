@@ -16,27 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Language } from "../api/languages";
-import { DeviconSetting } from "../types";
-import { cl } from "../utils/misc";
+import { BadgeStyle } from "@components/PluginSettings/styles";
 
-export interface HeaderProps {
-    langName?: string;
-    useDevIcon: DeviconSetting;
-    shikiLang: Language | null;
-}
-
-export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
-    if (!langName) return <></>;
-
+export function Badge({ text, color }): JSX.Element {
     return (
-        <div className={cl("lang")}>
-            {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
-                <i
-                    className={`${cl("devicon")} devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
-                />
-            )}
-            {langName}
-        </div>
+        <div style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto",
+            ...BadgeStyle
+        }}>{text}</div>
     );
 }

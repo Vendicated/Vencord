@@ -37,3 +37,9 @@ declare module "~fileContent/*" {
     const content: string;
     export default content;
 }
+
+declare module "*.css" { }
+declare module "*.css?managed" {
+    const name: string;
+    export default name;
+}
