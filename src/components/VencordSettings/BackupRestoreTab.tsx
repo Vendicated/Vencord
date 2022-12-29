@@ -25,7 +25,7 @@ import { Button, Card, Forms, Margins, Text } from "@webpack/common";
 function BackupRestoreTab() {
     return (
         <Forms.FormSection title="Settings Sync">
-            <Card className={classes("vcCard", "vcBackupRestoreCard")}>
+            <Card className={classes("vcSettingsCard", "vcBackupRestoreCard")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>
                     <span>Importing a settings file will overwrite your current settings.</span>

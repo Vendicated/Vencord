@@ -22,7 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
-import { classes, useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
 const cl = classNameFactory("vcSettings");
@@ -121,7 +121,7 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card className={classes("vcCard", cl("Donate"))}>
+        <Card className={cl("Card", "Donate")}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
