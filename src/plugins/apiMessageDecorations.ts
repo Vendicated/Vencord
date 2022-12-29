@@ -16,21 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "StartupTimings",
-    description: "Adds Startup Timings to the Settings menu",
-    authors: [Devs.Megu],
-    patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
-        replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:Vencord.Plugins.plugins.StartupTimings.StartupTimingPage},$&'
+    name: "MessageDecorationsAPI",
+    description: "API to add decorations to messages",
+    authors: [Devs.TheSun],
+    patches: [
+        {
+            find: ".withMentionPrefix",
+            replacement: {
+                match: /(\(\).roleDot.{10,50}{children:.{1,2})}\)/,
+                replace: "$1.concat(Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0]))})"
+            }
         }
-    }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
+    ],
 });
