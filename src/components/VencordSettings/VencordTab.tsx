@@ -25,7 +25,7 @@ import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
-const cl = classNameFactory("vcSettings");
+const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -42,7 +42,7 @@ function VencordSettings() {
         <React.Fragment>
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
-                <Card className={cl("QuickActionCard")}>
+                <Card className={cl("quick-actions-card")}>
                     {IS_WEB ? (
                         <Button
                             onClick={() => require("../Monaco").launchMonacoEditor()}
@@ -121,7 +121,7 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card className={cl("Card", "Donate")}>
+        <Card className={cl("card", "donate")}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
                 <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>

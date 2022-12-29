@@ -29,7 +29,7 @@ import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
 
-const cl = classNameFactory("vcSettings");
+const cl = classNameFactory("vc-settings-");
 
 const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
@@ -63,7 +63,7 @@ function Settings(props: SettingsProps) {
         <TabBar
             type={TabBar.Types.TOP}
             look={TabBar.Looks.BRAND}
-            className={cl("TabBar")}
+            className={cl("tab-bar")}
             selectedItem={tab}
             onItemSelect={Router.open}
         >
@@ -71,7 +71,7 @@ function Settings(props: SettingsProps) {
                 if (!component) return null;
                 return <TabBar.Item
                     id={key}
-                    className={cl("TabBarItem")}
+                    className={cl("tab-bar-item")}
                     key={key}>
                     {name}
                 </TabBar.Item>;
