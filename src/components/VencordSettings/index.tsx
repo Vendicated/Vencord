@@ -18,6 +18,7 @@
 
 import "./settingsStyles.css";
 
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
 import { Forms, Router, Text } from "@webpack/common";
@@ -28,7 +29,7 @@ import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
 
-const st = (style: string) => `vcSettings${style}`;
+const cl = classNameFactory("vcSettings");
 
 const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
@@ -62,7 +63,7 @@ function Settings(props: SettingsProps) {
         <TabBar
             type={TabBar.Types.TOP}
             look={TabBar.Looks.BRAND}
-            className={st("TabBar")}
+            className={cl("TabBar")}
             selectedItem={tab}
             onItemSelect={Router.open}
         >
@@ -70,7 +71,7 @@ function Settings(props: SettingsProps) {
                 if (!component) return null;
                 return <TabBar.Item
                     id={key}
-                    className={st("TabBarItem")}
+                    className={cl("TabBarItem")}
                     key={key}>
                     {name}
                 </TabBar.Item>;
