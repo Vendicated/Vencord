@@ -136,7 +136,7 @@ export default definePlugin({
     getProfileTimezonesComponent: (e: any) => {
 
         if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile) {
-            return (<></>);
+            return null;
         }
 
         const user = e.user as User;
@@ -146,7 +146,6 @@ export default definePlugin({
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
         }, [user.id]);
-
 
         return (
             <span style={{
@@ -159,15 +158,13 @@ export default definePlugin({
                 border: "4px solid white"
             }}>
                 {timezone && getTimeString(timezone)}
-
             </span>
-
         );
     }
     ,
     getTimezonesComponent: (e: any) => {
         if (Vencord.Settings.plugins.showTimezonesInChat || e.user)
-            return (<></>);
+            return null;
 
         const message = e.message as Message;
 
@@ -176,7 +173,6 @@ export default definePlugin({
         React.useEffect(() => {
             getUserTimezone(e.message.author.id).then(timezone => setTimezone(timezone));
         }, [message.author.id]);
-
 
         return (
             <span className={classes(styles.timestampInline, styles.timestamp)}>
