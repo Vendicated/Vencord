@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import IpcEvents from "@utils/IpcEvents";
+import { ipcMain } from "electron";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
-import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
-import definePlugin from "@utils/types";
+import { get } from "./simpleGet";
 
-export default definePlugin({
-    name: "StartupTimings",
-    description: "Adds Startup Timings to the Settings menu",
-    authors: [Devs.Megu],
-    patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
-        replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:Vencord.Plugins.plugins.StartupTimings.StartupTimingPage},$&'
-        }
-    }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
+ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
+    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
+    await writeFile(join(__dirname, "renderer.css"), buf);
+    return buf.toString("utf-8");
 });
+

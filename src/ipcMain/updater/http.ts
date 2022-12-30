@@ -69,7 +69,7 @@ async function fetchUpdates() {
         return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
-        if (["patcher.js", "preload.js", "renderer.js"].some(s => name.startsWith(s))) {
+        if (["patcher.js", "preload.js", "renderer.js", "renderer.css"].some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }
     });

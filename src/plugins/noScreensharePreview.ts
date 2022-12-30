@@ -16,21 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "StartupTimings",
-    description: "Adds Startup Timings to the Settings menu",
-    authors: [Devs.Megu],
-    patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
-        replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:Vencord.Plugins.plugins.StartupTimings.StartupTimingPage},$&'
-        }
-    }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
+    name: "NoScreensharePreview",
+    description: "Disables screenshare previews from being sent.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: '("ApplicationStreamPreviewUploadManager")',
+            replacement: [
+                ".\\.default\\.makeChunkedRequest\\(",
+                ".{1,2}\\..\\.post\\({url:"
+            ].map(match => ({
+                match: new RegExp(`return\\[(?<code>\\d),${match}.\\..{1,3}\\.STREAM_PREVIEW.+?}\\)\\];`),
+                replace: 'return[$<code>,Promise.resolve({body:"",status:204})];'
+            }))
+        },
+    ],
 });
