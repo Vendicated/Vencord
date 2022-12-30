@@ -37,21 +37,28 @@ const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
 const fetchBadges = (id: string, setBadges: Function) => {
-    if (!cache.has(id) || cache.get(id)?.expires < Date.now()) {
+    const cachedValue = cache.get(id);
+    if (!cache.has(id) || (cachedValue && cachedValue.expires < Date.now())) {
         fetch(`${API_URL}/users/${id}`)
             .then(res => res.json() as Promise<CustomBadges>)
             .then(body => {
                 cache.set(id, { badges: body, expires: Date.now() + EXPIRES });
                 setBadges(body);
             });
-    } else setBadges(cache.get(id)?.badges);
+    } else if (cachedValue) {
+        setBadges(cachedValue.badges);
+    }
 };
 
 const Badge = ({ name, img }: { name: string, img: string; }) => {
     return (
         <Tooltip text={name} >
             {(tooltipProps: any) => (
-                <img {...tooltipProps} src={img} style={{ width: "22px", height: "22px" }} />
+                <img
+                    {...tooltipProps}
+                    src={img}
+                    style={{ width: "22px", height: "22px", transform: name.includes("Replugged") ? "scale(0.9)" : null }}
+                />
             )}
         </Tooltip>
     );
