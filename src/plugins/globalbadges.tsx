@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Tooltip, React } from "@webpack/common";
+import { React, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
 
 interface CustomBadges {
@@ -39,8 +39,8 @@ const EXPIRES = 1000 * 60 * 15;
 const fetchBadges = (id: string, setBadges: Function) => {
     if (!cache.has(id) || cache.get(id)?.expires < Date.now()) {
         fetch(`${API_URL}/users/${id}`)
-            .then((res) => res.json() as Promise<CustomBadges>)
-            .then((body) => {
+            .then(res => res.json() as Promise<CustomBadges>)
+            .then(body => {
                 cache.set(id, { badges: body, expires: Date.now() + EXPIRES });
                 setBadges(body);
             });
@@ -64,9 +64,9 @@ const GlobalBadges = ({ user }: { user: User; }) => {
     if (!badges) return null;
     const globalBadges: JSX.Element[] = [];
 
-    Object.keys(badges).forEach((mod) => {
+    Object.keys(badges).forEach(mod => {
         if (mod.toLowerCase() === "vencord") return;
-        badges[mod].forEach((badge) => {
+        badges[mod].forEach(badge => {
             const badgeImg = `${API_URL}/badges/${mod}/${badge.replace(mod, "").trim().split(" ")[0]}`;
             const _ = {
                 "hunter": "Bug Hunter",
