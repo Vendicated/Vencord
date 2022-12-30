@@ -23,33 +23,30 @@ const API_URL = "https://timezonedb.catvibers.me/";
 const Cache = new Map();
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export interface Timezone {
-    userID: string,
-    timezoneId: string,
-    timezone: string;
-    error: string;
-}
 const getSettings = () => Vencord.Settings.plugins.Timezones;
 
-export async function getUserTimezone(discordID: string): Promise<Timezone> {
+export async function getUserTimezone(discordID: string): Promise<Number | null> {
 
     if (getSettings()[`timezones.${discordID}`])
-        return {
-            timezone: getSettings()[`timezones.${discordID}`],
-        } as Timezone;
+        return Number(getSettings()[`timezones.${discordID}`]);
 
     if (Cache.has(discordID)) {
-        return Cache.get(discordID).timezone;
+        return Cache.get(discordID);
     }
 
     const timezone = await fetch(API_URL + "api/user/" + discordID).then(
         r => r.json()
     );
-    Cache.set(discordID, timezone);
+
+    if (timezone.error) {
+        Cache.set(discordID, null);
+        return null;
+    }
+    Cache.set(discordID, timezone.timezone);
     return timezone.timezone;
 }
 
-export function getTimeString(timezone: Timezone, timestamp = moment()): string {
+export function getTimeString(timezone: Number, timestamp = moment()): string {
 
     const time = timestamp.utcOffset(Number(timezone));
 

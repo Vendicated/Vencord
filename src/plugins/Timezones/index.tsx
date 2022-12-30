@@ -25,7 +25,7 @@ import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
-import { getTimeString, getUserTimezone, Timezone } from "./Utils";
+import { getTimeString, getUserTimezone } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
 
 export default definePlugin({
@@ -74,7 +74,7 @@ export default definePlugin({
                 const user = findOption(args, "user");
                 const timezone = findOption(args, "timezone");
                 Vencord.Settings.plugins.Timezones[`timezones.${user}`] = timezone;
-                sendBotMessage(ctx.channel.id, {content: "Timezone set"});
+                sendBotMessage(ctx.channel.id, { content: "Timezone set" });
             },
         },
         {
@@ -91,11 +91,11 @@ export default definePlugin({
             execute(args, ctx) {
                 const user = findOption(args, "user");
                 if (!Vencord.Settings.plugins.Timezones[`timezones.${user}`]) {
-                    sendBotMessage(ctx.channel.id, {content: "No timezone"});
+                    sendBotMessage(ctx.channel.id, { content: "No timezone" });
                     return;
                 }
                 delete Vencord.Settings.plugins.Timezones[`timezones.${user}`];
-                sendBotMessage(ctx.channel.id, {content: "Timezone deleted"});
+                sendBotMessage(ctx.channel.id, { content: "Timezone deleted" });
             }
         },
         {
@@ -109,7 +109,7 @@ export default definePlugin({
                 if (str.length === 0) {
                     str = "No timezones set";
                 }
-                sendBotMessage(ctx.channel.id, {content:str});
+                sendBotMessage(ctx.channel.id, { content: str });
             }
         }
     ],
@@ -141,7 +141,7 @@ export default definePlugin({
 
         const user = e.user as User;
 
-        const [timezone, setTimezone] = React.useState<Timezone | null>(null);
+        const [timezone, setTimezone] = React.useState<Number | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
@@ -171,7 +171,7 @@ export default definePlugin({
 
         const message = e.message as Message;
 
-        const [timezone, setTimezone] = React.useState<Timezone | null>(null);
+        const [timezone, setTimezone] = React.useState<Number | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(e.message.author.id).then(timezone => setTimezone(timezone));
