@@ -20,12 +20,12 @@ import { findByPropsLazy } from "@webpack";
 
 
 const API_URL = "https://timezonedb.catvibers.me/";
-const Cache = new Map();
+const Cache = new Map<string, Number | null>();
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 const getSettings = () => Vencord.Settings.plugins.Timezones;
 
-export async function getUserTimezone(discordID: string): Promise<Number | null> {
+export async function getUserTimezone(discordID: string): Promise<Number | undefined | null> {
 
     if (getSettings()[`timezones.${discordID}`])
         return Number(getSettings()[`timezones.${discordID}`]);
