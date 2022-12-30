@@ -141,7 +141,7 @@ export default definePlugin({
 
         const user = e.user as User;
 
-        const [timezone, setTimezone] = React.useState<Number | null>(null);
+        const [timezone, setTimezone] = React.useState<number | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
@@ -171,7 +171,7 @@ export default definePlugin({
 
         const message = e.message as Message;
 
-        const [timezone, setTimezone] = React.useState<Number | null>(null);
+        const [timezone, setTimezone] = React.useState<number | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(e.message.author.id).then(timezone => setTimezone(timezone));
