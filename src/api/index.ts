@@ -19,11 +19,14 @@
 import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
 import * as $DataStore from "./DataStore";
+import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
+import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
 import * as $ServerList from "./ServerList";
+import * as $Styles from "./Styles";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
@@ -31,16 +34,16 @@ import * as $ServerList from "./ServerList";
  *
  * If your plugin uses this, you must add MessageEventsAPI to its dependencies
  */
-const MessageEvents = $MessageEventsAPI;
+export const MessageEvents = $MessageEventsAPI;
 /**
  * An API allowing you to create custom notices
  * (snackbars on the top, like the Update prompt)
  */
-const Notices = $Notices;
+export const Notices = $Notices;
 /**
  * An API allowing you to register custom commands
  */
-const Commands = $Commands;
+export const Commands = $Commands;
 /**
  * A wrapper around IndexedDB. This can store arbitrarily
  * large data and supports a lot of datatypes (Blob, Map, ...).
@@ -55,22 +58,33 @@ const Commands = $Commands;
  * This is actually just idb-keyval, so if you're familiar with that, you're golden!
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#supported_types}
  */
-const DataStore = $DataStore;
+export const DataStore = $DataStore;
 /**
  * An API allowing you to add custom components as message accessories
  */
-const MessageAccessories = $MessageAccessories;
+export const MessageAccessories = $MessageAccessories;
 /**
  * An API allowing you to add custom buttons in the message popover
  */
-const MessagePopover = $MessagePopover;
+export const MessagePopover = $MessagePopover;
 /**
  * An API allowing you to add badges to user profiles
  */
-const Badges = $Badges;
+export const Badges = $Badges;
 /**
  * An API allowing you to add custom elements to the server list
  */
-const ServerList = $ServerList;
-
-export { Badges, Commands, DataStore, MessageAccessories, MessageEvents, MessagePopover, Notices, ServerList };
+export const ServerList = $ServerList;
+/**
+ * An API allowing you to add components as message accessories
+ */
+export const MessageDecorations = $MessageDecorations;
+/**
+ * An API allowing you to add components to member list users, in both DM's and servers
+ */
+export const MemberListDecorators = $MemberListDecorators;
+/**
+ * An API allowing you to dynamically load styles
+ * a
+ */
+export const Styles = $Styles;

@@ -16,22 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./shiki.css";
+
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { parseUrl } from "@utils/misc";
 import { wordsFromPascal, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 
-import cssText from "~fileContent/style.css";
+import previewExampleText from "~fileContent/previewExample.tsx";
 
 import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
 import { themes } from "./api/themes";
 import { createHighlighter } from "./components/Highlighter";
-import { DeviconSetting, HljsSetting, ShikiSettings, StyleSheets } from "./types";
-import { clearStyles, removeStyle, setStyle } from "./utils/createStyle";
+import deviconStyle from "./devicon.css?managed";
+import { DeviconSetting, HljsSetting, ShikiSettings } from "./types";
+import { clearStyles } from "./utils/createStyle";
 
 const themeNames = Object.keys(themes);
-const devIconCss = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
 
 const getSettings = () => Settings.plugins.ShikiCodeblocks as ShikiSettings;
 
@@ -43,15 +46,14 @@ export default definePlugin({
         {
             find: "codeBlock:{react:function",
             replacement: {
-                match: /codeBlock:\{react:function\((.),(.),(.)\)\{/,
-                replace: "$&return Vencord.Plugins.plugins.ShikiCodeblocks.renderHighlighter($1,$2,$3);",
+                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
+                replace: "$&return $self.renderHighlighter($1,$2,$3);",
             },
         },
     ],
     start: async () => {
-        setStyle(cssText, StyleSheets.Main);
         if (getSettings().useDevIcon !== DeviconSetting.Disabled)
-            setStyle(devIconCss, StyleSheets.DevIcons);
+            enableStyle(deviconStyle);
 
         await shiki.init(getSettings().customTheme || getSettings().theme);
     },
@@ -59,6 +61,12 @@ export default definePlugin({
         shiki.destroy();
         clearStyles();
     },
+    settingsAboutComponent: ({ tempSettings }) => createHighlighter({
+        lang: "tsx",
+        content: previewExampleText,
+        isPreview: true,
+        tempSettings,
+    }),
     options: {
         theme: {
             type: OptionType.SELECT,
@@ -128,8 +136,8 @@ export default definePlugin({
                 },
             ],
             onChange: (newValue: DeviconSetting) => {
-                if (newValue === DeviconSetting.Disabled) removeStyle(StyleSheets.DevIcons);
-                else setStyle(devIconCss, StyleSheets.DevIcons);
+                if (newValue === DeviconSetting.Disabled) disableStyle(deviconStyle);
+                else enableStyle(deviconStyle);
             },
         },
         bgOpacity: {
@@ -137,7 +145,10 @@ export default definePlugin({
             description: "Background opacity",
             markers: [0, 20, 40, 60, 80, 100],
             default: 100,
-            stickToMarkers: false,
+            componentProps: {
+                stickToMarkers: false,
+                onValueRender: null, // Defaults to percentage
+            },
         },
     },
 

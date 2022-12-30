@@ -18,6 +18,8 @@
 
 import { WEBPACK_CHUNK } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { canonicalizeReplacement } from "@utils/patches";
+import { PatchReplacement } from "@utils/types";
 
 import { _initWebpack } from ".";
 
@@ -135,14 +137,17 @@ function patchPush() {
                     if (code.includes(patch.find)) {
                         patchedBy.add(patch.plugin);
 
-                        // @ts-ignore we change all patch.replacement to array in plugins/index
-                        for (const replacement of patch.replacement) {
+                        // we change all patch.replacement to array in plugins/index
+                        for (const replacement of patch.replacement as PatchReplacement[]) {
+                            if (replacement.predicate && !replacement.predicate()) continue;
                             const lastMod = mod;
                             const lastCode = code;
 
+                            canonicalizeReplacement(replacement, patch.plugin);
+
                             try {
-                                const newCode = code.replace(replacement.match, replacement.replace);
-                                if (newCode === code && !replacement.noWarn) {
+                                const newCode = code.replace(replacement.match, replacement.replace as string);
+                                if (newCode === code && !patch.noWarn) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                     if (IS_DEV) {
                                         logger.debug("Function Source:\n", code);

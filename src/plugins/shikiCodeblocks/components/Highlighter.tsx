@@ -42,25 +42,33 @@ export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
+    tempSettings?: Record<string, any>;
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
-    <ErrorBoundary>
-        <Highlighter {...props} />
-    </ErrorBoundary>
+    <pre className={cl("container")}>
+        <ErrorBoundary>
+            <Highlighter {...props} />
+        </ErrorBoundary>
+    </pre>
 );
 export const Highlighter = ({
     lang,
     content,
     isPreview,
+    tempSettings,
 }: HighlighterProps) => {
-    const { tryHljs, useDevIcon, bgOpacity } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
+    const {
+        tryHljs,
+        useDevIcon,
+        bgOpacity,
+    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"], tempSettings);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;
     const useHljs = shouldUseHljs({ lang, tryHljs });
 
-    const [preRef, isIntersecting] = useIntersection(true);
+    const [rootRef, isIntersecting] = useIntersection(true);
 
     const [tokens] = useAwaiter(async () => {
         if (!shikiLang || useHljs || !isIntersecting) return null;
@@ -82,14 +90,10 @@ export const Highlighter = ({
     let langName;
     if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;
 
-    const preClasses = [cl("root")];
-    if (!langName) preClasses.push(cl("plain"));
-    if (isPreview) preClasses.push(cl("preview"));
-
     return (
-        <pre
-            ref={preRef}
-            className={preClasses.join(" ")}
+        <div
+            ref={rootRef}
+            className={cl("root", { plain: !langName, preview: isPreview })}
             style={{
                 backgroundColor: useHljs
                     ? themeBase.backgroundColor
@@ -117,7 +121,7 @@ export const Highlighter = ({
                     theme={themeBase}
                 />}
             </code>
-        </pre>
+        </div>
     );
 };
 

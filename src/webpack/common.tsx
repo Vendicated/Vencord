@@ -31,7 +31,13 @@ export const Margins = findByPropsLazy("marginTop20");
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export const Flux = findByPropsLazy("connectStores");
+
 export let React: typeof import("react");
+export let useState: typeof React.useState;
+export let useEffect: typeof React.useEffect;
+export let useMemo: typeof React.useMemo;
+export let useRef: typeof React.useRef;
+
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
 
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
@@ -52,7 +58,11 @@ export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
 export let SelectedGuildStore: any;
 export let ChannelStore: Stores.ChannelStore;
-export let RelationshipStore: Stores.RelationshipStore;
+export let GuildMemberStore: Stores.GuildMemberStore;
+export let RelationshipStore: Stores.RelationshipStore & {
+    /** Get the date (as a string) that the relationship was created */
+    getSince(userId: string): string;
+};
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
@@ -71,6 +81,9 @@ export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.Comp
 
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
+
+export let SnowflakeUtils: { fromTimestamp: (timestamp: number) => string, extractTimestamp: (snowflake: string) => number; };
+waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
 export let Parser: any;
 export let Alerts: {
@@ -144,7 +157,10 @@ export const NavigationRouter = mapMangledModuleLazy("Transitioning to external 
     goForward: filters.byCode("goForward()"),
 });
 
-waitFor("useState", m => React = m);
+waitFor("useState", m => {
+    React = m;
+    ({ useEffect, useState, useMemo, useRef } = React);
+});
 
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
@@ -160,6 +176,7 @@ waitFor("getSortedPrivateChannels", m => ChannelStore = m);
 waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
 waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
 waitFor("getGuildCount", m => GuildStore = m);
+waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 waitFor("getRelationshipType", m => RelationshipStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
@@ -204,7 +221,7 @@ export type TextProps = React.PropsWithChildren & {
     className?: string;
 };
 
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 
 type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
 interface Menu {
@@ -282,3 +299,7 @@ export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
         options?: { enableSpellCheck?: boolean; }
     ): void;
 };
+
+export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
+    openUntrustedLink: filters.byCode(".apply(this,arguments)")
+});
