@@ -21,7 +21,6 @@ import {
     ModalFooter,
     ModalHeader,
     ModalRoot,
-    ModalSize,
     openModal,
 } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
@@ -33,7 +32,7 @@ export function DecModal(props: any) {
     const [password, setPassword] = React.useState("password");
 
     return (
-        <ModalRoot {...props} size={ModalSize.DYNAMIC}>
+        <ModalRoot {...props}>
             <ModalHeader>
                 <Forms.FormTitle tag="h4">Decrypt Message</Forms.FormTitle>
             </ModalHeader>
@@ -42,12 +41,14 @@ export function DecModal(props: any) {
                 <TextInput defaultValue={secret} disabled={true}></TextInput>
                 <Forms.FormText>Password</Forms.FormText>
                 <TextInput
+                    style={{ marginBottom: "20px" }}
                     onChange={(e: string) => {
                         setPassword(e);
                     }}></TextInput>
             </ModalContent>
             <ModalFooter>
                 <Button
+                    color={Button.Colors.GREEN}
                     onClick={() => {
                         const toSend = decrypt(secret, password);
                         if (!toSend || !props?.message) return;
@@ -58,6 +59,8 @@ export function DecModal(props: any) {
                     Decrypt
                 </Button>
                 <Button
+                    color={Button.Colors.TRANSPARENT}
+                    look={Button.Looks.LINK}
                     style={{ left: 15, position: "absolute" }}
                     onClick={() => {
                         props.onClose();
