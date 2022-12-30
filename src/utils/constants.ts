@@ -180,5 +180,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     pointy: {
         name: "pointy",
         id: 99914384989519872n
+    },
+    HypedDomi: {
+        name: "HypedDomi",
+        id: 354191516979429376n
     }
 });
