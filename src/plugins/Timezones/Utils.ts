@@ -25,7 +25,7 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export interface Timezone {
     userID: string,
-    timezoneId: String,
+    timezoneId: string,
     timezone: string;
     error: string;
 }
