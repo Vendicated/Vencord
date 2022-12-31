@@ -16,39 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy } from "@webpack";
+const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
+import { findLazy } from "@webpack";
 
 const API_URL = "https://timezonedb.catvibers.me/";
-const Cache = new Map<string, number | null>();
-export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
+const Cache = new Map<string, string | null>();
 
 const getSettings = () => Vencord.Settings.plugins.Timezones;
 
-export async function getUserTimezone(discordID: string): Promise<number | null> {
+export async function getUserTimezone(discordID: string): Promise<string | null> {
 
     if (getSettings()[`timezones.${discordID}`])
-        return Number(getSettings()[`timezones.${discordID}`]);
+        return getSettings()[`timezones.${discordID}`];
 
     if (Cache.has(discordID)) {
-        return Cache.get(discordID) as number | null;
+        return Cache.get(discordID) as string | null;
     }
 
-    const timezone = await fetch(API_URL + "api/user/" + discordID).then(
-        r => r.json()
-    );
+    const response = await fetch(API_URL + "api/user/" + discordID);
+    const timezone = await response.json();
 
-    if (timezone.error) {
+    if (response.status !== 200) {
         Cache.set(discordID, null);
         return null;
     }
-    Cache.set(discordID, timezone.timezone);
-    return Number(timezone.timezone);
+    Cache.set(discordID, timezone.timezoneId);
+    return timezone.timezoneId;
 }
 
-export function getTimeString(timezone: number, timestamp = moment()): string {
+export function getTimeString(timezone: string, timestamp = new Date()): string {
+    const locale = PreloadedUserSettings.getCurrentValue().localization.locale.value;
 
-    const time = timestamp.utcOffset(Number(timezone));
-
-    return time.format(Vencord.Settings.plugins.Timezones.use24hr ? "HH:mm" : "h:mm A");
+    return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", timeZone: timezone }).format(timestamp); // we hate javascript
 }

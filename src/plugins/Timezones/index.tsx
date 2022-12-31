@@ -33,11 +33,6 @@ export default definePlugin({
     description: "Shows the timezones of users",
     authors: [Devs.mantikafasi],
     options: {
-        use24hr: {
-            type: OptionType.BOOLEAN,
-            description: "Use 24h format",
-            default: true,
-        },
 
         showTimezonesInChat: {
             type: OptionType.BOOLEAN,
@@ -64,7 +59,7 @@ export default definePlugin({
                 },
                 {
                     name: "timezone",
-                    description: "Timezone to set (+3, -5, etc.)",
+                    description: "Timezone id to set (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)",
                     type: ApplicationCommandOptionType.STRING,
                 }
 
@@ -141,7 +136,7 @@ export default definePlugin({
 
         const user = e.user as User;
 
-        const [timezone, setTimezone] = React.useState<number | null>(null);
+        const [timezone, setTimezone] = React.useState<string | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
@@ -168,7 +163,7 @@ export default definePlugin({
 
         const message = e.message as Message;
 
-        const [timezone, setTimezone] = React.useState<number | null>(null);
+        const [timezone, setTimezone] = React.useState<string | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(e.message.author.id).then(timezone => setTimezone(timezone));
@@ -176,7 +171,7 @@ export default definePlugin({
 
         return (
             <span className={classes(styles.timestampInline, styles.timestamp)}>
-                {timezone && "• " + getTimeString(timezone, message.timestamp)}
+                {timezone && "• " + getTimeString(timezone, message.timestamp.toDate())}
             </span>);
     }
 });
