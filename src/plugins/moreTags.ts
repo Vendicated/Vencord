@@ -71,6 +71,12 @@ const tags: Tag[] = [{
     description: "Can manage messages or kick/ban people",
     botAndOpCases: true,
     permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
+}, {
+    name: "MODERATOR_VC",
+    displayName: "VC Mod",
+    description: "Can manage voice chats",
+    botAndOpCases: true,
+    permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     // reversed so higher entries have priority over lower entries
 }].reverse();
 
