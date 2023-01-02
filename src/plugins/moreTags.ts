@@ -18,18 +18,17 @@
 
 import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, waitFor } from "@webpack";
+import { waitFor } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
 import { Settings } from "../Vencord";
 
-let Permissions: Record<string, bigint>, computePermissions: ({ ...args }) => bigint;
+let Permissions: Record<string, bigint>, computePermissions: ({ ...args }) => bigint, Tags: Record<string, number>;
 waitFor(["SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS"], m => Permissions = m);
 waitFor(["computePermissions", "canEveryoneRole"], m => ({ computePermissions } = m));
-const Tags: Record<string, number> = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types);
+waitFor(m => m.Types?.[0] === "BOT", m => Tags = m.Types);
 
 interface Tag {
     // name used for identifying, must be alphanumeric + underscores
