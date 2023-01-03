@@ -25,7 +25,8 @@ const Engines = {
     Yandex: "https://yandex.com/images/search?rpt=imageview&url=",
     SauceNAO: "https://saucenao.com/search.php?url=",
     IQDB: "https://iqdb.org/?url=",
-    TinEye: "https://www.tineye.com/search?url="
+    TinEye: "https://www.tineye.com/search?url=",
+    ImgOps: "https://imgops.com/start?url="
 };
 
 export default definePlugin({
