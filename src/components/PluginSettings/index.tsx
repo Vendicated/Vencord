@@ -283,7 +283,7 @@ export default ErrorBoundary.wrap(function Settings() {
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
 
             <div className={cl("filter-controls")}>
-                <TextInput value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} style={{ marginBottom: 24 }} />
+                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} style={{ marginBottom: 24 }} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         className={InputStyles.inputDefault}
