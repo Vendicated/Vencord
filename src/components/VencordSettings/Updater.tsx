@@ -69,14 +69,18 @@ interface CommonProps {
     repoPending: boolean;
 }
 
+function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
+    return <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
+        {hash}
+    </Link>;
+}
+
 function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
         <Card style={{ padding: ".5em" }}>
             {updates.map(({ hash, author, message }) => (
                 <div>
-                    <Link href={`${repo}/commit/${hash}`} disabled={repoPending}>
-                        <code>{hash}</code>
-                    </Link>
+                    <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
                         color: "var(--text-normal)"
@@ -199,7 +203,7 @@ function Updater() {
                 <Link href={repo}>
                     {repo.split("/").slice(-2).join("/")}
                 </Link>
-            )} ({gitHash})</Forms.FormText>
+            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
 
             <Forms.FormDivider />
 

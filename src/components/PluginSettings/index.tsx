@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import * as styles from "@components/PluginSettings/styles";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
 import { classes, LazyComponent, useAwaiter } from "@utils/misc";
@@ -35,6 +37,8 @@ import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
+
+const cl = classNameFactory("vc-plugins-");
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
@@ -145,7 +149,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex style={styles.PluginsGridItem} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <Flex className={cl("card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <Switch
                 onChange={toggleEnabled}
                 disabled={disabled}
@@ -174,7 +178,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     >
                         {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
                     </Text>
-                    <button role="switch" onClick={() => openModal()} style={styles.SettingsIcon} className="button-12Fmur">
+                    <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
                         {plugin.options
                             ? <CogWheel
                                 style={{ color: iconHover ? "" : "var(--text-muted)" }}
@@ -278,8 +282,8 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
 
-            <div style={styles.FiltersBar}>
-                <TextInput value={searchValue.value} placeholder={"Search for a plugin..."} onChange={onSearch} style={{ marginBottom: 24 }} />
+            <div className={cl("filter-controls")}>
+                <TextInput value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} style={{ marginBottom: 24 }} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         className={InputStyles.inputDefault}
@@ -298,7 +302,7 @@ export default ErrorBoundary.wrap(function Settings() {
 
             <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
 
-            <div style={styles.PluginsGrid}>
+            <div className={cl("grid")}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
@@ -319,7 +323,7 @@ export default ErrorBoundary.wrap(function Settings() {
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>
-            <div style={styles.PluginsGrid}>
+            <div className={cl("grid")}>
                 {sortedPlugins?.length ? sortedPlugins
                     .filter(a => a.required || dependencyCheck(a.name, depMap).length && pluginFilter(a))
                     .map(plugin => {
