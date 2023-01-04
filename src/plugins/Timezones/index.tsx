@@ -138,7 +138,7 @@ export default definePlugin({
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
         }, [user.id]);
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || user.id === UserStore.getCurrentUser().id || !timezone) {
+        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || !timezone) {
             return null;
         }
 
