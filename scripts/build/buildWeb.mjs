@@ -121,9 +121,8 @@ const cssRuntime = `
     Object.assign(document.createElement("style"), {
         textContent: ${cssText},
         id: "vencord-css-core"
-    }),
-    { once: true }
-));
+    })
+), { once: true });
 `;
 
 await Promise.all([
