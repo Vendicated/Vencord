@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React } from "@webpack/common";
+import { React, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import { getTimeString, getUserTimezone } from "./Utils";
@@ -130,11 +130,11 @@ export default definePlugin({
 
     getProfileTimezonesComponent: (e: any) => {
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile) {
+        const user = e.user as User;
+
+        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || user.id === UserStore.getCurrentUser().id) {
             return null;
         }
-
-        const user = e.user as User;
 
         const [timezone, setTimezone] = React.useState<string | null>(null);
 
@@ -158,7 +158,7 @@ export default definePlugin({
     }
     ,
     getTimezonesComponent: (e: any) => {
-        if (Vencord.Settings.plugins.showTimezonesInChat || e.user)
+        if (Vencord.Settings.plugins.showTimezonesInChat || e.user || e.message.author.id === UserStore.getCurrentUser().id)
             return null;
 
         const message = e.message as Message;
