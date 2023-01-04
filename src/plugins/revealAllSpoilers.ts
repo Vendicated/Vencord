@@ -47,7 +47,7 @@ export default definePlugin({
         if (!ctrlKey) { return; }
 
         const { spoilerText, hidden } = findByPropsLazy("spoilerText");
-        const { messagesWrapper } = findByPropsLazy("messagesWrapper");
+        const { messagesWrapper } = findByPropsLazy("messagesWrapper", "messages");
 
         const parent = shiftKey
             ? document.querySelector(`div.${messagesWrapper}`)
