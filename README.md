@@ -13,7 +13,7 @@ A Discord client mod that does things differently
 
 ## Installing / Uninstalling
 
-If you're just a normal user, use [our simple gui installer!](https://github.com/Vendicated/VencordInstaller#usage)
+If you're just a normal user, use [our simple gui installer!](https://github.com/Vencord/Installer#usage)
 
 If you're a power user who wants to contribute and make plugins or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
 
