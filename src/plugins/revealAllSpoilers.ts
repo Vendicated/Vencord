@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 
 interface SpoilerEvent {
     ctrlKey: boolean;
@@ -42,14 +43,18 @@ export default definePlugin({
 
     reveal(event: SpoilerEvent) {
         const { ctrlKey, shiftKey, target } = event;
+
         if (!ctrlKey) { return; }
 
+        const { spoilerText, hidden } = findByPropsLazy("spoilerText");
+        const { messagesWrapper } = findByPropsLazy("messagesWrapper");
+
         const parent = shiftKey
-            ? document.querySelector("div[class*=messagesWrapper-]")
+            ? document.querySelector(`div.${messagesWrapper}`)
             : target.parentElement;
 
         for (const spoiler of parent!.querySelectorAll(
-            "span[class*=spoilerText-][class*=hidden-]"
+            `span.${spoilerText}.${hidden}`
         )) {
             (spoiler as HTMLElement).click();
         }
