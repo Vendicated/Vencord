@@ -21,12 +21,13 @@ import definePlugin from "@utils/types";
 
 interface SpoilerEvent {
     ctrlKey: boolean;
+    shiftKey: boolean;
     target: HTMLSpanElement;
 }
 
 export default definePlugin({
     name: "RevealAllSpoilers",
-    description: "Reveal all spoilers in a message by ctrl-clicking a spoiler",
+    description: "Reveal all spoilers in a message (Ctrl) or in the chat (Ctrl+Shift) and clicking a spoiler.",
     authors: [Devs.whqwert],
 
     patches: [
@@ -40,10 +41,14 @@ export default definePlugin({
     ],
 
     reveal(event: SpoilerEvent) {
-        const { ctrlKey, target } = event;
+        const { ctrlKey, shiftKey, target } = event;
         if (!ctrlKey) { return; }
 
-        for (const spoiler of target.parentElement!.querySelectorAll(
+        const parent = shiftKey
+            ? document.querySelector("div[class*=messagesWrapper-]")
+            : target.parentElement;
+
+        for (const spoiler of parent!.querySelectorAll(
             "span[class*=spoilerText-][class*=hidden-]"
         )) {
             (spoiler as HTMLElement).click();
