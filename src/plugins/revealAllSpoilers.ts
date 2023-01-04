@@ -32,9 +32,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".revealSpoiler=",
+            find: ".revealSpoiler=function",
             replacement: {
-                match: /\.revealSpoiler=function\((.{1,3})\){/,
+                match: /\.revealSpoiler=function\((.{1,2})\){/,
                 replace: ".revealSpoiler=function($1){Vencord.Plugins.plugins.RevealAllSpoilers.reveal($1);"
             }
         }
