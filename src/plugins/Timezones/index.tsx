@@ -132,27 +132,27 @@ export default definePlugin({
 
         const user = e.user as User;
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || user.id === UserStore.getCurrentUser().id) {
-            return null;
-        }
-
         const [timezone, setTimezone] = React.useState<string | null>(null);
 
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
         }, [user.id]);
 
+        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || user.id === UserStore.getCurrentUser().id || !timezone) {
+            return null;
+        }
+
         return (
             <span style={{
                 position: "absolute",
-                top: "110px",
+                top: "10px",
                 right: "10px",
                 zIndex: 5,
                 background: "white",
                 borderRadius: "5px",
                 border: "4px solid white"
             }}>
-                {timezone && getTimeString(timezone)}
+                {getTimeString(timezone)}
             </span>
         );
     }
