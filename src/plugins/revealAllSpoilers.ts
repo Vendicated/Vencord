@@ -26,6 +26,9 @@ interface SpoilerEvent {
     target: HTMLSpanElement;
 }
 
+const SpoilerClasses = findByPropsLazy("spoilerText");
+const MessagesClasses = findByPropsLazy("messagesWrapper", "messages");
+
 export default definePlugin({
     name: "RevealAllSpoilers",
     description: "Reveal all spoilers in a message (Ctrl) or in the chat (Ctrl+Shift) and clicking a spoiler.",
@@ -46,8 +49,8 @@ export default definePlugin({
 
         if (!ctrlKey) { return; }
 
-        const { spoilerText, hidden } = findByPropsLazy("spoilerText");
-        const { messagesWrapper } = findByPropsLazy("messagesWrapper", "messages");
+        const { spoilerText, hidden } = SpoilerClasses;
+        const { messagesWrapper } = MessagesClasses;
 
         const parent = shiftKey
             ? document.querySelector(`div.${messagesWrapper}`)
