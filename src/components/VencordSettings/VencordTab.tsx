@@ -18,13 +18,17 @@
 
 
 import { useSettings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import IpcEvents from "@utils/IpcEvents";
 import { useAwaiter } from "@utils/misc";
 import { Button, Card, Forms, Margins, React, Switch } from "@webpack/common";
 
-const st = (style: string) => `vcSettings${style}`;
+const cl = classNameFactory("vc-settings-");
+
+const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
+const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), {
@@ -32,17 +36,13 @@ function VencordSettings() {
     });
     const settings = useSettings();
 
-    const [donateImage] = React.useState(
-        Math.random() > 0.5
-            ? "https://cdn.discordapp.com/emojis/1026533090627174460.png"
-            : "https://media.discordapp.net/stickers/1039992459209490513.png"
-    );
+    const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     return (
         <React.Fragment>
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
-                <Card className={st("QuickActionCard")}>
+                <Card className={cl("quick-actions-card")}>
                     {IS_WEB ? (
                         <Button
                             onClick={() => require("../Monaco").launchMonacoEditor()}
@@ -121,18 +121,10 @@ interface DonateCardProps {
 
 function DonateCard({ image }: DonateCardProps) {
     return (
-        <Card style={{
-            padding: "1em",
-            display: "flex",
-            flexDirection: "row",
-            marginBottom: "1em",
-            marginTop: "1em"
-        }}>
+        <Card className={cl("card", "donate")}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>
-                    Please consider supporting the development of Vencord by donating!
-                </Forms.FormText>
+                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
                 <DonateButton style={{ transform: "translateX(-1em)" }} />
             </div>
             <img
@@ -140,7 +132,7 @@ function DonateCard({ image }: DonateCardProps) {
                 src={image}
                 alt=""
                 height={128}
-                style={{ marginLeft: "auto", transform: "rotate(10deg)" }}
+                style={{ marginLeft: "auto", transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : "" }}
             />
         </Card>
     );
