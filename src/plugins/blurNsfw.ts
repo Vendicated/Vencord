@@ -43,7 +43,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "().embedWrapper,embed",
+            find: ".embedWrapper,embed",
             replacement: [{
                 match: /(\.renderEmbed=.+?(.)=.\.props)(.+?\(\)\.embedWrapper)/g,
                 replace: "$1,vcProps=$2$3+(vcProps.channel.nsfw?' vc-nsfw-img':'')"

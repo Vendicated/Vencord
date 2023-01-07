@@ -32,10 +32,10 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Megu],
     required: true,
     patches: [{
-        find: "().versionHash",
+        find: ".versionHash",
         replacement: [
             {
-                match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}\(\)\.versionHash,.+?\})\)," "/,
+                match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                 replace: (m, component, props) => {
                     props = props.replace(/children:\[.+\]/, "");
                     return `${m},Vencord.Plugins.plugins.Settings.makeInfoElements(${component}, ${props})`;

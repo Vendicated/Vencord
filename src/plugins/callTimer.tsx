@@ -74,7 +74,7 @@ export default definePlugin({
     patches: [{
         find: ".renderConnectionStatus=",
         replacement: {
-            match: /(?<=renderConnectionStatus=.+\(\)\.channel,children:)\w/,
+            match: /(?<=renderConnectionStatus=.+\.channel,children:)\w/,
             replace: "[$&, Vencord.Plugins.plugins.CallTimer.renderTimer(this.props.channel.id)]"
         }
     }],

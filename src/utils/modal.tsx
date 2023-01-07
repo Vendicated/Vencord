@@ -55,12 +55,12 @@ interface ModalRootProps {
 
 type RenderFunction = (props: ModalProps) => React.ReactNode;
 
-export const Modals = mapMangledModuleLazy("().closeWithCircleBackground", {
-    ModalRoot: filters.byCode("().root"),
-    ModalHeader: filters.byCode("().header"),
-    ModalContent: filters.byCode("().content"),
-    ModalFooter: filters.byCode("().footerSeparator"),
-    ModalCloseButton: filters.byCode("().closeWithCircleBackground"),
+export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
+    ModalRoot: filters.byCode(".root"),
+    ModalHeader: filters.byCode(".header"),
+    ModalContent: filters.byCode(".content"),
+    ModalFooter: filters.byCode(".footerSeparator"),
+    ModalCloseButton: filters.byCode(".closeWithCircleBackground"),
 });
 
 export const ModalRoot = (props: ModalRootProps) => <Modals.ModalRoot {...props} />;

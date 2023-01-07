@@ -151,7 +151,7 @@ export default definePlugin({
     }, {
         find: ".Messages.NEW,name",
         replacement: {
-            match: /\(\)\.badgeContainer.+?.\?\(0,.\.jsx\)\(.{1,2},{name:(?<props>.)\.name}\):null/,
+            match: /.badgeContainer.+?.\?\(0,.\.jsx\)\(.{1,2},{name:(?<props>.)\.name}\):null/,
             replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleActivityButton($<props>)"
         }
     }, {

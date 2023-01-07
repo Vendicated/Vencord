@@ -44,7 +44,7 @@ let AutomodEmbed: React.ComponentType<any>,
     Endpoints: Record<string, any>;
 
 waitFor(["mle_AutomodEmbed"], m => (AutomodEmbed = m.mle_AutomodEmbed));
-waitFor(filters.byCode("().inlineMediaEmbed"), m => Embed = m);
+waitFor(filters.byCode(".inlineMediaEmbed"), m => Embed = m);
 waitFor(m => m.type?.toString()?.includes('["message","compact","className",'), m => ChannelMessage = m);
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
@@ -146,12 +146,12 @@ export default definePlugin({
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
         {
-            find: "().embedCard",
+            find: ".embedCard",
             replacement: [{
                 match: /{"use strict";(.{0,10})\(\)=>(.{1,2})}\);/,
                 replace: '{"use strict";$1()=>$2,me:()=>messageEmbed});'
             }, {
-                match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\(\)\.embedCard(.{0,500})}\)}/,
+                match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\.embedCard(.{0,500})}\)}/,
                 replace: "function $1($2){var $3=$2.message,$4=$2.channel$5().embedCard$6})}\
 var messageEmbed={mle_AutomodEmbed:$1};"
             }]
