@@ -217,6 +217,9 @@ function runTime(token: string) {
         // force enable all plugins and patches
         Vencord.Plugins.patches.length = 0;
         Object.values(Vencord.Plugins.plugins).forEach(p => {
+            // Needs native server to run
+            if (p.name === "WebRichPresence (arRPC)") return;
+
             p.required = true;
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
