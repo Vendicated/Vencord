@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import IpcEvents from "@utils/IpcEvents";
+import { ipcMain } from "electron";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
-export default definePlugin({
-    name: "MessageAccessoriesAPI",
-    description: "API to add message accessories.",
-    authors: [Devs.Cyn],
-    patches: [
-        {
-            find: "_messageAttachmentToEmbedMedia",
-            replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
-            },
-        },
-    ],
+import { get } from "./simpleGet";
+
+ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
+    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
+    await writeFile(join(__dirname, "renderer.css"), buf);
+    return buf.toString("utf-8");
 });
+

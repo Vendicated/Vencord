@@ -24,7 +24,7 @@ import { find, findByPropsLazy } from "@webpack";
 import { Menu } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
-const ImageModal = LazyComponent(() => find(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE")));
+const ImageModal = LazyComponent(() => find(m => m.prototype?.render?.toString().includes("this.renderMobileCloseButton()")));
 const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 
 const GuildBannerStore = findByPropsLazy("getGuildBannerURL");
@@ -63,7 +63,7 @@ export default new class ViewIcons implements PluginDef {
                 replace: (_, src) => `{src:${src},onClick:()=>${OPEN_URL}${src}),avatarDecoration`
             }
         }, {
-            find: "().popoutNoBannerPremium",
+            find: ".popoutNoBannerPremium",
             replacement: {
                 match: /style:.{0,10}\{\},(.{1,2})\)/,
                 replace: (m, style) =>

@@ -16,21 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-
-export default definePlugin({
-    name: "MessageAccessoriesAPI",
-    description: "API to add message accessories.",
-    authors: [Devs.Cyn],
-    patches: [
-        {
-            find: "_messageAttachmentToEmbedMedia",
-            replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
-            },
-        },
-    ],
+(window.VencordStyles ??= new Map()).set(STYLE_NAME, {
+    name: STYLE_NAME,
+    source: STYLE_SOURCE,
+    classNames: {},
+    dom: null,
 });
+
+export default STYLE_NAME;

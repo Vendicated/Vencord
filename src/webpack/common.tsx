@@ -36,6 +36,7 @@ export let React: typeof import("react");
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;
 export let useMemo: typeof React.useMemo;
+export let useRef: typeof React.useRef;
 
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
 
@@ -159,7 +160,7 @@ export const NavigationRouter = mapMangledModuleLazy("Transitioning to external 
 
 waitFor("useState", m => {
     React = m;
-    ({ useEffect, useState, useMemo } = React);
+    ({ useEffect, useState, useMemo, useRef } = React);
 });
 
 waitFor(["dispatch", "subscribe"], m => {
@@ -191,7 +192,7 @@ waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 waitFor(m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
-    return s.length < 200 && s.includes("().divider");
+    return s.length < 200 && s.includes(".divider");
 }, m => Forms.FormDivider = m);
 
 // This is the same module but this is easier
