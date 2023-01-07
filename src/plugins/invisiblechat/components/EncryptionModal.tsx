@@ -35,9 +35,9 @@ function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");
     const [cover, setCover] = React.useState("");
     const [password, setPassword] = React.useState("password");
-    const [dontUseCover, setDontUseCover] = React.useState(false);
+    const [noCover, setNoCover] = React.useState(false);
 
-    const valid = secret && dontUseCover ? true : (cover && cover.match(/\w \w/));
+    const isValid = secret && (noCover || (cover && /\w \w/.test(cover)));
 
     return (
         <ModalRoot {...props}>
@@ -46,20 +46,20 @@ function EncModal(props: ModalProps) {
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormText style={{ marginTop: "10px" }}>Secret</Forms.FormText>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Secret</Forms.FormTitle>
                 <TextInput
                     onChange={(e: string) => {
                         setSecret(e);
                     }}
                 />
-                <Forms.FormText style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Forms.FormText>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Forms.FormTitle>
                 <TextInput
-                    disabled={dontUseCover}
+                    disabled={noCover}
                     onChange={(e: string) => {
                         setCover(e);
                     }}
                 />
-                <Forms.FormText style={{ marginTop: "10px" }}>Password</Forms.FormText>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     defaultValue={"password"}
@@ -68,9 +68,9 @@ function EncModal(props: ModalProps) {
                     }}
                 />
                 <Switch
-                    value={dontUseCover}
+                    value={noCover}
                     onChange={(e: boolean) => {
-                        setDontUseCover(e);
+                        setNoCover(e);
                     }}
                 >
                     Don't use a Cover
@@ -80,11 +80,11 @@ function EncModal(props: ModalProps) {
             <ModalFooter>
                 <Button
                     color={Button.Colors.GREEN}
-                    disabled={!valid}
+                    disabled={!isValid}
                     onClick={() => {
-                        if (!valid) return;
-                        const encrypted = encrypt(secret, password, dontUseCover ? "d d" : cover);
-                        const toSend = dontUseCover ? encrypted.replaceAll("d", "") : encrypt;
+                        if (!isValid) return;
+                        const encrypted = encrypt(secret, password, noCover ? "d d" : cover);
+                        const toSend = noCover ? encrypted.replaceAll("d", "") : encrypted;
                         if (!toSend) return;
 
                         ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
@@ -92,7 +92,8 @@ function EncModal(props: ModalProps) {
                         });
 
                         props.onClose();
-                    }}>
+                    }}
+                >
                     Send
                 </Button>
                 <Button

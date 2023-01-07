@@ -38,9 +38,9 @@ export function DecModal(props: any) {
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormText style={{ paddingTop: "10px" }}>Secret</Forms.FormText>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Secret</Forms.FormTitle>
                 <TextInput defaultValue={secret} disabled={true}></TextInput>
-                <Forms.FormText>Password</Forms.FormText>
+                <Forms.FormTitle tag="h5">Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     onChange={setPassword}
