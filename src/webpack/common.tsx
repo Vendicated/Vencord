@@ -191,7 +191,7 @@ waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 waitFor(m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
-    return s.length < 200 && s.includes("().divider");
+    return s.length < 200 && s.includes(".divider");
 }, m => Forms.FormDivider = m);
 
 // This is the same module but this is easier
