@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,25 +44,29 @@ function EncModal(props: ModalProps) {
             <ModalHeader>
                 <Forms.FormTitle tag="h4">Encrypt Message</Forms.FormTitle>
             </ModalHeader>
+
             <ModalContent>
                 <Forms.FormText style={{ marginTop: "10px" }}>Secret</Forms.FormText>
                 <TextInput
                     onChange={(e: string) => {
                         setSecret(e);
-                    }}></TextInput>
+                    }}
+                />
                 <Forms.FormText style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Forms.FormText>
                 <TextInput
                     disabled={dontUseCover}
                     onChange={(e: string) => {
                         setCover(e);
-                    }}></TextInput>
+                    }}
+                />
                 <Forms.FormText style={{ marginTop: "10px" }}>Password</Forms.FormText>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     defaultValue={"password"}
                     onChange={(e: string) => {
                         setPassword(e);
-                    }}></TextInput>
+                    }}
+                />
                 <Switch
                     value={dontUseCover}
                     onChange={(e: boolean) => {
@@ -72,6 +76,7 @@ function EncModal(props: ModalProps) {
                     Don't use a Cover
                 </Switch>
             </ModalContent>
+
             <ModalFooter>
                 <Button
                     color={Button.Colors.GREEN}
@@ -96,7 +101,8 @@ function EncModal(props: ModalProps) {
                     style={{ left: 15, position: "absolute" }}
                     onClick={() => {
                         props.onClose();
-                    }}>
+                    }}
+                >
                     Cancel
                 </Button>
             </ModalFooter>

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,16 +36,17 @@ export function DecModal(props: any) {
             <ModalHeader>
                 <Forms.FormTitle tag="h4">Decrypt Message</Forms.FormTitle>
             </ModalHeader>
+
             <ModalContent>
                 <Forms.FormText style={{ paddingTop: "10px" }}>Secret</Forms.FormText>
                 <TextInput defaultValue={secret} disabled={true}></TextInput>
                 <Forms.FormText>Password</Forms.FormText>
                 <TextInput
                     style={{ marginBottom: "20px" }}
-                    onChange={(e: string) => {
-                        setPassword(e);
-                    }}></TextInput>
+                    onChange={setPassword}
+                />
             </ModalContent>
+
             <ModalFooter>
                 <Button
                     color={Button.Colors.GREEN}
@@ -62,9 +63,8 @@ export function DecModal(props: any) {
                     color={Button.Colors.TRANSPARENT}
                     look={Button.Looks.LINK}
                     style={{ left: 15, position: "absolute" }}
-                    onClick={() => {
-                        props.onClose();
-                    }}>
+                    onClick={props.onClose}
+                >
                     Cancel
                 </Button>
             </ModalFooter>

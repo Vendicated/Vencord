@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,12 @@ import { ChannelStore, FluxDispatcher } from "@webpack/common";
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
 
-
-let StegCloak;
 let steggo;
 
 const PopoverIcon = () => {
     return (
         <svg
-            fill={"var(--header-secondary)"}
+            fill="var(--header-secondary)"
             width={24} height={24}
             viewBox={"0 0 64 64"}
         >
@@ -44,8 +42,11 @@ const PopoverIcon = () => {
 
 function Indicator() {
     return (
-        <img src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png" width={20} style={{ marginBottom: -4 }}>
-        </img>
+        <img
+            src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
+            width={20}
+            style={{ marginBottom: -4 }}
+        />
     );
 
 }
@@ -53,7 +54,8 @@ function Indicator() {
 function ChatbarIcon() {
     return (
         <svg
-            key="Encrypt Message"
+            aria-label="Encrypt Message"
+            role="button"
             fill={"var(--header-secondary)"}
             width="30"
             height="30"
@@ -77,47 +79,51 @@ export default definePlugin({
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /var .,.,.=(.)\.className,.=.\.message,.=.\.children,.=.\.content,.=.\.onUpdate/gm,
-                replace: "try{$1?.content[0].match(Vencord.Plugins.plugins.InvisibleChat.INV_DETECTION)?$1?.content.push(Vencord.Plugins.plugins.InvisibleChat.indicator()):null}catch(e){};$&"
+                replace: "try{$1?.content[0].match($self.INV_DETECTION)?$1?.content.push($self.indicator()):null}catch{};$&"
             }
         },
         {
             find: ".activeCommandOption",
             replacement: {
                 match: /.=.\.activeCommand,.=.\.activeCommandOption,.{1,133}(.)=\[\];/,
-                replace: "$&;$1.push(Vencord.Plugins.plugins.InvisibleChat.chatbarIcon());",
+                replace: "$&;$1.push($self.chatbarIcon());",
             }
         },
     ],
-    EMBED_URL: "https://embed.sammcheese.net",
-    INV_DETECTION: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
-    URL_DETECTION: new RegExp(
+
+    EMBED_API_URL: "https://embed.sammcheese.net",
+    INV_REGEX: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
+    URL_REGEX: new RegExp(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
+
     async start() {
-        // Shitty Module initialization. Thanks Ven.
-        StegCloak = await getStegCloak();
-        steggo = new StegCloak.default(true, false);
+        const { default: StegCloak } = await getStegCloak();
+        steggo = new StegCloak(true, false);
 
         addButton("invDecrypt", message => {
-            return message?.content.match(this.INV_DETECTION) ?
-                {
+            return this.INV_REGEX.test(message?.content)
+                ? {
                     label: "Decrypt Message",
                     icon: this.popoverIcon,
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
                     onClick: () => buildDecModal({ message })
-                } : null;
+                }
+                : null;
         });
     },
+
     stop() {
         removeButton("invDecrypt");
     },
+
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
         const controller = new AbortController();
-        const _timeout = setTimeout(() => controller.abort(), 5000);
+        const timeout = setTimeout(() => controller.abort(), 5000);
 
-        const options = {
+        const options: RequestInit = {
             signal: controller.signal,
             method: "POST",
             headers: {
@@ -129,16 +135,16 @@ export default definePlugin({
         };
 
         // AWS hosted url to discord embed object
-        const rawRes = await fetch(this.EMBED_URL, options);
+        const rawRes = await fetch(this.EMBED_API_URL, options);
+        clearTimeout(timeout);
+
         return await rawRes.json();
     },
+
     async buildEmbed(message: any, revealed: string): Promise<void> {
-        const urlCheck = revealed.match(this.URL_DETECTION) || [];
+        const urlCheck = revealed.match(this.URL_REGEX);
 
-        let attachment;
-        if (urlCheck[0]) attachment = await this.getEmbed(new URL(urlCheck[0]));
-
-        const embed = {
+        message.embeds.push({
             type: "rich",
             title: "Decrypted Message",
             color: "0x45f5f5",
@@ -146,31 +152,31 @@ export default definePlugin({
             footer: {
                 text: "Made with ❤️ by c0dine and Sammy!",
             },
-        };
+        });
 
-        message.embeds.push(embed);
-        if (attachment) message.embeds.push(attachment);
+        if (urlCheck?.length)
+            message.embeds.push(await this.getEmbed(new URL(urlCheck[0])));
+
         this.updateMessage(message);
-        return Promise.resolve();
     },
+
     updateMessage: (message: any) => {
         FluxDispatcher.dispatch({
             type: "MESSAGE_UPDATE",
             message,
         });
     },
+
     chatbarIcon: ChatbarIcon,
     popoverIcon: () => <PopoverIcon />,
     indicator: Indicator
 });
 
 export function encrypt(secret: string, password: string, cover: string): string {
-    // \u200b appended to secret for detection of string
-    return steggo.hide(secret + "​", password, cover);
+    return steggo.hide(secret + "\u200b", password, cover);
 }
 
 export function decrypt(secret: string, password: string): string {
-    // eslint-disable-next-line no-irregular-whitespace
-    return steggo.reveal(secret, password).replace("​", "");
+    return steggo.reveal(secret, password).replace("\u200b", "");
 }
 
