@@ -72,6 +72,7 @@ export const Forms = {} as {
 };
 export let Card: Components.Card;
 export let Button: any;
+export const ButtonLooks = findByPropsLazy("BLANK", "FILLED", "INVERTED") as Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
 export let Switch: any;
 export let Tooltip: Components.Tooltip;
 export let Router: any;
