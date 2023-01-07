@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@utils/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, globalShortcut } from "electron";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 
@@ -153,6 +153,13 @@ if (!process.argv.includes("--vanilla")) {
                     responseHeaders["content-type"] = ["text/css"];
             }
             cb({ cancel: false, responseHeaders });
+
+
+            if (process.platform === "win32") {
+                globalShortcut.register("Control+Q", () => {
+                    app.quit();
+                });
+            }
         });
     });
 } else {
