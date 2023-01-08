@@ -30,8 +30,9 @@ export default definePlugin({
         description: "@someone randomly on the server.",
 
         execute(_, ctx) {
-            const members = GuildMemberStore.getMemberIds(ctx.channel.guild_id);
+            const members = ctx.channel.guild_id ? GuildMemberStore.getMemberIds(ctx.channel.guild_id) : ctx.channel.recipients;
             const member = members[Math.floor(Math.random() * members.length)];
+            if (!member) return;
             return {
                 content: `<@${member}>`
             };
