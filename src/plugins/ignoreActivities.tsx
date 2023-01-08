@@ -35,7 +35,7 @@ interface IgnoredActivity {
 }
 
 const RegisteredGamesClasses = findByPropsLazy("overlayToggleIconOff", "overlayToggleIconOn");
-const PreviewBadgeClasses = findByPropsLazy("previewBadge", "previewBadgeIcon");
+const TryItOutClasses = findByPropsLazy("tryItOutBadge", "tryItOutBadgeIcon");
 const BaseShapeRoundClasses = findByPropsLazy("baseShapeRound", "baseShapeRoundLeft", "baseShapeRoundRight");
 const RunningGameStore = findByPropsLazy("getRunningGames", "getGamesSeen");
 
@@ -116,7 +116,7 @@ function ToggleActivityComponent({ activity }: { activity: IgnoredActivity; }) {
 function ToggleActivityComponentWithBackground({ activity }: { activity: IgnoredActivity; }) {
     return (
         <div
-            className={`${PreviewBadgeClasses.previewBadge} ${BaseShapeRoundClasses.baseShapeRound}`}
+            className={`${TryItOutClasses.tryItOutBadge} ${BaseShapeRoundClasses.baseShapeRound}`}
             style={{ padding: "0 2px" }}
         >
             <ToggleActivityComponent activity={activity} />
@@ -145,11 +145,11 @@ export default definePlugin({
     patches: [{
         find: ".Messages.SETTINGS_GAMES_OVERLAY_ON",
         replacement: {
-            match: /(this.renderLastPlayed\(\)]}\),this.renderOverlayToggle\(\))/,
-            replace: "$1,Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(this.props)"
+            match: /this.renderLastPlayed\(\)]}\),this.renderOverlayToggle\(\)/,
+            replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(this.props)"
         }
     }, {
-        find: ".Messages.NEW,name",
+        find: ".overlayBadge",
         replacement: {
             match: /.badgeContainer.+?.\?\(0,.\.jsx\)\(.{1,2},{name:(?<props>.)\.name}\):null/,
             replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleActivityButton($<props>)"
@@ -157,8 +157,8 @@ export default definePlugin({
     }, {
         find: '.displayName="LocalActivityStore"',
         replacement: {
-            match: /((.)\.push\(.\({type:.\..{1,3}\.LISTENING.+?;)/,
-            replace: "$1$2=$2.filter(Vencord.Plugins.plugins.IgnoreActivities.isActivityEnabled);"
+            match: /(?<activities>.)\.push\(.\({type:.\..{1,3}\.LISTENING.+?\)\)/,
+            replace: "$&;$<activities>=$<activities>.filter(Vencord.Plugins.plugins.IgnoreActivities.isActivityIgnored);"
         }
     }],
 
@@ -207,7 +207,7 @@ export default definePlugin({
         );
     },
 
-    isActivityEnabled(props: { type: number; application_id?: string; name?: string; }) {
+    isActivityIgnored(props: { type: number; application_id?: string; name?: string; }) {
         if (props.type === 0) {
             if (props.application_id !== undefined) return !ignoredActivitiesCache.has(props.application_id);
             else {

@@ -29,21 +29,21 @@ export default definePlugin({
         {
             find: ".Messages.USER_VOLUME",
             replacement: {
-                match: /maxValue:(.{1,2}\..{1,2})\?(\d+?):(\d+?),/,
-                replace: (_, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
-                    + `maxValue:${defaultMaxVolumePredicate}`
-                    + `?${higherMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier`
-                    + `:${minorMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier,`
+                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
+                replace: ""
+                    + "maxValue:$<defaultMaxVolumePredicate>"
+                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
+                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
             }
         },
         {
             find: "currentVolume:",
             replacement: {
-                match: /maxValue:(.{1,2}\..{1,2})\?(\d+?):(\d+?),/,
-                replace: (_, defaultMaxVolumePredicate, higherMaxVolume, minorMaxVolume) => ""
-                    + `maxValue:${defaultMaxVolumePredicate}`
-                    + `?${higherMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier`
-                    + `:${minorMaxVolume}*Vencord.Settings.plugins.VolumeBooster.multiplier,`
+                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
+                replace: ""
+                    + "maxValue:$<defaultMaxVolumePredicate>"
+                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
+                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
             }
         }
     ],
