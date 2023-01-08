@@ -20,14 +20,18 @@ import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants.js";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
-import { UserSettingsProtoStore } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
 
-let updateTheme: (theme: "light" | "dark") => Promise<void>;
-waitFor(["updateTheme"], m => ({ updateTheme } = m));
-const getTheme = () => UserSettingsProtoStore.settings.appearance.theme === 1 ? "dark" : "light";
+const updateTheme: { updateTheme: (theme: "light" | "dark") => Promise<void>; } = findByPropsLazy("updateTheme");
+const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
+const getTheme = () => PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
 const logger = new Logger("TimedLightTheme");
-let interval: NodeJS.Timer;
+let nextChange: NodeJS.Timeout;
+
+function toAdjustedTimestamp(t: string): number {
+    const [hours, minutes] = t.split(":").map(i => i && parseInt(i, 10));
+    return new Date().setHours(hours as number, minutes || 0, 0, 0);
+}
 
 export default definePlugin({
     name: "TimedLightTheme",
@@ -40,6 +44,7 @@ export default definePlugin({
             default: "08:00",
             placeholder: "xx:xx",
             isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
+            onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
         },
         end: {
             description: "When to enter dark mode (24-hour time)",
@@ -47,6 +52,7 @@ export default definePlugin({
             default: "20:00",
             placeholder: "xx:xx",
             isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
+            onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
         },
     },
 
@@ -58,11 +64,6 @@ export default definePlugin({
             return this.stop();
         }
 
-        function toAdjustedTimestamp(t: string): number {
-            const [hours, minutes] = t.split(":").map(i => i && parseInt(i, 10));
-            return new Date().setHours(hours as number, minutes || 0, 0, 0);
-        }
-
         const startTimestamp = toAdjustedTimestamp(start);
         const endTimestamp = toAdjustedTimestamp(end);
         if (startTimestamp >= endTimestamp) {
@@ -71,19 +72,26 @@ export default definePlugin({
         }
         const now = Date.now();
         const theme = getTheme();
-        // do not remove
-        if (!theme) return null;
 
-        if ((now >= endTimestamp || now <= startTimestamp) && theme === "light") return updateTheme("dark");
-        else if ((now <= endTimestamp && now >= startTimestamp) && theme === "dark") return updateTheme("light");
+        if (now < startTimestamp) {
+            if (theme === "light") updateTheme.updateTheme("dark");
+            nextChange = setTimeout(() => this.checkForUpdate(), startTimestamp - now);
+        }
+        else if (now >= startTimestamp && now <= endTimestamp) {
+            if (theme === "dark") updateTheme.updateTheme("light");
+            nextChange = setTimeout(() => this.checkForUpdate(), endTimestamp - now);
+        }
+        else if (now > endTimestamp) {
+            if (theme === "light") updateTheme.updateTheme("dark");
+            nextChange = setTimeout(() => this.checkForUpdate(), (startTimestamp + 86400_000) - now);
+        }
     },
 
     start() {
-        interval = setInterval(() => this.checkForUpdate(), 60_000);
         this.checkForUpdate();
     },
 
     stop() {
-        clearInterval(interval);
+        clearTimeout(nextChange);
     },
 });
