@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GuildMemberStore } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { GuildMemberStore } from "@webpack/common";
 
 export default definePlugin({
     name: "@someone",
     authors: [Devs.cloudburst],
-    description: "@someone randomly on the server",
+    description: "Adds /@someone command, which pings a random person.",
     dependencies: ["CommandsAPI"],
     commands: [{
         name: "@someone",
