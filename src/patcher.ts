@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@utils/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, globalShortcut } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 
@@ -44,8 +44,26 @@ app.setAppPath(asarPath);
 
 if (!process.argv.includes("--vanilla")) {
     // Repatch after host updates on Windows
-    if (process.platform === "win32")
+    if (process.platform === "win32") {
         require("./patchWin32Updater");
+
+        const originalBuild = Menu.buildFromTemplate;
+        Menu.buildFromTemplate = function (template) {
+            if (template[0]?.label === "&File") {
+                const { submenu } = template[0];
+                if (Array.isArray(submenu)) {
+                    submenu.push({
+                        label: "Quit (Hidden)",
+                        visible: false,
+                        acceleratorWorksWhenHidden: true,
+                        accelerator: "Control+Q",
+                        click: () => app.quit()
+                    });
+                }
+            }
+            return originalBuild.call(this, template);
+        };
+    }
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
@@ -153,13 +171,6 @@ if (!process.argv.includes("--vanilla")) {
                     responseHeaders["content-type"] = ["text/css"];
             }
             cb({ cancel: false, responseHeaders });
-
-
-            if (process.platform === "win32") {
-                globalShortcut.register("Control+Q", () => {
-                    app.quit();
-                });
-            }
         });
     });
 } else {
