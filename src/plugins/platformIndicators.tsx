@@ -146,9 +146,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={
-                    props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
-                } inline />
+                <PlatformIndicator user={props.message?.author} inline />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
