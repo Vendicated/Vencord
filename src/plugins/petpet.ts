@@ -175,8 +175,8 @@ export default definePlugin({
                 gif.finish();
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
-                // Thus, setImmediate is needed to make this execute after Discord cleared the input
-                setImmediate(() => promptToUpload([file], cmdCtx.channel, DRAFT_TYPE));
+                // Thus, setTimeout is needed to make this execute after Discord cleared the input
+                setTimeout(() => promptToUpload([file], cmdCtx.channel, DRAFT_TYPE), 10);
             },
         },
     ]
