@@ -5,6 +5,7 @@ node_modules
 vencord_installer
 
 .idea
+.DS_Store
 
 yarn.lock
 package-lock.json
