@@ -24,14 +24,23 @@
 }
 
 .vc-plugins-card {
-    background-color: var(--background-modifier-selected);
+    background-color: var(--background-secondary-alt);
     color: var(--interactive-active);
-    border-radius: 3px;
-    cursor: pointer;
+    border-radius: 8px;
     display: block;
     height: 100%;
     padding: 10px;
-    width: 100%
+    width: 100%;
+    transition: box-shadow .1s ease-out, transform .1s ease-out, background .1s ease-out, opacity .1s ease-in, -webkit-box-shadow .1s ease-out, -webkit-transform .1s ease-out;
+    -webkit-transition: background .1s ease-out, opacity .1s ease-in, -webkit-box-shadow .1s ease-out, -webkit-transform .1s ease-out;
+}
+
+.vc-plugins-card:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+    -webkit-transform: translateY(-1px);
+    -webkit-box-shadow: var(--elevation-high);
 }
 
 .vc-plugins-card .vc-plugins-info-button {
@@ -40,6 +49,10 @@
     padding: 0;
     background: transparent;
     margin-right: 8px;
+}
+
+.vc-plugins-settings-button:hover {
+    color: var(--interactive-hover);
 }
 
 .vc-plugins-filter-controls {

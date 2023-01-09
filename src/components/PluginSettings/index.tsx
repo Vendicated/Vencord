@@ -154,7 +154,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
-                note={<Text variant="text-md/normal" style={{
+                note={<Text variant="text-sm/normal" style={{
                     height: 40,
                     overflow: "hidden",
                     // mfw css is so bad you need whatever this is to get multi line overflow ellipsis to work
@@ -163,7 +163,8 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     WebkitLineClamp: 2,
                     lineClamp: 2,
                     WebkitBoxOrient: "vertical",
-                    boxOrient: "vertical"
+                    boxOrient: "vertical",
+                    color: "var(--header-secondary)"
                 }}>
                     {plugin.description}
                 </Text>}
@@ -173,7 +174,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     <Text
                         variant="text-md/bold"
                         style={{
-                            display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px"
+                            display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px", cursor: "default"
                         }}
                     >
                         {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
