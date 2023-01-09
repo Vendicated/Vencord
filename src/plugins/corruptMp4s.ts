@@ -99,7 +99,7 @@ export default definePlugin({
             const newName = video.name.replace(/\.mp4$/i, ".corrupt.mp4");
             const promptToUpload = findByCode("UPLOAD_FILE_LIMIT_ERROR");
             const file = new File([buf], newName, { type: "video/mp4" });
-            setImmediate(() => promptToUpload([file], ctx.channel, DRAFT_TYPE));
+            setTimeout(() => promptToUpload([file], ctx.channel, DRAFT_TYPE), 10);
         }
     }]
 });
