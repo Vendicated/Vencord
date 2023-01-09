@@ -20,7 +20,7 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
-import { Settings, useSettings } from "@api/settings";
+import { useSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
@@ -71,8 +71,8 @@ function ReloadRequiredCard({ plugins, ...props }: ReloadRequiredCardProps) {
     const pluginSuffix = plugins.length === 1 ? " requires a reload to apply changes." : ".";
 
     return (
-        <ErrorCard {...props} style={{ padding: "1em", display: "grid", gridTemplateColumns: "1fr auto", gap: 8, ...props.style }}>
-            <span style={{ margin: "auto 0" }}>
+        <ErrorCard {...props} className={cl("reload-card")}>
+            <span className={cl("dep-text")}>
                 {pluginPrefix} <code>{plugins.join(", ")}</code>{pluginSuffix}
             </span>
             <Button look={Button.Looks.INVERTED} onClick={() => location.reload()}>Reload</Button>
@@ -90,8 +90,6 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = useSettings();
     const pluginSettings = settings.plugins[plugin.name];
-
-    const [iconHover, setIconHover] = React.useState(false);
 
     function isEnabled() {
         return pluginSettings?.enabled || plugin.started;
@@ -154,43 +152,20 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
-                note={<Text variant="text-md/normal" style={{
-                    height: 40,
-                    overflow: "hidden",
-                    // mfw css is so bad you need whatever this is to get multi line overflow ellipsis to work
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box", // firefox users will cope (it doesn't support it)
-                    WebkitLineClamp: 2,
-                    lineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    boxOrient: "vertical"
-                }}>
-                    {plugin.description}
-                </Text>}
+                note={<Text className={cl("note")} variant="text-md/normal">{plugin.description}</Text>}
                 hideBorder={true}
             >
-                <Flex style={{ marginTop: "auto", width: "100%", height: "100%", alignItems: "center", gap: "8px" }}>
+                <Flex className={cl("flex")}>
                     <Text
                         variant="text-md/bold"
-                        style={{
-                            display: "flex", width: "100%", alignItems: "center", flexGrow: "1", gap: "8px"
-                        }}
+                        className={cl("name")}
                     >
-                        {plugin.name}{(isNew) && <Badge text="NEW" color="#ED4245" />}
+                        {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
                     </Text>
                     <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
                         {plugin.options
-                            ? <CogWheel
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />
-                            : <InfoIcon
-                                width="24" height="24"
-                                style={{ color: iconHover ? "" : "var(--text-muted)" }}
-                                onMouseEnter={() => setIconHover(true)}
-                                onMouseLeave={() => setIconHover(false)}
-                            />}
+                            ? <CogWheel />
+                            : <InfoIcon width="24" height="24" />}
                     </button>
                 </Flex>
             </Switch>
@@ -287,7 +262,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         for (const p of sortedPlugins) {
             if (!pluginFilter(p)) continue;
 
-            const isRequired = p.required || depMap[p.name]?.some(d => Settings.plugins[d].enabled);
+            const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
 
             if (isRequired) {
                 const tooltipText = p.required
@@ -330,10 +305,10 @@ export default ErrorBoundary.wrap(function PluginSettings() {
                 Filters
             </Forms.FormTitle>
 
-            <ReloadRequiredCard plugins={[...changes.getChanges()]} style={{ marginBottom: 16 }} />
+            <ReloadRequiredCard plugins={[...changes.getChanges()]} className={Margins.marginBottom20} />
 
             <div className={cl("filter-controls")}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} style={{ marginBottom: 24 }} />
+                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.marginBottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         className={InputStyles.inputDefault}
@@ -373,7 +348,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText style={{ margin: "0 auto" }}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }
