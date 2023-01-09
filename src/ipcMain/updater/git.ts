@@ -66,13 +66,11 @@ async function pull() {
 async function build() {
     const opts = { cwd: VENCORD_SRC_DIR };
 
-    let res;
-
     const command = isFlatpak ? "flatpak-spawn" : "node";
     const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
     if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
 
-    res = await execFile(command, args, opts);
+    const res = await execFile(command, args, opts);
 
     return !res.stderr.includes("Build failed");
 }
