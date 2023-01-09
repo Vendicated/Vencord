@@ -68,9 +68,11 @@ async function build() {
 
     let res;
 
-    if (isFlatpak) res = await execFile("flatpak-spawn", ["--host", "node", "scripts/build/build.mjs"], opts);
-    else if (process.platform === "darwin") res = await execFile("/usr/local/bin/node", ["scripts/build/build.mjs"], opts);
-    else res = await execFile("node", ["scripts/build/build.mjs"], opts);
+    const command = isFlatpak ? "flatpak-spawn" : "node";
+    const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
+    if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
+
+    res = await execFile(command, args, opts);
 
     return !res.stderr.includes("Build failed");
 }
