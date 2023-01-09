@@ -198,7 +198,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     );
 }
 
-export default ErrorBoundary.wrap(function Settings() {
+enum SearchStatus {
+    ALL,
+    ENABLED,
+    DISABLED
+}
+
+export default ErrorBoundary.wrap(function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -239,21 +245,19 @@ export default ErrorBoundary.wrap(function Settings() {
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
-    const [searchValue, setSearchValue] = React.useState({ value: "", status: "all" });
+    const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
-    const onStatusChange = (status: string) => setSearchValue(prev => ({ ...prev, status }));
+    const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const showEnabled = searchValue.status === "enabled" || searchValue.status === "all";
-        const showDisabled = searchValue.status === "disabled" || searchValue.status === "all";
         const enabled = settings.plugins[plugin.name]?.enabled || plugin.started;
+        if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
+        if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
+        if (!searchValue.value.length) return true;
         return (
-            ((showEnabled && enabled) || (showDisabled && !enabled)) &&
-            (
-                plugin.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-                plugin.description.toLowerCase().includes(searchValue.value.toLowerCase())
-            )
+            plugin.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
+            plugin.description.toLowerCase().includes(searchValue.value.toLowerCase())
         );
     };
 
@@ -274,6 +278,52 @@ export default ErrorBoundary.wrap(function Settings() {
         return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
+    type P = JSX.Element | JSX.Element[];
+    let plugins: P, requiredPlugins: P;
+    if (sortedPlugins?.length) {
+        plugins = [];
+        requiredPlugins = [];
+
+        for (const p of sortedPlugins) {
+            if (!pluginFilter(p)) continue;
+
+            const isRequired = p.required || depMap[p.name]?.some(d => Settings.plugins[d].enabled);
+
+            if (isRequired) {
+                const tooltipText = p.required
+                    ? "This plugin is required for Vencord to function."
+                    : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+
+                requiredPlugins.push(
+                    <Tooltip text={tooltipText} key={p.name}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <PluginCard
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                onRestartNeeded={name => changes.handleChange(name)}
+                                disabled={true}
+                                plugin={p}
+                            />
+                        )}
+                    </Tooltip>
+                );
+            } else {
+                plugins.push(
+                    <PluginCard
+                        onRestartNeeded={name => changes.handleChange(name)}
+                        disabled={false}
+                        plugin={p}
+                        isNew={newPlugins?.includes(p.name)}
+                        key={p.name}
+                    />
+                );
+            }
+
+        }
+    } else {
+        plugins = requiredPlugins = <Text variant="text-md/normal">No plugins meet search criteria.</Text>;
+    }
+
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
@@ -288,9 +338,9 @@ export default ErrorBoundary.wrap(function Settings() {
                     <Select
                         className={InputStyles.inputDefault}
                         options={[
-                            { label: "Show All", value: "all", default: true },
-                            { label: "Show Enabled", value: "enabled" },
-                            { label: "Show Disabled", value: "disabled" }
+                            { label: "Show All", value: SearchStatus.ALL, default: true },
+                            { label: "Show Enabled", value: SearchStatus.ENABLED },
+                            { label: "Show Disabled", value: SearchStatus.DISABLED }
                         ]}
                         serialize={String}
                         select={onStatusChange}
@@ -303,49 +353,14 @@ export default ErrorBoundary.wrap(function Settings() {
             <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
 
             <div className={cl("grid")}>
-                {sortedPlugins?.length ? sortedPlugins
-                    .filter(a => !a.required && !dependencyCheck(a.name, depMap).length && pluginFilter(a))
-                    .map(plugin => {
-                        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
-                        const dependency = enabledDependants?.length;
-                        return <PluginCard
-                            onRestartNeeded={name => changes.add(name)}
-                            disabled={plugin.required || !!dependency}
-                            plugin={plugin}
-                            isNew={newPlugins?.includes(plugin.name)}
-                            key={plugin.name}
-                        />;
-                    })
-                    : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
-                }
+                {plugins}
             </div>
             <Forms.FormDivider />
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>
             <div className={cl("grid")}>
-                {sortedPlugins?.length ? sortedPlugins
-                    .filter(a => a.required || dependencyCheck(a.name, depMap).length && pluginFilter(a))
-                    .map(plugin => {
-                        const enabledDependants = depMap[plugin.name]?.filter(d => settings.plugins[d].enabled);
-                        const dependency = enabledDependants?.length;
-                        const tooltipText = plugin.required
-                            ? "This plugin is required for Vencord to function."
-                            : makeDependencyList(dependencyCheck(plugin.name, depMap));
-                        return <Tooltip text={tooltipText} key={plugin.name}>
-                            {({ onMouseLeave, onMouseEnter }) => (
-                                <PluginCard
-                                    onMouseLeave={onMouseLeave}
-                                    onMouseEnter={onMouseEnter}
-                                    onRestartNeeded={name => changes.handleChange(name)}
-                                    disabled={plugin.required || !!dependency}
-                                    plugin={plugin}
-                                />
-                            )}
-                        </Tooltip>;
-                    })
-                    : <Text variant="text-md/normal">No plugins meet search criteria.</Text>
-                }
+                {requiredPlugins}
             </div>
         </Forms.FormSection >
     );
@@ -361,8 +376,4 @@ function makeDependencyList(deps: string[]) {
             {deps.map((dep: string) => <Forms.FormText style={{ margin: "0 auto" }}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
-}
-
-function dependencyCheck(pluginName: string, depMap: Record<string, string[]>): string[] {
-    return depMap[pluginName]?.filter(d => Settings.plugins[d].enabled) || [];
 }
