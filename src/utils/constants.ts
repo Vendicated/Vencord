@@ -184,5 +184,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     SammCheese: {
         name: "Samm-Cheese",
         id: 372148345894076416n
+    },
+    cloudburst: {
+        name: "cloudburst",
+        id: 892128204150685769n
     }
 });
