@@ -16,18 +16,49 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { get, set } from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { FluxDispatcher } from "@webpack/common";
+
+const KEY = "SilentTyping_ENABLED";
 
 export default definePlugin({
     name: "SilentTyping",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.dzshn],
     description: "Hide that you are typing",
     patches: [{
         find: "startTyping:",
         replacement: {
             match: /startTyping:.+?,stop/,
-            replace: "startTyping:()=>{},stop"
+            replace: "startTyping:$self.startTyping,stop"
         }
-    }]
+    }],
+    dependencies: ["CommandsAPI"],
+    commands: [{
+        name: "silenttype",
+        description: "Toggle whether you're hiding that you're typing or not.",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [
+            {
+                name: "value",
+                description: "whether to hide or not what you're typing (default is toggle)",
+                required: false,
+                type: ApplicationCommandOptionType.BOOLEAN,
+            }
+        ],
+        execute: async (args, ctx) => {
+            const value = !!findOption(args, "value", !await get(KEY));
+            await set(KEY, value);
+            sendBotMessage(ctx.channel.id, {
+                content: value ? "Silent typing enabled!" : "Silent typing disabled!",
+            });
+        }
+    }],
+
+    async startTyping(channelId: string) {
+        if (await get(KEY)) return;
+        FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
+    }
 });
