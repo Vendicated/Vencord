@@ -1,0 +1,263 @@
+.spotimbed-embed {
+    border-radius: 4px;
+    color: var(--text-normal);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: 80px auto 32px;
+    grid-template-areas: 'art info' 'content content' 'controls controls';
+    width: 400px;
+    user-select: none;
+}
+
+.spotimbed-art-wrap {
+    grid-area: art;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    border-radius: 4px 0 0 0;
+    height: 80px;
+    width: 80px;
+    overflow: hidden;
+}
+
+.spotimbed-art {
+    width: 80px;
+}
+
+.spotimbed-art-default {
+    background: var(--background-secondary-alt);
+    color: inherit;
+    height: 40px;
+    width: 40px;
+    padding: 20px;
+}
+
+/* descender cut-off fix: https://stackoverflow.com/a/64039674 */
+.spotimbed-title,
+.spotimbed-infoline,
+.spotimbed-infoline-secondary {
+    padding-bottom: 0.14em;
+}
+
+.spotimbed-info {
+    grid-area: info;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px;
+    height: 80px;
+    font-size: 95%;
+    overflow: hidden;
+}
+
+.spotimbed-embed .spotimbed-link {
+    color: inherit;
+}
+
+.spotimbed-embed .spotimbed-link:hover {
+    text-decoration: underline;
+}
+
+.spotimbed-info .spotimbed-placeholder {
+    background-color: var(--text-normal);
+    border-radius: 9999px;
+    color: transparent;
+    font-size: 20%;
+    padding-right: 100px;
+}
+
+.spotimbed-titleline {
+    align-items: center;
+    font-weight: bold;
+}
+
+.spotimbed-title {
+    color: var(--header-primary);
+}
+
+.spotimbed-title-spacer {
+    flex: 1;
+}
+
+.spotimbed-mono {
+    font-family: Consolas, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Monaco, Courier New, Courier, monospace;
+}
+
+.spotimbed-title-tag {
+    background-color: rgba(0, 0, 0, .6);
+    border-radius: 4px;
+    color: rgba(255, 255, 255, .8);
+    font-size: 75%;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 16px;
+    padding: 3px 6px;
+}
+
+.spotimbed-titleline,
+.spotimbed-infoline-wrap {
+    display: flex;
+    white-space: pre;
+}
+
+.spotimbed-title,
+.spotimbed-infoline {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spotimbed-infoline-secondary {
+    font-size: 90%;
+}
+
+.spotimbed-content {
+    grid-area: content;
+    background-color: rgba(0, 0, 0, .12);
+}
+
+.spotimbed-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .2);
+}
+
+.spotimbed-tracklist {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.spotimbed-trackrow {
+    align-items: center;
+    display: flex;
+    height: 40px;
+}
+
+.spotimbed-embed.theme-dark {
+    --background-modifier-hover: rgba(255, 255, 255, .1);
+    --background-modifier-selected: rgba(255, 255, 255, .3);
+}
+
+.spotimbed-embed.theme-light {
+    --background-modifier-hover: rgba(0, 0, 0, .1);
+    --background-modifier-selected: rgba(0, 0, 0, .3);
+}
+
+.spotimbed-trackrow:not(.spotimbed-disabled):hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.spotimbed-trackrow.spotimbed-active {
+    background-color: var(--background-modifier-selected);
+    color: var(--interactive-active);
+}
+
+.spotimbed-trackrow:not(.spotimbed-active):not(.spotimbed-disabled) {
+    cursor: pointer;
+}
+
+.spotimbed-trackrow.spotimbed-disabled {
+    opacity: .5;
+}
+
+.spotimbed-trackrow-index {
+    margin: 0 10px;
+    width: 20px;
+    text-align: right;
+}
+
+.spotimbed-trackrow-length {
+    margin: 0 16px 0 10px;
+    font-size: 90%;
+}
+
+.spotimbed-trackrow-info {
+    flex: 1;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spotimbed-trackrow-title {
+    font-weight: 600;
+}
+
+.spotimbed-trackrow-infoline {}
+
+.spotimbed-controls {
+    background-color: rgba(0, 0, 0, .6);
+    border-radius: 0 0 4px 4px;
+    color: #fff;
+    grid-area: controls;
+    position: relative;
+}
+
+.spotimbed-media-player {
+    position: absolute;
+    bottom: 0;
+}
+
+.spotimbed-controls [class*="audioMetadata"] {
+    display: none;
+}
+
+.spotimbed-controls [class*="audioControls"] {
+    background-color: transparent;
+    border-radius: 0 0 4px 4px;
+}
+
+.spotimbed-controls .spotimbed-placeholder-wrap {
+    align-items: center;
+    display: flex;
+    height: 100%;
+}
+
+.spotimbed-controls .spotimbed-placeholder {
+    background: var(--text-normal);
+    border-radius: 9999px;
+    width: 66px;
+    height: 6px;
+    opacity: 1;
+}
+
+.spotimbed-controls .spotimbed-placeholder-scrubber {
+    height: 8px;
+    flex: 1;
+    margin-left: 8px;
+    opacity: 0.5;
+}
+
+.spotimbed-controls .spotimbed-placeholder-btn {
+    width: 16px;
+    height: 16px;
+    margin: 0 8px;
+}
+
+.spotimbed-unsupported {
+    background: var(--background-secondary);
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: var(--text-normal);
+    text-align: center;
+    line-height: 125%;
+    user-select: none;
+    padding: 6px 10px;
+    width: 400px;
+}
+
+.spotimbed-controls .spotimbed-placeholder-wrap,
+.spotimbed-info .spotimbed-placeholder {
+    animation: 1s ease infinite alternate spotimbed-placeholder;
+}
+
+@keyframes spotimbed-placeholder {
+    0% {
+        opacity: .1
+    }
+
+    10% {
+        opacity: .1
+    }
+
+    100% {
+        opacity: .05
+    }
+}
