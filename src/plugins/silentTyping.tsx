@@ -27,15 +27,12 @@ import { Settings } from "Vencord";
 
 const KEY = "SilentTyping_ENABLED";
 
-let forceUpdateIcon: () => void;
 let isEnabled: boolean;
+
+let forceUpdateIcon: () => void;
 
 function SilentTypingToggle() {
     forceUpdateIcon = useForceUpdater();
-
-    React.useEffect(() => {
-        (async () => { isEnabled = !!await get(KEY); })();
-    }, []);
 
     return (
         <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"} style={{ scale: "0.5" }}>
@@ -86,9 +83,9 @@ export default definePlugin({
         showIcon: {
             type: OptionType.BOOLEAN,
             default: false,
-            description: "Show an icon for toggling the plugin.",
+            description: "Show an icon for toggling the plugin",
             restartNeeded: true,
-        }
+        },
     },
     commands: [{
         name: "silenttype",
@@ -97,10 +94,10 @@ export default definePlugin({
         options: [
             {
                 name: "value",
-                description: "whether to hide or not what you're typing (default is toggle)",
+                description: "whether to hide or not that you're typing (default is toggle)",
                 required: false,
                 type: ApplicationCommandOptionType.BOOLEAN,
-            }
+            },
         ],
         execute: async (args, ctx) => {
             isEnabled = !!findOption(args, "value", !await get(KEY));
@@ -109,11 +106,15 @@ export default definePlugin({
             sendBotMessage(ctx.channel.id, {
                 content: isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
             });
-        }
+        },
     }],
 
+    async start() {
+        isEnabled = await get(KEY) ?? true;
+    },
+
     async startTyping(channelId: string) {
-        if (await get(KEY)) return;
+        if (isEnabled) return;
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
