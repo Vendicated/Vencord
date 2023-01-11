@@ -17,98 +17,228 @@
 */
 
 import { Settings } from "@api/settings";
+import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, FluxDispatcher, Forms, Margins, SelectedChannelStore, UserStore } from "@webpack/common";
-
-function speak(text: string) {
-    const speech = new SpeechSynthesisUtterance(text);
-    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === Settings.plugins.VcAnnouncements.voice);
-    if (!voice) {
-        new Logger("VcAnnouncements").error(`Voice "${Settings.plugins.VcAnnouncements.voice}" not found. Resetting to default.`);
-        voice = speechSynthesis.getVoices().find(v => v.default);
-        Settings.plugins.VcAnnouncements.voice = voice?.voiceURI;
-        if (!voice) return; // FIXME
-    }
-    speech.voice = voice!;
-    speechSynthesis.speak(speech);
-}
-
-function interpolate(str: string, user: string, channel: string) {
-    return str
-        .replaceAll("{{USER}}", user)
-        .replaceAll("{{CHANNEL}}", channel);
-}
+import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Button, ChannelStore, FluxDispatcher, Forms, Margins, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
 
 interface VoiceState {
     userId: string;
-    channelId: string;
-    oldChannelId: string;
+    channelId?: string;
+    oldChannelId?: string;
+    deaf: boolean;
+    mute: boolean;
+    selfDeaf: boolean;
+    selfMute: boolean;
 }
 
-function getVoices() {
+const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
+
+// Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
+// Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
+// not say the second mute, which would lead you to believe they're unmuted
+
+function getEnglishVoices() {
     const voices = speechSynthesis.getVoices();
     const englishVoices = voices.filter(v => v.lang.startsWith("en"));
     return !englishVoices.length ? voices : englishVoices;
 }
 
+function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
+    if (!text) return;
 
-function getTypeAndChannelId(oldChannel?: string, newChannel?: string) {
-    if (newChannel) return [oldChannel ? "moveMessage" : "joinMessage", newChannel];
-    if (oldChannel) return ["leaveMessage", oldChannel];
+    const speech = new SpeechSynthesisUtterance(text);
+    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
+    if (!voice) {
+        new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
+        voice = speechSynthesis.getVoices().find(v => v.default);
+        settings.voice = voice?.voiceURI;
+        if (!voice) return; // This should never happen
+    }
+    speech.voice = voice!;
+    speech.volume = settings.volume;
+    speech.rate = settings.rate;
+    speechSynthesis.speak(speech);
+}
+
+function clean(str: string, fallback: string) {
+    return str.normalize("NFKC")
+        .replace(/[^\w ]/g, "")
+        .trim()
+        || fallback;
+}
+
+function formatText(str: string, user: string, channel: string) {
+    return str
+        .replaceAll("{{USER}}", clean(user, user ? "Someone" : ""))
+        .replaceAll("{{CHANNEL}}", clean(channel, "channel"));
+}
+
+/*
+let StatusMap = {} as Record<string, {
+    mute: boolean;
+    deaf: boolean;
+}>;
+*/
+
+// For every user, channelId and oldChannelId will differ when moving channel.
+// Only for the local user, channelId and oldChannelId will be the same when moving channel,
+// for some ungodly reason
+let myLastChannelId: string | undefined;
+
+function getTypeAndChannelId({ channelId, oldChannelId }: VoiceState, isMe: boolean) {
+    if (isMe && channelId !== myLastChannelId) {
+        oldChannelId = myLastChannelId;
+        myLastChannelId = channelId;
+    }
+
+    if (channelId !== oldChannelId) {
+        if (channelId) return [oldChannelId ? "move" : "join", channelId];
+        if (oldChannelId) return ["leave", oldChannelId];
+    }
+    /*
+    if (channelId) {
+        if (deaf || selfDeaf) return ["deafen", channelId];
+        if (mute || selfMute) return ["mute", channelId];
+        const oldStatus = StatusMap[userId];
+        if (oldStatus.deaf) return ["undeafen", channelId];
+        if (oldStatus.mute) return ["unmute", channelId];
+    }
+    */
     return ["", ""];
 }
+
+/*
+function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, channelId }: VoiceState, isMe: boolean) {
+    if (isMe && (type === "join" || type === "move")) {
+        StatusMap = {};
+        const states = VoiceStateStore.getVoiceStatesForChannel(channelId!) as Record<string, VoiceState>;
+        for (const userId in states) {
+            const s = states[userId];
+            StatusMap[userId] = {
+                mute: s.mute || s.selfMute,
+                deaf: s.deaf || s.selfDeaf
+            };
+        }
+        return;
+    }
+
+    if (type === "leave" || (type === "move" && channelId !== SelectedChannelStore.getVoiceChannelId())) {
+        if (isMe)
+            StatusMap = {};
+        else
+            delete StatusMap[userId];
+
+        return;
+    }
+
+    StatusMap[userId] = {
+        deaf: deaf || selfDeaf,
+        mute: mute || selfMute
+    };
+}
+*/
 
 function handleVoiceStates({ voiceStates }: { voiceStates: VoiceState[]; }) {
     const myChanId = SelectedChannelStore.getVoiceChannelId();
     const myId = UserStore.getCurrentUser().id;
 
-    for (const { channelId, oldChannelId, userId } of voiceStates) {
+    for (const state of voiceStates) {
+        const { userId, channelId, oldChannelId } = state;
         const isMe = userId === myId;
         if (!isMe) {
             if (!myChanId) continue;
             if (channelId !== myChanId && oldChannelId !== myChanId) continue;
         }
 
-        const [type, id] = getTypeAndChannelId(oldChannelId, channelId);
+        const [type, id] = getTypeAndChannelId(state, isMe);
         if (!type) continue;
 
+        const template = Settings.plugins.VcNarrator[type + "Message"];
         const user = isMe ? "" : UserStore.getUser(userId).username;
         const channel = ChannelStore.getChannel(id).name;
 
-        speak(interpolate(Vencord.Settings.plugins.VcAnnouncements[type], user, channel));
+        speak(formatText(template, user, channel));
+
+        // updateStatuses(type, state, isMe);
     }
 }
 
-function playSample(settings: any, type: string) {
-    const user = UserStore.getCurrentUser().username;
+function handleToggleSelfMute() {
+    const chanId = SelectedChannelStore.getVoiceChannelId()!;
+    const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+    if (!s) return;
 
-    const text = interpolate(settings[type] ?? Settings.plugins.VcAnnouncements[type], user, "general");
-    const speech = new SpeechSynthesisUtterance(text);
-    if (settings.voice) {
-        speech.voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice)!;
-    }
-    speechSynthesis.speak(speech);
+    const event = s.mute || s.selfMute ? "unmute" : "mute";
+    speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
 }
 
-console.log("getVoices", getVoices());
+function handleToggleSelfDeafen() {
+    const chanId = SelectedChannelStore.getVoiceChannelId()!;
+    const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+    if (!s) return;
+
+    const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
+    speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
+}
+
+function playSample(tempSettings: any, type: string) {
+    const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+
+    speak(formatText(settings[type], UserStore.getCurrentUser().username, "general"), settings);
+}
+
 export default definePlugin({
-    name: "VcAnnouncements",
-    description: "TODO",
+    name: "VcNarrator",
+    description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
 
     start() {
+        if (speechSynthesis.getVoices().length === 0) {
+            new Logger("VcNarrator").warn("No Narrator voices found. Thus, this plugin will not work. Check my Settings for more info");
+            return;
+        }
         FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceStates);
+        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", handleToggleSelfMute);
+        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", handleToggleSelfDeafen);
     },
 
     stop() {
         FluxDispatcher.unsubscribe("VOICE_STATE_UPDATES", handleVoiceStates);
+        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", handleToggleSelfMute);
+        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", handleToggleSelfDeafen);
     },
+
+    optionsCache: null as Record<string, PluginOptionsItem> | null,
 
     get options() {
         return this.optionsCache ??= {
+            voice: {
+                type: OptionType.SELECT,
+                description: "Narrator Voice",
+                options: getEnglishVoices().map(v => ({
+                    label: v.name,
+                    value: v.voiceURI,
+                    default: v.default
+                }))
+            },
+            volume: {
+                type: OptionType.SLIDER,
+                description: "Narrator Volume",
+                default: 1,
+                markers: [0, 0.25, 0.5, 0.75, 1],
+                stickToMarkers: false
+            },
+            rate: {
+                type: OptionType.SLIDER,
+                description: "Narrator Speed",
+                default: 1,
+                markers: [0.1, 0.5, 1, 2, 5, 10],
+                stickToMarkers: false
+            },
             joinMessage: {
                 type: OptionType.STRING,
                 description: "Join Message",
@@ -124,31 +254,68 @@ export default definePlugin({
                 description: "Move Message",
                 default: "{{USER}} moved to {{CHANNEL}}"
             },
-            voice: {
-                type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
-                }))
+            muteMessage: {
+                type: OptionType.STRING,
+                description: "Mute Message (only self for now)",
+                default: "{{USER}} Muted"
+            },
+            unmuteMessage: {
+                type: OptionType.STRING,
+                description: "Unmute Message (only self for now)",
+                default: "{{USER}} unmuted"
+            },
+            deafenMessage: {
+                type: OptionType.STRING,
+                description: "Deafen Message (only self for now)",
+                default: "{{USER}} deafened"
+            },
+            undeafenMessage: {
+                type: OptionType.STRING,
+                description: "Undeafen Message (only self for now)",
+                default: "{{USER}} undeafened"
             }
-        } as const;
+        };
     },
 
     settingsAboutComponent({ tempSettings: s }) {
+        const [hasVoices, hasEnglishVoices] = useMemo(() => {
+            const voices = speechSynthesis.getVoices();
+            return [voices.length !== 0, voices.some(v => v.lang.startsWith("en"))];
+        }, []);
+
+        const types = useMemo(
+            () => Object.keys(Settings.plugins.VcNarrator).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+            [],
+        );
+
+        let errorComponent: React.ReactElement | null = null;
+        if (!hasVoices) {
+            let error = "No narrator voices found. ";
+            error += navigator.platform?.toLowerCase().includes("linux")
+                ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-synthesis flag"
+                : "Try installing some in the Narrator settings of your Operating System";
+            errorComponent = <ErrorCard>{error}</ErrorCard>;
+        } else if (!hasEnglishVoices) {
+            errorComponent = <ErrorCard>You don't have any English voices installed, so the narrator might sound weird</ErrorCard>;
+        }
+
         return (
             <Forms.FormSection>
-                <Forms.FormText>You can customise the spoken messages below.</Forms.FormText>
+                <Forms.FormText>
+                    You can customise the spoken messages below. You can disable specific messages by setting them to nothing
+                </Forms.FormText>
                 <Forms.FormText>
                     The special placeholders <code>{"{{USER}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
                     will be replaced with the user's name (nothing if it's yourself) and the channel's name respectively
                 </Forms.FormText>
-                <Flex className={Margins.marginTop20}>
-                    <Button onClick={() => playSample(s, "joinMessage")}>Test Join</Button>
-                    <Button onClick={() => playSample(s, "leaveMessage")}>Test Leave</Button>
-                    <Button onClick={() => playSample(s, "moveMessage")}>Test Move</Button>
-                </Flex>
+                {hasEnglishVoices && (
+                    <Flex className={Margins.marginTop20}>
+                        {types.map(t => (
+                            <Button key={t} onClick={() => playSample(s, t)}>Test {t}</Button>
+                        ))}
+                    </Flex>
+                )}
+                {errorComponent}
             </Forms.FormSection>
         );
     }
