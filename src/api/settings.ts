@@ -30,6 +30,7 @@ export interface Settings {
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    frameless: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -43,6 +44,7 @@ const DefaultSettings: Settings = {
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
+    frameless: false,
     plugins: {}
 };
 
