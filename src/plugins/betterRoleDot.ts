@@ -41,7 +41,7 @@ export default definePlugin({
             all: true,
             predicate: () => Settings.plugins.BetterRoleDot.bothStyles,
             replacement: {
-                match: /"(?:username|dot)"===\w\b/g,
+                match: /"(?:username|dot)"===\w(?!\.\w)/g,
                 replace: "true",
             },
         },
