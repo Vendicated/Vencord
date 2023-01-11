@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, FluxDispatcher, React, Tooltip } from "@webpack/common";
-import { Settings } from "Vencord";
+import { Settings } from "@api/settings";
 
 const KEY = "SilentTyping_ENABLED";
 
