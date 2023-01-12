@@ -17,7 +17,7 @@
 */
 
 import { app, autoUpdater } from "electron";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "fs";
 import { basename, dirname, join } from "path";
 
 const { setAppUserModelId } = app;
@@ -44,58 +44,53 @@ function isNewer($new: string, old: string) {
 }
 
 function patchLatest() {
-    const currentAppPath = dirname(process.execPath);
-    const currentVersion = basename(currentAppPath);
-    const discordPath = join(currentAppPath, "..");
+    try {
+        const currentAppPath = dirname(process.execPath);
+        const currentVersion = basename(currentAppPath);
+        const discordPath = join(currentAppPath, "..");
 
-    const latestVersion = readdirSync(discordPath).reduce((prev, curr) => {
-        return (curr.startsWith("app-") && isNewer(curr, prev))
-            ? curr
-            : prev;
-    }, currentVersion as string);
+        const latestVersion = readdirSync(discordPath).reduce((prev, curr) => {
+            return (curr.startsWith("app-") && isNewer(curr, prev))
+                ? curr
+                : prev;
+        }, currentVersion as string);
 
-    if (latestVersion === currentVersion) return;
+        if (latestVersion === currentVersion) return;
 
-    const app = join(discordPath, latestVersion, "resources", "app");
-    if (existsSync(app)) return;
+        const resources = join(discordPath, latestVersion, "resources");
+        const app = join(resources, "app.asar");
+        const _app = join(resources, "_app.asar");
 
-    console.info("[Vencord] Detected Host Update. Repatching...");
+        if (!existsSync(app) || statSync(app).isDirectory()) return;
 
-    const patcherPath = join(__dirname, "patcher.js");
-    mkdirSync(app);
-    writeFileSync(join(app, "package.json"), JSON.stringify({
-        name: "discord",
-        main: "index.js"
-    }));
-    writeFileSync(join(app, "index.js"), `require(${JSON.stringify(patcherPath)});`);
+        console.info("[Vencord] Detected Host Update. Repatching...");
+
+        renameSync(app, _app);
+        mkdirSync(app);
+        writeFileSync(join(app, "package.json"), JSON.stringify({
+            name: "discord",
+            main: "index.js"
+        }));
+        writeFileSync(join(app, "index.js"), `require(${JSON.stringify(join(__dirname, "patcher.js"))});`);
+    } catch (err) {
+        console.error("[Vencord] Failed to repatch latest host update", err);
+    }
 }
 
 // Windows Host Updates install to a new folder app-{HOST_VERSION}, so we
 // need to reinject
 function patchUpdater() {
     const main = require.main!;
-    const buildInfo = require(join(process.resourcesPath, "build_info.json"));
 
     try {
-        if (buildInfo?.newUpdater) {
-            const autoStartScript = join(main.filename, "..", "autoStart", "win32.js");
-            const { update } = require(autoStartScript);
+        const autoStartScript = join(main.filename, "..", "autoStart", "win32.js");
+        const { update } = require(autoStartScript);
 
-            // New Updater Injection
-            require.cache[autoStartScript]!.exports.update = function () {
-                patchLatest();
-                update.apply(this, arguments);
-            };
-        } else {
-            const hostUpdaterScript = join(main.filename, "..", "hostUpdater.js");
-            const { quitAndInstall } = require(hostUpdaterScript);
-
-            // Old Updater Injection
-            require.cache[hostUpdaterScript]!.exports.quitAndInstall = function () {
-                patchLatest();
-                quitAndInstall.apply(this, arguments);
-            };
-        }
+        // New Updater Injection
+        require.cache[autoStartScript]!.exports.update = function () {
+            update.apply(this, arguments);
+            patchLatest();
+        };
     } catch {
         // OpenAsar uses electrons autoUpdater on Windows
         const { quitAndInstall } = autoUpdater;
