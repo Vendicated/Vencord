@@ -65,7 +65,10 @@ if (!process.argv.includes("--vanilla")) {
         };
     }
 
-    const settings = JSON.parse(readSettings());
+    let settings;
+    try {
+        settings = JSON.parse(readSettings());
+    } catch { }
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
