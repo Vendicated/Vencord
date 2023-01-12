@@ -124,7 +124,7 @@ if (!process.argv.includes("--vanilla")) {
         });
 
         try {
-            if (settings.enableReactDevtools)
+            if (settings?.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
