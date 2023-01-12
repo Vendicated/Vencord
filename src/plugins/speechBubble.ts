@@ -158,7 +158,7 @@ export default definePlugin({
 
 
                 canvas.toBlob(blob => {
-                    const file = new File([blob!], "quote.png", { type: "image/png" });
+                    const file = new File([blob!], "speech-bubble.png", { type: "image/png" });
                     setTimeout(() => promptToUpload([file], ctx.channel, DRAFT_TYPE), 10);
                 });
             },
