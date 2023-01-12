@@ -143,10 +143,10 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     description: "Ignore certain activities (like games and actual activities) from showing up on your status. You can configure which ones are ignored from the Registered Games and Activities tabs.",
     patches: [{
-        find: ".Messages.SETTINGS_GAMES_OVERLAY_ON",
+        find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
         replacement: {
-            match: /this.renderLastPlayed\(\)]}\),this.renderOverlayToggle\(\)/,
-            replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(this.props)"
+            match: /var .=(?<props>.)\.overlay.+?"aria-label":.\..\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}}\)/,
+            replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton($<props>)"
         }
     }, {
         find: ".overlayBadge",
@@ -189,12 +189,10 @@ export default definePlugin({
         }
     },
 
-    renderToggleGameActivityButton(props: { game: { id?: string; exePath: string; } | null; }) {
-        if (!props.game) return (null);
-
+    renderToggleGameActivityButton(props: { id?: string; exePath: string; }) {
         return (
             <ErrorBoundary noop>
-                <ToggleActivityComponent activity={{ id: props.game.id ?? props.game.exePath, type: ActivitiesTypes.Game }} />
+                <ToggleActivityComponent activity={{ id: props.id ?? props.exePath, type: ActivitiesTypes.Game }} />
             </ErrorBoundary>
         );
     },
