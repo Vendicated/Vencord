@@ -17,12 +17,11 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, FluxDispatcher, React, Tooltip } from "@webpack/common";
-import { Settings, useSettings } from "@api/settings";
 
 interface SilentTypingSettings {
     enabled: boolean;
@@ -87,11 +86,6 @@ export default definePlugin({
             description: "Show an icon for toggling the plugin",
             restartNeeded: true,
         },
-        isEnabled: {
-            type: OptionType.BOOLEAN,
-            default: true,
-            description: "Enable plugin",
-        },
     },
     commands: [{
         name: "silenttype",
@@ -112,6 +106,10 @@ export default definePlugin({
             });
         },
     }],
+
+    start() {
+        getSettings().isEnabled ??= true;
+    },
 
     async startTyping(channelId: string) {
         if (getSettings().isEnabled) return;
