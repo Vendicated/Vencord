@@ -144,6 +144,7 @@ export const Settings = makeProxy(settings);
  * @param paths An optional list of paths to whitelist for rerenders
  * @returns Settings
  */
+// TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
 export function useSettings(paths?: string[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
