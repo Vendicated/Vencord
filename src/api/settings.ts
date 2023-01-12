@@ -19,7 +19,7 @@
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
-import { OptionType } from "@utils/types";
+import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -197,4 +197,20 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             break;
         }
     }
+}
+
+export function definePluginSettings<D extends SettingsDefinition, C extends SettingsChecks<D>>(def: D, checks?: C) {
+    const definedSettings: DefinedSettings<D> = {
+        get store() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        use: settings => useSettings(
+            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+        ).plugins[definedSettings.pluginName] as any,
+        def,
+        checks: checks ?? {},
+        pluginName: "",
+    };
+    return definedSettings;
 }
