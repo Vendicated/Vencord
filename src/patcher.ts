@@ -65,7 +65,7 @@ if (!process.argv.includes("--vanilla")) {
         };
     }
 
-    let settings = {} as object;
+    let settings = {} as any;
     try {
         settings = JSON.parse(readSettings());
     } catch { }
