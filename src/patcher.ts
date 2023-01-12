@@ -65,12 +65,18 @@ if (!process.argv.includes("--vanilla")) {
         };
     }
 
+    let settings = {} as any;
+    try {
+        settings = JSON.parse(readSettings());
+    } catch { }
+
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
+                options.frame = settings.frameless;
 
                 process.env.DISCORD_PRELOAD = original;
 
@@ -118,8 +124,7 @@ if (!process.argv.includes("--vanilla")) {
         });
 
         try {
-            const settings = JSON.parse(readSettings());
-            if (settings.enableReactDevtools)
+            if (settings?.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
