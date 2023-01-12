@@ -17,29 +17,29 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { get, set } from "@api/DataStore";
+import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, FluxDispatcher, React, Tooltip } from "@webpack/common";
-import { Settings } from "@api/settings";
 
-const KEY = "SilentTyping_ENABLED";
-
-let isEnabled: boolean;
-
-let forceUpdateIcon: () => void;
+interface SilentTypingSettings {
+    enabled: boolean;
+    showIcon: boolean;
+    isEnabled: boolean;
+}
+const getSettings = () => Settings.plugins.SilentTyping as SilentTypingSettings;
 
 function SilentTypingToggle() {
-    forceUpdateIcon = useForceUpdater();
+    const { isEnabled } = useSettings(["plugins.SilentTyping.isEnabled"]).plugins.SilentTyping as SilentTypingSettings;
+    const toggle = () => getSettings().isEnabled = !getSettings().isEnabled;
 
     return (
         <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"} style={{ scale: "0.5" }}>
             {(tooltipProps: any) => (
                 <Button
                     {...tooltipProps}
-                    onClick={async () => { set(KEY, (isEnabled = !await get(KEY))); forceUpdateIcon(); }}
+                    onClick={toggle}
                     size=""
                     look={ButtonLooks.BLANK}
                     innerClassName={ButtonWrapperClasses.button}
@@ -47,8 +47,8 @@ function SilentTypingToggle() {
                 >
                     <div className={ButtonWrapperClasses.buttonWrapper}>
                         <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
-                            <path fill="currentColor" d="M528 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h480c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM128 180v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm288 0v-40c0-6.627-5.373-12-12-12H172c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h232c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12z"/>
-                            {isEnabled && <path d="M13 432L590 48" stroke="var(--status-red-500)" stroke-width="72" stroke-linecap="round"/>}
+                            <path fill="currentColor" d="M528 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h480c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM128 180v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm288 0v-40c0-6.627-5.373-12-12-12H172c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h232c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12z" />
+                            {isEnabled && <path d="M13 432L590 48" stroke="var(--status-red-500)" stroke-width="72" stroke-linecap="round" />}
                         </svg>
                     </div>
                 </Button>
@@ -71,7 +71,7 @@ export default definePlugin({
         },
         {
             find: ".activeCommandOption",
-            predicate: () => Settings.plugins.SilentTyping.showIcon,
+            predicate: () => getSettings().showIcon,
             replacement: {
                 match: /\i=\i\.activeCommand,\i=\i\.activeCommandOption,.{1,133}(.)=\[\];/,
                 replace: "$&;$1.push($self.chatBarIcon());",
@@ -100,21 +100,19 @@ export default definePlugin({
             },
         ],
         execute: async (args, ctx) => {
-            isEnabled = !!findOption(args, "value", !await get(KEY));
-            await set(KEY, isEnabled);
-            forceUpdateIcon?.();
+            getSettings().isEnabled = !!findOption(args, "value", !getSettings().isEnabled);
             sendBotMessage(ctx.channel.id, {
-                content: isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
+                content: getSettings().isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
             });
         },
     }],
 
-    async start() {
-        isEnabled = await get(KEY) ?? true;
+    start() {
+        getSettings().isEnabled ??= true;
     },
 
     async startTyping(channelId: string) {
-        if (isEnabled) return;
+        if (getSettings().isEnabled) return;
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
