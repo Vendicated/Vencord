@@ -18,9 +18,9 @@
 
 import { Settings } from "@api/settings";
 import { ErrorCard } from "@components/ErrorCard";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, Margins, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
@@ -188,7 +188,7 @@ function handleToggleSelfDeafen() {
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
 
-    speak(formatText(settings[type], UserStore.getCurrentUser().username, "general"), settings);
+    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general"), settings);
 }
 
 export default definePlugin({
@@ -284,7 +284,7 @@ export default definePlugin({
         }, []);
 
         const types = useMemo(
-            () => Object.keys(Settings.plugins.VcNarrator).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+            () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
             [],
         );
 
@@ -309,11 +309,23 @@ export default definePlugin({
                     will be replaced with the user's name (nothing if it's yourself) and the channel's name respectively
                 </Forms.FormText>
                 {hasEnglishVoices && (
-                    <Flex className={Margins.marginTop20}>
-                        {types.map(t => (
-                            <Button key={t} onClick={() => playSample(s, t)}>Test {t}</Button>
-                        ))}
-                    </Flex>
+                    <>
+                        <Forms.FormTitle className={Margins.marginTop20} tag="h3">Play Example Sounds</Forms.FormTitle>
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(4, 1fr)",
+                                gap: "1rem",
+                            }}
+                            className={"vc-narrator-buttons"}
+                        >
+                            {types.map(t => (
+                                <Button key={t} onClick={() => playSample(s, t)}>
+                                    {wordsToTitle([t])}
+                                </Button>
+                            ))}
+                        </div>
+                    </>
                 )}
                 {errorComponent}
             </Forms.FormSection>
