@@ -20,12 +20,9 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, Co
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { UploadStore, fetchUser } from "@webpack/common";
+import { promptToUpload } from '@utils/discord';
 
-
-const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
-const fetchUser = findByCodeLazy(".USER(");
-const UploadStore = findByPropsLazy("getUploads");
 
 const baseImage = makeLazy(() => loadImage("https://raw.githubusercontent.com/Rapougnac/not-useful/mistress/6wb7ea.png"));
 
@@ -159,7 +156,7 @@ export default definePlugin({
 
                 canvas.toBlob(blob => {
                     const file = new File([blob!], "speech-bubble.png", { type: "image/png" });
-                    setTimeout(() => promptToUpload([file], ctx.channel, DRAFT_TYPE), 10);
+                    promptToUpload([file], ctx.channel);
                 });
             },
         }

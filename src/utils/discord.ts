@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { Channel, Guild } from "discord-types/general";
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
@@ -29,4 +30,13 @@ export function getCurrentGuild(): Guild | undefined {
 
 export function openPrivateChannel(userId: string) {
     PrivateChannelsStore.openPrivateChannel(userId);
+}
+
+const _promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+
+
+export function promptToUpload(files: File[], channel: Channel): void {
+    // Immediately after the command finishes, Discord clears all input, including pending attachments.
+    // Thus, setTimeout is needed to make this execute after Discord cleared the input
+    setTimeout(() => _promptToUpload(files, channel, 0), 10);
 }

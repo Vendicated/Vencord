@@ -53,6 +53,7 @@ export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export const GuildChannelStore = findByPropsLazy("getChannels");
 export const ReadStateStore = findByPropsLazy("lastMessageId");
 export const PresenceStore = findByPropsLazy("setCurrentUserOnConnectionOpen");
+export const UploadStore = findByPropsLazy("getUpload");
 export let GuildStore: Stores.GuildStore;
 export let UserStore: Stores.UserStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore;
@@ -63,6 +64,9 @@ export let RelationshipStore: Stores.RelationshipStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
 };
+
+export const fetchUser = findByCodeLazy(".USER(");
+
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;
