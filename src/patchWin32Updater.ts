@@ -80,13 +80,10 @@ function patchLatest() {
 // Windows Host Updates install to a new folder app-{HOST_VERSION}, so we
 // need to reinject
 function patchUpdater() {
-    const main = require.main!;
-
     try {
-        const autoStartScript = join(main.filename, "..", "autoStart", "win32.js");
+        const autoStartScript = join(require.main!.filename, "..", "autoStart", "win32.js");
         const { update } = require(autoStartScript);
 
-        // New Updater Injection
         require.cache[autoStartScript]!.exports.update = function () {
             update.apply(this, arguments);
             patchLatest();
