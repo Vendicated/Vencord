@@ -229,16 +229,28 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
     never;
+
 type SettingsStore<D extends SettingsDefinition> = {
     [K in keyof D]: PluginSettingType<D[K]>;
 };
 
 /** An instance of defined plugin settings */
 export interface DefinedSettings<D extends SettingsDefinition = SettingsDefinition, C extends SettingsChecks<D> = {}> {
+    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<D>;
+    /**
+     * React hook for getting the settings for this plugin
+     * @param filter optional filter to avoid rerenders for irrelavent settings
+     */
     use<F extends Extract<keyof D, string>>(filter?: F[]): F extends `${any}` ? Pick<SettingsStore<D>, F> : never;
+    /** Definitions of each setting */
     def: D;
+    /** Setting methods with return values that could rely on other settings */
     checks: C;
+    /**
+     * Name of the plugin these settings belong to,
+     * will be an empty string until plugin is initialized
+     */
     pluginName: string;
 }
 
