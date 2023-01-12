@@ -292,7 +292,7 @@ export default definePlugin({
         if (!hasVoices) {
             let error = "No narrator voices found. ";
             error += navigator.platform?.toLowerCase().includes("linux")
-                ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-synthesis flag"
+                ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
                 : "Try installing some in the Narrator settings of your Operating System";
             errorComponent = <ErrorCard>{error}</ErrorCard>;
         } else if (!hasEnglishVoices) {
