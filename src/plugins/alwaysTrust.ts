@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: ".displayName=\"MaskedLinkStore\"",
             replacement: {
-                match: /\.isTrustedDomain=function\(.\){return .+?};/,
+                match: /\.isTrustedDomain=function\(.\){return.+?};/,
                 replace: ".isTrustedDomain=function(){return true};"
             }
         },
