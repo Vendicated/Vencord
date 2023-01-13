@@ -76,7 +76,7 @@ if (!process.argv.includes("--vanilla")) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
-                options.frame = settings.frameless;
+                options.frame = !settings.frameless;
 
                 process.env.DISCORD_PRELOAD = original;
 
