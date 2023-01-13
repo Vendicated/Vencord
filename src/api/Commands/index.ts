@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { makeCodeblock } from "@utils/misc";
 
 import { sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from './types';
-import { OptionType } from '../../utils/types';
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
 
 export * from "./commandHelpers";
 export * from "./types";
@@ -38,7 +38,7 @@ const ReqPlaceholder = Symbol("RequiredMessageOption") as any as Option;
  */
 export let OptionalMessageOption: Option = OptPlaceholder;
 
-export const CustomMessageOption = (name: string, description: string, required: string) =>  ({
+export const CustomMessageOption = (name: string, description: string, required: string) => ({
     name,
     displayName: name,
     type: 3,
