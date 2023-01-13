@@ -30,6 +30,8 @@ const execFile = promisify(cpExecFile);
 
 const isFlatpak = Boolean(process.env.FLATPAK_ID?.includes("discordapp") || process.env.FLATPAK_ID?.includes("Discord"));
 
+if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
+
 function git(...args: string[]) {
     const opts = { cwd: VENCORD_SRC_DIR };
 
@@ -68,7 +70,6 @@ async function build() {
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
     const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
-    if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
 
     const res = await execFile(command, args, opts);
 
