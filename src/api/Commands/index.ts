@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) exhq
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 import { makeCodeblock } from "@utils/misc";
 
 import { sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from './types';
+import { OptionType } from '../../utils/types';
 
 export * from "./commandHelpers";
 export * from "./types";
@@ -37,10 +38,10 @@ const ReqPlaceholder = Symbol("RequiredMessageOption") as any as Option;
  */
 export let OptionalMessageOption: Option = OptPlaceholder;
 
-export const CustomMessageOption = (name, type, description, required) => ({
+export const CustomMessageOption = (name: string, description: string, required: string) =>  ({
     name,
     displayName: name,
-    type,
+    type: 3,
     description,
     displayDescription: description,
     required
