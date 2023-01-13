@@ -106,6 +106,12 @@ function VencordSettings() {
                             note="Shows a toast on startup">
                             Get notified about new updates
                         </Switch>
+                        <Switch
+                            value={settings.frameless}
+                            onChange={(v: boolean) => settings.frameless = v}
+                            note="Requires a full restart">
+                            Disable the window frame
+                        </Switch>
                     </React.Fragment>
                 )}
 
