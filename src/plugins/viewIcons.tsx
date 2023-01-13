@@ -63,7 +63,7 @@ export default new class ViewIcons implements PluginDef {
                 replace: (_, src) => `{src:${src},onClick:()=>${OPEN_URL}${src}),avatarDecoration`
             }
         }, {
-            find: "().popoutNoBannerPremium",
+            find: ".popoutNoBannerPremium",
             replacement: {
                 match: /style:.{0,10}\{\},(.{1,2})\)/,
                 replace: (m, style) =>

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,23 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "MessageAccessoriesAPI",
-    description: "API to add message accessories.",
-    authors: [Devs.Cyn],
+    name: "AlwaysTrust",
+    description: "Removes the annoying untrusted domain and suspicious file popup",
+    authors: [Devs.zt],
     patches: [
         {
-            find: "_messageAttachmentToEmbedMedia",
+            find: ".displayName=\"MaskedLinkStore\"",
             replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
-            },
+                match: /\.isTrustedDomain=function\(.\){return.+?};/,
+                replace: ".isTrustedDomain=function(){return true};"
+            }
         },
-    ],
+        {
+            find: "\"github.com\":new RegExp(\"\\\\/releases\\\\S*\\\\/download\"),",
+            replacement: {
+                match: /const o=JSON.parse\('\[.+?'\)/,
+                replace: "const o=[]"
+            }
+        }
+    ]
 });
