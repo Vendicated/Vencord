@@ -242,7 +242,7 @@ export interface DefinedSettings<D extends SettingsDefinition = SettingsDefiniti
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelavent settings
      */
-    use<F extends Extract<keyof D, string>>(filter?: F[]): F extends `${any}` ? Pick<SettingsStore<D>, F> : never;
+    use<F extends Extract<keyof D, string>>(filter?: F[]): Pick<SettingsStore<D>, F>;
     /** Definitions of each setting */
     def: D;
     /** Setting methods with return values that could rely on other settings */
