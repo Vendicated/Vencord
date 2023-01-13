@@ -20,12 +20,6 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-interface SpoilerEvent {
-    ctrlKey: boolean;
-    shiftKey: boolean;
-    target: HTMLSpanElement;
-}
-
 const SpoilerClasses = findByPropsLazy("spoilerText");
 const MessagesClasses = findByPropsLazy("messagesWrapper", "messages");
 
@@ -39,12 +33,12 @@ export default definePlugin({
             find: ".revealSpoiler=function",
             replacement: {
                 match: /\.revealSpoiler=function\((.{1,2})\){/,
-                replace: ".revealSpoiler=function($1){Vencord.Plugins.plugins.RevealAllSpoilers.reveal($1);"
+                replace: ".revealSpoiler=function($1){$self.reveal($1);"
             }
         }
     ],
 
-    reveal(event: SpoilerEvent) {
+    reveal(event: MouseEvent) {
         const { ctrlKey, shiftKey, target } = event;
 
         if (!ctrlKey) { return; }
@@ -54,10 +48,10 @@ export default definePlugin({
 
         const parent = shiftKey
             ? document.querySelector(`div.${messagesWrapper}`)
-            : target.parentElement;
+            : (target as HTMLSpanElement).parentElement;
 
         for (const spoiler of parent!.querySelectorAll(`span.${spoilerText}.${hidden}`)) {
-            (spoiler as HTMLElement).click();
+            (spoiler as HTMLSpanElement).click();
         }
     }
 
