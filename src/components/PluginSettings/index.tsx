@@ -152,14 +152,11 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 onChange={toggleEnabled}
                 disabled={disabled}
                 value={isEnabled()}
-                note={<Text className={cl("note")} variant="text-md/normal">{plugin.description}</Text>}
+                note={<Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>}
                 hideBorder={true}
             >
                 <Flex className={cl("flex")}>
-                    <Text
-                        variant="text-md/bold"
-                        className={cl("name")}
-                    >
+                    <Text variant="text-md/bold" className={cl("name")}>
                         {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
                     </Text>
                     <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
