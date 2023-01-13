@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
@@ -35,6 +35,19 @@ export default definePlugin({
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
+    options: {
+        enableDeleteOnClick: {
+            type: OptionType.BOOLEAN,
+            description: "Enable delete on click",
+            default: true
+        },
+        enableDoubleClickToEdit: {
+            type: OptionType.BOOLEAN,
+            description: "Enable double click to edit",
+            default: true
+        }
+    },
+
     start() {
         const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
         const PermissionStore = findByPropsLazy("can", "initialize");
@@ -47,11 +60,11 @@ export default definePlugin({
         this.onClick = addClickListener((msg, chan, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
-                if (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id)) {
+                if (Vencord.Settings.plugins.MessageClickActions.enableDoubleClickToEdit && (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id))) {
                     MessageActions.startEditMessage(chan.id, msg.id, msg.content);
                     event.preventDefault();
                 }
-            } else if (isMe || PermissionStore.can(Permissions.MANAGE_MESSAGES, chan)) {
+            } else if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick && (isMe || PermissionStore.can(Permissions.MANAGE_MESSAGES, chan))) {
                 MessageActions.deleteMessage(chan.id, msg.id);
                 event.preventDefault();
             }
