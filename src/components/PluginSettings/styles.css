@@ -31,8 +31,8 @@
     height: 100%;
     padding: 10px;
     width: 100%;
-    transition: box-shadow .1s ease-out, transform .1s ease-out, background .1s ease-out, opacity .1s ease-in, -webkit-box-shadow .1s ease-out, -webkit-transform .1s ease-out;
-    -webkit-transition: background .1s ease-out, opacity .1s ease-in, -webkit-box-shadow .1s ease-out, -webkit-transform .1s ease-out;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
 }
 
 .vc-plugins-card:hover {
@@ -73,7 +73,7 @@
 }
 
 .vc-plugins-note {
-    height: 40px;
+    height: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
