@@ -17,22 +17,29 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Settings, useSettings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, FluxDispatcher, React, Tooltip } from "@webpack/common";
 
-interface SilentTypingSettings {
-    enabled: boolean;
-    showIcon: boolean;
-    isEnabled: boolean;
-}
-const getSettings = () => Settings.plugins.SilentTyping as SilentTypingSettings;
+const settings = definePluginSettings({
+    showIcon: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show an icon for toggling the plugin",
+        restartNeeded: true,
+    },
+    isEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality",
+        default: true,
+    }
+});
 
 function SilentTypingToggle() {
-    const { isEnabled } = useSettings(["plugins.SilentTyping.isEnabled"]).plugins.SilentTyping as SilentTypingSettings;
-    const toggle = () => getSettings().isEnabled = !getSettings().isEnabled;
+    const { isEnabled } = settings.use(["isEnabled"]);
+    const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
 
     return (
         <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"}>
@@ -73,7 +80,7 @@ export default definePlugin({
         },
         {
             find: ".activeCommandOption",
-            predicate: () => getSettings().showIcon,
+            predicate: () => settings.store.showIcon,
             replacement: {
                 match: /\i=\i\.activeCommand,\i=\i\.activeCommandOption,.{1,133}(.)=\[\];/,
                 replace: "$&;$1.push($self.chatBarIcon());",
@@ -81,14 +88,6 @@ export default definePlugin({
         },
     ],
     dependencies: ["CommandsAPI"],
-    options: {
-        showIcon: {
-            type: OptionType.BOOLEAN,
-            default: false,
-            description: "Show an icon for toggling the plugin",
-            restartNeeded: true,
-        },
-    },
     commands: [{
         name: "silenttype",
         description: "Toggle whether you're hiding that you're typing or not.",
@@ -102,19 +101,15 @@ export default definePlugin({
             },
         ],
         execute: async (args, ctx) => {
-            getSettings().isEnabled = !!findOption(args, "value", !getSettings().isEnabled);
+            settings.store.isEnabled = !!findOption(args, "value", !settings.store.isEnabled);
             sendBotMessage(ctx.channel.id, {
-                content: getSettings().isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
+                content: settings.store.isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
             });
         },
     }],
 
-    start() {
-        getSettings().isEnabled ??= true;
-    },
-
     async startTyping(channelId: string) {
-        if (getSettings().isEnabled) return;
+        if (settings.store.isEnabled) return;
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
