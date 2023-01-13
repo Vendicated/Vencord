@@ -18,10 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { waitFor } from "@webpack";
-
-let GuildStore;
-waitFor(["getGuild"], m => GuildStore = m);
+import { GuildStore } from "@webpack/common";
 
 export default definePlugin({
     name: "ForceOwnerCrown",

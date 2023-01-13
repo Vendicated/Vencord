@@ -39,19 +39,15 @@ export default definePlugin({
             // e.detail since instead of the event they pass the channel.
             // do this timer workaround instead
             replacement: [
-                // voice channels
+                // voice/stage channels
                 {
-                    match: /onClick:(.*)function\(\)\{(e\.handleClick.+?)}/g,
-                    replace: "onClick:$1function(){Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{$2}, e)}",
+                    match: /onClick:function\(\)\{(e\.handleClick.+?)}/g,
+                    replace: "onClick:function(){Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{$1},e)}",
                 },
-                // stage channels
-                {
-                    match: /onClick:(.{0,15})this\.handleClick,/g,
-                    replace: "onClick:$1(...args)=>Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{this.handleClick(...args);}, args[0]),",
-                }
             ],
         },
         {
+            // channel mentions
             find: 'className:"channelMention",iconType:(',
             replacement: {
                 match: /onClick:(.{1,3}),/,
@@ -61,8 +57,7 @@ export default definePlugin({
     ],
 
     schedule(cb: () => void, e: any) {
-        // support from stage and voice channels patch
-        const id = e?.id ?? e.props.channel.id as string;
+        const id = e.props.channel.id as string;
         if (SelectedChannelStore.getVoiceChannelId() === id) {
             cb();
             return;
