@@ -21,7 +21,7 @@ import { hljs } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { HighlighterProps } from "../components/Highlighter";
-import { HljsSetting, ShikiSettings } from "../types";
+import { HljsSetting } from "../types";
 
 export const cl = classNameFactory("shiki-");
 
@@ -30,7 +30,7 @@ export const shouldUseHljs = ({
     tryHljs,
 }: {
     lang: HighlighterProps["lang"],
-    tryHljs: ShikiSettings["tryHljs"],
+    tryHljs: HljsSetting,
 }) => {
     const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
@@ -45,7 +45,6 @@ export const shouldUseHljs = ({
             return !langName && !!hljsLang;
         case HljsSetting.Never:
             return false;
+        default: return false;
     }
-
-    return false;
 };

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionBase } from "@utils/types";
+import { DefinedSettings, PluginOptionBase } from "@utils/types";
 
 export interface ISettingElementProps<T extends PluginOptionBase> {
     option: T;
@@ -27,6 +27,7 @@ export interface ISettingElementProps<T extends PluginOptionBase> {
     };
     id: string;
     onError(hasError: boolean): void;
+    definedSettings?: DefinedSettings;
 }
 
 export * from "./BadgeComponent";

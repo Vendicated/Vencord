@@ -60,7 +60,16 @@ for (const p of pluginsValues) {
     });
 }
 
-for (const p of pluginsValues)
+for (const p of pluginsValues) {
+    if (p.settings) {
+        p.settings.pluginName = p.name;
+        p.options ??= {};
+        for (const [name, def] of Object.entries(p.settings.def)) {
+            const checks = p.settings.checks?.[name];
+            p.options[name] = { ...def, ...checks };
+        }
+    }
+
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
@@ -69,6 +78,7 @@ for (const p of pluginsValues)
             patches.push(patch);
         }
     }
+}
 
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
     for (const name in Plugins)

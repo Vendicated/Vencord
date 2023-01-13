@@ -21,7 +21,7 @@ import { Forms, React, Select } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
 
-export function SettingBooleanComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
+export function SettingBooleanComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
 
     const [state, setState] = React.useState(def ?? false);
@@ -37,7 +37,7 @@ export function SettingBooleanComponent({ option, pluginSettings, id, onChange, 
     ];
 
     function handleChange(newValue: boolean): void {
-        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
@@ -51,7 +51,7 @@ export function SettingBooleanComponent({ option, pluginSettings, id, onChange, 
         <Forms.FormSection>
             <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <Select
-                isDisabled={option.disabled?.() ?? false}
+                isDisabled={option.disabled?.call(definedSettings) ?? false}
                 options={options}
                 placeholder={option.placeholder ?? "Select an option"}
                 maxVisibleItems={5}

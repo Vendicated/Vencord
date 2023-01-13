@@ -21,7 +21,7 @@ import { Forms, React, Select } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
 
-export function SettingSelectComponent({ option, pluginSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
+export function SettingSelectComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
 
     const [state, setState] = React.useState<any>(def ?? null);
@@ -32,7 +32,7 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
     }, [error]);
 
     function handleChange(newValue) {
-        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
@@ -45,7 +45,7 @@ export function SettingSelectComponent({ option, pluginSettings, onChange, onErr
         <Forms.FormSection>
             <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <Select
-                isDisabled={option.disabled?.() ?? false}
+                isDisabled={option.disabled?.call(definedSettings) ?? false}
                 options={option.options}
                 placeholder={option.placeholder ?? "Select an option"}
                 maxVisibleItems={5}
