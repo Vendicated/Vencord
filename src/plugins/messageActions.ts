@@ -39,14 +39,12 @@ export default definePlugin({
         enableDeleteOnClick: {
             type: OptionType.BOOLEAN,
             description: "Enable delete on click",
-            default: true,
-            restartNeeded: true
+            default: true
         },
         enableDoubleClickToEdit: {
             type: OptionType.BOOLEAN,
             description: "Enable double click to edit",
-            default: true,
-            restartNeeded: true
+            default: true
         }
     },
 
@@ -56,10 +54,8 @@ export default definePlugin({
         const Permissions = findLazy(m => typeof m.MANAGE_MESSAGES === "bigint");
         const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 
-        if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick) {
-            document.addEventListener("keydown", keydown);
-            document.addEventListener("keyup", keyup);
-        }
+        document.addEventListener("keydown", keydown);
+        document.addEventListener("keyup", keyup);
 
         this.onClick = addClickListener((msg, chan, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
@@ -77,10 +73,7 @@ export default definePlugin({
 
     stop() {
         removeClickListener(this.onClick);
-
-        if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick) {
-            document.removeEventListener("keydown", keydown);
-            document.removeEventListener("keyup", keyup);
-        }
+        document.removeEventListener("keydown", keydown);
+        document.removeEventListener("keyup", keyup);
     }
 });
