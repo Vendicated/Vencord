@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022-2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import { Settings } from "@api/settings";
 import { useAwaiter } from "@utils/misc";
 import { UserStore } from "@webpack/common";
 
-import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
+import { findPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
@@ -45,7 +45,7 @@ function ProfilePronouns(
         leProps: UserProfilePronounsProps;
     }
 ) {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(userId), {
+    const [result, , isPending] = useAwaiter(() => findPronouns(userId), {
         fallbackValue: null,
         onError: e => console.error("Fetching pronouns failed: ", e),
     });

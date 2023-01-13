@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022-2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 
 import { PronounsFormat } from ".";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
+
+
+let pronounDBStore: DataStore.UseStore | undefined;
+
+function getPronounDbStore(): DataStore.UseStore {
+    if (!pronounDBStore)
+        pronounDBStore = DataStore.createStore("VencordPronounData", "LocalPronounDBOverrides");
+    return pronounDBStore;
+}
 
 // A map of cached pronouns so the same request isn't sent twice
 const cache: Record<string, PronounCode> = {};
@@ -38,6 +48,26 @@ const bulkFetch = debounce(async () => {
         delete requestQueue[id];
     }
 });
+
+// Find the pronouns for a discord id, first looking for local override then fetching pronoundb.
+export async function findPronouns(id: string): Promise<PronounCode> {
+    return (await getLocalPronounOverride(id)) ?? await fetchPronouns(id);
+}
+
+export function setLocalPronounOverride(id: string, newOverride: PronounCode | null): Promise<void> {
+    if (newOverride == null) {
+        return DataStore.del(id, getPronounDbStore());
+    } else {
+        return DataStore.set(id, newOverride, getPronounDbStore());
+    }
+}
+
+export async function getLocalPronounOverride(id: string): Promise<PronounCode | null> {
+    const localValue = await DataStore.get(id, getPronounDbStore());
+    if (localValue in PronounMapping)
+        return localValue as PronounCode;
+    return null;
+}
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
 export function fetchPronouns(id: string): Promise<PronounCode> {
