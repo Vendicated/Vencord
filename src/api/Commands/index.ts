@@ -36,6 +36,16 @@ const ReqPlaceholder = Symbol("RequiredMessageOption") as any as Option;
  * @see {@link RequiredMessageOption}
  */
 export let OptionalMessageOption: Option = OptPlaceholder;
+
+export const CustomMessageOption = (name, type, description, required) => ({
+    name,
+    displayName: name,
+    type,
+    description,
+    displayDescription: description,
+    required
+});
+
 /**
  * Required message option named "message" you can use in commands.
  * Used in "me"
