@@ -92,5 +92,6 @@ execFileSync(installerBin, {
     env: {
         ...process.env,
         VENCORD_USER_DATA_DIR: DIST_DIR,
+        VENCORD_DEV_INSTALL: "1"
     }
 });
