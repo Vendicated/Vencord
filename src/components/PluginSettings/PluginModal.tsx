@@ -144,6 +144,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         onChange={onChange}
                         onError={onError}
                         pluginSettings={pluginSettings}
+                        definedSettings={plugin.settings}
                     />
                 );
             });
