@@ -70,7 +70,7 @@ async function ensureBinary() {
     writeFileSync(ETAG_FILE, newEtag);
 
     if (process.platform === "darwin") {
-        const zip = await res.arrayBuffer();
+        const zip = new Uint8Array(await res.arrayBuffer());
 
         const ff = await import("fflate");
         const INSTALLER_PATH = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
@@ -113,3 +113,5 @@ execFileSync(installerBin, {
         VENCORD_DEV_INSTALL: "1"
     }
 });
+
+Buffer.from("").buffer;
