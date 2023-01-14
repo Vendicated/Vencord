@@ -21,13 +21,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ButtonLooks, ChannelStore, FluxDispatcher, Tooltip } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, Tooltip } from "@webpack/common";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
-
-const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");
 
 let steggo: any;
 

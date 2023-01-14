@@ -79,6 +79,7 @@ export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.ComponentType<React.PropsWithRef<any>>;
+export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
