@@ -34,11 +34,13 @@ import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Switch, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Forms, Margins, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
 const cl = classNameFactory("vc-plugins-");
+
+import { Switch } from "@components/Switch";
 
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
@@ -148,24 +150,22 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
 
     return (
         <Flex className={cl("card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <Switch
-                onChange={toggleEnabled}
-                disabled={disabled}
-                value={isEnabled()}
-                note={<Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>}
-                hideBorder={true}
-            >
-                <Flex className={cl("flex")}>
-                    <Text variant="text-md/bold" className={cl("name")}>
-                        {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
-                    </Text>
-                    <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
-                        {plugin.options
-                            ? <CogWheel />
-                            : <InfoIcon width="24" height="24" />}
-                    </button>
-                </Flex>
-            </Switch>
+            <Flex className={cl("flex")}>
+                <Text variant="text-md/bold" className={cl("name")}>
+                    {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
+                </Text>
+                <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
+                    {plugin.options
+                        ? <CogWheel />
+                        : <InfoIcon width="24" height="24" />}
+                </button>
+                <Switch
+                    checked={isEnabled()}
+                    onChange={toggleEnabled}
+                    disabled={disabled}
+                />
+            </Flex>
+            <Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>
         </Flex>
     );
 }
