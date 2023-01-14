@@ -29,7 +29,7 @@
     border-radius: 8px;
     display: block;
     height: 100%;
-    padding: 10px;
+    padding: 12px;
     width: 100%;
     transition: 0.1s ease-out;
     transition-property: box-shadow, transform, background, opacity;
@@ -39,6 +39,16 @@
     background-color: var(--background-tertiary);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
+}
+
+.vc-plugins-card-header {
+    margin-top: auto;
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    height: 2rem;
+    align-items: center;
+    gap: 8px;
 }
 
 .vc-plugins-info-button {
@@ -90,14 +100,6 @@
     flex-grow: 1;
     gap: 8px;
     cursor: "default";
-}
-
-.vc-plugins-flex {
-    margin-top: auto;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    gap: 8px;
 }
 
 .vc-plugins-dep-name {

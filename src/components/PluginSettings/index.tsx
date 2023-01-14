@@ -150,7 +150,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
 
     return (
         <Flex className={cl("card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <Flex className={cl("flex")}>
+            <div className={cl("card-header")}>
                 <Text variant="text-md/bold" className={cl("name")}>
                     {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
                 </Text>
@@ -164,9 +164,9 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                     onChange={toggleEnabled}
                     disabled={disabled}
                 />
-            </Flex>
+            </div>
             <Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>
-        </Flex>
+        </Flex >
     );
 }
 
