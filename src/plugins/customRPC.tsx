@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -99,17 +99,33 @@ async function setRpc() {
             large_image: await getApplicationAsset(Settings.plugins.customRPC.imageBig),
             large_text: Settings.plugins.customRPC.imageBigTooltip
         };
-        if (Settings.plugins.customRPC.imageSmall) {
-            activity.assets.small_image = await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
-            activity.assets.small_text = Settings.plugins.customRPC.imageSmallTooltip;
+    }
+
+    if (Settings.plugins.customRPC.imageSmall) {
+        if (!activity.assets) {
+            activity.assets = {};
         }
+        activity.assets.small_image = await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
+        activity.assets.small_text = Settings.plugins.customRPC.imageSmallTooltip;
     }
 
 
-    for (const k of Object.keys(activity)) { // I'll make this not shit eventually.
+    for (const k of Object.keys(activity)) {
         const v = activity[k];
-        if (["", null, undefined, [], {}].includes(v)) {
+        if (typeof v === "string") {
+            if (v.length === 0) {
+                delete activity[k];
+            }
+        } else if (typeof v === null || typeof v === undefined) {
             delete activity[k];
+        } else {
+            // Assuming it's either an array or an object.
+            // Should be safe, considering it's only checking
+            // the Activity object, and it doesn't have any other
+            // type other than object (array :husk: + object), string, or null/undefined.
+            if (v.length === 0) {
+                delete activity[k];
+            }
         }
     }
 
@@ -129,7 +145,7 @@ export default definePlugin({
     start: function () {
         setRpc();
     },
-    options: {
+    settings: definePluginSettings({
         appID: {
             type: OptionType.STRING,
             description: "The ID of the application for the rich presence.",
@@ -200,7 +216,7 @@ export default definePlugin({
             description: "The URL for the second button",
             onChange: setRpc
         }
-    },
+    }),
     settingsAboutComponent: () => (
         <>
             <Forms.FormTitle tag="h1">NOTE:</Forms.FormTitle>
