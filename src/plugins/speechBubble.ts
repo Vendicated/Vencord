@@ -18,16 +18,17 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
+import { promptToUpload } from "@utils/discord";
 import { makeLazy } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { UploadStore, fetchUser } from "@webpack/common";
-import { promptToUpload } from '@utils/discord';
+import { fetchUser, UploadStore } from "@webpack/common";
 
 
 const baseImage = makeLazy(() => loadImage("https://raw.githubusercontent.com/Rapougnac/not-useful/mistress/6wb7ea.png"));
 
-const DRAFT_TYPE = 0;
 
+// Copied partially from petpet
+const DRAFT_TYPE = 0;
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -128,23 +129,23 @@ export default definePlugin({
                     return;
                 }
 
-                const avatar = await loadImage(url);
-                const image = await baseImage();
+                const image = await loadImage(url);
+                const mask = await baseImage();
 
-                const maskRatio = calculateAspectRatioFit(image.width, image.height, resolution, resolution);
 
                 const canvas = document.createElement("canvas");
-                if (resolution < avatar.width || resolution < avatar.height) {
-                    canvas.width = avatar.width;
-                    canvas.height = avatar.height;
+                if (resolution < image.width || resolution < image.height) {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
                 } else {
                     canvas.width = canvas.height = resolution;
                 }
+
+                const maskRatio = calculateAspectRatioFit(mask.width, mask.height, canvas.width, canvas.height);
                 const context = canvas.getContext("2d")!;
 
-
-                context.drawImage(avatar, 0, 0, canvas.width, canvas.height);
-                context.drawImage(image, 0, 0, canvas.width, Math.round(maskRatio.height / 1.5));
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                context.drawImage(mask, 0, 0, canvas.width, maskRatio.height / 1.5);
 
                 if (text !== "") {
                     context.fillStyle = "#FFFFFF";
