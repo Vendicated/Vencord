@@ -86,6 +86,7 @@ async function ensureBinary() {
         writeFileSync(outputFile, bytes, { mode: 0o755 });
 
         console.log("Overriding security policy for installer binary (this is required to run it)");
+        console.log("xattr might error, that's okay");
 
         const logAndRun = cmd => {
             console.log("Running", cmd);
