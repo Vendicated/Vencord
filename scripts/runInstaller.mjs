@@ -113,5 +113,3 @@ execFileSync(installerBin, {
         VENCORD_DEV_INSTALL: "1"
     }
 });
-
-Buffer.from("").buffer;
