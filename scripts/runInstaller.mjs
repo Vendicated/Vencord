@@ -48,7 +48,7 @@ async function ensureBinary() {
 
     mkdirSync(FILE_DIR, { recursive: true });
 
-    const installerFile = join(FILE_DIR, filename);
+    let installerFile = join(FILE_DIR, filename);
     const etag = existsSync(installerFile) && existsSync(ETAG_FILE) ? readFileSync(ETAG_FILE, "utf-8") : null;
 
     const res = await fetch(BASE_URL + filename, {
@@ -70,6 +70,7 @@ async function ensureBinary() {
     writeFileSync(ETAG_FILE, newEtag);
 
     if (process.platform === "darwin") {
+        installerFile = join(FILE_DIR, "VencordInstaller");
         const zip = new Uint8Array(await res.arrayBuffer());
 
         const ff = await import("fflate");
