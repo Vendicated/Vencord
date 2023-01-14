@@ -24,6 +24,7 @@ import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
+const INSTALLER_PATH_DARWIN = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FILE_DIR = join(BASE_DIR, "dist", "Installer");
@@ -49,9 +50,13 @@ async function ensureBinary() {
     mkdirSync(FILE_DIR, { recursive: true });
 
     const downloadName = join(FILE_DIR, filename);
-    const outputFile = process.platform === "darwin" ? join(FILE_DIR, "VencordInstaller") : downloadName;
+    const outputFile = process.platform === "darwin"
+        ? join(FILE_DIR, "VencordInstaller")
+        : downloadName;
 
-    const etag = existsSync(outputFile) && existsSync(ETAG_FILE) ? readFileSync(ETAG_FILE, "utf-8") : null;
+    const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
+        ? readFileSync(ETAG_FILE, "utf-8")
+        : null;
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
@@ -59,27 +64,27 @@ async function ensureBinary() {
             "If-None-Match": etag
         }
     });
+
     if (res.status === 304) {
         console.log("Up to date, not redownloading!");
         return outputFile;
     }
-
-    if (!res.ok) {
+    if (!res.ok)
         throw new Error(`Failed to download installer: ${res.status} ${res.statusText}`);
-    }
 
-    const newEtag = res.headers.get("etag");
-    writeFileSync(ETAG_FILE, newEtag);
+    writeFileSync(ETAG_FILE, res.headers.get("etag"));
 
     if (process.platform === "darwin") {
+        console.log("Unzipping...");
         const zip = new Uint8Array(await res.arrayBuffer());
 
         const ff = await import("fflate");
-        const INSTALLER_PATH = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
-        const bytes = ff.unzipSync(zip, { filter: f => f.name === INSTALLER_PATH })[INSTALLER_PATH];
+        const bytes = ff.unzipSync(zip, {
+            filter: f => f.name === INSTALLER_PATH_DARWIN
+        })[INSTALLER_PATH_DARWIN];
+
         writeFileSync(outputFile, bytes, { mode: 0o755 });
 
-        console.log("Downloaded and extracted installer");
         console.log("Overriding security policy for installer binary (this is required to run it)");
 
         const logAndRun = cmd => {
@@ -105,9 +110,10 @@ async function ensureBinary() {
 }
 
 
-console.log("Now running Installer...");
 
 const installerBin = await ensureBinary();
+
+console.log("Now running Installer...");
 
 execFileSync(installerBin, {
     stdio: "inherit",
