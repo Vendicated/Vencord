@@ -25,8 +25,8 @@ import { fileURLToPath } from "url";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
 
-const DIST_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
-const FILE_DIR = join(DIST_DIR, "dist", "Installer");
+const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
+const FILE_DIR = join(BASE_DIR, "dist", "Installer");
 const ETAG_FILE = join(FILE_DIR, "etag.txt");
 
 function getFilename() {
@@ -83,7 +83,11 @@ async function ensureBinary() {
 
         const logAndRun = cmd => {
             console.log("Running", cmd);
-            execSync(cmd);
+            try {
+                execSync(cmd);
+            } catch (e) {
+                console.error("Command failed - This is probably not an issue:\n " + e?.message);
+            }
         };
         logAndRun(`sudo spctl --add '${installerFile}' --label "Vencord Installer"`);
         logAndRun(`sudo xattr -d com.apple.quarantine '${installerFile}'`);
@@ -110,7 +114,7 @@ execFileSync(installerBin, {
     stdio: "inherit",
     env: {
         ...process.env,
-        VENCORD_USER_DATA_DIR: DIST_DIR,
+        VENCORD_USER_DATA_DIR: BASE_DIR,
         VENCORD_DEV_INSTALL: "1"
     }
 });
