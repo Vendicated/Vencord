@@ -72,7 +72,6 @@ async function ensureBinary() {
     writeFileSync(ETAG_FILE, newEtag);
 
     if (process.platform === "darwin") {
-        outputFile = join(FILE_DIR, "VencordInstaller");
         const zip = new Uint8Array(await res.arrayBuffer());
 
         const ff = await import("fflate");
