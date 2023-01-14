@@ -63,8 +63,8 @@ interface Activity {
 
 async function setRpc() {
     const activity: Activity = {
-        application_id: Settings.plugins.customRPC.appID ?? "0",
-        name: Settings.plugins.customRPC.appName ?? "Discord",
+        application_id: Settings.plugins.customRPC.appID || "0",
+        name: Settings.plugins.customRPC.appName || "Discord",
         state: Settings.plugins.customRPC.state,
         details: Settings.plugins.customRPC.details,
         type: 0,
@@ -102,49 +102,32 @@ async function setRpc() {
     }
 
     if (Settings.plugins.customRPC.imageSmall) {
-        if (!activity.assets) {
-            activity.assets = {};
-        }
+        activity.assets ??= {};
         activity.assets.small_image = await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
         activity.assets.small_text = Settings.plugins.customRPC.imageSmallTooltip;
     }
 
 
-    for (const k of Object.keys(activity)) {
+    for (const k in activity) {
         const v = activity[k];
-        if (typeof v === "string") {
-            if (v.length === 0) {
-                delete activity[k];
-            }
-        } else if (typeof v === null || typeof v === undefined) {
+        if (!v || v.length === 0)
             delete activity[k];
-        } else {
-            // Assuming it's either an array or an object.
-            // Should be safe, considering it's only checking
-            // the Activity object, and it doesn't have any other
-            // type other than object (array :husk: + object), string, or null/undefined.
-            if (v.length === 0) {
-                delete activity[k];
-            }
-        }
     }
 
-
-    FluxDispatcher.dispatch(
-        {
-            type: "LOCAL_ACTIVITY_UPDATE",
-            activity: activity
-        }
-    );
+    FluxDispatcher.dispatch({
+        type: "LOCAL_ACTIVITY_UPDATE",
+        activity
+    });
 }
 
 export default definePlugin({
     name: "customRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain],
-    start: function () {
+    start() {
         setRpc();
     },
+
     settings: definePluginSettings({
         appID: {
             type: OptionType.STRING,
@@ -217,6 +200,7 @@ export default definePlugin({
             onChange: setRpc
         }
     }),
+
     settingsAboutComponent: () => (
         <>
             <Forms.FormTitle tag="h1">NOTE:</Forms.FormTitle>
