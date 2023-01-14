@@ -53,14 +53,6 @@ export default definePlugin({
             }
         },
         {
-            // This is where the logic that chooses the icon is, we override it to be a locked voice channel if it's hidden
-            find: ".rulesChannelId))",
-            replacement: {
-                match: /(\w+)\.locked(.*?)switch\((\w+)\.type\)({case \w+\.\w+\.GUILD_ANNOUNCEMENT)/g,
-                replace: "Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($3)||$1.locked$2switch($3._isHiddenChannel?2:$3.type)$4"
-            }
-        },
-        {
             // inside the onMouseClick handler, we check if the channel is hidden and open the modal if it is
             find: ".handleThreadsPopoutClose();",
             replacement: {
