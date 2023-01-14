@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { execFileSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { Readable } from "stream";
@@ -34,8 +34,7 @@ function getFilename() {
         case "win32":
             return "VencordInstaller.exe";
         case "darwin":
-            // return "VencordInstaller.MacOS.zip";
-            throw new Error("PR Mac support if you want it. Or use a better OS that doesn't suck");
+            return "VencordInstaller.MacOS.zip";
         case "linux":
             return "VencordInstaller-" + (process.env.WAYLAND_DISPLAY ? "wayland" : "x11");
         default:
@@ -70,12 +69,31 @@ async function ensureBinary() {
     const newEtag = res.headers.get("etag");
     writeFileSync(ETAG_FILE, newEtag);
 
-    // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
-    const body = Readable.fromWeb(res.body);
-    await finished(body.pipe(createWriteStream(installerFile, {
-        mode: 0o755,
-        autoClose: true
-    })));
+    if (process.platform === "darwin") {
+        const zip = await res.arrayBuffer();
+
+        const ff = await import("fflate");
+        const INSTALLER_PATH = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
+        const bytes = ff.unzipSync(zip, { filter: f => f.name === INSTALLER_PATH })[INSTALLER_PATH];
+        writeFileSync(installerFile, bytes, { mode: 0o755 });
+
+        console.log("Downloaded and extracted installer");
+        console.log("Overriding security policy for installer binary (this is required to run it)");
+
+        const logAndRun = cmd => {
+            console.log("Running", cmd);
+            execSync(cmd);
+        };
+        logAndRun(`sudo spctl --add '${installerFile}' --label "Vencord Installer"`);
+        logAndRun(`sudo xattr -d com.apple.quarantine '${installerFile}'`);
+    } else {
+        // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
+        const body = Readable.fromWeb(res.body);
+        await finished(body.pipe(createWriteStream(installerFile, {
+            mode: 0o755,
+            autoClose: true
+        })));
+    }
 
     console.log("Finished downloading!");
 
