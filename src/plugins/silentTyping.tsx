@@ -88,6 +88,7 @@ export default definePlugin({
         },
     ],
     dependencies: ["CommandsAPI"],
+    settings,
     commands: [{
         name: "silenttype",
         description: "Toggle whether you're hiding that you're typing or not.",
