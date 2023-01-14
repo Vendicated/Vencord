@@ -23,7 +23,6 @@ import { showNotice } from "@api/Notices";
 import { useSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
@@ -34,7 +33,7 @@ import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Forms, Margins, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Margins, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -62,23 +61,27 @@ function showErrorToast(message: string) {
     });
 }
 
-interface ReloadRequiredCardProps extends React.HTMLProps<HTMLDivElement> {
-    plugins: string[];
-}
-
-function ReloadRequiredCard({ plugins, ...props }: ReloadRequiredCardProps) {
-    if (plugins.length === 0) return null;
-
-    const pluginPrefix = plugins.length === 1 ? "The plugin" : "The following plugins require a reload to apply changes:";
-    const pluginSuffix = plugins.length === 1 ? " requires a reload to apply changes." : ".";
-
+function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
-        <ErrorCard {...props} className={cl("reload-card")}>
-            <span className={cl("dep-text")}>
-                {pluginPrefix} <code>{plugins.join(", ")}</code>{pluginSuffix}
-            </span>
-            <Button look={Button.Looks.INVERTED} onClick={() => location.reload()}>Reload</Button>
-        </ErrorCard>
+        <Card className={cl("info-card", { "restart-card": required })}>
+            {required ? (
+                <>
+                    <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
+                    <Forms.FormText className={cl("dep-text")}>
+                        Restart now to apply new plugins and their settings
+                    </Forms.FormText>
+                    <Button color={Button.Colors.YELLOW} onClick={() => location.reload()}>
+                        Restart
+                    </Button>
+                </>
+            ) : (
+                <>
+                    <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
+                    <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
+                    <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
+                </>
+            )}
+        </Card>
     );
 }
 
@@ -149,7 +152,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex className={cl("card")} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <Flex className={cl("card", { "card-disabled": disabled })} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div className={cl("card-header")}>
                 <Text variant="text-md/bold" className={cl("name")}>
                     {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
@@ -298,11 +301,11 @@ export default ErrorBoundary.wrap(function PluginSettings() {
 
     return (
         <Forms.FormSection>
+            <ReloadRequiredCard required={changes.hasChanges} />
+
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Filters
             </Forms.FormTitle>
-
-            <ReloadRequiredCard plugins={[...changes.getChanges()]} className={Margins.marginBottom20} />
 
             <div className={cl("filter-controls")}>
                 <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.marginBottom20} />
