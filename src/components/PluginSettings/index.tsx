@@ -27,6 +27,7 @@ import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
+import { Switch } from "@components/Switch";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
 import { classes, LazyComponent, useAwaiter } from "@utils/misc";
@@ -37,12 +38,10 @@ import { Alerts, Button, Card, Forms, Margins, Parser, React, Select, Text, Text
 
 import Plugins from "~plugins";
 
-const cl = classNameFactory("vc-plugins-");
-
-import { Switch } from "@components/Switch";
-
 import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
 
+
+const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
