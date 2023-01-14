@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./Switch.css";
+
 import { findByPropsLazy } from "@webpack";
 
 interface SwitchProps {
@@ -36,12 +38,12 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
                 opacity: disabled ? 0.3 : 1
             }}>
                 <svg
-                    className={SwitchClasses.slider}
+                    className={SwitchClasses.slider + " vc-switch-slider"}
                     viewBox="0 0 28 20"
                     preserveAspectRatio="xMinYMid meet"
                     aria-hidden="true"
                     style={{
-                        left: checked ? "12px" : "-3px",
+                        transform: checked ? "translateX(12px)" : "translateX(-3px)",
                     }}
                 >
                     <rect fill="white" x="4" y="0" height="20" width="20" rx="10" />
