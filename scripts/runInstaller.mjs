@@ -48,8 +48,10 @@ async function ensureBinary() {
 
     mkdirSync(FILE_DIR, { recursive: true });
 
-    let installerFile = join(FILE_DIR, filename);
-    const etag = existsSync(installerFile) && existsSync(ETAG_FILE) ? readFileSync(ETAG_FILE, "utf-8") : null;
+    const downloadName = join(FILE_DIR, filename);
+    const outputFile = process.platform === "darwin" ? join(FILE_DIR, "VencordInstaller") : downloadName;
+
+    const etag = existsSync(outputFile) && existsSync(ETAG_FILE) ? readFileSync(ETAG_FILE, "utf-8") : null;
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
@@ -59,7 +61,7 @@ async function ensureBinary() {
     });
     if (res.status === 304) {
         console.log("Up to date, not redownloading!");
-        return installerFile;
+        return outputFile;
     }
 
     if (!res.ok) {
@@ -70,13 +72,13 @@ async function ensureBinary() {
     writeFileSync(ETAG_FILE, newEtag);
 
     if (process.platform === "darwin") {
-        installerFile = join(FILE_DIR, "VencordInstaller");
+        outputFile = join(FILE_DIR, "VencordInstaller");
         const zip = new Uint8Array(await res.arrayBuffer());
 
         const ff = await import("fflate");
         const INSTALLER_PATH = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
         const bytes = ff.unzipSync(zip, { filter: f => f.name === INSTALLER_PATH })[INSTALLER_PATH];
-        writeFileSync(installerFile, bytes, { mode: 0o755 });
+        writeFileSync(outputFile, bytes, { mode: 0o755 });
 
         console.log("Downloaded and extracted installer");
         console.log("Overriding security policy for installer binary (this is required to run it)");
@@ -85,16 +87,14 @@ async function ensureBinary() {
             console.log("Running", cmd);
             try {
                 execSync(cmd);
-            } catch (e) {
-                console.error("Command failed - This is probably not an issue:\n " + e?.message);
-            }
+            } catch { }
         };
-        logAndRun(`sudo spctl --add '${installerFile}' --label "Vencord Installer"`);
-        logAndRun(`sudo xattr -d com.apple.quarantine '${installerFile}'`);
+        logAndRun(`sudo spctl --add '${outputFile}' --label "Vencord Installer"`);
+        logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
         const body = Readable.fromWeb(res.body);
-        await finished(body.pipe(createWriteStream(installerFile, {
+        await finished(body.pipe(createWriteStream(outputFile, {
             mode: 0o755,
             autoClose: true
         })));
@@ -102,7 +102,7 @@ async function ensureBinary() {
 
     console.log("Finished downloading!");
 
-    return installerFile;
+    return outputFile;
 }
 
 
