@@ -24,13 +24,21 @@
 }
 
 .vc-plugins-card {
-    background-color: var(--background-modifier-selected);
+    background-color: var(--background-secondary-alt);
     color: var(--interactive-active);
-    border-radius: 3px;
+    border-radius: 8px;
     display: block;
     height: 100%;
     padding: 10px;
     width: 100%;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
+}
+
+.vc-plugins-card:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
 }
 
 .vc-plugins-info-button {
@@ -39,6 +47,10 @@
     padding: 0;
     background: transparent;
     margin-right: 8px;
+}
+
+.vc-plugins-settings-button:hover {
+    color: var(--interactive-hover);
 }
 
 .vc-plugins-filter-controls {
@@ -61,7 +73,7 @@
 }
 
 .vc-plugins-note {
-    height: 40px;
+    height: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -77,6 +89,7 @@
     align-items: center;
     flex-grow: 1;
     gap: 8px;
+    cursor: "default";
 }
 
 .vc-plugins-flex {

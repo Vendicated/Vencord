@@ -81,8 +81,14 @@ export interface PluginDef {
     target?: "WEB" | "DESKTOP" | "BOTH";
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
+     * @deprecated Use `settings` instead
      */
+    // TODO: Remove when everything is migrated to `settings`
     options?: Record<string, PluginOptionsItem>;
+    /**
+     * Optionally provide settings that the user can configure in the Plugins tab of settings.
+     */
+    settings?: DefinedSettings;
     /**
      * Check that this returns true before allowing a save to complete.
      * If a string is returned, show the error to the user.
@@ -107,19 +113,25 @@ export enum OptionType {
     COMPONENT,
 }
 
-export type PluginOptionsItem =
-    | PluginOptionString
-    | PluginOptionNumber
-    | PluginOptionBoolean
-    | PluginOptionSelect
-    | PluginOptionSlider
-    | PluginOptionComponent;
+export type SettingsDefinition = Record<string, PluginSettingDef>;
+export type SettingsChecks<D extends SettingsDefinition> = {
+    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
+    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+};
 
-export interface PluginOptionBase {
+export type PluginSettingDef = (
+    | PluginSettingStringDef
+    | PluginSettingNumberDef
+    | PluginSettingBooleanDef
+    | PluginSettingSelectDef
+    | PluginSettingSliderDef
+    | PluginSettingComponentDef
+) & PluginSettingCommon;
+
+export interface PluginSettingCommon {
     description: string;
     placeholder?: string;
     onChange?(newValue: any): void;
-    disabled?(): boolean;
     restartNeeded?: boolean;
     componentProps?: Record<string, any>;
     /**
@@ -127,49 +139,47 @@ export interface PluginOptionBase {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
-
-export interface PluginOptionString extends PluginOptionBase {
-    type: OptionType.STRING;
+interface IsDisabled<D = unknown> {
+    /**
+     * Checks if this setting should be disabled
+     */
+    disabled?(this: D): boolean;
+}
+interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
      */
-    isValid?(value: string): boolean | string;
+    isValid?(this: D, value: T): boolean | string;
+}
+
+export interface PluginSettingStringDef {
+    type: OptionType.STRING;
     default?: string;
 }
-
-export interface PluginOptionNumber extends PluginOptionBase {
-    type: OptionType.NUMBER | OptionType.BIGINT;
-    /**
-     * Prevents the user from saving settings if this is false or a string
-     */
-    isValid?(value: number | BigInt): boolean | string;
+export interface PluginSettingNumberDef {
+    type: OptionType.NUMBER;
     default?: number;
 }
-
-export interface PluginOptionBoolean extends PluginOptionBase {
+export interface PluginSettingBigIntDef {
+    type: OptionType.BIGINT;
+    default?: BigInt;
+}
+export interface PluginSettingBooleanDef {
     type: OptionType.BOOLEAN;
-    /**
-     * Prevents the user from saving settings if this is false or a string
-     */
-    isValid?(value: boolean): boolean | string;
     default?: boolean;
 }
 
-export interface PluginOptionSelect extends PluginOptionBase {
+export interface PluginSettingSelectDef {
     type: OptionType.SELECT;
-    /**
-     * Prevents the user from saving settings if this is false or a string
-     */
-    isValid?(value: PluginOptionSelectOption): boolean | string;
-    options: PluginOptionSelectOption[];
+    options: readonly PluginSettingSelectOption[];
 }
-export interface PluginOptionSelectOption {
+export interface PluginSettingSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;
 }
 
-export interface PluginOptionSlider extends PluginOptionBase {
+export interface PluginSettingSliderDef {
     type: OptionType.SLIDER;
     /**
      * All the possible values in the slider. Needs at least two values.
@@ -183,10 +193,6 @@ export interface PluginOptionSlider extends PluginOptionBase {
      * If false, allow users to select values in-between your markers.
      */
     stickToMarkers?: boolean;
-    /**
-     * Prevents the user from saving settings if this is false or a string
-     */
-    isValid?(value: number): boolean | string;
 }
 
 interface IPluginOptionComponentProps {
@@ -206,12 +212,67 @@ interface IPluginOptionComponentProps {
     /**
      * The options object
      */
-    option: PluginOptionComponent;
+    option: PluginSettingComponentDef;
 }
 
-export interface PluginOptionComponent extends PluginOptionBase {
+export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
     component: (props: IPluginOptionComponentProps) => JSX.Element;
 }
 
+/** Maps a `PluginSettingDef` to its value type */
+type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
+    O extends PluginSettingNumberDef ? number :
+    O extends PluginSettingBigIntDef ? BigInt :
+    O extends PluginSettingBooleanDef ? boolean :
+    O extends PluginSettingSelectDef ? O["options"][number]["value"] :
+    O extends PluginSettingSliderDef ? number :
+    O extends PluginSettingComponentDef ? any :
+    never;
+
+type SettingsStore<D extends SettingsDefinition> = {
+    [K in keyof D]: PluginSettingType<D[K]>;
+};
+
+/** An instance of defined plugin settings */
+export interface DefinedSettings<D extends SettingsDefinition = SettingsDefinition, C extends SettingsChecks<D> = {}> {
+    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
+    store: SettingsStore<D>;
+    /**
+     * React hook for getting the settings for this plugin
+     * @param filter optional filter to avoid rerenders for irrelavent settings
+     */
+    use<F extends Extract<keyof D, string>>(filter?: F[]): Pick<SettingsStore<D>, F>;
+    /** Definitions of each setting */
+    def: D;
+    /** Setting methods with return values that could rely on other settings */
+    checks: C;
+    /**
+     * Name of the plugin these settings belong to,
+     * will be an empty string until plugin is initialized
+     */
+    pluginName: string;
+}
+
+export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
+
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
+
+/* -------------------------------------------- */
+/*             Legacy Options Types             */
+/* -------------------------------------------- */
+
+export type PluginOptionBase = PluginSettingCommon & IsDisabled;
+export type PluginOptionsItem =
+    | PluginOptionString
+    | PluginOptionNumber
+    | PluginOptionBoolean
+    | PluginOptionSelect
+    | PluginOptionSlider
+    | PluginOptionComponent;
+export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
+export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
+export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
+export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
+export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
+export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
