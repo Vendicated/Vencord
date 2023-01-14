@@ -19,7 +19,7 @@
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
 import { contextBridge, ipcRenderer, webFrame } from "electron";
-import { readFileSync } from "fs";
+import { readFileSync, watch } from "fs";
 import { join } from "path";
 
 import VencordNative from "./VencordNative";
@@ -48,6 +48,11 @@ if (location.protocol !== "data:") {
     try {
         const css = readFileSync(rendererCss, "utf-8");
         insertCss(css);
+        if (IS_DEV) {
+            watch(rendererCss, debounce(() => {
+                document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
+            }, 30));
+        }
     } catch (err) {
         if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
             throw err;
