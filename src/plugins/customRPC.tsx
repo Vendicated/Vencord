@@ -73,7 +73,7 @@ async function setRpc() {
 
     if (Settings.plugins.customRPC.startTime) {
         activity.timestamps = {
-            start: Settings.plugins.customRPC.startTime === 0 ? null : Settings.plugins.customRPC.startTime,
+            start: Settings.plugins.customRPC.startTime || null,
         };
         if (Settings.plugins.customRPC.endTime) {
             activity.timestamps.end = Settings.plugins.customRPC.endTime;
@@ -84,13 +84,13 @@ async function setRpc() {
         activity.buttons = [
             Settings.plugins.customRPC.buttonOneText,
             Settings.plugins.customRPC.buttonTwoText
-        ].filter(x => x !== undefined && x !== "");
+        ].filter(Boolean);
 
         activity.metadata = {
             button_urls: [
                 Settings.plugins.customRPC.buttonOneURL,
                 Settings.plugins.customRPC.buttonTwoURL
-            ].filter(x => x !== undefined && x !== "")
+            ].filter(Boolean)
         };
     }
 
