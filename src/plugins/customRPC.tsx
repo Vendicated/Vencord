@@ -34,10 +34,35 @@ const assetManager = mapMangledModuleLazy(
 async function getApplicationAsset(key: string): Promise<string> {
     return (await assetManager.getAsset(Settings.plugins.customRPC.appID, [key, undefined]))[0];
 }
+
+interface ActivityAssets {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+}
+
+interface Activity {
+    state: string;
+    details?: string;
+    timestamps?: {
+        start?: Number;
+        end?: Number;
+    };
+    assets?: ActivityAssets;
+    buttons?: Array<string>;
+    name: string;
+    application_id: string;
+    metadata?: {
+        button_urls?: Array<string>;
+    };
+    type: Number;
+    flags: Number;
+}
 // END
 
 async function setRpc() {
-    const activity = {
+    const activity: Activity = {
         application_id: Settings.plugins.customRPC.appID ?? "0",
         name: Settings.plugins.customRPC.appName ?? "Discord",
         state: Settings.plugins.customRPC.state,
@@ -47,23 +72,20 @@ async function setRpc() {
     };
 
     if (Settings.plugins.customRPC.startTime) {
-        // @ts-ignore silence.
         activity.timestamps = {
             start: Settings.plugins.customRPC.startTime === 0 ? null : Settings.plugins.customRPC.startTime,
         };
-        if (Settings.plugins.customRPC.endTime) { // @ts-ignore SHUT UP
+        if (Settings.plugins.customRPC.endTime) {
             activity.timestamps.end = Settings.plugins.customRPC.endTime;
         }
     }
 
     if (Settings.plugins.customRPC.buttonOneText) {
-        // @ts-ignore
         activity.buttons = [
             Settings.plugins.customRPC.buttonOneText,
             Settings.plugins.customRPC.buttonTwoText
         ].filter(x => x !== undefined && x !== "");
 
-        // @ts-ignore
         activity.metadata = {
             button_urls: [
                 Settings.plugins.customRPC.buttonOneURL,
@@ -73,31 +95,24 @@ async function setRpc() {
     }
 
     if (Settings.plugins.customRPC.imageBig) {
-        // @ts-ignore
         activity.assets = {
             large_image: await getApplicationAsset(Settings.plugins.customRPC.imageBig),
             large_text: Settings.plugins.customRPC.imageBigTooltip
         };
         if (Settings.plugins.customRPC.imageSmall) {
-            // @ts-ignore
-            activity.assets.small_image =await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
-            // @ts-ignore
+            activity.assets.small_image = await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
             activity.assets.small_text = Settings.plugins.customRPC.imageSmallTooltip;
         }
     }
 
-    console.debug("Before:", activity);
 
     for (const k of Object.keys(activity)) { // I'll make this not shit eventually.
         const v = activity[k];
-        console.debug(`${k}: ${v}`);
         if (["", null, undefined, [], {}].includes(v)) {
             delete activity[k];
-            console.debug("Deleted ", k);
         }
     }
 
-    console.debug("After:", activity);
 
     FluxDispatcher.dispatch(
         {
