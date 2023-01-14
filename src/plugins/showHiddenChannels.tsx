@@ -18,23 +18,20 @@
 
 
 import { Settings } from "@api/settings";
+import { Badge } from "@components/Badge";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
-import { Button, ChannelStore, SnowflakeUtils, Text } from "@webpack/common";
+import { Button, ChannelStore, PermissionStore, SnowflakeUtils, Text } from "@webpack/common";
 
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
 
-let can = (permission, channel) => true;
-waitFor(m => m.can && m.initialize, m => ({ can } = m));
-
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show hidden channels",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven],
     options: {
         hideUnreads: {
             description: "Hide unreads",
@@ -50,14 +47,6 @@ export default definePlugin({
             replacement: {
                 match: /renderLevel:(\w+)\.CannotShow/g,
                 replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted)?$1.Show:$1.CannotShow"
-            }
-        },
-        {
-            // This is where the logic that chooses the icon is, we override it to be a locked voice channel if it's hidden
-            find: ".rulesChannelId))",
-            replacement: {
-                match: /(\w+)\.locked(.*?)switch\((\w+)\.type\)({case \w+\.\w+\.GUILD_ANNOUNCEMENT)/g,
-                replace: "Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($3)||$1.locked$2switch($3._isHiddenChannel?2:$3.type)$4"
             }
         },
         {
@@ -92,8 +81,17 @@ export default definePlugin({
                 match: /((.)\.getGuildId\(\))(&&\(!\(.\.isThread.{1,100}\.hasRelevantUnread\()/,
                 replace: "$1&&!$2._isHiddenChannel$3"
             }
+        },
+        // Lock Icon
+        {
+            find: ".rulesChannelId))",
+            replacement: {
+                match: /(\.locked.{0,400})(switch\((\i)\.type\))/,
+                replace: "$1 if($3._isHiddenChannel)return $self.LockIcon;$2"
+            }
         }
     ],
+
     shouldShow(channel, category, isMuted) {
         if (!this.isHiddenChannel(channel)) return false;
         if (!category) return false;
@@ -101,6 +99,7 @@ export default definePlugin({
 
         return !category.isCollapsed;
     },
+
     isHiddenChannel(channel) {
         if (!channel) return false;
         if (channel.channelId)
@@ -109,9 +108,10 @@ export default definePlugin({
             return false;
 
         // check for disallowed voice channels too so that they get hidden when collapsing the category
-        channel._isHiddenChannel = !can(VIEW_CHANNEL, channel) || (channel.type === 2 && !can(CONNECT, channel));
+        channel._isHiddenChannel = !PermissionStore.can(VIEW_CHANNEL, channel) || (channel.type === 2 && !PermissionStore.can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
+
     channelSelected(channel) {
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
@@ -123,11 +123,7 @@ export default definePlugin({
                     <ModalHeader>
                         <Flex>
                             <Text variant="heading-md/bold">{channel.name}</Text>
-                            {(channel.isNSFW() && (
-                                <Text style={{ backgroundColor: "var(--status-danger)", borderRadius: "8px", paddingLeft: 4, paddingRight: 4 }} variant="heading-md/normal">
-                                    NSFW
-                                </Text>
-                            ))}
+                            {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
                         </Flex>
                     </ModalHeader>
                     <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
@@ -164,5 +160,15 @@ export default definePlugin({
             ));
         }
         return isHidden;
-    }
+    },
+
+    LockIcon: () => (
+        <svg
+            height="18"
+            width="20"
+            viewBox="0 0 24 24"
+        >
+            <path fill="var(--channel-icon)" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
+        </svg>
+    )
 });
