@@ -22,6 +22,8 @@ export function Badge({ text, color }): JSX.Element {
             backgroundColor: color,
             justifySelf: "flex-end",
             marginLeft: "auto"
-        }}>{text}</div>
+        }}>
+            {text}
+        </div>
     );
 }

@@ -30,7 +30,7 @@ export interface ISettingElementProps<T extends PluginOptionBase> {
     definedSettings?: DefinedSettings;
 }
 
-export * from "./BadgeComponent";
+export * from "../../Badge";
 export * from "./SettingBooleanComponent";
 export * from "./SettingCustomComponent";
 export * from "./SettingNumericComponent";
