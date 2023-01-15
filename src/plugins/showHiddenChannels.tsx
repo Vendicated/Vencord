@@ -25,13 +25,28 @@ import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, PermissionStore, SnowflakeUtils, Text } from "@webpack/common";
 
+enum ChannelTypes {
+    GUILD_TEXT = 0,
+    DM = 1,
+    GUILD_VOICE = 1,
+    GROUP_DM = 3,
+    GUILD_CATEGORY = 4,
+    GUILD_ANNOUNCEMENT = 5,
+    ANNOUNCEMENT_THREAD = 10,
+    PUBLIC_THREAD = 11,
+    PRIVATE_THREAD = 12,
+    GUILD_STAGE_VOICE = 13,
+    GUILD_DIRECTORY = 14,
+    GUILD_FORUM = 15
+}
+
 const CONNECT = 1048576n;
 const VIEW_CHANNEL = 1024n;
 
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show hidden channels",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nickyux],
     options: {
         hideUnreads: {
             description: "Hide unreads",
@@ -116,14 +131,18 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if (channel.type === 0 && isHidden) {
+        if ((channel.type === ChannelTypes.GUILD_TEXT || channel.type == ChannelTypes.GUILD_FORUM || channel.type == ChannelTypes.GUILD_ANNOUNCEMENT) && isHidden) {
             const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
-                        <Flex>
+                        <Flex style={{ width: "100%" }}>
                             <Text variant="heading-md/bold">{channel.name}</Text>
-                            {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
+                            <div style={{ alignSelf: "flex-end", justifyContent: "center", marginLeft: "auto", display: "flex", gap: "0.5em" }}>
+                                {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
+                                {(channel.type === ChannelTypes.GUILD_FORUM) && <Badge text="FORUM" color="var(--brand-experiment)" />}
+                                {(channel.type === ChannelTypes.GUILD_ANNOUNCEMENT) && <Badge text="ANNOUNCEMENT" color="var(--brand-experiment)" />}
+                            </div>
                         </Flex>
                     </ModalHeader>
                     <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
@@ -131,7 +150,7 @@ export default definePlugin({
                         {(channel.topic || "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Topic:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <Text variant="code">{channel.topic}</Text>
                             </>
@@ -139,7 +158,7 @@ export default definePlugin({
                         {lastMessageDate && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Last message sent:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Last Post Created:" : "Last Message Sent:"}
                                 </Text>
                                 <Text variant="code">{lastMessageDate}</Text>
                             </>
