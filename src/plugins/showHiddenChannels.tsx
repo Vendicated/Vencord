@@ -131,7 +131,7 @@ export default definePlugin({
         if (!channel) return false;
         const isHidden = this.isHiddenChannel(channel);
         // check for type again, otherwise it would show it for hidden stage channels
-        if ((channel.type === ChannelTypes.GUILD_TEXT || channel.type == ChannelTypes.GUILD_FORUM || channel.type == ChannelTypes.GUILD_ANNOUNCEMENT) && isHidden) {
+        if ((channel.type === ChannelTypes.GUILD_TEXT || channel.type === ChannelTypes.GUILD_FORUM || channel.type === ChannelTypes.GUILD_ANNOUNCEMENT) && isHidden) {
             const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
