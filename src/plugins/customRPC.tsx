@@ -82,50 +82,121 @@ enum ActivityType {
 }
 // END
 
-async function createActivity() {
+const strOpt = (description: string) => ({
+    type: OptionType.STRING,
+    description,
+    onChange: setRpc
+}) as const;
+
+const numOpt = (description: string) => ({
+    type: OptionType.NUMBER,
+    description,
+    onChange: setRpc
+}) as const;
+
+const choice = (label: string, value: any, _default?: Boolean) => ({
+    label,
+    value,
+    default: _default
+}) as const;
+
+const choiceOpt = (description: string, options) => ({
+    type: OptionType.SELECT,
+    description,
+    onChange: setRpc,
+    options
+}) as const;
+
+
+const settings = definePluginSettings({
+    appID: strOpt("The ID of the application for the rich presence."),
+    appName: strOpt("The name of the presence."),
+    details: strOpt("Line 1 of rich presence."),
+    state: strOpt("Line 2 of rich presence."),
+    type: choiceOpt("Type of presence", [
+        choice("Playing", ActivityType.PLAYING, true),
+        choice("Listening", ActivityType.LISTENING),
+        choice("Watching", ActivityType.WATCHING),
+        choice("Competing", ActivityType.COMPETING)
+    ]),
+    startTime: numOpt("Unix Timestamp for beginning of activity."),
+    endTime: numOpt("Unix Timestamp for end of activity."),
+    imageBig: strOpt("Sets the big image to the specified image."),
+    imageBigTooltip: strOpt("Sets the tooltip text for the big image."),
+    imageSmall: strOpt("Sets the small image to the specified image."),
+    imageSmallTooltip: strOpt("Sets the tooltip text for the small image."),
+    buttonOneText: strOpt("The text for the first button"),
+    buttonOneURL: strOpt("The URL for the first button"),
+    buttonTwoText: strOpt("The text for the second button"),
+    buttonTwoURL: strOpt("The URL for the second button")
+});
+
+async function createActivity(): Promise<Activity | undefined> {
+    const {
+        appID,
+        appName,
+        details,
+        state,
+        type,
+        startTime,
+        endTime,
+        imageBig,
+        imageBigTooltip,
+        imageSmall,
+        imageSmallTooltip,
+        buttonOneText,
+        buttonOneURL,
+        buttonTwoText,
+        buttonTwoURL
+    } = settings.store;
+
+    if (!appName) return;
+
     const activity: Activity = {
-        application_id: Settings.plugins.customRPC.appID || "0",
-        name: Settings.plugins.customRPC.appName || "Discord",
-        state: Settings.plugins.customRPC.state,
-        details: Settings.plugins.customRPC.details,
-        type: Settings.plugins.customRPC.type,
+        application_id: appID || "0",
+        name: appName,
+        state,
+        details,
+        type,
         flags: 1 << 0,
     };
 
-    if (Settings.plugins.customRPC.startTime) {
+    if (startTime) {
         activity.timestamps = {
-            start: Settings.plugins.customRPC.startTime || null,
+            start: startTime,
         };
-        if (Settings.plugins.customRPC.endTime) {
-            activity.timestamps.end = Settings.plugins.customRPC.endTime;
+        if (endTime) {
+            activity.timestamps.end = endTime;
         }
     }
 
-    if (Settings.plugins.customRPC.buttonOneText) {
+    if (buttonOneText) {
         activity.buttons = [
-            Settings.plugins.customRPC.buttonOneText,
-            Settings.plugins.customRPC.buttonTwoText
+            buttonOneText,
+            buttonTwoText
         ].filter(Boolean);
 
         activity.metadata = {
             button_urls: [
-                Settings.plugins.customRPC.buttonOneURL,
-                Settings.plugins.customRPC.buttonTwoURL
+                buttonOneURL,
+                buttonTwoURL
             ].filter(Boolean)
         };
     }
 
-    if (Settings.plugins.customRPC.imageBig) {
+    if (imageBig) {
         activity.assets = {
-            large_image: await getApplicationAsset(Settings.plugins.customRPC.imageBig),
-            large_text: Settings.plugins.customRPC.imageBigTooltip
+            large_image: await getApplicationAsset(imageBig),
+            large_text: imageBigTooltip
         };
     }
 
-    if (Settings.plugins.customRPC.imageSmall) {
-        activity.assets ??= {};
-        activity.assets.small_image = await getApplicationAsset(Settings.plugins.customRPC.imageSmall);
-        activity.assets.small_text = Settings.plugins.customRPC.imageSmallTooltip;
+    if (imageSmall) {
+        activity.assets = {
+            ...activity.assets,
+            small_image: await getApplicationAsset(imageSmall),
+            small_text: imageSmallTooltip
+        };
     }
 
 
@@ -140,7 +211,7 @@ async function createActivity() {
 }
 
 async function setRpc() {
-    const activity: Activity = await createActivity();
+    const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
@@ -149,115 +220,18 @@ async function setRpc() {
 }
 
 export default definePlugin({
-    name: "customRPC",
+    name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain],
-    start() {
-        setRpc();
-    },
+    start: setRpc,
 
-    settings: definePluginSettings({
-        appID: {
-            type: OptionType.STRING,
-            description: "The ID of the application for the rich presence.",
-            onChange: setRpc,
-        },
-        appName: {
-            type: OptionType.STRING,
-            description: "The name of the presence.",
-            onChange: setRpc,
-        },
-        details: {
-            type: OptionType.STRING,
-            description: "Line 1 of rich presence.",
-            onChange: setRpc
-        },
-        state: {
-            type: OptionType.STRING,
-            description: "Line 2 of rich presence.",
-            onChange: setRpc
-        },
-        type: {
-            type: OptionType.SELECT,
-            description: "The type of presence.",
-            onChange: setRpc,
-            options: [
-                {
-                    label: "Playing",
-                    value: 0,
-                    default: true
-                },
-                {
-                    label: "Listening",
-                    value: 2
-                },
-                {
-                    label: "Watching",
-                    value: 3
-                },
-                {
-                    label: "Competing",
-                    value: 5
-                }
-            ]
-        },
-        startTime: {
-            type: OptionType.NUMBER,
-            description: "Unix Timestamp for beginning of activity.",
-            onChange: setRpc
-        },
-        endTime: {
-            type: OptionType.NUMBER,
-            description: "Unix Timestamp for end of activity.",
-            onChange: setRpc
-        },
-        imageBig: {
-            type: OptionType.STRING,
-            description: "Sets the big image to the specified image.",
-            onChange: setRpc
-        },
-        imageBigTooltip: {
-            type: OptionType.STRING,
-            description: "Sets the tooltip text for the big image.",
-            onChange: setRpc
-        },
-        imageSmall: {
-            type: OptionType.STRING,
-            description: "Sets the small image to the specified image.",
-            onChange: setRpc
-        },
-        imageSmallTooltip: {
-            type: OptionType.STRING,
-            description: "Sets the tooltip text for the small image.",
-            onChange: setRpc
-        },
-        buttonOneText: {
-            type: OptionType.STRING,
-            description: "The text for the first button",
-            onChange: setRpc
-        },
-        buttonOneURL: {
-            type: OptionType.STRING,
-            description: "The URL for the first button",
-            onChange: setRpc
-        },
-        buttonTwoText: {
-            type: OptionType.STRING,
-            description: "The text for the second button",
-            onChange: setRpc
-        },
-        buttonTwoURL: {
-            type: OptionType.STRING,
-            description: "The URL for the second button",
-            onChange: setRpc
-        }
-    }),
+    settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         return (
             <>
-                <Forms.FormTitle tag="h1">NOTE:</Forms.FormTitle>
+                <Forms.FormTitle tag="h2">NOTE:</Forms.FormTitle>
                 <Forms.FormText>
                     You will need to <Link href="https://discord.com/developers/applications">create an
                     application</Link> and
