@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { promptToUpload } from "@utils/discord";
 import { makeLazy } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { fetchUser, UploadStore } from "@webpack/common";
+import { UploadStore, UserUtils } from "@webpack/common";
 
 
 const baseImage = makeLazy(() => loadImage("https://raw.githubusercontent.com/Rapougnac/not-useful/mistress/6wb7ea.png"));
@@ -68,7 +68,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
                 return opt.value;
             case "user":
                 try {
-                    const user = await fetchUser(opt.value);
+                    const user = await UserUtils.fetchUser(opt.value);
                     return user.getAvatarURL(noServerPfp ? void 0 : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
                 } catch (err) {
                     console.error("[SpeechBubble] Failed to fetch user\n", err);

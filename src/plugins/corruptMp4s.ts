@@ -21,7 +21,8 @@ import { findOption } from "@api/Commands/commandHelpers";
 import { ApplicationCommandInputType } from "@api/Commands/types";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCode, findByProps } from "@webpack";
+import { findByCode } from "@webpack";
+import { UploadStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 
@@ -60,7 +61,6 @@ export default definePlugin({
             }
         ],
         execute: async (args, ctx) => {
-            const UploadStore = findByProps("getUploads");
             const upload = UploadStore.getUploads(ctx.channel.id, DRAFT_TYPE)[0];
 
             const video = upload?.item?.file as File | undefined;

@@ -65,8 +65,6 @@ export let RelationshipStore: Stores.RelationshipStore & {
     getSince(userId: string): string;
 };
 
-export const fetchUser = findByCodeLazy(".USER(");
-
 
 export const Forms = {} as {
     FormTitle: Components.FormTitle;

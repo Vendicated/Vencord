@@ -19,9 +19,10 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { getGifEncoder } from "@utils/dependencies";
+import { promptToUpload } from "@utils/discord";
 import { makeLazy } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { UploadStore, UserUtils } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 const DEFAULT_DELAY = 20;
@@ -34,10 +35,6 @@ const getFrames = makeLazy(() => Promise.all(
         (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)
     ))
 );
-
-const fetchUser = findByCodeLazy(".USER(");
-const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
-const UploadStore = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -70,7 +67,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
                 return opt.value;
             case "user":
                 try {
-                    const user = await fetchUser(opt.value);
+                    const user = await UserUtils.fetchUser(opt.value);
                     return user.getAvatarURL(noServerPfp ? void 0 : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
                 } catch (err) {
                     console.error("[petpet] Failed to fetch user\n", err);
@@ -176,7 +173,7 @@ export default definePlugin({
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
-                setTimeout(() => promptToUpload([file], cmdCtx.channel, DRAFT_TYPE), 10);
+                setTimeout(() => promptToUpload([file], cmdCtx.channel), 10);
             },
         },
     ]
