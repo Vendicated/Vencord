@@ -46,7 +46,7 @@ const assetManager = mapMangledModuleLazy(
 );
 
 async function getApplicationAsset(key: string): Promise<string> {
-    return (await assetManager.getAsset(Settings.plugins.customRPC.appID, [key, undefined]))[0];
+    return (await assetManager.getAsset(settings.store.appID, [key, undefined]))[0];
 }
 
 interface ActivityAssets {
@@ -241,7 +241,7 @@ export default definePlugin({
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
-                        application={{ id: Settings.plugins.customRPC.appID }}
+                        application={{ id: settings.store.appID }}
                         user={UserStore.getCurrentUser()}/>}
                 </div>
             </>
