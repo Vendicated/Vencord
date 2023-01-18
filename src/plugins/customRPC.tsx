@@ -210,12 +210,12 @@ async function createActivity(): Promise<Activity | undefined> {
     return activity;
 }
 
-async function setRpc() {
+async function setRpc(disable?: Boolean) {
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity
+        activity: !disable ? activity : {}
     });
 }
 
@@ -224,7 +224,7 @@ export default definePlugin({
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain],
     start: setRpc,
-
+    stop: () => setRpc(true),
     settings,
 
     settingsAboutComponent: () => {
