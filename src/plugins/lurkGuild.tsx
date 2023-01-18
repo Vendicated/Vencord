@@ -18,11 +18,11 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
-import { find, findByCode, findByProps } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
-var client: {
+const client: {
     joinGuild(id: string, options: {
         lurker: boolean,
         loadId: string;
@@ -31,17 +31,17 @@ var client: {
     transitionToGuildSync(id: string, options: {
         welcomeModalChannelId: undefined;
     }): Promise<void>;
-};
+} = findByPropsLazy("joinGuild");
 
-var LurkingStore: {
+const LurkingStore: {
     lurkingGuildIds(): string[];
-};
+} = findByPropsLazy("lurkingGuildIds");
 
-var InviteButton: {
+const InviteButton: {
     Button: typeof Button;
-};
+} = findLazy(mod => mod.Button?.displayName === "InviteButton.Button");
 
-var generateId: () => string;
+const generateId: () => string = findByCodeLazy('().replace(/-/g,"")');
 
 var context: Guild;
 function LurkGuildButton() {
@@ -102,12 +102,5 @@ export default definePlugin({
         <ErrorBoundary noop>
             <LurkGuildButton />
         </ErrorBoundary>
-    ),
-
-    start() {
-        client = findByProps("joinGuild");
-        generateId = findByCode('().replace(/-/g,"")');
-        LurkingStore = findByProps("lurkingGuildIds");
-        InviteButton = find(mod => mod.Button?.displayName === "InviteButton.Button");
-    }
+    )
 });
