@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/misc";
@@ -34,7 +34,6 @@ import {
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-const ProfileComponent = findByCodeLazy("autoFocusNote", "initialSection");
 const Colors = findByPropsLazy("profileColors");
 
 // START yoinked from lastfm.tsx
@@ -207,6 +206,8 @@ async function createActivity(): Promise<Activity | undefined> {
             delete activity[k];
     }
 
+    // WHAT DO YOU WANT FROM ME
+    // eslint-disable-next-line consistent-return
     return activity;
 }
 
@@ -234,15 +235,15 @@ export default definePlugin({
                 <Forms.FormTitle tag="h2">NOTE:</Forms.FormTitle>
                 <Forms.FormText>
                     You will need to <Link href="https://discord.com/developers/applications">create an
-                    application</Link> and
+                        application</Link> and
                     get its ID to use this plugin.
                 </Forms.FormText>
-                <Forms.FormDivider/>
+                <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}
-                        user={UserStore.getCurrentUser()}/>}
+                        user={UserStore.getCurrentUser()} />}
                 </div>
             </>
         );
