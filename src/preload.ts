@@ -49,9 +49,11 @@ if (location.protocol !== "data:") {
         const css = readFileSync(rendererCss, "utf-8");
         insertCss(css);
         if (IS_DEV) {
-            watch(rendererCss, debounce(() => {
+            // persistent means keep process running if watcher is the only thing still running
+            // which we obviously don't want
+            watch(rendererCss, { persistent: false }, () => {
                 document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
-            }, 30));
+            });
         }
     } catch (err) {
         if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
