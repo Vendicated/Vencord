@@ -16,13 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React } from "@webpack/common";
 
 const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
+
+const settings = definePluginSettings({
+    showAvatars: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show avatars in the typing indicator"
+    },
+    showRoleColors: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the typing indicator"
+    },
+    alternativeFormatting: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Use alternative formatting for when several users are typing"
+    }
+});
 
 export default definePlugin({
     name: "TypingTweaks",
@@ -48,16 +67,19 @@ export default definePlugin({
             replacement: {
                 match: /(\i)\((\i),"SEVERAL_USERS_TYPING",".+?"\)/,
                 replace: "$1($2,\"SEVERAL_USERS_TYPING\",\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
-            }
+            },
+            predicate: () => settings.store.alternativeFormatting
         },
         {
             find: "getCooldownTextStyle",
             replacement: {
                 match: /(\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\).+?SEVERAL_USERS_TYPING/,
                 replace: "$&.format({a:$2,b:$3,c:$1.length})"
-            }
+            },
+            predicate: () => settings.store.alternativeFormatting
         }
     ],
+    settings,
 
     mutateChildren(props, users, children) {
         if (!Array.isArray(children)) return children;
@@ -72,13 +94,13 @@ export default definePlugin({
             display: "grid",
             gridAutoFlow: "column",
             gap: "4px",
-            color: GuildMemberStore.getMember(guildId, user.id)?.colorString
+            color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined
         }}>
-            <div style={{ marginTop: "4px" }}>
+            {settings.store.showAvatars && <div style={{ marginTop: "4px" }}>
                 <Avatar
                     size={Avatar.Sizes.SIZE_16}
                     src={user.getAvatarURL(guildId, 128)}/>
-            </div>
+            </div>}
             {user.username}
         </strong>;
     }, { noop: true })
