@@ -1,0 +1,21 @@
+name: Blank Template
+description: Use this only if your issue does not fit into another template. **DO NOT ASK FOR SUPPORT OR REQUEST PLUGINS**
+labels: []
+body:
+  - type: textarea
+    id: info-sec
+    attributes:
+      label: Tell us all about it.
+      description: Go nuts, let us know what you're wanting to bring attention to.
+      placeholder: ...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agreement-check
+    attributes:
+      label: Request Agreement
+      description: DO NOT USE THIS TEMPLATE FOR SUPPORT OR PLUGIN REQUESTS!!! For Support, **join our Discord**. For plugin requests, **use discussions**
+      options:
+        - label: This is not a support or plugin request
+          required: true
