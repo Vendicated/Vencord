@@ -1,6 +1,7 @@
 name: Bug/Crash Report
 description: Create a bug or crash report for Vencord
 labels: [bug]
+title: "[Bug] <title>"
 
 body:
   - type: input
