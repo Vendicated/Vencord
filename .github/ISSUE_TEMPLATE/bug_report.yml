@@ -55,3 +55,12 @@ body:
         ```
     validations:
       required: false
+
+  - type: checkboxes
+    id: agreement-check
+    attributes:
+      label: Request Agreement
+      description: We only accept reports for bugs that happen on Discord Stable. Canary and PTB are Development branches and may be unstable
+      options:
+        - label: I am using Discord Stable or tried on Stable and this bug happens there as well
+          required: true
