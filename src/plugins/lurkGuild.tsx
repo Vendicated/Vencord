@@ -22,26 +22,6 @@ import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
-const client: {
-    joinGuild(id: string, options: {
-        lurker: boolean,
-        loadId: string;
-        lurkLocation: string;
-    }): Promise<void>;
-
-    transitionToGuildSync(id: string, options: {
-        search: string,
-        state: {
-            analyticsSource: {
-                page: string,
-                object: string;
-                section: undefined;
-            };
-        },
-        welcomeModalChannelId: undefined;
-    }): Promise<void>;
-} = findByPropsLazy("joinGuild");
-
 const LurkingStore: {
     lurkingGuildIds(): string[];
 } = findByPropsLazy("lurkingGuildIds");
@@ -52,9 +32,13 @@ const InviteButton: {
 
 const generateId: () => string = findByCodeLazy('().replace(/-/g,"")');
 
-const analytics: {
-    track(name: string, params: object): void;
-} = findByPropsLazy("track", "isThrottled");
+var lurkGuild: (options: {
+    analyticsContext: string,
+    categoryId: null,
+    guildId: string,
+    index: number,
+    loadId: string
+}) => Promise<void>;
 
 var context: Guild;
 function LurkGuildButton() {
@@ -72,35 +56,12 @@ function LurkGuildButton() {
             submitting={submitting}
             onClick={async () => {
                 setSubmitting(true);
-
-                const loadId = generateId();
-                await client.joinGuild(guild.id, {
-                    lurker: true,
-                    loadId,
-                    lurkLocation: "Guild Discovery"
-                });
-                await client.transitionToGuildSync(guild.id, {
-                    search: "",
-                    state: {
-                        analyticsSource: {
-                            page: "Guild Discovery",
-                            object: "Card",
-                            section: undefined
-                        }
-                    },
-                    welcomeModalChannelId: undefined
-                });
-
-                analytics.track("guild_discovery_guild_selected", {
-                    location: {
-                        "page": "Guild Discovery",
-                        "section": "Popular"
-                    },
-                    guild_id: guild.id,
-                    loadId,
-                    card_index: 0,
-                    location_object: "Card",
-                    category_id: null
+                await lurkGuild({
+                    analyticsContext: "Popular",
+                    categoryId: null,
+                    guildId: guild.id,
+                    index: 0,
+                    loadId: generateId()
                 });
             }}>
             {!isLurking ? "Lurk" : "Already lurking"}
@@ -117,6 +78,13 @@ export default definePlugin({
     }],
 
     patches: [{
+        // Grab lurkGuild (not accessible through webpack since it's behind a proxy function)
+        find: ".GUILD_DISCOVERY,object:",
+        replacement: {
+            match: /(function ([a-zA-Z_]+)(?:(?!function ).)+\.GUILD_DISCOVERY,object:.*?\.apply\(this,arguments\)})/s,
+            replace: "$1Vencord.Plugins.plugins.LurkGuild.setLurkGuild($2);"
+        }
+    }, {
         // Grab invite guild
         find: ".GuildSplash,{",
         replacement: {
@@ -133,6 +101,7 @@ export default definePlugin({
     }],
 
     setContext: (guild: Guild) => context = guild,
+    setLurkGuild: (func: typeof lurkGuild) => lurkGuild = func,
 
     render: () => (
         <ErrorBoundary noop>
