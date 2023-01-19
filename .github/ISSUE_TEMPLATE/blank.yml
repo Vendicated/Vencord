@@ -1,6 +1,7 @@
 name: Blank Template
 description: Use this only if your issue does not fit into another template. **DO NOT ASK FOR SUPPORT OR REQUEST PLUGINS**
 labels: []
+
 body:
   - type: textarea
     id: info-sec

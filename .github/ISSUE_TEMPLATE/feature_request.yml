@@ -1,6 +1,7 @@
 name: Feature Request
 description: Create a feature request for Vencord. To request new plugins, please use the Discussions tab
 labels: [enhancement]
+title: "[Feature Request] <title>"
 
 body:
   - type: input
@@ -20,3 +21,12 @@ body:
       placeholder: I think ... would be a cool feature to add. This would be awesome, thanks!
     validations:
       required: true
+
+  - type: checkboxes
+    id: agreement-check
+    attributes:
+      label: Request Agreement
+      description: DO NOT USE THIS TEMPLATE FOR PLUGIN REQUESTS!!! For plugin requests, **use discussions**
+      options:
+        - label: This is not a plugin request
+          required: true
