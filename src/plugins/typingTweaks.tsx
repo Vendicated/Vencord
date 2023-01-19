@@ -46,6 +46,8 @@ export default definePlugin({
     ],
 
     mutateChildren(props, users, children) {
+        if (!Array.isArray(children)) return children;
+
         let element = 0;
 
         return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]}/> : c);
