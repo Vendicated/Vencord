@@ -42,6 +42,20 @@ export default definePlugin({
                 match: /return \i\.Z\.getName\(.,.\.props\.channel\.id,(.)\)/,
                 replace: "return $1"
             }
+        },
+        {
+            find: "t(n,\"SEVERAL_USERS_TYPING\"",
+            replacement: {
+                match: /(\i)\((\i),"SEVERAL_USERS_TYPING",".+?"\)/,
+                replace: "$1($2,\"SEVERAL_USERS_TYPING\",\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
+            }
+        },
+        {
+            find: "getCooldownTextStyle",
+            replacement: {
+                match: /(\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\).+?SEVERAL_USERS_TYPING/,
+                replace: "$&.format({a:$2,b:$3,c:$1.length})"
+            }
         }
     ],
 
