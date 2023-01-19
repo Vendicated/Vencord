@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
@@ -31,14 +32,14 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /=(.{1,2})\[2];(.+)"aria-atomic":!0,children:(.{1,2})}\)/,
+                match: /=(\i)\[2];(.+)"aria-atomic":!0,children:(\i)}\)/,
                 replace: "=$1[2];$2\"aria-atomic\":!0,style:{display:\"grid\",gridAutoFlow:\"column\",gridGap:\"0.25em\"},children:$self.mutateChildren(this.props,$1,$3)})"
             }
         },
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /return .{1,2}\.Z\.getName\(.,.\.props\.channel\.id,(.)\)/,
+                match: /return \i\.Z\.getName\(.,.\.props\.channel\.id,(.)\)/,
                 replace: "return $1"
             }
         }
@@ -47,36 +48,22 @@ export default definePlugin({
     mutateChildren(props, users, children) {
         let element = 0;
 
-        for (const child of children) {
-            const i = children.indexOf(child);
-
-            if (child.type !== "strong") continue;
-
-            children[i] = this.TypingUser({
-                ...props,
-                user: users[element++]
-            });
-        }
-
-        return children;
+        return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]}/> : c);
     },
 
-    TypingUser({ user, guildId }) {
-        return <strong style={
-            {
-                display: "grid",
-                gridAutoFlow: "column",
-                gap: "4px",
-                color: GuildMemberStore.getMember(guildId, user.id)?.colorString
-            }
-        }>
+    TypingUser: ErrorBoundary.wrap(({ user, guildId }) => {
+        return <strong style={{
+            display: "grid",
+            gridAutoFlow: "column",
+            gap: "4px",
+            color: GuildMemberStore.getMember(guildId, user.id)?.colorString
+        }}>
             <div style={{ marginTop: "4px" }}>
                 <Avatar
                     size={Avatar.Sizes.SIZE_16}
-                    src={user.getAvatarURL(guildId, 16)}
-                />
+                    src={user.getAvatarURL(guildId, 128)}/>
             </div>
             {user.username}
         </strong>;
-    }
+    }, { noop: true })
 });
