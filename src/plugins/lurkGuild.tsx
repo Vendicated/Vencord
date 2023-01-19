@@ -26,9 +26,18 @@ const client: {
     joinGuild(id: string, options: {
         lurker: boolean,
         loadId: string;
+        lurkLocation: string;
     }): Promise<void>;
 
     transitionToGuildSync(id: string, options: {
+        search: string,
+        state: {
+            analyticsSource: {
+                page: string,
+                object: string;
+                section: undefined;
+            };
+        },
         welcomeModalChannelId: undefined;
     }): Promise<void>;
 } = findByPropsLazy("joinGuild");
@@ -42,6 +51,10 @@ const InviteButton: {
 } = findLazy(mod => mod.Button?.displayName === "InviteButton.Button");
 
 const generateId: () => string = findByCodeLazy('().replace(/-/g,"")');
+
+const analytics: {
+    track(name: string, params: object): void;
+} = findByPropsLazy("track", "isThrottled");
 
 var context: Guild;
 function LurkGuildButton() {
@@ -59,12 +72,35 @@ function LurkGuildButton() {
             submitting={submitting}
             onClick={async () => {
                 setSubmitting(true);
+
+                const loadId = generateId();
                 await client.joinGuild(guild.id, {
                     lurker: true,
-                    loadId: generateId()
+                    loadId,
+                    lurkLocation: "Guild Discovery"
                 });
                 await client.transitionToGuildSync(guild.id, {
+                    search: "",
+                    state: {
+                        analyticsSource: {
+                            page: "Guild Discovery",
+                            object: "Card",
+                            section: undefined
+                        }
+                    },
                     welcomeModalChannelId: undefined
+                });
+
+                analytics.track("guild_discovery_guild_selected", {
+                    location: {
+                        "page": "Guild Discovery",
+                        "section": "Popular"
+                    },
+                    guild_id: guild.id,
+                    loadId,
+                    card_index: 0,
+                    location_object: "Card",
+                    category_id: null
                 });
             }}>
             {!isLurking ? "Lurk" : "Already lurking"}
