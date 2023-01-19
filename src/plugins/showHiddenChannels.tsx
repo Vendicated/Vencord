@@ -27,16 +27,8 @@ import { Button, ChannelStore, PermissionStore, SnowflakeUtils, Text } from "@we
 
 enum ChannelTypes {
     GUILD_TEXT = 0,
-    DM = 1,
-    GUILD_VOICE = 1,
-    GROUP_DM = 3,
-    GUILD_CATEGORY = 4,
+    GUILD_VOICE = 2,
     GUILD_ANNOUNCEMENT = 5,
-    ANNOUNCEMENT_THREAD = 10,
-    PUBLIC_THREAD = 11,
-    PRIVATE_THREAD = 12,
-    GUILD_STAGE_VOICE = 13,
-    GUILD_DIRECTORY = 14,
     GUILD_FORUM = 15
 }
 
@@ -110,7 +102,7 @@ export default definePlugin({
     shouldShow(channel, category, isMuted) {
         if (!this.isHiddenChannel(channel)) return false;
         if (!category) return false;
-        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
+        if (channel.type === ChannelTypes.GUILD_TEXT && category.guild?.hideMutedChannels && isMuted) return false;
 
         return !category.isCollapsed;
     },
@@ -123,7 +115,7 @@ export default definePlugin({
             return false;
 
         // check for disallowed voice channels too so that they get hidden when collapsing the category
-        channel._isHiddenChannel = !PermissionStore.can(VIEW_CHANNEL, channel) || (channel.type === 2 && !PermissionStore.can(CONNECT, channel));
+        channel._isHiddenChannel = !PermissionStore.can(VIEW_CHANNEL, channel) || (channel.type === ChannelTypes.GUILD_VOICE && !PermissionStore.can(CONNECT, channel));
         return channel._isHiddenChannel;
     },
 

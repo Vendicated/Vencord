@@ -21,7 +21,6 @@ export function Badge({ text, color }): JSX.Element {
         <div className="vc-plugins-badge" style={{
             backgroundColor: color,
             justifySelf: "flex-end",
-            alignSelf: "center",
             marginLeft: "auto"
         }}>
             {text}
