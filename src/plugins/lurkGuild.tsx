@@ -17,8 +17,9 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findLazy, findModuleId, wreq } from "@webpack";
 import { Button, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
@@ -32,13 +33,21 @@ const InviteButton: {
 
 const generateId: () => string = findByCodeLazy('().replace(/-/g,"")');
 
-var lurkGuild: (options: {
+const lurkGuild: (options: {
     analyticsContext: string,
     categoryId: null,
     guildId: string,
     index: number,
     loadId: string
-}) => Promise<void>;
+}) => Promise<void> = proxyLazy(() => {
+    const id = findModuleId(".GUILD_DISCOVERY,object:")!;
+
+    const funcName = wreq.m[id].toString()
+        .match(/(function ([a-zA-Z_]+)(?:(?!function ).)+\.GUILD_DISCOVERY,object:.*?\.apply\(this,arguments\)})/s)[2];
+    return Object.values(wreq(id)).find(v =>
+        typeof v === "function" &&
+        v.toString().includes(`return ${funcName}.apply(this,arguments)`)) as typeof lurkGuild;
+});
 
 var context: Guild;
 function LurkGuildButton() {
@@ -78,13 +87,6 @@ export default definePlugin({
     }],
 
     patches: [{
-        // Grab lurkGuild (not accessible through webpack since it's behind a proxy function)
-        find: ".GUILD_DISCOVERY,object:",
-        replacement: {
-            match: /(function ([a-zA-Z_]+)(?:(?!function ).)+\.GUILD_DISCOVERY,object:.*?\.apply\(this,arguments\)})/s,
-            replace: "$1Vencord.Plugins.plugins.LurkGuild.setLurkGuild($2);"
-        }
-    }, {
         // Grab invite guild
         find: ".GuildSplash,{",
         replacement: {
@@ -101,7 +103,6 @@ export default definePlugin({
     }],
 
     setContext: (guild: Guild) => context = guild,
-    setLurkGuild: (func: typeof lurkGuild) => lurkGuild = func,
 
     render: () => (
         <ErrorBoundary noop>
