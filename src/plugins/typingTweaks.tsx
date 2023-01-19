@@ -25,7 +25,7 @@ const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
 
 export default definePlugin({
     name: "TypingTweaks",
-    description: "Adds some tweaks to typing indicators",
+    description: "Show avatars and role colours in the typing indicator",
     authors: [Devs.zt],
     patches: [
         {
