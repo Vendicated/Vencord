@@ -40,7 +40,7 @@ export default definePlugin({
                     + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
             }
         })),
-        // Prevent Audio Context Settings sync from sending trying to sync with values above 200, changing them to 200 before we send to Discord
+        // Prevent Audio Context Settings sync from trying to sync with values above 200, changing them to 200 before we send to Discord
         {
             find: "AudioContextSettingsMigrated",
             replacement: [
