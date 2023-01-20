@@ -68,7 +68,7 @@ export default definePlugin({
                         + "$<restOfFunction>"
                         + "($<localVolume>>200?undefined:$<localVolume>=$<syncVolume>)"
                         + "$<secondRestOfFunction>"
-                        + "setLocalVolume($<id>,$<localVolume>)"
+                        + "setLocalVolume($<id>,$<localVolume> ?? 100)"
                 }
             ]
         }
