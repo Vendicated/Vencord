@@ -26,10 +26,23 @@ export default definePlugin({
     description: "Allows you to set the user and stream volume above the default maximum.",
 
     patches: [
-        {
-            find: ".Messages.USER_VOLUME",
+        ...[
+            ".Messages.USER_VOLUME",
+            "currentVolume:"
+        ].map(find => ({
+            find,
             replacement: {
-                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
+                match: /maxValue:(?<defaultMaxVolumePredicate>\i\.\i)\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
+                replace: ""
+                    + "maxValue:$<defaultMaxVolumePredicate>"
+                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
+                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
+            }
+        })),
+        {
+            find: "currentVolume:",
+            replacement: {
+                match: /maxValue:(?<defaultMaxVolumePredicate>\i\.\i)\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
                 replace: ""
                     + "maxValue:$<defaultMaxVolumePredicate>"
                     + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
@@ -37,14 +50,34 @@ export default definePlugin({
             }
         },
         {
-            find: "currentVolume:",
-            replacement: {
-                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
-                replace: ""
-                    + "maxValue:$<defaultMaxVolumePredicate>"
-                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
-                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
-            }
+            find: "AudioContextSettingsMigrated",
+            replacement: [
+                {
+                    match: /(?<restOfFunction>updateAsync\("audioContextSettings".{1,50})(?<volumeChangeExpression>return (?<volumeOptions>\i)\.volume=(?<newVolume>\i))/,
+                    replace: "$<restOfFunction>if($<newVolume>>200)return $<volumeOptions>.volume=200;$<volumeChangeExpression>"
+                },
+                {
+                    match: /(?<restOfFunction>Object\.entries\(\i\.localMutes\).+?)volume:(?<volumeExpression>.+?),/,
+                    replace: "$<restOfFunction>volume:$<volumeExpression>>200?200:$<volumeExpression>,"
+                },
+                {
+                    match: /(?<restOfFunction>Object\.entries\(\i\.localVolumes\).+?)volume:(?<volumeExpression>.+?)}\)/,
+                    replace: "$<restOfFunction>volume:$<volumeExpression>>200?200:$<volumeExpression>})"
+                }
+            ]
+        },
+        {
+            find: '.displayName="MediaEngineStore"',
+            replacement: [
+                {
+                    match: /(?<restOfFunction>\.settings\.audioContextSettings.+?)(?<localVolume>\i\[\i\])=(?<syncVolume>\i\.volume)(?<secondRestOfFunction>.+?)setLocalVolume\((?<id>.+?),.+?\)/,
+                    replace: ""
+                        + "$<restOfFunction>"
+                        + "($<localVolume>>200?undefined:$<localVolume>=$<syncVolume>)"
+                        + "$<secondRestOfFunction>"
+                        + "setLocalVolume($<id>,$<localVolume>)"
+                }
+            ]
         }
     ],
 
