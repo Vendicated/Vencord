@@ -26,6 +26,7 @@ export default definePlugin({
     description: "Allows you to set the user and stream volume above the default maximum.",
 
     patches: [
+        // Change the max volume for sliders to allow for values above 200
         ...[
             ".Messages.USER_VOLUME",
             "currentVolume:"
@@ -39,16 +40,7 @@ export default definePlugin({
                     + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
             }
         })),
-        {
-            find: "currentVolume:",
-            replacement: {
-                match: /maxValue:(?<defaultMaxVolumePredicate>\i\.\i)\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
-                replace: ""
-                    + "maxValue:$<defaultMaxVolumePredicate>"
-                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
-                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
-            }
-        },
+        // Prevent Audio Context Settings sync from sending trying to sync with values above 200, changing them to 200 before we send to Discord
         {
             find: "AudioContextSettingsMigrated",
             replacement: [
@@ -66,6 +58,7 @@ export default definePlugin({
                 }
             ]
         },
+        // Prevent the MediaEngineStore from overwriting our LocalVolumes above 200 with the ones the Discord Audio Context Settings sync sends
         {
             find: '.displayName="MediaEngineStore"',
             replacement: [
