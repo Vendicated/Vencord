@@ -158,7 +158,7 @@ export default definePlugin({
         find: '.displayName="LocalActivityStore"',
         replacement: {
             match: /(?<activities>.)\.push\(.\({type:.\..{1,3}\.LISTENING.+?\)\)/,
-            replace: "$&;$<activities>=$<activities>.filter(Vencord.Plugins.plugins.IgnoreActivities.isActivityIgnored);"
+            replace: "$&;$<activities>=$<activities>.filter(Vencord.Plugins.plugins.IgnoreActivities.isActivityNotIgnored);"
         }
     }],
 
@@ -205,7 +205,7 @@ export default definePlugin({
         );
     },
 
-    isActivityIgnored(props: { type: number; application_id?: string; name?: string; }) {
+    isActivityNotIgnored(props: { type: number; application_id?: string; name?: string; }) {
         if (props.type === 0) {
             if (props.application_id !== undefined) return !ignoredActivitiesCache.has(props.application_id);
             else {
