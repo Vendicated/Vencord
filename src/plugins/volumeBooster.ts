@@ -26,25 +26,51 @@ export default definePlugin({
     description: "Allows you to set the user and stream volume above the default maximum.",
 
     patches: [
-        {
-            find: ".Messages.USER_VOLUME",
+        // Change the max volume for sliders to allow for values above 200
+        ...[
+            ".Messages.USER_VOLUME",
+            "currentVolume:"
+        ].map(find => ({
+            find,
             replacement: {
-                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
+                match: /maxValue:(?<defaultMaxVolumePredicate>\i\.\i)\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
                 replace: ""
                     + "maxValue:$<defaultMaxVolumePredicate>"
                     + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
                     + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
             }
+        })),
+        // Prevent Audio Context Settings sync from trying to sync with values above 200, changing them to 200 before we send to Discord
+        {
+            find: "AudioContextSettingsMigrated",
+            replacement: [
+                {
+                    match: /(?<restOfFunction>updateAsync\("audioContextSettings".{1,50})(?<volumeChangeExpression>return (?<volumeOptions>\i)\.volume=(?<newVolume>\i))/,
+                    replace: "$<restOfFunction>if($<newVolume>>200)return $<volumeOptions>.volume=200;$<volumeChangeExpression>"
+                },
+                {
+                    match: /(?<restOfFunction>Object\.entries\(\i\.localMutes\).+?)volume:(?<volumeExpression>.+?),/,
+                    replace: "$<restOfFunction>volume:$<volumeExpression>>200?200:$<volumeExpression>,"
+                },
+                {
+                    match: /(?<restOfFunction>Object\.entries\(\i\.localVolumes\).+?)volume:(?<volumeExpression>.+?)}\)/,
+                    replace: "$<restOfFunction>volume:$<volumeExpression>>200?200:$<volumeExpression>})"
+                }
+            ]
         },
+        // Prevent the MediaEngineStore from overwriting our LocalVolumes above 200 with the ones the Discord Audio Context Settings sync sends
         {
-            find: "currentVolume:",
-            replacement: {
-                match: /maxValue:(?<defaultMaxVolumePredicate>.{1,2}\..{1,2})\?(?<higherMaxVolume>\d+?):(?<minorMaxVolume>\d+?),/,
-                replace: ""
-                    + "maxValue:$<defaultMaxVolumePredicate>"
-                    + "?$<higherMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier"
-                    + ":$<minorMaxVolume>*Vencord.Settings.plugins.VolumeBooster.multiplier,"
-            }
+            find: '.displayName="MediaEngineStore"',
+            replacement: [
+                {
+                    match: /(?<restOfFunction>\.settings\.audioContextSettings.+?)(?<localVolume>\i\[\i\])=(?<syncVolume>\i\.volume)(?<secondRestOfFunction>.+?)setLocalVolume\((?<id>.+?),.+?\)/,
+                    replace: ""
+                        + "$<restOfFunction>"
+                        + "($<localVolume>>200?undefined:$<localVolume>=$<syncVolume>)"
+                        + "$<secondRestOfFunction>"
+                        + "setLocalVolume($<id>,$<localVolume>??$<syncVolume>)"
+                }
+            ]
         }
     ],
 
