@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.Cyn],
     patches: [
         {
-            find: "_messageAttachmentToEmbedMedia",
+            find: ".Messages.REMOVE_ATTACHMENT_BODY",
             replacement: {
                 match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
                 replace: (_, pre, accessories, post) =>
