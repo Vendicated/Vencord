@@ -29,10 +29,10 @@ export async function toggle(isEnabled: boolean) {
             style = document.createElement("style");
             style.id = "vencord-custom-css";
             document.head.appendChild(style);
-            VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.innerText = css);
+            VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.textContent = css);
             style.textContent = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
         }
-    } else // @ts-ignore yes typescript, property 'disabled' does exist on type 'HTMLStyleElement' u should try reading the docs some time
+    } else
         style.disabled = !isEnabled;
 }
 
