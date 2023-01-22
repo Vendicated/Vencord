@@ -16,22 +16,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/settings";
+import definePlugin, { OptionType } from "@utils/types";
+
+const boolSetting = (description, def?: boolean) => ({
+    type: OptionType.BOOLEAN,
+    description,
+    default: def
+}) as const;
+
+const PLUGIN_NAME = "NoAutoUnmute";
 
 export default definePlugin({
-    name: "NoAutoUnmute",
-    description: "Stops Discord from automatically unmuting you when you join a voice channel",
+    name: PLUGIN_NAME,
+    description: "Stops Discord from automatically unmuting you when you join a voice channel.",
     authors: [{
         name: "My-Name-Is-Jeff",
         id: 150427554166210560n
     }],
+    settings: definePluginSettings({
+        autoMute: boolSetting("Automatically mute when joining a voice channel.", false),
+        autoDeafen: boolSetting("Automatically deafen when joining a voice channel.", false),
+    }),
     patches: [
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\(.{1,2}\){.{0,250}?\({deaf:!1,)mute:!1(?<post>}\);)/,
-                replace: "$<pre>mute:true$<post>",
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\(.{1,2}\){.{0,250}?\if\(.{1,2}\.mute\|\|.{1,2}\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
+                replace: `$<pre>||Vencord.Plugins.plugins.${PLUGIN_NAME}.shouldOverride()$<mid>deaf:Vencord.Plugins.plugins.${PLUGIN_NAME}.shouldDeafen(),mute:true$<post>`,
             },
         },
-    ]
+    ],
+    shouldOverride() {
+        return this.settings.store.autoMute || this.settings.store.autoDeafen;
+    },
+    shouldDeafen() {
+        return this.settings.store.autoDeafen;
+    }
 });
