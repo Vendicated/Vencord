@@ -43,14 +43,14 @@ export default definePlugin({
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.{0,250}?\if\((?<var>.{1,2})\.mute\|\|\3\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\if\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
                 replace: `$<pre>||${PLUGIN_PATH}.shouldOverride()$<mid>deaf:${PLUGIN_PATH}.shouldDeafen($<event>,$<var>),mute:${PLUGIN_PATH}.shouldMute($<event>,$<var>)$<post>`,
             },
         },
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){var (?<var>.{1,2})=\2\.guildId.+?if\()(?<cond>null==\3)/,
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){var (?<var>.{1,2})=\k<event>\.guildId.+?if\()(?<cond>null==\k<var>)/,
                 replace: `$<pre>($<cond>||${PLUGIN_PATH}.shouldOverride())`
             }
         }
