@@ -101,15 +101,18 @@ export default definePlugin({
         {
             find: ".UNREAD_HIGHLIGHT",
             predicate: () => Settings.plugins.ShowHiddenChannels.showMode === ShowMode.HiddenIconWithMutedStyle,
+            // Make the channel appear as muted if it's hidden
             replacement: [
                 {
                     match: /(?<restOfFunction>\i\.channel,.+?)(?<isMuted>\i)=(?<props>\i).muted/,
                     replace: "$<restOfFunction>$<isMuted>=$self.isHiddenChannel($<props>.channel)?true:$<props>.muted"
                 },
+                // Add the hidden eye icon if the channel is hidden
                 {
                     match: /channel:(?<channel>\i),.+?\.channelName.+?\.children.+?:null/,
                     replace: "$&,$self.isHiddenChannel($<channel>)?$self.HiddenChannelIcon():null"
                 },
+                // Make voice channels also appear as muted if they are muted
                 {
                     match: /(?<restOfFunction>.wrapper:\i\(\).notInteractive,)(?<secondRestOfFunction>.+?)(?<isMutedClassExpression>\i\?\i\.MUTED:)/,
                     replace: "$<restOfFunction>$<isMutedClassExpression>\"\",$<secondRestOfFunction>"
