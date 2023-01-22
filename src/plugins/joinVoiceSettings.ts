@@ -25,32 +25,43 @@ const boolSetting = (description, def?: boolean) => ({
     default: def
 }) as const;
 
-const PLUGIN_NAME = "NoAutoUnmute";
+const PLUGIN_NAME = "JoinVoiceSettings";
+const PLUGIN_PATH = `Vencord.Plugins.plugins.${PLUGIN_NAME}`;
 
 export default definePlugin({
     name: PLUGIN_NAME,
-    description: "Stops Discord from automatically unmuting you when you join a voice channel.",
+    description: "Gives you more control over your mute and deafen state when joining a voice channel.",
     authors: [{
         name: "My-Name-Is-Jeff",
         id: 150427554166210560n
     }],
     settings: definePluginSettings({
-        autoMute: boolSetting("Automatically mute when joining a voice channel.", false),
-        autoDeafen: boolSetting("Automatically deafen when joining a voice channel.", false),
+        autoMute: boolSetting("Automatically mute when joining a voice channel", false),
+        autoDeafen: boolSetting("Automatically deafen when joining a voice channel", false),
+        noAutoUnmute: boolSetting("Stop Discord from automatically unmuting when joining a voice channel", false),
+        noAutoUndeafen: boolSetting("Stop Discord from automatically undeafening when joining a voice channel", false),
     }),
     patches: [
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\(.{1,2}\){.{0,250}?\if\(.{1,2}\.mute\|\|.{1,2}\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
-                replace: `$<pre>||Vencord.Plugins.plugins.${PLUGIN_NAME}.shouldOverride()$<mid>deaf:Vencord.Plugins.plugins.${PLUGIN_NAME}.shouldDeafen(),mute:true$<post>`,
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\(.{1,2}\){.{0,250}?\if\((?<var>.{1,2})\.mute\|\|.{1,2}\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
+                replace: `$<pre>||${PLUGIN_PATH}.shouldOverride($<var>)$<mid>deaf:${PLUGIN_PATH}.shouldDeafen($<var>),mute:${PLUGIN_PATH}.shouldMute($<var>)$<post>`,
             },
         },
     ],
-    shouldOverride() {
+    shouldOverride(_s: AudioSettings) {
         return this.settings.store.autoMute || this.settings.store.autoDeafen;
     },
-    shouldDeafen() {
-        return this.settings.store.autoDeafen;
+    shouldDeafen(s: AudioSettings) {
+        return this.settings.store.autoDeafen || (s.deaf && this.settings.store.noAutoUndeafen);
+    },
+    shouldMute(s: AudioSettings) {
+        return this.settings.store.autoDeafen || this.settings.store.autoMute || (s.mute && (this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
     }
 });
+
+type AudioSettings = {
+    mute: boolean,
+    deaf: boolean;
+};
