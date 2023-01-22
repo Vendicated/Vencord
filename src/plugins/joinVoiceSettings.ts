@@ -43,23 +43,39 @@ export default definePlugin({
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\(.{1,2}\){.{0,250}?\if\((?<var>.{1,2})\.mute\|\|.{1,2}\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
-                replace: `$<pre>||${PLUGIN_PATH}.shouldOverride($<var>)$<mid>deaf:${PLUGIN_PATH}.shouldDeafen($<var>),mute:${PLUGIN_PATH}.shouldMute($<var>)$<post>`,
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.{0,250}?\if\((?<var>.{1,2})\.mute\|\|\3\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
+                replace: `$<pre>||${PLUGIN_PATH}.shouldOverride()$<mid>deaf:${PLUGIN_PATH}.shouldDeafen($<event>,$<var>),mute:${PLUGIN_PATH}.shouldMute($<event>,$<var>)$<post>`,
             },
         },
+        {
+            find: ".displayName=\"MediaEngineStore\"",
+            replacement: {
+                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){var (?<var>.{1,2})=\2\.guildId.+?if\()(?<cond>null==\3)/,
+                replace: `$<pre>($<cond>||${PLUGIN_PATH}.shouldOverride())`
+            }
+        }
     ],
-    shouldOverride(_s: AudioSettings) {
+    shouldOverride() {
         return this.settings.store.autoMute || this.settings.store.autoDeafen;
     },
-    shouldDeafen(s: AudioSettings) {
-        return this.settings.store.autoDeafen || (s.deaf && this.settings.store.noAutoUndeafen);
+    shouldDeafen(e: VoiceChannelSelectEvent, s: AudioSettings) {
+        return this.settings.store.autoDeafen || (s.deaf && (e.guildId != null || this.settings.store.noAutoUndeafen));
     },
-    shouldMute(s: AudioSettings) {
-        return this.settings.store.autoDeafen || this.settings.store.autoMute || (s.mute && (this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
+    shouldMute(e: VoiceChannelSelectEvent, s: AudioSettings) {
+        return this.settings.store.autoDeafen || this.settings.store.autoMute || (s.mute && (e.guildId != null || this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
     }
 });
 
-type AudioSettings = {
+interface AudioSettings {
     mute: boolean,
     deaf: boolean;
-};
+}
+
+interface VoiceChannelSelectEvent {
+    type: "VOICE_CHANNEL_SELECT";
+    guildId?: string;
+    channelId?: string;
+    currentVoiceChannelId?: string;
+    video: boolean;
+    stream: boolean;
+}
