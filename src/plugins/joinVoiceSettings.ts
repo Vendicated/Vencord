@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const boolSetting = (description, def?: boolean) => ({
@@ -31,10 +32,7 @@ const PLUGIN_PATH = `Vencord.Plugins.plugins.${PLUGIN_NAME}`;
 export default definePlugin({
     name: PLUGIN_NAME,
     description: "Gives you more control over your mute and deafen state when joining a voice channel.",
-    authors: [{
-        name: "My-Name-Is-Jeff",
-        id: 150427554166210560n
-    }],
+    authors: [Devs.MyNameIsJeff],
     settings: definePluginSettings({
         autoMute: boolSetting("Automatically mute when joining a voice channel", false),
         autoDeafen: boolSetting("Automatically deafen when joining a voice channel", false),
