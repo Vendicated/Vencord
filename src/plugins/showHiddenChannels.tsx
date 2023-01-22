@@ -86,7 +86,7 @@ export default definePlugin({
             find: ".UNREAD_HIGHLIGHT",
             predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
             replacement: [{
-                match: /(?<restOfFunction>\i\.channel,.+?)(?<hasUnread>\i)=(?<props>\i).unread/,
+                match: /(?<restOfFunction>\i\.connected,)(?<hasUnread>\i)=(?<props>\i).unread/,
                 replace: "$<restOfFunction>$<hasUnread>=$self.isHiddenChannel($<props>.channel)?false:$<props>.unread"
             }]
         },
@@ -104,7 +104,7 @@ export default definePlugin({
             // Make the channel appear as muted if it's hidden
             replacement: [
                 {
-                    match: /(?<restOfFunction>\i\.channel,.+?)(?<isMuted>\i)=(?<props>\i).muted/,
+                    match: /(?<restOfFunction>\i\.name,)(?<isMuted>\i)=(?<props>\i).muted/,
                     replace: "$<restOfFunction>$<isMuted>=$self.isHiddenChannel($<props>.channel)?true:$<props>.muted"
                 },
                 // Add the hidden eye icon if the channel is hidden
@@ -114,8 +114,8 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<restOfFunction>.wrapper:\i\(\).notInteractive,)(?<secondRestOfFunction>.+?)(?<isMutedClassExpression>\i\?\i\.MUTED:)/,
-                    replace: "$<restOfFunction>$<isMutedClassExpression>\"\",$<secondRestOfFunction>"
+                    match: /(?<restOfFunction>.wrapper:\i\(\).notInteractive,)(?<secondRestOfFunction>.+?)(?<isMutedClassExpression>(?<isMuted>\i)\?\i\.MUTED:)/,
+                    replace: "$<restOfFunction>$<isMutedClassExpression>\"\",$<secondRestOfFunction>$<isMuted>?\"\":"
                 }
             ]
         },
