@@ -60,7 +60,7 @@ async function init() {
                                 location.reload();
                         }
                     );
-                });
+                }, 10_000);
                 return;
             }
 
@@ -74,7 +74,7 @@ async function init() {
                             Router.open("VencordUpdater");
                         }
                     );
-                }, 10000);
+                }, 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
