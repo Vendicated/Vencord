@@ -53,6 +53,7 @@ export async function onRelationshipRemove(event: RelationshipRemove) {
 export function onGuildDelete(event: GuildDelete) {
     if (settings.store.servers && event.guild.unavailable === undefined) {
         if (manualRemovedGuild === event.guild.id) {
+            deleteGuild(event.guild.id);
             return void (manualRemovedGuild = undefined);
         }
         const guild = getGuild(event.guild.id);
@@ -66,6 +67,7 @@ export function onGuildDelete(event: GuildDelete) {
 export function onChannelDelete(event: ChannelDelete) {
     if (settings.store.groups && event.channel.type === 3) {
         if (manualRemovedGroup === event.channel.id) {
+            deleteGroup(event.channel.id);
             return void (manualRemovedGroup = undefined);
         }
         const channel = getGroup(event.channel.id);

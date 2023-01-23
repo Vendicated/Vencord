@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Notices } from "@api/index";
+import { DataStore, Notices } from "@api/index";
 import { findByPropsLazy } from "@webpack";
-import { NavigationRouter } from "@webpack/common";
+import { NavigationRouter, RelationshipStore, UserUtils } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
 import settings from "./settings";
@@ -31,6 +31,55 @@ const Notifications = findByPropsLazy("showNotification", "requestPermission");
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
+const friends: { friends: string[]; requests: string[] } = {
+    friends: [],
+    requests: []
+};
+
+export async function syncAndRunChecks() {
+    const oldGuilds: Map<string, SimpleGuild> | undefined = await DataStore.get("relationship-notifier-guilds");
+    const oldGroups: Map<string, SimpleGroupChannel> | undefined = await DataStore.get("relationship-notifier-groups");
+    const oldFriends: { friends: string[]; requests: string[] } | undefined = await DataStore.get("relationship-notifier-friends");
+
+    await syncGuilds();
+    await syncGroups();
+    await syncFriends();
+
+    if (settings.store.offlineRemovals) {
+        const removedGuilds = oldGuilds ? [...oldGuilds.keys()].filter(id => !guilds.has(id)) : [];
+        const removedGroups = oldGroups ? [...oldGroups.keys()].filter(id => !groups.has(id)) : [];
+        const removedFriends = oldFriends ? [...oldFriends.friends].filter(id => !friends.friends.includes(id)) : [];
+        const removedRequests = oldFriends ? [...oldFriends.requests].filter(id => !friends.requests.includes(id)) : [];
+
+        if (settings.store.groups) {
+            removedGroups.forEach(id => {
+                const group = oldGroups?.get(id);
+                if (group) notify(`You are no longer in the group ${group.name}.`, group.iconURL);
+            });
+        }
+
+        if (settings.store.servers) {
+            removedGuilds.forEach(id => {
+                const guild = oldGuilds?.get(id);
+                if (guild) notify(`You are no longer in the guild ${guild.name}.`, guild.iconURL);
+            });
+        }
+
+        if (settings.store.friends) {
+            for (const id of removedFriends) {
+                const user = await UserUtils.fetchUser(id).catch(() => undefined);
+                if (user) notify(`You are no longer friends with ${user.tag}.`, user.getAvatarURL(undefined, undefined, false));
+            }
+        }
+
+        if (settings.store.friendRequestCancels) {
+            for (const id of removedRequests) {
+                const user = await UserUtils.fetchUser(id).catch(() => undefined);
+                if (user) notify(`Friend request from ${user.tag} has been removed.`, user.getAvatarURL(undefined, undefined, false));
+            }
+        }
+    }
+}
 
 export function notify(text: string, icon?: string) {
     if (!document.hasFocus() && settings.store.notifications) {
@@ -47,9 +96,10 @@ export function getGuild(id: string) {
 
 export function deleteGuild(id: string) {
     guilds.delete(id);
+    syncGuilds();
 }
 
-export function syncGuilds() {
+export async function syncGuilds() {
     const currentGuilds: [string, Guild][] = Object.entries(GuildStore.getGuilds());
     for (const [id, guild] of currentGuilds) {
         guilds.set(id, {
@@ -58,6 +108,7 @@ export function syncGuilds() {
             iconURL: guild.icon ? `https://cdn.discordapp.com/icons/${id}/${guild.icon}.png` : undefined
         });
     }
+    await DataStore.set("relationship-notifier-guilds", guilds);
 }
 
 export function getGroup(id: string) {
@@ -66,9 +117,10 @@ export function getGroup(id: string) {
 
 export function deleteGroup(id: string) {
     groups.delete(id);
+    syncGroups();
 }
 
-export function syncGroups() {
+export async function syncGroups() {
     const currentChannels: Channel[] = DMStore.getSortedPrivateChannels();
     for (const channel of currentChannels) {
         if (channel.type !== 3) continue;
@@ -78,4 +130,12 @@ export function syncGroups() {
             iconURL: channel.icon ? `https://cdn.discordapp.com/channel-icons/${channel.id}/${channel.icon}.png` : undefined
         });
     }
+    await DataStore.set("relationship-notifier-groups", groups);
+}
+
+export async function syncFriends() {
+    const allFriends = RelationshipStore.getRelationships();
+    friends.friends = Object.entries(allFriends).filter(([_, type]) => type === 1).map(([id]) => id);
+    friends.requests = Object.entries(allFriends).filter(([_, type]) => type === 3).map(([id]) => id);
+    await DataStore.set("relationship-notifier-friends", friends);
 }

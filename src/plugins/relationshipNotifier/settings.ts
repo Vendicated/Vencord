@@ -25,6 +25,11 @@ const settings = definePluginSettings({
         description: "Send a desktop notification discord is unfocused",
         default: true,
     },
+    offlineRemovals: {
+        type: OptionType.BOOLEAN,
+        description: "Notify you when starting discord if you were removed while offline.",
+        default: true
+    },
     friends: {
         type: OptionType.BOOLEAN,
         description: "Notify when a friend removes you",
