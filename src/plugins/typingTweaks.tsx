@@ -48,6 +48,7 @@ export default definePlugin({
     description: "Show avatars and role colours in the typing indicator",
     authors: [Devs.zt],
     patches: [
+        // Style the indicator and add function call to modify the children before rendering
         {
             find: "getCooldownTextStyle",
             replacement: {
@@ -55,6 +56,7 @@ export default definePlugin({
                 replace: "=$1[2];$2\"aria-atomic\":!0,style:{display:\"grid\",gridAutoFlow:\"column\",gridGap:\"0.25em\"},children:$self.mutateChildren(this.props,$1,$3)})"
             }
         },
+        // Changes the indicator to keep the user object when creating the list of typing users
         {
             find: "getCooldownTextStyle",
             replacement: {
@@ -62,6 +64,7 @@ export default definePlugin({
                 replace: "return $1"
             }
         },
+        // Changes indicator to format message with the typing users
         {
             find: "t(n,\"SEVERAL_USERS_TYPING\"",
             replacement: {
@@ -70,6 +73,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.alternativeFormatting
         },
+        // Adds the alternative formatting for several users typing
         {
             find: "getCooldownTextStyle",
             replacement: {
