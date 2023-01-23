@@ -28,13 +28,13 @@ const boolSetting = (description, def?: boolean) => ({
 
 export default definePlugin({
     name: "JoinVoiceSettings",
-    description: "Gives you more control over your mute and deafen state when joining a voice channel.",
+    description: "Gives you more control over your mute and deafen state when joining a voice call or channel.",
     authors: [Devs.MyNameIsJeff],
     settings: definePluginSettings({
-        autoMute: boolSetting("Automatically mute when joining a voice channel", false),
-        autoDeafen: boolSetting("Automatically deafen when joining a voice channel", false),
-        noAutoUnmute: boolSetting("Stop Discord from automatically unmuting when joining a voice channel", false),
-        noAutoUndeafen: boolSetting("Stop Discord from automatically undeafening when joining a voice channel", false),
+        alwaysJoinMuted: boolSetting("Automatically mute when joining a voice call or channel", false),
+        alwaysJoinDeafened: boolSetting("Automatically deafen when joining a voice call or channel", false),
+        noAutoUnmute: boolSetting("Stop Discord from automatically unmuting when joining a call", false),
+        noAutoUndeafen: boolSetting("Stop Discord from automatically undeafening when joining a call", false),
     }),
     patches: [
         {
@@ -53,10 +53,10 @@ export default definePlugin({
         }
     ],
     shouldOverride() {
-        return this.settings.store.autoMute || this.settings.store.autoDeafen;
+        return this.settings.store.alwaysJoinMuted || this.settings.store.alwaysJoinDeafened;
     },
     shouldDeafen(e: VoiceChannelSelectEvent, s: AudioSettings) {
-        return this.settings.store.autoDeafen || (s.deaf && (e.guildId != null || this.settings.store.noAutoUndeafen));
+        return this.settings.store.alwaysJoinDeafened || (s.deaf && (e.guildId != null || this.settings.store.noAutoUndeafen));
     },
     shouldMute(e: VoiceChannelSelectEvent, s: AudioSettings) {
         return this.shouldOverride() || (s.mute && (e.guildId != null || this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
