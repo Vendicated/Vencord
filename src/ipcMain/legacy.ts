@@ -16,35 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const PluginsGrid: React.CSSProperties = {
-    marginTop: 16,
-    display: "grid",
-    gridGap: 16,
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-};
+import IpcEvents from "@utils/IpcEvents";
+import { ipcMain } from "electron";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
-export const PluginsGridItem: React.CSSProperties = {
-    backgroundColor: "var(--background-modifier-selected)",
-    color: "var(--interactive-active)",
-    borderRadius: 3,
-    cursor: "pointer",
-    display: "block",
-    height: "min-content",
-    padding: 10,
-    width: "100%",
-};
+import { get } from "./simpleGet";
 
-export const FiltersBar: React.CSSProperties = {
-    gap: 10,
-    height: 40,
-    gridTemplateColumns: "1fr 150px",
-    display: "grid"
-};
+ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
+    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
+    await writeFile(join(__dirname, "renderer.css"), buf);
+    return buf.toString("utf-8");
+});
 
-export const SettingsIcon: React.CSSProperties = {
-    height: "24px",
-    width: "24px",
-    padding: "0",
-    background: "transparent",
-    marginRight: 8
-};

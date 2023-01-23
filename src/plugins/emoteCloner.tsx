@@ -50,14 +50,14 @@ function getGuildCandidates(isAnimated: boolean) {
 }
 
 async function doClone(guildId: string, id: string, name: string, isAnimated: boolean) {
-    const data = await fetch(`https://cdn.discordapp.com/emojis/${id}.${isAnimated ? "gif" : "png"}`)
+    const data = await fetch(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${id}.${isAnimated ? "gif" : "png"}`)
         .then(r => r.blob());
     const reader = new FileReader();
 
     reader.onload = () => {
         uploadEmoji({
             guildId,
-            name,
+            name: name.split("~")[0],
             image: reader.result
         }).then(() => {
             Toasts.show({
@@ -226,7 +226,7 @@ export default definePlugin({
                             <img
                                 role="presentation"
                                 aria-hidden
-                                src={`https://cdn.discordapp.com/emojis/${id}.${isAnimated ? "gif" : "png"}`}
+                                src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${id}.${isAnimated ? "gif" : "png"}`}
                                 alt=""
                                 height={24}
                                 width={24}

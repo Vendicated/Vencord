@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./legacy";
 import "./updater";
 
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
-import { BrowserWindow, desktopCapturer, ipcMain, shell } from "electron";
+import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
@@ -43,9 +44,6 @@ export function readSettings() {
         return "{}";
     }
 }
-
-// Fix for screensharing in Electron >= 17
-ipcMain.handle(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, (_, opts) => desktopCapturer.getSources(opts));
 
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
 
@@ -80,7 +78,7 @@ ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
 export function initIpc(mainWindow: BrowserWindow) {
     open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
-        watch(QUICKCSS_PATH, debounce(async () => {
+        watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
     });

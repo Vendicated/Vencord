@@ -36,6 +36,7 @@ export let React: typeof import("react");
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;
 export let useMemo: typeof React.useMemo;
+export let useRef: typeof React.useRef;
 
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
 
@@ -71,12 +72,15 @@ export const Forms = {} as {
 };
 export let Card: Components.Card;
 export let Button: any;
+export const ButtonLooks = findByPropsLazy("BLANK", "FILLED", "INVERTED") as Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
 export let Switch: any;
 export let Tooltip: Components.Tooltip;
+export let Timestamp: any;
 export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
 export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.ComponentType<React.PropsWithRef<any>>;
+export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 
 export const Select = LazyComponent(() => findByCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = LazyComponent(() => findByCode("closestMarkerIndex", "stickToMarkers"));
@@ -158,7 +162,7 @@ export const NavigationRouter = mapMangledModuleLazy("Transitioning to external 
 
 waitFor("useState", m => {
     React = m;
-    ({ useEffect, useState, useMemo } = React);
+    ({ useEffect, useState, useMemo, useRef } = React);
 });
 
 waitFor(["dispatch", "subscribe"], m => {
@@ -179,7 +183,11 @@ waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 waitFor("getRelationshipType", m => RelationshipStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
-waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
+
+waitFor(filters.byCode("tooltipNote", "ringTarget"), m => Switch = m);
+
+waitFor(filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"), m => Timestamp = m);
+
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
 
@@ -190,7 +198,7 @@ waitFor(m => m.Types?.INPUT_PLACEHOLDER, m => Forms.FormText = m);
 waitFor(m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
-    return s.length < 200 && s.includes("().divider");
+    return s.length < 200 && s.includes(".divider");
 }, m => Forms.FormDivider = m);
 
 // This is the same module but this is easier

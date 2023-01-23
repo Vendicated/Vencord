@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@utils/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 
@@ -44,8 +44,31 @@ app.setAppPath(asarPath);
 
 if (!process.argv.includes("--vanilla")) {
     // Repatch after host updates on Windows
-    if (process.platform === "win32")
+    if (process.platform === "win32") {
         require("./patchWin32Updater");
+
+        const originalBuild = Menu.buildFromTemplate;
+        Menu.buildFromTemplate = function (template) {
+            if (template[0]?.label === "&File") {
+                const { submenu } = template[0];
+                if (Array.isArray(submenu)) {
+                    submenu.push({
+                        label: "Quit (Hidden)",
+                        visible: false,
+                        acceleratorWorksWhenHidden: true,
+                        accelerator: "Control+Q",
+                        click: () => app.quit()
+                    });
+                }
+            }
+            return originalBuild.call(this, template);
+        };
+    }
+
+    let settings = {} as any;
+    try {
+        settings = JSON.parse(readSettings());
+    } catch { }
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
@@ -53,6 +76,9 @@ if (!process.argv.includes("--vanilla")) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
+                if (settings.frameless) {
+                    options.frame = false;
+                }
 
                 process.env.DISCORD_PRELOAD = original;
 
@@ -100,8 +126,7 @@ if (!process.argv.includes("--vanilla")) {
         });
 
         try {
-            const settings = JSON.parse(readSettings());
-            if (settings.enableReactDevtools)
+            if (settings?.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
