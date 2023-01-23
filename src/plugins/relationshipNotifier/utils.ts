@@ -21,7 +21,7 @@ import { findByPropsLazy } from "@webpack";
 import { NavigationRouter } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
-import relationshipNotifier from "./index";
+import settings from "./settings";
 import SimpleGroupChannel from "./types/SimpleGroupChannel";
 import SimpleGuild from "./types/SimpleGuild";
 
@@ -33,7 +33,7 @@ const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
 
 export function notify(text: string, icon?: string) {
-    if (!document.hasFocus() && relationshipNotifier.settings.store.notifications) {
+    if (!document.hasFocus() && settings.store.notifications) {
         Notifications.showNotification(icon, "Relationship Notifier", text, {
             onClick: () => NavigationRouter.transitionTo("/channels/@me")
         }, {});
