@@ -84,5 +84,8 @@
             "overwriteDest": true
         },
         "sourceDir": "./dist/extension-v2-unpacked"
+    },
+    "engines": {
+        "node": ">=18"
     }
 }
