@@ -23,15 +23,14 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Player } from "./PlayerComponent";
 
 function toggleHoverControls(value: boolean) {
-    const hoverControls = `
-    .vc-spotify-button-row { height: 0; opacity: 0; will-change: height, opacity; transition: height .2s, opacity .05s; }
-    #vc-spotify-player:hover .vc-spotify-button-row { opacity: 1; height: 32px; }
-    `;
-    if (document.getElementById("vc-spotify-hover-controls")) document.getElementById("vc-spotify-hover-controls")?.remove();
+    document.getElementById("vc-spotify-hover-controls")?.remove();
     if (value) {
         const style = document.createElement("style");
         style.id = "vc-spotify-hover-controls";
-        style.innerHTML = hoverControls;
+        style.textContent =  `
+.vc-spotify-button-row { height: 0; opacity: 0; will-change: height, opacity; transition: height .2s, opacity .05s; }
+#vc-spotify-player:hover .vc-spotify-button-row { opacity: 1; height: 32px; }
+`;
         document.head.appendChild(style);
     }
 }
