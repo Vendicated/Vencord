@@ -59,7 +59,7 @@ export default definePlugin({
         return this.settings.store.autoDeafen || (s.deaf && (e.guildId != null || this.settings.store.noAutoUndeafen));
     },
     shouldMute(e: VoiceChannelSelectEvent, s: AudioSettings) {
-        return this.settings.store.autoDeafen || this.settings.store.autoMute || (s.mute && (e.guildId != null || this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
+        return this.shouldOverride() || (s.mute && (e.guildId != null || this.settings.store.noAutoUnmute || (s.deaf && this.settings.store.noAutoUndeafen)));
     }
 });
 
