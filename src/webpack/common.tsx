@@ -152,9 +152,9 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
-export const NavigationRouter = mapMangledModuleLazy("Transitioning to external path", {
-    transitionTo: filters.byCode("Transitioning to external path"),
-    transitionToGuild: filters.byCode("transitionToGuild"),
+export const NavigationRouter = mapMangledModuleLazy('"transitionToGuild', {
+    transitionTo: filters.byCode('"transitionTo '),
+    transitionToGuild: filters.byCode('"transitionToGuild'),
     goBack: filters.byCode("goBack()"),
     goForward: filters.byCode("goForward()"),
 });
