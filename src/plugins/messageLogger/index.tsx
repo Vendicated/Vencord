@@ -23,8 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Parser, UserStore } from "@webpack/common";
+import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 function addDeleteStyleClass() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -41,13 +40,7 @@ export default definePlugin({
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
 
-    timestampModule: null as any,
-    moment: null as Function | null,
-
     start() {
-        this.moment = findByPropsLazy("relativeTimeRounding", "relativeTimeThreshold");
-        this.timestampModule = findByPropsLazy("messageLogger_TimestampComponent");
-
         addDeleteStyleClass();
     },
 
@@ -59,7 +52,6 @@ export default definePlugin({
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
-        const Timestamp = this.timestampModule.messageLogger_TimestampComponent;
         return (
             <ErrorBoundary noop>
                 <div className="messageLogger-edited">
@@ -78,7 +70,7 @@ export default definePlugin({
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: this.moment?.call(newMessage.edited_timestamp),
+            timestamp: moment?.call(newMessage.edited_timestamp),
             content: oldMessage.content
         };
     },
@@ -310,17 +302,6 @@ export default definePlugin({
                     replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
-        },
-
-        {
-            // Message "(edited)" timestamp component
-            // Module 23552
-            find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
-            replacement: {
-                // Re-export the timestamp component under a findable name
-                match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
-                replace: "{$1,messageLogger_TimestampComponent:()=>$2}"
-            }
         },
 
         {
