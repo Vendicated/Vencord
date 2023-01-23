@@ -39,7 +39,7 @@ const settings = definePluginSettings({
     alternativeFormatting: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Use alternative formatting for when several users are typing"
+        description: "Show a more useful message when several users are typing"
     }
 });
 
