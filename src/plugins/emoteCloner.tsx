@@ -57,7 +57,7 @@ async function doClone(guildId: string, id: string, name: string, isAnimated: bo
     reader.onload = () => {
         uploadEmoji({
             guildId,
-            name,
+            name: name.split("~")[0],
             image: reader.result
         }).then(() => {
             Toasts.show({
