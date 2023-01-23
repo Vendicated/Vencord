@@ -26,11 +26,8 @@ const boolSetting = (description, def?: boolean) => ({
     default: def
 }) as const;
 
-const PLUGIN_NAME = "JoinVoiceSettings";
-const PLUGIN_PATH = `Vencord.Plugins.plugins.${PLUGIN_NAME}`;
-
 export default definePlugin({
-    name: PLUGIN_NAME,
+    name: "JoinVoiceSettings",
     description: "Gives you more control over your mute and deafen state when joining a voice channel.",
     authors: [Devs.MyNameIsJeff],
     settings: definePluginSettings({
@@ -44,14 +41,14 @@ export default definePlugin({
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
                 match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\if\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,50}?\({)deaf:!1,mute:!1(?<post>}\);)/,
-                replace: `$<pre>||${PLUGIN_PATH}.shouldOverride()$<mid>deaf:${PLUGIN_PATH}.shouldDeafen($<event>,$<var>),mute:${PLUGIN_PATH}.shouldMute($<event>,$<var>)$<post>`,
+                replace: "$<pre>||$self.shouldOverride()$<mid>deaf:$self.shouldDeafen($<event>,$<var>),mute:$self.shouldMute($<event>,$<var>)$<post>",
             },
         },
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: {
                 match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){var (?<var>.{1,2})=\k<event>\.guildId.+?if\()(?<cond>null==\k<var>)/,
-                replace: `$<pre>($<cond>||${PLUGIN_PATH}.shouldOverride())`
+                replace: "$<pre>($<cond>||$self.shouldOverride())"
             }
         }
     ],
