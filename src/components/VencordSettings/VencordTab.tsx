@@ -102,13 +102,6 @@ function VencordSettings() {
                             Enable React Developer Tools
                         </Switch>
                         <Switch
-                            value={settings.notifyAboutUpdates}
-                            onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                            note="Shows a toast on startup"
-                        >
-                            Get notified about new updates
-                        </Switch>
-                        <Switch
                             value={settings.frameless}
                             onChange={(v: boolean) => settings.frameless = v}
                             note="Requires a full restart"

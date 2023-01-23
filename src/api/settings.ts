@@ -27,6 +27,7 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
+    autoUpdate: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -42,6 +43,7 @@ export interface Settings {
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
+    autoUpdate: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
