@@ -192,5 +192,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Rapougnac: {
         name: "Rapougnac",
         id: 253554702858452992n,
+    },
+    captain: {
+        name: "Captain",
+        id: 347366054806159360n
     }
 });

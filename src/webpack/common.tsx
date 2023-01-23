@@ -184,7 +184,9 @@ waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
 waitFor("getRelationshipType", m => RelationshipStore = m);
 
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
-waitFor(filters.byCode("helpdeskArticleId"), m => Switch = m);
+
+waitFor(filters.byCode("tooltipNote", "ringTarget"), m => Switch = m);
+
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
 
@@ -307,3 +309,4 @@ export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
+

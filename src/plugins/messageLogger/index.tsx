@@ -259,8 +259,8 @@ export default definePlugin({
                     replace: "$1,deleted=$2.attachment?.deleted,"
                 },
                 {
-                    match: /(hiddenSpoilers:\w,className:)/,
-                    replace: "$1 (deleted ? 'messageLogger-deleted-attachment ' : '') +"
+                    match: /\["className","attachment","inlineMedia".+?className:/,
+                    replace: "$& (deleted ? 'messageLogger-deleted-attachment ' : '') +"
                 }
             ]
         },
