@@ -175,7 +175,7 @@ export default definePlugin({
                         </Flex>
                     </ModalHeader>
                     <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
-                        <Text variant="text-md/normal">You don't have permission to view messages in this channel.</Text>
+                        <Text variant="text-md/normal">You don't have permission to view {channel.type === ChannelTypes.GUILD_FORUM ? "posts" : "messages"} in this channel.</Text>
                         {(channel.topic ?? "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
