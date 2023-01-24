@@ -20,7 +20,7 @@ import type { User } from "discord-types/general";
 import type Other from "discord-types/other";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady,filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 
 export let FluxDispatcher: Other.FluxDispatcher;
 export const Flux = findByPropsLazy("connectStores");
@@ -121,3 +121,6 @@ waitFor(filters.byCode("currentToast:null"), m => Toasts.pop = m);
 
 waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
+
+export let Router: any;
+waitFor(["open", "saveAccountChanges"], m => Router = m);
