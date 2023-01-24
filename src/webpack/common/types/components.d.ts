@@ -65,3 +65,35 @@ export type FormText = ComponentType<PropsWithChildren<{
     /** defaults to FormText.Types.DEFAULT */
     type?: string;
 }> & TextProps> & { Types: FormTextTypes; };
+
+export type Tooltip = ComponentType<{
+    text: ReactNode;
+    children: React.FunctionComponent<{
+        onClick(): void;
+        onMouseEnter(): void;
+        onMouseLeave(): void;
+        onContextMenu(): void;
+        onFocus(): void;
+        onBlur(): void;
+        "aria-label"?: string;
+    }>;
+    "aria-label"?: string;
+
+    allowOverflow?: boolean;
+    forceOpen?: boolean;
+    hide?: boolean;
+    hideOnClick?: boolean;
+    shouldShow?: boolean;
+    spacing?: number;
+
+    /** Tooltip.Colors.BLACK */
+    color?: string;
+    /** Tooltip.Positions.TOP */
+    position?: string;
+
+    tooltipClassName?: string;
+    tooltipContentClassName?: string;
+}> & {
+    Positions: Record<"BOTTOM" | "CENTER" | "LEFT" | "RIGHT" | "TOP" | "WINDOW_CENTER", string>;
+    Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
+};

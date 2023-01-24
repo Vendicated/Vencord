@@ -38,7 +38,7 @@ export const Forms = {
 export const Card = makeWaitForComponent("Card", m => m.Types?.PRIMARY === "cardPrimary");
 export const Button = makeWaitForComponent("Button", ["Hovers", "Looks", "Sizes"]);
 export const Switch = makeWaitForComponent("Switch", filters.byCode("tooltipNote", "ringTarget"));
-export const Tooltip = makeWaitForComponent<Components.Tooltip>("Tooltip", ["Positions", "Colors"]);
+export const Tooltip = makeWaitForComponent<t.Tooltip>("Tooltip", ["Positions", "Colors"]);
 export const Timestamp = makeWaitForComponent("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const TextInput = makeWaitForComponent<Components.TextInput>("TextInput", ["defaultProps", "Sizes", "contextType"]);
 export const TextArea = makeWaitForComponent<React.ComponentType<React.PropsWithRef<any>>>("TextArea", filters.byCode("handleSetRef", "textArea"));
