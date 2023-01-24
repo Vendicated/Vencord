@@ -7,12 +7,6 @@ on:
 jobs:
     Publish:
         runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix:
-                browser:
-                    - firefox
-                    - chrome
 
         steps:
             - uses: actions/checkout@v3
