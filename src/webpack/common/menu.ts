@@ -21,7 +21,6 @@ import { proxyLazy } from "@utils/proxyLazy";
 // eslint-disable-next-line path-alias/no-relative
 import { filters, mapMangledModule, mapMangledModuleLazy } from "../webpack";
 
-
 export const Menu = proxyLazy(() => {
     const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
     const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];

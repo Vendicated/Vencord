@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import * as Stores from "discord-types/stores";
+import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
 import { findByPropsLazy, waitFor } from "../webpack";
