@@ -82,10 +82,19 @@ async function buildPluginZip(target, files, shouldZip) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/browser.js"),
         "dist/Vencord.css": await readFile("dist/browser.css"),
-        ...Object.fromEntries(await Promise.all(files.map(async f => [
-            (f.startsWith("manifest") ? "manifest.json" : f),
-            await readFile(join("browser", f))
-        ]))),
+        ...Object.fromEntries(await Promise.all(files.map(async f => {
+            let content = await readFile(join("browser", f));
+            if (f.startsWith("manifest")) {
+                const json = JSON.parse(content.toString("utf-8"));
+                json.version = PackageJSON.version;
+                content = new TextEncoder().encode(JSON.stringify(json));
+            }
+
+            return [
+                f.startsWith("manifest") ? "manifest.json" : f,
+                content
+            ];
+        }))),
     };
 
     if (shouldZip) {
