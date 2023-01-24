@@ -22,5 +22,6 @@ export * from "./react";
 export * from "./stores";
 export * as ComponentTypes from "./types/components.d";
 export * as MenuTypes from "./types/menu.d";
+export * as UtilTypes from "./types/utils.d";
 export * from "./utils";
 

@@ -23,33 +23,19 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, mapMangledModu
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const Flux = findByPropsLazy("connectStores");
+export const Flux: t.Flux = findByPropsLazy("connectStores");
 
-export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
+export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
 
-export let SnowflakeUtils: { fromTimestamp: (timestamp: number) => string, extractTimestamp: (snowflake: string) => number; };
+export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
-export let Parser: any;
-export let Alerts: {
-    show(alert: {
-        title: any;
-        body: React.ReactNode;
-        className?: string;
-        confirmColor?: string;
-        cancelText?: string;
-        confirmText?: string;
-        secondaryConfirmText?: string;
-        onCancel?(): void;
-        onConfirm?(): void;
-        onConfirmSecondary?(): void;
-    }): void;
-    /** This is a noop, it does nothing. */
-    close(): void;
-};
+export let Parser: t.Parser;
+export let Alerts: t.Alerts;
+
 const ToastType = {
     MESSAGE: 0,
     SUCCESS: 1,
@@ -122,5 +108,5 @@ waitFor(filters.byCode("currentToast:null"), m => Toasts.pop = m);
 waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
 
-export let Router: any;
-waitFor(["open", "saveAccountChanges"], m => Router = m);
+export let SettingsRouter: any;
+waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
