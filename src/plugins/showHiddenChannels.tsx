@@ -151,7 +151,7 @@ export default definePlugin({
                 }
             ]
         },
-        // Make muted channels also appear as unread if hide unread is false, using the HiddenIconWithMutedStyle and the channel is hidden
+        // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
         {
             find: ".UNREAD_HIGHLIGHT",
             predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
