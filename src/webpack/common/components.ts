@@ -21,13 +21,13 @@ import type Components from "discord-types/components";
 
 // eslint-disable-next-line path-alias/no-relative
 import { filters, findByCode, findByCodeLazy, findByPropsLazy, waitFor } from "../webpack";
-
+import type * as t from "./types/components";
 
 export const Forms = {} as {
-    FormTitle: Components.FormTitle;
-    FormSection: any;
-    FormDivider: any;
-    FormText: Components.FormText;
+    FormTitle: t.FormTitle;
+    FormSection: t.FormSection;
+    FormDivider: t.FormDivider;
+    FormText: t.FormText;
 };
 export let Card: Components.Card;
 export let Button: any;
@@ -37,7 +37,7 @@ export let Tooltip: Components.Tooltip;
 export let Timestamp: any;
 export let Router: any;
 export let TextInput: any;
-export let Text: (props: TextProps) => JSX.Element;
+export let Text: (props: t.TextProps) => JSX.Element;
 export const TextArea = findByCodeLazy("handleSetRef", "textArea") as React.ComponentType<React.PropsWithRef<any>>;
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 
@@ -72,17 +72,6 @@ waitFor(m => {
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 }, m => Text = m);
 
-export type TextProps = React.PropsWithChildren & {
-    variant: TextVariant;
-    style?: React.CSSProperties;
-    color?: string;
-    tag?: "div" | "span" | "p" | "strong" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
-    selectable?: boolean;
-    lineClamp?: number;
-    id?: string;
-    className?: string;
-};
 
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
+export const Margins: t.Margins = findByPropsLazy("marginTop20");
 
-export const Margins = findByPropsLazy("marginTop20");
