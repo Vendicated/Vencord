@@ -17,12 +17,12 @@
 */
 
 import type { User } from "discord-types/general";
-import type Other from "discord-types/other";
 
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import type * as t from "./types/utils";
 
-export let FluxDispatcher: Other.FluxDispatcher;
+export let FluxDispatcher: t.FluxDispatcher;
 export const Flux = findByPropsLazy("connectStores");
 
 export const RestAPI = findByPropsLazy("getAPIBaseURL", "get");
