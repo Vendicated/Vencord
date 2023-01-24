@@ -18,7 +18,6 @@
 
 import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
-import { readFileSync } from "fs";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -187,21 +186,4 @@ if (!process.argv.includes("--vanilla")) {
 }
 
 console.log("[Vencord] Loading original Discord app.asar");
-// Legacy Vencord Injector requires "../app.asar". However, because we
-// restore the require.main above this is messed up, so monkey patch Module._load to
-// redirect such requires
-// FIXME: remove this eventually
-if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
-    console.warn("[Vencord] [--> WARNING <--] You have a legacy Vencord install. Please reinject");
-    const Module = require("module");
-    const loadModule = Module._load;
-    Module._load = function (path: string) {
-        if (path === "../app.asar") {
-            Module._load = loadModule;
-            arguments[0] = require.main!.filename;
-        }
-        return loadModule.apply(this, arguments);
-    };
-} else {
-    require(require.main!.filename);
-}
+require(require.main!.filename);

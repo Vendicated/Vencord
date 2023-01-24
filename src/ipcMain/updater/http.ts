@@ -37,10 +37,7 @@ async function githubGet(endpoint: string) {
             Accept: "application/vnd.github+json",
             // "All API requests MUST include a valid User-Agent header.
             // Requests with no User-Agent header will be rejected."
-            "User-Agent": VENCORD_USER_AGENT,
-            // todo: perhaps add support for (optional) api token?
-            // unauthorised rate limit is 60 reqs/h
-            // https://github.com/settings/tokens/new?description=Vencord%20Updater
+            "User-Agent": VENCORD_USER_AGENT
         }
     });
 }
