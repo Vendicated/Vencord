@@ -25,9 +25,13 @@ function throwNotFound(name: string): never {
     throw new Error(`Could not find ${name}`);
 }
 
-export function makeWaitForComponent<T extends React.ComponentType = React.ComponentType<any>>(name: string, filter: FilterFn | string | string[]): T {
+export function makeWaitForComponent<T extends React.ComponentType = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
     let myValue: T;
-    waitFor(filter, (v: any) => myValue = v);
+    const lazyComponent = LazyComponent(() => myValue ?? throwNotFound(name)) as T;
+    waitFor(filter, (v: any) => {
+        myValue = v;
+        Object.assign(lazyComponent, v);
+    });
 
-    return LazyComponent(() => myValue ?? throwNotFound(name)) as T;
+    return lazyComponent;
 }
