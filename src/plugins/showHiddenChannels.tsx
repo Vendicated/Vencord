@@ -180,8 +180,6 @@ export default definePlugin({
     },
 
     onHiddenChannelSelected(channel: Channel) {
-        console.log(ChannelTypesToChannelName);
-
         // Check for type, otherwise it would attempt to show the modal for stage channels
         if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.GUILD_FORUM].includes(channel.type)) {
             openModal(modalProps => (
