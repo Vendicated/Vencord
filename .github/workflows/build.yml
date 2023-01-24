@@ -61,6 +61,8 @@ jobs:
 
                 git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
                 cd upload
+
+                GLOBIGNORE: .git:.gitignore:README.md:LICENSE
                 rm -rf *
                 cp -r ../dist/* .
 
@@ -69,6 +71,5 @@ jobs:
                 git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
               env:
                 API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
-                GLOBIGNORE: .git:.gitignore:README.md:LICENSE
                 GH_REPO: Vencord/builds
                 USERNAME: GitHub-Actions
