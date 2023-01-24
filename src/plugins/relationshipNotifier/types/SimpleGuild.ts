@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default interface SimpleGuild {
+interface SimpleGuild {
     id: string;
     name: string;
     iconURL?: string;
 }
+
+export default SimpleGuild;

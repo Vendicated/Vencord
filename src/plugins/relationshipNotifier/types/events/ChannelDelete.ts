@@ -18,7 +18,9 @@
 
 import { Channel } from "discord-types/general";
 
-export default interface ChannelDelete {
+interface ChannelDelete {
     type: "CHANNEL_DELETE";
     channel: Channel;
 }
+
+export default ChannelDelete;

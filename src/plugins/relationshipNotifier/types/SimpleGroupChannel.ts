@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default interface SimpleGroupChannel {
+interface SimpleGroupChannel {
     id: string;
     name: string;
     iconURL?: string;
 }
+
+export default SimpleGroupChannel;

@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default interface GuildDelete {
+interface GuildDelete {
     type: "GUILD_DELETE";
     guild: {
         id: string;
         unavailable?: boolean;
     }
 }
+
+export default GuildDelete;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default interface RelationshipRemove {
+interface RelationshipRemove {
     type: "RELATIONSHIP_REMOVE";
     relationship: {
         id: string;
@@ -24,3 +24,5 @@ export default interface RelationshipRemove {
         type: number;
     }
 }
+
+export default RelationshipRemove;
