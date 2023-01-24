@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { checkForUpdates, UpdateLogger } from "./utils/updater";
+import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { Router } from "./webpack/common";
 
@@ -44,7 +44,27 @@ async function init() {
     if (!IS_WEB) {
         try {
             const isOutdated = await checkForUpdates();
-            if (isOutdated && Settings.notifyAboutUpdates)
+            if (!isOutdated) return;
+
+            if (Settings.autoUpdate) {
+                await update();
+                const needsFullRestart = await rebuild();
+                setTimeout(() => {
+                    showNotice(
+                        "Vencord has been updated!",
+                        "Restart",
+                        () => {
+                            if (needsFullRestart)
+                                window.DiscordNative.app.relaunch();
+                            else
+                                location.reload();
+                        }
+                    );
+                }, 10_000);
+                return;
+            }
+
+            if (Settings.notifyAboutUpdates)
                 setTimeout(() => {
                     showNotice(
                         "A Vencord update is available!",
@@ -54,7 +74,7 @@ async function init() {
                             Router.open("VencordUpdater");
                         }
                     );
-                }, 10000);
+                }, 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }

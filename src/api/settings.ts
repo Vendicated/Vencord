@@ -27,10 +27,12 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
+    autoUpdate: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
     frameless: boolean;
+    winCtrlQ: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -41,10 +43,12 @@ export interface Settings {
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
+    autoUpdate: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
     frameless: false,
+    winCtrlQ: false,
     plugins: {}
 };
 

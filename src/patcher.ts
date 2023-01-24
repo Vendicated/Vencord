@@ -43,32 +43,34 @@ require.main!.filename = join(asarPath, discordPkg.main);
 app.setAppPath(asarPath);
 
 if (!process.argv.includes("--vanilla")) {
+    let settings: typeof import("@api/settings").Settings = {} as any;
+    try {
+        settings = JSON.parse(readSettings());
+    } catch { }
+
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
         require("./patchWin32Updater");
 
-        const originalBuild = Menu.buildFromTemplate;
-        Menu.buildFromTemplate = function (template) {
-            if (template[0]?.label === "&File") {
-                const { submenu } = template[0];
-                if (Array.isArray(submenu)) {
-                    submenu.push({
-                        label: "Quit (Hidden)",
-                        visible: false,
-                        acceleratorWorksWhenHidden: true,
-                        accelerator: "Control+Q",
-                        click: () => app.quit()
-                    });
+        if (settings.winCtrlQ) {
+            const originalBuild = Menu.buildFromTemplate;
+            Menu.buildFromTemplate = function (template) {
+                if (template[0]?.label === "&File") {
+                    const { submenu } = template[0];
+                    if (Array.isArray(submenu)) {
+                        submenu.push({
+                            label: "Quit (Hidden)",
+                            visible: false,
+                            acceleratorWorksWhenHidden: true,
+                            accelerator: "Control+Q",
+                            click: () => app.quit()
+                        });
+                    }
                 }
-            }
-            return originalBuild.call(this, template);
-        };
+                return originalBuild.call(this, template);
+            };
+        }
     }
-
-    let settings = {} as any;
-    try {
-        settings = JSON.parse(readSettings());
-    } catch { }
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
