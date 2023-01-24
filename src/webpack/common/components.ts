@@ -40,15 +40,15 @@ export const Button = makeWaitForComponent("Button", ["Hovers", "Looks", "Sizes"
 export const Switch = makeWaitForComponent("Switch", filters.byCode("tooltipNote", "ringTarget"));
 export const Tooltip = makeWaitForComponent<Components.Tooltip>("Tooltip", ["Positions", "Colors"]);
 export const Timestamp = makeWaitForComponent("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const TextArea = makeWaitForComponent<React.ComponentType<React.PropsWithRef<any>>>("TextArea", ["handleSetRef", "textArea"]);
 export const TextInput = makeWaitForComponent<Components.TextInput>("TextInput", ["defaultProps", "Sizes", "contextType"]);
+export const TextArea = makeWaitForComponent<React.ComponentType<React.PropsWithRef<any>>>("TextArea", filters.byCode("handleSetRef", "textArea"));
 export const Text = makeWaitForComponent<ComponentType<t.TextProps>>("Text", m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 });
-export const Select = makeWaitForComponent("Select", ["optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"]);
-export const Slider = makeWaitForComponent("Slider", ["closestMarkerIndex", "stickToMarkers"]);
+export const Select = makeWaitForComponent("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = makeWaitForComponent("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
 
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 export const Margins: t.Margins = findByPropsLazy("marginTop20");
