@@ -24,7 +24,7 @@ import { Button, Card, Forms, Margins, Text } from "@webpack/common";
 
 function BackupRestoreTab() {
     return (
-        <Forms.FormSection title="Settings Sync">
+        <Forms.FormSection title="Settings Sync" className={Margins.marginTop16}>
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>
