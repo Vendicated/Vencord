@@ -34,28 +34,19 @@ jobs:
             - name: Build web
               run: pnpm buildWeb --standalone
 
-            - name: Sign firefox extension
-              run: |
-                pnpx web-ext sign --api-key $WEBEXT_USER --api-secret $WEBEXT_SECRET --channel=unlisted
-              env:
-                WEBEXT_USER: ${{ secrets.WEBEXT_USER }}
-                WEBEXT_SECRET: ${{ secrets.WEBEXT_SECRET }}
-
             - name: Build
               run: pnpm build --standalone
 
-            - name: Rename extensions for more user friendliness
+            - name: Clean up obsolete files
               run: |
-                mv dist/*.xpi dist/Vencord-for-Firefox.xpi
-                mv dist/extension-v3.zip dist/Vencord-for-Chrome-and-Edge.zip
-                rm -rf dist/extension-v2-unpacked dist/extension-v2.zip
+                rm -rf dist/extension* Vencord.user.css
 
             - name: Get some values needed for the release
               id: release_values
               run: |
                 echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-            - name: Upload Devbuild as release
+            - name: Upload DevBuild as release
               run: |
                 gh release upload devbuild --clobber dist/*
                 gh release edit devbuild --title "DevBuild $RELEASE_TAG"
@@ -63,7 +54,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 RELEASE_TAG: ${{ env.release_tag }}
 
-            - name: Upload Devbuild to builds repo
+            - name: Upload DevBuild to builds repo
               run: |
                 git config --global user.name "$USERNAME"
                 git config --global user.email actions@github.com
