@@ -16,23 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
+import type { ComponentType, CSSProperties, PropsWithChildren, UIEvent } from "react";
+
+type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
 export interface Menu {
     ContextMenu: RC<{
         navId: string;
         onClose(): void;
         className?: string;
-        style?: React.CSSProperties;
+        style?: CSSProperties;
         hideScroller?: boolean;
         onSelect?(): void;
     }>;
-    MenuSeparator: React.ComponentType;
+    MenuSeparator: ComponentType;
     MenuGroup: RC<any>;
     MenuItem: RC<{
         id: string;
         label: string;
-        render?: React.ComponentType;
+        render?: ComponentType;
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
@@ -49,18 +51,18 @@ export interface Menu {
     }>;
 }
 
-export type ContextMenuApi = {
+export interface ContextMenuApi {
     close(): void;
     open(
-        event: React.UIEvent,
+        event: UIEvent,
         render?: Menu["ContextMenu"],
         options?: { enableSpellCheck?: boolean; },
         renderLazy?: () => Promise<Menu["ContextMenu"]>
     ): void;
     openLazy(
-        event: React.UIEvent,
+        event: UIEvent,
         renderLazy?: () => Promise<Menu["ContextMenu"]>,
         options?: { enableSpellCheck?: boolean; }
     ): void;
-};
+}
 
