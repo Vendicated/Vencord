@@ -17,57 +17,56 @@
 */
 
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Badge } from "@components/Badge";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
+const Permissions = findByPropsLazy("VIEW_CHANNEL", "ADMINISTRATOR");
+const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
 
-const VIEW_CHANNEL = 1024n;
-
-enum ChannelTypes {
-    GUILD_TEXT = 0,
-    GUILD_ANNOUNCEMENT = 5,
-    GUILD_FORUM = 15
-}
-
-const ChannelTypesToChannelName = {
+const ChannelTypesToChannelName = proxyLazy(() => ({
     [ChannelTypes.GUILD_TEXT]: "TEXT",
     [ChannelTypes.GUILD_ANNOUNCEMENT]: "ANNOUNCEMENT",
     [ChannelTypes.GUILD_FORUM]: "FORUM"
-};
+}));
 
 enum ShowMode {
     LockIcon,
     HiddenIconWithMutedStyle
 }
 
+const settings = definePluginSettings({
+    hideUnreads: {
+        description: "Hide Unreads",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    showMode: {
+        description: "The mode used to display hidden channels.",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Plain style with Lock Icon instead", value: ShowMode.LockIcon, default: true },
+            { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
+        ],
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux],
-    options: {
-        hideUnreads: {
-            description: "Hide Unreads",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true
-        },
-        showMode: {
-            description: "The mode used to display hidden channels.",
-            type: OptionType.SELECT,
-            options: [
-                { label: "Plain style with Lock Icon instead", value: ShowMode.LockIcon, default: true },
-                { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
-            ],
-            restartNeeded: true
-        }
-    },
+    settings,
+
     patches: [
         {
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
@@ -93,25 +92,29 @@ export default definePlugin({
             ]
         },
         {
-            // inside the onMouseClick handler, we check if the channel is hidden and open the modal if it is
+            // inside the onMouseDown handler, we check if the channel is hidden and open the modal if it is
             find: ".handleThreadsPopoutClose();",
-            replacement: {
-                match: /(?<this>\i)\.handleThreadsPopoutClose\(\);/,
-                replace: "if(arguments[0].button===0&&$self.channelSelected($<this>?.props?.channel))return;$&"
-            }
-        },
-        {
-            find: ".UNREAD_HIGHLIGHT",
-            predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
-            replacement: [{
-                // Hide unreads
-                match: /(?<restOfFunction>\i\.connected,)(?<hasUnread>\i)=(?<props>\i).unread/,
-                replace: "$<restOfFunction>$<hasUnread>=$self.isHiddenChannel($<props>.channel)?false:$<props>.unread"
-            }]
+            replacement: [
+                {
+                    match: /(?<this>\i)\.handleThreadsPopoutClose\(\);/,
+                    replace: "if($self.isHiddenChannel($<this>.props.channel)&&arguments[0].button===0){"
+                        + "$self.onHiddenChannelSelected($<this>.props.channel);"
+                        + "return;"
+                        + "};$&"
+                },
+                ...[
+                    "renderEditButton",
+                    "renderInviteButton",
+                    "renderOpenChatButton"
+                ].map(func => ({
+                    match: new RegExp(`\\i\\.${func}=function\\(\\){`, "g"), // Global because Discord has multiple declarations of the same functions
+                    replace: "$&if($self.isHiddenChannel(this.props.channel))return null;"
+                }))
+            ]
         },
         {
             find: ".Messages.CHANNEL_TOOLTIP_DIRECTORY",
-            predicate: () => Settings.plugins.ShowHiddenChannels.showMode === ShowMode.LockIcon,
+            predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
                 // Lock Icon
                 match: /switch\((?<channel>\i)\.type\).{1,30}\.GUILD_ANNOUNCEMENT.{1,30}\(0,\i\.\i\)\(\i\)/,
@@ -120,7 +123,16 @@ export default definePlugin({
         },
         {
             find: ".UNREAD_HIGHLIGHT",
-            predicate: () => Settings.plugins.ShowHiddenChannels.showMode === ShowMode.HiddenIconWithMutedStyle,
+            predicate: () => settings.store.hideUnreads === true,
+            replacement: [{
+                // Hide unreads
+                match: /(?<restOfFunction>\i\.connected,)(?<hasUnread>\i)=(?<props>\i).unread/,
+                replace: "$<restOfFunction>$<hasUnread>=$self.isHiddenChannel($<props>.channel)?false:$<props>.unread"
+            }]
+        },
+        {
+            find: ".UNREAD_HIGHLIGHT",
+            predicate: () => settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
@@ -139,6 +151,15 @@ export default definePlugin({
                 }
             ]
         },
+        // Make muted channels also appear as unread if hide unread is false, using the HiddenIconWithMutedStyle and the channel is hidden
+        {
+            find: ".UNREAD_HIGHLIGHT",
+            predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
+            replacement: {
+                match: /(?<=channel:(?<channel>\i),.+?\.LOCKED:\i)/,
+                replace: "&&!($self.settings.store.hideUnreads===false&&$self.isHiddenChannel($<channel>))"
+            }
+        },
         {
             // Hide New unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
@@ -146,25 +167,23 @@ export default definePlugin({
                 match: /(?<restOfFunction>return null!=(?<channel>\i))(?<secondRestOfFunction>&&null!=\i\.getGuildId\(\).{1,120}hasRelevantUnread\(\i\)\))/,
                 replace: "$<restOfFunction>&&!$self.isHiddenChannel($<channel>)$<secondRestOfFunction>"
             }
-        },
+        }
     ],
 
-    isHiddenChannel(channel) {
+    isHiddenChannel(channel: Channel & { channelId?: string; }) {
         if (!channel) return false;
 
         if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
-        return !PermissionStore.can(VIEW_CHANNEL, channel);
+        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
 
-    channelSelected(channel) {
-        if (!channel) return false;
-
-        const isHidden = this.isHiddenChannel(channel);
+    onHiddenChannelSelected(channel: Channel) {
+        console.log(ChannelTypesToChannelName);
 
         // Check for type, otherwise it would attempt to show the modal for stage channels
-        if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.GUILD_FORUM].includes(channel.type) && isHidden) {
+        if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.GUILD_FORUM].includes(channel.type)) {
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
@@ -174,7 +193,7 @@ export default definePlugin({
                             {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
                         </Flex>
                     </ModalHeader>
-                    <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
+                    <ModalContent style={{ margin: "10px 8px" }}>
                         <Text variant="text-md/normal">You don't have permission to view {channel.type === ChannelTypes.GUILD_FORUM ? "posts" : "messages"} in this channel.</Text>
                         {(channel.topic ?? "").length > 0 && (
                             <>
@@ -211,7 +230,6 @@ export default definePlugin({
                 </ModalRoot>
             ));
         }
-        return isHidden;
     },
 
     LockIcon: () => (
