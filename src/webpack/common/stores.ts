@@ -19,7 +19,7 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByPropsLazy, waitFor } from "../webpack";
+import { filters, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 
 export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
@@ -40,6 +40,10 @@ export let RelationshipStore: Stores.RelationshipStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
 };
+
+export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
+    openUntrustedLink: filters.byCode(".apply(this,arguments)")
+});
 
 waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
 waitFor("getSortedPrivateChannels", m => ChannelStore = m);

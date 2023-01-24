@@ -20,15 +20,16 @@ import { proxyLazy } from "@utils/proxyLazy";
 
 // eslint-disable-next-line path-alias/no-relative
 import { filters, mapMangledModule, mapMangledModuleLazy } from "../webpack";
+import type * as t from "./types/menu";
 
-export const Menu = proxyLazy(() => {
+export const Menu: t.Menu = proxyLazy(() => {
     const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
     const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
 
     const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
         ContextMenu: filters.byCode("getContainerProps"),
         ...Object.fromEntries((hasDeobfuscator ? menuItems : []).map(s => [s, (m: any) => m.name === s]))
-    }) as Menu;
+    }) as t.Menu;
 
     if (!hasDeobfuscator) {
         for (const m of menuItems)
@@ -42,58 +43,9 @@ export const Menu = proxyLazy(() => {
     return map;
 });
 
-export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
+export const ContextMenu: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
     open: filters.byCode("stopPropagation"),
     openLazy: m => m.toString().length < 50,
     close: filters.byCode("CONTEXT_MENU_CLOSE")
-}) as {
-    close(): void;
-    open(
-        event: React.UIEvent,
-        render?: Menu["ContextMenu"],
-        options?: { enableSpellCheck?: boolean; },
-        renderLazy?: () => Promise<Menu["ContextMenu"]>
-    ): void;
-    openLazy(
-        event: React.UIEvent,
-        renderLazy?: () => Promise<Menu["ContextMenu"]>,
-        options?: { enableSpellCheck?: boolean; }
-    ): void;
-};
-
-export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
-    openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
 
-type RC<C> = React.ComponentType<React.PropsWithChildren<C & Record<string, any>>>;
-
-interface Menu {
-    ContextMenu: RC<{
-        navId: string;
-        onClose(): void;
-        className?: string;
-        style?: React.CSSProperties;
-        hideScroller?: boolean;
-        onSelect?(): void;
-    }>;
-    MenuSeparator: React.ComponentType;
-    MenuGroup: RC<any>;
-    MenuItem: RC<{
-        id: string;
-        label: string;
-        render?: React.ComponentType;
-        onChildrenScroll?: Function;
-        childRowHeight?: number;
-        listClassName?: string;
-    }>;
-    MenuCheckboxItem: RC<{
-        id: string;
-    }>;
-    MenuRadioItem: RC<{
-        id: string;
-    }>;
-    MenuControlItem: RC<{
-        id: string;
-        interactive?: boolean;
-    }>;
-}
