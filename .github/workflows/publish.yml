@@ -44,11 +44,15 @@ jobs:
                 # TODO make this real
                 cd dist/extension-unpacked
 
+                EXIT_CODE=0
                 # Chrome Store - TODO actually sign up for chrome publishing
-                # pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish || true
+                # Do not fail so that even if chrome fails, firefox gets a shot. But also store exit code to fail workflow later
+                # pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish || EXIT_CODE=$?
 
                 # Firefox
                 pnpx web-ext-submit@7.4.0
+
+                exit $EXIT_CODE
               env:
                 EXTENSION_ID: ${{ secrets.EXTENSION_ID }}
                 CLIENT_ID: ${{ secrets.CLIENT_ID }}
