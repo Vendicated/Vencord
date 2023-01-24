@@ -19,7 +19,7 @@
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor, _resolveReady } from "../webpack";
+import { _resolveReady,filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
