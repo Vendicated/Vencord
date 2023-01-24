@@ -39,18 +39,17 @@ export default definePlugin({
     patches: [
         {
             find: ".displayName=\"MediaEngineStore\"",
-            replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\if\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,100}?\({)deaf:!1,mute:!1(?=}\);)/,
-                replace: "$<pre>||$self.shouldOverride()$<mid>deaf:$self.shouldDeafen($<event>,$<var>),mute:$self.shouldMute($<event>,$<var>)",
-            },
+            replacement: [
+                {
+                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\if\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,100}?\({)deaf:!1,mute:!1(?=}\);)/,
+                    replace: "$<pre>||$self.shouldOverride()$<mid>deaf:$self.shouldDeafen($<event>,$<var>),mute:$self.shouldMute($<event>,$<var>)",
+                },
+                {
+                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?(?:var |,)(?<var>.{1,2})=\k<event>\.guildId.+?if\()(?<cond>null==\k<var>)/,
+                    replace: "$<pre>($<cond>||$self.shouldOverride())"
+                }
+            ]
         },
-        {
-            find: ".displayName=\"MediaEngineStore\"",
-            replacement: {
-                match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?(?:var |,)(?<var>.{1,2})=\k<event>\.guildId.+?if\()(?<cond>null==\k<var>)/,
-                replace: "$<pre>($<cond>||$self.shouldOverride())"
-            }
-        }
     ],
     shouldOverride() {
         return this.settings.store.alwaysJoinMuted || this.settings.store.alwaysJoinDeafened;
