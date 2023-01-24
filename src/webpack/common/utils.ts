@@ -19,7 +19,7 @@
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor, _resolveReady } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -84,9 +84,9 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
-export const NavigationRouter = mapMangledModuleLazy("Transitioning to external path", {
-    transitionTo: filters.byCode("Transitioning to external path"),
-    transitionToGuild: filters.byCode("transitionToGuild"),
+export const NavigationRouter = mapMangledModuleLazy("transitionToGuild - ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
     goBack: filters.byCode("goBack()"),
     goForward: filters.byCode("goForward()"),
 });
