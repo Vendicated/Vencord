@@ -102,6 +102,7 @@ export default definePlugin({
                         + "return;"
                         + "};$&"
                 },
+                // Render null instead of the buttons if the channel is hidden
                 ...[
                     "renderEditButton",
                     "renderInviteButton",
