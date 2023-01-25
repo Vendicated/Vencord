@@ -74,16 +74,20 @@ export default definePlugin({
             // These replacements only change the necessary CannotShow's
             replacement: [
                 {
+                    match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
+                    replace: "this.category.isCollapsed?$<RenderLevels>.WouldShowIfUncollapsed:$<RenderLevels>.Show"
+                },
+                {
+                    match: /(?<=(?<permissionCheck>if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{)if\(this\.id===\i\).+?};)(?<isChannelGatedAndVisibleCondition>if\(!\i\.\i\.isChannelGatedAndVisible\(.+?})(?<restOfFunction>.+?)(?=return{renderLevel:\i\.Show.{1,40}return \i)/,
+                    replace: "$<restOfFunction>$<permissionCheck>$<isChannelGatedAndVisibleCondition>}"
+                },
+                {
                     match: /(?<=renderLevel:(?<renderLevelExpression>\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
                     replace: "$<renderLevelExpression>"
                 },
                 {
-                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
+                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
                     replace: "$<RenderLevels>.Show"
-                },
-                {
-                    match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
-                    replace: "this.category.isCollapsed?$<RenderLevels>.WouldShowIfUncollapsed:$<RenderLevels>.Show"
                 },
                 {
                     match: /(?<=getRenderLevel=function.+?return ).+?\?(?<renderLevelExpressionWithoutPermCheck>.+?):\i\.CannotShow(?=})/,
