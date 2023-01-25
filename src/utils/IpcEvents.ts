@@ -20,13 +20,13 @@ type Enum<T extends Record<string, string>> = {
     [k in keyof T]: T[k];
 } & { [v in keyof T as T[v]]: v; };
 
-function strEnum<T extends Record<string, string>>(obj: T) {
+function strEnum<T extends Record<string, string>>(obj: T): T {
     const o = {} as T;
     for (const key in obj) {
         o[key] = obj[key] as any;
         o[obj[key]] = key as any;
     }
-    return Object.freeze(o) as any;
+    return Object.freeze(o);
 }
 
 export default strEnum({
