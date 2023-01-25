@@ -35,5 +35,12 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
+    },
+
+    "applications": {
+        "gecko": {
+            "id": "vencord-firefox@vendicated.dev",
+            "strict_min_version": "109.0"
+        }
     }
 }
