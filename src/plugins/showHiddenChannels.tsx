@@ -77,6 +77,7 @@ export default definePlugin({
                     match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
                     replace: "this.category.isCollapsed?$<RenderLevels>.WouldShowIfUncollapsed:$<RenderLevels>.Show"
                 },
+                // Move isChannelGatedAndVisible renderLevel logic to the bottom to not show hidden channels in case they are muted
                 {
                     match: /(?<=(?<permissionCheck>if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{)if\(this\.id===\i\).+?};)(?<isChannelGatedAndVisibleCondition>if\(!\i\.\i\.isChannelGatedAndVisible\(.+?})(?<restOfFunction>.+?)(?=return{renderLevel:\i\.Show.{1,40}return \i)/,
                     replace: "$<restOfFunction>$<permissionCheck>$<isChannelGatedAndVisibleCondition>}"

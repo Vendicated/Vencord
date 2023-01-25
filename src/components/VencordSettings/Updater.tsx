@@ -199,7 +199,7 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection>
+        <Forms.FormSection className={Margins.marginTop16}>
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.notifyAboutUpdates}
@@ -225,7 +225,7 @@ function Updater() {
                 </Link>
             )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
 
-            <Forms.FormDivider />
+            <Forms.FormDivider className={Margins.marginTop8 + " " + Margins.marginBottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
