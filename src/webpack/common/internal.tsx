@@ -21,8 +21,10 @@ import { LazyComponent } from "@utils/misc";
 // eslint-disable-next-line path-alias/no-relative
 import { FilterFn, waitFor } from "../webpack";
 
-export function makeWaitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
-    let myValue: T = function () { throw new Error(`Vencord could not find the ${name} Component`); } as any;
+export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
+    let myValue: T = function () {
+        throw new Error(`Vencord could not find the ${name} Component`);
+    } as any;
 
     const lazyComponent = LazyComponent(() => myValue) as T;
     waitFor(filter, (v: any) => {
