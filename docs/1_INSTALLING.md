@@ -1,5 +1,5 @@
 > **Warning**
-> These instructions are only for advanced users. If you're not a Developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead. 
+> These instructions are only for advanced users. If you're not a Developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead.
 
 # Installation Guide
 
@@ -183,7 +183,6 @@ In `index.js`:
 
 ```js
 require("C:/Users/<your user>/path/to/vencord/dist/patcher.js");
-require("../app.asar");
 ```
 
 And in `package.json`:

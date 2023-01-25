@@ -75,7 +75,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
 
 export default ErrorBoundary.wrap(function () {
     const settings = useSettings();
-    const ref = React.useRef<HTMLTextAreaElement>();
+    const ref = React.useRef<HTMLTextAreaElement>(null);
 
     function onBlur() {
         settings.themeLinks = [...new Set(
@@ -93,7 +93,7 @@ export default ErrorBoundary.wrap(function () {
                 <Forms.FormTitle tag="h5">Paste links to .css / .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
                 <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
-                <Forms.FormDivider />
+                <Forms.FormDivider className={Margins.marginTop8 + " " + Margins.marginBottom8} />
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
                 <div style={{ marginBottom: ".5em" }}>
                     <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
