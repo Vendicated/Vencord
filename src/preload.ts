@@ -18,7 +18,7 @@
 
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
-import { contextBridge, ipcRenderer, webFrame } from "electron";
+import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
 import { join } from "path";
 
@@ -45,24 +45,14 @@ if (location.protocol !== "data:") {
         }
     }
 
-    try {
-        const css = readFileSync(rendererCss, "utf-8");
-        insertCss(css);
-        if (IS_DEV) {
-            // persistent means keep process running if watcher is the only thing still running
-            // which we obviously don't want
-            watch(rendererCss, { persistent: false }, () => {
-                document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
-            });
-        }
-    } catch (err) {
-        if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
-            throw err;
-
-        // hack: the pre update updater does not download this file, so manually download it
-        // TODO: remove this in a future version
-        ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
-            .then(insertCss);
+    const css = readFileSync(rendererCss, "utf-8");
+    insertCss(css);
+    if (IS_DEV) {
+        // persistent means keep process running if watcher is the only thing still running
+        // which we obviously don't want
+        watch(rendererCss, { persistent: false }, () => {
+            document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
+        });
     }
     require(process.env.DISCORD_PRELOAD!);
 } else {
