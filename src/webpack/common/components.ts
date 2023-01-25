@@ -16,13 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type Components from "discord-types/components";
-import type { ComponentType } from "react";
-
 // eslint-disable-next-line path-alias/no-relative
 import { filters, findByPropsLazy } from "../webpack";
 import { makeWaitForComponent } from "./internal";
-import type * as t from "./types/components";
+import * as t from "./types/components";
 
 export const Forms = {
     FormTitle: makeWaitForComponent<t.FormTitle>("FormTitle", filters.byCode("errorSeparator")),
@@ -35,20 +32,20 @@ export const Forms = {
     FormText: makeWaitForComponent<t.FormText>("FormText", m => m.Types?.INPUT_PLACEHOLDER),
 };
 
-export const Card = makeWaitForComponent("Card", m => m.Types?.PRIMARY === "cardPrimary");
-export const Button = makeWaitForComponent("Button", ["Hovers", "Looks", "Sizes"]);
-export const Switch = makeWaitForComponent("Switch", filters.byCode("tooltipNote", "ringTarget"));
+export const Card = makeWaitForComponent<t.Card>("Card", m => m.Types?.PRIMARY === "cardPrimary");
+export const Button = makeWaitForComponent<t.Button>("Button", ["Hovers", "Looks", "Sizes"]);
+export const Switch = makeWaitForComponent<t.Switch>("Switch", filters.byCode("tooltipNote", "ringTarget"));
 export const Tooltip = makeWaitForComponent<t.Tooltip>("Tooltip", ["Positions", "Colors"]);
-export const Timestamp = makeWaitForComponent("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const TextInput = makeWaitForComponent<Components.TextInput>("TextInput", ["defaultProps", "Sizes", "contextType"]);
-export const TextArea = makeWaitForComponent<React.ComponentType<React.PropsWithRef<any>>>("TextArea", filters.byCode("handleSetRef", "textArea"));
-export const Text = makeWaitForComponent<ComponentType<t.TextProps>>("Text", m => {
+export const Timestamp = makeWaitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const TextInput = makeWaitForComponent<t.TextInput>("TextInput", ["defaultProps", "Sizes", "contextType"]);
+export const TextArea = makeWaitForComponent<t.TextArea>("TextArea", filters.byCode("handleSetRef", "textArea"));
+export const Text = makeWaitForComponent<t.Text>("Text", m => {
     if (typeof m !== "function") return false;
     const s = m.toString();
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 });
-export const Select = makeWaitForComponent("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-export const Slider = makeWaitForComponent("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
+export const Select = makeWaitForComponent<t.Select>("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const Slider = makeWaitForComponent<t.Slider>("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
 
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 export const Margins: t.Margins = findByPropsLazy("marginTop20");

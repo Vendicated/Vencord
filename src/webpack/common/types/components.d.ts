@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, HtmlHTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import type { Moment } from "moment";
+import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
@@ -32,8 +33,9 @@ export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
     lineClamp?: number;
 }>;
 
+export type Text = ComponentType<TextProps>;
 
-export type FormTitle = ComponentType<HtmlHTMLAttributes<HTMLTitleElement> & PropsWithChildren<{
+export type FormTitle = ComponentType<HTMLProps<HTMLTitleElement> & PropsWithChildren<{
     /** default is h5 */
     tag?: Heading;
     faded?: boolean;
@@ -68,7 +70,7 @@ export type FormText = ComponentType<PropsWithChildren<{
 
 export type Tooltip = ComponentType<{
     text: ReactNode;
-    children: React.FunctionComponent<{
+    children: FunctionComponent<{
         onClick(): void;
         onMouseEnter(): void;
         onMouseLeave(): void;
@@ -97,3 +99,175 @@ export type Tooltip = ComponentType<{
     Positions: Record<"BOTTOM" | "CENTER" | "LEFT" | "RIGHT" | "TOP" | "WINDOW_CENTER", string>;
     Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
 };
+
+export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
+    editable?: boolean;
+    outline?: boolean;
+    /** Card.Types.PRIMARY */
+    type?: string;
+}>> & {
+    Types: Record<"BRAND" | "CUSTOM" | "DANGER" | "PRIMARY" | "SUCCESS" | "WARNING", string>;
+};
+
+export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonElement>, "size"> & {
+    /** Button.Looks.FILLED */
+    look?: string;
+    /** Button.Colors.BRAND */
+    color?: string;
+    /** Button.Sizes.MEDIUM */
+    size?: string;
+    /** Button.BorderColors.BLACK */
+    borderColor?: string;
+
+    wrapperClassName?: string;
+    className?: string;
+    innerClassName?: string;
+
+    buttonRef?: Ref<HTMLButtonElement>;
+    focusProps?: any;
+
+    submittingStartedLabel?: string;
+    submittingFinishedLabel?: string;
+}>> & {
+    BorderColors: Record<"BLACK" | "BRAND" | "BRAND_NEW" | "GREEN" | "LINK" | "PRIMARY" | "RED" | "TRANSPARENT" | "WHITE" | "YELLOW", string>;
+    Colors: Record<"BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT" | "BRAND_NEW" | "CUSTOM", string>;
+    Hovers: Record<"DEFAULT" | "BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT", string>;
+    Looks: Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
+    Sizes: Record<"NONE" | "TINY" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN" | "MAX" | "ICON", string>;
+
+    Link: any;
+};
+
+export type Switch = ComponentType<PropsWithChildren<{
+    value: boolean;
+    onChange(value: boolean): void;
+
+    disabled?: boolean;
+    hideBorder?: boolean;
+    className?: string;
+    style?: CSSProperties;
+
+    note?: ReactNode;
+    tooltipNote?: ReactNode;
+}>>;
+
+export type Timestamp = ComponentType<PropsWithChildren<{
+    timestamp: Moment;
+    isEdited?: boolean;
+
+    className?: string;
+    id?: string;
+
+    cozyAlt?: boolean;
+    compact?: boolean;
+    isInline?: boolean;
+    isVisibleOnlyOnHover?: boolean;
+}>>;
+
+export type TextInput = ComponentType<PropsWithChildren<{
+    name?: string;
+    onChange?(value: string, name?: string): void;
+    placeholder?: string;
+    editable?: boolean;
+    maxLength?: number;
+    error?: string;
+
+    inputClassName?: string;
+    inputPrefix?: string;
+    inputRef?: Ref<HTMLInputElement>;
+    prefixElement?: ReactNode;
+
+    focusProps?: any;
+
+    /** TextInput.Sizes.DEFAULT */
+    size?: string;
+} & Omit<HTMLProps<HTMLInputElement>, "onChange">>> & {
+    Sizes: Record<"DEFAULT" | "MINI", string>;
+};
+
+export type TextArea = ComponentType<PropsWithRef<HTMLProps<HTMLTextAreaElement>>>;
+
+interface SelectOption {
+    disabled?: boolean;
+    value: any;
+    label: string;
+    key?: React.Key;
+    default?: boolean;
+}
+
+export type Select = ComponentType<PropsWithChildren<{
+    placeholder?: string;
+    options: ReadonlyArray<SelectOption>; // TODO
+
+    /**
+     * - 0 ~ Filled
+     * - 1 ~ Custom
+     */
+    look?: 0 | 1;
+    className?: string;
+    popoutClassName?: string;
+    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    optionClassName?: string;
+
+    autoFocus?: boolean;
+    isDisabled?: boolean;
+    clearable?: boolean;
+    closeOnSelect?: boolean;
+    hideIcon?: boolean;
+
+    select?(value: any): void;
+    isSelected?(value: any): boolean;
+    serialize?(value: any): string;
+    clear?(): void;
+
+    maxVisibleItems?: number;
+    popoutWidth?: number;
+
+    onClose?(): void;
+    onOpen?(): void;
+
+    renderOptionLabel?(option: SelectOption): ReactNode;
+    /** discord stupid this gets all options instead of one yeah */
+    renderOptionValue?(option: SelectOption[]): ReactNode;
+
+    "aria-label"?: boolean;
+    "aria-labelledby"?: boolean;
+}>>;
+
+export type Slider = ComponentType<PropsWithChildren<{
+    initialValue: number;
+    defaultValue?: number;
+    keyboardStep?: number;
+    maxValue?: number;
+    minValue?: number;
+    markers?: number[];
+    stickToMarkers?: boolean;
+
+    /** 0 above, 1 below */
+    markerPosition?: 0 | 1;
+    orientation?: "horizontal" | "vertical";
+
+    getAriaValueText?(currentValue: number): string;
+    renderMarker?(marker: number): ReactNode;
+    onMarkerRender?(marker: number): ReactNode;
+    onValueRender?(value: number): ReactNode;
+    onValueChange?(value: number): void;
+    asValueChanges?(value: number): void;
+
+    className?: string;
+    disabled?: boolean;
+    handleSize?: number;
+    mini?: boolean;
+    hideBubble?: boolean;
+
+    fillStyles?: CSSProperties;
+    barStyles?: CSSProperties;
+    grabberStyles?: CSSProperties;
+    grabberClassName?: string;
+    barClassName?: string;
+
+    "aria-hidden"?: boolean;
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
+    "aria-describedby"?: string;
+}>>;
