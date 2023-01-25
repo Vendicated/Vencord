@@ -210,7 +210,7 @@ export default definePlugin({
                                     {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
-                                    {Parser.parseTopic(channel.topic, true, { channelId: channel.id })}
+                                    {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
                                 </div>
                             </>
                         )}
