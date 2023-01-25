@@ -97,7 +97,7 @@ export default definePlugin({
         },
         {
             // inside the onMouseDown handler, we check if the channel is hidden and open the modal if it is
-            find: ".handleThreadsPopoutClose();",
+            find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
                 {
                     match: /(?=(?<this>\i)\.handleThreadsPopoutClose\(\))/,
@@ -105,6 +105,11 @@ export default definePlugin({
                         + "$self.onHiddenChannelSelected($<this>.props.channel);"
                         + "return;"
                         + "}"
+                },
+                // Do nothing when trying to join a voice channel if the channel is hidden
+                {
+                    match: /(?<=handleClick=function\(\){)(?=.{1,80}(?<this>\i)\.handleVoiceConnect\(\))/,
+                    replace: "if($self.isHiddenChannel($<this>.props.channel))return;"
                 },
                 // Render null instead of the buttons if the channel is hidden
                 ...[
