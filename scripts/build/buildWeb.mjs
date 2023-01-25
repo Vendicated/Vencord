@@ -124,20 +124,22 @@ async function buildPluginZip(target, files, shouldZip) {
     }
 }
 
-const cssText = "`" + readFileSync("dist/Vencord.user.css", "utf-8").replaceAll("`", "\\`") + "`";
-const cssRuntime = `
+const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
+    const cssRuntime = `
 ;document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
     Object.assign(document.createElement("style"), {
-        textContent: ${cssText},
+        textContent: \`${content.replaceAll("`", "\\`")}\`,
         id: "vencord-css-core"
     })
 ), { once: true });
 `;
 
+    return appendFile("dist/Vencord.user.js", cssRuntime);
+});
+
 await Promise.all([
-    appendFile("dist/Vencord.user.js", cssRuntime),
-    buildPluginZip("extension-v3.zip", ["modifyResponseHeaders.json", "content.js", "manifestv3.json"], true),
-    buildPluginZip("extension-v2.zip", ["background.js", "content.js", "manifestv2.json"], true),
-    buildPluginZip("extension-v2-unpacked", ["background.js", "content.js", "manifestv2.json"], false),
+    appendCssRuntime,
+    buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json"], true),
+    buildPluginZip("extension-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json"], false),
 ]);
 
