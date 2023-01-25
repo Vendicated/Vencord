@@ -75,7 +75,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
 
 export default ErrorBoundary.wrap(function () {
     const settings = useSettings();
-    const ref = React.useRef<HTMLTextAreaElement>();
+    const ref = React.useRef<HTMLTextAreaElement>(null);
 
     function onBlur() {
         settings.themeLinks = [...new Set(

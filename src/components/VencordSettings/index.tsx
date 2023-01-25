@@ -21,7 +21,7 @@ import "./settingsStyles.css";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
-import { Forms, Router, Text } from "@webpack/common";
+import { Forms, SettingsRouter, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
@@ -65,7 +65,7 @@ function Settings(props: SettingsProps) {
             look={TabBar.Looks.BRAND}
             className={cl("tab-bar")}
             selectedItem={tab}
-            onItemSelect={Router.open}
+            onItemSelect={SettingsRouter.open}
         >
             {Object.entries(SettingsTabs).map(([key, { name, component }]) => {
                 if (!component) return null;

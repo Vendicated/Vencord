@@ -32,7 +32,7 @@ import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
-import { Router } from "./webpack/common";
+import { SettingsRouter } from "./webpack/common";
 
 export let Components: any;
 
@@ -71,7 +71,7 @@ async function init() {
                         "View Update",
                         () => {
                             popNotice();
-                            Router.open("VencordUpdater");
+                            SettingsRouter.open("VencordUpdater");
                         }
                     );
                 }, 10_000);
