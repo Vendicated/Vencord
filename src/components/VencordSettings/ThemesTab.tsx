@@ -75,11 +75,11 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
 
 export default ErrorBoundary.wrap(function () {
     const settings = useSettings();
-    const ref = React.useRef<HTMLTextAreaElement>(null);
+    const [themeText, setThemeText] = React.useState(settings.themeLinks.join("\n"));
 
     function onBlur() {
         settings.themeLinks = [...new Set(
-            ref.current!.value
+            themeText
                 .trim()
                 .split(/\n+/)
                 .map(s => s.trim())
@@ -119,8 +119,8 @@ export default ErrorBoundary.wrap(function () {
                     padding: ".5em",
                     border: "1px solid var(--background-modifier-accent)"
                 }}
-                ref={ref}
-                defaultValue={settings.themeLinks.join("\n")}
+                value={themeText}
+                onChange={e => setThemeText(e.currentTarget.value)}
                 className={TextAreaProps.textarea}
                 placeholder="Theme Links"
                 spellCheck={false}
