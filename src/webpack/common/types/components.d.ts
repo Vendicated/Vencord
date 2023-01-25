@@ -271,3 +271,14 @@ export type Slider = ComponentType<PropsWithChildren<{
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
 }>>;
+
+// TODO - type maybe idk probably not that useful other than the constants
+export type Flex = ComponentType<PropsWithChildren<any>> & {
+    Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
+    Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
+    Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
+    Wrap: Record<"NO_WRAP" | "WRAP" | "WRAP_REVERSE", string>;
+
+    Content: ComponentType<PropsWithChildren<any>>;
+    Sidebar: ComponentType<PropsWithChildren<any>>;
+};

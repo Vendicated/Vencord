@@ -46,6 +46,7 @@ export const Text = waitForComponent<t.Text>("Text", m => {
 });
 export const Select = waitForComponent<t.Select>("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
+export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 export const Margins: t.Margins = findByPropsLazy("marginTop20");
