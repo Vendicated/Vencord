@@ -45,7 +45,7 @@ function BackupRestoreTab() {
             </Text>
             <Flex>
                 <Button
-                    onClick={uploadSettingsBackup}
+                    onClick={() => uploadSettingsBackup()}
                     size={Button.Sizes.SMALL}
                 >
                     Import Settings
