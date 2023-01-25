@@ -24,12 +24,12 @@ import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, ChannelStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
-const Permissions = findByPropsLazy("VIEW_CHANNEL", "ADMINISTRATOR");
+const Permissions = findLazy(m => typeof m.VIEW_CHANNEL === "bigint");
 const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
 
 const ChannelTypesToChannelName = proxyLazy(() => ({
