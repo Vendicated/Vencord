@@ -296,7 +296,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection>
+        <Forms.FormSection className={Margins.marginTop16}>
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
@@ -326,7 +326,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
             <div className={cl("grid")}>
                 {plugins}
             </div>
-            <Forms.FormDivider />
+
+            <Forms.FormDivider className={Margins.marginTop20} />
+
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>
