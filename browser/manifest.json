@@ -1,9 +1,14 @@
 {
     "manifest_version": 3,
+    "minimum_chrome_version": "91",
+
     "name": "Vencord Web",
-    "description": "Yeee",
+    "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
+    "icons": {
+        "128": "icon.png"
+    },
 
     "host_permissions": [
         "*://*.discord.com/*",

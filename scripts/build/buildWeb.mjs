@@ -139,7 +139,7 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 
 await Promise.all([
     appendCssRuntime,
-    buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json"], true),
-    buildPluginZip("extension-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json"], false),
+    buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], true),
+    buildPluginZip("extension-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], false),
 ]);
 
