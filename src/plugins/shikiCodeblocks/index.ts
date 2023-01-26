@@ -16,25 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./shiki.css";
+
+import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { parseUrl } from "@utils/misc";
-import { wordsFromPascal, wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 import previewExampleText from "~fileContent/previewExample.tsx";
-import cssText from "~fileContent/style.css";
 
-import { Settings } from "../../Vencord";
 import { shiki } from "./api/shiki";
-import { themes } from "./api/themes";
 import { createHighlighter } from "./components/Highlighter";
-import { DeviconSetting, HljsSetting, ShikiSettings, StyleSheets } from "./types";
-import { clearStyles, removeStyle, setStyle } from "./utils/createStyle";
-
-const themeNames = Object.keys(themes);
-const devIconCss = "@import url('https://cdn.jsdelivr.net/gh/devicons/devicon@v2.10.1/devicon.min.css');";
-
-const getSettings = () => Settings.plugins.ShikiCodeblocks as ShikiSettings;
+import deviconStyle from "./devicon.css?managed";
+import { settings } from "./settings";
+import { DeviconSetting } from "./types";
+import { clearStyles } from "./utils/createStyle";
 
 export default definePlugin({
     name: "ShikiCodeblocks",
@@ -44,17 +39,16 @@ export default definePlugin({
         {
             find: "codeBlock:{react:function",
             replacement: {
-                match: /codeBlock:\{react:function\((.),(.),(.)\)\{/,
-                replace: "$&return Vencord.Plugins.plugins.ShikiCodeblocks.renderHighlighter($1,$2,$3);",
+                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
+                replace: "$&return $self.renderHighlighter($1,$2,$3);",
             },
         },
     ],
     start: async () => {
-        setStyle(cssText, StyleSheets.Main);
-        if (getSettings().useDevIcon !== DeviconSetting.Disabled)
-            setStyle(devIconCss, StyleSheets.DevIcons);
+        if (settings.store.useDevIcon !== DeviconSetting.Disabled)
+            enableStyle(deviconStyle);
 
-        await shiki.init(getSettings().customTheme || getSettings().theme);
+        await shiki.init(settings.store.customTheme || settings.store.theme);
     },
     stop: () => {
         shiki.destroy();
@@ -66,90 +60,7 @@ export default definePlugin({
         isPreview: true,
         tempSettings,
     }),
-    options: {
-        theme: {
-            type: OptionType.SELECT,
-            description: "Default themes",
-            options: themeNames.map(themeName => ({
-                label: wordsToTitle(wordsFromPascal(themeName)),
-                value: themes[themeName],
-                default: themes[themeName] === themes.DarkPlus,
-            })),
-            disabled: () => !!getSettings().customTheme,
-            onChange: shiki.setTheme,
-        },
-        customTheme: {
-            type: OptionType.STRING,
-            description: "A link to a custom vscode theme",
-            placeholder: themes.MaterialCandy,
-            isValid: value => {
-                if (!value) return true;
-                const url = parseUrl(value);
-                if (!url) return "Must be a valid URL";
-
-                if (!url.pathname.endsWith(".json")) return "Must be a json file";
-
-                return true;
-            },
-            onChange: value => shiki.setTheme(value || getSettings().theme),
-        },
-        tryHljs: {
-            type: OptionType.SELECT,
-            description: "Use the more lightweight default Discord highlighter and theme.",
-            options: [
-                {
-                    label: "Never",
-                    value: HljsSetting.Never,
-                },
-                {
-                    label: "Prefer Shiki instead of Highlight.js",
-                    value: HljsSetting.Secondary,
-                    default: true,
-                },
-                {
-                    label: "Prefer Highlight.js instead of Shiki",
-                    value: HljsSetting.Primary,
-                },
-                {
-                    label: "Always",
-                    value: HljsSetting.Always,
-                },
-            ],
-        },
-        useDevIcon: {
-            type: OptionType.SELECT,
-            description: "How to show language icons on codeblocks",
-            options: [
-                {
-                    label: "Disabled",
-                    value: DeviconSetting.Disabled,
-                },
-                {
-                    label: "Colorless",
-                    value: DeviconSetting.Greyscale,
-                    default: true,
-                },
-                {
-                    label: "Colored",
-                    value: DeviconSetting.Color,
-                },
-            ],
-            onChange: (newValue: DeviconSetting) => {
-                if (newValue === DeviconSetting.Disabled) removeStyle(StyleSheets.DevIcons);
-                else setStyle(devIconCss, StyleSheets.DevIcons);
-            },
-        },
-        bgOpacity: {
-            type: OptionType.SLIDER,
-            description: "Background opacity",
-            markers: [0, 20, 40, 60, 80, 100],
-            default: 100,
-            componentProps: {
-                stickToMarkers: false,
-                onValueRender: null, // Defaults to percentage
-            },
-        },
-    },
+    settings,
 
     // exports
     shiki,

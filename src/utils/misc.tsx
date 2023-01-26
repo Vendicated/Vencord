@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, React, Toasts } from "@webpack/common";
+import { Clipboard, React, Toasts, useEffect, useState } from "@webpack/common";
 
 /**
  * Makes a lazy function. On first call, the value is computed.
@@ -48,13 +48,13 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
         deps: [],
         onError: null,
     }, providedOpts);
-    const [state, setState] = React.useState({
+    const [state, setState] = useState({
         value: opts.fallbackValue,
         error: null,
         pending: true
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         let isAlive = true;
         if (!state.pending) setState({ ...state, pending: true });
 
@@ -72,7 +72,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
  * Returns a function that can be used to force rerender react components
  */
 export function useForceUpdater() {
-    const [, set] = React.useState(0);
+    const [, set] = useState(0);
     return () => set(s => s + 1);
 }
 
@@ -142,7 +142,7 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
  * classes("one", "two") => "one two"
  */
 export function classes(...classes: string[]) {
-    return classes.join(" ");
+    return classes.filter(c => typeof c === "string").join(" ");
 }
 
 /**
@@ -150,34 +150,6 @@ export function classes(...classes: string[]) {
  */
 export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
-}
-
-/**
- * Wraps a Function into a try catch block and logs any errors caught
- * Due to the nature of this function, not all paths return a result.
- * Thus, for consistency, the returned functions will always return void or Promise<void>
- *
- * @param name Name identifying the wrapped function. This will appear in the logged errors
- * @param func Function (async or sync both work)
- * @param thisObject Optional thisObject
- * @returns Wrapped Function
- */
-export function suppressErrors<F extends Function>(name: string, func: F, thisObject?: any): F {
-    return (func.constructor.name === "AsyncFunction"
-        ? async function (this: any) {
-            try {
-                await func.apply(thisObject ?? this, arguments);
-            } catch (e) {
-                console.error(`Caught an Error in ${name || "anonymous"}\n`, e);
-            }
-        }
-        : function (this: any) {
-            try {
-                func.apply(thisObject ?? this, arguments);
-            } catch (e) {
-                console.error(`Caught an Error in ${name || "anonymous"}\n`, e);
-            }
-        }) as any as F;
 }
 
 /**

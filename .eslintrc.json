@@ -37,7 +37,7 @@
                 " * Vencord, a modification for Discord's desktop app",
                 {
                     "pattern": " \\* Copyright \\(c\\) \\d{4}",
-                    "template": " * Copyright (c) 2022 Vendicated and contributors"
+                    "template": " * Copyright (c) 2023 Vendicated and contributors"
                 },
                 " *",
                 " * This program is free software: you can redistribute it and/or modify",
@@ -84,7 +84,12 @@
         "no-extra-semi": "error",
         "consistent-return": ["warn", { "treatUndefinedAsUnspecified": true }],
         "dot-notation": "error",
-        "no-useless-escape": "error",
+        "no-useless-escape": [
+            "error",
+            {
+                "extra": "i"
+            }
+        ],
         "no-fallthrough": "error",
         "for-direction": "error",
         "no-async-promise-executor": "error",

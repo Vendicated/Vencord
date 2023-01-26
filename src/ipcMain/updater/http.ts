@@ -37,10 +37,7 @@ async function githubGet(endpoint: string) {
             Accept: "application/vnd.github+json",
             // "All API requests MUST include a valid User-Agent header.
             // Requests with no User-Agent header will be rejected."
-            "User-Agent": VENCORD_USER_AGENT,
-            // todo: perhaps add support for (optional) api token?
-            // unauthorised rate limit is 60 reqs/h
-            // https://github.com/settings/tokens/new?description=Vencord%20Updater
+            "User-Agent": VENCORD_USER_AGENT
         }
     });
 }
@@ -52,7 +49,7 @@ async function calculateGitChanges() {
     const res = await githubGet(`/compare/${gitHash}...HEAD`);
 
     const data = JSON.parse(res.toString("utf-8"));
-    return data.commits.map(c => ({
+    return data.commits.map((c: any) => ({
         // github api only sends the long sha
         hash: c.sha.slice(0, 7),
         author: c.author.login,
@@ -69,7 +66,7 @@ async function fetchUpdates() {
         return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
-        if (["patcher.js", "preload.js", "renderer.js"].some(s => name.startsWith(s))) {
+        if (["patcher.js", "preload.js", "renderer.js", "renderer.css"].some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }
     });

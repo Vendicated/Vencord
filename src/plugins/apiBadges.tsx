@@ -66,11 +66,20 @@ export default definePlugin({
         /* Patch the badge list component on user profiles */
         {
             find: "Messages.PROFILE_USER_BADGES,role:",
-            replacement: {
-                match: /src:(\w{1,3})\[(\w{1,3})\.key\],/,
-                // <img src={badge.image ?? imageMap[badge.key]} {...badge.props} />
-                replace: (_, imageMap, badge) => `src: ${badge}.image ?? ${imageMap}[${badge}.key], ...${badge}.props,`
-            }
+            replacement: [
+                {
+                    match: /src:(\w{1,3})\[(\w{1,3})\.key\],/,
+                    // <img src={badge.image ?? imageMap[badge.key]} {...badge.props} />
+                    replace: (_, imageMap, badge) => `src: ${badge}.image ?? ${imageMap}[${badge}.key], ...${badge}.props,`
+                },
+                {
+                    match: /spacing:(\d{1,2}),children:(.{1,40}(\i)\.jsx.+?(\i)\.onClick.+?\)})},/,
+                    // if the badge provides it's own component, render that instead of an image
+                    // the badge also includes info about the user that has it (type BadgeUserArgs), which is why it's passed as props
+                    replace: (_, s, origBadgeComponent, React, badge) =>
+                        `spacing:${s},children:${badge}.component ? () => (0,${React}.jsx)(${badge}.component, { ...${badge} }) : ${origBadgeComponent}},`
+                }
+            ]
         }
     ],
 

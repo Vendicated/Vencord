@@ -31,13 +31,15 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
     }
 }
 
+const CANARY = process.env.USE_CANARY === "true";
+
 const browser = await pup.launch({
     headless: true,
     executablePath: process.env.CHROMIUM_BIN
 });
 
 const page = await browser.newPage();
-await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36");
+await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 
 function maybeGetError(handle: JSHandle) {
     return (handle as JSHandle<Error>)?.getProperty("message")
@@ -65,7 +67,7 @@ function toCodeBlock(s: string) {
 }
 
 async function printReport() {
-    console.log("# Vencord Report");
+    console.log("# Vencord Report" + (CANARY ? " (Canary)" : ""));
     console.log();
 
     console.log("## Bad Patches");
@@ -98,7 +100,7 @@ async function printReport() {
             },
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
-                username: "Vencord Reporter",
+                username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
                 avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/f0204a918c6c9c9a43195997e97d8adf.webp",
                 embeds: [
                     {
@@ -215,6 +217,9 @@ function runTime(token: string) {
         // force enable all plugins and patches
         Vencord.Plugins.patches.length = 0;
         Object.values(Vencord.Plugins.plugins).forEach(p => {
+            // Needs native server to run
+            if (p.name === "WebRichPresence (arRPC)") return;
+
             p.required = true;
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
@@ -271,4 +276,4 @@ await page.evaluateOnNewDocument(`
     ;(${runTime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
 `);
 
-await page.goto("https://discord.com/login");
+await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
