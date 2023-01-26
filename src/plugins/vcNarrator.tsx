@@ -41,12 +41,6 @@ const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentC
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-function getEnglishVoices() {
-    const voices = speechSynthesis.getVoices();
-    const englishVoices = voices.filter(v => v.lang.startsWith("en"));
-    return !englishVoices.length ? voices : englishVoices;
-}
-
 function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
     if (!text) return;
 
@@ -219,7 +213,7 @@ export default definePlugin({
             voice: {
                 type: OptionType.SELECT,
                 description: "Narrator Voice",
-                options: getEnglishVoices().map(v => ({
+                options: speechSynthesis.getVoices().map(v => ({
                     label: v.name,
                     value: v.voiceURI,
                     default: v.default
@@ -242,12 +236,12 @@ export default definePlugin({
             joinMessage: {
                 type: OptionType.STRING,
                 description: "Join Message",
-                default: "{{USER}} joined {{CHANNEL}}"
+                default: "{{USER}} joined"
             },
             leaveMessage: {
                 type: OptionType.STRING,
                 description: "Leave Message",
-                default: "{{USER}} left {{CHANNEL}}"
+                default: "{{USER}} left"
             },
             moveMessage: {
                 type: OptionType.STRING,
