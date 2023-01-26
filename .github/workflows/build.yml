@@ -62,7 +62,7 @@ jobs:
                 git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
                 cd upload
 
-                GLOBIGNORE: .git:.gitignore:README.md:LICENSE
+                GLOBIGNORE=.git:.gitignore:README.md:LICENSE
                 rm -rf *
                 cp -r ../dist/* .
 
