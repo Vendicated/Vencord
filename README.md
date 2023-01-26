@@ -18,7 +18,7 @@ The cutest Discord client mod
 
 ## Installing on Browser
 
-[![Get the Firefox extension](https://blog.mozilla.org/addons/files/2015/11/get-the-addon-small.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Chrome](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/tbyBjqi7Zu733AAKA5n4.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
+[![Get it on the Firefox Webstore](https://blog.mozilla.org/addons/files/2015/11/get-the-addon-small.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Get it on the Chrome Webstore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
 
 Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that QuickCSS and plugins making use of external resources will not work with the UserScript.
 
