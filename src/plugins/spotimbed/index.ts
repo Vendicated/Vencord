@@ -17,18 +17,12 @@
 */
 
 import { Devs } from "@utils/constants";
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import type { Embed, Message } from "discord-types/general";
 
-import cssText from "~fileContent/spotimbed.css";
-
 import { createSpotimbed, Spotimbed } from "./components/Embed";
-import { ColorStyle } from "./types";
+import { settings } from "./settings";
 import { createEmbedData, getEmbeddableLinks } from "./utils/ast";
-
-const colorMethodNames = Object.values(ColorStyle);
-let style: HTMLStyleElement | null = null;
 
 export default definePlugin({
     name: "SpotiMbed",
@@ -38,49 +32,19 @@ export default definePlugin({
         {
             find: ".renderEmbeds=function(",
             replacement: {
-                match: /\.renderEmbeds=function\((\w+)\)\{/,
-                replace: "$&$1={...$1,embeds:Vencord.Plugins.plugins.SpotiMbed.patchEmbeds($1)};",
+                match: /\.renderEmbeds=function\((\i)\)\{/,
+                replace: "$&$1={...$1,embeds:$self.patchEmbeds($1)};",
             }
         },
         {
             find: '.provider&&"Spotify"===',
             replacement: {
-                match: /(?<="Spotify"===\w+\.provider\.name\?\(0,.\.jsx\)\()\w+(?=,)/,
-                replace: "Vencord.Plugins.plugins.SpotiMbed.createSpotimbed",
+                match: /(?<="Spotify"===\i\.provider\.name\?\(0,\i\.jsx\)\()\i(?=,)/,
+                replace: "$self.createSpotimbed",
             },
         },
     ],
-
-    start() {
-        style = document.createElement("style");
-        style.innerText = cssText;
-        document.head.appendChild(style);
-    },
-    stop() {
-        style?.remove();
-    },
-
-    options: {
-        colorStyle: {
-            description: "Color Style",
-            type: OptionType.SELECT,
-            options: colorMethodNames.map(name => ({
-                label: wordsToTitle(wordsFromCamel(name)),
-                value: name,
-                default: name === "vibrant",
-            })),
-        },
-        forceStyle: {
-            description: "Force Style",
-            type: OptionType.SLIDER,
-            markers: [0, 100],
-            default: 0,
-            componentProps: {
-                stickToMarkers: false,
-                onValueRender: null,
-            }
-        }
-    },
+    settings,
 
     // exports
     createSpotimbed,

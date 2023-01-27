@@ -19,8 +19,7 @@
 import { parseUrl } from "@utils/misc";
 import { indexesOf } from "@utils/text";
 import { Parser } from "@webpack/common";
-
-import { ParserNode } from "../types";
+import { ParserNode } from "webpack/common/types/utils";
 
 export function walk<K extends string>(root: ParserNode[], collect: K) {
     const collected: ParserNode[] = [];
@@ -55,7 +54,7 @@ export function createEmbedData(spotifyLink: string) {
     const url = new URL(spotifyLink);
     return {
         type: "link",
-        id: "spotimbed:/" + url.pathname,
+        id: "spotimbed://" + url.pathname,
         provider: { name: "Spotify" },
         url: spotifyLink,
     };

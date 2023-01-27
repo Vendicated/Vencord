@@ -141,7 +141,7 @@ export const compileStyle = (style: Style) => {
  */
 export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
 
-type ClassNameFactoryArg = string | string[] | Record<string, unknown>;
+type ClassNameFactoryArg = string | string[] | Record<string, unknown> | undefined | null | false;
 /**
  * @param prefix The prefix to add to each class, defaults to `""`
  * @returns A classname generator function
@@ -154,6 +154,7 @@ type ClassNameFactoryArg = string | string[] | Record<string, unknown>;
 export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
+        if (!arg) continue;
         if (typeof arg === "string") classNames.add(arg);
         else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
         else if (typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));

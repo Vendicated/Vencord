@@ -22,6 +22,9 @@ import { React } from "@webpack/common";
 import { spotify } from "../api/spotify";
 import { Artist, Resource, ResourceType } from "../types";
 
+const resourceCache: Record<string, Resource> = {};
+const CACHE_SIZE = 25;
+
 export async function getResource(id: string, type: string): Promise<Resource | null> {
     switch (type) {
         case ResourceType.Track: {
@@ -46,11 +49,14 @@ export async function getResource(id: string, type: string): Promise<Resource | 
 }
 
 export function useResource(id: string, type: string) {
-    // eslint-disable-next-line
-    if (false) {
+    const cacheKey = `${type}:${id}`;
+
+    const cached = resourceCache[cacheKey];
+
+    if (cached) {
         // Appease reconciler
         React.useEffect(() => { }, [id, type]);
-        return null;
+        return cached;
     } else {
         const [resource, error] = useAwaiter(() => getResource(id, type), {
             fallbackValue: null,
@@ -59,6 +65,13 @@ export function useResource(id: string, type: string) {
 
         if (error instanceof Error) throw error;
         else if (error) console.error(error);
+
+        if (resource) {
+            for (const key of Object.keys(resourceCache).slice(CACHE_SIZE - 1))
+                delete resourceCache[key];
+
+            resourceCache[cacheKey] = resource;
+        }
 
         return resource;
     }

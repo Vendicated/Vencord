@@ -25,7 +25,7 @@ import { repository } from "../../../../package.json";
 import { usePaletteStyle } from "../hooks/usePaletteStyle";
 import { usePreviewUrl } from "../hooks/usePreviewUrl";
 import { useResource } from "../hooks/useResource";
-import { useSpotimbedSettings } from "../hooks/useSpotimbedSettings";
+import { settings } from "../settings";
 import { ColorStyle, ResourceType } from "../types";
 import { getDataUrlFromUrl, getPaletteFromUrl } from "../utils/image";
 import { cl } from "../utils/misc";
@@ -72,7 +72,7 @@ export function createSpotimbed({ embed: { url: src, thumbnail } }: EmbedProps) 
 }
 
 export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resourceId }: SpotimbedProps) {
-    const { colorStyle } = useSpotimbedSettings(["colorStyle"]);
+    const { colorStyle } = settings.use(["colorStyle"]);
     const [artUrl, setArtUrl] = React.useState(initialArtUrl);
 
     const isDiscordTheme = colorStyle === ColorStyle.Discord;

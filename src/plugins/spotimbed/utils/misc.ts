@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const cl = (...classNames: (string | null | undefined | false)[]) => classNames
-    .filter(c => typeof c === "string")
-    .map(c => `spotimbed-${c}`)
-    .join(" ");
+import { classNameFactory } from "@api/Styles";
+
+export const cl = classNameFactory("spotimbed-");
 
 export const sortBy = <T, R extends string | number>(valueFn: (elem: T) => R, reverse = false) => (a: T, b: T) => {
     const aVal = valueFn(a);

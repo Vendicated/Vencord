@@ -56,7 +56,27 @@ export type Parser = Record<
     | "parseForumPostGuidelines"
     | "parseForumPostMostRecentMessage",
     (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
-> & Record<"defaultRules" | "guildEventRules", Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>>;
+> & Record<"defaultRules" | "guildEventRules", Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>> & {
+    parseToAST(content: string): ParserNode[];
+};
+
+export type ParserNode = TextNode | LinkNode | BlockQuoteNode;
+
+export interface LinkNode {
+    type: "link";
+    target: string;
+    content: ParserNode[];
+}
+
+export interface BlockQuoteNode {
+    type: "blockquote";
+    content: ParserNode[];
+}
+
+export interface TextNode {
+    type: "text";
+    content: string;
+}
 
 export interface Alerts {
     show(alert: {

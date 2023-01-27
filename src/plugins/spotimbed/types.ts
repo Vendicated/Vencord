@@ -34,27 +34,6 @@ export interface SpotimbedSettings extends CommonSettings {
     forceStyle: number;
 }
 
-// Discord simple-markdown Types
-
-interface BasicNode {
-    type: string;
-    content: string | ParserNode[];
-}
-
-export interface LinkNode extends BasicNode {
-    type: "link";
-    target: string;
-}
-export interface BlockQuoteNode extends BasicNode {
-    type: "blockquote";
-}
-export interface TextNode extends BasicNode {
-    type: "text";
-    content: string;
-}
-
-export type ParserNode = TextNode | LinkNode | BlockQuoteNode;
-
 // Discord Spotify Types
 
 export interface SpotifySocket {
