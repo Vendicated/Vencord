@@ -17,131 +17,211 @@
 */
 
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Badge } from "@components/Badge";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, PermissionStore, SnowflakeUtils, Text } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { Button, ChannelStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
-const CONNECT = 1048576n;
-const VIEW_CHANNEL = 1024n;
+const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
+const Permissions = findLazy(m => typeof m.VIEW_CHANNEL === "bigint");
+const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
+
+const ChannelTypesToChannelName = proxyLazy(() => ({
+    [ChannelTypes.GUILD_TEXT]: "TEXT",
+    [ChannelTypes.GUILD_ANNOUNCEMENT]: "ANNOUNCEMENT",
+    [ChannelTypes.GUILD_FORUM]: "FORUM"
+}));
+
+enum ShowMode {
+    LockIcon,
+    HiddenIconWithMutedStyle
+}
+
+const settings = definePluginSettings({
+    hideUnreads: {
+        description: "Hide Unreads",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    showMode: {
+        description: "The mode used to display hidden channels.",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Plain style with Lock Icon instead", value: ShowMode.LockIcon, default: true },
+            { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
+        ],
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "ShowHiddenChannels",
-    description: "Show hidden channels",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven],
-    options: {
-        hideUnreads: {
-            description: "Hide unreads",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true // Restart is needed to refresh channel list
-        }
-    },
+    description: "Show channels that you do not have access to view.",
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux],
+    settings,
+
     patches: [
         {
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
             find: ".CannotShow",
+            // These replacements only change the necessary CannotShow's
+            replacement: [
+                {
+                    match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
+                    replace: "this.category.isCollapsed?$<RenderLevels>.WouldShowIfUncollapsed:$<RenderLevels>.Show"
+                },
+                // Move isChannelGatedAndVisible renderLevel logic to the bottom to not show hidden channels in case they are muted
+                {
+                    match: /(?<=(?<permissionCheck>if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{)if\(this\.id===\i\).+?};)(?<isChannelGatedAndVisibleCondition>if\(!\i\.\i\.isChannelGatedAndVisible\(.+?})(?<restOfFunction>.+?)(?=return{renderLevel:\i\.Show.{1,40}return \i)/,
+                    replace: "$<restOfFunction>$<permissionCheck>$<isChannelGatedAndVisibleCondition>}"
+                },
+                {
+                    match: /(?<=renderLevel:(?<renderLevelExpression>\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
+                    replace: "$<renderLevelExpression>"
+                },
+                {
+                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
+                    replace: "$<RenderLevels>.Show"
+                },
+                {
+                    match: /(?<=getRenderLevel=function.+?return ).+?\?(?<renderLevelExpressionWithoutPermCheck>.+?):\i\.CannotShow(?=})/,
+                    replace: "$<renderLevelExpressionWithoutPermCheck>"
+                }
+            ]
+        },
+        {
+            // inside the onMouseDown handler, we check if the channel is hidden and open the modal if it is
+            find: "VoiceChannel.renderPopout: There must always be something to render",
+            replacement: [
+                {
+                    match: /(?=(?<this>\i)\.handleThreadsPopoutClose\(\))/,
+                    replace: "if($self.isHiddenChannel($<this>.props.channel)&&arguments[0].button===0){"
+                        + "$self.onHiddenChannelSelected($<this>.props.channel);"
+                        + "return;"
+                        + "}"
+                },
+                // Do nothing when trying to join a voice channel if the channel is hidden
+                {
+                    match: /(?<=handleClick=function\(\){)(?=.{1,80}(?<this>\i)\.handleVoiceConnect\(\))/,
+                    replace: "if($self.isHiddenChannel($<this>.props.channel))return;"
+                },
+                // Render null instead of the buttons if the channel is hidden
+                ...[
+                    "renderEditButton",
+                    "renderInviteButton",
+                    "renderOpenChatButton"
+                ].map(func => ({
+                    match: new RegExp(`(?<=\\i\\.${func}=function\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
+                    replace: "if($self.isHiddenChannel(this.props.channel))return null;"
+                }))
+            ]
+        },
+        {
+            find: ".Messages.CHANNEL_TOOLTIP_DIRECTORY",
+            predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
-                match: /renderLevel:(\w+)\.CannotShow/g,
-                replace: "renderLevel:Vencord.Plugins.plugins.ShowHiddenChannels.shouldShow(this.record, this.category, this.isMuted)?$1.Show:$1.CannotShow"
+                // Lock Icon
+                match: /(?=switch\((?<channel>\i)\.type\).{1,30}\.GUILD_ANNOUNCEMENT.{1,30}\(0,\i\.\i\))/,
+                replace: "if($self.isHiddenChannel($<channel>))return $self.LockIcon;"
             }
         },
         {
-            // inside the onMouseClick handler, we check if the channel is hidden and open the modal if it is
-            find: ".handleThreadsPopoutClose();",
-            replacement: {
-                match: /((\w)\.handleThreadsPopoutClose\(\);)/g,
-                replace: "if(arguments[0].button===0&&Vencord.Plugins.plugins.ShowHiddenChannels.channelSelected($2?.props?.channel))return;$1"
-            }
+            find: ".UNREAD_HIGHLIGHT",
+            predicate: () => settings.store.hideUnreads === true,
+            replacement: [{
+                // Hide unreads
+                match: /(?<=\i\.connected,\i=)(?=(?<props>\i)\.unread)/,
+                replace: "$self.isHiddenChannel($<props>.channel)?false:"
+            }]
         },
         {
-            // Prevent categories from disappearing when they're collapsed
-            find: ".prototype.shouldShowEmptyCategory=function(){",
-            replacement: {
-                match: /(\.prototype\.shouldShowEmptyCategory=function\(\){)/g,
-                replace: "$1return true;"
-            }
+            find: ".UNREAD_HIGHLIGHT",
+            predicate: () => settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
+            replacement: [
+                // Make the channel appear as muted if it's hidden
+                {
+                    match: /(?<=\i\.name,\i=)(?=(?<props>\i)\.muted)/,
+                    replace: "$self.isHiddenChannel($<props>.channel)?true:"
+                },
+                // Add the hidden eye icon if the channel is hidden
+                {
+                    match: /(?<=(?<channel>\i)=\i\.channel,.+?\(\)\.children.+?:null)/,
+                    replace: ",$self.isHiddenChannel($<channel>)?$self.HiddenChannelIcon():null"
+                },
+                // Make voice channels also appear as muted if they are muted
+                {
+                    match: /(?<=\i\(\)\.wrapper:\i\(\)\.notInteractive,)(?<otherClasses>.+?)(?<mutedClassExpression>(?<isMuted>\i)\?\i\.MUTED)/,
+                    replace: "$<mutedClassExpression>:\"\",$<otherClasses>$<isMuted>?\"\""
+                }
+            ]
         },
+        // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
         {
-            // Hide unreads
-            find: "?\"button\":\"link\"",
-            predicate: () => Settings.plugins.ShowHiddenChannels.hideUnreads === true,
+            find: ".UNREAD_HIGHLIGHT",
+            predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: {
-                match: /(\w)\.connected,(\w)=(\w\.unread),(\w=\w\.canHaveDot)/g,
-                replace: "$1.connected,$2=Vencord.Plugins.plugins.ShowHiddenChannels.isHiddenChannel($1.channel)?false:$3,$4"
+                match: /(?<=(?<channel>\i)=\i\.channel,.+?\.LOCKED:\i)/,
+                replace: "&&!($self.settings.store.hideUnreads===false&&$self.isHiddenChannel($<channel>))"
             }
         },
         {
             // Hide New unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
-                match: /((.)\.getGuildId\(\))(&&\(!\(.\.isThread.{1,100}\.hasRelevantUnread\()/,
-                replace: "$1&&!$2._isHiddenChannel$3"
-            }
-        },
-        // Lock Icon
-        {
-            find: ".rulesChannelId))",
-            replacement: {
-                match: /(\.locked.{0,400})(switch\((\i)\.type\))/,
-                replace: "$1 if($3._isHiddenChannel)return $self.LockIcon;$2"
+                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
+                replace: "&&!$self.isHiddenChannel($<channel>)"
             }
         }
     ],
 
-    shouldShow(channel, category, isMuted) {
-        if (!this.isHiddenChannel(channel)) return false;
-        if (!category) return false;
-        if (channel.type === 0 && category.guild?.hideMutedChannels && isMuted) return false;
+    isHiddenChannel(channel: Channel & { channelId?: string; }) {
+        if (!channel) return false;
 
-        return !category.isCollapsed;
+        if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
+
+        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
 
-    isHiddenChannel(channel) {
-        if (!channel) return false;
-        if (channel.channelId)
-            channel = ChannelStore.getChannel(channel.channelId);
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM())
-            return false;
-
-        // check for disallowed voice channels too so that they get hidden when collapsing the category
-        channel._isHiddenChannel = !PermissionStore.can(VIEW_CHANNEL, channel) || (channel.type === 2 && !PermissionStore.can(CONNECT, channel));
-        return channel._isHiddenChannel;
-    },
-
-    channelSelected(channel) {
-        if (!channel) return false;
-        const isHidden = this.isHiddenChannel(channel);
-        // check for type again, otherwise it would show it for hidden stage channels
-        if (channel.type === 0 && isHidden) {
-            const lastMessageDate = channel.lastMessageId ? new Date(SnowflakeUtils.extractTimestamp(channel.lastMessageId)).toLocaleString() : null;
+    onHiddenChannelSelected(channel: Channel) {
+        // Check for type, otherwise it would attempt to show the modal for stage channels
+        if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.GUILD_FORUM].includes(channel.type)) {
             openModal(modalProps => (
                 <ModalRoot size={ModalSize.SMALL} {...modalProps}>
                     <ModalHeader>
                         <Flex>
-                            <Text variant="heading-md/bold">{channel.name}</Text>
+                            <Text variant="heading-md/bold">#{channel.name}</Text>
+                            {<Badge text={ChannelTypesToChannelName[channel.type]} color="var(--brand-experiment)" />}
                             {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
                         </Flex>
                     </ModalHeader>
-                    <ModalContent style={{ marginBottom: 10, marginTop: 10, marginRight: 8, marginLeft: 8 }}>
-                        <Text variant="text-md/normal">You don't have the permission to view the messages in this channel.</Text>
-                        {(channel.topic || "").length > 0 && (
+                    <ModalContent style={{ margin: "10px 8px" }}>
+                        <Text variant="text-md/normal">You don't have permission to view {channel.type === ChannelTypes.GUILD_FORUM ? "posts" : "messages"} in this channel.</Text>
+                        {(channel.topic ?? "").length > 0 && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Topic:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
-                                <Text variant="code">{channel.topic}</Text>
+                                <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
+                                    {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
+                                </div>
                             </>
                         )}
-                        {lastMessageDate && (
+                        {channel.lastMessageId && (
                             <>
                                 <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    Last message sent:
+                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Last Post Created" : "Last Message Sent:"}
                                 </Text>
-                                <Text variant="code">{lastMessageDate}</Text>
+                                <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
+                                    <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(channel.lastMessageId))} />
+                                </div>
                             </>
                         )}
                     </ModalContent>
@@ -159,16 +239,38 @@ export default definePlugin({
                 </ModalRoot>
             ));
         }
-        return isHidden;
     },
 
     LockIcon: () => (
         <svg
+            className={ChannelListClasses.icon}
             height="18"
             width="20"
             viewBox="0 0 24 24"
+            aria-hidden={true}
+            role="img"
         >
-            <path fill="var(--channel-icon)" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
+            <path fillRule="evenodd" fill="currentColor" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
         </svg>
+    ),
+
+    HiddenChannelIcon: () => (
+        <Tooltip text="Hidden Channel">
+            {({ onMouseLeave, onMouseEnter }) => (
+                <svg
+                    onMouseLeave={onMouseLeave}
+                    onMouseEnter={onMouseEnter}
+                    className={ChannelListClasses.icon}
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    aria-hidden={true}
+                    role="img"
+                    style={{ marginLeft: 6, zIndex: 0, cursor: "not-allowed" }}
+                >
+                    <path fillRule="evenodd" fill="currentColor" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z" />
+                </svg>
+            )}
+        </Tooltip>
     )
 });

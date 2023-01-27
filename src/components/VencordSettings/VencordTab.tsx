@@ -82,7 +82,7 @@ function VencordSettings() {
 
             <Forms.FormDivider />
 
-            <Forms.FormSection title="Settings">
+            <Forms.FormSection className={Margins.marginTop16} title="Settings">
                 <Forms.FormText className={Margins.marginBottom20}>
                     Hint: You can change the position of this settings section in the settings of the "Settings" plugin!
                 </Forms.FormText>
@@ -97,21 +97,26 @@ function VencordSettings() {
                         <Switch
                             value={settings.enableReactDevtools}
                             onChange={(v: boolean) => settings.enableReactDevtools = v}
-                            note="Requires a full restart">
+                            note="Requires a full restart"
+                        >
                             Enable React Developer Tools
-                        </Switch>
-                        <Switch
-                            value={settings.notifyAboutUpdates}
-                            onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                            note="Shows a toast on startup">
-                            Get notified about new updates
                         </Switch>
                         <Switch
                             value={settings.frameless}
                             onChange={(v: boolean) => settings.frameless = v}
-                            note="Requires a full restart">
+                            note="Requires a full restart"
+                        >
                             Disable the window frame
                         </Switch>
+                        {navigator.platform.toLowerCase().startsWith("win") && (
+                            <Switch
+                                value={settings.winCtrlQ}
+                                onChange={(v: boolean) => settings.winCtrlQ = v}
+                                note="Requires a full restart"
+                            >
+                                Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)
+                            </Switch>
+                        )}
                     </React.Fragment>
                 )}
 

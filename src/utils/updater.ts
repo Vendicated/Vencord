@@ -22,7 +22,7 @@ import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 import { IpcRes } from "./types";
 
-export const UpdateLogger = new Logger("Updater", "white");
+export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
 export let isOutdated = false;
 export let isNewer = false;
 export let updateError: any;

@@ -98,7 +98,7 @@ function openViewRawModal(msg: Message) {
                             <>
                                 <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
                                 <CodeBlock content={msg.content} lang="" />
-                                <Forms.FormDivider classes={Margins.marginBottom20} />
+                                <Forms.FormDivider className={Margins.marginBottom20} />
                             </>
                         )}
 

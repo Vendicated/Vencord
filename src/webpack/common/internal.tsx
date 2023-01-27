@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { LazyComponent } from "@utils/misc";
 
-export default definePlugin({
-    name: "MessageAccessoriesAPI",
-    description: "API to add message accessories.",
-    authors: [Devs.Cyn],
-    patches: [
-        {
-            find: ".Messages.REMOVE_ATTACHMENT_BODY",
-            replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
-            },
-        },
-    ],
-});
+// eslint-disable-next-line path-alias/no-relative
+import { FilterFn, waitFor } from "../webpack";
+
+export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
+    let myValue: T = function () {
+        throw new Error(`Vencord could not find the ${name} Component`);
+    } as any;
+
+    const lazyComponent = LazyComponent(() => myValue) as T;
+    waitFor(filter, (v: any) => {
+        myValue = v;
+        Object.assign(lazyComponent, v);
+    });
+
+    return lazyComponent;
+}

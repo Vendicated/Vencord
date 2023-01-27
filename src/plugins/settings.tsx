@@ -17,10 +17,12 @@
 */
 
 import { Settings } from "@api/settings";
+import PatchHelper from "@components/PatchHelper";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { SettingsRouter } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -62,22 +64,67 @@ export default definePlugin({
                     }
                 }
             },
-            replace: (m, mod) => {
-                const updater = !IS_WEB ? '{section:"VencordUpdater",label:"Updater",element:Vencord.Plugins.plugins.Settings.tabs.updater},' : "";
-                const patchHelper = IS_DEV ? '{section:"VencordPatchHelper",label:"Patch Helper",element:Vencord.Components.PatchHelper},' : "";
-                return (
-                    `{section:${mod}.ID.HEADER,label:"Vencord"},` +
-                    '{section:"VencordSettings",label:"Vencord",element:Vencord.Plugins.plugins.Settings.tabs.vencord},' +
-                    '{section:"VencordPlugins",label:"Plugins",element:Vencord.Plugins.plugins.Settings.tabs.plugins},' +
-                    '{section:"VencordThemes",label:"Themes",element:Vencord.Plugins.plugins.Settings.tabs.themes},' +
-                    updater +
-                    '{section:"VencordSettingsSync",label:"Backup & Restore",element:Vencord.Plugins.plugins.Settings.tabs.sync},' +
-                    patchHelper +
-                    `{section:${mod}.ID.DIVIDER},${m}`
-                );
-            }
+            replace: "...$self.makeSettingsCategories($1),$&"
         }
     }],
+
+    makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
+        const makeOnClick = (tab: string) => () => SettingsRouter.open(tab);
+
+        const cats = [
+            {
+                section: ID.HEADER,
+                label: "Vencord"
+            }, {
+                section: "VencordSettings",
+                label: "Vencord",
+                element: () => <SettingsComponent tab="VencordSettings" />,
+                onClick: makeOnClick("VencordSettings")
+            }, {
+                section: "VencordPlugins",
+                label: "Plugins",
+                element: () => <SettingsComponent tab="VencordPlugins" />,
+                onClick: makeOnClick("VencordPlugins")
+            }, {
+                section: "VencordThemes",
+                label: "Themes",
+                element: () => <SettingsComponent tab="VencordThemes" />,
+                onClick: makeOnClick("VencordThemes")
+            }
+        ] as Array<{
+            section: unknown,
+            label?: string;
+            element?: React.ComponentType;
+            onClick?(): void;
+        }>;
+
+        if (!IS_WEB)
+            cats.push({
+                section: "VencordUpdater",
+                label: "Updater",
+                element: () => <SettingsComponent tab="VencordUpdater" />,
+                onClick: makeOnClick("VencordUpdater")
+            });
+
+        cats.push({
+            section: "VencordSettingsSync",
+            label: "Backup & Restore",
+            element: () => <SettingsComponent tab="VencordSettingsSync" />,
+            onClick: makeOnClick("VencordSettingsSync")
+        });
+
+        if (IS_DEV)
+            cats.push({
+                section: "VencordPatchHelper",
+                label: "Patch Helper",
+                element: PatchHelper!,
+                onClick: makeOnClick("VencordPatchHelper")
+            });
+
+        cats.push({ section: ID.DIVIDER });
+
+        return cats;
+    },
 
     options: {
         settingsLocation: {
