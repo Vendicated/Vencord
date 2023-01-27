@@ -1,8 +1,8 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.0.1",
-    "description": "A Discord client mod that does things differently",
+    "version": "1.0.3",
+    "description": "The cutest Discord client mod",
     "keywords": [],
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -20,33 +20,32 @@
     "scripts": {
         "build": "node scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
-        "inject": "node scripts/patcher/install.js",
+        "inject": "node scripts/runInstaller.mjs",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm lint && pnpm build && pnpm testTsc",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
         "testTsc": "tsc --noEmit",
-        "uninject": "node scripts/patcher/uninstall.js",
+        "uninject": "node scripts/runInstaller.mjs",
         "watch": "node scripts/build/build.mjs --watch"
     },
     "dependencies": {
+        "@vap/core": "0.0.12",
+        "@vap/shiki": "0.10.3",
         "fflate": "^0.7.4"
     },
     "devDependencies": {
         "@types/diff": "^5.0.2",
-        "@types/lodash": "^4.14.0",
-        "@types/node": "^18.11.9",
-        "@types/react": "^18.0.25",
-        "@types/react-dom": "^18.0.9",
+        "@types/lodash": "^4.14.191",
+        "@types/node": "^18.11.18",
+        "@types/react": "^18.0.27",
+        "@types/react-dom": "^18.0.10",
         "@types/yazl": "^2.4.2",
-        "@typescript-eslint/eslint-plugin": "^5.44.0",
-        "@typescript-eslint/parser": "^5.44.0",
-        "@vap/core": "0.0.12",
-        "@vap/shiki": "0.10.3",
-        "console-menu": "^0.1.0",
+        "@typescript-eslint/eslint-plugin": "^5.49.0",
+        "@typescript-eslint/parser": "^5.49.0",
         "diff": "^5.1.0",
         "discord-types": "^1.3.26",
-        "esbuild": "^0.15.16",
+        "esbuild": "^0.15.18",
         "eslint": "^8.28.0",
         "eslint-import-resolver-alias": "^1.1.2",
         "eslint-plugin-header": "^3.1.1",
@@ -55,10 +54,10 @@
         "eslint-plugin-unused-imports": "^2.0.0",
         "highlight.js": "10.6.0",
         "moment": "^2.29.4",
-        "puppeteer-core": "^19.3.0",
+        "puppeteer-core": "^19.6.0",
         "standalone-electron-types": "^1.0.0",
-        "type-fest": "^3.3.0",
-        "typescript": "^4.9.3"
+        "type-fest": "^3.5.3",
+        "typescript": "^4.9.4"
     },
     "packageManager": "pnpm@7.13.4",
     "pnpm": {
@@ -68,7 +67,8 @@
         },
         "peerDependencyRules": {
             "ignoreMissing": [
-                "eslint-plugin-import"
+                "eslint-plugin-import",
+                "eslint"
             ]
         },
         "allowedDeprecatedVersions": {
@@ -84,5 +84,8 @@
             "overwriteDest": true
         },
         "sourceDir": "./dist/extension-v2-unpacked"
+    },
+    "engines": {
+        "node": ">=18"
     }
 }

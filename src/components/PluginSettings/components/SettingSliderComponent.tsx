@@ -29,7 +29,7 @@ export function makeRange(start: number, end: number, step = 1) {
     return ranges;
 }
 
-export function SettingSliderComponent({ option, pluginSettings, id, onChange, onError }: ISettingElementProps<PluginOptionSlider>) {
+export function SettingSliderComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;
 
     const [error, setError] = React.useState<string | null>(null);
@@ -39,7 +39,7 @@ export function SettingSliderComponent({ option, pluginSettings, id, onChange, o
     }, [error]);
 
     function handleChange(newValue: number): void {
-        const isValid = (option.isValid && option.isValid(newValue)) ?? true;
+        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
@@ -52,7 +52,7 @@ export function SettingSliderComponent({ option, pluginSettings, id, onChange, o
         <Forms.FormSection>
             <Forms.FormTitle>{option.description}</Forms.FormTitle>
             <Slider
-                disabled={option.disabled?.() ?? false}
+                disabled={option.disabled?.call(definedSettings) ?? false}
                 markers={option.markers}
                 minValue={option.markers[0]}
                 maxValue={option.markers[option.markers.length - 1]}

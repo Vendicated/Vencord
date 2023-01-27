@@ -18,26 +18,11 @@
 
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
-import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
-import { readFileSync } from "fs";
+import { contextBridge, webFrame } from "electron";
+import { readFileSync, watch } from "fs";
 import { join } from "path";
 
 import VencordNative from "./VencordNative";
-
-if (electron.desktopCapturer === void 0) {
-    // Fix for desktopCapturer being main only in Electron 17+
-    // Discord accesses this in discord_desktop_core (DiscordNative.desktopCapture.getDesktopCaptureSources)
-    // and errors with cannot "read property getSources() of undefined"
-    // see discord_desktop_core/app/discord_native/renderer/desktopCapture.js
-    const electronPath = require.resolve("electron");
-    delete require.cache[electronPath]!.exports;
-    require.cache[electronPath]!.exports = {
-        ...electron,
-        desktopCapturer: {
-            getSources: opts => ipcRenderer.invoke(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, opts)
-        }
-    };
-}
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
@@ -60,17 +45,14 @@ if (location.protocol !== "data:") {
         }
     }
 
-    try {
-        const css = readFileSync(rendererCss, "utf-8");
-        insertCss(css);
-    } catch (err) {
-        if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
-            throw err;
-
-        // hack: the pre update updater does not download this file, so manually download it
-        // TODO: remove this in a future version
-        ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
-            .then(insertCss);
+    const css = readFileSync(rendererCss, "utf-8");
+    insertCss(css);
+    if (IS_DEV) {
+        // persistent means keep process running if watcher is the only thing still running
+        // which we obviously don't want
+        watch(rendererCss, { persistent: false }, () => {
+            document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
+        });
     }
     require(process.env.DISCORD_PRELOAD!);
 } else {

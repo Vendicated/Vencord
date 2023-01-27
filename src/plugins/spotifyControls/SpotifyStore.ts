@@ -76,10 +76,6 @@ export const SpotifyStore = proxyLazy(() => {
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
     class SpotifyStore extends Store {
-        constructor(dispatcher: any, handlers: any) {
-            super(dispatcher, handlers);
-        }
-
         public mPosition = 0;
         private start = 0;
 

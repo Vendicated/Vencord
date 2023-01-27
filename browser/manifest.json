@@ -1,10 +1,14 @@
 {
     "manifest_version": 3,
+    "minimum_chrome_version": "91",
+
     "name": "Vencord Web",
-    "description": "Yeee",
-    "version": "1.0.0",
+    "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
+    "icons": {
+        "128": "icon.png"
+    },
 
     "host_permissions": [
         "*://*.discord.com/*",
@@ -36,5 +40,12 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
+    },
+
+    "applications": {
+        "gecko": {
+            "id": "vencord-firefox@vendicated.dev",
+            "strict_min_version": "109.0"
+        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "@utils/IpcEvents";
-import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
-import { join } from "path";
-
-import { get } from "./simpleGet";
-
-ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
-    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
-    await writeFile(join(__dirname, "renderer.css"), buf);
-    return buf.toString("utf-8");
-});
-
+if (Number(process.versions.node.split(".")[0]) < 18)
+    throw `Your node version (${process.version}) is too old, please update to v18 or higher https://nodejs.org/en/download/`;

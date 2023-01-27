@@ -18,7 +18,6 @@
 
 import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
-import { readFileSync } from "fs";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -43,26 +42,33 @@ require.main!.filename = join(asarPath, discordPkg.main);
 app.setAppPath(asarPath);
 
 if (!process.argv.includes("--vanilla")) {
+    let settings: typeof import("@api/settings").Settings = {} as any;
+    try {
+        settings = JSON.parse(readSettings());
+    } catch { }
+
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
         require("./patchWin32Updater");
 
-        const originalBuild = Menu.buildFromTemplate;
-        Menu.buildFromTemplate = function (template) {
-            if (template[0]?.label === "&File") {
-                const { submenu } = template[0];
-                if (Array.isArray(submenu)) {
-                    submenu.push({
-                        label: "Quit (Hidden)",
-                        visible: false,
-                        acceleratorWorksWhenHidden: true,
-                        accelerator: "Control+Q",
-                        click: () => app.quit()
-                    });
+        if (settings.winCtrlQ) {
+            const originalBuild = Menu.buildFromTemplate;
+            Menu.buildFromTemplate = function (template) {
+                if (template[0]?.label === "&File") {
+                    const { submenu } = template[0];
+                    if (Array.isArray(submenu)) {
+                        submenu.push({
+                            label: "Quit (Hidden)",
+                            visible: false,
+                            acceleratorWorksWhenHidden: true,
+                            accelerator: "Control+Q",
+                            click: () => app.quit()
+                        });
+                    }
                 }
-            }
-            return originalBuild.call(this, template);
-        };
+                return originalBuild.call(this, template);
+            };
+        }
     }
 
     class BrowserWindow extends electron.BrowserWindow {
@@ -71,6 +77,9 @@ if (!process.argv.includes("--vanilla")) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
+                if (settings.frameless) {
+                    options.frame = false;
+                }
 
                 process.env.DISCORD_PRELOAD = original;
 
@@ -118,8 +127,7 @@ if (!process.argv.includes("--vanilla")) {
         });
 
         try {
-            const settings = JSON.parse(readSettings());
-            if (settings.enableReactDevtools)
+            if (settings?.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
@@ -178,21 +186,4 @@ if (!process.argv.includes("--vanilla")) {
 }
 
 console.log("[Vencord] Loading original Discord app.asar");
-// Legacy Vencord Injector requires "../app.asar". However, because we
-// restore the require.main above this is messed up, so monkey patch Module._load to
-// redirect such requires
-// FIXME: remove this eventually
-if (readFileSync(injectorPath, "utf-8").includes('require("../app.asar")')) {
-    console.warn("[Vencord] [--> WARNING <--] You have a legacy Vencord install. Please reinject");
-    const Module = require("module");
-    const loadModule = Module._load;
-    Module._load = function (path: string) {
-        if (path === "../app.asar") {
-            Module._load = loadModule;
-            arguments[0] = require.main!.filename;
-        }
-        return loadModule.apply(this, arguments);
-    };
-} else {
-    require(require.main!.filename);
-}
+require(require.main!.filename);
