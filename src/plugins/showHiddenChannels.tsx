@@ -183,15 +183,15 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /\(\(0,\i\.\i\)\((?<channel>\i)\.type\)\?/,
-                replace: "!$self.isHiddenChannel($<channel>)&&$&"
+                match: /(?<=getChannel\(\i\);return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
+                replace: "&&!$self.isHiddenChannel($<channel>)"
             }
         },
         {
             find: '"alt+down"',
             replacement: {
-                match: /\.map\(\(.{1,30}return \i\.id/,
-                replace: ".filter(ch=>!$self.isHiddenChannel(ch))$&"
+                match: /(?<=getState\(\)\.channelId.{1,30}\(0,\i\.\i\)\(\i\))(?=\.map\()/,
+                replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
         },
     ],
