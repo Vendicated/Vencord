@@ -64,7 +64,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
     settings,
 
     patches: [
@@ -178,7 +178,22 @@ export default definePlugin({
                 match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
                 replace: "&&!$self.isHiddenChannel($<channel>)"
             }
-        }
+        },
+        // Patch keybind handlers so you can't accidentally jump to hidden channels
+        {
+            find: '"alt+shift+down"',
+            replacement: {
+                match: /\(\(0,\i\.\i\)\((?<channel>\i)\.type\)\?/,
+                replace: "!$self.isHiddenChannel($<channel>)&&$&"
+            }
+        },
+        {
+            find: '"alt+down"',
+            replacement: {
+                match: /\.map\(\(.{1,30}return \i\.id/,
+                replace: ".filter(ch=>!$self.isHiddenChannel(ch))$&"
+            }
+        },
     ],
 
     isHiddenChannel(channel: Channel & { channelId?: string; }) {
