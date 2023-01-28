@@ -24,12 +24,12 @@ import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, ChannelStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
-const Permissions = findByPropsLazy("VIEW_CHANNEL", "ADMINISTRATOR");
+const Permissions = findLazy(m => typeof m.VIEW_CHANNEL === "bigint");
 const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
 
 const ChannelTypesToChannelName = proxyLazy(() => ({
@@ -64,7 +64,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
     settings,
 
     patches: [
@@ -178,7 +178,22 @@ export default definePlugin({
                 match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
                 replace: "&&!$self.isHiddenChannel($<channel>)"
             }
-        }
+        },
+        // Patch keybind handlers so you can't accidentally jump to hidden channels
+        {
+            find: '"alt+shift+down"',
+            replacement: {
+                match: /(?<=getChannel\(\i\);return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
+                replace: "&&!$self.isHiddenChannel($<channel>)"
+            }
+        },
+        {
+            find: '"alt+down"',
+            replacement: {
+                match: /(?<=getState\(\)\.channelId.{1,30}\(0,\i\.\i\)\(\i\))(?=\.map\()/,
+                replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
+            }
+        },
     ],
 
     isHiddenChannel(channel: Channel & { channelId?: string; }) {
@@ -210,7 +225,7 @@ export default definePlugin({
                                     {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
                                 </Text>
                                 <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
-                                    {Parser.parseTopic(channel.topic, true, { channelId: channel.id })}
+                                    {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
                                 </div>
                             </>
                         )}
