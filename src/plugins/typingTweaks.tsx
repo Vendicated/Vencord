@@ -66,7 +66,7 @@ export default definePlugin({
         },
         // Changes indicator to format message with the typing users
         {
-            find: "t(n,\"SEVERAL_USERS_TYPING\"",
+            find: ',"SEVERAL_USERS_TYPING","',
             replacement: {
                 match: /(\i)\((\i),"SEVERAL_USERS_TYPING",".+?"\)/,
                 replace: "$1($2,\"SEVERAL_USERS_TYPING\",\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
