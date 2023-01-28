@@ -80,6 +80,10 @@ if (!process.argv.includes("--vanilla")) {
                 if (settings.frameless) {
                     options.frame = false;
                 }
+                if (settings.transparent) {
+                    options.transparent = true;
+                    options.backgroundColor = "#00000000";
+                }
 
                 process.env.DISCORD_PRELOAD = original;
 
