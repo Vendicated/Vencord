@@ -16,14 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useAwaiter } from "@utils/misc";
-import { React } from "@webpack/common";
 
 import { spotify } from "../api/spotify";
 import { Artist, Resource, ResourceType } from "../types";
-
-const resourceCache: Record<string, Resource> = {};
-const CACHE_SIZE = 25;
+import { useCachedAwaiter } from "./useCachedAwaiter";
 
 export async function getResource(id: string, type: string): Promise<Resource | null> {
     switch (type) {
@@ -38,7 +34,7 @@ export async function getResource(id: string, type: string): Promise<Resource | 
         }
         case ResourceType.Artist: {
             const artist = await spotify.getArtist(id) as Artist;
-            artist.top_tracks ??= (await spotify.getArtistTopTracks(id, "US")).tracks;
+            artist.top_tracks ??= (await spotify.getArtistTopTracks(id)).tracks;
             return artist;
         }
         case ResourceType.User: {
@@ -49,30 +45,13 @@ export async function getResource(id: string, type: string): Promise<Resource | 
 }
 
 export function useResource(id: string, type: string) {
-    const cacheKey = `${type}:${id}`;
+    const [resource, error] = useCachedAwaiter(() => getResource(id, type), {
+        cacheKey: `${type}:${id}`,
+        storeKey: "spotimbed:resource",
+    });
 
-    const cached = resourceCache[cacheKey];
+    if (error instanceof Error) throw error;
+    else if (error) console.error(error);
 
-    if (cached) {
-        // Appease reconciler
-        React.useEffect(() => { }, [id, type]);
-        return cached;
-    } else {
-        const [resource, error] = useAwaiter(() => getResource(id, type), {
-            fallbackValue: null,
-            deps: [id, type],
-        });
-
-        if (error instanceof Error) throw error;
-        else if (error) console.error(error);
-
-        if (resource) {
-            for (const key of Object.keys(resourceCache).slice(CACHE_SIZE - 1))
-                delete resourceCache[key];
-
-            resourceCache[cacheKey] = resource;
-        }
-
-        return resource;
-    }
+    return resource;
 }

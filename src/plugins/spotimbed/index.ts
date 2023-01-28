@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./spotimbed.css";
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Embed, Message } from "discord-types/general";

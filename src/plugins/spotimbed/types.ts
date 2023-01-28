@@ -68,7 +68,7 @@ interface ApiResource {
     href: string;
     uri: string;
 }
-interface Pagination<T> {
+export interface Pagination<T> {
     href: string;
     items: T[];
     limit: number;
@@ -77,7 +77,7 @@ interface Pagination<T> {
     previous: string | null;
     total: number;
 }
-interface ResourceImage {
+export interface ResourceImage {
     height: number;
     width: number;
     url: string;

@@ -33,6 +33,11 @@ interface AwaiterOpts<T> {
     fallbackValue: T,
     deps?: unknown[],
     onError?(e: any): void,
+    /**
+     * Whether the awaiter should skip fetching, using only the fallback value.
+     * Useful for preventing unnecessary renders when the value is cached.
+     */
+    skipFetch?: boolean,
 }
 /**
  * Await a promise
@@ -47,20 +52,24 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
         fallbackValue: null,
         deps: [],
         onError: null,
+        skipFetch: false,
     }, providedOpts);
     const [state, setState] = useState({
         value: opts.fallbackValue,
         error: null,
-        pending: true
+        pending: !opts.skipFetch,
     });
 
     useEffect(() => {
         let isAlive = true;
-        if (!state.pending) setState({ ...state, pending: true });
 
-        factory()
-            .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && (setState({ value: null, error, pending: false }), opts.onError?.(error)));
+        if (!opts.skipFetch) {
+            if (!state.pending) setState({ ...state, pending: true });
+
+            factory()
+                .then(value => isAlive && setState({ value, error: null, pending: false }))
+                .catch(error => isAlive && (setState({ value: null, error, pending: false }), opts.onError?.(error)));
+        }
 
         return () => void (isAlive = false);
     }, opts.deps);

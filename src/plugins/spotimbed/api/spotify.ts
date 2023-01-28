@@ -18,7 +18,8 @@
 
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 
-import { Album, Artist, Playlist, SpotifyHttp, SpotifyStore, Track, User } from "../types";
+import { settings } from "../settings";
+import { Album, Artist, Pagination, Playlist, Resource, SpotifyHttp, SpotifyStore, Track, User } from "../types";
 
 const API_BASE = "https://api.spotify.com/v1";
 
@@ -29,6 +30,9 @@ const builtinApi: { http: SpotifyHttp; } = mapMangledModuleLazy(
 const spotifyStore: SpotifyStore = findByPropsLazy("getActiveSocketAndDevice");
 
 const resourcePromiseCache = new Map<string, Promise<any>>();
+
+type SearchableResource = Track | Album | Playlist | Artist;
+type ResourceMap = { [K in Resource["type"]]: Resource extends infer R ? R extends { type: K; } ? R : never : never; };
 
 export const spotify = {
     getResource(resourcePath: string) {
@@ -49,32 +53,28 @@ export const spotify = {
     },
 
     getTrack(trackId: string): Promise<Track> {
-        return this.getResource(`/tracks/${trackId}`);
+        return this.getResource(`/tracks/${trackId}?market=${settings.store.market}`);
     },
     getAlbum(albumId: string): Promise<Album> {
-        return this.getResource(`/albums/${albumId}`);
+        return this.getResource(`/albums/${albumId}?market=${settings.store.market}`);
     },
     getPlaylist(playlistId: string): Promise<Playlist> {
-        return this.getResource(`/playlists/${playlistId}`);
+        return this.getResource(`/playlists/${playlistId}?market=${settings.store.market}`);
     },
     getArtist(artistId: string): Promise<Artist> {
         return this.getResource(`/artists/${artistId}`);
     },
-    getArtistTopTracks(artistId: string, market: string): Promise<{ tracks: Track[]; }> {
-        return this.getResource(`/artists/${artistId}/top-tracks?market=${market}`);
+    getArtistTopTracks(artistId: string): Promise<{ tracks: Track[]; }> {
+        return this.getResource(`/artists/${artistId}/top-tracks?market=${settings.store.market}`);
     },
     getUser(userId: string): Promise<User> {
         return this.getResource(`/users/${userId}`);
     },
-
-    // search(query, type = "track", limit = 20) {
-    //     return this.genericRequest(
-    //         get(`${SPOTIFY_BASE_URL}/search`)
-    //             .query("q", query)
-    //             .query("type", type)
-    //             .query("limit", limit)
-    //     ).then(r => r.body);
-    // },
+    getSearch<TK extends SearchableResource["type"]>(query: string, types: TK[], limit = 20, offset = 0): Promise<{
+        [K in TK]: Pagination<ResourceMap[K]>;
+    }> {
+        return this.getResource(`/search?q=${encodeURIComponent(query)}&type=${types.join(",")}&limit=${limit}&offset=${offset}&market=${settings.store.market}`);
+    },
 
     // async _fetchAll(url, limit, offset) {
     //     const items = [];

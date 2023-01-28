@@ -18,13 +18,13 @@
 
 import { React } from "@webpack/common";
 
+import { settings } from "../settings";
 import { getRgbContrast, hslTargets, hsv2rgb, pickColor } from "../utils/color";
 import { RgbPalette } from "../utils/image";
 import { lerpList } from "../utils/misc";
-import { useSpotimbedSettings } from "./useSpotimbedSettings";
 
 export function usePaletteStyle(palette: RgbPalette | null) {
-    const { colorStyle, forceStyle } = useSpotimbedSettings(["colorStyle", "forceStyle"]);
+    const { colorStyle, forceStyle } = settings.use(["colorStyle", "forceStyle"]);
 
     return React.useMemo(() => {
         let accent = "var(--background-secondary)";
@@ -43,5 +43,5 @@ export function usePaletteStyle(palette: RgbPalette | null) {
         }
 
         return [accent, theme] as const;
-    }, [palette, colorStyle, forceStyle]);
+    }, [JSON.stringify(palette), colorStyle, forceStyle]);
 }

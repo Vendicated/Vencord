@@ -17,17 +17,18 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { parseUrl, useAwaiter } from "@utils/misc";
+import { parseUrl } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
 import { repository } from "../../../../package.json";
+import { useCachedAwaiter } from "../hooks/useCachedAwaiter";
 import { usePaletteStyle } from "../hooks/usePaletteStyle";
 import { usePreviewUrl } from "../hooks/usePreviewUrl";
 import { useResource } from "../hooks/useResource";
 import { settings } from "../settings";
 import { ColorStyle, ResourceType } from "../types";
-import { getDataUrlFromUrl, getPaletteFromUrl } from "../utils/image";
+import { getDataUrlFromUrl, getPaletteFromUrl, getSmallestImage } from "../utils/image";
 import { cl } from "../utils/misc";
 import { Art } from "./Art";
 import { AudioControls } from "./AudioControls";
@@ -80,14 +81,14 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const noPalette = !artUrl || isDiscordTheme || isForeign;
     const hasPlayer = resourceType !== ResourceType.User;
 
-    const [palette, , artPending] = useAwaiter(async () => {
+    const [palette, , artPending] = useCachedAwaiter(async () => {
         if (noPalette) return null;
         const artData = await getDataUrlFromUrl(artUrl);
         const palette = await getPaletteFromUrl(artData, 128, 10);
         return palette;
     }, {
-        fallbackValue: null,
-        deps: [artUrl, colorStyle, resourceType],
+        cacheKey: JSON.stringify([artUrl, colorStyle, resourceType]),
+        storeKey: "spotmbed:palette",
     });
 
     const [accent, theme] = usePaletteStyle(palette);
@@ -96,8 +97,8 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const [previewUrl, trackIndex, setTrackIndex] = usePreviewUrl(resourceData);
 
     if (!artUrl && resourceData) {
-        if ("images" in resourceData) setArtUrl(resourceData.images[0].url);
-        else if (resourceData.type === "track") setArtUrl(resourceData.album.images[0].url);
+        const smallestArt = getSmallestImage(resourceData);
+        if (smallestArt) setArtUrl(smallestArt.url);
     }
 
     // TODO: Context menu additions
