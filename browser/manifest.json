@@ -42,7 +42,7 @@
         ]
     },
 
-    "applications": {
+    "browser_specific_settings": {
         "gecko": {
             "id": "vencord-firefox@vendicated.dev",
             "strict_min_version": "109.0"
