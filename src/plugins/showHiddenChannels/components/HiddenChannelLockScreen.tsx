@@ -21,6 +21,33 @@ import { LazyComponent } from "@utils/misc";
 import { proxyLazy } from "@utils/proxyLazy";
 import { find, findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { Channel } from "discord-types/general";
+
+enum SortOrderTypesTyping {
+    LATEST_ACTIVITY = 0,
+    CREATION_DATE = 1
+}
+
+enum ForumLayoutTypesTyping {
+    DEFAULT = 0,
+    LIST = 1,
+    GRID = 2
+}
+
+interface Tag {
+    id: string;
+    name: string;
+    emojiId: string | null;
+    emojiName: string | null;
+    moderated: boolean;
+}
+
+interface ExtendedChannel extends Channel {
+    defaultThreadRateLimitPerUser?: number;
+    defaultSortOrder?: SortOrderTypesTyping | null;
+    defaultForumLayout?: ForumLayoutTypesTyping;
+    availableTags?: Array<Tag>;
+}
 
 const ChatClasses = findByPropsLazy("chat", "chatContent");
 const TagClasses = findLazy(m => typeof m.tags === "string" && Object.entries(m).length === 1); // Object exported with a single key called tags
@@ -47,7 +74,7 @@ const SortOrderTypesToNames = proxyLazy(() => ({
 }));
 
 const ForumLayoutTypesToNames = proxyLazy(() => ({
-    [ForumLayoutTypes.Default]: "Not set",
+    [ForumLayoutTypes.DEFAULT]: "Not set",
     [ForumLayoutTypes.LIST]: "List view",
     [ForumLayoutTypes.GRID]: "Gallery view"
 }));
@@ -55,7 +82,7 @@ const ForumLayoutTypesToNames = proxyLazy(() => ({
 // Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
-function HiddenChannelLockScreen(channel: any) {
+function HiddenChannelLockScreen(channel: ExtendedChannel) {
     return (
         <ErrorBoundary noop>
             <div className={ChatClasses.chat + " " + "shc-lock-screen-container"}>
@@ -83,9 +110,9 @@ function HiddenChannelLockScreen(channel: any) {
                     }
                 </div>
 
-                <Text variant="text-lg/normal">You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel. {channel.isForumChannel() && channel.topic?.length > 0 && "However you may see its guidelines:"}</Text >
+                <Text variant="text-lg/normal">You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel. {channel.isForumChannel() && channel.topic && channel.topic.length > 0 && "However you may see its guidelines:"}</Text >
 
-                {channel.isForumChannel() && channel.topic?.length > 0 && <div className="shc-lock-screen-topic-container">
+                {channel.isForumChannel() && channel.topic && channel.topic.length > 0 && <div className="shc-lock-screen-topic-container">
                     {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
                 </div>}
 
@@ -110,7 +137,7 @@ function HiddenChannelLockScreen(channel: any) {
                 {channel.defaultSortOrder &&
                     <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[channel.defaultSortOrder]}</Text>
                 }
-                {channel.availableTags?.length > 0 &&
+                {channel.availableTags && channel.availableTags.length > 0 &&
                     <div className="shc-lock-screen-tags-container">
                         <Text variant="text-lg/bold">Tags:</Text>
                         <div className={TagClasses.tags}>
