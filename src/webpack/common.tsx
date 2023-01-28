@@ -75,6 +75,7 @@ export let Button: any;
 export const ButtonLooks = findByPropsLazy("BLANK", "FILLED", "INVERTED") as Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
 export let Switch: any;
 export let Tooltip: Components.Tooltip;
+export let Timestamp: any;
 export let Router: any;
 export let TextInput: any;
 export let Text: (props: TextProps) => JSX.Element;
@@ -152,9 +153,9 @@ export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("cop
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
-export const NavigationRouter = mapMangledModuleLazy('"transitionToGuild', {
-    transitionTo: filters.byCode('"transitionTo '),
-    transitionToGuild: filters.byCode('"transitionToGuild'),
+export const NavigationRouter = mapMangledModuleLazy("Transitioning to external path", {
+    transitionTo: filters.byCode("Transitioning to external path"),
+    transitionToGuild: filters.byCode("transitionToGuild"),
     goBack: filters.byCode("goBack()"),
     goForward: filters.byCode("goForward()"),
 });
@@ -184,6 +185,8 @@ waitFor("getRelationshipType", m => RelationshipStore = m);
 waitFor(["Hovers", "Looks", "Sizes"], m => Button = m);
 
 waitFor(filters.byCode("tooltipNote", "ringTarget"), m => Switch = m);
+
+waitFor(filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"), m => Timestamp = m);
 
 waitFor(["Positions", "Colors"], m => Tooltip = m);
 waitFor(m => m.Types?.PRIMARY === "cardPrimary", m => Card = m);
@@ -307,4 +310,3 @@ export const ContextMenu = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
-
