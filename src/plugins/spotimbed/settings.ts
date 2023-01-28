@@ -33,14 +33,14 @@ export const settings = definePluginSettings({
         options: colorMethodNames.map(name => ({
             label: wordsToTitle(wordsFromCamel(name)),
             value: name,
-            default: name === "vibrant",
+            default: name === "pastel",
         })),
     },
     forceStyle: {
         description: "Force Style",
         type: OptionType.SLIDER,
         markers: [0, 100],
-        default: 0,
+        default: 0.5,
         componentProps: {
             stickToMarkers: false,
             onValueRender: null,
@@ -55,4 +55,9 @@ export const settings = definePluginSettings({
             default: code === "US",
         })),
     },
+    nativeLinks: {
+        description: "Native Links",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
 });

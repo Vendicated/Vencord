@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { parseUrl } from "@utils/misc";
+
+import { settings } from "../settings";
 import { Artist, Resource, User } from "../types";
 import { cl } from "../utils/misc";
 
@@ -37,14 +40,17 @@ export function AttributionLine(prep: string, entity: React.ReactNode) {
 }
 
 export function ResourceLink(resource: Resource, className: string = "", title?: string) {
+    const { nativeLinks } = settings.use(["nativeLinks"]);
     const name = resource.type === "user" ? resource.display_name : resource.name;
-    const url = resource.external_urls.spotify;
+    const url = parseUrl(resource.external_urls.spotify);
+    const href = nativeLinks ? `spotify:/${url?.pathname}` : url?.href;
 
     return <a
         className={[cl("link")].concat(className.split(" ")).join(" ")}
-        href={url}
+        href={href}
         data-resource-link={true}
         target="_blank"
+        rel="noreferrer noopener"
         title={title == null ? name : (title || void 0)}
     >{name}</a>;
 }

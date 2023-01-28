@@ -77,7 +77,7 @@ function TrackRow({ track, position, isSelected, onClick }: TrackRowProps) {
         <div
             className={cl(
                 "trackrow",
-                isDisabled && "trackrow-disabled",
+                isDisabled && "disabled",
                 !isDisabled && isSelected && "active",
             )}
             onClick={isDisabled ? void 0 : onClick}

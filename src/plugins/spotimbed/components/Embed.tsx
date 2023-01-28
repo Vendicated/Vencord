@@ -104,12 +104,13 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     // TODO: Context menu additions
     return isForeign ? UnsupportedEmbed() : (
         <div className={[
-            cl("embed"),
+            cl("embed", hasPlayer && "has-player"),
             theme,
             isDiscordTheme ? null : "default-colors",
         ].join(" ")} style={{
+            "--spotimbed-accent": accent,
             backgroundColor: accent,
-        }}>
+        } as React.CSSProperties}>
             <div className={cl("art-wrap")}>
                 <Art src={artUrl ?? null} pending={artPending} />
             </div>

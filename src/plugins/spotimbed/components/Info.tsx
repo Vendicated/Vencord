@@ -71,6 +71,7 @@ interface InfoFields {
     infolines?: React.ReactNode[];
     secondaryLines?: React.ReactNode[];
 }
+// eslint-disable-next-line consistent-return
 function getInfoFields(resource: Resource): InfoFields {
     switch (resource.type) {
         case ResourceType.Track: return {
@@ -113,6 +114,9 @@ function getInfoFields(resource: Resource): InfoFields {
                 secondaryLines,
             };
         }
+        case ResourceType.User: return {
+            tags: [resource.id],
+            infolines: [`${resource.followers.total} followers`],
+        };
     }
-    return {};
 }

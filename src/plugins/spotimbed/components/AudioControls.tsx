@@ -26,8 +26,8 @@ import { cl } from "../utils/misc";
 interface MediaPlayerProps {
     src: string;
     type: "AUDIO" | "VIDEO";
-    height: number;
-    width: number;
+    height: number | "100%";
+    width: number | "100%";
     forceExternal: boolean;
     autoPlay: boolean;
     playable: boolean;
@@ -63,7 +63,7 @@ export const AudioControls = ({ mediaHref }: AudioControlsProps) => {
             src={mediaHref}
             type="AUDIO"
             height={300}
-            width={400}
+            width={"100%"}
             forceExternal={false}
             autoPlay={false}
             playable={true}

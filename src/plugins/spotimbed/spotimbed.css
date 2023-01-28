@@ -3,10 +3,14 @@
     color: var(--text-normal);
     display: grid;
     grid-template-columns: 80px 1fr;
-    grid-template-rows: 80px auto 32px;
-    grid-template-areas: 'art info' 'content content' 'controls controls';
+    grid-template-rows: 80px auto;
+    grid-template-areas: 'art info' 'content content';
     width: 400px;
     user-select: none;
+}
+.spotimbed-has-player {
+    grid-template-rows: 80px auto 32px;
+    grid-template-areas: 'art info' 'content content' 'controls controls';
 }
 
 .spotimbed-art-wrap {
@@ -14,10 +18,13 @@
     align-items: center;
     display: flex;
     justify-content: center;
-    border-radius: 4px 0 0 0;
+    border-radius: 4px 0 0 4px;
     height: 80px;
     width: 80px;
     overflow: hidden;
+}
+:where(.spotimbed-has-player) .spotimbed-art-wrap {
+    border-radius: 4px 0 0 0;
 }
 
 .spotimbed-art {
@@ -51,11 +58,11 @@
     overflow: hidden;
 }
 
-.spotimbed-embed .spotimbed-link {
+.spotimbed-link {
     color: inherit;
 }
 
-.spotimbed-embed .spotimbed-link:hover {
+.spotimbed-link:hover {
     text-decoration: underline;
 }
 
@@ -81,7 +88,7 @@
 }
 
 .spotimbed-mono {
-    font-family: Consolas, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Monaco, Courier New, Courier, monospace;
+    font-family: var(--font-code);
 }
 
 .spotimbed-title-tag {
@@ -119,6 +126,9 @@
 .spotimbed-content::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, .2);
 }
+.spotimbed-embed:not(.theme-custom) .spotimbed-content::-webkit-scrollbar-thumb {
+    background-color: var(--spotimbed-accent);
+}
 
 .spotimbed-tracklist {
     height: 200px;
@@ -138,7 +148,7 @@
 
 .spotimbed-embed.theme-light {
     --background-modifier-hover: rgba(0, 0, 0, .1);
-    --background-modifier-selected: rgba(0, 0, 0, .3);
+    --background-modifier-selected: rgba(0, 0, 0, .2);
 }
 
 .spotimbed-trackrow:not(.spotimbed-disabled):hover {
@@ -204,6 +214,27 @@
     border-radius: 0 0 4px 4px;
 }
 
+.spotimbed-controls [class*="videoButton"] {
+    margin-right: 0 !important;
+}
+
+.spotimbed-controls [class*="durationTimeWrapper"] {
+    transform: translateY(-15%);
+}
+
+.spotimbed-controls [class*="durationTimeWrapper"]>* {
+    display: none;
+}
+
+.spotimbed-controls [class*="durationTimeWrapper"]::before {
+    content: "Preview";
+    font-family: var(--font-code);
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 0 4px 0 0;
+    font-size: 80%;
+}
+
 .spotimbed-controls .spotimbed-placeholder-wrap {
     align-items: center;
     display: flex;
@@ -229,6 +260,29 @@
     width: 16px;
     height: 16px;
     margin: 0 8px;
+}
+
+.spotimbed-embed:not(.theme-custom) .spotimbed-controls .spotimbed-placeholder {
+    background: var(--spotimbed-accent);
+}
+.spotimbed-embed:not(.theme-custom) .spotimbed-media-player {
+    --brand-experiment: var(--spotimbed-accent);
+    --brand-experiment-560: var(--spotimbed-accent);
+}
+.spotimbed-embed:not(.theme-custom) .spotimbed-controls [class*="durationTimeWrapper"]::before {
+    color: var(--spotimbed-accent);
+}
+.spotimbed-embed.theme-light .spotimbed-controls [class*="durationTimeWrapper"]::before {
+    filter: brightness(1.4);
+}
+.spotimbed-embed.theme-dark .spotimbed-controls [class*="durationTimeWrapper"]::before {
+    filter: brightness(2.8);
+}
+.spotimbed-embed.theme-light .spotimbed-controls [class*="mediaBarProgress"] {
+    filter: brightness(0.8) saturate(2);
+}
+.spotimbed-embed.theme-dark .spotimbed-controls [class*="mediaBarProgress"] {
+    filter: brightness(1.6) saturate(1.5);
 }
 
 .spotimbed-unsupported {
