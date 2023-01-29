@@ -23,6 +23,8 @@ import { find, findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
+import { humanizeTime } from "../util";
+
 enum SortOrderTypesTyping {
     LATEST_ACTIVITY = 0,
     CREATION_DATE = 1
@@ -123,13 +125,13 @@ function HiddenChannelLockScreen(channel: ExtendedChannel) {
                     <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(channel.lastPinTimestamp)} /></Text>
                 }
                 {(channel.rateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Slowmode: {moment.duration(channel.rateLimitPerUser, "seconds").humanize()}</Text>
+                    <Text variant="text-md/normal">Slowmode: {humanizeTime(channel.rateLimitPerUser ?? 0, "seconds")}</Text>
                 }
                 {(channel.defaultThreadRateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Default thread slowmode: {moment.duration(channel.rateLimitPerUser, "seconds").humanize()}</Text>
+                    <Text variant="text-md/normal">Default thread slowmode: {humanizeTime(channel.defaultThreadRateLimitPerUser ?? 0, "seconds")}</Text>
                 }
                 {(channel.defaultAutoArchiveDuration ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}: {moment.duration(channel.defaultAutoArchiveDuration, "minutes").humanize()}</Text>
+                    <Text variant="text-md/normal">Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}: {humanizeTime(channel.defaultAutoArchiveDuration ?? 0, "minutes")}</Text>
                 }
                 {channel.defaultForumLayout &&
                     <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[channel.defaultForumLayout]}</Text>
