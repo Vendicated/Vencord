@@ -86,17 +86,13 @@ export default definePlugin({
     },
 
     oldTrendingCat: null as Category[] | null,
+    sillyInstance: null as any,
 
     get collections(): Collection[] {
         CollectionManager.refreshCacheCollection();
         return CollectionManager.cache_collections;
     },
 
-    set collections(val: Collection[]) {
-        localStorage.setItem(`${this.name}-collections`, JSON.stringify(val));
-    },
-
-    sillyInstance: null as any,
 
     renderContent(instance) {
         if (instance.props.query.startsWith("gc:")) {
