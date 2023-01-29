@@ -105,9 +105,8 @@ export default definePlugin({
                 format: getFormat(g.src),
                 src: g.src,
                 url: g.url,
-                // If ya dont have any favriouts this will error :| idk how they get the width and height ill figure it out later
-                width: instance.props.favorites[0].width,
-                height: instance.props.favorites[0].height
+                width: g.width,
+                height: g.height
             })).reverse();
         }
 
@@ -141,7 +140,6 @@ export default definePlugin({
                     onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.name} />
             );
-        // TODO: Remove gif from collection context menu
         if (instance.props.item.id.startsWith("gc-moment:"))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
@@ -161,6 +159,19 @@ export default definePlugin({
 
         // oh my. WHY do i have to check if its null twice :|
         const src = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.src ?? url : url;
+
+        const height = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.height ?? target.clientHeight : 50;
+        const width = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.width ?? target.clientWidth : 50;
+
+        const gif: Gif = {
+            id: uuidv4(),
+            height,
+            width,
+            src,
+            url
+        };
+
+        console.log(gif);
         return (
             <Menu.MenuItem
                 label="Add To Collection"
@@ -174,7 +185,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={col.name.split(":")[1]}
-                            action={() => CollectionManager.addToCollection(col.name, { id: uuidv4(), src, url })}
+                            action={() => CollectionManager.addToCollection(col.name, gif)}
                         />
                     );
                 }) : /* bruh */ <></>}
@@ -190,7 +201,7 @@ export default definePlugin({
                                 <ModalHeader>
                                     <Forms.FormText>Create Collection</Forms.FormText>
                                 </ModalHeader>
-                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} src={src} url={url} />
+                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif} />
                             </ModalRoot>
                         ));
                     }}
@@ -231,13 +242,12 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
 
 
 interface CreateCollectionModalProps {
-    src: string,
-    url: string,
+    gif: Gif;
     onClose: () => void,
     createCollection: (name: string, gifs: Gif[]) => void;
 }
 
-function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCollectionModalProps) {
+function CreateCollectionModal({ gif, createCollection, onClose }: CreateCollectionModalProps) {
 
     const [name, setName] = React.useState("");
     return (
@@ -255,7 +265,7 @@ function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCo
                     disabled={!name.length}
                     onClick={() => {
                         if (!name.length) return;
-                        createCollection(name, [{ id: uuidv4(), src, url }]);
+                        createCollection(name, [gif]);
                         onClose();
                     }}
                 >

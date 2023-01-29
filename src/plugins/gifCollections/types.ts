@@ -31,6 +31,8 @@ export interface Gif {
     id: string,
     src: string;
     url: string;
+    height: number,
+    width: number;
 }
 
 export interface Props {
