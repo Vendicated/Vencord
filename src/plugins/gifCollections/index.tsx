@@ -87,6 +87,7 @@ export default definePlugin({
 
     oldTrendingCat: null as Category[] | null,
     sillyInstance: null as any,
+    sillyContentInstance: null as any,
 
     get collections(): Collection[] {
         CollectionManager.refreshCacheCollection();
@@ -96,6 +97,7 @@ export default definePlugin({
 
     renderContent(instance) {
         if (instance.props.query.startsWith("gc:")) {
+            this.sillyContentInstance = instance;
             const collection = this.collections.find(c => c.name === instance.props.query);
             if (!collection) return;
             instance.props.resultItems = collection.gifs.map(g => ({
@@ -144,7 +146,7 @@ export default definePlugin({
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="gif"
-                    onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
+                    onConfirm={() => { this.sillyContentInstance && this.sillyContentInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.id}
                 />);
 
@@ -220,7 +222,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
                         await CollectionManager.deleteCollection(nameOrId);
                         onConfirm();
                     }
-                }) : CollectionManager.removeFromCollection(nameOrId)}
+                }) : CollectionManager.removeFromCollection(nameOrId).then(() => onConfirm())}
         />
     </Menu.ContextMenu>
 );
