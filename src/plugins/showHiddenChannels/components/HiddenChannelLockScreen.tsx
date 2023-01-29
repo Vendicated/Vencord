@@ -62,6 +62,7 @@ const TagClasses = findLazy(m => typeof m.tags === "string" && Object.entries(m)
 const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
 const SortOrderTypes = findLazy(m => typeof m.LATEST_ACTIVITY === "number");
 const ForumLayoutTypes = findLazy(m => typeof m.LIST === "number");
+const ChannelFlags = findLazy(m => typeof m.REQUIRE_TAG === "number");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
@@ -155,6 +156,9 @@ function HiddenChannelLockScreen(channel: ExtendedChannel) {
                             emojiId: channel.defaultReactionEmoji?.emojiId
                         }} />
                     </div>
+                }
+                {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
+                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
                 }
                 {channel.availableTags && channel.availableTags.length > 0 &&
                     <div className="shc-lock-screen-tags-container">
