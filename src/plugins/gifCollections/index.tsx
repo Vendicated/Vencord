@@ -96,6 +96,8 @@ export default definePlugin({
         localStorage.setItem(`${this.name}-collections`, JSON.stringify(val));
     },
 
+    sillyInstance: null as any,
+
     renderContent(instance) {
         if (instance.props.query.startsWith("gc:")) {
             const collection = this.collections.find(c => c.name === instance.props.query);
@@ -120,6 +122,7 @@ export default definePlugin({
 
     insertCollections(instance: { props: Props; }) {
         try {
+            this.sillyInstance = instance;
             if (instance.props.trendingCategories.length && instance.props.trendingCategories[0].type === "Trending")
                 this.oldTrendingCat = instance.props.trendingCategories;
 
@@ -133,8 +136,8 @@ export default definePlugin({
     },
 
     collectionContextMenu(e, instance) {
-        if (instance.props.item.name != null)
-            return ContextMenu.open(e, () => <CollectionDeleteContextMenu name={instance.props.item.name} />);
+        if (instance.props.item.name != null && instance.props.item.name.startsWith("gc:"))
+            return ContextMenu.open(e, () => <CollectionDeleteContextMenu onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }} name={instance.props.item.name} />);
         // TODO: Remove gif from collection context menu
         return null;
     },
@@ -187,7 +190,7 @@ export default definePlugin({
 });
 
 // stolen from spotify controls
-const CollectionDeleteContextMenu = ({ name }: { name: string, }) => (
+const CollectionDeleteContextMenu = ({ name, onConfirm }: { name: string, onConfirm: () => void; }) => (
     <Menu.ContextMenu
         navId="spotify-album-menu"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
@@ -204,7 +207,10 @@ const CollectionDeleteContextMenu = ({ name }: { name: string, }) => (
                     body: "Do you really want to delete this collection?",
                     confirmText: "Delete",
                     cancelText: "Nevermind",
-                    onConfirm: () => CollectionManager.deleteCollection(name)
+                    onConfirm: async () => {
+                        await CollectionManager.deleteCollection(name);
+                        onConfirm();
+                    }
                 })}
         />
     </Menu.ContextMenu>
