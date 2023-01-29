@@ -23,49 +23,10 @@ import definePlugin from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
 import { Settings } from "Vencord";
 
-// welp
-export enum Format { NONE = 0, IMAGE = 1, VIDEO = 2 }
-
-export interface Category {
-    type: "Trending" | "Category";
-    name: string;
-    src: string;
-    format: Format;
-    gifs?: Gif[];
-}
-
-export interface Gif {
-    src: string;
-    url: string;
-}
-
-export interface Props {
-    favorites: { [src: string]: any; };
-    trendingCategories: Category[];
-}
-
-type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-
-export type Collection = WithRequired<Category, "gifs">;
-
-
-// goose gang
-function getLocalStoragePropertyDescriptor() {
-    const frame = document.createElement("frame");
-    frame.src = "about:blank";
-
-    document.body.appendChild(frame);
-
-    const r = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage");
-
-    frame.remove();
-
-    return r;
-}
-
-const fixLocalStorage = () => {
-    Object.defineProperty(window, "localStorage", getLocalStoragePropertyDescriptor()!);
-};
+import * as CollectionManager from "./CollectionManager";
+import { Category, Collection, Gif, Props } from "./types";
+import { getFormat } from "./utils/getFormat";
+import { uuidv4 } from "./utils/uuidv4";
 
 export default definePlugin({
     name: "Gif Collection",
@@ -95,7 +56,7 @@ export default definePlugin({
                 // Delete context menu for collection
                 {
                     match: /(.{1,2}\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
-                    replace: "$1onContextMenu: (e) => Vencord.Plugins.plugins[\"Gif Collection\"].collectionContextMenu(e, this.props.item.name),"
+                    replace: "$1onContextMenu: (e) => Vencord.Plugins.plugins[\"Gif Collection\"].collectionContextMenu(e, this),"
                 }
             ]
         },
@@ -121,21 +82,18 @@ export default definePlugin({
     ],
 
     start() {
-        fixLocalStorage();
+        CollectionManager.refreshCacheCollection();
     },
 
     oldTrendingCat: null as Category[] | null,
 
     get collections(): Collection[] {
-        return JSON.parse(localStorage.getItem(`${this.name}-collections`) ?? "[]");
+        CollectionManager.refreshCacheCollection();
+        return CollectionManager.cache_collections;
     },
 
     set collections(val: Collection[]) {
         localStorage.setItem(`${this.name}-collections`, JSON.stringify(val));
-    },
-
-    get_url_extension(url: string) {
-        return url.split(/[#?]/)[0].split(".").pop()?.trim();
     },
 
     renderContent(instance) {
@@ -143,15 +101,14 @@ export default definePlugin({
             const collection = this.collections.find(c => c.name === instance.props.query);
             if (!collection) return;
             instance.props.resultItems = collection.gifs.map(g => ({
-                // only works for tennor gifs
-                id: g.src.split("-")[g.src.split("-").length - 1],
-                format: this.get_url_extension(g.src) === "mp4" || this.get_url_extension(g.src) == null ? Format.VIDEO : Format.IMAGE,
+                id: uuidv4(),
+                format: getFormat(g.src),
                 src: g.src,
                 url: g.url,
                 // If ya dont have any favriouts this will error :| idk how they get the width and height ill figure it out later
                 width: instance.props.favorites[0].width,
                 height: instance.props.favorites[0].height
-            }));
+            })).reverse();
         }
 
     },
@@ -161,29 +118,6 @@ export default definePlugin({
         return res.length > 1 ? res[1] : res[0];
     },
 
-    createCollection(name: string, gifs: Gif[] = []) {
-        const tempCol = this.collections;
-        tempCol.push({
-            name: `gc:${name}`,
-            src: gifs.length ? gifs[0].src : "",
-            format: this.get_url_extension(gifs[0].src) === "mp4" || this.get_url_extension(gifs[0].src) == null ? Format.VIDEO : Format.IMAGE,
-            type: "Category",
-            gifs
-        });
-
-        this.collections = tempCol;
-
-    },
-
-    addToCollection(collectionName: string, src: string, url: string) {
-        const tempCol = this.collections;
-        const colIndex = tempCol.findIndex(col => col.name === collectionName);
-        if (colIndex === -1) return console.warn("cant find that collection eh");
-
-        tempCol[colIndex].gifs?.push({ src, url });
-        return this.collections = tempCol;
-    },
-
     insertCollections(instance: { props: Props; }) {
         try {
             if (instance.props.trendingCategories.length && instance.props.trendingCategories[0].type === "Trending")
@@ -191,21 +125,18 @@ export default definePlugin({
 
 
             if (this.oldTrendingCat != null)
-                instance.props.trendingCategories = this.collections.concat(this.oldTrendingCat as Collection[]);
+                instance.props.trendingCategories = this.collections.reverse().concat(this.oldTrendingCat as Collection[]);
 
         } catch (err) {
             console.error(err);
         }
     },
 
-    collectionContextMenu(e, name: string) {
-        if (!name.startsWith("gc:")) return;
-        ContextMenu.open(e, () =>
-            <CollectionDeleteContextMenu
-                name={name}
-                // TODO: implement this
-                deleteCollection={(name: string) => { console.log("uuuh", name); }}
-            />);
+    collectionContextMenu(e, instance) {
+        if (instance.props.item.name != null)
+            return ContextMenu.open(e, () => <CollectionDeleteContextMenu name={instance.props.item.name} />);
+        // TODO: Remove gif from collection context menu
+        return null;
     },
 
 
@@ -229,7 +160,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={col.name.split(":")[1]}
-                            action={() => this.addToCollection(col.name, src, url)}
+                            action={() => CollectionManager.addToCollection(col.name, { src, url })}
                         />
                     );
                 }) : /* bruh */ <></>}
@@ -245,7 +176,7 @@ export default definePlugin({
                                 <ModalHeader>
                                     <Forms.FormText>Create Collection</Forms.FormText>
                                 </ModalHeader>
-                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={this.createCollection.bind(this)} src={src} url={url} />
+                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} src={src} url={url} />
                             </ModalRoot>
                         ));
                     }}
@@ -256,7 +187,7 @@ export default definePlugin({
 });
 
 // stolen from spotify controls
-const CollectionDeleteContextMenu = ({ name, deleteCollection }: { name: string, deleteCollection: (name: string) => void; }) => (
+const CollectionDeleteContextMenu = ({ name }: { name: string, }) => (
     <Menu.ContextMenu
         navId="spotify-album-menu"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
@@ -273,7 +204,7 @@ const CollectionDeleteContextMenu = ({ name, deleteCollection }: { name: string,
                     body: "Do you really want to delete this collection?",
                     confirmText: "Delete",
                     cancelText: "Nevermind",
-                    onConfirm: () => deleteCollection(name)
+                    onConfirm: () => CollectionManager.deleteCollection(name)
                 })}
         />
     </Menu.ContextMenu>
@@ -286,7 +217,7 @@ interface CreateCollectionModalProps {
     src: string,
     url: string,
     onClose: () => void,
-    createCollection: (name: string, gifs?: Gif[]) => void;
+    createCollection: (name: string, gifs: Gif[]) => void;
 }
 
 function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCollectionModalProps) {
@@ -298,7 +229,6 @@ function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCo
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Collection Name</Forms.FormTitle>
                 <TextInput
                     onChange={(e: string) => setName(e)}
-                    onSubmit={() => console.log("Hi")}
                 />
 
             </ModalContent>
