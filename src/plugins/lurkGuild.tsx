@@ -52,7 +52,7 @@ const lurkGuild: (options: {
 var context: Guild;
 function LurkGuildButton() {
     // Outside variable can be changed by render of another invite
-    const [guild] = useState(context);
+    const guild = context;
     if (guild.joinedAt || !guild.hasFeature("DISCOVERABLE"))
         return null;
 
