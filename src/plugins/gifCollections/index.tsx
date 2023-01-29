@@ -154,14 +154,14 @@ export default definePlugin({
 
 
     makeMenu(url: string, target: HTMLElement) {
-        if (target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
+        if (target == null || target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
             return null;
 
-        // oh my. WHY do i have to check if its null twice :|
-        const src = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.src ?? url : url;
+        // oh my
+        const src = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.src ?? url;
 
-        const height = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.height ?? target.clientHeight : 50;
-        const width = target != null ? (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.width ?? target.clientWidth : 50;
+        const height = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.height ?? target.clientHeight;
+        const width = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.width ?? target.clientWidth;
 
         const gif: Gif = {
             id: uuidv4(),
