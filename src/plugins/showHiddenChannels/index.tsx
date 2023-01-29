@@ -223,7 +223,7 @@ export default definePlugin({
             find: 'jumboable?"jumbo":"default"',
             replacement: {
                 match: /(?<=\i:\(\)=>\i)(?=}.+?(?<component>\i)=function.{1,20}node,\i=\i.isInteracting)/,
-                replace: ",hc1:()=>$<component>"
+                replace: ",hc1:()=>$<component>" // Blame Ven length check for the small name :pensive_cry:
             }
         }
     ],
