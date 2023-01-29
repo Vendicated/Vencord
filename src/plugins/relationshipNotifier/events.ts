@@ -17,10 +17,9 @@
 */
 
 import { onChannelDelete, onGuildDelete, onRelationshipRemove } from "./functions";
-import EventListener from "./types/EventListener";
 import { syncFriends, syncGroups, syncGuilds } from "./utils";
 
-const events: EventListener[] = [
+const events = [
     {
         name: "GUILD_CREATE",
         callbacks: [syncGuilds]
@@ -49,6 +48,6 @@ const events: EventListener[] = [
         name: "RELATIONSHIP_REMOVE",
         callbacks: [syncFriends, onRelationshipRemove]
     }
-];
+] as const;
 
 export default events;
