@@ -28,6 +28,7 @@ export interface Category {
 }
 
 export interface Gif {
+    id: string,
     src: string;
     url: string;
 }

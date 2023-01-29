@@ -18,7 +18,7 @@
 
 import { DataStore } from "@api/index";
 
-import { Collection, Gif } from "./types";
+import { Collection, Format, Gif } from "./types";
 import { getFormat } from "./utils/getFormat";
 
 export const DATA_COLLECTION_NAME = "gif-collections-collections";
@@ -67,6 +67,23 @@ export const addToCollection = async (name: string, gif: Gif) => {
 
 };
 
+export const removeFromCollection = async (id: string) => {
+    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collectionIndex = collections.findIndex(c => c.gifs.findIndex(g => g.id === id) !== -1);
+    if (collectionIndex === -1) return console.warn("collection not found");
+
+    // Remove The Gif
+    collections[collectionIndex].gifs = collections[collectionIndex].gifs.filter(g => g.id !== id);
+
+    const collection = collections[collectionIndex];
+    // TODO: need to change default image eh
+    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : "https://i.imgur.com/TFatP8r.png";
+    collections[collectionIndex].src = latestGifSrc;
+    collections[collectionIndex].format = latestGifSrc ? getFormat(latestGifSrc) : Format.IMAGE;
+
+    await DataStore.set(DATA_COLLECTION_NAME, collections);
+    return await refreshCacheCollection();
+};
 
 export const deleteCollection = async name => {
 

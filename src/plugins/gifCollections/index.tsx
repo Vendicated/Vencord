@@ -99,7 +99,7 @@ export default definePlugin({
             const collection = this.collections.find(c => c.name === instance.props.query);
             if (!collection) return;
             instance.props.resultItems = collection.gifs.map(g => ({
-                id: uuidv4(),
+                id: g.id,
                 format: getFormat(g.src),
                 src: g.src,
                 url: g.url,
@@ -133,8 +133,21 @@ export default definePlugin({
 
     collectionContextMenu(e, instance) {
         if (instance.props.item.name != null && instance.props.item.name.startsWith("gc:"))
-            return ContextMenu.open(e, () => <CollectionDeleteContextMenu onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }} name={instance.props.item.name} />);
+            return ContextMenu.open(e, () =>
+                <RemoveItemContextMenu
+                    type="collection"
+                    onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
+                    nameOrId={instance.props.item.name} />
+            );
         // TODO: Remove gif from collection context menu
+        if (instance.props.item.id.startsWith("gc-moment:"))
+            return ContextMenu.open(e, () =>
+                <RemoveItemContextMenu
+                    type="gif"
+                    onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
+                    nameOrId={instance.props.item.id}
+                />);
+
         return null;
     },
 
@@ -159,7 +172,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={col.name.split(":")[1]}
-                            action={() => CollectionManager.addToCollection(col.name, { src, url })}
+                            action={() => CollectionManager.addToCollection(col.name, { id: uuidv4(), src, url })}
                         />
                     );
                 }) : /* bruh */ <></>}
@@ -186,28 +199,28 @@ export default definePlugin({
 });
 
 // stolen from spotify controls
-const CollectionDeleteContextMenu = ({ name, onConfirm }: { name: string, onConfirm: () => void; }) => (
+const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "collection", nameOrId: string, onConfirm: () => void; }) => (
     <Menu.ContextMenu
-        navId="spotify-album-menu"
+        navId="gif-collection-id"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="Spotify Album Menu"
+        aria-label={type === "collection" ? "Delete Collection" : "Remove"}
     >
         <Menu.MenuItem
             key="delete-collection"
             id="delete-collection"
-            label="Delete Collection"
+            label={type === "collection" ? "Delete Collection" : "Remove"}
             action={() =>
                 // Stolen from Review components
-                Alerts.show({
+                type === "collection" ? Alerts.show({
                     title: "Are you sure?",
                     body: "Do you really want to delete this collection?",
                     confirmText: "Delete",
                     cancelText: "Nevermind",
                     onConfirm: async () => {
-                        await CollectionManager.deleteCollection(name);
+                        await CollectionManager.deleteCollection(nameOrId);
                         onConfirm();
                     }
-                })}
+                }) : CollectionManager.removeFromCollection(nameOrId)}
         />
     </Menu.ContextMenu>
 );
@@ -240,7 +253,7 @@ function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCo
                     disabled={!name.length}
                     onClick={() => {
                         if (!name.length) return;
-                        createCollection(name, [{ src, url }]);
+                        createCollection(name, [{ id: uuidv4(), src, url }]);
                         onClose();
                     }}
                 >
