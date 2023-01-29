@@ -192,5 +192,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     captain: {
         name: "Captain",
         id: 347366054806159360n
+    },
+    Aria: {
+        name: "Syncxv",
+        id: 549244932213309442n
     }
 });
