@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+// eslint-disable-next-line path-alias/no-relative
+import { findByPropsLazy, waitFor } from "../webpack";
 
-export default definePlugin({
-    name: "MessageAccessoriesAPI",
-    description: "API to add message accessories.",
-    authors: [Devs.Cyn],
-    patches: [
-        {
-            find: ".Messages.REMOVE_ATTACHMENT_BODY",
-            replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
-            },
-        },
-    ],
+export let React: typeof import("react");
+export let useState: typeof React.useState;
+export let useEffect: typeof React.useEffect;
+export let useMemo: typeof React.useMemo;
+export let useRef: typeof React.useRef;
+
+export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
+
+waitFor("useState", m => {
+    React = m;
+    ({ useEffect, useState, useMemo, useRef } = React);
 });

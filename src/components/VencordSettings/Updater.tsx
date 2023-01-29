@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -23,7 +24,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { classes, useAwaiter } from "@utils/misc";
 import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Toasts } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Margins, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -183,6 +184,8 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
+    const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
+
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
     React.useEffect(() => {
@@ -196,7 +199,24 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection>
+        <Forms.FormSection className={Margins.marginTop16}>
+            <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
+            <Switch
+                value={settings.notifyAboutUpdates}
+                onChange={(v: boolean) => settings.notifyAboutUpdates = v}
+                note="Shows a toast on startup"
+                disabled={settings.autoUpdate}
+            >
+                Get notified about new updates
+            </Switch>
+            <Switch
+                value={settings.autoUpdate}
+                onChange={(v: boolean) => settings.autoUpdate = v}
+                note="Automatically update Vencord without confirmation prompt"
+            >
+                Automatically update
+            </Switch>
+
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
             <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
@@ -205,7 +225,7 @@ function Updater() {
                 </Link>
             )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
 
-            <Forms.FormDivider />
+            <Forms.FormDivider className={Margins.marginTop8 + " " + Margins.marginBottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
