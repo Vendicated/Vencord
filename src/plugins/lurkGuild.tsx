@@ -91,14 +91,14 @@ export default definePlugin({
         find: ".GuildSplash,{",
         replacement: {
             match: /(\.GuildSplash,{guild:)([a-z]+)(})/,
-            replace: "$1Vencord.Plugins.plugins.LurkGuild.setContext($2)$3"
+            replace: "$1$self.setContext($2)$3"
         }
     },{
         // Render after normal button
         find: ".GuildSplash,{",
         replacement: {
             match: /(Messages\.JOINED_GUILD:[a-zA-Z.]+?\.Messages\.JOIN_GUILD}\))/,
-            replace: "$1,Vencord.Plugins.plugins.LurkGuild.render()"
+            replace: "$1,$self.render()"
         }
     }],
 
