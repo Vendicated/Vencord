@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Forms, Menu, React, TextInput } from "@webpack/common";
+import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
 import { Settings } from "Vencord";
 
 // welp
@@ -91,6 +91,11 @@ export default definePlugin({
                     // ill improve the regex later
                     match: /(.{1,2}\.renderContent=function\(\){)/,
                     replace: "$1;Vencord.Plugins.plugins[\"Gif Collection\"].renderContent(this);"
+                },
+                // Delete context menu for collection
+                {
+                    match: /(.{1,2}\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
+                    replace: "$1onContextMenu: (e) => Vencord.Plugins.plugins[\"Gif Collection\"].collectionContextMenu(e, this.props.item.name),"
                 }
             ]
         },
@@ -160,12 +165,7 @@ export default definePlugin({
         const tempCol = this.collections;
         tempCol.push({
             name: `gc:${name}`,
-            // // this is probably why settings dont save?????? its not
-            // get src() {
-            //     return this.gifs.length ? this.gifs[0].src : "";
-            // },
             src: gifs.length ? gifs[0].src : "",
-            // i dont think is matters /shrug
             format: this.get_url_extension(gifs[0].src) === "mp4" || this.get_url_extension(gifs[0].src) == null ? Format.VIDEO : Format.IMAGE,
             type: "Category",
             gifs
@@ -196,6 +196,16 @@ export default definePlugin({
         } catch (err) {
             console.error(err);
         }
+    },
+
+    collectionContextMenu(e, name: string) {
+        if (!name.startsWith("gc:")) return;
+        ContextMenu.open(e, () =>
+            <CollectionDeleteContextMenu
+                name={name}
+                // TODO: implement this
+                deleteCollection={(name: string) => { console.log("uuuh", name); }}
+            />);
     },
 
 
@@ -235,7 +245,7 @@ export default definePlugin({
                                 <ModalHeader>
                                     <Forms.FormText>Create Collection</Forms.FormText>
                                 </ModalHeader>
-                                <BruhModal onClose={modalProps.onClose} createCollection={this.createCollection.bind(this)} src={src} url={url} />
+                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={this.createCollection.bind(this)} src={src} url={url} />
                             </ModalRoot>
                         ));
                     }}
@@ -245,14 +255,41 @@ export default definePlugin({
     }
 });
 
-interface ModalProps {
+// stolen from spotify controls
+const CollectionDeleteContextMenu = ({ name, deleteCollection }: { name: string, deleteCollection: (name: string) => void; }) => (
+    <Menu.ContextMenu
+        navId="spotify-album-menu"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="Spotify Album Menu"
+    >
+        <Menu.MenuItem
+            key="delete-collection"
+            id="delete-collection"
+            label="Delete Collection"
+            action={() =>
+                // Stolen from Review components
+                Alerts.show({
+                    title: "Are you sure?",
+                    body: "Do you really want to delete this collection?",
+                    confirmText: "Delete",
+                    cancelText: "Nevermind",
+                    onConfirm: () => deleteCollection(name)
+                })}
+        />
+    </Menu.ContextMenu>
+);
+
+
+
+
+interface CreateCollectionModalProps {
     src: string,
     url: string,
     onClose: () => void,
     createCollection: (name: string, gifs?: Gif[]) => void;
 }
 
-function BruhModal({ src, url, createCollection, onClose }: ModalProps) {
+function CreateCollectionModal({ src, url, createCollection, onClose }: CreateCollectionModalProps) {
 
     const [name, setName] = React.useState("");
     return (
@@ -261,6 +298,7 @@ function BruhModal({ src, url, createCollection, onClose }: ModalProps) {
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Collection Name</Forms.FormTitle>
                 <TextInput
                     onChange={(e: string) => setName(e)}
+                    onSubmit={() => console.log("Hi")}
                 />
 
             </ModalContent>
