@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findLazy, findModuleId, wreq } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findModuleId, wreq } from "@webpack";
 import { Button, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
@@ -27,9 +27,9 @@ const LurkingStore: {
     lurkingGuildIds(): string[];
 } = findByPropsLazy("lurkingGuildIds");
 
-const InviteButton: {
-    Button: typeof Button;
-} = findLazy(mod => mod.Button?.displayName === "InviteButton.Button");
+const InviteClasses: {
+    button: string;
+} = findByPropsLazy("guildIconExpired", "buttonForNonMember");
 
 const generateId: () => string = findByCodeLazy('().replace(/-/g,"")');
 
@@ -60,8 +60,9 @@ function LurkGuildButton() {
 
     const isLurking = !!LurkingStore.lurkingGuildIds().length;
     return (
-        <InviteButton.Button
-            isDisabled={isLurking && !submitting}
+        <Button
+            className={InviteClasses.button}
+            disabled={isLurking && !submitting}
             submitting={submitting}
             onClick={async () => {
                 setSubmitting(true);
@@ -74,7 +75,7 @@ function LurkGuildButton() {
                 });
             }}>
             {!isLurking ? "Lurk" : "Already lurking"}
-        </InviteButton.Button>
+        </Button>
     );
 }
 
