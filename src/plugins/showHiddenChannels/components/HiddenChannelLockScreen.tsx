@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { proxyLazy } from "@utils/proxyLazy";
-import { find, findByPropsLazy, findLazy } from "@webpack";
+import { find, findByCode, findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
@@ -36,6 +36,11 @@ enum ForumLayoutTypesTyping {
     GRID = 2
 }
 
+interface DefaultReaction {
+    emojiId: string | null;
+    emojiName: string | null;
+}
+
 interface Tag {
     id: string;
     name: string;
@@ -48,6 +53,7 @@ interface ExtendedChannel extends Channel {
     defaultThreadRateLimitPerUser?: number;
     defaultSortOrder?: SortOrderTypesTyping | null;
     defaultForumLayout?: ForumLayoutTypesTyping;
+    defaultReactionEmoji?: DefaultReaction | null;
     availableTags?: Array<Tag>;
 }
 
@@ -63,6 +69,7 @@ const TagComponent = LazyComponent(() => find(m => {
     // Get the component which doesn't include increasedActivity logic
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
+const EmojiComponent = LazyComponent(() => findByCode('.jumboable?"jumbo":"default"'));
 
 const ChannelTypesToChannelNames = proxyLazy(() => ({
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -138,6 +145,16 @@ function HiddenChannelLockScreen(channel: ExtendedChannel) {
                 }
                 {channel.defaultSortOrder &&
                     <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[channel.defaultSortOrder]}</Text>
+                }
+                {channel.defaultReactionEmoji &&
+                    <div className="shc-lock-screen-default-emoji-container">
+                        <Text variant="text-md/normal">Default reaction emoji:</Text>
+                        <EmojiComponent node={{
+                            type: channel.defaultReactionEmoji?.emojiName ? "emoji" : "customEmoji",
+                            name: channel.defaultReactionEmoji?.emojiName ?? "",
+                            emojiId: channel.defaultReactionEmoji?.emojiId
+                        }} />
+                    </div>
                 }
                 {channel.availableTags && channel.availableTags.length > 0 &&
                     <div className="shc-lock-screen-tags-container">

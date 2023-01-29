@@ -217,6 +217,14 @@ export default definePlugin({
                 match: /(?<=getState\(\)\.channelId.{1,30}\(0,\i\.\i\)\(\i\))(?=\.map\()/,
                 replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
+        },
+        // Export the emoji component used on the lock screen
+        {
+            find: 'jumboable?"jumbo":"default"',
+            replacement: {
+                match: /(?<=\i:\(\)=>\i)(?=}.+?(?<component>\i)=function.{1,20}node,\i=\i.isInteracting)/,
+                replace: ",hc1:()=>$<component>"
+            }
         }
     ],
 

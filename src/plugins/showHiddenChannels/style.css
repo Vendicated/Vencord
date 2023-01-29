@@ -63,3 +63,16 @@
     z-index: 0;
     cursor: not-allowed;
 }
+
+.shc-lock-screen-default-emoji-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.shc-lock-screen-default-emoji-container > [class^=emojiContainer] {
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    padding: 3px 4px;
+    margin-left: 5px;
+}
