@@ -27,6 +27,16 @@ const marketCodes = "AD AE AG AL AM AO AR AT AU AZ BA BB BD BE BF BG BH BI BJ BN
 const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 
 export const settings = definePluginSettings({
+    volume: {
+        description: "Volume",
+        type: OptionType.SLIDER,
+        markers: [0, 1],
+        default: 0.5,
+        componentProps: {
+            stickToMarkers: false,
+            onValueRender: null,
+        },
+    },
     colorStyle: {
         description: "Color Style",
         type: OptionType.SELECT,

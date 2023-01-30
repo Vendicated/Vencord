@@ -297,12 +297,11 @@
     width: 400px;
 }
 
-.spotimbed-controls .spotimbed-placeholder-wrap,
-.spotimbed-info .spotimbed-placeholder {
-    animation: 1s ease infinite alternate spotimbed-placeholder;
+.spotimbed-blinking {
+    animation: 1s ease infinite alternate spotimbed-blinking;
 }
 
-@keyframes spotimbed-placeholder {
+@keyframes spotimbed-blinking {
     0% {
         opacity: .1
     }

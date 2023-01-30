@@ -21,6 +21,7 @@ import { findLazy } from "@webpack";
 import { React } from "@webpack/common";
 import { Constructor } from "type-fest";
 
+import { settings } from "../settings";
 import { cl } from "../utils/misc";
 
 interface MediaPlayerProps {
@@ -54,8 +55,7 @@ export interface AudioControlsProps {
 }
 
 export const AudioControls = ({ mediaHref }: AudioControlsProps) => {
-    // TODO: Move state to a setting
-    const [volume, setVolume] = React.useState(0.5);
+    const { volume } = settings.use(["volume"]);
 
     const mediaPlayer = mediaHref ? (
         <ReclassedMediaPlayer
@@ -72,11 +72,11 @@ export const AudioControls = ({ mediaHref }: AudioControlsProps) => {
             renderLinkComponent={() => <></>}
             volume={() => volume}
             onMute={() => { }}
-            onVolumeChange={volume => setVolume(volume)}
+            onVolumeChange={volume => settings.store.volume = volume}
             autoMute={() => { }}
         />
     ) : (
-        <div className={cl("placeholder-wrap")}>
+        <div className={cl("placeholder-wrap", "placeholder-blinking")}>
             <div className={cl("placeholder", "placeholder-btn")} />
             <div className={cl("placeholder")} style={{ width: "66px" }} />
             <div className={cl("placeholder", "placeholder-scrubber")} />

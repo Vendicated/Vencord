@@ -27,5 +27,5 @@ export const formatDuration = (ms: number) => {
     const parts = [Math.floor(ms / SECOND % 60).toString().padStart(2, "0")];
     parts.unshift(Math.floor(ms / MINUTE % 60).toString().padStart(2, "0"));
     if (ms >= HOUR) parts.unshift(Math.floor(ms / HOUR).toString());
-    return parts.join(":").replace(/^0+/, "");
+    return parts.join(":").replace(/^0+(?=\d)/, "");
 };
