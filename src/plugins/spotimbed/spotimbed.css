@@ -23,7 +23,7 @@
     width: 80px;
     overflow: hidden;
 }
-:where(.spotimbed-has-player) .spotimbed-art-wrap {
+.spotimbed-has-player .spotimbed-art-wrap {
     border-radius: 4px 0 0 0;
 }
 
@@ -222,7 +222,7 @@
     transform: translateY(-15%);
 }
 
-.spotimbed-controls [class*="durationTimeWrapper"]>* {
+.spotimbed-controls [class*="durationTimeWrapper"] > [class*="durationTime"] {
     display: none;
 }
 
