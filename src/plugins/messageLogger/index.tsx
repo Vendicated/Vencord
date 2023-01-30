@@ -45,8 +45,8 @@ export default definePlugin({
     },
 
     stop() {
-        document.querySelectorAll(".messageLogger-deleted").forEach(e => e.remove());
-        document.querySelectorAll(".messageLogger-edited").forEach(e => e.remove());
+        document.querySelectorAll(".messagelogger-deleted").forEach(e => e.remove());
+        document.querySelectorAll(".messagelogger-edited").forEach(e => e.remove());
         document.body.classList.remove("messagelogger-red-overlay");
         document.body.classList.remove("messagelogger-red-text");
     },
@@ -54,7 +54,7 @@ export default definePlugin({
     renderEdit(edit: { timestamp: any, content: string; }) {
         return (
             <ErrorBoundary noop>
-                <div className="messageLogger-edited">
+                <div className="messagelogger-edited">
                     {Parser.parse(edit.content)}
                     <Timestamp
                         timestamp={edit.timestamp}
@@ -252,7 +252,7 @@ export default definePlugin({
                 },
                 {
                     match: /\["className","attachment","inlineMedia".+?className:/,
-                    replace: "$& (deleted ? 'messageLogger-deleted-attachment ' : '') +"
+                    replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
                 }
             ]
         },
@@ -268,9 +268,9 @@ export default definePlugin({
                     replace: "var $1=$2.id,deleted=$2.message.deleted,"
                 },
                 {
-                    // Append messageLogger-deleted to classNames if deleted
+                    // Append messagelogger-deleted to classNames if deleted
                     match: /\)\("li",\{(.+?),className:/,
-                    replace: ")(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
+                    replace: ")(\"li\",{$1,className:(deleted ? \"messagelogger-deleted \" : \"\")+"
                 }
             ]
         },
