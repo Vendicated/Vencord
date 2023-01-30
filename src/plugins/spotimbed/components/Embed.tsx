@@ -18,6 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { parseUrl } from "@utils/misc";
+import { useIntersection } from "@utils/react";
 import { React } from "@webpack/common";
 
 import { repository } from "../../../../package.json";
@@ -75,24 +76,26 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const { colorStyle } = settings.use(["colorStyle"]);
     const [artUrl, setArtUrl] = React.useState(initialArtUrl);
 
+    const [embedRef, isIntersecting] = useIntersection(true);
+
     const isDiscordTheme = colorStyle === ColorStyle.Discord;
     const isForeign = !Object.values(ResourceType).includes(resourceType as ResourceType);
     const noPalette = !artUrl || isDiscordTheme || isForeign;
     const hasPlayer = resourceType !== ResourceType.User;
 
     const [palette, , artPending] = useCachedAwaiter(async () => {
-        if (noPalette) return null;
+        if (noPalette || !isIntersecting) return null;
         const artData = await getDataUrlFromUrl(artUrl);
         const palette = await getPaletteFromUrl(artData, 128, 10);
         return palette;
     }, {
-        cacheKey: JSON.stringify([artUrl, colorStyle, resourceType]),
+        deps: [artUrl, colorStyle, resourceType, isIntersecting],
         storeKey: "spotmbed:palette",
     });
 
     const [accent, theme] = usePaletteStyle(palette);
 
-    const resourceData = useResource(resourceId, resourceType);
+    const resourceData = useResource(resourceId, resourceType, !isIntersecting);
     const [previewUrl, trackIndex, setTrackIndex] = usePreviewUrl(resourceData);
 
     if (!artUrl && resourceData) {
@@ -121,6 +124,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     // TODO: Context menu additions
     return isForeign ? UnsupportedEmbed() : (
         <div
+            ref={embedRef}
             className={classes.join(" ")}
             onClick={isUnavailable ? () => setDismissed(true) : void 0}
             style={styles}

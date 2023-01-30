@@ -28,12 +28,13 @@ type Store<T = any> = {
 };
 
 interface CachedAwaiterOptions {
-    cacheKey: string;
+    deps: (undefined | null | string | number | boolean)[];
     storeKey: string;
     cacheSize?: number;
 }
-export function useCachedAwaiter<T>(factory: () => Promise<T>, { cacheKey, storeKey, cacheSize = 25 }: CachedAwaiterOptions) {
+export function useCachedAwaiter<T>(factory: () => Promise<T>, { deps, storeKey, cacheSize = 25 }: CachedAwaiterOptions) {
     const store: Store<T> = stores[storeKey] ??= { keys: new LinkedList(), values: {} };
+    const cacheKey = deps.map(dep => JSON.stringify(dep)).join(":");
     const cached = store.values[cacheKey] || null;
 
     const [value, error, pending] = useAwaiter(factory, {

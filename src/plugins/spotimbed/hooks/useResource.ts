@@ -44,9 +44,12 @@ export async function getResource(id: string, type: string): Promise<Resource | 
     return null;
 }
 
-export function useResource(id: string, type: string) {
-    const [resource, error] = useCachedAwaiter(() => getResource(id, type), {
-        cacheKey: `${type}:${id}`,
+export function useResource(id: string, type: string, noop = false) {
+    const [resource, error] = useCachedAwaiter(async () => {
+        if (noop) return null;
+        return getResource(id, type);
+    }, {
+        deps: [type, id, noop],
         storeKey: "spotimbed:resource",
     });
 
