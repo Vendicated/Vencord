@@ -1,10 +1,11 @@
 {
     "recommendations": [
-        "EditorConfig.EditorConfig",
         "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "EditorConfig.EditorConfig",
+        "ExodiusStudios.comment-anchors",
         "formulahendry.auto-rename-tag",
         "GregorBiswanger.json2ts",
-        "eamodio.gitlens",
-        "ExodiusStudios.comment-anchors"
+        "stylelint.vscode-stylelint"
     ]
 }

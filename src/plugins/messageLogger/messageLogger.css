@@ -1,27 +1,28 @@
-.messagelogger-red-overlay .messageLogger-deleted {
-    background-color: rgba(240, 71, 71, 0.15);
+.messagelogger-red-overlay .messagelogger-deleted {
+    background-color: rgba(240 71 71 / 15%);
 }
-.messagelogger-red-text .messageLogger-deleted div {
+
+.messagelogger-red-text .messagelogger-deleted div {
     color: #f04747;
 }
 
-.messageLogger-deleted [class^="buttons"] {
+.messagelogger-deleted [class^="buttons"] {
     display: none;
 }
 
-.messageLogger-deleted-attachment {
+.messagelogger-deleted-attachment {
     filter: grayscale(1);
 }
 
-.messageLogger-deleted-attachment:hover {
+.messagelogger-deleted-attachment:hover {
     filter: grayscale(0);
     transition: 250ms filter linear;
 }
 
-.theme-dark .messageLogger-edited {
+.theme-dark .messagelogger-edited {
     filter: brightness(80%);
 }
 
-.theme-light .messageLogger-edited {
+.theme-light .messagelogger-edited {
     opacity: 0.5;
 }
