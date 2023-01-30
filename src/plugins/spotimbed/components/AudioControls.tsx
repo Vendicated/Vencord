@@ -76,7 +76,7 @@ export const AudioControls = ({ mediaHref }: AudioControlsProps) => {
             autoMute={() => { }}
         />
     ) : (
-        <div className={cl("placeholder-wrap", "placeholder-blinking")}>
+        <div className={cl("placeholder-wrap", "blinking")}>
             <div className={cl("placeholder", "placeholder-btn")} />
             <div className={cl("placeholder")} style={{ width: "66px" }} />
             <div className={cl("placeholder", "placeholder-scrubber")} />

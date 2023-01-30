@@ -2,6 +2,7 @@
     border-radius: 4px;
     color: var(--text-normal);
     display: grid;
+    position: relative;
     grid-template-columns: 80px 1fr;
     grid-template-rows: 80px auto;
     grid-template-areas: 'art info' 'content content';
@@ -11,6 +12,32 @@
 .spotimbed-has-player {
     grid-template-rows: 80px auto 32px;
     grid-template-areas: 'art info' 'content content' 'controls controls';
+}
+
+.spotimbed-embed.spotimbed-unavailable::after {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    inset: 0;
+    padding: 0 32px;
+    border-radius: 4px;
+
+    cursor: pointer;
+    opacity: 1;
+    backdrop-filter: brightness(0.6) blur(2px);
+    transition: opacity 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
+
+    content: "This " attr(data-resource-type) " won't be playable because " attr(data-reason) "\a(click to dismiss)";
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-weight: 600;
+    text-align: center;
+}
+.spotimbed-embed.spotimbed-unavailable.spotimbed-dismissed::after {
+    opacity: 0;
+    backdrop-filter: brightness(0) blur(0);
+    pointer-events: none;
 }
 
 .spotimbed-art-wrap {

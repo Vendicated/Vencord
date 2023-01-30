@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Album, Resource, ResourceType, Track } from "../types";
+import { Album, Resource, ResourceType, RestrictionReason, Track } from "../types";
 import { getMonth } from "./time";
 
 export function formatReleaseDate(date: string) {
@@ -44,4 +44,13 @@ export function getTracks(resource: Resource): Track[] | null {
         case ResourceType.Artist: return resource.top_tracks;
     }
     return null;
+}
+
+export function getReason(reason: string): string {
+    switch (reason) {
+        case RestrictionReason.Explicit: return "it's explicit";
+        case RestrictionReason.Market: return "it isn't available in your country/market";
+        case RestrictionReason.Product: return "it isn't available with your Spotify subscription";
+        default: return `it's unavailable "${reason}"`;
+    }
 }

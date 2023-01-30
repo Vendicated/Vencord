@@ -23,9 +23,9 @@ import { formatDuration } from "../utils/time";
 import { AttributionLine, Byline, ResourceLink } from "./common";
 
 const PlaceholderBody = () => <>
-    <div><span className={cl("placeholder")}>movies for guys</span></div>
-    <div><span className={cl("placeholder")}>by Jane Remover</span></div>
-    <div><span className={cl("placeholder")}>on Frailty</span></div>
+    <div><span className={cl("placeholder", "blinking")}>movies for guys</span></div>
+    <div><span className={cl("placeholder", "blinking")}>by Jane Remover</span></div>
+    <div><span className={cl("placeholder", "blinking")}>on Frailty</span></div>
 </>;
 
 export interface InfoProps {

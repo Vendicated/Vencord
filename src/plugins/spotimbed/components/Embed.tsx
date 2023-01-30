@@ -18,7 +18,6 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { parseUrl } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
 import { repository } from "../../../../package.json";
@@ -30,12 +29,12 @@ import { settings } from "../settings";
 import { ColorStyle, ResourceType } from "../types";
 import { getDataUrlFromUrl, getPaletteFromUrl, getSmallestImage } from "../utils/image";
 import { cl } from "../utils/misc";
+import { getReason } from "../utils/spotify";
 import { Art } from "./Art";
 import { AudioControls } from "./AudioControls";
 import { Info } from "./Info";
 import { TrackList } from "./TrackList";
 
-const classNames = findByPropsLazy("thin");
 const REPO_ISSUES_URL = `${repository.url.slice(4, -4)}/issues/new`;
 
 function UnsupportedEmbed() {
@@ -101,16 +100,33 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
         if (smallestArt) setArtUrl(smallestArt.url);
     }
 
+    const isUnavailable = !!(resourceData && "restrictions" in resourceData && resourceData.restrictions?.reason);
+    const [dismissed, setDismissed] = React.useState(false);
+
+    const classes = [
+        cl(
+            "embed",
+            hasPlayer && "has-player",
+            isUnavailable && "unavailable",
+            dismissed && "dismissed",
+        ),
+        theme,
+        isDiscordTheme ? null : "default-colors",
+    ];
+    const styles = {
+        "--spotimbed-accent": accent,
+        backgroundColor: accent,
+    } as React.CSSProperties;
+
     // TODO: Context menu additions
     return isForeign ? UnsupportedEmbed() : (
-        <div className={[
-            cl("embed", hasPlayer && "has-player"),
-            theme,
-            isDiscordTheme ? null : "default-colors",
-        ].join(" ")} style={{
-            "--spotimbed-accent": accent,
-            backgroundColor: accent,
-        } as React.CSSProperties}>
+        <div
+            className={classes.join(" ")}
+            onClick={isUnavailable ? () => setDismissed(true) : void 0}
+            style={styles}
+            data-resource-type={resourceType}
+            data-reason={isUnavailable ? getReason(resourceData.restrictions!.reason) : void 0}
+        >
             <div className={cl("art-wrap")}>
                 <Art src={artUrl ?? null} pending={artPending} />
             </div>

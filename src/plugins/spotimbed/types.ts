@@ -16,22 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Settings } from "Vencord";
-
-type CommonSettings = {
-    [K in keyof Settings["plugins"][string]as K extends `${infer V}` ? K : never]: Settings["plugins"][string][K];
-};
-
 export enum ColorStyle {
     Vibrant = "vibrant",
     Pastel = "pastel",
     Muted = "muted",
     Discord = "discord",
-}
-
-export interface SpotimbedSettings extends CommonSettings {
-    colorStyle: ColorStyle;
-    forceStyle: number;
 }
 
 // Discord Spotify Types
@@ -59,6 +48,12 @@ export interface SpotifyHttp {
 }
 
 // Spotify API Types
+
+export const enum RestrictionReason {
+    Market = "market",
+    Product = "product",
+    Explicit = "explicit",
+}
 
 interface ApiResource {
     type: string;
@@ -97,7 +92,7 @@ export interface Track extends ApiResource {
     album: Album<false>;
     artists: Artist[];
 
-    available_markets: string[];
+    restrictions?: { reason: string; };
     disc_number: number;
     duration_ms: number;
     explicit: boolean;
@@ -115,7 +110,7 @@ export interface Album<HasTracks = true> extends ApiResource {
     images: ResourceImage[];
     album_type: "album" | "single" | "compilation";
     genres: string[];
-    available_markets: string[];
+    restrictions?: { reason: string; };
     release_date: string;
     release_date_precision: "year" | "month" | "day";
     label: string;
