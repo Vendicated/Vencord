@@ -48,11 +48,21 @@ export default definePlugin({
     ],
     settings,
 
-    settingsAboutComponent: ({ tempSettings }) => createSpotimbed({
-        embed: {
-            url: "https://open.spotify.com/track/6a4z5B7vOzTLYTnokxuDXo"
-        },
-        tempSettings,
+    settingsAboutComponent: ({ tempSettings }) => React.Fragment({
+        children: [
+            createSpotimbed({
+                embed: {
+                    url: "https://open.spotify.com/track/6a4z5B7vOzTLYTnokxuDXo"
+                },
+                tempSettings,
+            }),
+            createSpotimbed({
+                embed: {
+                    url: "https://open.spotify.com/album/6MbBpKe8dZYYqOq0AxpQps"
+                },
+                tempSettings,
+            }),
+        ]
     }),
 
     // exports

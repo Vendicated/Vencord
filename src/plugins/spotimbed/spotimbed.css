@@ -5,13 +5,15 @@
     position: relative;
     grid-template-columns: 80px 1fr;
     grid-template-rows: 80px auto;
-    grid-template-areas: 'art info' 'content content';
+    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
+    grid-template-areas: "art info" "content content";
     width: 400px;
     user-select: none;
 }
+
 .spotimbed-has-player {
     grid-template-rows: 80px auto 32px;
-    grid-template-areas: 'art info' 'content content' 'controls controls';
+    grid-template-areas: "art info" "content content" "controls controls";
 }
 
 .spotimbed-embed.spotimbed-unavailable::after {
@@ -22,18 +24,17 @@
     inset: 0;
     padding: 0 32px;
     border-radius: 4px;
-
     cursor: pointer;
     opacity: 1;
     backdrop-filter: brightness(0.6) blur(2px);
     transition: opacity 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
-
     content: "This " attr(data-resource-type) " won't be playable because " attr(data-reason) "\a(click to dismiss)";
     white-space: pre-wrap;
     line-height: 1.5;
     font-weight: 600;
     text-align: center;
 }
+
 .spotimbed-embed.spotimbed-unavailable.spotimbed-dismissed::after {
     opacity: 0;
     backdrop-filter: brightness(0) blur(0);
@@ -50,8 +51,9 @@
     width: 80px;
     overflow: hidden;
 }
+
 .spotimbed-has-player .spotimbed-art-wrap {
-    border-radius: 4px 0 0 0;
+    border-radius: 4px 0 0;
 }
 
 .spotimbed-art {
@@ -119,9 +121,9 @@
 }
 
 .spotimbed-title-tag {
-    background-color: rgba(0, 0, 0, .6);
+    background-color: rgb(0 0 0 / 60%);
     border-radius: 4px;
-    color: rgba(255, 255, 255, .8);
+    color: rgb(255 255 255 / 80%);
     font-size: 75%;
     font-weight: 600;
     text-transform: uppercase;
@@ -147,12 +149,13 @@
 
 .spotimbed-content {
     grid-area: content;
-    background-color: rgba(0, 0, 0, .12);
+    background-color: rgb(0 0 0 / 12%);
 }
 
 .spotimbed-content::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .2);
+    background: rgb(0 0 0 / 20%);
 }
+
 .spotimbed-embed:not(.theme-custom) .spotimbed-content::-webkit-scrollbar-thumb {
     background-color: var(--spotimbed-accent);
 }
@@ -169,13 +172,17 @@
 }
 
 .spotimbed-embed.theme-dark {
-    --background-modifier-hover: rgba(255, 255, 255, .1);
-    --background-modifier-selected: rgba(255, 255, 255, .3);
+    --background-modifier-hover: rgb(255 255 255 / 10%);
+    --background-modifier-selected: rgb(255 255 255 / 30%);
 }
 
 .spotimbed-embed.theme-light {
-    --background-modifier-hover: rgba(0, 0, 0, .1);
-    --background-modifier-selected: rgba(0, 0, 0, .2);
+    --background-modifier-hover: rgb(0 0 0 / 10%);
+    --background-modifier-selected: rgb(0 0 0 / 20%);
+}
+
+.spotimbed-trackrow:not(.spotimbed-active, .spotimbed-disabled) {
+    cursor: pointer;
 }
 
 .spotimbed-trackrow:not(.spotimbed-disabled):hover {
@@ -187,12 +194,8 @@
     color: var(--interactive-active);
 }
 
-.spotimbed-trackrow:not(.spotimbed-active):not(.spotimbed-disabled) {
-    cursor: pointer;
-}
-
 .spotimbed-trackrow.spotimbed-disabled {
-    opacity: .5;
+    opacity: 0.5;
 }
 
 .spotimbed-trackrow-index {
@@ -217,10 +220,8 @@
     font-weight: 600;
 }
 
-.spotimbed-trackrow-infoline {}
-
 .spotimbed-controls {
-    background-color: rgba(0, 0, 0, .6);
+    background-color: rgb(0 0 0 / 60%);
     border-radius: 0 0 4px 4px;
     color: #fff;
     grid-area: controls;
@@ -292,22 +293,28 @@
 .spotimbed-embed:not(.theme-custom) .spotimbed-controls .spotimbed-placeholder {
     background: var(--spotimbed-accent);
 }
+
 .spotimbed-embed:not(.theme-custom) .spotimbed-media-player {
     --brand-experiment: var(--spotimbed-accent);
     --brand-experiment-560: var(--spotimbed-accent);
 }
+
 .spotimbed-embed:not(.theme-custom) .spotimbed-controls [class*="durationTimeWrapper"]::before {
     color: var(--spotimbed-accent);
 }
+
 .spotimbed-embed.theme-light .spotimbed-controls [class*="durationTimeWrapper"]::before {
     filter: brightness(1.4);
 }
+
 .spotimbed-embed.theme-dark .spotimbed-controls [class*="durationTimeWrapper"]::before {
     filter: brightness(2.8);
 }
+
 .spotimbed-embed.theme-light .spotimbed-controls [class*="mediaBarProgress"] {
     filter: brightness(0.8) saturate(2);
 }
+
 .spotimbed-embed.theme-dark .spotimbed-controls [class*="mediaBarProgress"] {
     filter: brightness(1.6) saturate(1.5);
 }
@@ -330,14 +337,14 @@
 
 @keyframes spotimbed-blinking {
     0% {
-        opacity: .1
+        opacity: 0.1;
     }
 
     10% {
-        opacity: .1
+        opacity: 0.1;
     }
 
     100% {
-        opacity: .05
+        opacity: 0.05;
     }
 }
