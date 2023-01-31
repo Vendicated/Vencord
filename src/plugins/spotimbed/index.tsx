@@ -18,6 +18,7 @@
 
 import "./spotimbed.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Embed, Message } from "discord-types/general";
@@ -48,22 +49,10 @@ export default definePlugin({
     ],
     settings,
 
-    settingsAboutComponent: ({ tempSettings }) => React.Fragment({
-        children: [
-            createSpotimbed({
-                embed: {
-                    url: "https://open.spotify.com/track/6a4z5B7vOzTLYTnokxuDXo"
-                },
-                tempSettings,
-            }),
-            createSpotimbed({
-                embed: {
-                    url: "https://open.spotify.com/album/6MbBpKe8dZYYqOq0AxpQps"
-                },
-                tempSettings,
-            }),
-        ]
-    }),
+    settingsAboutComponent: ({ tempSettings }) => <ErrorBoundary>
+        <Spotimbed type="track" id="6a4z5B7vOzTLYTnokxuDXo" tempSettings={tempSettings} />
+        <Spotimbed type="album" id="6MbBpKe8dZYYqOq0AxpQps" tempSettings={tempSettings} />
+    </ErrorBoundary>,
 
     // exports
     createSpotimbed,
