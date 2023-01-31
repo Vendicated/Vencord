@@ -65,21 +65,19 @@ export default definePlugin({
             }
         },
         // Changes indicator to format message with the typing users
-        // Fix for UK English, and probably other languages
         {
-            find: "\"DISCORD_DESC_SHORT\":\"Imagine a place\"",
+            find: "\"SEVERAL_USERS_TYPING\":\"",
             replacement: {
-                match: /"(SEVERAL_USERS_TYPING)":".+?"/,
-                replace: "\"$1\":\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\""
+                match: /("SEVERAL_USERS_TYPING"):".+?"/,
+                replace: "$1:\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\""
             },
             predicate: () => settings.store.alternativeFormatting
         },
-        // US English
         {
             find: ",\"SEVERAL_USERS_TYPING\",\"",
             replacement: {
-                match: /(\i)\((\i),"SEVERAL_USERS_TYPING",".+?"\)/,
-                replace: "$1($2,\"SEVERAL_USERS_TYPING\",\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
+                match: /(\i)\((\i),("SEVERAL_USERS_TYPING"),".+?"\)/,
+                replace: "$1($2,$3,\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
             },
             predicate: () => settings.store.alternativeFormatting
         },
