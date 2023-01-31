@@ -52,14 +52,16 @@ export interface EmbedProps {
             proxyURL: string;
         };
     };
+    tempSettings?: Record<string, any>;
 }
 export interface SpotimbedProps {
     art?: string;
     type: string;
     id: string;
+    tempSettings?: Record<string, any>;
 }
 
-export function createSpotimbed({ embed: { url: src, thumbnail } }: EmbedProps) {
+export function createSpotimbed({ embed: { url: src, thumbnail }, tempSettings }: EmbedProps) {
     const url = parseUrl(src);
     if (!url) return <></>;
 
@@ -68,12 +70,14 @@ export function createSpotimbed({ embed: { url: src, thumbnail } }: EmbedProps) 
             art={thumbnail?.proxyURL}
             type={url.pathname.split("/")[1]}
             id={url.pathname.split("/")[2]}
+            tempSettings={tempSettings}
         />
     </ErrorBoundary>;
 }
 
-export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resourceId }: SpotimbedProps) {
-    const { colorStyle } = settings.use(["colorStyle"]);
+export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resourceId, tempSettings }: SpotimbedProps) {
+    // TODO: Make this normal settings.use when it's fixed in settingsAboutComponent
+    const { colorStyle } = { ...settings.use(["colorStyle"]), ...tempSettings };
     const [artUrl, setArtUrl] = React.useState(initialArtUrl);
 
     const [embedRef, isIntersecting] = useIntersection(true);

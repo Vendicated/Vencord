@@ -32,7 +32,7 @@ const spotifyStore: SpotifyStore = findByPropsLazy("getActiveSocketAndDevice");
 const resourcePromiseCache = new Map<string, Promise<any>>();
 
 type SearchableResource = Track | Album | Playlist | Artist;
-type ResourceMap = { [K in Resource["type"]]: Resource extends infer R ? R extends { type: K; } ? R : never : never; };
+type ResourceMap = { [K in Resource["type"]]: Extract<Resource, { type: K; }>; };
 
 export const spotify = {
     getResource(resourcePath: string) {
@@ -52,6 +52,7 @@ export const spotify = {
         return resourcePromise;
     },
 
+    // TODO use _.pick to lessen memory footprint
     getTrack(trackId: string): Promise<Track> {
         return this.getResource(`/tracks/${trackId}?market=${settings.store.market}`);
     },
@@ -75,23 +76,4 @@ export const spotify = {
     }> {
         return this.getResource(`/search?q=${encodeURIComponent(query)}&type=${types.join(",")}&limit=${limit}&offset=${offset}&market=${settings.store.market}`);
     },
-
-    // async _fetchAll(url, limit, offset) {
-    //     const items = [];
-    //     while (url) {
-    //         const req = get(url);
-    //         if (limit) {
-    //             req.query("limit", limit);
-    //             limit = 0;
-    //         }
-    //         if (offset) {
-    //             req.query("offset", offset);
-    //             offset = 0;
-    //         }
-    //         const res = await this.genericRequest(req).then(r => r.body);
-    //         items.push(...res.items);
-    //         url = res.next;
-    //     }
-    //     return items;
-    // }
 };

@@ -35,6 +35,7 @@ export const settings = definePluginSettings({
         componentProps: {
             stickToMarkers: false,
             onValueRender: null,
+            onMarkerRender: (value: number) => Math.round(value * 100).toString() + "%",
         },
     },
     colorStyle: {

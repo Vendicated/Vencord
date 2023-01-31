@@ -48,6 +48,13 @@ export default definePlugin({
     ],
     settings,
 
+    settingsAboutComponent: ({ tempSettings }) => createSpotimbed({
+        embed: {
+            url: "https://open.spotify.com/track/6a4z5B7vOzTLYTnokxuDXo"
+        },
+        tempSettings,
+    }),
+
     // exports
     createSpotimbed,
     Spotimbed,
