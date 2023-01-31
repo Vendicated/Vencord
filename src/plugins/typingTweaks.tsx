@@ -113,7 +113,7 @@ export default definePlugin({
                     size={Avatar.Sizes.SIZE_16}
                     src={user.getAvatarURL(guildId, 128)}/>
             </div>}
-            {guildId ? GuildMemberStore.getNick(guildId, user.id) || user.username : user.username}
+            {GuildMemberStore.getNick(guildId!, user.id) || user.username}
         </strong>;
     }, { noop: true })
 });
