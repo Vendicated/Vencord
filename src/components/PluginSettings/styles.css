@@ -94,6 +94,7 @@
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+    /* stylelint-disable-next-line property-no-unknown */
     box-orient: vertical;
 }
 
@@ -132,6 +133,6 @@
     margin-top: 0.5em;
 }
 
-.vc-plugins-info-button svg:not(:hover):not(:focus) {
+.vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
 }
