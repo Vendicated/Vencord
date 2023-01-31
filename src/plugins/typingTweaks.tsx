@@ -66,10 +66,18 @@ export default definePlugin({
         },
         // Changes indicator to format message with the typing users
         {
-            find: ',"SEVERAL_USERS_TYPING","',
+            find: '"SEVERAL_USERS_TYPING":"',
             replacement: {
-                match: /(\i)\((\i),"SEVERAL_USERS_TYPING",".+?"\)/,
-                replace: "$1($2,\"SEVERAL_USERS_TYPING\",\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
+                match: /("SEVERAL_USERS_TYPING"):".+?"/,
+                replace: "$1:\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\""
+            },
+            predicate: () => settings.store.alternativeFormatting
+        },
+        {
+            find: ",\"SEVERAL_USERS_TYPING\",\"",
+            replacement: {
+                match: /(\i)\((\i),("SEVERAL_USERS_TYPING"),".+?"\)/,
+                replace: "$1($2,$3,\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
             },
             predicate: () => settings.store.alternativeFormatting
         },
@@ -78,7 +86,7 @@ export default definePlugin({
             find: "getCooldownTextStyle",
             replacement: {
                 match: /(\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\).+?SEVERAL_USERS_TYPING/,
-                replace: "$&.format({a:$2,b:$3,c:$1.length})"
+                replace: "$&.format({a:$2,b:$3,c:$1.length-2})"
             },
             predicate: () => settings.store.alternativeFormatting
         }
@@ -105,7 +113,7 @@ export default definePlugin({
                     size={Avatar.Sizes.SIZE_16}
                     src={user.getAvatarURL(guildId, 128)}/>
             </div>}
-            {user.username}
+            {GuildMemberStore.getNick(guildId!, user.id) || user.username}
         </strong>;
     }, { noop: true })
 });
