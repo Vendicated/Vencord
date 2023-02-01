@@ -226,11 +226,11 @@
     color: #fff;
     grid-area: controls;
     position: relative;
+    display: flex;
 }
 
 .spotimbed-media-player {
-    position: absolute;
-    bottom: 0;
+    flex: 1;
 }
 
 .spotimbed-controls [class*="audioMetadata"] {
@@ -240,6 +240,7 @@
 .spotimbed-controls [class*="audioControls"] {
     background-color: transparent;
     border-radius: 0 0 4px 4px;
+    margin-top: 0;
 }
 
 .spotimbed-controls [class*="videoButton"] {
@@ -248,19 +249,24 @@
 
 .spotimbed-controls [class*="durationTimeWrapper"] {
     transform: translateY(-15%);
+    display: none;
 }
 
 .spotimbed-controls [class*="durationTimeWrapper"] > [class*="durationTime"] {
     display: none;
 }
 
-.spotimbed-controls [class*="durationTimeWrapper"]::before {
+.spotimbed-controls [class*="horizontal"]::before {
     content: "Preview";
     font-family: var(--font-code);
     text-transform: uppercase;
     border-radius: 4px;
     padding: 0 4px 0 0;
     font-size: 80%;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .spotimbed-controls .spotimbed-placeholder-wrap {
@@ -299,15 +305,15 @@
     --brand-experiment-560: var(--spotimbed-accent);
 }
 
-.spotimbed-embed:not(.theme-custom) .spotimbed-controls [class*="durationTimeWrapper"]::before {
+.spotimbed-embed:not(.theme-custom) .spotimbed-controls [class*="horizontal"]::before {
     color: var(--spotimbed-accent);
 }
 
-.spotimbed-embed.theme-light .spotimbed-controls [class*="durationTimeWrapper"]::before {
+.spotimbed-embed.theme-light .spotimbed-controls [class*="horizontal"]::before {
     filter: brightness(1.4);
 }
 
-.spotimbed-embed.theme-dark .spotimbed-controls [class*="durationTimeWrapper"]::before {
+.spotimbed-embed.theme-dark .spotimbed-controls [class*="horizontal"]::before {
     filter: brightness(2.8);
 }
 
