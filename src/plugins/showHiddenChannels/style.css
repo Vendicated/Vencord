@@ -7,7 +7,7 @@
 }
 
 .shc-lock-screen-container > * {
-    margin: 5px
+    margin: 5px;
 }
 
 .shc-lock-screen-logo {
@@ -49,13 +49,13 @@
     margin: inherit;
 }
 
-.shc-lock-screen-tags-container > [class^=tags] {
+.shc-lock-screen-tags-container > [class^="tags"] {
     flex-wrap: wrap;
 }
 
 .shc-evenodd-fill-current-color {
     fill-rule: evenodd;
-    fill: currentColor;
+    fill: currentcolor;
 }
 
 .shc-hidden-channel-icon {
@@ -70,7 +70,7 @@
     align-items: center;
 }
 
-.shc-lock-screen-default-emoji-container > [class^=emojiContainer] {
+.shc-lock-screen-default-emoji-container > [class^="emojiContainer"] {
     background-color: var(--background-secondary);
     border-radius: 8px;
     padding: 3px 4px;
