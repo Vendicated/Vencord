@@ -26,6 +26,7 @@ import NotificationComponent from "./NotificationComponent";
 const NotificationQueue = new Queue();
 
 let reactRoot: Root;
+let id = 42;
 
 function getRoot() {
     if (!reactRoot) {
@@ -46,11 +47,11 @@ export interface NotificationData {
     color?: string;
 }
 
-function _showNotification(notification: NotificationData) {
+function _showNotification(notification: NotificationData, id: number) {
     const root = getRoot();
     return new Promise<void>(resolve => {
         root.render(
-            <NotificationComponent {...notification} onClose={() => {
+            <NotificationComponent {...notification} id={id} onClose={() => {
                 root.render(null);
                 resolve();
             }} />,
@@ -59,5 +60,5 @@ function _showNotification(notification: NotificationData) {
 }
 
 export function showNotification(notification: NotificationData) {
-    NotificationQueue.push(() => _showNotification(notification));
+    NotificationQueue.push(() => _showNotification(notification, id++));
 }

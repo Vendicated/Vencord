@@ -25,6 +25,7 @@ import { NotificationData } from "./Notifications";
 
 interface Props extends NotificationData {
     onClose(): void;
+    id: number;
 }
 
 export default ErrorBoundary.wrap(function NotificationComponent({
@@ -34,9 +35,10 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     icon,
     timeoutMs = 5000,
     onClick,
-    onClose
+    onClose,
+    id
 }: Props) {
-    const start = useMemo(() => Date.now(), []);
+    const start = useMemo(() => Date.now(), [id, timeoutMs]);
     const [timeoutProgress, setTimeoutProgress] = useState(0);
 
     useEffect(() => {
@@ -51,7 +53,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             clearInterval(intervalId);
             clearTimeout(timeoutId);
         };
-    }, [timeoutMs]);
+    }, [timeoutMs, id]);
 
     return (
         <button
