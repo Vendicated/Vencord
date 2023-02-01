@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "lib": [
             "DOM",
+            "DOM.Iterable",
             "esnext",
             "esnext.array",
             "esnext.asynciterable",
