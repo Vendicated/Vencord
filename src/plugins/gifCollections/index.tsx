@@ -21,7 +21,7 @@ import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
-import { Settings } from "Vencord";
+import { Settings } from "@api/Settings";
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
