@@ -255,6 +255,7 @@ export interface DefinedSettings<D extends SettingsDefinition = SettingsDefiniti
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
+export type NonMethodsKeys<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
 

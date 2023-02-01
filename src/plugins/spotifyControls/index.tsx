@@ -39,7 +39,7 @@ export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
-    dependencies: ["MenuItemDeobfuscatorAPI"],
+    dependencies: ["MenuItemDeobfuscatorAPI", "SpotifyAPI"],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -58,22 +58,6 @@ export default definePlugin({
                 replace: "return [Vencord.Plugins.plugins.SpotifyControls.renderPlayer(),$1]"
             }
         },
-        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
-        {
-            find: ".PLAYER_DEVICES",
-            replacement: {
-                match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
-                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
-            }
-        },
-        // Discord doesn't give you the repeat kind, only a boolean
-        {
-            find: 'repeat:"off"!==',
-            replacement: {
-                match: /repeat:"off"!==(.{1,3}),/,
-                replace: "actual_repeat:$1,$&"
-            }
-        }
     ],
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
     renderPlayer: () => <Player />

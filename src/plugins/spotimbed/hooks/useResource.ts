@@ -17,28 +17,30 @@
 */
 
 
-import { spotify } from "../api/spotify";
-import { Artist, Resource, ResourceType } from "../types";
+import { ResourceType, Spotify } from "@api/Spotify";
+
+import { settings } from "../settings";
+import { ArtistWithTracks, DisplayResource } from "../types";
 import { useCachedAwaiter } from "./useCachedAwaiter";
 
-export async function getResource(id: string, type: string): Promise<Resource | null> {
+export async function getResource(id: string, type: string): Promise<DisplayResource | null> {
     switch (type) {
         case ResourceType.Track: {
-            return spotify.getTrack(id);
+            return Spotify.getTrack(id, { market: settings.store.market });
         }
         case ResourceType.Album: {
-            return spotify.getAlbum(id);
+            return Spotify.getAlbum(id, { market: settings.store.market });
         }
         case ResourceType.Playlist: {
-            return spotify.getPlaylist(id);
+            return Spotify.getPlaylist(id, { market: settings.store.market });
         }
         case ResourceType.Artist: {
-            const artist = await spotify.getArtist(id) as Artist;
-            artist.top_tracks ??= (await spotify.getArtistTopTracks(id)).tracks;
+            const artist = await Spotify.getArtist(id) as ArtistWithTracks;
+            artist.tracks ??= (await Spotify.getArtistTopTracks(id, { market: settings.store.market })).tracks;
             return artist;
         }
         case ResourceType.User: {
-            return spotify.getUser(id);
+            return Spotify.getUser(id);
         }
     }
     return null;

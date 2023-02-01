@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Album, Artist, Playlist, Track, User } from "@api/Spotify";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
-export interface ArtistWithTracks extends Artist {
-    tracks: Track[];
-}
-
-export type DisplayResource = Track | Album | Playlist | ArtistWithTracks | User;
+export default definePlugin({
+    name: "SpotifyAPI",
+    description: "Adds some utils for plugins that use Spotify integration",
+    authors: [Devs.Ven, Devs.Vap],
+    patches: [
+        // Discord doesn't give you the repeat kind, only a boolean
+        {
+            find: 'repeat:"off"!==',
+            replacement: {
+                match: /repeat:"off"!==(\i),/,
+                replace: "actualRepeat:$1,$&"
+            }
+        }
+    ],
+});

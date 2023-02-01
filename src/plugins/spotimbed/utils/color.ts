@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ColorStyle } from "../types";
+import { ColorStyle } from "../settings";
 import type { RgbPalette } from "./image";
 import { sortBy } from "./misc";
 

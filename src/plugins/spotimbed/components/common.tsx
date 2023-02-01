@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Artist, Resource, User } from "@api/Spotify";
 import { parseUrl } from "@utils/misc";
 
 import { settings } from "../settings";
-import { Artist, Resource, User } from "../types";
 import { cl } from "../utils/misc";
 
 type Person = Artist | User;

@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Resource, ResourceType } from "../types";
+import { ResourceType } from "@api/Spotify";
+
+import { DisplayResource } from "../types";
 import { cl } from "../utils/misc";
 import { formatReleaseDate, getAlbumType } from "../utils/spotify";
 import { formatDuration } from "../utils/time";
@@ -29,7 +31,7 @@ const PlaceholderBody = () => <>
 </>;
 
 export interface InfoProps {
-    resource: Resource | null;
+    resource: DisplayResource | null;
 }
 
 export function Info({ resource }: InfoProps) {
@@ -72,13 +74,13 @@ interface InfoFields {
     secondaryLines?: React.ReactNode[];
 }
 // eslint-disable-next-line consistent-return
-function getInfoFields(resource: Resource): InfoFields {
+function getInfoFields(resource: DisplayResource): InfoFields {
     switch (resource.type) {
         case ResourceType.Track: return {
             tags: [formatDuration(resource.duration_ms)],
             infolines: [
                 Byline(resource.artists),
-                AttributionLine("on", ResourceLink(resource.album, cl("track-album")))
+                AttributionLine("on", ResourceLink(resource.album, cl("track-album"))),
             ],
         };
         case ResourceType.Album: {

@@ -29,20 +29,25 @@ import { createEmbedData, getEmbeddableLinks } from "./utils/ast";
 
 export default definePlugin({
     name: "SpotiMbed",
-    authors: [Devs.Vap],
     description: "Your mom",
+    authors: [Devs.Vap],
+    dependencies: ["SpotifyAPI"],
     patches: [
         {
             find: ".renderEmbeds=function(",
             replacement: {
+                // .renderEmbeds = function(message) { ... }
                 match: /\.renderEmbeds=function\((\i)\)\{/,
+                // .renderEmbeds = function(message) { message = { ...message, embeds: patchedEmbeds }; ... }
                 replace: "$&$1={...$1,embeds:$self.patchEmbeds($1)};",
             }
         },
         {
             find: '.provider&&"Spotify"===',
             replacement: {
+                // "Spotify" === embed.provider.name ? <DiscordEmbed embed={embed} /> : ...
                 match: /(?<="Spotify"===\i\.provider\.name\?\(0,\i\.jsx\)\()\i(?=,)/,
+                // "Spotify" === embed.provider.name ? <SpotiMbed embed={embed} /> : ...
                 replace: "$self.createSpotimbed",
             },
         },

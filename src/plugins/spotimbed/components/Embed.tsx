@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getImageClosestTo, ResourceType } from "@api/Spotify";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { parseUrl } from "@utils/misc";
 import { useIntersection } from "@utils/react";
@@ -26,9 +27,8 @@ import { useCachedAwaiter } from "../hooks/useCachedAwaiter";
 import { usePaletteStyle } from "../hooks/usePaletteStyle";
 import { usePreviewUrl } from "../hooks/usePreviewUrl";
 import { useResource } from "../hooks/useResource";
-import { settings } from "../settings";
-import { ColorStyle, ResourceType } from "../types";
-import { getDataUrlFromUrl, getPaletteFromUrl, getSmallestImage } from "../utils/image";
+import { ColorStyle, settings } from "../settings";
+import { getDataUrlFromUrl, getPaletteFromUrl } from "../utils/image";
 import { cl } from "../utils/misc";
 import { getReason } from "../utils/spotify";
 import { Art } from "./Art";
@@ -103,7 +103,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const [previewUrl, trackIndex, setTrackIndex] = usePreviewUrl(resourceData);
 
     if (!artUrl && resourceData) {
-        const smallestArt = getSmallestImage(resourceData);
+        const smallestArt = getImageClosestTo(resourceData, 80);
         if (smallestArt) setArtUrl(smallestArt.url);
     }
 

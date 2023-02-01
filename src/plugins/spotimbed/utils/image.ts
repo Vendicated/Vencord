@@ -18,8 +18,6 @@
 
 import { getGifEncoder } from "@utils/dependencies";
 
-import { Resource, ResourceImage } from "../types";
-
 const DEFAULT_PALETTE: RgbPalette = [[0, 0, 0]];
 
 export type RgbPalette = number[][];
@@ -58,15 +56,4 @@ export async function getDataUrlFromUrl(url: string) {
         reader.readAsDataURL(blob);
     });
     return base64;
-}
-
-export function getSmallestImage(resource: Resource) {
-    let images: ResourceImage[] | null = null;
-    if ("images" in resource) images = resource.images.slice();
-    else if (resource.type === "track") images = resource.album.images.slice();
-
-    if (!images) return null;
-
-    images.sort((a, b) => a.width - b.width);
-    return images[0];
 }

@@ -18,17 +18,17 @@
 
 import "./spotifyStyles.css";
 
+import { PlayerTrack, Spotify } from "@api/Spotify";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
-import { classes, LazyComponent } from "@utils/misc";
-import { filters, find, findByCodeLazy } from "@webpack";
+import { LazyComponent } from "@utils/misc";
+import { filters, find } from "@webpack";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState } from "@webpack/common";
 
-import { SpotifyStore, Track } from "./SpotifyStore";
-
-const cl = (className: string) => `vc-spotify-${className}`;
+const cl = classNameFactory("vc-spotify-");
 
 function msToHuman(ms: number) {
     const minutes = ms / 1000 / 60;
@@ -37,18 +37,10 @@ function msToHuman(ms: number) {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-const useStateFromStores: <T>(
-    stores: typeof SpotifyStore[],
-    mapper: () => T,
-    idk?: null,
-    compare?: (old: T, newer: T) => boolean
-) => T
-    = findByCodeLazy("useStateFromStores");
-
 function Svg(path: string, label: string) {
     return () => (
         <svg
-            className={classes(cl("button-icon"), cl(label))}
+            className={cl("button-icon", label)}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -83,10 +75,7 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 }
 
 function Controls() {
-    const [isPlaying, shuffle, repeat] = useStateFromStores(
-        [SpotifyStore],
-        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat]
-    );
+    const { isPlaying, shuffle, repeat } = Spotify.usePlayer(["isPlaying", "shuffle", "repeat"]);
 
     const [nextRepeat, repeatClassName] = (() => {
         switch (repeat) {
@@ -101,23 +90,23 @@ function Controls() {
     return (
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
-                className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
-                onClick={() => SpotifyStore.setShuffle(!shuffle)}
+                className={cl("button", shuffle ? "shuffle-on" : "shuffle-off")}
+                onClick={() => Spotify.setShuffle(!shuffle)}
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => Spotify.prev()}>
                 <SkipPrev />
             </Button>
-            <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
+            <Button onClick={() => Spotify.setPlaying(!isPlaying)}>
                 {isPlaying ? <PauseButton /> : <PlayButton />}
             </Button>
-            <Button onClick={() => SpotifyStore.next()}>
+            <Button onClick={() => Spotify.next()}>
                 <SkipNext />
             </Button>
             <Button
-                className={classes(cl("button"), cl(repeatClassName))}
-                onClick={() => SpotifyStore.setRepeat(nextRepeat)}
+                className={cl("button", repeatClassName)}
+                onClick={() => Spotify.setRepeat(nextRepeat)}
                 style={{ position: "relative" }}
             >
                 {repeat === "track" && <span className={cl("repeat-1")}>1</span>}
@@ -128,7 +117,7 @@ function Controls() {
 }
 
 const seek = debounce((v: number) => {
-    SpotifyStore.seek(v);
+    Spotify.seek(v);
 });
 
 const Slider = LazyComponent(() => {
@@ -137,19 +126,16 @@ const Slider = LazyComponent(() => {
 });
 
 function SeekBar() {
-    const { duration } = SpotifyStore.track!;
+    const { duration } = Spotify.PlayerStore.track!;
 
-    const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
-        [SpotifyStore],
-        () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
-    );
+    const { mPosition: storePosition, isSettingPosition, isPlaying } = Spotify.usePlayer(["mPosition", "isSettingPosition", "isPlaying"]);
 
     const [position, setPosition] = useState(storePosition);
 
     // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
-            setPosition(SpotifyStore.position);
+            setPosition(Spotify.PlayerStore.position);
             const interval = setInterval(() => {
                 setPosition(p => p + 1000);
             }, 1000);
@@ -162,7 +148,7 @@ function SeekBar() {
         <div id={cl("progress-bar")}>
             <Forms.FormText
                 variant="text-xs/medium"
-                className={cl("progress-time") + " " + cl("time-left")}
+                className={cl("progress-time", "time-left")}
                 aria-label="Progress"
             >
                 {msToHuman(position)}
@@ -180,7 +166,7 @@ function SeekBar() {
             />
             <Forms.FormText
                 variant="text-xs/medium"
-                className={cl("progress-time") + " " + cl("time-right")}
+                className={cl("progress-time", "time-right")}
                 aria-label="Total Duration"
             >
                 {msToHuman(duration)}
@@ -190,8 +176,8 @@ function SeekBar() {
 }
 
 
-function AlbumContextMenu({ track }: { track: Track; }) {
-    const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
+function AlbumContextMenu({ track }: { track: PlayerTrack; }) {
+    const { volume } = Spotify.usePlayer(["volume"]);
 
     return (
         <Menu.ContextMenu
@@ -203,7 +189,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 key="open-album"
                 id="open-album"
                 label="Open Album"
-                action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+                action={() => Spotify.openExternal(`/album/${track.album.id}`)}
             />
             <Menu.MenuItem
                 key="view-cover"
@@ -223,7 +209,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                         value={volume}
                         minValue={0}
                         maxValue={100}
-                        onChange={debounce((v: number) => SpotifyStore.setVolume(v))}
+                        onChange={debounce((v: number) => Spotify.setVolume(v))}
                     />
                 )}
             />
@@ -231,7 +217,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     );
 }
 
-function Info({ track }: { track: Track; }) {
+function Info({ track }: { track: PlayerTrack; }) {
     const img = track?.album?.image;
 
     const [coverExpanded, setCoverExpanded] = useState(false);
@@ -269,7 +255,7 @@ function Info({ track }: { track: Track; }) {
                     role={track.id ? "link" : undefined}
                     title={track.name}
                     onClick={track.id ? () => {
-                        SpotifyStore.openExternal(`/track/${track.id}`);
+                        Spotify.openExternal(`/track/${track.id}`);
                     } : void 0}
                 >
                     {track.name}
@@ -314,21 +300,17 @@ function Info({ track }: { track: Track; }) {
 }
 
 export function Player() {
-    const track = useStateFromStores(
-        [SpotifyStore],
-        () => SpotifyStore.track,
-        null,
-        (prev, next) => prev?.id ? (prev.id === next?.id) : prev?.name === next?.name
+    const { track } = Spotify.usePlayer(
+        ["track"],
+        ({ track: prev }, { track: next }) => prev?.id ? (prev?.id === next?.id) : prev?.name === next?.name,
     );
 
-    const device = useStateFromStores(
-        [SpotifyStore],
-        () => SpotifyStore.device,
-        null,
-        (prev, next) => prev?.id === next?.id
+    const { device } = Spotify.usePlayer(
+        ["device"],
+        ({ device: prev }, { device: next }) => prev?.id === next?.id,
     );
 
-    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
+    const { isPlaying } = Spotify.usePlayer(["isPlaying"]);
     const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity

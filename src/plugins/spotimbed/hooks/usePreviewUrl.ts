@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ResourceType } from "@api/Spotify";
 import { React } from "@webpack/common";
 
-import { Resource, ResourceType } from "../types";
+import { DisplayResource } from "../types";
 
-function getPreviewUrl(resource: Resource, trackIndex: number): string | null {
+function getPreviewUrl(resource: DisplayResource, trackIndex: number): string | null {
     switch (resource.type) {
         case ResourceType.Track: return resource.preview_url;
 
@@ -28,12 +29,12 @@ function getPreviewUrl(resource: Resource, trackIndex: number): string | null {
 
         case ResourceType.Playlist: return resource.tracks.items[trackIndex]?.track.preview_url;
 
-        case ResourceType.Artist: return resource.top_tracks[trackIndex]?.preview_url;
+        case ResourceType.Artist: return resource.tracks[trackIndex]?.preview_url;
     }
     return null;
 }
 
-export function usePreviewUrl(resource: Resource | null) {
+export function usePreviewUrl(resource: DisplayResource | null) {
     const idRef = React.useRef(resource?.id);
     const [trackIndex, setTrackIndex] = React.useState(0);
 

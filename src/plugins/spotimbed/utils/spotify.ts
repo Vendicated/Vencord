@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Album, Resource, ResourceType, RestrictionReason, Track } from "../types";
+import { Album, ResourceType, RestrictionReason, Track } from "@api/Spotify";
+
+import { DisplayResource } from "../types";
 import { getMonth } from "./time";
 
 export function formatReleaseDate(date: string) {
@@ -35,13 +37,13 @@ export function getAlbumType(album: Album) {
     return "Album";
 }
 
-export function getTracks(resource: Resource): Track[] | null {
+export function getTracks(resource: DisplayResource): Track[] | null {
     switch (resource.type) {
         case ResourceType.Album: return resource.tracks.items;
 
         case ResourceType.Playlist: return resource.tracks.items.map(item => item.track);
 
-        case ResourceType.Artist: return resource.top_tracks;
+        case ResourceType.Artist: return resource.tracks;
     }
     return null;
 }

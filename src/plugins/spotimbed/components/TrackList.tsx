@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ResourceType, Track } from "@api/Spotify";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
-import { Resource, ResourceType, Track } from "../types";
+import { DisplayResource } from "../types";
 import { cl } from "../utils/misc";
 import { getTracks } from "../utils/spotify";
 import { formatDuration } from "../utils/time";
@@ -29,7 +30,7 @@ const listResourceTypes = [ResourceType.Album, ResourceType.Playlist, ResourceTy
 const scrollerClasses: Record<string, string> = findByPropsLazy("thin");
 
 export interface TrackListProps {
-    resource: Resource | null;
+    resource: DisplayResource | null;
     resourceType: ResourceType;
     selectedTrack: number;
     onTrackSelect(track: number): void;
