@@ -17,6 +17,7 @@
 */
 
 import { DataStore } from "@api/index";
+import { Toasts } from "@webpack/common";
 
 import { Collection, Format, Gif } from "./types";
 import { getFormat } from "./utils/getFormat";
@@ -39,7 +40,16 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
     const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
     const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
     // TODO: notify user instead of just console.warn
-    if (duplicateCollection) return console.warn("collection already exists");
+    if (duplicateCollection)
+        return Toasts.show({
+            message: "That collection already exists",
+            type: Toasts.Type.FAILURE,
+            id: Toasts.genId(),
+            options: {
+                duration: 3000,
+                position: Toasts.Position.BOTTOM
+            }
+        });
 
     collections.push({
         name: `gc:${name}`,
