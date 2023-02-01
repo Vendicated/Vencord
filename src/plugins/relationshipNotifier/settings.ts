@@ -19,10 +19,10 @@
 import { definePluginSettings } from "@api/settings";
 import { OptionType } from "@utils/types";
 
-const settings = definePluginSettings({
+export default definePluginSettings({
     notifications: {
         type: OptionType.BOOLEAN,
-        description: "Send a desktop notification discord is unfocused",
+        description: "Also send a desktop notification when discord is unfocused",
         default: true,
     },
     offlineRemovals: {
@@ -51,5 +51,3 @@ const settings = definePluginSettings({
         default: true
     }
 });
-
-export default settings;

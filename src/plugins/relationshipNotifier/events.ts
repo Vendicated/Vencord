@@ -19,7 +19,7 @@
 import { onChannelDelete, onGuildDelete, onRelationshipRemove } from "./functions";
 import { syncFriends, syncGroups, syncGuilds } from "./utils";
 
-const events = [
+export default [
     {
         name: "GUILD_CREATE",
         callbacks: [syncGuilds]
@@ -49,5 +49,3 @@ const events = [
         callbacks: [syncFriends, onRelationshipRemove]
     }
 ] as const;
-
-export default events;
