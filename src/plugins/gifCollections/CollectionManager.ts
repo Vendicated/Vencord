@@ -17,9 +17,10 @@
 */
 
 import { DataStore } from "@api/index";
+import { Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 
-import { Collection, Format, Gif } from "./types";
+import { Collection, Gif } from "./types";
 import { getFormat } from "./utils/getFormat";
 
 export const DATA_COLLECTION_NAME = "gif-collections-collections";
@@ -53,8 +54,8 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
     // gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
     collections.push({
         name: `gc:${name}`,
-        src: gifs[gifs.length - 1]?.src ?? "",
-        format: getFormat(gifs[gifs.length - 1]?.src ?? ""),
+        src: gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage,
+        format: getFormat(gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage),
         type: "Category",
         gifs
     });
@@ -86,10 +87,9 @@ export const removeFromCollection = async (id: string) => {
     collections[collectionIndex].gifs = collections[collectionIndex].gifs.filter(g => g.id !== id);
 
     const collection = collections[collectionIndex];
-    // TODO: need to change default image eh
-    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : "https://i.imgur.com/TFatP8r.png";
+    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : Settings.plugins["Gif Collection"].defaultEmptyCollectionImage;
     collections[collectionIndex].src = latestGifSrc;
-    collections[collectionIndex].format = latestGifSrc ? getFormat(latestGifSrc) : Format.IMAGE;
+    collections[collectionIndex].format = getFormat(latestGifSrc);
 
     await DataStore.set(DATA_COLLECTION_NAME, collections);
     return await refreshCacheCollection();

@@ -16,15 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
 import { getFormat } from "./utils/getFormat";
 import { uuidv4 } from "./utils/uuidv4";
+
+const settings = definePluginSettings({
+    defaultEmptyCollectionImage: {
+        description: "The image / gif that will be shown when a collection has no images / gifs",
+        type: OptionType.STRING,
+        default: "https://i.imgur.com/TFatP8r.png"
+    }
+});
 
 export default definePlugin({
     name: "Gif Collection",
@@ -84,6 +93,8 @@ export default definePlugin({
             ]
         }
     ],
+
+    settings,
 
     start() {
         CollectionManager.refreshCacheCollection();
