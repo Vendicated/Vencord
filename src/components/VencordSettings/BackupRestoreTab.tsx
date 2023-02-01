@@ -18,19 +18,14 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Forms, Margins, Text } from "@webpack/common";
 
 function BackupRestoreTab() {
     return (
-        <Forms.FormSection title="Settings Sync">
-            <Card style={{
-                backgroundColor: "var(--info-warning-background)",
-                borderColor: "var(--info-warning-foreground)",
-                color: "var(--info-warning-text)",
-                padding: "1em",
-                marginBottom: "0.5em",
-            }}>
+        <Forms.FormSection title="Settings Sync" className={Margins.marginTop16}>
+            <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>
                     <span>Importing a settings file will overwrite your current settings.</span>
@@ -50,7 +45,7 @@ function BackupRestoreTab() {
             </Text>
             <Flex>
                 <Button
-                    onClick={uploadSettingsBackup}
+                    onClick={() => uploadSettingsBackup()}
                     size={Button.Sizes.SMALL}
                 >
                     Import Settings

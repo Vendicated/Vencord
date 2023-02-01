@@ -33,7 +33,7 @@ export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
         <div className={cl("lang")}>
             {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
                 <i
-                    className={`devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
+                    className={`${cl("devicon")} devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
                 />
             )}
             {langName}

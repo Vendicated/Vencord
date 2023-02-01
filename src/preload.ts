@@ -18,32 +18,42 @@
 
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
-import electron, { contextBridge, ipcRenderer, webFrame } from "electron";
-import { readFileSync } from "fs";
+import { contextBridge, webFrame } from "electron";
+import { readFileSync, watch } from "fs";
 import { join } from "path";
 
 import VencordNative from "./VencordNative";
-
-if (electron.desktopCapturer === void 0) {
-    // Fix for desktopCapturer being main only in Electron 17+
-    // Discord accesses this in discord_desktop_core (DiscordNative.desktopCapture.getDesktopCaptureSources)
-    // and errors with cannot "read property getSources() of undefined"
-    // see discord_desktop_core/app/discord_native/renderer/desktopCapture.js
-    const electronPath = require.resolve("electron");
-    delete require.cache[electronPath]!.exports;
-    require.cache[electronPath]!.exports = {
-        ...electron,
-        desktopCapturer: {
-            getSources: opts => ipcRenderer.invoke(IpcEvents.GET_DESKTOP_CAPTURE_SOURCES, opts)
-        }
-    };
-}
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
 if (location.protocol !== "data:") {
     // Discord
     webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+    const rendererCss = join(__dirname, "renderer.css");
+
+    function insertCss(css: string) {
+        const style = document.createElement("style");
+        style.id = "vencord-css-core";
+        style.textContent = css;
+
+        if (document.readyState === "complete") {
+            document.documentElement.appendChild(style);
+        } else {
+            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+                once: true
+            });
+        }
+    }
+
+    const css = readFileSync(rendererCss, "utf-8");
+    insertCss(css);
+    if (IS_DEV) {
+        // persistent means keep process running if watcher is the only thing still running
+        // which we obviously don't want
+        watch(rendererCss, { persistent: false }, () => {
+            document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
+        });
+    }
     require(process.env.DISCORD_PRELOAD!);
 } else {
     // Monaco Popout

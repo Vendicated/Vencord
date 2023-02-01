@@ -1,0 +1,28 @@
+.messagelogger-red-overlay .messagelogger-deleted {
+    background-color: rgba(240 71 71 / 15%);
+}
+
+.messagelogger-red-text .messagelogger-deleted div {
+    color: #f04747;
+}
+
+.messagelogger-deleted [class^="buttons"] {
+    display: none;
+}
+
+.messagelogger-deleted-attachment {
+    filter: grayscale(1);
+}
+
+.messagelogger-deleted-attachment:hover {
+    filter: grayscale(0);
+    transition: 250ms filter linear;
+}
+
+.theme-dark .messagelogger-edited {
+    filter: brightness(80%);
+}
+
+.theme-light .messagelogger-edited {
+    opacity: 0.5;
+}

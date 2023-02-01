@@ -24,7 +24,7 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 
 // Add yourself here if you made a plugin
-export const Devs = Object.freeze({
+export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
         name: "Vendicated",
         id: 343383572805058560n
@@ -177,9 +177,28 @@ export const Devs = Object.freeze({
         name: "'ax",
         id: 273562710745284628n,
     },
-    Sambot:
-    {
+    Sambot: {
         name: "Sambot",
         id: 705798778472366131n,
     },
+    pointy: {
+        name: "pointy",
+        id: 99914384989519872n
+    },
+    SammCheese: {
+        name: "Samm-Cheese",
+        id: 372148345894076416n
+    },
+    zt: {
+        name: "zt",
+        id: 289556910426816513n
+    },
+    captain: {
+        name: "Captain",
+        id: 347366054806159360n
+    },
+    whqwert: {
+        name: "whqwert",
+        id: 586239091520176128n
+    }
 });

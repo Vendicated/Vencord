@@ -22,7 +22,7 @@ import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 import { IpcRes } from "./types";
 
-export const UpdateLogger = new Logger("Updater", "white");
+export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
 export let isOutdated = false;
 export let isNewer = false;
 export let updateError: any;
@@ -61,7 +61,7 @@ export function getRepo() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
 }
 
-type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js", string>;
+type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
 
 /**
  * @returns true if hard restart is required

@@ -1,6 +1,5 @@
 .shiki-container {
     border: 4px;
-    /* fallback background */
     background-color: var(--background-secondary);
 }
 
@@ -13,7 +12,6 @@
     overflow-x: auto;
     padding: 0.5em;
     position: relative;
-
     font-size: 0.875rem;
     line-height: 1.125rem;
     text-indent: 0;
@@ -22,8 +20,7 @@
     border: none;
 }
 
-.shiki-root [class^='devicon-'],
-.shiki-root [class*=' devicon-'] {
+.shiki-devicon {
     margin-right: 8px;
     user-select: none;
 }
@@ -49,7 +46,7 @@
     padding: 4px 8px;
 }
 
-.shiki-btn~.shiki-btn {
+.shiki-btn ~ .shiki-btn {
     margin-left: 4px;
 }
 
@@ -59,7 +56,7 @@
 
 .shiki-spinner-container {
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgb(0 0 0 / 60%);
     display: flex;
     position: absolute;
     justify-content: center;

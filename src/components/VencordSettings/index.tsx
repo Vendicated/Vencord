@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./settingsStyles.css";
+
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
-import { Forms, Router, Text } from "@webpack/common";
-
-import cssText from "~fileContent/settingsStyles.css";
+import { Forms, SettingsRouter, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
 import PluginsTab from "./PluginsTab";
@@ -28,11 +29,7 @@ import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
 
-const style = document.createElement("style");
-style.textContent = cssText;
-document.head.appendChild(style);
-
-const st = (style: string) => `vcSettings${style}`;
+const cl = classNameFactory("vc-settings-");
 
 const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
@@ -66,15 +63,15 @@ function Settings(props: SettingsProps) {
         <TabBar
             type={TabBar.Types.TOP}
             look={TabBar.Looks.BRAND}
-            className={st("TabBar")}
+            className={cl("tab-bar")}
             selectedItem={tab}
-            onItemSelect={Router.open}
+            onItemSelect={SettingsRouter.open}
         >
             {Object.entries(SettingsTabs).map(([key, { name, component }]) => {
                 if (!component) return null;
                 return <TabBar.Item
                     id={key}
-                    className={st("TabBarItem")}
+                    className={cl("tab-bar-item")}
                     key={key}>
                     {name}
                 </TabBar.Item>;

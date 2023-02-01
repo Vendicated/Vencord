@@ -1,23 +1,40 @@
-.vcSettingsTabBar {
+.vc-settings-tab-bar {
     margin-top: 20px;
     margin-bottom: -2px;
     border-bottom: 2px solid var(--background-modifier-accent);
 }
 
-.vcSettingsTabBarItem {
+.vc-settings-tab-bar-item {
     margin-right: 32px;
     padding-bottom: 16px;
     margin-bottom: -2px;
 }
 
-.vcSettingsQuickActionCard {
+.vc-settings-quick-actions-card {
     padding: 1em;
     display: flex;
     gap: 1em;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
     flex-grow: 1;
-    flex-direction: row;
+    flex-flow: row wrap;
     margin-bottom: 1em;
+}
+
+.vc-settings-donate {
+    display: flex;
+    flex-direction: row;
+}
+
+.vc-settings-card {
+    padding: 1em;
+    margin-bottom: 1em;
+    margin-top: 1em;
+}
+
+.vc-backup-restore-card {
+    background-color: var(--info-warning-background);
+    border-color: var(--info-warning-foreground);
+    color: var(--info-warning-text);
+    margin-top: 0;
 }
