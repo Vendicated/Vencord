@@ -44,6 +44,7 @@ export interface NotificationData {
     icon?: string;
     timeoutMs?: number;
     onClick?(): void;
+    onClose?(): void;
     color?: string;
 }
 
@@ -52,6 +53,7 @@ function _showNotification(notification: NotificationData, id: number) {
     return new Promise<void>(resolve => {
         root.render(
             <NotificationComponent {...notification} id={id} onClose={() => {
+                notification.onClose?.();
                 root.render(null);
                 resolve();
             }} />,
