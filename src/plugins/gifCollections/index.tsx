@@ -171,7 +171,6 @@ export default definePlugin({
             url
         };
 
-        console.log(gif);
         return (
             <Menu.MenuItem
                 label="Add To Collection"
