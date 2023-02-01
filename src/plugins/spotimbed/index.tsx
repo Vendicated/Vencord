@@ -18,6 +18,7 @@
 
 import "./spotimbed.css";
 
+import { ResourceType } from "@api/Spotify";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -55,8 +56,8 @@ export default definePlugin({
     settings,
 
     settingsAboutComponent: ({ tempSettings }) => <ErrorBoundary>
-        <Spotimbed type="track" id="6a4z5B7vOzTLYTnokxuDXo" tempSettings={tempSettings} />
-        <Spotimbed type="album" id="6MbBpKe8dZYYqOq0AxpQps" tempSettings={tempSettings} />
+        <Spotimbed type={ResourceType.Track} id="6a4z5B7vOzTLYTnokxuDXo" tempSettings={tempSettings} />
+        <Spotimbed type={ResourceType.Album} id="6MbBpKe8dZYYqOq0AxpQps" tempSettings={tempSettings} />
     </ErrorBoundary>,
 
     // exports

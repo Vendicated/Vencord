@@ -233,6 +233,27 @@
     flex: 1;
 }
 
+.spotimbed-queue-btn {
+    background: none;
+    color: inherit;
+    box-sizing: content-box;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    opacity: 0.6;
+}
+
+.spotimbed-queue-btn:hover {
+    opacity: 1;
+}
+
+.spotimbed-queue-btn.spotimbed-queued {
+    color: var(--status-green-500);
+    opacity: 0.8;
+    cursor: pointer;
+    pointer-events: none;
+}
+
 .spotimbed-controls [class*="audioMetadata"] {
     display: none;
 }

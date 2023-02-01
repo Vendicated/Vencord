@@ -56,19 +56,26 @@ export interface EmbedProps {
 }
 export interface SpotimbedProps {
     art?: string;
-    type: string;
+    type: ResourceType;
     id: string;
     tempSettings?: Record<string, any>;
+}
+
+function isSupported(type: string): type is ResourceType {
+    return Object.values(ResourceType).includes(type as ResourceType);
 }
 
 export function createSpotimbed({ embed: { url: src, thumbnail }, tempSettings }: EmbedProps) {
     const url = parseUrl(src);
     if (!url) return <></>;
 
+    const resourceType = url.pathname.split("/")[1];
+    if (!isSupported(resourceType)) return UnsupportedEmbed();
+
     return <ErrorBoundary>
         <Spotimbed
             art={thumbnail?.proxyURL}
-            type={url.pathname.split("/")[1]}
+            type={resourceType}
             id={url.pathname.split("/")[2]}
             tempSettings={tempSettings}
         />
@@ -83,8 +90,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     const [embedRef, isIntersecting] = useIntersection(true);
 
     const isDiscordTheme = colorStyle === ColorStyle.Discord;
-    const isForeign = !Object.values(ResourceType).includes(resourceType as ResourceType);
-    const noPalette = !artUrl || isDiscordTheme || isForeign;
+    const noPalette = !artUrl || isDiscordTheme;
     const hasPlayer = resourceType !== ResourceType.User;
 
     const [palette, , artPending] = useCachedAwaiter(async () => {
@@ -126,7 +132,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
     } as React.CSSProperties;
 
     // TODO: Context menu additions
-    return isForeign ? UnsupportedEmbed() : (
+    return (
         <div
             ref={embedRef}
             className={classes.join(" ")}
@@ -145,7 +151,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
                 selectedTrack={trackIndex}
                 onTrackSelect={setTrackIndex}
             />
-            {hasPlayer && <AudioControls mediaHref={previewUrl} />}
+            {hasPlayer && <AudioControls mediaHref={previewUrl} resource={resourceData} />}
         </div>
     );
 }
