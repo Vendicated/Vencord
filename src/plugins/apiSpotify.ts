@@ -28,7 +28,9 @@ export default definePlugin({
         {
             find: 'repeat:"off"!==',
             replacement: {
+                // repeat: "off" !== repeatMode,
                 match: /repeat:"off"!==(\i),/,
+                // actualRepeat: repeatMode, ...
                 replace: "actualRepeat:$1,$&"
             }
         },
@@ -36,7 +38,9 @@ export default definePlugin({
         {
             find: ".PLAYER_DEVICES",
             replacement: {
+                // get: superagent.bind(null, "get"),
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
+                // SpotifyAPIMarker: 1, post: superagent.bind(null, "post"), ...
                 replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
             }
         },
