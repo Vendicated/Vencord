@@ -19,6 +19,7 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
@@ -237,7 +238,7 @@ export default definePlugin({
         return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
 
-    HiddenChannelLockScreen,
+    HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
 
     LockIcon: () => (
         <svg
@@ -252,7 +253,7 @@ export default definePlugin({
         </svg>
     ),
 
-    HiddenChannelIcon: () => (
+    HiddenChannelIcon: ErrorBoundary.wrap(() => (
         <Tooltip text="Hidden Channel">
             {({ onMouseLeave, onMouseEnter }) => (
                 <svg
@@ -269,5 +270,5 @@ export default definePlugin({
                 </svg>
             )}
         </Tooltip>
-    )
+    ), { noop: true })
 });

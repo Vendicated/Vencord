@@ -19,11 +19,10 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { proxyLazy } from "@utils/proxyLazy";
+import { formatDuration } from "@utils/text";
 import { find, findByCode, findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
-
-import { humanizeTime } from "../util";
 
 enum SortOrderTypesTyping {
     LATEST_ACTIVITY = 0,
@@ -92,85 +91,112 @@ const ForumLayoutTypesToNames = proxyLazy(() => ({
 // Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
-function HiddenChannelLockScreen(channel: ExtendedChannel) {
+function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
+    const {
+        type,
+        topic,
+        lastMessageId,
+        defaultForumLayout,
+        lastPinTimestamp,
+        defaultAutoArchiveDuration,
+        availableTags,
+        id: channelId,
+        rateLimitPerUser,
+        defaultThreadRateLimitPerUser,
+        defaultSortOrder,
+        defaultReactionEmoji
+    } = channel;
+
     return (
-        <ErrorBoundary noop>
-            <div className={ChatClasses.chat + " " + "shc-lock-screen-container"}>
-                <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
+        <div className={ChatClasses.chat + " " + "shc-lock-screen-container"}>
+            <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
-                <div className="shc-lock-screen-heading-container">
-                    <Text variant="heading-xxl/bold">This is a hidden {ChannelTypesToChannelNames[channel.type]} channel.</Text>
-                    {channel.isNSFW() &&
-                        <Tooltip text="NSFW">
-                            {({ onMouseLeave, onMouseEnter }) => (
-                                <svg
-                                    onMouseLeave={onMouseLeave}
-                                    onMouseEnter={onMouseEnter}
-                                    className="shc-lock-screen-heading-nsfw-icon"
-                                    width="32"
-                                    height="32"
-                                    viewBox="0 0 48 48"
-                                    aria-hidden={true}
-                                    role="img"
-                                >
-                                    <path d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
-                                </svg>
-                            )}
-                        </Tooltip>
-                    }
-                </div>
-
-                <Text variant="text-lg/normal">You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel. {channel.isForumChannel() && channel.topic && channel.topic.length > 0 && "However you may see its guidelines:"}</Text >
-
-                {channel.isForumChannel() && channel.topic && channel.topic.length > 0 && <div className="shc-lock-screen-topic-container">
-                    {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
-                </div>}
-
-                {channel.lastMessageId &&
-                    <Text variant="text-md/normal">Last {channel.isForumChannel() ? "post" : "message"} created: <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(channel.lastMessageId))} /></Text>
-                }
-                {channel.lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(channel.lastPinTimestamp)} /></Text>
-                }
-                {(channel.rateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Slowmode: {humanizeTime(channel.rateLimitPerUser ?? 0, "seconds")}</Text>
-                }
-                {(channel.defaultThreadRateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Default thread slowmode: {humanizeTime(channel.defaultThreadRateLimitPerUser ?? 0, "seconds")}</Text>
-                }
-                {(channel.defaultAutoArchiveDuration ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}: {humanizeTime(channel.defaultAutoArchiveDuration ?? 0, "minutes")}</Text>
-                }
-                {channel.defaultForumLayout &&
-                    <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[channel.defaultForumLayout]}</Text>
-                }
-                {channel.defaultSortOrder &&
-                    <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[channel.defaultSortOrder]}</Text>
-                }
-                {channel.defaultReactionEmoji &&
-                    <div className="shc-lock-screen-default-emoji-container">
-                        <Text variant="text-md/normal">Default reaction emoji:</Text>
-                        <EmojiComponent node={{
-                            type: channel.defaultReactionEmoji?.emojiName ? "emoji" : "customEmoji",
-                            name: channel.defaultReactionEmoji?.emojiName ?? "",
-                            emojiId: channel.defaultReactionEmoji?.emojiId
-                        }} />
-                    </div>
-                }
-                {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
-                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
-                }
-                {channel.availableTags && channel.availableTags.length > 0 &&
-                    <div className="shc-lock-screen-tags-container">
-                        <Text variant="text-lg/bold">Available tags:</Text>
-                        <div className={TagClasses.tags}>
-                            {channel.availableTags.map(tag => <TagComponent tag={tag} />)}
-                        </div>
-                    </div>
+            <div className="shc-lock-screen-heading-container">
+                <Text variant="heading-xxl/bold">This is a hidden {ChannelTypesToChannelNames[type]} channel.</Text>
+                {channel.isNSFW() &&
+                    <Tooltip text="NSFW">
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <svg
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                className="shc-lock-screen-heading-nsfw-icon"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 48 48"
+                                aria-hidden={true}
+                                role="img"
+                            >
+                                <path d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
+                            </svg>
+                        )}
+                    </Tooltip>
                 }
             </div>
-        </ErrorBoundary>
+
+            <Text variant="text-lg/normal">
+                You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
+                {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+            </Text >
+
+            {channel.isForumChannel() && topic && topic.length > 0 && (
+                <div className="shc-lock-screen-topic-container">
+                    {Parser.parseTopic(topic, false, { channelId })}
+                </div>
+            )}
+
+            {lastMessageId &&
+                <Text variant="text-md/normal">
+                    Last {channel.isForumChannel() ? "post" : "message"} created:
+                    <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
+                </Text>
+            }
+
+            {lastPinTimestamp &&
+                <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
+            }
+            {(rateLimitPerUser ?? 0) > 0 &&
+                <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser! * 1000)}</Text>
+            }
+            {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
+                <Text variant="text-md/normal">
+                    Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser! * 1000)}
+                </Text>
+            }
+            {(defaultAutoArchiveDuration ?? 0) > 0 &&
+                <Text variant="text-md/normal">
+                    Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
+                    {formatDuration(defaultAutoArchiveDuration! * 1000 * 60)}
+                </Text>
+            }
+            {defaultForumLayout != null &&
+                <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
+            }
+            {defaultSortOrder != null &&
+                <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
+            }
+            {defaultReactionEmoji != null &&
+                <div className="shc-lock-screen-default-emoji-container">
+                    <Text variant="text-md/normal">Default reaction emoji:</Text>
+                    <EmojiComponent node={{
+                        type: defaultReactionEmoji.emojiName ? "emoji" : "customEmoji",
+                        name: defaultReactionEmoji.emojiName ?? "",
+                        emojiId: defaultReactionEmoji.emojiId
+                    }} />
+                </div>
+            }
+            {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
+                <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
+            }
+            {availableTags && availableTags.length > 0 &&
+                <div className="shc-lock-screen-tags-container">
+                    <Text variant="text-lg/bold">Available tags:</Text>
+                    <div className={TagClasses.tags}>
+                        {availableTags.map(tag => <TagComponent tag={tag} />)}
+                    </div>
+                </div>
+            }
+        </div>
     );
 }
 
-export default HiddenChannelLockScreen;
+export default ErrorBoundary.wrap(HiddenChannelLockScreen);
