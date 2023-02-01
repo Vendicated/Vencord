@@ -32,6 +32,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
         fallbackValue: [],
         deps: [refetchCount],
     });
+    const username = UserStore.getUser(userId)?.username ?? "";
 
     const dirtyRefetch = () => setRefetchCount(refetchCount + 1);
 
@@ -79,7 +80,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             <textarea
                 className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder={"Review @" + UserStore.getUser(userId)?.username ?? ""}
+                placeholder={reviews?.find(r => r.senderdiscordid === UserStore.getCurrentUser().id) ? `Update review for @${username}` : `Review @${username}`}
                 onKeyDown={onKeyPress}
                 style={{
                     marginTop: "6px",
