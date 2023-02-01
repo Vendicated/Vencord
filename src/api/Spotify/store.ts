@@ -84,7 +84,7 @@ export const SpotifyPlayerStore = proxyLazy(() => {
             store.repeat = player.actualRepeat || "off";
             store.position = player.position ?? 0;
             // eslint-disable-next-line dot-notation
-            store["isSettingPosition"] = false;
+            store.isSettingPosition = false;
             store.emitChange();
         },
         SPOTIFY_SET_DEVICES({ devices }: { devices: SpotifyDevice[]; }) {

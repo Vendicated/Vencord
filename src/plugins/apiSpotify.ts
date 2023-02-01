@@ -31,6 +31,14 @@ export default definePlugin({
                 match: /repeat:"off"!==(\i),/,
                 replace: "actualRepeat:$1,$&"
             }
-        }
+        },
+        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
+        {
+            find: ".PLAYER_DEVICES",
+            replacement: {
+                match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
+                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
+            }
+        },
     ],
 });

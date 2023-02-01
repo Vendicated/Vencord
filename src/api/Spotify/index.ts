@@ -18,7 +18,7 @@
 
 import IpcEvents from "@utils/IpcEvents";
 import { NonMethodsKeys } from "@utils/types";
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
 import { SpotifyPlayerStore as PlayerStore } from "./store";
 import { Album, Artist, MarketQuery, Pagination, Playlist, RepeatState, Resource, ResourceImage, SpotifyHttp, SpotifyStore, Track, User } from "./types";
@@ -26,10 +26,7 @@ export * from "./types";
 
 const API_BASE = "https://api.spotify.com/v1";
 
-const builtinApi: { http: SpotifyHttp; } = mapMangledModuleLazy(
-    'type:"SPOTIFY_ACCOUNT_ACCESS_TOKEN_REVOKE"',
-    { http: filters.byProps("get", "put") },
-);
+const spotifyHttp: SpotifyHttp = findByPropsLazy("SpotifyAPIMarker");
 const spotifyStore: SpotifyStore = findByPropsLazy("getActiveSocketAndDevice");
 const useStateFromStores: <T>(
     stores: any[],
@@ -60,7 +57,7 @@ export const Spotify = {
         const account = Object.values(accounts)[0];
         if (!account) return Promise.reject(new Error("No accounts stored"));
 
-        return builtinApi.http[method](account.accountId, account.accessToken, {
+        return spotifyHttp[method](account.accountId, account.accessToken, {
             url: API_BASE + path,
         }).then(res => res.body);
     },
@@ -126,6 +123,7 @@ export const Spotify = {
             compare,
         );
     },
+
     prev() {
         return this.post("/me/player/previous");
     },
@@ -146,6 +144,10 @@ export const Spotify = {
     },
     seek(ms: number) {
         return Spotify.put("/me/player/seek", { position_ms: Math.round(ms) });
+    },
+    queue(track: Track | Track["id"]) {
+        const trackId = typeof track === "string" ? track : track.id;
+        return this.post("/me/player/queue", { uri: `spotify:track:${trackId}` });
     },
 };
 
