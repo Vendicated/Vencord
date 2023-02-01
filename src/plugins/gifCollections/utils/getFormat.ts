@@ -20,6 +20,6 @@ import { Format } from "../types";
 import { getUrlExtension } from "./getUrlExtension";
 
 export function getFormat(url: string) {
-    const exstension = getUrlExtension(url);
-    return url.startsWith("https://media.tenor") || exstension === "mp4" || exstension == null ? Format.VIDEO : Format.IMAGE;
+    const extension = getUrlExtension(url);
+    return url.startsWith("https://media.tenor") || extension === "mp4" || extension == null ? Format.VIDEO : Format.IMAGE;
 }
