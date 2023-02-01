@@ -69,7 +69,7 @@ export const addToCollection = async (name: string, gif: Gif) => {
 
 export const removeFromCollection = async (id: string) => {
     const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
-    const collectionIndex = collections.findIndex(c => c.gifs.findIndex(g => g.id === id) !== -1);
+    const collectionIndex = collections.findIndex(c => c.gifs.some(g => g.id === id));
     if (collectionIndex === -1) return console.warn("collection not found");
 
     // Remove The Gif
