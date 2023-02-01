@@ -196,5 +196,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Aria: {
         name: "Syncxv",
         id: 549244932213309442n
+    },
+    whqwert: {
+        name: "whqwert",
+        id: 586239091520176128n
     }
 });
