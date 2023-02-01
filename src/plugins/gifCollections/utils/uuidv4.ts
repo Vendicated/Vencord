@@ -18,7 +18,6 @@
 
 export function uuidv4() {
     let d = new Date().getTime();
-    if (typeof performance !== "undefined" && typeof performance.now === "function") {
         d += performance.now();
     }
     return "gc-moment:xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
