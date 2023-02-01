@@ -69,19 +69,17 @@ export default definePlugin({
             }
         },
         {
-            // pass the target to the open link menu so we can grab its data
-            find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
+            // pass the target to the open link menu so we can check if it's an image
+            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
             replacement: [
-                // pass target to st function -> st({target: d, /* ... */})
                 {
-                    match: /((?<target>.)=.{1,2}\.target,.{1,500}return .{1,3}{)/,
-                    replace: "$1target:$<target>,"
+                    match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
+                    replace: "$&,_vencordTarget:arguments[0].target"
                 },
-                // pass target from e.target and send it to open link component
                 {
-                    // im sorry
-                    match: /(=(?<props>.{1,2})\.itemSrc.{1,2700}return .{1,100},.{1,2}=\(.{1,10}\)\()(?<args>null.{1,10})\)/,
-                    replace: "$1$<args>,$<props>.target)"
+                    // var f = props.itemHref, .... MakeNativeMenu(null != f ? f : blah)
+                    match: /(\i)=\i\.itemHref,.+?\(null!=\1\?\1:.{1,10}(?=\))/,
+                    replace: "$&,arguments[0]._vencordTarget"
                 }
             ]
         }
