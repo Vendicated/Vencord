@@ -16,27 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
 
 import { definePluginSettings } from "@api/settings";
-import { Badge } from "@components/Badge";
-import { Flex } from "@components/Flex";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, ChannelStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
+
+import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
 const Permissions = findLazy(m => typeof m.VIEW_CHANNEL === "bigint");
-const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
-
-const ChannelTypesToChannelName = proxyLazy(() => ({
-    [ChannelTypes.GUILD_TEXT]: "TEXT",
-    [ChannelTypes.GUILD_ANNOUNCEMENT]: "ANNOUNCEMENT",
-    [ChannelTypes.GUILD_FORUM]: "FORUM"
-}));
 
 enum ShowMode {
     LockIcon,
@@ -97,16 +90,8 @@ export default definePlugin({
             ]
         },
         {
-            // inside the onMouseDown handler, we check if the channel is hidden and open the modal if it is
             find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
-                {
-                    match: /(?=(?<this>\i)\.handleThreadsPopoutClose\(\))/,
-                    replace: "if($self.isHiddenChannel($<this>.props.channel)&&arguments[0].button===0){"
-                        + "$self.onHiddenChannelSelected($<this>.props.channel);"
-                        + "return;"
-                        + "}"
-                },
                 // Do nothing when trying to join a voice channel if the channel is hidden
                 {
                     match: /(?<=handleClick=function\(\){)(?=.{1,80}(?<this>\i)\.handleVoiceConnect\(\))/,
@@ -179,6 +164,46 @@ export default definePlugin({
                 replace: "&&!$self.isHiddenChannel($<channel>)"
             }
         },
+        // Only render the channel header and buttons that work when transitioning to a hidden channel
+        {
+            find: "Missing channel in Channel.renderHeaderToolbar",
+            replacement: [
+                {
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_TEXT:)(?=.+?;(?<pushNotificationButtonExpression>.+?{channel:(?<channel>\i)},"notifications"\)\);))/,
+                    replace: "if($self.isHiddenChannel($<channel>)){$<pushNotificationButtonExpression>break;}"
+                },
+                {
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:if\(!\i\){)(?=.+?;(?<pushNotificationButtonExpression>.+?{channel:(?<channel>\i)},"notifications"\)\)))/,
+                    replace: "if($self.isHiddenChannel($<channel>)){$<pushNotificationButtonExpression>;break;}"
+                },
+                {
+                    match: /(?<=(?<this>\i)\.renderMobileToolbar=function.+?case \i\.\i\.GUILD_FORUM:)/,
+                    replace: "if($self.isHiddenChannel($<this>.props.channel))break;"
+                },
+                {
+                    match: /(?<=renderHeaderBar=function.+?hideSearch:(?<channel>\i)\.isDirectory\(\))/,
+                    replace: "||$self.isHiddenChannel($<channel>)"
+                },
+                {
+                    match: /(?<=renderSidebar=function\(\){)/,
+                    replace: "if($self.isHiddenChannel(this.props.channel))return null;"
+                },
+                {
+                    match: /(?<=renderChat=function\(\){)/,
+                    replace: "if($self.isHiddenChannel(this.props.channel))return $self.HiddenChannelLockScreen(this.props.channel);"
+                },
+            ]
+        },
+        // Avoid trying to fetch messages from hidden channels
+        {
+            find: '"MessageManager"',
+            replacement: [
+                {
+                    match: /(?<=if\(null!=(?<channelId>\i)\).{1,100}"Skipping fetch because channelId is a static route".{1,10}else{)/,
+                    replace: "if($self.isHiddenChannel({channelId:$<channelId>}))return;"
+                },
+            ]
+        },
         // Patch keybind handlers so you can't accidentally jump to hidden channels
         {
             find: '"alt+shift+down"',
@@ -194,6 +219,14 @@ export default definePlugin({
                 replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
         },
+        // Export the emoji component used on the lock screen
+        {
+            find: 'jumboable?"jumbo":"default"',
+            replacement: {
+                match: /(?<=\i:\(\)=>\i)(?=}.+?(?<component>\i)=function.{1,20}node,\i=\i.isInteracting)/,
+                replace: ",hc1:()=>$<component>" // Blame Ven length check for the small name :pensive_cry:
+            }
+        }
     ],
 
     isHiddenChannel(channel: Channel & { channelId?: string; }) {
@@ -205,56 +238,7 @@ export default definePlugin({
         return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
 
-    onHiddenChannelSelected(channel: Channel) {
-        // Check for type, otherwise it would attempt to show the modal for stage channels
-        if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.GUILD_FORUM].includes(channel.type)) {
-            openModal(modalProps => (
-                <ModalRoot size={ModalSize.SMALL} {...modalProps}>
-                    <ModalHeader>
-                        <Flex>
-                            <Text variant="heading-md/bold">#{channel.name}</Text>
-                            {<Badge text={ChannelTypesToChannelName[channel.type]} color="var(--brand-experiment)" />}
-                            {channel.isNSFW() && <Badge text="NSFW" color="var(--status-danger)" />}
-                        </Flex>
-                    </ModalHeader>
-                    <ModalContent style={{ margin: "10px 8px" }}>
-                        <Text variant="text-md/normal">You don't have permission to view {channel.type === ChannelTypes.GUILD_FORUM ? "posts" : "messages"} in this channel.</Text>
-                        {(channel.topic ?? "").length > 0 && (
-                            <>
-                                <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Guidelines:" : "Topic:"}
-                                </Text>
-                                <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
-                                    {Parser.parseTopic(channel.topic, false, { channelId: channel.id })}
-                                </div>
-                            </>
-                        )}
-                        {channel.lastMessageId && (
-                            <>
-                                <Text variant="text-md/bold" style={{ marginTop: 10 }}>
-                                    {channel.type === ChannelTypes.GUILD_FORUM ? "Last Post Created" : "Last Message Sent:"}
-                                </Text>
-                                <div style={{ color: "var(--text-normal)", marginTop: 10 }}>
-                                    <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(channel.lastMessageId))} />
-                                </div>
-                            </>
-                        )}
-                    </ModalContent>
-                    <ModalFooter>
-                        <Flex>
-                            <Button
-                                onClick={modalProps.onClose}
-                                size={Button.Sizes.SMALL}
-                                color={Button.Colors.PRIMARY}
-                            >
-                                Close
-                            </Button>
-                        </Flex>
-                    </ModalFooter>
-                </ModalRoot>
-            ));
-        }
-    },
+    HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
 
     LockIcon: () => (
         <svg
@@ -265,27 +249,26 @@ export default definePlugin({
             aria-hidden={true}
             role="img"
         >
-            <path fillRule="evenodd" fill="currentColor" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
+            <path className="shc-evenodd-fill-current-color " d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
         </svg>
     ),
 
-    HiddenChannelIcon: () => (
+    HiddenChannelIcon: ErrorBoundary.wrap(() => (
         <Tooltip text="Hidden Channel">
             {({ onMouseLeave, onMouseEnter }) => (
                 <svg
                     onMouseLeave={onMouseLeave}
                     onMouseEnter={onMouseEnter}
-                    className={ChannelListClasses.icon}
+                    className={ChannelListClasses.icon + " " + "shc-hidden-channel-icon"}
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     aria-hidden={true}
                     role="img"
-                    style={{ marginLeft: 6, zIndex: 0, cursor: "not-allowed" }}
                 >
-                    <path fillRule="evenodd" fill="currentColor" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z" />
+                    <path className="shc-evenodd-fill-current-color " d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z" />
                 </svg>
             )}
         </Tooltip>
-    )
+    ), { noop: true })
 });
