@@ -39,7 +39,6 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
 
     const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
     const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
-    // TODO: notify user instead of just console.warn
     if (duplicateCollection)
         return Toasts.show({
             message: "That collection already exists",
@@ -51,10 +50,11 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
             }
         });
 
+    // gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
     collections.push({
         name: `gc:${name}`,
-        src: gifs.length ? gifs[gifs.length - 1].src : "",
-        format: getFormat(gifs[gifs.length - 1].src),
+        src: gifs[gifs.length - 1]?.src ?? "",
+        format: getFormat(gifs[gifs.length - 1]?.src ?? ""),
         type: "Category",
         gifs
     });
