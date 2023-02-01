@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { moment } from "@webpack/common";
+
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words
@@ -42,3 +44,26 @@ export const indexesOf = (text: string, sub: string) => {
     while ((i = text.indexOf(sub, i + 1)) !== -1) indexes.push(i);
     return indexes;
 };
+
+/**
+ * Forms milliseconds into a human readable string link "1 day, 2 hours, 3 minutes and 4 seconds"
+ * @param ms Milliseconds
+ * @param short Whether to use short units like "d" instead of "days"
+ */
+export function formatDuration(ms: number, short: boolean = false) {
+    const dur = moment.duration(ms);
+    return (["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const).reduce((res, unit) => {
+        const x = dur[unit]();
+        if (x > 0 || res.length) {
+            if (res.length)
+                res += unit === "seconds" ? " and " : ", ";
+
+            const unitStr = short
+                ? unit[0]
+                : x === 1 ? unit.slice(0, -1) : unit;
+
+            res += `${x} ${unitStr}`;
+        }
+        return res;
+    }, "").replace(/((,|and) \b0 \w+)+$/, "") || "now";
+}
