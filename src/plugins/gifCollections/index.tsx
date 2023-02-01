@@ -31,6 +31,7 @@ export default definePlugin({
     // need better description eh
     description: "Allows you to have collections of gifs",
     authors: [Devs.Aria],
+    dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [
         {
             find: "renderCategoryExtras",
