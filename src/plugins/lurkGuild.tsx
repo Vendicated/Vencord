@@ -49,36 +49,6 @@ const lurkGuild: (options: {
         v.toString().includes(`return ${funcName}.apply(this,arguments)`)) as typeof lurkGuild;
 });
 
-var context: Guild;
-function LurkGuildButton() {
-    // Outside variable can be changed by render of another invite
-    const guild = context;
-    if (guild.joinedAt || !guild.hasFeature("DISCOVERABLE"))
-        return null;
-
-    const [submitting, setSubmitting] = useState(false);
-
-    const isLurking = !!LurkingStore.lurkingGuildIds().length;
-    return (
-        <Button
-            className={InviteClasses.button}
-            disabled={isLurking && !submitting}
-            submitting={submitting}
-            onClick={async () => {
-                setSubmitting(true);
-                await lurkGuild({
-                    analyticsContext: "Popular",
-                    categoryId: null,
-                    guildId: guild.id,
-                    index: 0,
-                    loadId: generateId()
-                });
-            }}>
-            {!isLurking ? "Lurk" : "Already lurking"}
-        </Button>
-    );
-}
-
 export default definePlugin({
     name: "LurkGuild",
     description: "Allows to lurk a guild from its invite (needs a guild to be public/discoverable).",
@@ -88,26 +58,37 @@ export default definePlugin({
     }],
 
     patches: [{
-        // Grab invite guild
-        find: ".GuildSplash,{",
+        find: "GuildSplash,{",
         replacement: {
-            match: /(\.GuildSplash,{guild:)([a-z]+)(})/,
-            replace: "$1$self.setContext($2)$3"
-        }
-    },{
-        // Render after normal button
-        find: ".GuildSplash,{",
-        replacement: {
-            match: /(Messages\.JOINED_GUILD:[a-zA-Z.]+?\.Messages\.JOIN_GUILD}\))/,
-            replace: "$1,$self.render()"
+            match: /GuildSplash,{guild:([a-z]+).*?JOIN_GUILD}\)/,
+            replace: "$&,$self.render($1)"
         }
     }],
 
-    setContext: (guild: Guild) => context = guild,
+    render: ErrorBoundary.wrap((guild: Guild) => {
+        if (guild.joinedAt || !guild.features.has("DISCOVERABLE"))
+            return null;
 
-    render: () => (
-        <ErrorBoundary noop>
-            <LurkGuildButton />
-        </ErrorBoundary>
-    )
+        const [submitting, setSubmitting] = useState(false);
+
+        const isLurking = !!LurkingStore.lurkingGuildIds().length;
+        return (
+            <Button
+                className={InviteClasses.button}
+                disabled={isLurking && !submitting}
+                submitting={submitting}
+                onClick={async () => {
+                    setSubmitting(true);
+                    await lurkGuild({
+                        analyticsContext: "Popular",
+                        categoryId: null,
+                        guildId: guild.id,
+                        index: 0,
+                        loadId: generateId()
+                    });
+                }}>
+                {!isLurking ? "Lurk" : "Already lurking"}
+            </Button>
+        );
+    }, { noop: true })
 });
