@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "The cutest Discord client mod",
     "keywords": [],
     "homepage": "https://github.com/Vendicated/Vencord#readme",
@@ -22,8 +22,9 @@
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
         "inject": "node scripts/runInstaller.mjs",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint-styles": "stylelint \"src/**/*.css\"",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm lint && pnpm build && pnpm testTsc",
+        "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm testTsc",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
         "testTsc": "tsc --noEmit",
         "uninject": "node scripts/runInstaller.mjs",
@@ -56,6 +57,8 @@
         "moment": "^2.29.4",
         "puppeteer-core": "^19.6.0",
         "standalone-electron-types": "^1.0.0",
+        "stylelint": "^14.16.1",
+        "stylelint-config-standard": "^29.0.0",
         "type-fest": "^3.5.3",
         "typescript": "^4.9.4"
     },
