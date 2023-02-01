@@ -103,7 +103,7 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends JSX.IntrinsicAttributes = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Props): React.ComponentType<T>;
+        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Props): React.ComponentType<T>;
     };
 
 ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
