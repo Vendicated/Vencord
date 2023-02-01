@@ -17,11 +17,9 @@
 */
 
 import { Devs } from "@utils/constants";
-import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
-import { Settings } from "@api/Settings";
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
@@ -72,12 +70,19 @@ export default definePlugin({
         {
             // pass the target to the open link menu so we can grab its data
             find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
-            predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
-            noWarn: true,
-            replacement: {
-                match: /(?<props>.).onHeightUpdate.{0,200}(.)=(.)=.\.url;.+?\(null!=\3\?\3:\2[^)]+/,
-                replace: "$&,$<props>.target"
-            }
+            replacement: [
+                // pass target to st function -> st({target: d, /* ... */})
+                {
+                    match: /((?<target>.)=.{1,2}\.target,.{1,500}return .{1,3}{)/,
+                    replace: "$1target:$<target>,"
+                },
+                // pass target from e.target and send it to open link component
+                {
+                    // im sorry
+                    match: /(=(?<props>.{1,2})\.itemSrc.{1,2700}return .{1,100},.{1,2}=\(.{1,10}\)\()(?<args>null.{1,10})\)/,
+                    replace: "$1$<args>,$<props>.target)"
+                }
+            ]
         }
     ],
 
