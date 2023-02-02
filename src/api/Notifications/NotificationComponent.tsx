@@ -18,6 +18,7 @@
 
 import "./styles.css";
 
+import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Forms, useEffect, useMemo, useState } from "@webpack/common";
 
@@ -31,32 +32,33 @@ interface Props extends NotificationData {
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
     body,
-    color = "var(--brand-500)",
+    color,
     icon,
-    timeoutMs = 5000,
     onClick,
     onClose,
     id
 }: Props) {
+    const { timeout } = useSettings(["notifications.timeout"]).notifications;
+
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
-    const start = useMemo(() => Date.now(), [id, timeoutMs, isHover]);
+    const start = useMemo(() => Date.now(), [id, timeout, isHover]);
 
     useEffect(() => {
         if (isHover) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
-            if (elapsed >= timeoutMs)
+            if (elapsed >= timeout)
                 onClose();
             else
                 setElapsed(elapsed);
         }, 10);
 
         return () => clearInterval(intervalId);
-    }, [timeoutMs, id, isHover]);
+    }, [timeout, id, isHover]);
 
-    const timeoutProgress = elapsed / timeoutMs;
+    const timeoutProgress = elapsed / timeout;
 
     return (
         <button

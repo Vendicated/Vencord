@@ -42,7 +42,6 @@ export interface NotificationData {
     title: string;
     body: ReactNode;
     icon?: string;
-    timeoutMs?: number;
     onClick?(): void;
     onClose?(): void;
     color?: string;
