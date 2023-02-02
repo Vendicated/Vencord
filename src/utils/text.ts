@@ -37,25 +37,54 @@ export const wordsToPascal = (words: string[]) =>
 export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 
+const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds"] as const;
+type Units = typeof units[number];
+
+function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
+    if (short === false) return isOne ? unit.slice(0, -1) : unit;
+
+    if (unit === "months") return "mon";
+    if (unit === "minutes") return "min";
+    if (unit === "milliseconds") return "mil";
+    return unit[0];
+}
+
 /**
  * Forms milliseconds into a human readable string link "1 day, 2 hours, 3 minutes and 4 seconds"
- * @param ms Milliseconds
+ * @param time The time on the specified unit
+ * @param unit The unit the time is on
  * @param short Whether to use short units like "d" instead of "days"
  */
-export function formatDuration(ms: number, short: boolean = false) {
-    const dur = moment.duration(ms);
-    return (["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const).reduce((res, unit) => {
-        const x = dur[unit]();
-        if (x > 0 || res.length) {
-            if (res.length)
-                res += unit === "seconds" ? " and " : ", ";
+export function formatDuration(time: number, unit: Units, short: boolean = false) {
+    const dur = moment.duration(time, unit);
 
-            const unitStr = short
-                ? unit[0]
-                : x === 1 ? unit.slice(0, -1) : unit;
+    let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
 
-            res += `${x} ${unitStr}`;
+    const onlyAmountsStr = unitsAmounts.map(({ amount }) => amount).join(",");
+    const amountsToBeRemoved = onlyAmountsStr.slice(0, onlyAmountsStr.match(/,?0(?!.+?[^0,])/)!.index).split(",").length;
+    unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
+
+    const weeksAmount = unitsAmounts.find(({ unit }) => unit === "weeks");
+    if (weeksAmount && weeksAmount.amount > 0) {
+        const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
+        const daysAmount = unitsAmounts[daysAmountIndex];
+
+        const daysMod = daysAmount.amount % weeksAmount.amount;
+        if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
+        else daysAmount.amount = daysMod;
+    }
+
+
+    let res: string = "";
+    while (unitsAmounts.length) {
+        if (res.length) res += unitsAmounts.length ? ", " : " and ";
+
+        const { amount, unit } = unitsAmounts.shift()!;
+
+        if (amount > 0 || res.length) {
+            res += `${amount} ${getUnitStr(unit, amount === 1, short)}`;
         }
-        return res;
-    }, "").replace(/((,|and) \b0 \w+)+$/, "") || "now";
+    }
+
+    return res.length ? res : `0 ${getUnitStr(unit, false, short)}`;
 }

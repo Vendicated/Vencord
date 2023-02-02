@@ -155,17 +155,17 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
             }
             {(rateLimitPerUser ?? 0) > 0 &&
-                <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser! * 1000)}</Text>
+                <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
             }
             {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
                 <Text variant="text-md/normal">
-                    Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser! * 1000)}
+                    Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
                 </Text>
             }
             {(defaultAutoArchiveDuration ?? 0) > 0 &&
                 <Text variant="text-md/normal">
                     Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
-                    {formatDuration(defaultAutoArchiveDuration! * 1000 * 60)}
+                    {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
                 </Text>
             }
             {defaultForumLayout != null &&
