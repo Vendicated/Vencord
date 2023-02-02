@@ -44,6 +44,7 @@ export interface Settings {
     notifications: {
         timeout: number;
         position: "top-right" | "bottom-right";
+        useNative: "always" | "never" | "not-focused";
     };
 }
 
@@ -60,7 +61,8 @@ const DefaultSettings: Settings = {
 
     notifications: {
         timeout: 5000,
-        position: "bottom-right"
+        position: "bottom-right",
+        useNative: "not-focused"
     }
 };
 
