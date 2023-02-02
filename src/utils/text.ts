@@ -64,16 +64,12 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     const amountsToBeRemoved = onlyAmountsStr.slice(0, onlyAmountsStr.match(/,?0(?!.+?[^0,])/)!.index).split(",").length;
     unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
 
-    const weeksAmount = unitsAmounts.find(({ unit }) => unit === "weeks");
-    if (weeksAmount && weeksAmount.amount > 0) {
-        const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
-        const daysAmount = unitsAmounts[daysAmountIndex];
+    const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
+    const daysAmount = unitsAmounts[daysAmountIndex];
 
-        const daysMod = daysAmount.amount % weeksAmount.amount;
-        if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
-        else daysAmount.amount = daysMod;
-    }
-
+    const daysMod = daysAmount.amount % 7;
+    if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
+    else daysAmount.amount = daysMod;
 
     let res: string = "";
     while (unitsAmounts.length) {
