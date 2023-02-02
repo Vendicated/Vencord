@@ -30,7 +30,7 @@ import { createEmbedData, getEmbeddableLinks } from "./utils/ast";
 
 export default definePlugin({
     name: "SpotiMbed",
-    description: "Your mom",
+    description: "Makes Spotify embeds reliable and actually useable",
     authors: [Devs.Vap],
     dependencies: ["SpotifyAPI"],
     patches: [
