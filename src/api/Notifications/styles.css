@@ -13,8 +13,6 @@
     right: 1rem;
     border-radius: 5px;
     cursor: pointer;
-
-    /* border-left: 4px solid var(--vc-color, var(--brand-500)); */
 }
 
 .vc-notification {
@@ -45,7 +43,7 @@
     height: 0.5rem;
     border-radius: 5px;
     margin-top: auto;
-    background-color: var(--brand-500);
+    background-color: var(--vc-color, var(--brand-500));
 }
 
 .vc-notification-p {
