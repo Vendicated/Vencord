@@ -16,7 +16,7 @@
     grid-template-areas: "art info" "content content" "controls controls";
 }
 
-.spotimbed-embed.spotimbed-unavailable::after {
+.spotimbed-unavailable::after {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,7 +35,7 @@
     text-align: center;
 }
 
-.spotimbed-embed.spotimbed-unavailable.spotimbed-dismissed::after {
+.spotimbed-dismissed::after {
     opacity: 0;
     backdrop-filter: brightness(0) blur(0);
     pointer-events: none;
@@ -247,7 +247,7 @@
     opacity: 1;
 }
 
-.spotimbed-queue-btn.spotimbed-queued {
+.spotimbed-queued {
     color: var(--status-green-500);
     opacity: 0.8;
     cursor: pointer;
