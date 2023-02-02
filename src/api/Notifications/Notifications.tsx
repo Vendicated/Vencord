@@ -39,7 +39,7 @@ function getRoot() {
 }
 
 export interface NotificationData {
-    title: ReactNode;
+    title: string;
     body: ReactNode;
     icon?: string;
     timeoutMs?: number;

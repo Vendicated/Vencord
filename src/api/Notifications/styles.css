@@ -57,3 +57,7 @@
     transform-origin: left;
     border-radius: 5px;
 }
+
+.vc-notification-p {
+    line-height: 140%;
+}

@@ -76,7 +76,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 <div className="vc-notification-content">
                     <Forms.FormTitle tag="h2">{title}</Forms.FormTitle>
                     <div>
-                        {body}
+                        {typeof body === "string" ? <p className="vc-notification-p">{body}</p> : body}
                     </div>
                 </div>
             </div>
