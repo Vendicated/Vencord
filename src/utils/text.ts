@@ -77,9 +77,9 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
 
     let res: string = "";
     while (unitsAmounts.length) {
-        if (res.length) res += unitsAmounts.length ? ", " : " and ";
-
         const { amount, unit } = unitsAmounts.shift()!;
+
+        if (res.length) res += unitsAmounts.length ? ", " : " and ";
 
         if (amount > 0 || res.length) {
             res += `${amount} ${getUnitStr(unit, amount === 1, short)}`;
