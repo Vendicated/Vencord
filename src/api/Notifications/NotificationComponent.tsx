@@ -31,7 +31,7 @@ interface Props extends NotificationData {
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
     body,
-    color = "var(--color-brand)",
+    color = "var(--brand-500)",
     icon,
     timeoutMs = 5000,
     onClick,
