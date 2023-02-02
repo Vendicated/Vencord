@@ -38,22 +38,25 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     onClose,
     id
 }: Props) {
-    const start = useMemo(() => Date.now(), [id, timeoutMs]);
-    const [timeoutProgress, setTimeoutProgress] = useState(0);
+    const [isHover, setIsHover] = useState(false);
+    const [elapsed, setElapsed] = useState(0);
+    const start = useMemo(() => Date.now() - elapsed, [id, timeoutMs, isHover]);
 
     useEffect(() => {
+        if (isHover) return;
+
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
-            setTimeoutProgress(elapsed / timeoutMs);
+            if (elapsed >= timeoutMs)
+                onClose();
+            else
+                setElapsed(elapsed);
         }, 10);
 
-        const timeoutId = setTimeout(onClose, timeoutMs);
+        return () => clearInterval(intervalId);
+    }, [timeoutMs, id, isHover]);
 
-        return () => {
-            clearInterval(intervalId);
-            clearTimeout(timeoutId);
-        };
-    }, [timeoutMs, id]);
+    const timeoutProgress = elapsed / timeoutMs;
 
     return (
         <button
@@ -65,6 +68,8 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 e.stopPropagation();
                 onClose();
             }}
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => setIsHover(false)}
         >
             <div className="vc-notification">
                 {icon && <img src={icon} alt="" />}
