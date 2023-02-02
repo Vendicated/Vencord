@@ -11,21 +11,22 @@
     z-index: 42;
     bottom: 1rem;
     right: 1rem;
-    border-radius: 5px;
+    border-radius: 6px;
+    overflow: hidden;
     cursor: pointer;
 }
 
 .vc-notification {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    padding: 1rem;
-    gap: 1rem;
+    padding: 1.25rem;
+    gap: 1.25rem;
 }
 
 .vc-notification img {
     height: 5rem;
     width: 5rem;
+    border-radius: 6px;
 }
 
 /* Discord adding 3km margin to generic tags */
@@ -36,16 +37,16 @@
 .vc-notification-content {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
 }
 
 .vc-notification-progressbar {
-    height: 0.5rem;
+    height: 0.25rem;
     border-radius: 5px;
     margin-top: auto;
-    background-color: var(--vc-color, var(--brand-500));
+    background-color: var(--vc-color, var(--brand-experiment));
 }
 
 .vc-notification-p {
+    margin: 8px 0 0 0;
     line-height: 140%;
 }
