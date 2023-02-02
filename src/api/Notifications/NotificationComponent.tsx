@@ -40,10 +40,10 @@ export default ErrorBoundary.wrap(function NotificationComponent({
 }: Props) {
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
-    const start = useMemo(() => Date.now() - elapsed, [id, timeoutMs, isHover]);
+    const start = useMemo(() => Date.now(), [id, timeoutMs, isHover]);
 
     useEffect(() => {
-        if (isHover) return;
+        if (isHover) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
