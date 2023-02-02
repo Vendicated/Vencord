@@ -34,10 +34,6 @@
     margin: unset;
 }
 
-.vc-notification-content {
-    flex-direction: column;
-}
-
 .vc-notification-progressbar {
     height: 0.25rem;
     border-radius: 5px;
