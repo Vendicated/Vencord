@@ -50,7 +50,7 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
 }
 
 /**
- * Forms milliseconds into a human readable string link "1 day, 2 hours, 3 minutes and 4 seconds"
+ * Forms time into a human readable string link "1 day, 2 hours, 3 minutes and 4 seconds"
  * @param time The time on the specified unit
  * @param unit The unit the time is on
  * @param short Whether to use short units like "d" instead of "days"
