@@ -80,9 +80,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                     </div>
                 </div>
             </div>
-            <div className="vc-notification-progressbar">
-                <div className="vc-notification-progressbar-inner" style={{ transform: `scaleX(${1 - timeoutProgress})` }} />
-            </div>
+            <div className="vc-notification-progressbar" style={{ width: `${(1 - timeoutProgress) * 100}%` }} />
         </button>
     );
 });
