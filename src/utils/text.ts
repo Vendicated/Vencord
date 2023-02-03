@@ -61,7 +61,7 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
 
     const onlyAmountsStr = unitsAmounts.map(({ amount }) => amount).join(",");
-    const amountsToBeRemoved = onlyAmountsStr.slice(0, onlyAmountsStr.match(/,?0(?!.+?[^0,])/)!.index).split(",").length;
+    const amountsToBeRemoved = unitsAmounts.length - onlyAmountsStr.slice(0, onlyAmountsStr.match(/,?0(?!.+?[^0,])/)!.index).split(",").length;
     unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
 
     const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
@@ -72,6 +72,8 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
         if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
         else daysAmount.amount = daysMod;
     }
+
+    console.log([...unitsAmounts]);
 
     let res: string = "";
     while (unitsAmounts.length) {
