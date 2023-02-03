@@ -65,11 +65,13 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
 
     const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
-    const daysAmount = unitsAmounts[daysAmountIndex];
+    if (daysAmountIndex) {
+        const daysAmount = unitsAmounts[daysAmountIndex];
 
-    const daysMod = daysAmount.amount % 7;
-    if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
-    else daysAmount.amount = daysMod;
+        const daysMod = daysAmount.amount % 7;
+        if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
+        else daysAmount.amount = daysMod;
+    }
 
     let res: string = "";
     while (unitsAmounts.length) {
