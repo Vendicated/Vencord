@@ -73,8 +73,6 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
         else daysAmount.amount = daysMod;
     }
 
-    console.log([...unitsAmounts]);
-
     let res: string = "";
     while (unitsAmounts.length) {
         const { amount, unit } = unitsAmounts.shift()!;
