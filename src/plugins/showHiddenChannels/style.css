@@ -34,14 +34,14 @@
     color: var(--text-normal);
     background-color: var(--background-secondary);
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     max-width: 70vw;
 }
 
 .shc-lock-screen-tags-container {
     background-color: var(--background-secondary);
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     max-width: 70vw;
 }
 
@@ -78,9 +78,12 @@
 }
 
 .shc-lock-screen-allowed-users-and-roles-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background-color: var(--background-secondary);
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     max-width: 70vw;
 }
 
