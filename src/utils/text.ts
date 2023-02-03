@@ -65,7 +65,7 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
 
     const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
-    if (daysAmountIndex) {
+    if (daysAmountIndex !== -1) {
         const daysAmount = unitsAmounts[daysAmountIndex];
 
         const daysMod = daysAmount.amount % 7;
