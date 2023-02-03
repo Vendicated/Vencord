@@ -70,6 +70,8 @@ const TagComponent = LazyComponent(() => find(m => {
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
 const EmojiComponent = LazyComponent(() => findByCode('.jumboable?"jumbo":"default"'));
+// The component for the beggining of a channel, but we patched it so it only returns the allowed users and roles components for hidden channels
+const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE"));
 
 const ChannelTypesToChannelNames = proxyLazy(() => ({
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -195,6 +197,10 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     </div>
                 </div>
             }
+            <div className="shc-lock-screen-allowed-users-and-roles-container">
+                <Text variant="text-lg/bold">Allowed users and roles:</Text>
+                <ChannelBeginHeader channel={channel} />
+            </div>
         </div>
     );
 }

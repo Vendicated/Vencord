@@ -160,7 +160,7 @@ export default definePlugin({
             // Hide New unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
-                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
+                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/g, // Global because discord has multiple methods like that in the same module
                 replace: "&&!$self.isHiddenChannel($<channel>)"
             }
         },
@@ -191,7 +191,7 @@ export default definePlugin({
                 {
                     match: /(?<=renderChat=function\(\){)/,
                     replace: "if($self.isHiddenChannel(this.props.channel))return $self.HiddenChannelLockScreen(this.props.channel);"
-                },
+                }
             ]
         },
         // Avoid trying to fetch messages from hidden channels
@@ -226,6 +226,19 @@ export default definePlugin({
                 match: /(?<=\i:\(\)=>\i)(?=}.+?(?<component>\i)=function.{1,20}node,\i=\i.isInteracting)/,
                 replace: ",hc1:()=>$<component>" // Blame Ven length check for the small name :pensive_cry:
             }
+        },
+        {
+            find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
+            replacement: [
+                {
+                    match: /(?<=\i:\(\)=>\i)(?=}.+?function (?<component>\i).{1,600}computePermissionsForRoles)/,
+                    replace: ",hc2:()=>$<component>"
+                },
+                {
+                    match: /(?<=MANAGE_ROLES.{1,60}return)(?=\(.+?(?<component>\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(?<channel>\i)\.guild_id.+?roleColor.+?]}\)))/,
+                    replace: " $self.isHiddenChannel($<channel>)?$<component>:"
+                }
+            ]
         }
     ],
 
