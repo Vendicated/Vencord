@@ -328,7 +328,6 @@ export default definePlugin({
 
         if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
-        if (channel.id === "872579262782242896" || channel.id === "888183620840345620") return true;
 
         return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
