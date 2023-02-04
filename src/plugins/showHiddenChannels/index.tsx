@@ -179,7 +179,7 @@ export default definePlugin({
             // Hide New unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
-                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/g, // Global because discord has multiple methods like that in the same module
+                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
                 replace: "&&!$self.isHiddenChannel($<channel>)"
             }
         },
@@ -250,10 +250,12 @@ export default definePlugin({
             find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
             replacement: [
                 {
+                    // Export the channel beggining header
                     match: /(?<=\i:\(\)=>\i)(?=}.+?function (?<component>\i).{1,600}computePermissionsForRoles)/,
                     replace: ",hc2:()=>$<component>"
                 },
                 {
+                    // Patch the header to only return allowed users and roles if it's a hidden channel (Like when it's used on the HiddenChannelLockScreen)
                     match: /(?<=MANAGE_ROLES.{1,60}return)(?=\(.+?(?<component>\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(?<channel>\i)\.guild_id.+?roleColor.+?]}\)))/,
                     replace: " $self.isHiddenChannel($<channel>)?$<component>:"
                 }
