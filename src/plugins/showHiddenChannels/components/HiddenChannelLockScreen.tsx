@@ -62,6 +62,7 @@ const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
 const SortOrderTypes = findLazy(m => typeof m.LATEST_ACTIVITY === "number");
 const ForumLayoutTypes = findLazy(m => typeof m.LIST === "number");
 const ChannelFlags = findLazy(m => typeof m.REQUIRE_TAG === "number");
+const VideoQualityModes = findLazy(m => typeof m.AUTO === "number" && typeof m.FULL === "number");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
@@ -76,7 +77,9 @@ const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIR
 const ChannelTypesToChannelNames = proxyLazy(() => ({
     [ChannelTypes.GUILD_TEXT]: "text",
     [ChannelTypes.GUILD_ANNOUNCEMENT]: "announcement",
-    [ChannelTypes.GUILD_FORUM]: "forum"
+    [ChannelTypes.GUILD_FORUM]: "forum",
+    [ChannelTypes.GUILD_VOICE]: "voice",
+    [ChannelTypes.GUILD_STAGE_VOICE]: "stage"
 }));
 
 const SortOrderTypesToNames = proxyLazy(() => ({
@@ -88,6 +91,11 @@ const ForumLayoutTypesToNames = proxyLazy(() => ({
     [ForumLayoutTypes.DEFAULT]: "Not set",
     [ForumLayoutTypes.LIST]: "List view",
     [ForumLayoutTypes.GRID]: "Gallery view"
+}));
+
+const VideoQualityModesToNames = proxyLazy(() => ({
+    [VideoQualityModes.AUTO]: "Automatic",
+    [VideoQualityModes.FULL]: "720p"
 }));
 
 // Icon from the modal when clicking a message link you don't have access to view
@@ -106,7 +114,10 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         rateLimitPerUser,
         defaultThreadRateLimitPerUser,
         defaultSortOrder,
-        defaultReactionEmoji
+        defaultReactionEmoji,
+        bitrate,
+        rtcRegion,
+        videoQualityMode
     } = channel;
 
     return (
@@ -135,10 +146,12 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
             </div>
 
-            <Text variant="text-lg/normal">
-                You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
-            </Text >
+            {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
+                <Text variant="text-lg/normal">
+                    You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
+                    {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+                </Text >
+            )}
 
             {channel.isForumChannel() && topic && topic.length > 0 && (
                 <div className="shc-lock-screen-topic-container">
@@ -163,6 +176,15 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <Text variant="text-md/normal">
                     Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
                 </Text>
+            }
+            {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
+                <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
+            }
+            {rtcRegion !== undefined &&
+                <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
+            }
+            {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
+                <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
             }
             {(defaultAutoArchiveDuration ?? 0) > 0 &&
                 <Text variant="text-md/normal">

@@ -187,7 +187,7 @@ function patchPush() {
                                     }
 
                                     logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
-                                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), context);
+                                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
                                     const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
                                     logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                                 }

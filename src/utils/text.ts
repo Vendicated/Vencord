@@ -37,7 +37,7 @@ export const wordsToPascal = (words: string[]) =>
 export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 
-const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds"] as const;
+const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
 type Units = typeof units[number];
 
 function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
@@ -45,7 +45,6 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
 
     if (unit === "months") return "mon";
     if (unit === "minutes") return "min";
-    if (unit === "milliseconds") return "mil";
     return unit[0];
 }
 

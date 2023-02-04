@@ -90,13 +90,32 @@ export default definePlugin({
             ]
         },
         {
+            find: "VoiceChannel, transitionTo: Channel does not have a guildId",
+            replacement: [
+                {
+                    // Do not show confirmation to join a voice channel when already connected to another if clicking on a hidden voice channel
+                    match: /(?<=getCurrentClientVoiceChannelId\(\i\.guild_id\);if\()(?=.+?\((?<channel>\i)\))/,
+                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                },
+                {
+                    // Make Discord think we are connected to a voice channel so it shows us inside it
+                    match: /(?=\|\|\i\.default\.selectVoiceChannel\((?<channel>\i)\.id\))/,
+                    replace: "||$self.isHiddenChannel($<channel>)"
+                },
+                {
+                    // Make Discord think we are connected to a voice channel so it shows us inside it
+                    match: /(?<=\|\|\i\.default\.selectVoiceChannel\((?<channel>\i)\.id\);!__OVERLAY__&&\()/,
+                    replace: "$self.isHiddenChannel($<channel>)||"
+                }
+            ]
+        },
+        {
             find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
-                // Do nothing when trying to join a voice channel if the channel is hidden
-                {
-                    match: /(?<=handleClick=function\(\){)(?=.{1,80}(?<this>\i)\.handleVoiceConnect\(\))/,
-                    replace: "if($self.isHiddenChannel($<this>.props.channel))return;"
-                },
+                /* {
+                    match: /(?<=(?<this>\i)\.handleClick=function.+?shouldShowGuildVerificationPopout.+?;)(?=\i||.+?__OVERLAY__)/,
+                    replace: "$self.isHiddenChannel($<this>.props.channel)||"
+                }, */
                 // Render null instead of the buttons if the channel is hidden
                 ...[
                     "renderEditButton",
@@ -239,6 +258,66 @@ export default definePlugin({
                     replace: " $self.isHiddenChannel($<channel>)?$<component>:"
                 }
             ]
+        },
+        {
+            find: ".Messages.SHOW_CHAT",
+            replacement: [
+                {
+                    // Render our HiddenChannelLockScreen component instead of the main voice channel component
+                    match: /(?<=renderContent=function.{1,1700}children:)/,
+                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?$self.HiddenChannelLockScreen(this.props.channel):"
+                },
+                {
+                    // Disable gradients for the HiddenChannelLockScreen of voice channels
+                    match: /(?<=renderContent=function.{1,1600}disableGradients:)/,
+                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)||"
+                },
+                {
+                    // Disable useless components for the HiddenChannelLockScreen of voice channels
+                    match: /(?<=renderContent=function.{1,800}render(?!Header).{0,30}:)(?!void)/g,
+                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
+                },
+                {
+                    // Remove the divider and the open chat button for the HiddenChannelLockScreen
+                    match: /(?<="more-options-popout"\)\);if\()(?=.+?channelId:(?<channel>\i)\.id)/,
+                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                }
+            ]
+        },
+        {
+            find: "Guild voice channel without guild id.",
+            replacement: [
+                {
+                    // Render our HiddenChannelLockScreen component instead of the main stage channel component
+                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,1400}children:)(?=.{1,20}}\)}function)/,
+                    replace: "$self.isHiddenChannel($<channel>)?$self.HiddenChannelLockScreen($<channel>):"
+                },
+                {
+                    // Disable useless components for the HiddenChannelLockScreen of stage channels
+                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,1000}render(?!Header).{0,30}:)/g,
+                    replace: "$self.isHiddenChannel($<channel>)?null:"
+                },
+                {
+                    // Disable gradients for the HiddenChannelLockScreen of stage channels
+                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600}disableGradients:)/,
+                    replace: "$self.isHiddenChannel($<channel>)||"
+                },
+                {
+                    // Disable gradients for the HiddenChannelLockScreen of stage channels
+                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600})style:/,
+                    replace: "$self.isHiddenChannel($<channel>)?undefined:"
+                },
+                {
+                    // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
+                    match: /(?<=channel:(?<channel>\i).{0,200}\.Messages\.STAGE_CHANNEL.{0,300})\(0,\i\.jsx\)\(\i\.\i\.Divider.+?}\)]}\)/,
+                    replace: "$self.isHiddenChannel($<channel>)?null:($&)"
+                },
+                {
+                    // Remove the open chat button for the HiddenChannelLockScreen
+                    match: /(?<=null,)(?=.{1,120}channelId:(?<channel>\i)\.id,.+?toggleRequestToSpeakSidebar:\i,iconClassName:\i\(\)\.buttonIcon)/,
+                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                }
+            ]
         }
     ],
 
@@ -247,6 +326,7 @@ export default definePlugin({
 
         if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
+        if (channel.id === "872579262782242896" || channel.id === "888183620840345620") return true;
 
         return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
     },
