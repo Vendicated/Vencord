@@ -59,9 +59,18 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
 
     let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
 
-    const onlyAmountsStr = unitsAmounts.map(({ amount }) => amount).join(",");
-    const amountsToBeRemoved = unitsAmounts.length - onlyAmountsStr.slice(0, onlyAmountsStr.match(/,?0(?!.+?[^0,])/)!.index).split(",").length;
-    unitsAmounts = unitsAmounts.slice(0, -amountsToBeRemoved);
+    let amountsToBeRemoved = 0;
+
+    outer:
+    for (let i = 0; i < unitsAmounts.length; i++) {
+        if (unitsAmounts[i].amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
+        for (let v = i + 1; v < unitsAmounts.length; v++) {
+            if (unitsAmounts[v].amount !== 0) continue outer;
+        }
+
+        amountsToBeRemoved = unitsAmounts.length - (i + 1);
+    }
+    unitsAmounts = amountsToBeRemoved === 0 ? unitsAmounts : unitsAmounts.slice(0, -amountsToBeRemoved);
 
     const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
     if (daysAmountIndex !== -1) {

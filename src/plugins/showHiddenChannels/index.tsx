@@ -305,8 +305,8 @@ export default definePlugin({
                     replace: "$self.isHiddenChannel($<channel>)||"
                 },
                 {
-                    // Disable gradients for the HiddenChannelLockScreen of stage channels
-                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600})style:/,
+                    // Disable strange styles applied to the header for the HiddenChannelLockScreen of stage channels
+                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600}style:)/,
                     replace: "$self.isHiddenChannel($<channel>)?undefined:"
                 },
                 {
