@@ -262,6 +262,11 @@ export default definePlugin({
             find: ".Messages.SHOW_CHAT",
             replacement: [
                 {
+                    // Remove the divider and the open chat button for the HiddenChannelLockScreen
+                    match: /(?<=function \i\((?<props>\i)\).{1,1800}"more-options-popout"\)\);if\()/,
+                    replace: "(!$self.isHiddenChannel($<props>.channel)||$<props>.inCall)&&"
+                },
+                {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
                     match: /(?<=renderContent=function.{1,1700}children:)/,
                     replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?$self.HiddenChannelLockScreen(this.props.channel):"
@@ -275,11 +280,6 @@ export default definePlugin({
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
                     match: /(?<=renderContent=function.{1,800}render(?!Header).{0,30}:)(?!void)/g,
                     replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
-                },
-                {
-                    // Remove the divider and the open chat button for the HiddenChannelLockScreen
-                    match: /(?<="more-options-popout"\)\);if\()(?=.+?channelId:(?<channel>\i)\.id)/,
-                    replace: "!$self.isHiddenChannel($<channel>)&&"
                 }
             ]
         },
