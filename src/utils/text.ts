@@ -43,8 +43,6 @@ type Units = typeof units[number];
 function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
     if (short === false) return isOne ? unit.slice(0, -1) : unit;
 
-    if (unit === "months") return "mon";
-    if (unit === "minutes") return "min";
     return unit[0];
 }
 
