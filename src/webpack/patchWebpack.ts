@@ -21,6 +21,7 @@ import Logger from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
+import { traceFunction } from "../debug/Tracer";
 import { _initWebpack } from ".";
 
 let webpackChunk: any[];
@@ -132,6 +133,7 @@ function patchPush() {
 
                 for (let i = 0; i < patches.length; i++) {
                     const patch = patches[i];
+                    const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
                     if (patch.predicate && !patch.predicate()) continue;
 
                     if (code.includes(patch.find)) {
@@ -146,7 +148,7 @@ function patchPush() {
                             canonicalizeReplacement(replacement, patch.plugin);
 
                             try {
-                                const newCode = code.replace(replacement.match, replacement.replace as string);
+                                const newCode = executePatch(replacement.match, replacement.replace as string);
                                 if (newCode === code && !patch.noWarn) {
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                     if (IS_DEV) {

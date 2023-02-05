@@ -76,8 +76,8 @@ export default definePlugin({
         {
             find: ",\"SEVERAL_USERS_TYPING\",\"",
             replacement: {
-                match: /(\i)\((\i),("SEVERAL_USERS_TYPING"),".+?"\)/,
-                replace: "$1($2,$3,\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\")"
+                match: /(?<="SEVERAL_USERS_TYPING",)".+?"/,
+                replace: '"**!!{a}!!**, **!!{b}!!**, and {c} others are typing..."'
             },
             predicate: () => settings.store.alternativeFormatting
         },
@@ -98,7 +98,7 @@ export default definePlugin({
 
         let element = 0;
 
-        return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]}/> : c);
+        return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]} /> : c);
     },
 
     TypingUser: ErrorBoundary.wrap(({ user, guildId }) => {
@@ -111,7 +111,7 @@ export default definePlugin({
             {settings.store.showAvatars && <div style={{ marginTop: "4px" }}>
                 <Avatar
                     size={Avatar.Sizes.SIZE_16}
-                    src={user.getAvatarURL(guildId, 128)}/>
+                    src={user.getAvatarURL(guildId, 128)} />
             </div>}
             {GuildMemberStore.getNick(guildId!, user.id) || user.username}
         </strong>;

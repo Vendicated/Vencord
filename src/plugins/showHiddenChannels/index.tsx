@@ -112,10 +112,6 @@ export default definePlugin({
         {
             find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
-                /* {
-                    match: /(?<=(?<this>\i)\.handleClick=function.+?shouldShowGuildVerificationPopout.+?;)(?=\i||.+?__OVERLAY__)/,
-                    replace: "$self.isHiddenChannel($<this>.props.channel)||"
-                }, */
                 // Render null instead of the buttons if the channel is hidden
                 ...[
                     "renderEditButton",
@@ -299,6 +295,11 @@ export default definePlugin({
                     match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,1000}render(?!Header).{0,30}:)/g,
                     replace: "$self.isHiddenChannel($<channel>)?null:"
                 },
+                // Prevent Discord from replacing our route if we aren't connected to the stage channel
+                {
+                    match: /(?<=if\()(?=!\i&&!\i&&!\i.{1,80}(?<channel>\i)\.getGuildId\(\).{1,50}Guild voice channel without guild id\.)/,
+                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of stage channels
                     match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600}disableGradients:)/,
@@ -311,7 +312,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
-                    match: /(?<=channel:(?<channel>\i).{0,200}\.Messages\.STAGE_CHANNEL.{0,300})\(0,\i\.jsx\)\(\i\.\i\.Divider.+?}\)]}\)/,
+                    match: /\(0,\i\.jsx\)\(\i\.\i\.Divider.+?}\)]}\)(?=.+?:(?<channel>\i)\.guild_id)/,
                     replace: "$self.isHiddenChannel($<channel>)?null:($&)"
                 },
                 {
@@ -319,7 +320,7 @@ export default definePlugin({
                     match: /(?<=null,)(?=.{1,120}channelId:(?<channel>\i)\.id,.+?toggleRequestToSpeakSidebar:\i,iconClassName:\i\(\)\.buttonIcon)/,
                     replace: "!$self.isHiddenChannel($<channel>)&&"
                 }
-            ]
+            ],
         }
     ],
 
