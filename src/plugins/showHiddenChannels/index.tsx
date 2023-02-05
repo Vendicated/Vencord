@@ -22,14 +22,15 @@ import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
-const Permissions = findLazy(m => typeof m.VIEW_CHANNEL === "bigint");
+
+const VIEW_CHANNEL = 1n << 10n;
 
 enum ShowMode {
     LockIcon,
@@ -330,7 +331,7 @@ export default definePlugin({
         if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
-        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel);
+        return !PermissionStore.can(VIEW_CHANNEL, channel);
     },
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,

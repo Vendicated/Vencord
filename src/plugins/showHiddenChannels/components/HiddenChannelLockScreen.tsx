@@ -24,12 +24,12 @@ import { find, findByCode, findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-enum SortOrderTypesTyping {
+enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
     CREATION_DATE = 1
 }
 
-enum ForumLayoutTypesTyping {
+enum ForumLayoutTypes {
     DEFAULT = 0,
     LIST = 1,
     GRID = 2
@@ -50,19 +50,32 @@ interface Tag {
 
 interface ExtendedChannel extends Channel {
     defaultThreadRateLimitPerUser?: number;
-    defaultSortOrder?: SortOrderTypesTyping | null;
-    defaultForumLayout?: ForumLayoutTypesTyping;
+    defaultSortOrder?: SortOrderTypes | null;
+    defaultForumLayout?: ForumLayoutTypes;
     defaultReactionEmoji?: DefaultReaction | null;
     availableTags?: Array<Tag>;
 }
 
+enum ChannelTypes {
+    GUILD_TEXT = 0,
+    GUILD_VOICE = 2,
+    GUILD_ANNOUNCEMENT = 5,
+    GUILD_STAGE_VOICE = 13,
+    GUILD_FORUM = 15
+}
+
+enum VideoQualityModes {
+    AUTO = 1,
+    FULL = 2
+}
+
+enum ChannelFlags {
+    PINNED = 1 << 1,
+    REQUIRE_TAG = 1 << 4
+}
+
 const ChatClasses = findByPropsLazy("chat", "chatContent");
 const TagClasses = findLazy(m => typeof m.tags === "string" && Object.entries(m).length === 1); // Object exported with a single key called tags
-const ChannelTypes = findByPropsLazy("GUILD_TEXT", "GUILD_FORUM");
-const SortOrderTypes = findLazy(m => typeof m.LATEST_ACTIVITY === "number");
-const ForumLayoutTypes = findLazy(m => typeof m.LIST === "number");
-const ChannelFlags = findLazy(m => typeof m.REQUIRE_TAG === "number");
-const VideoQualityModes = findLazy(m => typeof m.AUTO === "number" && typeof m.FULL === "number");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
