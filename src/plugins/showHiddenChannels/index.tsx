@@ -90,7 +90,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "VoiceChannel.renderPopout: There must always be something to render",
+            find: "VoiceChannel, transitionTo: Channel does not have a guildId",
             replacement: [
                 {
                     // Do not show confirmation to join a voice channel when already connected to another if clicking on a hidden voice channel
@@ -106,7 +106,12 @@ export default definePlugin({
                     // Make Discord think we are connected to a voice channel so it shows us inside it
                     match: /(?<=\|\|\i\.default\.selectVoiceChannel\((?<channel>\i)\.id\);!__OVERLAY__&&\()/,
                     replace: "$self.isHiddenChannel($<channel>)||"
-                },
+                }
+            ]
+        },
+        {
+            find: "VoiceChannel.renderPopout: There must always be something to render",
+            replacement: [
                 // Render null instead of the buttons if the channel is hidden
                 ...[
                     "renderEditButton",
@@ -130,11 +135,11 @@ export default definePlugin({
         {
             find: ".UNREAD_HIGHLIGHT",
             predicate: () => settings.store.hideUnreads === true,
-            replacement: [{
+            replacement: {
                 // Hide unreads
                 match: /(?<=\i\.connected,\i=)(?=(?<props>\i)\.unread)/,
                 replace: "$self.isHiddenChannel($<props>.channel)?false:"
-            }]
+            }
         },
         {
             find: ".UNREAD_HIGHLIGHT",
