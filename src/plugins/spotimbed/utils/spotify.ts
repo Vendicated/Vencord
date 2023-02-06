@@ -56,3 +56,16 @@ export function getReason(reason: string): string {
         default: return `it's unavailable "${reason}"`;
     }
 }
+
+export function getSelectedTrack(resource: DisplayResource, trackIndex: number): Track | null {
+    switch (resource.type) {
+        case ResourceType.Track: return resource;
+
+        case ResourceType.Album: return resource.tracks.items[trackIndex];
+
+        case ResourceType.Playlist: return resource.tracks.items[trackIndex]?.track;
+
+        case ResourceType.Artist: return resource.tracks[trackIndex];
+    }
+    return null;
+}

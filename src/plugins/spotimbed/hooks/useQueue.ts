@@ -17,18 +17,21 @@
 */
 
 import { Spotify } from "@api/Spotify";
+import { useAwaiter } from "@utils/misc";
 import { useState } from "@webpack/common";
 
 export function useQueue(cooldown: number) {
-    const [queued, setQueued] = useState(false);
+    const [trackId, setTrackId] = useState<string | null>(null);
 
-    function queue(track: string) {
-        if (queued) return;
-        Spotify.queue(track).catch(error => console.error("Failed to queue track", error));
-        setQueued(true);
+    const [completed, error, pending] = useAwaiter(async () => {
+        if (!trackId) return false;
+        await Spotify.queue(trackId);
+        setTimeout(() => setTrackId(null), cooldown);
+        return true;
+    }, {
+        fallbackValue: false,
+        deps: [trackId],
+    });
 
-        setTimeout(() => setQueued(false), cooldown);
-    }
-
-    return [queued, queue] as const;
+    return [completed, pending, error, setTrackId] as const;
 }

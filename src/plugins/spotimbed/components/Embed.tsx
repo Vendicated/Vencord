@@ -151,7 +151,7 @@ export function Spotimbed({ art: initialArtUrl, type: resourceType, id: resource
                 selectedTrack={trackIndex}
                 onTrackSelect={setTrackIndex}
             />
-            {hasPlayer && <AudioControls mediaHref={previewUrl} resource={resourceData} />}
+            {hasPlayer && <AudioControls mediaHref={previewUrl} resource={resourceData} trackIndex={trackIndex} />}
         </div>
     );
 }

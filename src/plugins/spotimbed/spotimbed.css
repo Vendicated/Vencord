@@ -236,9 +236,9 @@
 .spotimbed-queue-btn {
     background: none;
     color: inherit;
-    box-sizing: content-box;
-    width: 24px;
-    height: 24px;
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
     padding: 4px;
     opacity: 0.6;
 }
@@ -247,10 +247,24 @@
     opacity: 1;
 }
 
-.spotimbed-queued {
+.spotimbed-queue-btn[data-state="complete"] {
     color: var(--status-green-500);
     opacity: 0.8;
-    cursor: pointer;
+    cursor: default;
+    pointer-events: none;
+}
+
+.spotimbed-queue-btn[data-state="pending"] {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.spotimbed-queue-btn[data-state="error"] {
+    padding: 6px;
+    color: var(--status-red-400);
+    opacity: 0.8;
+    cursor: default;
     pointer-events: none;
 }
 
