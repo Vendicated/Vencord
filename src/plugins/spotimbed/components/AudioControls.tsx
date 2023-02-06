@@ -17,10 +17,11 @@
 */
 
 import { proxyLazy } from "@utils/proxyLazy";
-import { findLazy } from "@webpack";
+import { find } from "@webpack";
 import { React } from "@webpack/common";
 import { Constructor } from "type-fest";
 
+import { usePlayer } from "../hooks/usePlayer";
 import { settings } from "../settings";
 import { DisplayResource } from "../types";
 import { cl } from "../utils/misc";
@@ -42,13 +43,24 @@ interface MediaPlayerProps {
     onMute: (muted: boolean) => void;
     onVolumeChange: (volume: number) => void;
     autoMute: () => void;
+    onPlay?: () => void;
+}
+interface MediaPlayerState {
+    playing: boolean;
+}
+interface MediaPlayer extends React.PureComponent<MediaPlayerProps, MediaPlayerState> {
+    setPlay(play: boolean): void;
 }
 
-const MediaPlayer: Constructor<React.PureComponent<MediaPlayerProps>> = findLazy(m => m.prototype?.renderControls);
-const ReclassedMediaPlayer = proxyLazy(() => {
-    return class ReclassedMediaPlayer extends MediaPlayer {
+const MediaPlayer = proxyLazy(() => {
+    const DiscordMediaPlayer: Constructor<MediaPlayer> = find(m => m.prototype?.renderControls);
+    return class MediaPlayer extends DiscordMediaPlayer {
         render() {
             return React.cloneElement(super.render() as React.ReactElement, { className: cl("media-player") });
+        }
+        componentDidUpdate(prevProps: MediaPlayerProps, prevState: MediaPlayerState, snapshot) {
+            super.componentDidUpdate?.(prevProps, prevState, snapshot);
+            if (!prevState.playing && this.state.playing) this.props.onPlay?.();
         }
     };
 });
@@ -61,9 +73,14 @@ export interface AudioControlsProps {
 
 export const AudioControls = ({ mediaHref, resource, trackIndex }: AudioControlsProps) => {
     const { volume } = settings.use(["volume"]);
+    const [playing, play] = usePlayer();
+    const playerRef = React.useRef<MediaPlayer>(null);
+
+    if (playerRef.current?.state.playing && !playing) playerRef.current.setPlay(false);
 
     const mediaPlayer = mediaHref ? (
-        <ReclassedMediaPlayer
+        <MediaPlayer
+            ref={playerRef as any}
             key={mediaHref}
             src={mediaHref}
             type="AUDIO"
@@ -78,6 +95,7 @@ export const AudioControls = ({ mediaHref, resource, trackIndex }: AudioControls
             onMute={() => { }}
             onVolumeChange={volume => settings.store.volume = volume}
             autoMute={() => { }}
+            onPlay={() => play()}
         />
     ) : (
         <div className={cl("placeholder-wrap", "blinking")}>
