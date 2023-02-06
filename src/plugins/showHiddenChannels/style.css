@@ -1,11 +1,18 @@
+.shc-lock-screen-outer-container {
+    background-color: var(--background-primary);
+    overflow: hidden scroll;
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+}
+
 .shc-lock-screen-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: 100%;
-    height: 100%;
+    min-height: 100%;
 }
 
 .shc-lock-screen-container > * {
@@ -51,8 +58,12 @@
     margin: inherit;
 }
 
-.shc-lock-screen-tags-container > [class^="tags"] {
+.shc-lock-screen-tags {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 8px;
 }
 
 .shc-evenodd-fill-current-color {

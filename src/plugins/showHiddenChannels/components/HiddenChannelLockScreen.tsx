@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
-import { proxyLazy } from "@utils/proxyLazy";
 import { formatDuration } from "@utils/text";
-import { find, findByCode, findByPropsLazy, findLazy } from "@webpack";
+import { find, findByCode, findByPropsLazy } from "@webpack";
 import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
@@ -74,8 +73,7 @@ enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-const ChatClasses = findByPropsLazy("chat", "chatContent");
-const TagClasses = findLazy(m => typeof m.tags === "string" && Object.entries(m).length === 1); // Object exported with a single key called tags
+const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
@@ -87,29 +85,29 @@ const EmojiComponent = LazyComponent(() => findByCode('.jumboable?"jumbo":"defau
 // The component for the beggining of a channel, but we patched it so it only returns the allowed users and roles components for hidden channels
 const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE"));
 
-const ChannelTypesToChannelNames = proxyLazy(() => ({
+const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
     [ChannelTypes.GUILD_ANNOUNCEMENT]: "announcement",
     [ChannelTypes.GUILD_FORUM]: "forum",
     [ChannelTypes.GUILD_VOICE]: "voice",
     [ChannelTypes.GUILD_STAGE_VOICE]: "stage"
-}));
+};
 
-const SortOrderTypesToNames = proxyLazy(() => ({
+const SortOrderTypesToNames = {
     [SortOrderTypes.LATEST_ACTIVITY]: "Latest activity",
     [SortOrderTypes.CREATION_DATE]: "Creation date"
-}));
+};
 
-const ForumLayoutTypesToNames = proxyLazy(() => ({
+const ForumLayoutTypesToNames = {
     [ForumLayoutTypes.DEFAULT]: "Not set",
     [ForumLayoutTypes.LIST]: "List view",
     [ForumLayoutTypes.GRID]: "Gallery view"
-}));
+};
 
-const VideoQualityModesToNames = proxyLazy(() => ({
+const VideoQualityModesToNames = {
     [VideoQualityModes.AUTO]: "Automatic",
     [VideoQualityModes.FULL]: "720p"
-}));
+};
 
 // Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
@@ -134,107 +132,109 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     } = channel;
 
     return (
-        <div className={ChatClasses.chat + " " + "shc-lock-screen-container"}>
-            <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
+        <div className={ChatScrollClasses.auto + " " + "shc-lock-screen-outer-container"}>
+            <div className="shc-lock-screen-container">
+                <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
-            <div className="shc-lock-screen-heading-container">
-                <Text variant="heading-xxl/bold">This is a hidden {ChannelTypesToChannelNames[type]} channel.</Text>
-                {channel.isNSFW() &&
-                    <Tooltip text="NSFW">
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <svg
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                className="shc-lock-screen-heading-nsfw-icon"
-                                width="32"
-                                height="32"
-                                viewBox="0 0 48 48"
-                                aria-hidden={true}
-                                role="img"
-                            >
-                                <path d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
-                            </svg>
-                        )}
-                    </Tooltip>
-                }
-            </div>
-
-            {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
-                <Text variant="text-lg/normal">
-                    You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                    {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
-                </Text >
-            )}
-
-            {channel.isForumChannel() && topic && topic.length > 0 && (
-                <div className="shc-lock-screen-topic-container">
-                    {Parser.parseTopic(topic, false, { channelId })}
+                <div className="shc-lock-screen-heading-container">
+                    <Text variant="heading-xxl/bold">This is a hidden {ChannelTypesToChannelNames[type]} channel.</Text>
+                    {channel.isNSFW() &&
+                        <Tooltip text="NSFW">
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <svg
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    className="shc-lock-screen-heading-nsfw-icon"
+                                    width="32"
+                                    height="32"
+                                    viewBox="0 0 48 48"
+                                    aria-hidden={true}
+                                    role="img"
+                                >
+                                    <path d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
+                                </svg>
+                            )}
+                        </Tooltip>
+                    }
                 </div>
-            )}
 
-            {lastMessageId &&
-                <Text variant="text-md/normal">
-                    Last {channel.isForumChannel() ? "post" : "message"} created:
-                    <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
-                </Text>
-            }
+                {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
+                    <Text variant="text-lg/normal">
+                        You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
+                        {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+                    </Text >
+                )}
 
-            {lastPinTimestamp &&
-                <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
-            }
-            {(rateLimitPerUser ?? 0) > 0 &&
-                <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
-            }
-            {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
-                <Text variant="text-md/normal">
-                    Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
-                </Text>
-            }
-            {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
-                <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
-            }
-            {rtcRegion !== undefined &&
-                <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
-            }
-            {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
-                <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
-            }
-            {(defaultAutoArchiveDuration ?? 0) > 0 &&
-                <Text variant="text-md/normal">
-                    Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
-                    {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
-                </Text>
-            }
-            {defaultForumLayout != null &&
-                <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
-            }
-            {defaultSortOrder != null &&
-                <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
-            }
-            {defaultReactionEmoji != null &&
-                <div className="shc-lock-screen-default-emoji-container">
-                    <Text variant="text-md/normal">Default reaction emoji:</Text>
-                    <EmojiComponent node={{
-                        type: defaultReactionEmoji.emojiName ? "emoji" : "customEmoji",
-                        name: defaultReactionEmoji.emojiName ?? "",
-                        emojiId: defaultReactionEmoji.emojiId
-                    }} />
-                </div>
-            }
-            {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
-                <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
-            }
-            {availableTags && availableTags.length > 0 &&
-                <div className="shc-lock-screen-tags-container">
-                    <Text variant="text-lg/bold">Available tags:</Text>
-                    <div className={TagClasses.tags}>
-                        {availableTags.map(tag => <TagComponent tag={tag} />)}
+                {channel.isForumChannel() && topic && topic.length > 0 && (
+                    <div className="shc-lock-screen-topic-container">
+                        {Parser.parseTopic(topic, false, { channelId })}
                     </div>
+                )}
+
+                {lastMessageId &&
+                    <Text variant="text-md/normal">
+                        Last {channel.isForumChannel() ? "post" : "message"} created:
+                        <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
+                    </Text>
+                }
+
+                {lastPinTimestamp &&
+                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
+                }
+                {(rateLimitPerUser ?? 0) > 0 &&
+                    <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
+                }
+                {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
+                    <Text variant="text-md/normal">
+                        Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
+                    </Text>
+                }
+                {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
+                    <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
+                }
+                {rtcRegion !== undefined &&
+                    <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
+                }
+                {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
+                    <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
+                }
+                {(defaultAutoArchiveDuration ?? 0) > 0 &&
+                    <Text variant="text-md/normal">
+                        Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
+                        {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
+                    </Text>
+                }
+                {defaultForumLayout != null &&
+                    <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
+                }
+                {defaultSortOrder != null &&
+                    <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
+                }
+                {defaultReactionEmoji != null &&
+                    <div className="shc-lock-screen-default-emoji-container">
+                        <Text variant="text-md/normal">Default reaction emoji:</Text>
+                        <EmojiComponent node={{
+                            type: defaultReactionEmoji.emojiName ? "emoji" : "customEmoji",
+                            name: defaultReactionEmoji.emojiName ?? "",
+                            emojiId: defaultReactionEmoji.emojiId
+                        }} />
+                    </div>
+                }
+                {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
+                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
+                }
+                {availableTags && availableTags.length > 0 &&
+                    <div className="shc-lock-screen-tags-container">
+                        <Text variant="text-lg/bold">Available tags:</Text>
+                        <div className="shc-lock-screen-tags">
+                            {availableTags.map(tag => <TagComponent tag={tag} />)}
+                        </div>
+                    </div>
+                }
+                <div className="shc-lock-screen-allowed-users-and-roles-container">
+                    <Text variant="text-lg/bold">Allowed users and roles:</Text>
+                    <ChannelBeginHeader channel={channel} />
                 </div>
-            }
-            <div className="shc-lock-screen-allowed-users-and-roles-container">
-                <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                <ChannelBeginHeader channel={channel} />
             </div>
         </div>
     );
