@@ -71,10 +71,12 @@ interface Activity {
     };
     type: ActivityType;
     flags: Number;
+    url?: string;
 }
 
 enum ActivityType {
     PLAYING = 0,
+    STREAMING = 1,
     LISTENING = 2,
     WATCHING = 3,
     COMPETING = 5
@@ -87,9 +89,10 @@ const strOpt = (description: string) => ({
     onChange: setRpc
 }) as const;
 
-const numOpt = (description: string) => ({
+const numOpt = (description: string, _default?: number) => ({
     type: OptionType.NUMBER,
     description,
+    default: _default,
     onChange: setRpc
 }) as const;
 
@@ -114,10 +117,13 @@ const settings = definePluginSettings({
     state: strOpt("Line 2 of rich presence."),
     type: choiceOpt("Type of presence", [
         choice("Playing", ActivityType.PLAYING, true),
+        choice("Streaming", ActivityType.STREAMING),
         choice("Listening", ActivityType.LISTENING),
         choice("Watching", ActivityType.WATCHING),
         choice("Competing", ActivityType.COMPETING)
     ]),
+    url: strOpt("The url for the STREAMING activity."),
+    flags: numOpt("The flags for the rich presence.", 1),
     startTime: numOpt("Unix Timestamp for beginning of activity."),
     endTime: numOpt("Unix Timestamp for end of activity."),
     imageBig: strOpt("Sets the big image to the specified image."),
@@ -137,6 +143,8 @@ async function createActivity(): Promise<Activity | undefined> {
         details,
         state,
         type,
+        url,
+        flags,
         startTime,
         endTime,
         imageBig,
@@ -157,8 +165,12 @@ async function createActivity(): Promise<Activity | undefined> {
         state,
         details,
         type,
-        flags: 1 << 0,
+        flags
     };
+
+    if (url) {
+        activity.url = url;
+    }
 
     if (startTime) {
         activity.timestamps = {
@@ -223,7 +235,7 @@ async function setRpc(disable?: Boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain],
+    authors: [Devs.captain, Devs.Nuckyz],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
