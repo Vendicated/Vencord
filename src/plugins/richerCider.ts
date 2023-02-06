@@ -27,7 +27,7 @@ const appIds = [
 
 export default definePlugin({
     name: "richerCider", // why must you make me run in circles for 2 hours.
-    description: "Enhances Cider by adding the \"Listening to\" and progress bar to the rich presence.",
+    description: "Enhances Cider by adding the \"Listening to\" to the user's rich presence when applicable ID is found.",
     authors: [{
         id: 191621342473224192n,
         name: "cryptofyre",
