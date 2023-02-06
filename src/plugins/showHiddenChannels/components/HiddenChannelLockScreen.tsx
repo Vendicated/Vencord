@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import { find, findByCode, findByPropsLazy } from "@webpack";
-import { moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 enum SortOrderTypes {
@@ -128,8 +128,28 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         defaultReactionEmoji,
         bitrate,
         rtcRegion,
-        videoQualityMode
+        videoQualityMode,
+        permissionOverwrites
     } = channel;
+
+    const membersToFetch: Array<string> = [];
+
+    const guildOwnerId = GuildStore.getGuild(channel.guild_id).ownerId;
+    if (!GuildMemberStore.getMember(channel.guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
+
+    Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
+        if (type === 1) {
+            if (!GuildMemberStore.getMember(channel.guild_id, userId)) membersToFetch.push(userId);
+        }
+    });
+
+    if (membersToFetch.length > 0) {
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [channel.guild_id],
+            userIds: membersToFetch
+        });
+    }
 
     return (
         <div className={ChatScrollClasses.auto + " " + "shc-lock-screen-outer-container"}>
