@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { GuildMemberStore, React } from "@webpack/common";
+import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 
 const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
 
@@ -113,7 +113,7 @@ export default definePlugin({
                     size={Avatar.Sizes.SIZE_16}
                     src={user.getAvatarURL(guildId, 128)} />
             </div>}
-            {GuildMemberStore.getNick(guildId!, user.id) || user.username}
+            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
         </strong>;
     }, { noop: true })
 });
