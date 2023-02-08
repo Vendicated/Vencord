@@ -1,9 +1,18 @@
+.shc-lock-screen-outer-container {
+    background-color: var(--background-primary);
+    overflow: hidden scroll;
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+}
+
 .shc-lock-screen-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    min-height: 100%;
 }
 
 .shc-lock-screen-container > * {
@@ -34,14 +43,14 @@
     color: var(--text-normal);
     background-color: var(--background-secondary);
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     max-width: 70vw;
 }
 
 .shc-lock-screen-tags-container {
     background-color: var(--background-secondary);
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     max-width: 70vw;
 }
 
@@ -49,8 +58,12 @@
     margin: inherit;
 }
 
-.shc-lock-screen-tags-container > [class^="tags"] {
+.shc-lock-screen-tags {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 8px;
 }
 
 .shc-evenodd-fill-current-color {
@@ -75,4 +88,19 @@
     border-radius: 8px;
     padding: 3px 4px;
     margin-left: 5px;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--background-secondary);
+    border-radius: 5px;
+    padding: 10px;
+    max-width: 70vw;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
+    margin-left: 10px;
+    flex-wrap: wrap;
 }
