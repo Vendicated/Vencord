@@ -16,17 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Link } from "@components/Link";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
-import { Link } from "@components/Link";
-
 const appIds = [
     "911790844204437504",
     "886578863147192350",
     "1020414178047041627",
     "1032800329332445255"
-]
-
+];
 export default definePlugin({
     name: "richerCider",
     description: "Enhances Cider (More details in info button) by adding the \"Listening to\" type prefix to the user's rich presence when an applicable ID is found.",
@@ -43,7 +41,6 @@ export default definePlugin({
             }
         }
     ],
-    
     settingsAboutComponent: () => (
         <>
             <Forms.FormTitle tag="h3">Install Cider to use this Plugin</Forms.FormTitle>
@@ -55,14 +52,8 @@ export default definePlugin({
             <Forms.FormText>
                 Cider is an open-source and community oriented Apple Music client for Windows, macOS, and Linux.
             </Forms.FormText>
-            <br></br>
-            <Forms.FormTitle tag="h3">Recommended Optional Plugins</Forms.FormTitle>
-            <Forms.FormText>
-                I'd recommend using TimeBarAllActivities alongside this plugin to give off a much better visual to the eye (Keep in mind this only effects your client and will not show on the serverside)
-            </Forms.FormText>
         </>
     ),
-
     patchActivity(activity: any) {
         if (appIds.includes(activity.application_id)) {
             activity.type = 2; /* LISTENING type */
