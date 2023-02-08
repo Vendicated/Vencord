@@ -55,7 +55,7 @@ export default definePlugin({
             <br></br>
             <Forms.FormTitle tag="h3">Recommended Optional Plugins</Forms.FormTitle>
             <Forms.FormText>
-                I'd recommend using TimeBarAllActivities alongside this plugin to give off a much better visual to the eye (Keep in mind this only effects your client and will not show on the serverside)
+                I'd recommend using TimeBarAllActivities alongside this plugin to give off a much better visual to the eye (Keep in mind this only affects your client and will not show for other users)
             </Forms.FormText>
         </>
     ),
