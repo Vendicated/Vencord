@@ -18,7 +18,7 @@
 
 import { proxyLazy } from "@utils/proxyLazy";
 import { find } from "@webpack";
-import { React } from "@webpack/common";
+import { React, useEffect, useRef } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { usePlayer } from "../hooks/usePlayer";
@@ -77,6 +77,12 @@ export const AudioControls = ({ mediaHref, resource, trackIndex }: AudioControls
     const playerRef = React.useRef<MediaPlayer>(null);
 
     if (playerRef.current?.state.playing && !playing) playerRef.current.setPlay(false);
+
+    const firstRender = useRef(true);
+    useEffect(() => {
+        if (!firstRender.current) playerRef.current?.setPlay(true);
+        else firstRender.current = false;
+    }, [trackIndex]);
 
     const mediaPlayer = mediaHref ? (
         <MediaPlayer
