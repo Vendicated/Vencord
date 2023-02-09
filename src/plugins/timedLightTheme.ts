@@ -44,7 +44,7 @@ function showError() {
         id: Toasts.genId(),
         type: Toasts.Type.FAILURE,
         options: {
-            duration: 1000,
+            duration: 1500,
             position: Toasts.Position.BOTTOM
         }
     });
@@ -57,7 +57,7 @@ const settings = definePluginSettings({
         default: "08:00",
         placeholder: "xx:xx",
         isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-        onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+        onChange: () => Vencord.Plugins.isPluginEnabled("TimedLightTheme") && (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
     },
     end: {
         description: "When to enter dark mode (24-hour time)",
@@ -65,7 +65,7 @@ const settings = definePluginSettings({
         default: "20:00",
         placeholder: "xx:xx",
         isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-        onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+        onChange: () => Vencord.Plugins.isPluginEnabled("TimedLightTheme") && (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
     },
 });
 
