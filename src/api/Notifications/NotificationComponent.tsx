@@ -47,7 +47,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     const start = useMemo(() => Date.now(), [id, timeout, isHover]);
 
     useEffect(() => {
-        if (isHover) return void setElapsed(0);
+        if (isHover || timeout === 0) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
@@ -85,7 +85,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}
-            <div className="vc-notification-progressbar" style={{ width: `${(1 - timeoutProgress) * 100}%` }} />
+            {timeout !== 0 && <div className="vc-notification-progressbar" style={{ width: `${(1 - timeoutProgress) * 100}%` }} />}
         </button>
     );
 });

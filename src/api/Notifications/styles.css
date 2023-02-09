@@ -8,7 +8,7 @@
     color: var(--text-normal);
     background-color: var(--background-secondary-alt);
     position: absolute;
-    z-index: 42;
+    z-index: 2147483647;
     bottom: 1rem;
     right: 1rem;
     border-radius: 6px;
