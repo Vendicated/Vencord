@@ -16,15 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants.js";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
 
-const updateTheme: { updateTheme: (theme: "light" | "dark") => Promise<void>; } = findByPropsLazy("updateTheme");
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
 const getTheme = () => PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
+const updateTheme: { updateTheme: (theme: "light" | "dark") => Promise<void>; } = findByPropsLazy("updateTheme");
+function updateThemeIfNecessary(theme: "light" | "dark") {
+    const currentTheme = getTheme();
+    if (
+        (theme === "light" && currentTheme === "dark")
+        || (theme === "dark" && currentTheme === "light")
+    ) updateTheme.updateTheme(theme);
+}
 const logger = new Logger("TimedLightTheme");
 let nextChange: NodeJS.Timeout;
 
@@ -33,32 +40,34 @@ function toAdjustedTimestamp(t: string): number {
     return new Date().setHours(hours as number, minutes || 0, 0, 0);
 }
 
+const settings = definePluginSettings({
+    start: {
+        description: "When to enter light mode (24-hour time)",
+        type: OptionType.STRING,
+        default: "08:00",
+        placeholder: "xx:xx",
+        isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
+        onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+    },
+    end: {
+        description: "When to enter dark mode (24-hour time)",
+        type: OptionType.STRING,
+        default: "20:00",
+        placeholder: "xx:xx",
+        isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
+        onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+    },
+});
+
 export default definePlugin({
     name: "TimedLightTheme",
     authors: [Devs.TheSun],
     description: "Automatically enables/disable light theme based on the time of day",
-    options: {
-        start: {
-            description: "When to enter light mode (24-hour time)",
-            type: OptionType.STRING,
-            default: "08:00",
-            placeholder: "xx:xx",
-            isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-            onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
-        },
-        end: {
-            description: "When to enter dark mode (24-hour time)",
-            type: OptionType.STRING,
-            default: "20:00",
-            placeholder: "xx:xx",
-            isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-            onChange: () => (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
-        },
-    },
+    settings,
 
     // eslint-disable-next-line consistent-return
     checkForUpdate() {
-        const { start, end } = Settings.plugins[this.name];
+        const { start, end } = settings.store;
         if (!start || !end) {
             logger.warn("Invalid settings: no start or end time. Stopping plugin");
             return this.stop();
@@ -71,18 +80,17 @@ export default definePlugin({
             return this.stop();
         }
         const now = Date.now();
-        const theme = getTheme();
 
         if (now < startTimestamp) {
-            if (theme === "light") updateTheme.updateTheme("dark");
+            updateThemeIfNecessary("dark");
             nextChange = setTimeout(() => this.checkForUpdate(), startTimestamp - now);
         }
         else if (now >= startTimestamp && now <= endTimestamp) {
-            if (theme === "dark") updateTheme.updateTheme("light");
+            updateThemeIfNecessary("light");
             nextChange = setTimeout(() => this.checkForUpdate(), endTimestamp - now);
         }
         else if (now > endTimestamp) {
-            if (theme === "light") updateTheme.updateTheme("dark");
+            updateThemeIfNecessary("dark");
             nextChange = setTimeout(() => this.checkForUpdate(), (startTimestamp + 86400_000) - now);
         }
     },
