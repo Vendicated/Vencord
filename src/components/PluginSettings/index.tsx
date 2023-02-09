@@ -222,7 +222,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const enabled = settings.plugins[plugin.name]?.enabled || plugin.started;
+        const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
         if (!searchValue.value.length) return true;
