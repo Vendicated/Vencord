@@ -55,11 +55,22 @@ export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
 
+/**
+ * React hook that returns stateful data for one or more stores
+ * You might need a custom comparator (4th argument) if your store data is an object
+ *
+ * @param stores The stores to listen to
+ * @param mapper A function that returns the data you need
+ * @param idk some thing, idk just pass null
+ * @param isEqual A custom comparator for the data returned by mapper
+ *
+ * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
+ */
 export const useStateFromStores: <T>(
     stores: t.FluxStore[],
     mapper: () => T,
-    idk?: null,
-    compare?: (old: T, newer: T) => boolean
+    idk?: any,
+    isEqual?: (old: T, newer: T) => boolean
 ) => T
     = findByCodeLazy("useStateFromStores");
 
