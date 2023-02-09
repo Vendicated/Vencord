@@ -177,6 +177,7 @@ function VencordSettings() {
             <Forms.FormTitle tag="h5" className={Margins.top16}>Notification Timeout</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
             <Slider
+                disabled={notifSettings.useNative === "always"}
                 markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
                 minValue={0}
                 maxValue={20_000}

@@ -23,7 +23,7 @@
     gap: 1.25rem;
 }
 
-.vc-notification img {
+.vc-notification-icon {
     height: 5rem;
     width: 5rem;
     border-radius: 6px;
@@ -44,4 +44,8 @@
 .vc-notification-p {
     margin: 0.5rem 0 0;
     line-height: 140%;
+}
+
+.vc-notification-img {
+    width: 100%;
 }

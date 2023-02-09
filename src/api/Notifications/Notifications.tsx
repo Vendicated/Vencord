@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { Queue } from "@utils/Queue";
 import { ReactDOM } from "@webpack/common";
 import type { ReactNode } from "react";
@@ -40,8 +41,16 @@ function getRoot() {
 
 export interface NotificationData {
     title: string;
-    body: ReactNode;
+    body: string;
+    /**
+     * Same as body but can be a custom component.
+     * Will be used over body if present.
+     * Not supported on desktop notifications, those will fall back to body */
+    richBody?: ReactNode;
+    /** Small icon. This is for things like profile pictures and should be square */
     icon?: string;
+    /** Large image. Optimally, this should be around 16x9 but it doesn't matter much. Desktop Notifications might not support this */
+    image?: string;
     onClick?(): void;
     onClose?(): void;
     color?: string;
@@ -60,6 +69,25 @@ function _showNotification(notification: NotificationData, id: number) {
     });
 }
 
-export function showNotification(notification: NotificationData) {
-    NotificationQueue.push(() => _showNotification(notification, id++));
+function shouldBeNative() {
+    const { useNative } = Settings.notifications;
+    if (useNative === "always") return true;
+    if (useNative === "not-focused") return !document.hasFocus();
+    return false;
+}
+
+export function showNotification(data: NotificationData) {
+    if (shouldBeNative()) {
+        const { title, body, icon, image, onClick = null, onClose = null } = data;
+        const n = new Notification(title, {
+            body,
+            tag: "Vencord",
+            icon,
+            image
+        });
+        n.onclick = onClick;
+        n.onclose = onClose;
+    } else {
+        NotificationQueue.push(() => _showNotification(data, id++));
+    }
 }

@@ -32,11 +32,13 @@ interface Props extends NotificationData {
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
     body,
+    richBody,
     color,
     icon,
     onClick,
     onClose,
-    id
+    id,
+    image
 }: Props) {
     const { timeout } = useSettings(["notifications.timeout"]).notifications;
 
@@ -74,14 +76,15 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             onMouseLeave={() => setIsHover(false)}
         >
             <div className="vc-notification">
-                {icon && <img src={icon} alt="" />}
+                {icon && <img className="vc-notification-icon" src={icon} alt="" />}
                 <div className="vc-notification-content">
                     <Forms.FormTitle tag="h2">{title}</Forms.FormTitle>
                     <div>
-                        {typeof body === "string" ? <p className="vc-notification-p">{body}</p> : body}
+                        {richBody ?? <p className="vc-notification-p">{body}</p>}
                     </div>
                 </div>
             </div>
+            {image && <img className="vc-notification-img" src={image} alt="" />}
             <div className="vc-notification-progressbar" style={{ width: `${(1 - timeoutProgress) * 100}%` }} />
         </button>
     );
