@@ -3,13 +3,12 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    width: 30vw;
+    width: 25vw;
     min-height: 10vh;
     color: var(--text-normal);
     background-color: var(--background-secondary-alt);
     position: absolute;
     z-index: 2147483647;
-    bottom: 1rem;
     right: 1rem;
     border-radius: 6px;
     overflow: hidden;
@@ -24,8 +23,8 @@
 }
 
 .vc-notification-icon {
-    height: 5rem;
-    width: 5rem;
+    height: 4rem;
+    width: 4rem;
     border-radius: 6px;
 }
 
@@ -38,7 +37,6 @@
     height: 0.25rem;
     border-radius: 5px;
     margin-top: auto;
-    background-color: var(--vc-color, var(--brand-experiment));
 }
 
 .vc-notification-p {

@@ -40,7 +40,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     id,
     image
 }: Props) {
-    const { timeout } = useSettings(["notifications.timeout"]).notifications;
+    const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
 
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
@@ -65,7 +65,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     return (
         <button
             className="vc-notification-root"
-            style={{ "--vc-color": color } as any}
+            style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
             onClick={onClick}
             onContextMenu={e => {
                 e.preventDefault();
@@ -85,7 +85,12 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}
-            {timeout !== 0 && <div className="vc-notification-progressbar" style={{ width: `${(1 - timeoutProgress) * 100}%` }} />}
+            {timeout !== 0 && (
+                <div
+                    className="vc-notification-progressbar"
+                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-experiment)" }}
+                />
+            )}
         </button>
     );
 });
