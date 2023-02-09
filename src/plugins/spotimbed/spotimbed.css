@@ -131,6 +131,10 @@
     padding: 3px 6px;
 }
 
+.spotimbed-title-tag + .spotimbed-title-tag {
+    margin-left: 8px;
+}
+
 .spotimbed-titleline,
 .spotimbed-infoline-wrap {
     display: flex;

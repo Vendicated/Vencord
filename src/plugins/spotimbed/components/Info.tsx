@@ -94,7 +94,7 @@ function getInfoFields(resource: DisplayResource): InfoFields {
             };
         }
         case ResourceType.Artist: return {
-            tags: resource.genres,
+            tags: resource.genres.slice(0, 1),
             infolines: [`${resource.followers.total} followers`],
             secondaryLines: ["Top Tracks"]
         };

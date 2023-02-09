@@ -116,6 +116,6 @@ export const AudioControls = ({ mediaHref, resource, trackIndex }: AudioControls
 
     return <div className={cl("controls")}>
         {mediaPlayer}
-        {selectedTrack && <QueueButton track={selectedTrack} />}
+        {selectedTrack && <QueueButton tooltip="Add to queue" track={selectedTrack} />}
     </div>;
 };
