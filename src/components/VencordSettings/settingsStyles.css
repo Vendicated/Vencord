@@ -16,9 +16,8 @@
     gap: 1em;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
     flex-grow: 1;
-    flex-direction: row;
+    flex-flow: row wrap;
     margin-bottom: 1em;
 }
 

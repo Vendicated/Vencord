@@ -186,8 +186,11 @@ page.on("console", async e => {
     } else if (isDebug) {
         console.error(e.text());
     } else if (level === "error") {
-        console.error("Got unexpected error", e.text());
-        report.otherErrors.push(e.text());
+        const text = e.text();
+        if (!text.startsWith("Failed to load resource: the server responded with a status of")) {
+            console.error("Got unexpected error", text);
+            report.otherErrors.push(text);
+        }
     }
 });
 
@@ -209,6 +212,7 @@ function runTime(token: string) {
 
 
         // Monkey patch Logger to not log with custom css
+        // @ts-ignore
         Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
             if (level === "warn" || level === "error")
                 console[level]("[Vencord]", this.name + ":", ...args);
@@ -253,6 +257,8 @@ function runTime(token: string) {
 
                 if (!isWasm)
                     await wreq.e(id as any);
+
+                await new Promise(r => setTimeout(r, 100));
             }
             console.error("[PUP_DEBUG]", "Finished loading chunks!");
 
