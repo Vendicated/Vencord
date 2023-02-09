@@ -196,7 +196,7 @@ interface SelectOption {
 }
 
 export type Select = ComponentType<PropsWithChildren<{
-    placeholder?: string;
+    placeholder: string;
     options: ReadonlyArray<SelectOption>; // TODO
 
     /**
@@ -215,9 +215,9 @@ export type Select = ComponentType<PropsWithChildren<{
     closeOnSelect?: boolean;
     hideIcon?: boolean;
 
-    select?(value: any): void;
-    isSelected?(value: any): boolean;
-    serialize?(value: any): string;
+    select(value: any): void;
+    isSelected(value: any): boolean;
+    serialize(value: any): string;
     clear?(): void;
 
     maxVisibleItems?: number;
