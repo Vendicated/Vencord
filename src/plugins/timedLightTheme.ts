@@ -18,9 +18,9 @@
 
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants.js";
-import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
+import { Toasts } from "@webpack/common";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
 const getTheme = () => PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
@@ -32,12 +32,22 @@ function updateThemeIfNecessary(theme: "light" | "dark") {
         || (theme === "dark" && currentTheme === "light")
     ) updateTheme.updateTheme(theme);
 }
-const logger = new Logger("TimedLightTheme");
 let nextChange: NodeJS.Timeout;
 
 function toAdjustedTimestamp(t: string): number {
     const [hours, minutes] = t.split(":").map(i => i && parseInt(i, 10));
     return new Date().setHours(hours as number, minutes || 0, 0, 0);
+}
+function showError() {
+    Toasts.show({
+        message: "TimedLightTheme - Invalid settings",
+        id: Toasts.genId(),
+        type: Toasts.Type.FAILURE,
+        options: {
+            duration: 1000,
+            position: Toasts.Position.BOTTOM
+        }
+    });
 }
 
 const settings = definePluginSettings({
@@ -62,22 +72,19 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "TimedLightTheme",
     authors: [Devs.TheSun],
-    description: "Automatically enables/disable light theme based on the time of day",
+    description: "Automatically enables/disables light theme based on the time of day",
     settings,
 
-    // eslint-disable-next-line consistent-return
     checkForUpdate() {
         const { start, end } = settings.store;
         if (!start || !end) {
-            logger.warn("Invalid settings: no start or end time. Stopping plugin");
-            return this.stop();
+            showError();
         }
 
         const startTimestamp = toAdjustedTimestamp(start);
         const endTimestamp = toAdjustedTimestamp(end);
         if (startTimestamp >= endTimestamp) {
-            logger.warn("Invalid settings: start time higher than end time. Stopping plugin");
-            return this.stop();
+            showError();
         }
         const now = Date.now();
 
