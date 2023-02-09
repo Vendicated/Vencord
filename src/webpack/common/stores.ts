@@ -19,36 +19,52 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { waitForStore } from "./internal";
+import * as t from "./types/stores";
 
-export const MessageStore = findByPropsLazy("getRawMessages") as Omit<Stores.MessageStore, "getMessages"> & {
+export const Flux: t.Flux = findByPropsLazy("connectStores");
+
+type GenericStore = t.FluxStore & Record<string, any>;
+
+export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };
-export const PermissionStore = findByPropsLazy("can", "getGuildPermissions");
-export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
-export const GuildChannelStore = findByPropsLazy("getChannels");
-export const ReadStateStore = findByPropsLazy("lastMessageId");
-export const PresenceStore = findByPropsLazy("setCurrentUserOnConnectionOpen");
 
-export let GuildStore: Stores.GuildStore;
-export let UserStore: Stores.UserStore;
-export let SelectedChannelStore: Stores.SelectedChannelStore;
-export let SelectedGuildStore: any;
-export let ChannelStore: Stores.ChannelStore;
-export let GuildMemberStore: Stores.GuildMemberStore;
-export let RelationshipStore: Stores.RelationshipStore & {
+// this is not actually a FluxStore
+export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
+export let PermissionStore: GenericStore;
+export let GuildChannelStore: GenericStore;
+export let ReadStateStore: GenericStore;
+export let PresenceStore: GenericStore;
+
+export let GuildStore: Stores.GuildStore & t.FluxStore;
+export let UserStore: Stores.UserStore & t.FluxStore;
+export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
+export let SelectedGuildStore: t.FluxStore & Record<string, any>;
+export let ChannelStore: Stores.ChannelStore & t.FluxStore;
+export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
+export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
 };
+
+export let WindowStore: t.WindowStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
 
-waitFor(["getCurrentUser", "initialize"], m => UserStore = m);
-waitFor("getSortedPrivateChannels", m => ChannelStore = m);
-waitFor("getCurrentlySelectedChannelId", m => SelectedChannelStore = m);
-waitFor("getLastSelectedGuildId", m => SelectedGuildStore = m);
-waitFor("getGuildCount", m => GuildStore = m);
-waitFor(["getMember", "initialize"], m => GuildMemberStore = m);
-waitFor("getRelationshipType", m => RelationshipStore = m);
+waitForStore("UserStore", s => UserStore = s);
+waitForStore("ChannelStore", m => ChannelStore = m);
+waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
+waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
+waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("GuildMemberStore", m => GuildMemberStore = m);
+waitForStore("RelationshipStore", m => RelationshipStore = m);
+waitForStore("PermissionStore", m => PermissionStore = m);
+waitForStore("PresenceStore", m => PresenceStore = m);
+waitForStore("ReadStateStore", m => ReadStateStore = m);
+waitForStore("GuildChannelStore", m => GuildChannelStore = m);
+waitForStore("MessageStore", m => MessageStore = m);
+waitForStore("WindowStore", m => WindowStore = m);
