@@ -78,13 +78,13 @@ export default definePlugin({
     checkForUpdate() {
         const { start, end } = settings.store;
         if (!start || !end) {
-            showError();
+            return showError();
         }
 
         const startTimestamp = toAdjustedTimestamp(start);
         const endTimestamp = toAdjustedTimestamp(end);
         if (startTimestamp >= endTimestamp) {
-            showError();
+            return showError();
         }
         const now = Date.now();
 
