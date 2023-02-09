@@ -22,6 +22,9 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {};
 
+const GET_KEY = Symbol.for("vencord.lazy.get");
+const CACHED_KEY = Symbol.for("vencord.lazy.cached");
+
 for (const method of [
     "apply",
     "construct",
@@ -38,11 +41,11 @@ for (const method of [
     "setPrototypeOf"
 ]) {
     handler[method] =
-        (target: any, ...args: any[]) => Reflect[method](target.get(), ...args);
+        (target: any, ...args: any[]) => Reflect[method](target[GET_KEY](), ...args);
 }
 
 handler.ownKeys = target => {
-    const v = target.get();
+    const v = target[GET_KEY]();
     const keys = Reflect.ownKeys(v);
     for (const key of unconfigurable) {
         if (!keys.includes(key)) keys.push(key);
@@ -54,7 +57,12 @@ handler.getOwnPropertyDescriptor = (target, p) => {
     if (typeof p === "string" && unconfigurable.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
 
-    return Reflect.getOwnPropertyDescriptor(target.get(), p);
+    if (p !== GET_KEY && p !== CACHED_KEY) return;
+
+    const descriptor = Reflect.getOwnPropertyDescriptor(target[GET_KEY](), p);
+
+    if (descriptor) Object.defineProperty(target, p, descriptor);
+    return descriptor;
 };
 
 /**
@@ -67,10 +75,10 @@ handler.getOwnPropertyDescriptor = (target, p) => {
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazy<T>(factory: () => T): T {
-    const proxyDummy: { (): void; cachedValue?: T; get(): T; } = function () { };
-
-    proxyDummy.cachedValue = void 0;
-    proxyDummy.get = () => proxyDummy.cachedValue ??= factory();
+    const proxyDummy: { (): void;[CACHED_KEY]?: T;[GET_KEY](): T; } = Object.assign(function () { }, {
+        [CACHED_KEY]: void 0,
+        [GET_KEY]: () => proxyDummy[CACHED_KEY] ??= factory(),
+    });
 
     return new Proxy(proxyDummy, handler) as any;
 }
