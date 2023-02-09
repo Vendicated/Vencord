@@ -196,7 +196,7 @@ interface SelectOption {
 }
 
 export type Select = ComponentType<PropsWithChildren<{
-    placeholder: string;
+    placeholder?: string;
     options: ReadonlyArray<SelectOption>; // TODO
 
     /**
