@@ -20,7 +20,7 @@ import "./styles.css";
 
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Forms, React, useEffect, useMemo, useState } from "@webpack/common";
+import { Forms, React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
 
@@ -35,22 +35,15 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     image
 }: NotificationData) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
+    const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
-    const [focusSignal, setFocusSignal] = useState(0);
 
-    const [start, hasFocus] = useMemo(() => [Date.now(), document.hasFocus()], [timeout, isHover, focusSignal]);
+    const start = useMemo(() => Date.now(), [timeout, isHover, hasFocus]);
 
     useEffect(() => {
-        if (isHover || timeout === 0) return void setElapsed(0);
-
-        if (!hasFocus) {
-            setElapsed(0);
-            const listener = () => setFocusSignal(x => x + 1);
-            window.addEventListener("focus", listener);
-            return () => window.removeEventListener("focus", listener);
-        }
+        if (isHover || !hasFocus || timeout === 0) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
@@ -61,7 +54,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
         }, 10);
 
         return () => clearInterval(intervalId);
-    }, [timeout, isHover, focusSignal]);
+    }, [timeout, isHover, hasFocus]);
 
     const timeoutProgress = elapsed / timeout;
 
@@ -88,7 +81,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}
-            {hasFocus && timeout !== 0 && (
+            {timeout !== 0 && (
                 <div
                     className="vc-notification-progressbar"
                     style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-experiment)" }}

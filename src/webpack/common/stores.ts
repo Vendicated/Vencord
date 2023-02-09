@@ -19,7 +19,7 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -54,6 +54,14 @@ export let WindowStore: t.WindowStore;
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
 });
+
+export const useStateFromStores: <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    idk?: null,
+    compare?: (old: T, newer: T) => boolean
+) => T
+    = findByCodeLazy("useStateFromStores");
 
 waitForStore("UserStore", s => UserStore = s);
 waitForStore("ChannelStore", m => ChannelStore = m);
