@@ -60,7 +60,7 @@ function _showNotification(notification: NotificationData, id: number) {
     const root = getRoot();
     return new Promise<void>(resolve => {
         root.render(
-            <NotificationComponent {...notification} id={id} onClose={() => {
+            <NotificationComponent key={id} {...notification} onClose={() => {
                 notification.onClose?.();
                 root.render(null);
                 resolve();
@@ -81,7 +81,6 @@ export function showNotification(data: NotificationData) {
         const { title, body, icon, image, onClick = null, onClose = null } = data;
         const n = new Notification(title, {
             body,
-            tag: "Vencord",
             icon,
             image
         });

@@ -20,14 +20,9 @@ import "./styles.css";
 
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Forms, useEffect, useMemo, useState } from "@webpack/common";
+import { Forms, React, useEffect, useMemo, useState } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
-
-interface Props extends NotificationData {
-    onClose(): void;
-    id: number;
-}
 
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
@@ -37,28 +32,36 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     icon,
     onClick,
     onClose,
-    id,
     image
-}: Props) {
+}: NotificationData) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
 
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
-    const start = useMemo(() => Date.now(), [id, timeout, isHover]);
+    const [focusSignal, setFocusSignal] = useState(0);
+
+    const [start, hasFocus] = useMemo(() => [Date.now(), document.hasFocus()], [timeout, isHover, focusSignal]);
 
     useEffect(() => {
         if (isHover || timeout === 0) return void setElapsed(0);
 
+        if (!hasFocus) {
+            setElapsed(0);
+            const listener = () => setFocusSignal(x => x + 1);
+            window.addEventListener("focus", listener);
+            return () => window.removeEventListener("focus", listener);
+        }
+
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
             if (elapsed >= timeout)
-                onClose();
+                onClose!();
             else
                 setElapsed(elapsed);
         }, 10);
 
         return () => clearInterval(intervalId);
-    }, [timeout, id, isHover]);
+    }, [timeout, isHover, focusSignal]);
 
     const timeoutProgress = elapsed / timeout;
 
@@ -70,7 +73,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             onContextMenu={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                onClose();
+                onClose!();
             }}
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
@@ -85,7 +88,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}
-            {timeout !== 0 && (
+            {hasFocus && timeout !== 0 && (
                 <div
                     className="vc-notification-progressbar"
                     style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-experiment)" }}
