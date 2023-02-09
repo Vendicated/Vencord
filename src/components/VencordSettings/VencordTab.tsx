@@ -161,7 +161,7 @@ function VencordSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16}>Notification Position</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
             <Select
                 isDisabled={notifSettings.useNative === "always"}
                 placeholder="Notification Position"
@@ -174,7 +174,7 @@ function VencordSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16}>Notification Timeout</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
             <Slider
                 disabled={notifSettings.useNative === "always"}
