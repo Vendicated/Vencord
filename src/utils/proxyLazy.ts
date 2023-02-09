@@ -22,8 +22,8 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {};
 
-const GET_KEY = Symbol.for("vencord.lazy.get");
-const CACHED_KEY = Symbol.for("vencord.lazy.cached");
+const GET_KEY = Symbol("vencord.lazy.get");
+const CACHED_KEY = Symbol("vencord.lazy.cached");
 
 for (const method of [
     "apply",
@@ -56,8 +56,6 @@ handler.ownKeys = target => {
 handler.getOwnPropertyDescriptor = (target, p) => {
     if (typeof p === "string" && unconfigurable.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
-
-    if (p !== GET_KEY && p !== CACHED_KEY) return;
 
     const descriptor = Reflect.getOwnPropertyDescriptor(target[GET_KEY](), p);
 
