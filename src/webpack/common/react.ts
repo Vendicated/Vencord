@@ -25,7 +25,7 @@ export let useEffect: typeof React.useEffect;
 export let useMemo: typeof React.useMemo;
 export let useRef: typeof React.useRef;
 
-export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal", "render");
+export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/client") = findByPropsLazy("createPortal", "render");
 
 waitFor("useState", m => {
     React = m;
