@@ -27,7 +27,7 @@ export class Queue {
      * @param maxSize The maximum amount of functions that can be queued at once.
      *                If the queue is full, the oldest function will be removed.
      */
-    constructor(public maxSize = Infinity) { }
+    constructor(public readonly maxSize = Infinity) { }
 
     private queue = [] as Array<() => Promisable<unknown>>;
 

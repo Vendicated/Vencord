@@ -25,6 +25,7 @@ import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
+import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
 import * as $Styles from "./Styles";
 
@@ -88,3 +89,7 @@ export const MemberListDecorators = $MemberListDecorators;
  * a
  */
 export const Styles = $Styles;
+/**
+ * An API allowing you to display notifications
+ */
+export const Notifications = $Notifications;

@@ -50,7 +50,7 @@ export const filters = {
         }
         return true;
     },
-    byDisplayName: (name: string): FilterFn => m =>
+    byStoreName: (name: string): FilterFn => m =>
         m.constructor?.displayName === name
 };
 
@@ -331,15 +331,15 @@ export function findByCodeLazy(...code: string[]) {
 /**
  * Find a store by its displayName
  */
-export function findByDisplayName(name: string) {
-    return find(filters.byDisplayName(name));
+export function findStore(name: string) {
+    return find(filters.byStoreName(name));
 }
 
 /**
  * findByDisplayName but lazy
  */
-export function findByDisplayNameLazy(name: string) {
-    return findLazy(filters.byDisplayName(name));
+export function findStoreLazy(name: string) {
+    return findLazy(filters.byStoreName(name));
 }
 
 /**

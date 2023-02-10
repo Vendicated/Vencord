@@ -40,6 +40,12 @@ export interface Settings {
             [setting: string]: any;
         };
     };
+
+    notifications: {
+        timeout: number;
+        position: "top-right" | "bottom-right";
+        useNative: "always" | "never" | "not-focused";
+    };
 }
 
 const DefaultSettings: Settings = {
@@ -51,7 +57,13 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
-    plugins: {}
+    plugins: {},
+
+    notifications: {
+        timeout: 5000,
+        position: "bottom-right",
+        useNative: "not-focused"
+    }
 };
 
 try {

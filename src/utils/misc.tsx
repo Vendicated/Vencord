@@ -200,3 +200,7 @@ export const checkIntersecting = (el: Element) => {
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
 };
+
+export function identity<T>(value: T): T {
+    return value;
+}

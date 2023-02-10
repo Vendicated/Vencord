@@ -16,9 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./components";
-export * from "./fluxEvents";
-export * from "./menu";
-export * from "./stores";
-export * from "./utils";
+import { FluxDispatcher, FluxEvents } from "./utils";
 
+export class FluxStore {
+    constructor(dispatcher: FluxDispatcher, eventHandlers?: Partial<Record<FluxEvents, (data: any) => void>>);
+
+    emitChange(): void;
+    getDispatchToken(): string;
+    getName(): string;
+    initialize(): void;
+    initializeIfNeeded(): void;
+    __getLocalVars(): Record<string, any>;
+}
+
+export interface Flux {
+    Store: typeof FluxStore;
+}
+
+export class WindowStore extends FluxStore {
+    isElementFullScreen(): boolean;
+    isFocused(): boolean;
+    windowSize(): Record<"width" | "height", number>;
+}
