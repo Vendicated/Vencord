@@ -1,0 +1,105 @@
+/* User Permissions Component */
+
+.perm-viewer-user-permissions-title-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.perm-viewer-user-permissions-title {
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.perm-viewer-user-permissions-title-toggle-permissions-btn {
+    cursor: pointer;
+}
+
+/*  RolesAndUsersPermissions Component */
+
+.perm-viewer-roles-and-users-permissions-title {
+    flex-grow: 1;
+}
+
+.perm-viewer-roles-and-users-permissions-no-permissions {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.perm-viewer-roles-and-users-permissions-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas: "list permissions";
+    padding: 16px 0;
+}
+
+.perm-viewer-roles-and-users-permissions-list {
+    grid-area: list;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid var(--background-modifier-active);
+}
+
+.perm-viewer-roles-and-users-permissions-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 5px;
+    cursor: pointer;
+    width: 165px;
+}
+
+.perm-viewer-roles-and-users-permissions-list-item > div {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.perm-viewer-roles-and-users-permissions-list-item-active {
+    background-color: var(--background-modifier-selected);
+    border-radius: 5px;
+}
+
+.perm-viewer-roles-and-users-permissions-list-item-role-circle {
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.perm-viewer-roles-and-users-permissions-list-item-user-img {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
+    margin-right: 6px;
+}
+
+.perm-viewer-roles-and-users-permissions-permissions {
+    grid-area: permissions;
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+}
+
+.perm-viewer-roles-and-users-permissions-permissions-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 2px solid var(--background-modifier-active);
+}
+
+.perm-viewer-roles-and-users-permissions-permissions-item:last-child {
+    border: 0;
+}
+
+.perm-viewer-roles-and-users-permissions-permissions-item-icon {
+    border: 1px solid var(--background-modifier-selected);
+    width: 25px;
+    height: 25px;
+    margin-right: 5px;
+}
