@@ -50,39 +50,39 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.MEDIUM}
         >
             <ModalHeader>
-                <Text className="perm-viewer-roles-and-users-permissions-title" variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className="permviewer-perms-title" variant="heading-lg/semibold">{header} permissions:</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent>
                 {selectedItem === null && (
-                    <div className="perm-viewer-roles-and-users-permissions-no-permissions">
+                    <div className="permviewer-perms-no-perms">
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
                     </div>
                 )}
 
                 {selectedItem !== null && (
-                    <div className="perm-viewer-roles-and-users-permissions-container">
-                        <div className="perm-viewer-roles-and-users-permissions-list">
+                    <div className="permviewer-perms-container">
+                        <div className="permviewer-perms-list">
                             {permissions.map(permission => (
                                 <div
-                                    className={["perm-viewer-roles-and-users-permissions-list-item", selectedItem === permission.id ? "perm-viewer-roles-and-users-permissions-list-item-active" : ""].filter(Boolean).join(" ")}
+                                    className={["permviewer-perms-list-item", selectedItem === permission.id ? "permviewer-perms-list-item-active" : ""].filter(Boolean).join(" ")}
                                     onClick={() => selectItem(permission.id)}
-                                    onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} />)}
+                                    onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
                                 >
                                     {permission.type === PermissionType.Role && (
-                                        <span className="perm-viewer-roles-and-users-permissions-list-item-role-circle" style={{ backgroundColor: guild.roles[permission.id].colorString ?? "var(--primary-dark-300)" }} />
+                                        <span className="permviewer-perms-role-circle" style={{ backgroundColor: guild.roles[permission.id].colorString ?? "var(--primary-dark-300)" }} />
                                     )}
                                     {permission.type === PermissionType.User && (
-                                        <img className="perm-viewer-roles-and-users-permissions-list-item-user-img" src={UserStore.getUser(permission.id).getAvatarURL(undefined, undefined, false)} />
+                                        <img className="permviewer-perms-user-img" src={UserStore.getUser(permission.id).getAvatarURL(undefined, undefined, false)} />
                                     )}
                                     <Text variant="text-md/normal">{permission.type === PermissionType.Role ? guild.roles[permission.id].name : UserStore.getUser(permission.id).tag}</Text>
                                 </div>
                             ))}
                         </div>
-                        <div className="perm-viewer-roles-and-users-permissions-permissions">
+                        <div className="permviewer-perms-perms">
                             {Object.entries(Permissions).map(([permissionName, bit]) => (
-                                <div className="perm-viewer-roles-and-users-permissions-permissions-item">
-                                    <div className="perm-viewer-roles-and-users-permissions-permissions-item-icon">
+                                <div className="permviewer-perms-perms-item">
+                                    <div className="permviewer-perms-perms-item-icon">
                                         {((permissionsData: RoleOrUserPermission) => {
                                             const { permissions, overwriteAllow, overwriteDeny } = permissionsData;
 
@@ -163,10 +163,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     );
 }
 
-function RoleContextMenu({ guild, roleId }: { guild: Guild; roleId: string; }) {
+function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
     return (
         <Menu.ContextMenu
-            navId="perm-viewer-role-context-menu"
+            navId="permviewer-role-context-menu"
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Role Options"
         >
@@ -174,7 +174,11 @@ function RoleContextMenu({ guild, roleId }: { guild: Guild; roleId: string; }) {
                 key="view-as-role"
                 id="view-as-role"
                 label="View As Role"
-                action={() => FluxDispatcher.dispatch({ type: "IMPERSONATE_UPDATE", guildId: guild.id, data: { type: "ROLES", roles: { [roleId]: guild.roles[roleId] } } })}
+                action={() => {
+                    onClose();
+
+                    FluxDispatcher.dispatch({ type: "IMPERSONATE_UPDATE", guildId: guild.id, data: { type: "ROLES", roles: { [roleId]: guild.roles[roleId] } } });
+                }}
             />
         </Menu.ContextMenu>
     );

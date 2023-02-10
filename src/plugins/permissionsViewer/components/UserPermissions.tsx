@@ -42,7 +42,7 @@ const RolePillClasses: Record<"flex" | "alignCenter" | "justifyCenter" | "wrap" 
     findByPropsLazy("roleNameOverflow", "root", "roleName", "roleRemoveButton");
 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
-    const [viewPermissions, setViewPermissions] = useState(false);
+    const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
     const userPermissions: UserPermissions = [];
 
@@ -70,14 +70,14 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
     return (
         <div>
-            <div className="perm-viewer-user-permissions-title-container">
-                <Text className="perm-viewer-user-permissions-title" variant="eyebrow">Permissions</Text>
+            <div className="permviewer-userperms-title-container">
+                <Text className="permviewer-userperms-title" variant="eyebrow">Permissions</Text>
                 <Tooltip text="Toggle Permissions">
                     {({ onMouseLeave, onMouseEnter }) => (
                         <svg
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            className="perm-viewer-user-permissions-title-toggle-permissions-btn"
+                            className="permviewer-userperms-toggleperms-btn"
                             width="24"
                             height="24"
                             viewBox="0 0 24 24"

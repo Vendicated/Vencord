@@ -41,6 +41,11 @@ export const settings = definePluginSettings({
             { label: "Highest Role", value: PermissionsSortOrder.HighestRole, default: true },
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
         ],
+    },
+    defaultPermissionsDropdownState: {
+        description: "Whether the permissions dropdown on user popouts should be open by default",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 });
 
