@@ -10,6 +10,10 @@
     margin-bottom: 6px;
 }
 
+.permviewer-userperms-permdetails-btn {
+    cursor: pointer;
+}
+
 .permviewer-userperms-toggleperms-btn {
     cursor: pointer;
 }

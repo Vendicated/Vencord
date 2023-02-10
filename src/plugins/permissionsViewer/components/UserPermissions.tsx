@@ -17,12 +17,14 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { openModal } from "@utils/modal";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Text, Tooltip, useState } from "@webpack/common";
+import { Text, Tooltip, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
 import { getPermissionString } from "../formatting";
+import RolesAndUsersPermissions, { PermissionType, RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
@@ -44,50 +46,78 @@ const RolePillClasses: Record<"flex" | "alignCenter" | "justifyCenter" | "wrap" 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
     const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
+    const rolePermissions: Array<RoleOrUserPermission> = [];
     const userPermissions: UserPermissions = [];
 
-    if (viewPermissions) {
-        const { roles: userRolesIds } = guildMember;
-        const { roles } = guild;
-        const userRoles = sortUserRoles([...userRolesIds.map(id => roles[id]), roles[guild.id]]);
+    const { roles: userRolesIds } = guildMember;
+    const { roles } = guild;
+    const userRoles = [...userRolesIds.map(id => roles[id]), roles[guild.id]];
 
-        for (const [permission, bit] of Object.entries(Permissions)) {
-            for (const userRole of userRoles) {
-                if ((userRole.permissions & bit) > 0n) {
-                    userPermissions.push({
-                        permission: getPermissionString(permission),
-                        roleColor: userRole.colorString ?? "var(--primary-dark-300)",
-                        rolePosition: userRole.position
-                    });
+    userRoles.sort(({ position: a }, { position: b }) => b - a);
 
-                    break;
-                }
+    for (const userRole of userRoles) {
+        rolePermissions.push({
+            type: PermissionType.Role,
+            id: userRole.id,
+            permissions: userRole.permissions
+        });
+    }
+
+    sortUserRoles(userRoles);
+
+    for (const [permission, bit] of Object.entries(Permissions)) {
+        for (const userRole of userRoles) {
+            if ((userRole.permissions & bit) > 0n) {
+                userPermissions.push({
+                    permission: getPermissionString(permission),
+                    roleColor: userRole.colorString ?? "var(--primary-dark-300)",
+                    rolePosition: userRole.position
+                });
+
+                break;
             }
         }
-
-        userPermissions.sort(({ rolePosition: a }, { rolePosition: b }) => b - a);
     }
+
+    userPermissions.sort(({ rolePosition: a }, { rolePosition: b }) => b - a);
 
     return (
         <div>
             <div className="permviewer-userperms-title-container">
                 <Text className="permviewer-userperms-title" variant="eyebrow">Permissions</Text>
-                <Tooltip text="Toggle Permissions">
-                    {({ onMouseLeave, onMouseEnter }) => (
-                        <svg
-                            onMouseLeave={onMouseLeave}
-                            onMouseEnter={onMouseEnter}
-                            className="permviewer-userperms-toggleperms-btn"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            transform={viewPermissions ? "scale(1 -1)" : "scale(1 1)"}
-                            onClick={() => setViewPermissions(!viewPermissions)}
-                        >
-                            <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
-                        </svg>
-                    )}
-                </Tooltip>
+                <div>
+                    <Tooltip text="Details">
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <svg
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                className="permviewer-userperms-permdetails-btn"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                onClick={() => openModal(modalProps => <RolesAndUsersPermissions guild={guild} permissions={rolePermissions} modalProps={modalProps} header={guildMember.nick ?? UserStore.getUser(guildMember.userId).username} />)}
+                            >
+                                <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                            </svg>
+                        )}
+                    </Tooltip>
+                    <Tooltip text="Toggle Permissions">
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <svg
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                className="permviewer-userperms-toggleperms-btn"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                transform={viewPermissions ? "scale(1 -1)" : "scale(1 1)"}
+                                onClick={() => setViewPermissions(!viewPermissions)}
+                            >
+                                <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
+                            </svg>
+                        )}
+                    </Tooltip>
+                </div>
             </div>
             {viewPermissions && userPermissions.length > 0 && (
                 <div className={[RolePillClasses.root, RoleClasses.roles].join(" ")}>
