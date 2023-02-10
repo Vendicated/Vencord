@@ -23,7 +23,6 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, mapMangledModu
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");

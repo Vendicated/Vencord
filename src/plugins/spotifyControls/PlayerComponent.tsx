@@ -26,7 +26,7 @@ import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
 import { LazyComponent } from "@utils/misc";
 import { filters, find } from "@webpack";
-import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 const cl = classNameFactory("vc-spotify-");
 

@@ -82,7 +82,6 @@
         "no-constant-condition": ["error", { "checkLoops": false }],
         "no-duplicate-imports": "error",
         "no-extra-semi": "error",
-        "consistent-return": ["warn", { "treatUndefinedAsUnspecified": true }],
         "dot-notation": "error",
         "no-useless-escape": [
             "error",
