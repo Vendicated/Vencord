@@ -73,7 +73,7 @@ export default definePlugin({
         {
             find: ".Messages.STAGE_CHANNEL_USER_MOVE_TO_AUDIENCE",
             replacement: {
-                match: /var (?<user>\i)=\i\.user,(?<guildId>\i)=\i\.guildId.+?\.GUILD_CHANNEL_USER_MENU]\)/,
+                match: /var (?<user>\i)=\i\.user,(?<guildId>\i)=\i\.guildId.+?\.GUILD_CHANNEL_USER_MENU\]\)/,
                 replace: (mod, user, guildId) => {
                     const rolesItem = mod.match(RegExp(`(?<=,).{1,2}(?==\\(0,.{1,2}\\..{1,2}\\)\\(${user}\\.id,${guildId}\\))`));
 
@@ -90,6 +90,21 @@ export default definePlugin({
             replacement: {
                 match: /(?<=null:\i,)(?=.{0,80}\.Messages\.PRIVACY_SETTINGS.+?guild:(?<guild>\i)})/,
                 replace: "$self.MenuItem($<guild>.id),"
+            }
+        },
+        {
+            find: ".CHANNEL_TITLE_MENU]",
+            replacement: {
+                match: /var (?<channel>\i)=\i\.channel,(?<guild>\i)=\i\.guild.+?\.CHANNEL_TITLE_MENU\]\)/,
+                replace: (mod, channel, guild) => {
+                    const copyChannelTopicItem = mod.match(/(?<=,).{1,2}(?==function.{0,60}"copy-channel-topic")/);
+
+                    if (copyChannelTopicItem) {
+                        mod = mod.replace(RegExp(`(?<=children:\\[)(?=.{1,2}\\?${copyChannelTopicItem[0]})`), `Vencord.Plugins.plugins.PermissionsViewer.MenuItem(${guild}.id,${channel}.id,${MenuItemParentType.Channel}),`);
+                    }
+
+                    return mod;
+                }
             }
         },
         ...[
