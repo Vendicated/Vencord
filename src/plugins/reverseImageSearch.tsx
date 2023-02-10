@@ -39,7 +39,7 @@ export default definePlugin({
         replacement: {
             match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
             replace: (m, src) =>
-                `${m},Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${src}, arguments[2])`
+                `${m},$self.makeMenu(${src}, arguments[2])`
         }
     }, {
         // pass the target to the open link menu so we can check if it's an image

@@ -151,7 +151,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, false);" +
+                        "   cache = $self.handleDelete(cache, $1, false);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -161,7 +161,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, true);" +
+                        "   cache = $self.handleDelete(cache, $1, true);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -171,7 +171,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) :" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
                         ".update($3"
@@ -287,7 +287,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), "
+                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
                 }
             ]
         },

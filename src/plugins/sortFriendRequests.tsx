@@ -36,7 +36,7 @@ export default definePlugin({
             // Otherwise, use the default comparator
             replace: (_, row) => `.sortBy((function(${row}) {
                 return ${row}.type === 3 || ${row}.type === 4
-                    ? -Vencord.Plugins.plugins.SortFriendRequests.getSince(${row}.user)
+                    ? -$self.getSince(${row}.user)
                     : ${row}.comparator
             }))`
         }, {
@@ -44,7 +44,7 @@ export default definePlugin({
             match: /(user:(\w{1,3}),.{10,30}),subText:(\w{1,3}),(.{10,30}userInfo}\))/,
             // Show dates in the friend request list
             replace: (_, pre, user, subText, post) => `${pre},
-                subText: Vencord.Plugins.plugins.SortFriendRequests.makeSubtext(${subText}, ${user}),
+                subText: $self.makeSubtext(${subText}, ${user}),
                 ${post}`
         }]
     }],
