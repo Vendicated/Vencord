@@ -54,7 +54,7 @@ export function DecModal(props: any) {
                         const toSend = decrypt(secret, password);
                         if (!toSend || !props?.message) return;
                         // @ts-expect-error
-                        $self.buildEmbed(props?.message, toSend);
+                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
                         props.onClose();
                     }}>
                     Decrypt
