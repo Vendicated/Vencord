@@ -51,7 +51,7 @@ enum MenuItemParentType {
 
 export default definePlugin({
     name: "PermissionsViewer",
-    description: "",
+    description: "View the permissions an user or channel has, and the roles of a server.",
     authors: [Devs.Nuckyz],
     settings,
 
