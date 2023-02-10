@@ -16,9 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./components";
-export * from "./fluxEvents";
-export * from "./menu";
-export * from "./stores";
-export * from "./utils";
+let styleStr = "";
 
+export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
+
+for (const dir of ["top", "bottom", "left", "right"] as const) {
+    for (const size of [8, 16, 20] as const) {
+        const cl = `vc-m-${dir}-${size}`;
+        Margins[`${dir}${size}`] = cl;
+        styleStr += `.${cl}{margin-${dir}:${size}px;}`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () =>
+    document.head.append(Object.assign(document.createElement("style"), {
+        textContent: styleStr,
+        id: "vencord-margins"
+    })), { once: true });
