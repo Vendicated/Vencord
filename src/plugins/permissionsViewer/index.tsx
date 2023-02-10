@@ -94,7 +94,8 @@ export default definePlugin({
         },
         ...[
             ".CHANNEL_LIST_VOICE_CHANNEL_MENU]",
-            ".CHANNEL_LIST_TEXT_CHANNEL_MENU]"
+            ".CHANNEL_LIST_TEXT_CHANNEL_MENU]",
+            ".CHANNEL_CATEGORY_MENU]"
         ].map(find => ({
             find,
             replacement: {
