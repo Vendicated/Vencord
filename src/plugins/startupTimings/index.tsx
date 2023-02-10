@@ -29,7 +29,7 @@ export default definePlugin({
         find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
         replacement: {
             match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:Vencord.Plugins.plugins.StartupTimings.StartupTimingPage},$&'
+            replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
         }
     }],
     StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)

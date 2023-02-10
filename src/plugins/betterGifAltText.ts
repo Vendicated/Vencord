@@ -31,7 +31,7 @@ export default definePlugin({
             replacement: {
                 match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
-                    "Vencord.Plugins.plugins.BetterGifAltText.altify(e);$1",
+                    "$self.altify(e);$1",
             },
         },
         {
@@ -39,7 +39,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
                 replace:
-                    "?($1.alt='GIF',Vencord.Plugins.plugins.BetterGifAltText.altify($1))",
+                    "?($1.alt='GIF',$self.altify($1))",
             },
         },
     ],

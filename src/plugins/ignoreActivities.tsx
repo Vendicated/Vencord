@@ -146,19 +146,19 @@ export default definePlugin({
         find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
         replacement: {
             match: /var .=(?<props>.)\.overlay.+?"aria-label":.\..\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}}\)/,
-            replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton($<props>)"
+            replace: "$&,$self.renderToggleGameActivityButton($<props>)"
         }
     }, {
         find: ".overlayBadge",
         replacement: {
             match: /.badgeContainer.+?.\?\(0,.\.jsx\)\(.{1,2},{name:(?<props>.)\.name}\):null/,
-            replace: "$&,Vencord.Plugins.plugins.IgnoreActivities.renderToggleActivityButton($<props>)"
+            replace: "$&,$self.renderToggleActivityButton($<props>)"
         }
     }, {
         find: '.displayName="LocalActivityStore"',
         replacement: {
             match: /(?<activities>.)\.push\(.\({type:.\..{1,3}\.LISTENING.+?\)\)/,
-            replace: "$&;$<activities>=$<activities>.filter(Vencord.Plugins.plugins.IgnoreActivities.isActivityNotIgnored);"
+            replace: "$&;$<activities>=$<activities>.filter($self.isActivityNotIgnored);"
         }
     }],
 

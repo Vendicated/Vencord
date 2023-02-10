@@ -37,7 +37,7 @@ export default definePlugin({
             find: "disableBorderColor:!0",
             replacement: {
                 match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
-                replace: "$&,Vencord.Plugins.plugins.ReviewDB.getReviewsComponent($1)"
+                replace: "$&,$self.getReviewsComponent($1)"
             },
         }
     ],
