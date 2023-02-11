@@ -70,7 +70,7 @@ export default definePlugin({
             find: ".memberGroupsPlaceholder",
             replacement: [
                 {
-                    match: /(function\((.)\).+?roleIcon.{5,20}null,).," ÔÇö ",.\]/,
+                    match: /(function\((.)\).+?roleIcon.{5,20}null,).," \u2014 ",.\]/,
                     replace: "$1$self.roleGroupColor(e)]"
                 },
                 {
