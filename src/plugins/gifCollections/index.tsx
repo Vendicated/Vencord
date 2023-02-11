@@ -65,8 +65,26 @@ export default definePlugin({
                 {
                     match: /(.{1,2}\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
                     replace: "$1onContextMenu: (e) => Vencord.Plugins.plugins[\"Gif Collection\"].collectionContextMenu(e, this),"
-                }
+                },
             ]
+        },
+        /*
+        problem:
+            when you click your collection in the gifs picker discord enters the collection name into the search bar
+            which causes discord to fetch the gifs from their api. This causes a tiny flash when the gifs have fetched successfully
+        solution:
+            if query starts with gc: and collection is not null then return early and prevent the fetch
+        */
+        {
+            find: "type:\"GIF_PICKER_QUERY\"",
+            replacement: {
+                match: /(function .{1,3}\((?<query>.{1,3}),.{1,3}\){.{1,200}dispatch\({type:"GIF_PICKER_QUERY".{1,20};)/,
+                replace:
+                    `$1 if($<query>.startsWith('gc:')) {
+                    const collection = Vencord.Plugins.plugins["Gif Collection"].collections.find(c => c.name === $<query>);
+                    if(collection != null) { return };
+                };`
+            }
         },
         // Ven goated ong on me
         {
@@ -97,8 +115,10 @@ export default definePlugin({
     settings,
 
     start() {
+        console.log("updated???");
         CollectionManager.refreshCacheCollection();
     },
+    CollectionManager,
 
     oldTrendingCat: null as Category[] | null,
     sillyInstance: null as any,
@@ -108,7 +128,6 @@ export default definePlugin({
         CollectionManager.refreshCacheCollection();
         return CollectionManager.cache_collections;
     },
-
 
     renderContent(instance) {
         if (instance.props.query.startsWith("gc:")) {
@@ -131,6 +150,7 @@ export default definePlugin({
         const res = props.name.split(":");
         return res.length > 1 ? res[1] : res[0];
     },
+
 
     insertCollections(instance: { props: Props; }) {
         try {
