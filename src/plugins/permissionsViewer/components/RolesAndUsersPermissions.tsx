@@ -17,10 +17,10 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findLazy } from "@webpack";
 import { ContextMenu, FluxDispatcher, Menu, Text, UserStore, useState } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { Guild, User } from "discord-types/general";
 
 import { getPermissionString } from "../formatting";
 
@@ -38,6 +38,62 @@ export interface RoleOrUserPermission {
 }
 
 const Permissions: Record<string, bigint> = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+
+async function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
+    const usersChunks: Array<Array<string>> = [];
+
+    for (const permission of permissions) {
+        if (permission.type === PermissionType.User) {
+            if (!UserStore.getUser(permission.id)) {
+                const currentChunk = usersChunks[usersChunks.length - 1] ?? [];
+                if (currentChunk.length < 100) {
+                    currentChunk.push(permission.id);
+
+                    if (usersChunks.length) usersChunks[usersChunks.length - 1] = currentChunk;
+                    else usersChunks.push(currentChunk);
+                }
+                else usersChunks.push([permission.id]);
+            }
+        }
+    }
+
+    let awaitAllChunks: Promise<void> | undefined = undefined;
+
+    if (usersChunks.length > 0) {
+        const allUsers = usersChunks.flat();
+
+        awaitAllChunks = new Promise<void>((res, rej) => {
+            let chunksReceived = 0;
+
+            const timeout = setTimeout(rej, 15 * 1000);
+
+            FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", ({ guildId, members }: { guildId: string; members: Array<{ user: User; }>; }) => {
+                if (guildId === guild.id && members.some(member => allUsers.includes(member.user.id))) {
+                    chunksReceived += 1;
+                }
+
+                if (chunksReceived === usersChunks.length) {
+                    res();
+                    clearTimeout(timeout);
+                }
+            });
+        });
+
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [guild.id],
+            userIds: allUsers
+        });
+    }
+
+    try {
+        if (awaitAllChunks) await awaitAllChunks;
+
+        openModal(modalProps => <RolesAndUsersPermissions permissions={permissions} guild={guild} modalProps={modalProps} header={header} />);
+    } catch (err) {
+
+    }
+}
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     permissions.sort(({ type: a }, { type: b }) => a - b);
@@ -184,4 +240,6 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     );
 }
 
-export default ErrorBoundary.wrap(RolesAndUsersPermissionsComponent);
+const RolesAndUsersPermissions = ErrorBoundary.wrap(RolesAndUsersPermissionsComponent);
+
+export default openRolesAndUsersPermissionsModal;

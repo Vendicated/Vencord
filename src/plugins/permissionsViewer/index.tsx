@@ -20,12 +20,11 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, GuildStore, Menu, UserStore } from "@webpack/common";
-import { Guild, GuildMember, User } from "discord-types/general";
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, UserStore } from "@webpack/common";
+import { Guild, GuildMember } from "discord-types/general";
 
-import RolesAndUsersPermissions, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 
 export enum PermissionsSortOrder {
@@ -183,64 +182,8 @@ export default definePlugin({
                 id="perm-viewer-permissions"
                 key="perm-viewer-permissions"
                 label="Permissions"
-                action={async () => {
-                    const usersChunks: Array<Array<string>> = [];
-
-                    for (const permission of permissions) {
-                        if (permission.type === PermissionType.User) {
-                            if (!UserStore.getUser(permission.id)) {
-                                const currentChunk = usersChunks[usersChunks.length - 1] ?? [];
-                                if (currentChunk.length < 100) {
-                                    currentChunk.push(permission.id);
-
-                                    if (usersChunks.length) {
-                                        usersChunks[usersChunks.length - 1] = currentChunk;
-                                    } else usersChunks.push(currentChunk);
-                                }
-                                else usersChunks.push([permission.id]);
-                            }
-                        }
-                    }
-
-                    let awaitAllChunks: Promise<void> | undefined = undefined;
-
-                    if (usersChunks.length > 0) {
-                        const allUsers = usersChunks.flat();
-
-                        awaitAllChunks = new Promise<void>((res, rej) => {
-                            let chunksReceived = 0;
-
-                            const timeout = setTimeout(rej, 15 * 1000);
-
-                            FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", ({ guildId, members }: { guildId: string; members: Array<{ user: User; }>; }) => {
-                                if (guildId === guild.id && members.some(member => allUsers.includes(member.user.id))) {
-                                    chunksReceived += 1;
-                                }
-
-                                if (chunksReceived === usersChunks.length) {
-                                    res();
-                                    clearTimeout(timeout);
-                                }
-                            });
-                        });
-
-                        FluxDispatcher.dispatch({
-                            type: "GUILD_MEMBERS_REQUEST",
-                            guildIds: [guild.id],
-                            userIds: allUsers
-                        });
-                    }
-
-                    try {
-                        if (awaitAllChunks) await awaitAllChunks;
-
-                        openModal(modalProps => <RolesAndUsersPermissions permissions={permissions} guild={guild} modalProps={modalProps} header={header} />);
-                    } catch (err) {
-
-                    }
-                }}
+                action={async () => openRolesAndUsersPermissionsModal(permissions, guild, header)}
             />
-
         );
     }
 });
