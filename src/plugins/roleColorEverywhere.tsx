@@ -35,7 +35,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(.),channelId:(.).{0,300}?"@".concat\(.+?\)/,
-                    replace: "$&,color:Vencord.Plugins.plugins.RoleColorEverywhere.getUserColor($1, $2)"
+                    replace: "$&,color:$self.getUserColor($1, $2)"
                 }
             ],
         },
@@ -45,7 +45,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /((\w)=\w\.typingUsers.+?)(\w),\w=(\w+?\(\w+?,\d+?\)).+?(\w\.\w\.Messages.SEVERAL_USERS_TYPING);/,
-                    replace: "$1$3=Vencord.Plugins.plugins.RoleColorEverywhere.typingUsers($4,$2,$5);"
+                    replace: "$1$3=$self.typingUsers($4,$2,$5);"
                 }
             ],
         },
@@ -55,11 +55,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(function\((.)\).+?roleIcon.{5,20}null,).," ÔÇö ",.\]/,
-                    replace: "$1Vencord.Plugins.plugins.RoleColorEverywhere.roleGroupColor(e)]"
+                    replace: "$1$self.roleGroupColor(e)]"
                 },
                 {
                     match: /n\.isShown;/,
-                    replace: "$&Vencord.Plugins.plugins.RoleColorEverywhere.testing(e,n,f,h,c,s);"
+                    replace: "$&$self.testing(e,n,f,h,c,s);"
                 }
             ],
         },
