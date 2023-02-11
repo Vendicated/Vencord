@@ -114,6 +114,6 @@ export default definePlugin({
             color: role?.colorString,
             fontWeight: "unset",
             letterSpacing: ".05em"
-        }}>{title} ÔÇö {count}</span>;
+        }}>{title} &mdash; {count}</span>;
     }
 });
