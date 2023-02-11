@@ -16,13 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findByPropsLazy } from "@webpack";
 import { GuildStore, UserStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
+
+const settings = definePluginSettings({
+    chatMentions: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in chat mentions."
+    },
+    typingIndicator: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show colors in the typing indicator. Incompatible with TypingTweaks."
+    },
+});
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -38,6 +52,7 @@ export default definePlugin({
                     replace: "$&,color:$self.getUserColor($1, $2)"
                 }
             ],
+            predicate: () => settings.store.chatMentions
         },
         // Typing Users
         {
@@ -48,6 +63,7 @@ export default definePlugin({
                     replace: "$1$3=$self.typingUsers($4,$2,$5);"
                 }
             ],
+            predicate: () => settings.store.typingIndicator
         },
         // Member List Role Names
         {
@@ -64,6 +80,8 @@ export default definePlugin({
             ],
         },
     ],
+    settings,
+
     getColor(userId, channelId) {
         const channel = Vencord.Webpack.Common.ChannelStore.getChannel(channelId);
         if (!channel) {
