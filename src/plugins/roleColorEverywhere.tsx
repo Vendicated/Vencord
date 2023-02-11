@@ -30,7 +30,7 @@ const settings = definePluginSettings({
     memberList: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in member list roles"
+        description: "Show role colors in member list role headers"
     }
 });
 
