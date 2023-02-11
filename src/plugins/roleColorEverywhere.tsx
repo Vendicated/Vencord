@@ -18,10 +18,9 @@
 
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findByPropsLazy } from "@webpack";
-import { GuildStore, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { GuildStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
 
@@ -30,11 +29,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Show role colors in chat mentions"
-    },
-    typingIndicator: {
-        type: OptionType.BOOLEAN,
-        default: true,
-        description: "Show colors in the typing indicator (incompatible with TypingTweaks)"
     },
 });
 
@@ -53,17 +47,6 @@ export default definePlugin({
                 }
             ],
             predicate: () => settings.store.chatMentions
-        },
-        // Typing Users
-        {
-            find: "Messages.ONE_USER_TYPING",
-            replacement: [
-                {
-                    match: /((\w)=\w\.typingUsers.+?)(\w),\w=(\w+?\(\w+?,\d+?\)).+?(\w\.\w\.Messages.SEVERAL_USERS_TYPING);/,
-                    replace: "$1$3=$self.typingUsers($4,$2,$5);"
-                }
-            ],
-            predicate: () => settings.store.typingIndicator
         },
         // Member List Role Names
         {
@@ -98,31 +81,6 @@ export default definePlugin({
     getUserColor({ id: userId }, channelId) {
         const colorString = this.getColor(userId, channelId);
         return colorString && parseInt(colorString.slice(1), 16);
-    },
-    typingUsers(users, userIds, SEVERAL_USERS_TYPING) { // todo: work with i18n
-        const currentUser = UserStore.getCurrentUser();
-
-        const locale = findByProps("getLocale").getLocale();
-        const fmt = new Intl.ListFormat(locale, { style: "long", type: "conjunction" });
-
-        userIds = Object.keys(userIds).filter(m => m !== currentUser.id);
-        const several = userIds.length > 3;
-        userIds = fmt.formatToParts(userIds.slice(0, 3));
-
-        const stuff = userIds.length === 0 ? null : (!several ? <>
-            {userIds.map(({ value: id, type }, i) => {
-                const channel = getCurrentChannel();
-                const member = MemberStore.getMember(channel.guild_id, id);
-
-                return type === "element" ?
-                    <strong style={{ color: member?.colorString }}>
-                        {member?.nick || UserStore.getUser(id).username}
-                    </strong>
-                    : id;
-            })} {users.length > 1 ? "are" : "is"} typing...
-        </> : SEVERAL_USERS_TYPING);
-
-        return stuff;
     },
     roleGroupColor({ id, count, title, guildId, ...args }) {
         const guild = GuildStore.getGuild(guildId);
