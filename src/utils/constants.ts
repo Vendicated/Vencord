@@ -196,5 +196,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     whqwert: {
         name: "whqwert",
         id: 586239091520176128n
+    },
+    RuiNtD: {
+        name: "RuiNtD",
+        id: 157917665162297344n
     }
 });
