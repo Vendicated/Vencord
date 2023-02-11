@@ -17,9 +17,9 @@
 */
 
 import { Devs } from "@utils/constants";
+import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByProps, findByPropsLazy } from "@webpack";
-import { getCurrentChannel } from "@utils/discord";
 import { GuildStore, UserStore } from "@webpack/common";
 
 const MemberStore = findByPropsLazy("getMember");
@@ -41,7 +41,7 @@ export default definePlugin({
         },
         // Typing Users
         {
-            find: 'Messages.ONE_USER_TYPING',
+            find: "Messages.ONE_USER_TYPING",
             replacement: [
                 {
                     match: /((\w)=\w\.typingUsers.+?)(\w),\w=(\w+?\(\w+?,\d+?\)).+?(\w\.\w\.Messages.SEVERAL_USERS_TYPING);/,
@@ -51,7 +51,7 @@ export default definePlugin({
         },
         // Member List Role Names
         {
-            find: '.memberGroupsPlaceholder',
+            find: ".memberGroupsPlaceholder",
             replacement: [
                 {
                     match: /(function\((.)\).+?roleIcon.{5,20}null,).," ÔÇö ",.\]/,
@@ -75,7 +75,7 @@ export default definePlugin({
             return null;
         }
 
-        return member?.colorString
+        return member?.colorString;
     },
     getUserColor({ id: userId }, channelId) {
         const colorString = this.getColor(userId, channelId);
@@ -85,9 +85,9 @@ export default definePlugin({
         const currentUser = UserStore.getCurrentUser();
 
         const locale = findByProps("getLocale").getLocale();
-        const fmt = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' })
+        const fmt = new Intl.ListFormat(locale, { style: "long", type: "conjunction" });
 
-        userIds = Object.keys(userIds).filter(m => m != currentUser.id);
+        userIds = Object.keys(userIds).filter(m => m !== currentUser.id);
         const several = userIds.length > 3;
         userIds = fmt.formatToParts(userIds.slice(0, 3));
 
@@ -96,19 +96,19 @@ export default definePlugin({
                 const channel = getCurrentChannel();
                 const member = MemberStore.getMember(channel.guild_id, id);
 
-                return type === 'element' ?
-                    <strong style={{color: member?.colorString}}>
+                return type === "element" ?
+                    <strong style={{ color: member?.colorString }}>
                         {member?.nick || UserStore.getUser(id).username}
                     </strong>
-                : id
-            })} {users.length > 1 ? 'are' : 'is'} typing...
-        </> : SEVERAL_USERS_TYPING)
+                    : id;
+            })} {users.length > 1 ? "are" : "is"} typing...
+        </> : SEVERAL_USERS_TYPING);
 
         return stuff;
     },
     roleGroupColor({ id, count, title, guildId, ...args }) {
         const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id]
+        const role = guild?.roles[id];
 
         return <span style={{
             color: role?.colorString,
