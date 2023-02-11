@@ -24,8 +24,8 @@ import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextIn
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
+import { createGif } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
-import { createGif } from "./utils/getGif";
 
 const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
