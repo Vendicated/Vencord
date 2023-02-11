@@ -19,6 +19,7 @@
 import { Settings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, Forms } from "@webpack/common";
@@ -72,6 +73,8 @@ enum ActivityFlag {
 }
 
 const applicationId = "1043533871037284423";
+
+const logger = new Logger("LastFMRichPresence");
 
 const presenceStore = findByPropsLazy("getLocalPresence");
 const assetManager = mapMangledModuleLazy(
@@ -173,7 +176,7 @@ export default definePlugin({
                 imageUrl: trackData.image?.find(x => x.size === "large")?.["#text"]
             };
         } catch (e) {
-            console.log("Failed to query Last.fm API", e);
+            logger.error(`Failed to query Last.fm API\n${e}`);
             // will clear the rich presence if API fails
             return;
         }
