@@ -58,10 +58,6 @@ export default definePlugin({
                     match: /(function\((.)\).+?roleIcon.{5,20}null,).," \u2014 ",.\]/,
                     replace: "$1$self.roleGroupColor(e)]"
                 },
-                {
-                    match: /n\.isShown;/,
-                    replace: "$&$self.testing(e,n,f,h,c,s);"
-                }
             ],
             predicate: () => settings.store.memberList,
         },
