@@ -19,10 +19,7 @@
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { GuildStore } from "@webpack/common";
-
-const MemberStore = findByPropsLazy("getMember");
+import { GuildMemberStore, GuildStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -71,7 +68,7 @@ export default definePlugin({
             return null;
         }
 
-        const member = MemberStore.getMember(channel.guild_id, userId);
+        const member = GuildMemberStore.getMember(channel.guild_id, userId);
         if (!member) {
             return null;
         }
