@@ -27,6 +27,11 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in chat mentions"
     },
+    memberList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in member list roles"
+    }
 });
 
 export default definePlugin({
@@ -43,7 +48,7 @@ export default definePlugin({
                     replace: "$&,color:$self.getUserColor($1, $2)"
                 }
             ],
-            predicate: () => settings.store.chatMentions
+            predicate: () => settings.store.chatMentions,
         },
         // Member List Role Names
         {
@@ -58,6 +63,7 @@ export default definePlugin({
                     replace: "$&$self.testing(e,n,f,h,c,s);"
                 }
             ],
+            predicate: () => settings.store.memberList,
         },
     ],
     settings,
