@@ -40,7 +40,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish],
+    authors: [Devs.KingFish, Devs.lewisakura],
     description: "Adds the top role color anywhere possible",
     patches: [
         // Chat Mentions
