@@ -21,5 +21,6 @@ import { getUrlExtension } from "./getUrlExtension";
 
 export function getFormat(url: string) {
     const extension = getUrlExtension(url);
-    return url.startsWith("https://media.tenor") || extension === "mp4" || extension == null ? Format.VIDEO : Format.IMAGE;
+    const videoExtensions = ["mp4", "ogg", "webm", "avi", "wmv", "flv", "mov", "mkv", "m4v"];
+    return url.startsWith("https://media.tenor") || extension == null || videoExtensions.includes(extension) ? Format.VIDEO : Format.IMAGE;
 }

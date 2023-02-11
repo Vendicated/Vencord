@@ -25,7 +25,7 @@ import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextIn
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
 import { getFormat } from "./utils/getFormat";
-import { uuidv4 } from "./utils/uuidv4";
+import { createGif } from "./utils/getGif";
 
 const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
@@ -169,22 +169,11 @@ export default definePlugin({
 
 
     makeMenu(url: string, target: HTMLElement) {
-        if (target == null || target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
-            return null;
+        if (!target) return null;
+        // youtube video url is a message link for some reason
+        const gif = createGif(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target.closest("li"));
 
-        // oh my
-        const src = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.src ?? url;
-
-        const height = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.height ?? target.clientHeight;
-        const width = (target.nextElementSibling?.firstElementChild as HTMLVideoElement)?.width ?? target.clientWidth;
-
-        const gif: Gif = {
-            id: uuidv4(),
-            height,
-            width,
-            src,
-            url
-        };
+        if (!gif) return null;
 
         return (
             <Menu.MenuItem
