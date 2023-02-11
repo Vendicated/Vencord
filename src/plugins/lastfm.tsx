@@ -31,7 +31,7 @@ interface ActivityAssets {
 }
 
 
-type ActivityButton = {
+interface ActivityButton {
     label: string;
     url: string;
 };
@@ -156,7 +156,7 @@ export default definePlugin({
                 user: this.settings.username,
                 limit: "1",
                 format: "json"
-            }).toString();
+            });
 
             const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
             const trackData = (await response.json()).recenttracks?.track[0];
@@ -170,7 +170,7 @@ export default definePlugin({
                 album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 url: trackData.url,
-                imageUrl: (trackData.image || []).filter(x => x.size === "large")[0]?.["#text"]
+                imageUrl: trackData.image?.find(x => x.size === "large")?.["#text"]
             };
         } catch (e) {
             console.log("Failed to query Last.fm API", e);
@@ -203,7 +203,7 @@ export default definePlugin({
             small_text: "Last.fm",
         };
 
-        let buttons: ActivityButton[] = [
+        const buttons: ActivityButton[] = [
             {
                 label: "View Song",
                 url: trackData.url,
