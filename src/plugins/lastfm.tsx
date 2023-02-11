@@ -161,8 +161,11 @@ export default definePlugin({
                 format: "json"
             });
 
-            const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            const trackData = (await response.json()).recenttracks?.track[0];
+            const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+            const json = await res.json();
+            if (json.error)
+                throw new Error(json.message);
+            const trackData = json.recenttracks?.track[0];
 
             if (!trackData) return;
             if (!trackData["@attr"]?.nowplaying) return;
