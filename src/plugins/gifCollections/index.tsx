@@ -115,7 +115,6 @@ export default definePlugin({
     settings,
 
     start() {
-        console.log("updated???");
         CollectionManager.refreshCacheCollection();
     },
     CollectionManager,
@@ -150,7 +149,6 @@ export default definePlugin({
         const res = props.name.split(":");
         return res.length > 1 ? res[1] : res[0];
     },
-
 
     insertCollections(instance: { props: Props; }) {
         try {
