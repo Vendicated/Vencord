@@ -29,12 +29,12 @@ const settings = definePluginSettings({
     chatMentions: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in chat mentions."
+        description: "Show role colors in chat mentions"
     },
     typingIndicator: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show colors in the typing indicator. Incompatible with TypingTweaks."
+        description: "Show colors in the typing indicator (incompatible with TypingTweaks)"
     },
 });
 
