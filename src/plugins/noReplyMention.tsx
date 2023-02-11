@@ -51,7 +51,7 @@ export default definePlugin({
             replacement: {
                 match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
                 replace:
-                    "CREATE_PENDING_REPLY:function($1){$1.shouldMention=Vencord.Plugins.plugins.NoReplyMention.shouldMention($1);",
+                    "CREATE_PENDING_REPLY:function($1){$1.shouldMention=$self.shouldMention($1);",
             },
         },
     ],

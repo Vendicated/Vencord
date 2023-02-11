@@ -112,7 +112,6 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 
         if (file) {
             try {
-                console.log(file);
                 await importSettings(new TextDecoder().decode(file.data));
                 if (showToast) toastSuccess();
             } catch (err) {
