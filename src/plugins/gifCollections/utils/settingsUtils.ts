@@ -121,7 +121,7 @@ export async function uploadGifCollections(showToast = true): Promise<void> {
 
 const toastSuccess = () => Toasts.show({
     type: Toasts.Type.SUCCESS,
-    message: "Settings successfully imported. Restart to apply changes!",
+    message: "Settings successfully imported.",
     id: Toasts.genId()
 });
 

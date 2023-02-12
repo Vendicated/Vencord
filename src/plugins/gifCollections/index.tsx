@@ -20,7 +20,6 @@ import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import { uploadSettingsBackup } from "@utils/settingsSync";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
@@ -30,7 +29,7 @@ import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
 import { getGifByElement, getGifByMessage } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
-import { downloadCollections } from "./utils/settingsUtils";
+import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
 
 const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
@@ -48,7 +47,7 @@ const settings = definePluginSettings({
                 confirmText: "Import",
                 confirmColor: findByProps("colorRed")?.colorRed,
                 cancelText: "Nevermind",
-                onConfirm: async () => uploadSettingsBackup()
+                onConfirm: async () => uploadGifCollections()
 
             })}>
                 Import Collections
