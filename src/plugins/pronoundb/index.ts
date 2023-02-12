@@ -38,7 +38,7 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, Vencord.Plugins.plugins.PronounDB.PronounsChatComponent(e)]"
+                replace: "[$1, $self.PronounsChatComponent(e)]"
             }
         },
         // Hijack the discord pronouns section (hidden without experiment) and add a wrapper around the text section
@@ -46,7 +46,7 @@ export default definePlugin({
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
                 match: /\(0,.\.jsx\)\((?<PronounComponent>.{1,2}\..),(?<pronounProps>{currentPronouns.+?:(?<fullProps>.{1,2})\.pronouns.+?})\)/,
-                replace: "$<fullProps>&&Vencord.Plugins.plugins.PronounDB.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
+                replace: "$<fullProps>&&$self.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
             }
         },
         // Make pronouns experiment be enabled by default

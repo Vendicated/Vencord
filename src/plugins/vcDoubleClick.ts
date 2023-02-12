@@ -42,7 +42,7 @@ export default definePlugin({
                 // voice/stage channels
                 {
                     match: /onClick:function\(\)\{(e\.handleClick.+?)}/g,
-                    replace: "onClick:function(){Vencord.Plugins.plugins.VoiceChatDoubleClick.schedule(()=>{$1},e)}",
+                    replace: "onClick:function(){$self.schedule(()=>{$1},e)}",
                 },
             ],
         },
