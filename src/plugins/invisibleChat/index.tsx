@@ -17,11 +17,13 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, Tooltip } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -105,6 +107,13 @@ function ChatBarIcon() {
     );
 }
 
+const settings = definePluginSettings({
+    savedPasswords: {
+        type: OptionType.STRING,
+        default: "password, Password",
+        description: "Saved Passwords (Seperated with a , )"
+    }
+});
 
 export default definePlugin({
     name: "InvisibleChat",
@@ -133,7 +142,7 @@ export default definePlugin({
     URL_REGEX: new RegExp(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
-
+    settings,
     async start() {
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
@@ -145,7 +154,12 @@ export default definePlugin({
                     icon: this.popOverIcon,
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
-                    onClick: () => buildDecModal({ message })
+                    onClick: async () => {
+                        await iteratePasswords(message).then((res: string | false) => {
+                            if (res) return void this.buildEmbed(message, res);
+                            return void buildDecModal({ message });
+                        });
+                    }
                 }
                 : null;
         });
@@ -213,7 +227,31 @@ export function encrypt(secret: string, password: string, cover: string): string
     return steggo.hide(secret + "\u200b", password, cover);
 }
 
-export function decrypt(secret: string, password: string): string {
-    return steggo.reveal(secret, password).replace("\u200b", "");
+export function decrypt(secret: string, password: string, removeIndicator: boolean): string {
+    const decrypted = steggo.reveal(secret, password);
+    return removeIndicator ? decrypted.replace("\u200b", "") : decrypted;
 }
 
+export function isCorrectPassword(result: string): boolean {
+    return result.endsWith("\u200b");
+}
+
+export async function iteratePasswords(message: Message): Promise<string | false> {
+    const passwords = settings.store.savedPasswords.split(", ");
+
+    if (!message || !message?.content || !passwords || !passwords.length) return false;
+
+    let { content } = message;
+
+    // we use an extra variable so we dont have to edit the message content directly
+    if (message.content.match(/^\W/)) content = `d ${message.content}d`;
+
+    for (let i = 0; i < passwords.length; i++) {
+        const result = decrypt(content, passwords[i], false);
+        if (isCorrectPassword(result)) {
+            return result;
+        }
+    }
+
+    return false;
+}
