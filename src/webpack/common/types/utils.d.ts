@@ -31,20 +31,6 @@ export interface FluxDispatcher {
     unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
 }
 
-declare class FluxStore {
-    constructor(dispatcher: FluxDispatcher, eventHandlers?: Partial<Record<FluxEvents, (data: any) => void>>);
-
-    emitChange(): void;
-    getDispatchToken(): string;
-    getName(): string;
-    initialize(): void;
-    initializeIfNeeded(): void;
-}
-
-export interface Flux {
-    Store: typeof FluxStore;
-}
-
 export type Parser = Record<
     | "parse"
     | "parseTopic"

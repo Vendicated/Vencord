@@ -94,7 +94,7 @@ export default definePlugin({
         find: ",reactionRef:",
         replacement: {
             match: /((.)=(.{1,3})\.hideCount)(,.+?reactionCount.+?\}\))/,
-            replace: "$1,whoReactedProps=$3$4,$2?null:Vencord.Plugins.plugins.WhoReacted.renderUsers(whoReactedProps)"
+            replace: "$1,whoReactedProps=$3$4,$2?null:$self.renderUsers(whoReactedProps)"
         }
     }],
 

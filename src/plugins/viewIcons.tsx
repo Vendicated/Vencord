@@ -79,7 +79,7 @@ export default new class ViewIcons implements PluginDef {
                 },
                 {
                     match: /(id:"leave-guild".{0,200}),(\(0,.{1,3}\.jsxs?\).{0,200}function)/,
-                    replace: "$1,Vencord.Plugins.plugins.ViewIcons.buildGuildContextMenuEntries(_guild),$2"
+                    replace: "$1,$self.buildGuildContextMenuEntries(_guild),$2"
                 }
             ]
         }

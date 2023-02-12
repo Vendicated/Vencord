@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+let styleStr = "";
 
-import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
-import definePlugin from "@utils/types";
+export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
 
-export default definePlugin({
-    name: "StartupTimings",
-    description: "Adds Startup Timings to the Settings menu",
-    authors: [Devs.Megu],
-    patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
-        replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
-        }
-    }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
-});
+for (const dir of ["top", "bottom", "left", "right"] as const) {
+    for (const size of [8, 16, 20] as const) {
+        const cl = `vc-m-${dir}-${size}`;
+        Margins[`${dir}${size}`] = cl;
+        styleStr += `.${cl}{margin-${dir}:${size}px;}`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () =>
+    document.head.append(Object.assign(document.createElement("style"), {
+        textContent: styleStr,
+        id: "vencord-margins"
+    })), { once: true });
