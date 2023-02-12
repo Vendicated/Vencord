@@ -239,7 +239,7 @@ export function isCorrectPassword(result: string): boolean {
 export async function iteratePasswords(message: Message): Promise<string | false> {
     const passwords = settings.store.savedPasswords.split(",").map(s => s.trim());
 
-    if (!message || !message?.content || !passwords || !passwords.length) return false;
+    if (!message?.content || !passwords?.length) return false;
 
     let { content } = message;
 
