@@ -18,16 +18,17 @@
 
 import { definePluginSettings, migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/proxyLazy.js";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
+import { find, findByPropsLazy, waitFor, } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-let Permissions: Record<string, bigint>, computePermissions: ({ ...args }) => bigint, Tags: Record<string, number>;
-waitFor(["SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS"], m => Permissions = m);
 // PermissionStore.computePermissions is not the same function and doesn't work here
+let computePermissions: ({ ...args }) => bigint;
 waitFor(["computePermissions", "canEveryoneRole"], m => ({ computePermissions } = m));
-waitFor(m => m.Types?.[0] === "BOT", m => Tags = m.Types);
+const Permissions: Record<string, bigint> = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS");
+const Tags: Record<string, number> = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types);
 
 const isWebhook = (message, user) => message?.webhookId && user.isNonUserBot();
 
