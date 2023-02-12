@@ -28,9 +28,10 @@ export const DATA_COLLECTION_NAME = "gif-collections-collections";
 // this is here bec async + react class component dont play nice and stutters happen. IF theres a better way of doing it pls let me know
 export let cache_collections: Collection[] = [];
 
+export const getCollections = async () => await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
 
 export const getCollection = async (name: string) => {
-    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collections = await getCollections();
     return collections.find(c => c.name === name);
 };
 
@@ -38,7 +39,7 @@ export const getCachedCollection = (name: string) => cache_collections.find(c =>
 
 export const createCollection = async (name: string, gifs: Gif[]) => {
 
-    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collections = await getCollections();
     const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
     if (duplicateCollection)
         return Toasts.show({
@@ -65,7 +66,7 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
 };
 
 export const addToCollection = async (name: string, gif: Gif) => {
-    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collections = await getCollections();
     const collectionIndex = collections.findIndex(c => c.name === name);
     if (collectionIndex === -1) return console.warn("collection not found");
 
@@ -79,7 +80,7 @@ export const addToCollection = async (name: string, gif: Gif) => {
 };
 
 export const removeFromCollection = async (id: string) => {
-    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collections = await getCollections();
     const collectionIndex = collections.findIndex(c => c.gifs.some(g => g.id === id));
     if (collectionIndex === -1) return console.warn("collection not found");
 
@@ -97,7 +98,7 @@ export const removeFromCollection = async (id: string) => {
 
 export const deleteCollection = async name => {
 
-    const collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    const collections = await getCollections();
     const col = collections.filter(c => c.name !== name);
     await DataStore.set(DATA_COLLECTION_NAME, col);
     await refreshCacheCollection();
@@ -105,6 +106,6 @@ export const deleteCollection = async name => {
 
 
 export const refreshCacheCollection = async () => {
-    cache_collections = await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+    cache_collections = await getCollections();
 };
 

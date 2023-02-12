@@ -20,7 +20,9 @@ import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { uploadSettingsBackup } from "@utils/settingsSync";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByProps } from "@webpack";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -28,12 +30,37 @@ import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
 import { getGifByElement, getGifByMessage } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
+import { downloadCollections } from "./utils/settingsUtils";
 
 const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
         description: "The image / gif that will be shown when a collection has no images / gifs",
         type: OptionType.STRING,
         default: "https://i.imgur.com/TFatP8r.png"
+    },
+    importGifs: {
+        type: OptionType.COMPONENT,
+        description: "Import Collections",
+        component: () =>
+            <Button onClick={() => Alerts.show({
+                title: "Are you sure?",
+                body: "Importing collections will overwrite your current collections.",
+                confirmText: "Import",
+                confirmColor: findByProps("colorRed")?.colorRed,
+                cancelText: "Nevermind",
+                onConfirm: async () => uploadSettingsBackup()
+
+            })}>
+                Import Collections
+            </Button>,
+    },
+    exportGifs: {
+        type: OptionType.COMPONENT,
+        description: "Export Collections",
+        component: () =>
+            <Button onClick={downloadCollections}>
+                Export Collections
+            </Button>
     }
 });
 
