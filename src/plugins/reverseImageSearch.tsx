@@ -32,34 +32,35 @@ const Engines = {
 export default definePlugin({
     name: "ReverseImageSearch",
     description: "Adds ImageSearch to image context menus",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Nuckyz],
     dependencies: ["MenuItemDeobfuscatorAPI"],
-    patches: [{
-        find: "open-native-link",
-        replacement: {
-            match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-            replace: (m, src) =>
-                `${m},Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${src}, arguments[2])`
-        }
-    }, {
-        // pass the target to the open link menu so we can check if it's an image
-        find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
-        replacement: [
-            {
-                match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
-                replace: "$&,_vencordTarget:arguments[0].target"
-            },
-            {
-                // var f = props.itemHref, .... MakeNativeMenu(null != f ? f : blah)
-                match: /(\i)=\i\.itemHref,.+?\(null!=\1\?\1:.{1,10}(?=\))/,
-                replace: "$&,arguments[0]._vencordTarget"
-            }
-        ]
-    }],
+    patches: [
+        {
+            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+            replacement: [
+                {
+                    match: /(?<=(?<target>\i)\.getAttribute\("data-type"\).+?favoriteableType:\i,)/,
+                    replace: 'reverseImageSearchType:$<target>.getAttribute("data-role"),'
+                },
+                {
+                    match: /var \i=(?<props>\i)\.message,\i=\i\.channel,\i=\i\.textSelection,\i=\i\.favoriteableType.+?(?<itemHref>\i)=\i\.itemHref,(?<itemSrc>\i)=\i\.itemSrc.+?]}\)}/,
+                    replace: (mod, props, itemHref, itemSrc) => {
+                        mod = mod.replace(RegExp(`(?<=${props}\\.navId,)`), `reverseImageSearchType=${props}.reverseImageSearchType,`);
+                        const targetItems = mod.match(RegExp(`(?<=,).{1,2}(?==\\(0,.{1,2}\\..{1,2}\\)\\(null!=${itemHref})`));
 
-    makeMenu(src: string, target: HTMLElement) {
-        if (target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
-            return null;
+                        if (targetItems) {
+                            mod = mod.replace(RegExp(`(?<=children:${targetItems[0]})`), `.concat(Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${itemHref}??${itemSrc},reverseImageSearchType)).filter(Boolean)`);
+                        }
+
+                        return mod;
+                    }
+                }
+            ]
+        }
+    ],
+
+    makeMenu(src: string, type: string) {
+        if (type !== "img") return null;
 
         return (
             <Menu.MenuItem

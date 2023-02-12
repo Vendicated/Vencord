@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings, Settings } from "@api/settings";
+import { migratePluginSettings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
-import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -179,9 +178,10 @@ migratePluginSettings("EmoteCloner", "EmoteYoink");
 export default definePlugin({
     name: "EmoteCloner",
     description: "Adds a Clone context menu item to emotes to clone them your own server",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Nuckyz],
     dependencies: ["MenuItemDeobfuscatorAPI"],
 
+<<<<<<< HEAD
     patches: [{
         // Literally copy pasted from ReverseImageSearch lol
         find: "open-native-link",
@@ -189,31 +189,42 @@ export default definePlugin({
             match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
             replace: "$&,$self.makeMenu(arguments[2])"
         },
+=======
+    patches: [
+        {
+            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+            replacement: [
+                {
+                    match: /(?<=(?<target>\i)\.getAttribute\("data-type"\).+?favoriteableType:\i,)/,
+                    replace: "emoteClonerDataAlt:$<target>.alt,"
+                },
+                {
+                    match: /var \i=(?<props>\i)\.message,\i=\i\.channel,\i=\i\.textSelection,(?<favoriteableType>\i)=\i\.favoriteableType,(?<favoriteableId>\i)=\i\.favoriteableId.+?(?<itemHref>\i)=\i\.itemHref,(?<itemSrc>\i)=\i\.itemSrc.+?]}\)}/,
+                    replace: (mod, props, favoriteableType, favoriteableId, itemHref, itemSrc) => {
+                        mod = mod.replace(RegExp(`(?<=${props}\\.navId,)`), `emoteClonerDataAlt=${props}.emoteClonerDataAlt,`);
+                        const targetItems = mod.match(RegExp(`(?<=,).{1,2}(?==\\(0,.{1,2}\\..{1,2}\\)\\(null!=${itemHref})`));
+>>>>>>> 5f762e0 (Fix Emote Cloner)
 
-    },
-    // Also copy pasted from Reverse Image Search
-    {
-        // pass the target to the open link menu so we can grab its data
-        find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
-        predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
-        noWarn: true,
-        replacement: {
-            match: /(?<props>.).onHeightUpdate.{0,200}(.)=(.)=.\.url;.+?\(null!=\3\?\3:\2[^)]+/,
-            replace: "$&,$<props>.target"
+                        if (targetItems) {
+                            mod = mod.replace(RegExp(`(?<=children:${targetItems[0]})`), `.concat(Vencord.Plugins.plugins.EmoteCloner.makeMenu(${favoriteableId},emoteClonerDataAlt,${itemHref}??${itemSrc},${favoriteableType})).filter(Boolean)`);
+                        }
+
+                        return mod;
+                    }
+                }
+            ]
         }
-    }],
+    ],
 
-    makeMenu(htmlElement: HTMLImageElement) {
-        if (htmlElement?.dataset.type !== "emoji")
-            return null;
+    makeMenu(id: string, alt: string, src: string, type: string) {
+        if (type !== "emoji") return null;
 
-        const { id } = htmlElement.dataset;
-        const name = htmlElement.alt.match(/:(.*)(?:~\d+)?:/)?.[1];
+        const name = alt.match(/:(.*)(?:~\d+)?:/)?.[1];
 
         if (!name || !id)
             return null;
 
-        const isAnimated = new URL(htmlElement.src).pathname.endsWith(".gif");
+        const isAnimated = new URL(src).pathname.endsWith(".gif");
 
         return <Menu.MenuItem
             id="emote-cloner"
