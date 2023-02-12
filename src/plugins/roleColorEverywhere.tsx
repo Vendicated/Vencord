@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -44,7 +44,7 @@ export default definePlugin({
             find: 'className:"mention"',
             replacement: [
                 {
-                    match: /user:(.),channelId:(.).{0,300}?"@".concat\(.+?\)/,
+                    match: /user:(\i),channelId:(\i).{0,300}?"@"\.concat\(.+?\)/,
                     replace: "$&,color:$self.getUserColor($1, $2)"
                 }
             ],
@@ -55,8 +55,8 @@ export default definePlugin({
             find: ".memberGroupsPlaceholder",
             replacement: [
                 {
-                    match: /(function\((.)\).+?roleIcon.{5,20}null,).," \u2014 ",.\]/,
-                    replace: "$1$self.roleGroupColor(e)]"
+                    match: /(memo\(\(function\((.)\).{0,500}CHANNEL_MEMBERS_A11Y_LABEL.+?roleIcon.{5,20}null,).," \u2014 ",.\]/,
+                    replace: "$1$self.roleGroupColor($2)]"
                 },
             ],
             predicate: () => settings.store.memberList,
@@ -65,7 +65,7 @@ export default definePlugin({
     settings,
 
     getColor(userId, channelId) {
-        const channel = Vencord.Webpack.Common.ChannelStore.getChannel(channelId);
+        const channel = ChannelStore.getChannel(channelId);
         if (!channel) {
             return null;
         }
