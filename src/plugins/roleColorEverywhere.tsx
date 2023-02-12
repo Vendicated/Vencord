@@ -25,12 +25,14 @@ const settings = definePluginSettings({
     chatMentions: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in chat mentions"
+        description: "Show role colors in chat mentions",
+        restartNeeded: true
     },
     memberList: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in member list role headers"
+        description: "Show role colors in member list role headers",
+        restartNeeded: true
     }
 });
 
