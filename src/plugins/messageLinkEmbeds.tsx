@@ -206,7 +206,6 @@ export default definePlugin({
         const { message }: { message: Message; } = props;
         // @ts-ignore
         const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
-        embeddedBy.push(message.id);
 
         const accessories = [] as (JSX.Element | null)[];
 
@@ -239,7 +238,7 @@ export default definePlugin({
                 }
             }
             const messageProps: MessageEmbedProps = {
-                message: withEmbeddedBy(linkedMessage, embeddedBy),
+                message: withEmbeddedBy(linkedMessage, [...embeddedBy, message.id]),
                 channel: linkedChannel,
                 guildID
             };
