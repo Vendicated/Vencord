@@ -18,9 +18,10 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { requestMissingGuildMembers } from "@utils/guild";
+import { useForceUpdater } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Menu, Text, UserStore, useState } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, Menu, Text, useEffect, UserStore, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 import { getPermissionString } from "../formatting";
@@ -40,16 +41,26 @@ export interface RoleOrUserPermission {
 
 const Permissions: Record<string, bigint> = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-async function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
-    const success = await requestMissingGuildMembers(permissions.filter(permission => permission.type === PermissionType.User).map(({ id }) => id), guild.id);
-
-    if (success) openModal(modalProps => <RolesAndUsersPermissions permissions={permissions} guild={guild} modalProps={modalProps} header={header} />);
+function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
+    return openModal(modalProps => <RolesAndUsersPermissions permissions={permissions} guild={guild} modalProps={modalProps} header={header} />);
 }
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     permissions.sort(({ type: a }, { type: b }) => a - b);
 
-    const [selectedItem, selectItem] = useState<string | null>(permissions[0]?.id ?? null);
+    const forceUpdate = useForceUpdater();
+    let requestSucess: boolean | undefined = undefined;
+
+    useEffect(() => {
+        requestMissingGuildMembers(permissions.filter(permission => permission.type === PermissionType.User).map(({ id }) => id), guild.id)
+            .then(sucess => {
+                requestSucess = sucess;
+                forceUpdate();
+            });
+    }, []);
+
+    const [selectedItemIndex, selectItem] = useState<number>(0);
+    const selectedItem = permissions[selectedItemIndex];
 
     return (
         <ModalRoot
@@ -61,37 +72,46 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent>
-                {selectedItem === null && (
+                {selectedItem === undefined && (
                     <div className="permviewer-perms-no-perms">
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
                     </div>
                 )}
 
-                {selectedItem !== null && (
+                {selectedItem !== undefined && (
                     <div className="permviewer-perms-container">
                         <div className="permviewer-perms-list">
-                            {permissions.map(permission => (
-                                <div
-                                    className={["permviewer-perms-list-item", selectedItem === permission.id ? "permviewer-perms-list-item-active" : ""].filter(Boolean).join(" ")}
-                                    onClick={() => selectItem(permission.id)}
-                                    onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
-                                >
-                                    {permission.type === PermissionType.Role && (
-                                        <span className="permviewer-perms-role-circle" style={{ backgroundColor: guild.roles[permission.id].colorString ?? "var(--primary-dark-300)" }} />
-                                    )}
-                                    {permission.type === PermissionType.User && (
-                                        <img className="permviewer-perms-user-img" src={UserStore.getUser(permission.id).getAvatarURL(undefined, undefined, false)} />
-                                    )}
-                                    <Text variant="text-md/normal">{permission.type === PermissionType.Role ? guild.roles[permission.id].name : UserStore.getUser(permission.id).tag}</Text>
-                                </div>
-                            ))}
+                            {permissions.map((permission, index) => {
+                                const user = UserStore.getUser(permission.id);
+                                const role = guild.roles[permission.id];
+
+                                return (
+                                    <div
+                                        className={["permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : ""].filter(Boolean).join(" ")}
+                                        onClick={() => selectItem(index)}
+                                        onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
+                                    >
+                                        {permission.type === PermissionType.Role && (
+                                            <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-dark-300)" }} />
+                                        )}
+                                        {permission.type === PermissionType.User && user !== undefined && (
+                                            <img className="permviewer-perms-user-img" src={user.getAvatarURL(undefined, undefined, false)} />
+                                        )}
+                                        <Text variant="text-md/normal">{
+                                            permission.type === PermissionType.Role
+                                                ? role?.name ?? "Unknown Role"
+                                                : user?.tag ?? requestSucess === undefined ? "Loading User..." : "Unknown User"
+                                        }</Text>
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="permviewer-perms-perms">
                             {Object.entries(Permissions).map(([permissionName, bit]) => (
                                 <div className="permviewer-perms-perms-item">
                                     <div className="permviewer-perms-perms-item-icon">
-                                        {((permissionsData: RoleOrUserPermission) => {
-                                            const { permissions, overwriteAllow, overwriteDeny } = permissionsData;
+                                        {(() => {
+                                            const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
                                             let permissionState: boolean | null;
 
@@ -157,7 +177,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 }
                                             }
 
-                                        })(permissions.find(permission => permission.id === selectedItem)!)}
+                                        })()}
                                     </div>
                                     <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
                                 </div>
@@ -182,6 +202,8 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 id="view-as-role"
                 label="View As Role"
                 action={() => {
+                    if (!guild.roles[roleId]) return;
+
                     onClose();
 
                     FluxDispatcher.dispatch({ type: "IMPERSONATE_UPDATE", guildId: guild.id, data: { type: "ROLES", roles: { [roleId]: guild.roles[roleId] } } });
