@@ -37,6 +37,7 @@ import {
 import { Channel, Guild, Message } from "discord-types/general";
 
 let messageCache: { [id: string]: { message?: Message, fetched: boolean; }; } = {};
+const messageLinkHierarchy: { [id: string]: string[] } = {};
 
 let AutomodEmbed: React.ComponentType<any>,
     Embed: React.ComponentType<any>,
@@ -133,6 +134,19 @@ const computeWidthAndHeight = (width: number, height: number) => {
     return { width: newWidth, height: newHeight };
 };
 
+function checkRecursion(id: string, rootId: string | null = null, depth = 0): boolean {
+    rootId ??= id;
+    if (depth >= 16)
+        return true;
+    for (const parent of messageLinkHierarchy[id] ?? []) {
+        if (parent === rootId)
+            return true;
+        if (checkRecursion(parent, rootId, depth + 1))
+            return true;
+    }
+    return false;
+}
+
 interface MessageEmbedProps {
     message: Message;
     channel: Channel;
@@ -200,6 +214,11 @@ export default definePlugin({
         let match = null as RegExpMatchArray | null;
         while ((match = this.messageLinkRegex.exec(message.content!)) !== null) {
             const [_, guildID, channelID, messageID] = match;
+
+            // Prevent an infinite loop by checking if this message is linked to itself or another parent message
+            (messageLinkHierarchy[messageID] ??= []).push(message.id);
+            if (checkRecursion(messageID))
+                continue;
 
             const linkedChannel = ChannelStore.getChannel(channelID);
             if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
