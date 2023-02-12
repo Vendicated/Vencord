@@ -24,7 +24,7 @@ import { Message } from "discord-types/general";
 import { Gif } from "../types";
 import { uuidv4 } from "./uuidv4";
 
-export function createGif(url: string, listItem?: HTMLLIElement | null): Gif | null {
+export function getGifByElement(url: string, listItem?: HTMLLIElement | null): Gif | null {
     if (!listItem || !listItem.id) return null;
 
     const [channelId, messageId] = listItem.id.split("-").slice(2);
@@ -34,16 +34,16 @@ export function createGif(url: string, listItem?: HTMLLIElement | null): Gif | n
     const message = MessageStore.getMessage(channelId, messageId);
     if (!message || !message.embeds.length && !message.attachments.length) return null;
 
-    return getGif(url, message);
+    return getGifByMessage(url, message);
 }
 
 
-function getGif(url: string, message: Message): Gif | null {
+export function getGifByMessage(url: string, message: Message): Gif | null {
     if (!message.embeds.length && !message.attachments.length)
         return null;
 
     // find embed with matching url or image/thumbnail url
-    const embed = message.embeds.find(e => e.url === url || e.image?.url === url || e.image?.proxyURL === url || e.thumbnail?.proxyURL === url); // no point in checking thumbnail url because no way of getting it eh. discord renders the img element with proxy urls
+    const embed = message.embeds.find(e => e.url === url || e.image?.url === url || e.image?.proxyURL === url || e.video?.proxyURL === url || e.thumbnail?.proxyURL === url); // no point in checking thumbnail/video url because no way of getting it eh. discord renders the img/video element with proxy urls
     if (embed) {
         if (embed.image)
             return {

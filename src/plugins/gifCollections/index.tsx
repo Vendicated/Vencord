@@ -16,15 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
-import { createGif } from "./utils/createGif";
+import { getGifByElement, getGifByMessage } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
 
 const settings = definePluginSettings({
@@ -86,6 +88,18 @@ export default definePlugin({
                 };`
             }
         },
+
+        {
+            // Stolen from message logger
+            find: "id:\"remove-reactions\"",
+            replacement: [
+                {
+                    // adds our contextmenu after the delete / speak message menu item
+                    match: /\[(""===.{1,200})\](.{1,10},)/,
+                    replace: "[$1, Vencord.Plugins.plugins['Gif Collection'].makeMenu(arguments[0].message, arguments[0]._vencordTarget)]$2"
+                }
+            ]
+        },
         // Ven goated ong on me
         {
             find: "open-native-link",
@@ -98,6 +112,8 @@ export default definePlugin({
         {
             // pass the target to the open link menu so we can check if it's an image
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+            predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
+            noWarn: true,
             replacement: [
                 {
                     match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
@@ -185,11 +201,21 @@ export default definePlugin({
     },
 
 
+    // naming things is hard ok
+    getVideoGif(message: Message, target: Element) {
+        const videoElement = target.closest('[class^="imageWrapper"]')?.querySelector("video");
+        if (!target || !message || !videoElement || !message.embeds.length || !message.embeds.find(e => e.video?.proxyURL === videoElement.src)) return null;
+        return getGifByMessage(videoElement.src, message);
+    },
 
-    makeMenu(url: string, target: HTMLElement) {
-        if (!target) return null;
-        // youtube video url is a message link for some reason
-        const gif = createGif(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target.closest("li"));
+    makeMenu(urlOrMessage: string | Message, target: HTMLElement) {
+        if (!urlOrMessage || !target) return null;
+        let gif: Gif;
+        if (typeof urlOrMessage === "string")
+            // youtube video url is a message link for some reason
+            gif = getGifByElement(urlOrMessage.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? urlOrMessage : urlOrMessage, target.closest("li"))!;
+        else
+            gif = this.getVideoGif(urlOrMessage, target)!;
 
         if (!gif) return null;
 
