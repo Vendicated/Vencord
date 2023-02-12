@@ -55,7 +55,7 @@ export default definePlugin({
             find: ".memberGroupsPlaceholder",
             replacement: [
                 {
-                    match: /(memo\(\(function\((.)\).{0,500}CHANNEL_MEMBERS_A11Y_LABEL.+?roleIcon.{5,20}null,).," \u2014 ",.\]/,
+                    match: /(memo\(\(function\((.)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
                     replace: "$1$self.roleGroupColor($2)]"
                 },
             ],
