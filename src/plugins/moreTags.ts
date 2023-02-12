@@ -16,17 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
+import { definePluginSettings, migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-import { Settings } from "../Vencord";
-
 let Permissions: Record<string, bigint>, computePermissions: ({ ...args }) => bigint, Tags: Record<string, number>;
 waitFor(["SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS"], m => Permissions = m);
+// PermissionStore.computePermissions is not the same function and doesn't work here
 waitFor(["computePermissions", "canEveryoneRole"], m => ({ computePermissions } = m));
 waitFor(m => m.Types?.[0] === "BOT", m => Tags = m.Types);
 
@@ -81,60 +80,43 @@ const addTagVar = (name: string, types: string) => `${types}[${types}.${name}=${
 const addTagCase = (name: string, displayName: string, types: string, textVar: string) =>
     `case ${types}.${name}:${textVar}=${displayName};break;`;
 
-// because channel id isn't available in user profiles by default where the tag is rendered
-const passChannelIdDownProps = [
-    {
-        find: ".hasAvatarForGuild(null==",
-        replacement: {
-            match: /\.usernameSection,user/,
-            replace: ".usernameSection,moreTags_channelId:arguments[0].channelId,user"
-        }
+const settings = definePluginSettings({
+    dontShowBotTag: {
+        description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
+        type: OptionType.BOOLEAN
     },
-    {
-        find: "copyMetaData:\"User Tag\"",
-        replacement: {
-            match: /discriminatorClass:(.{1,100}),botClass:/,
-            replace: "discriminatorClass:$1,moreTags_channelId:arguments[0].moreTags_channelId,botClass:"
+    clydeSystemTag: {
+        description: "Show system tag for Clyde",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    ...Object.fromEntries(tags.map(t => [
+        `visibility_${t.name}`, {
+            description: `Show ${t.displayName} tags (${t.description})`,
+            type: OptionType.SELECT,
+            options: [{
+                label: "Always",
+                value: "always",
+                default: true
+            }, {
+                label: "Only in chat",
+                value: "chat"
+            }, {
+                label: "Only in memeber list and profiles",
+                value: "not-chat"
+            }, {
+                label: "Never",
+                value: "never"
+            }]
         }
-    }
-];
-
+    ]))
+});
 migratePluginSettings("MoreTags", "Webhook Tags");
 export default definePlugin({
     name: "MoreTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
     authors: [Devs.Cyn, Devs.TheSun],
-    options: {
-        dontShowBotTag: {
-            description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
-            type: OptionType.BOOLEAN
-        },
-        clydeSystemTag: {
-            description: "Show system tag for Clyde",
-            type: OptionType.BOOLEAN,
-            default: true
-        },
-        ...Object.fromEntries(tags.map(t => [
-            `visibility_${t.name}`, {
-                description: `Show ${t.displayName} tags (${t.description})`,
-                type: OptionType.SELECT,
-                options: [{
-                    label: "Always",
-                    value: "always",
-                    default: true
-                }, {
-                    label: "Only in chat",
-                    value: "chat"
-                }, {
-                    label: "Only in memeber list and profiles",
-                    value: "not-chat"
-                }, {
-                    label: "Never",
-                    value: "never"
-                }]
-            }
-        ]))
-    },
+    settings,
     patches: [
         // add tags to the tag list
         {
@@ -143,8 +125,7 @@ export default definePlugin({
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
                     replace: (orig, types) =>
-                        // e[e.BOT=0]="BOT";
-                        `${tags.map((t, i) =>
+                        `${tags.map(t =>
                             `${addTagVar(t.name, types)};${addTagVar(`${t.name}_OP`, types)};${addTagVar(`${t.name}_BOT`, types)};`
                         ).join("")}${orig}`
                 },
@@ -181,6 +162,21 @@ export default definePlugin({
 return type!==null?$2.botTag,type"
             }
         },
+        // pass channel id down props to be used in profiles
+        {
+            find: ".hasAvatarForGuild(null==",
+            replacement: {
+                match: /\.usernameSection,user/,
+                replace: ".usernameSection,moreTags_channelId:arguments[0].channelId,user"
+            }
+        },
+        {
+            find: 'copyMetaData:"User Tag"',
+            replacement: {
+                match: /discriminatorClass:(.{1,100}),botClass:/,
+                replace: "discriminatorClass:$1,moreTags_channelId:arguments[0].moreTags_channelId,botClass:"
+            }
+        },
         // in profiles
         {
             find: ",botType:",
@@ -189,13 +185,11 @@ return type!==null?$2.botTag,type"
                 replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
             }
         },
-        ...passChannelIdDownProps
     ],
 
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
-        // PermissionStore.computePermissions is not the same function and doesn't work here
         const permissions = computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
         return Object.entries(Permissions).map(([perm, permInt]) =>
             permissions & permInt ? perm : ""
@@ -212,7 +206,7 @@ return type!==null?$2.botTag,type"
         // "as any" cast because the Channel type doesn't have .isForumPost() yet
         channel ??= ChannelStore.getChannel(channelId) as any;
 
-        const settings = Settings.plugins[this.name];
+        const settings = this.settings.store;
         const perms = this.getPermissions(user, channel);
 
         if (location === "chat" && user.id === "1" && settings.clydeSystemTag) return Tags.OFFICIAL;

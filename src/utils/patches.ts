@@ -29,7 +29,7 @@ export function canonicalizeMatch(match: RegExp | string) {
 
 export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string) {
     if (typeof replace === "function") return replace;
-    return replace.replaceAll("$self", `Vencord.Plugins.plugins["${pluginName}"]`);
+    return replace.replaceAll("$self", `Vencord.Plugins.plugins.${pluginName}`);
 }
 
 export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {
