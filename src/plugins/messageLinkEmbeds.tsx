@@ -139,6 +139,16 @@ interface MessageEmbedProps {
     guildID: string;
 }
 
+function withEmbeddedBy(message: Message, embeddedBy: string[]) {
+    return new Proxy(message, {
+        get(_, prop) {
+            if (prop === "vencordEmbeddedBy") return embeddedBy;
+            // @ts-ignore ts so bad
+            return Reflect.get(...arguments);
+        }
+    });
+}
+
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
@@ -194,19 +204,25 @@ export default definePlugin({
 
     messageEmbedAccessory(props) {
         const { message }: { message: Message; } = props;
+        // @ts-ignore
+        const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
+        embeddedBy.push(message.id);
 
         const accessories = [] as (JSX.Element | null)[];
 
         let match = null as RegExpMatchArray | null;
         while ((match = this.messageLinkRegex.exec(message.content!)) !== null) {
             const [_, guildID, channelID, messageID] = match;
+            if (embeddedBy.includes(messageID)) {
+                continue;
+            }
 
             const linkedChannel = ChannelStore.getChannel(channelID);
             if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
                 continue;
             }
 
-            let linkedMessage = messageCache[messageID]?.message as Message;
+            let linkedMessage = messageCache[messageID]?.message;
             if (!linkedMessage) {
                 linkedMessage ??= MessageStore.getMessage(channelID, messageID);
                 if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
@@ -223,7 +239,7 @@ export default definePlugin({
                 }
             }
             const messageProps: MessageEmbedProps = {
-                message: linkedMessage,
+                message: withEmbeddedBy(linkedMessage, embeddedBy),
                 channel: linkedChannel,
                 guildID
             };
@@ -267,7 +283,7 @@ export default definePlugin({
                 }
             }}
             renderDescription={() => {
-                return <div key={message.id} className={classNames.join(" ")} >
+                return <div key={message.id} className={classNames.join(" ")}>
                     <ChannelMessage
                         id={`message-link-embeds-${message.id}`}
                         message={message}
