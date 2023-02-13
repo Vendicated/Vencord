@@ -20,10 +20,10 @@ import { definePluginSettings } from "@api/settings";
 import { OptionType } from "@utils/types";
 
 export default definePluginSettings({
-    notifications: {
+    notices: {
         type: OptionType.BOOLEAN,
-        description: "Also send a desktop notification when discord is unfocused",
-        default: true,
+        description: "Also show a notice at the top of your screen when removed (use this if you don't want to miss any notifications).",
+        default: false
     },
     offlineRemovals: {
         type: OptionType.BOOLEAN,

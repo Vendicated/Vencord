@@ -17,8 +17,9 @@
 */
 
 import { DataStore, Notices } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { findByPropsLazy } from "@webpack";
-import { NavigationRouter, RelationshipStore, UserUtils } from "@webpack/common";
+import { RelationshipStore, UserUtils } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
 import settings from "./settings";
@@ -82,12 +83,12 @@ export async function syncAndRunChecks() {
 }
 
 export function notify(text: string, icon?: string) {
-    if (!document.hasFocus() && settings.store.notifications) {
-        Notifications.showNotification(icon, "Relationship Notifier", text, {
-            onClick: () => NavigationRouter.transitionTo("/channels/@me")
-        }, {});
-    }
-    Notices.showNotice(text, "OK", () => Notices.popNotice());
+    if (settings.store.notices) Notices.showNotice(text, "OK", () => Notices.popNotice());
+    showNotification({
+        title: "Relationship Notifier",
+        body: text,
+        icon
+    });
 }
 
 export function getGuild(id: string) {
