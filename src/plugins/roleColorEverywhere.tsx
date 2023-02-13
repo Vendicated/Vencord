@@ -47,7 +47,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(\i),channelId:(\i).{0,300}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1, $2)"
+                    replace: "$&,color:$self.getUserColor($1.userId, $2)"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -58,8 +58,8 @@ export default definePlugin({
             find: ".source,children",
             replacement: [
                 {
-                    match: /function .{1,3}\((.)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
-                    replace: "$&color:$self.getUserColor({id:$1.id},$1.channelId),"
+                    match: /function \i\((\i)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
+                    replace: "$&color:$self.getUserColor($1.id,$1.channelId),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -69,7 +69,7 @@ export default definePlugin({
             find: ".memberGroupsPlaceholder",
             replacement: [
                 {
-                    match: /(memo\(\(function\((.)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
+                    match: /(memo\(\(function\((\i)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
                     replace: "$1$self.roleGroupColor($2)]"
                 },
             ],
@@ -91,7 +91,7 @@ export default definePlugin({
 
         return member?.colorString;
     },
-    getUserColor({ id: userId }, channelId) {
+    getUserColor(userId, channelId) {
         const colorString = this.getColor(userId, channelId);
         return colorString && parseInt(colorString.slice(1), 16);
     },
