@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
@@ -33,8 +34,16 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in member list role headers",
         restartNeeded: true
+    },
+    voiceUsers: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the voice chat user list",
+        restartNeeded: true
     }
 });
+
+const logger = new Logger("RoleColorEverywhere");
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -47,7 +56,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(\i),channelId:(\i).{0,300}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1.userId, $2)"
+                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2})"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -59,7 +68,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /function \i\((\i)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
-                    replace: "$&color:$self.getUserColor($1.id,$1.channelId),"
+                    replace: "$&color:$self.getUserColor($1.id,{guildId:$1.guildId}),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -75,24 +84,42 @@ export default definePlugin({
             ],
             predicate: () => settings.store.memberList,
         },
+        // Voice chat users
+        {
+            find: "renderPrioritySpeaker",
+            replacement: [
+                {
+                    match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
+                    replace: "$&...$self.getVoiceProps(this.props),"
+                }
+            ],
+            predicate: () => settings.store.voiceUsers,
+        }
     ],
     settings,
 
-    getColor(userId, channelId) {
-        const channel = ChannelStore.getChannel(channelId);
-        if (!channel) {
-            return null;
+    getColor(userId, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
+        if (!guildId && !channelId) return null;
+
+        if (!guildId) {
+            const channel = ChannelStore.getChannel(channelId!);
+            if (!channel) {
+                return null;
+            }
+
+            guildId = channel.guild_id;
         }
 
-        const member = GuildMemberStore.getMember(channel.guild_id, userId);
+        logger.info(guildId);
+        const member = GuildMemberStore.getMember(guildId, userId);
         if (!member) {
             return null;
         }
 
         return member?.colorString;
     },
-    getUserColor(userId, channelId) {
-        const colorString = this.getColor(userId, channelId);
+    getUserColor(userId, ids) {
+        const colorString = this.getColor(userId, ids);
         return colorString && parseInt(colorString.slice(1), 16);
     },
     roleGroupColor({ id, count, title, guildId, ...args }) {
@@ -104,5 +131,12 @@ export default definePlugin({
             fontWeight: "unset",
             letterSpacing: ".05em"
         }}>{title} &mdash; {count}</span>;
+    },
+    getVoiceProps({ user: { id: userId }, guildId }) {
+        return {
+            style: {
+                color: this.getColor(userId, { guildId })
+            }
+        };
     }
 });
