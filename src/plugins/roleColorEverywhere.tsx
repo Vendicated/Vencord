@@ -25,7 +25,7 @@ const settings = definePluginSettings({
     chatMentions: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in chat mentions",
+        description: "Show role colors in chat mentions (including in the message box)",
         restartNeeded: true
     },
     memberList: {
@@ -48,6 +48,18 @@ export default definePlugin({
                 {
                     match: /user:(\i),channelId:(\i).{0,300}?"@"\.concat\(.+?\)/,
                     replace: "$&,color:$self.getUserColor($1, $2)"
+                }
+            ],
+            predicate: () => settings.store.chatMentions,
+        },
+        // Slate
+        {
+            // taken from CommandsAPI
+            find: ".source,children",
+            replacement: [
+                {
+                    match: /function .{1,3}\((.)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
+                    replace: "$&color:$self.getUserColor({id:$1.id},$1.channelId),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
