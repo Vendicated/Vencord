@@ -26,9 +26,7 @@ export default definePlugin({
     name: "Listening To WACUP",
     description: "Adds \"Listening to\" type prefix to the user's rich presence when using WACUP.",
     authors: [{
-        id: 1073712074632478722n,
-        name: "cryptofyre",
-        id: 477660562533384213n,
+        id: 477660562533384213,
         name: "brenden",
     }],
     patches: [
@@ -49,7 +47,7 @@ export default definePlugin({
             <br></br>
             <Forms.FormTitle tag="h3">What is WACUP?</Forms.FormTitle>
             <Forms.FormText>
-            WACUP (Winamp Community Update Project) is a media player that's made to emulate some of your favourite media players from the past & bring them into the future.
+            Winamp Community Update Project is a media player that's made to emulate some of your favourite media players from the past & bring them into the future.
             </Forms.FormText>
         </>
     ),
