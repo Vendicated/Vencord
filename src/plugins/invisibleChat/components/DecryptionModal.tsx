@@ -51,7 +51,7 @@ export function DecModal(props: any) {
                 <Button
                     color={Button.Colors.GREEN}
                     onClick={() => {
-                        const toSend = decrypt(secret, password);
+                        const toSend = decrypt(secret, password, true);
                         if (!toSend || !props?.message) return;
                         // @ts-expect-error
                         Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
