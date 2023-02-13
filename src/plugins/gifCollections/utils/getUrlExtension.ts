@@ -17,5 +17,7 @@
 */
 
 export function getUrlExtension(url: string) {
+    // tennor stuff is like //media.tenor/blah/blah
+    if (!url.startsWith("https:")) url = "https:" + url;
     return new URL(url).pathname.split(".").pop();
 }

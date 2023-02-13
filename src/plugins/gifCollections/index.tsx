@@ -30,6 +30,7 @@ import { Category, Collection, Gif, Props } from "./types";
 import { getGifByElement, getGifByMessage } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
 import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
+import { uuidv4 } from "./utils/uuidv4";
 
 const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
@@ -41,15 +42,16 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Import Collections",
         component: () =>
-            <Button onClick={() => Alerts.show({
-                title: "Are you sure?",
-                body: "Importing collections will overwrite your current collections.",
-                confirmText: "Import",
-                confirmColor: findByProps("colorRed")?.colorRed,
-                cancelText: "Nevermind",
-                onConfirm: async () => uploadGifCollections()
+            <Button onClick={async () =>
+                (await CollectionManager.getCollections()).length ? Alerts.show({
+                    title: "Are you sure?",
+                    body: "Importing collections will overwrite your current collections.",
+                    confirmText: "Import",
+                    confirmColor: findByProps("colorRed")?.colorRed,
+                    cancelText: "Nevermind",
+                    onConfirm: async () => uploadGifCollections()
 
-            })}>
+                }) : uploadGifCollections()}>
                 Import Collections
             </Button>,
     },
@@ -126,6 +128,15 @@ export default definePlugin({
                 }
             ]
         },
+        // {
+        //     find: "image-context",
+        //     replacement: [
+        //         {
+        //             match: /(,.{1,3}=.{1,10}\(.{1,3},.{1,3})(\);return)/,
+        //             replace: "$1,arguments[0].target$2"
+        //         }
+        //     ]
+        // },
         // Ven goated ong on me
         {
             find: "open-native-link",
@@ -155,6 +166,7 @@ export default definePlugin({
     ],
 
     settings,
+
 
     start() {
         CollectionManager.refreshCacheCollection();
@@ -215,7 +227,7 @@ export default definePlugin({
                     onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.name} />
             );
-        if (instance.props.item.id.startsWith("gc-moment:"))
+        if (instance.props.item?.id?.startsWith("gc-moment:"))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="gif"
@@ -223,6 +235,32 @@ export default definePlugin({
                     nameOrId={instance.props.item.id}
                 />);
 
+        const gif = instance.props.item;
+        if (gif.src && gif.url && gif.height != null && gif.width != null)
+            return ContextMenu.open(e, () => <Menu.ContextMenu
+                navId="gif-collection-bruh"
+                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                aria-label="add to collection"
+            >
+                <Menu.MenuItem
+                    key="delete-collection"
+                    id="delete-collection"
+                    label="Add to collection"
+                >
+                    {this.collections.length ? this.collections.map(col => {
+                        const key = "add-to-collection-" + col.name;
+                        return (
+                            <Menu.MenuItem
+                                key={key}
+                                id={key}
+                                label={col.name.split(":")[1]}
+                                action={() => CollectionManager.addToCollection(col.name, { ...instance.props.item, id: uuidv4() })}
+                            />
+                        );
+                    }) : /* bruh */ <></>}
+
+                </Menu.MenuItem>
+            </Menu.ContextMenu>);
         return null;
     },
 
@@ -258,7 +296,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={col.name.split(":")[1]}
-                            action={() => CollectionManager.addToCollection(col.name, gif)}
+                            action={() => CollectionManager.addToCollection(col.name, gif!)}
                         />
                     );
                 }) : /* bruh */ <></>}
@@ -274,7 +312,7 @@ export default definePlugin({
                                 <ModalHeader>
                                     <Forms.FormText>Create Collection</Forms.FormText>
                                 </ModalHeader>
-                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif} />
+                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif!} />
                             </ModalRoot>
                         ));
                     }}
@@ -307,7 +345,9 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
                         onConfirm();
                     }
                 }) : CollectionManager.removeFromCollection(nameOrId).then(() => onConfirm())}
-        />
+        >
+
+        </Menu.MenuItem>
     </Menu.ContextMenu>
 );
 
