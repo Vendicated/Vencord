@@ -27,8 +27,8 @@ import { Message } from "discord-types/general";
 
 import * as CollectionManager from "./CollectionManager";
 import { Category, Collection, Gif, Props } from "./types";
-import { getGifByElement, getGifByMessage } from "./utils/createGif";
 import { getFormat } from "./utils/getFormat";
+import { getGifByMessageAndTarget as getGifByTargetAndMessage, getGifByTarget as getGifByUrlAndTarget } from "./utils/getGif";
 import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
 import { uuidv4 } from "./utils/uuidv4";
 
@@ -124,7 +124,7 @@ export default definePlugin({
                 {
                     // adds our contextmenu after the delete / speak message menu item
                     match: /\[(""===.{1,200})\](.{1,10},)/,
-                    replace: "[$1, Vencord.Plugins.plugins['Gif Collection'].makeMenu(arguments[0].message, arguments[0]._vencordTarget)]$2"
+                    replace: "[$1, Vencord.Plugins.plugins['Gif Collection'].makeMenu(arguments[0].message, arguments[0].itemHref, arguments[0]._vencordTarget)]$2"
                 }
             ]
         },
@@ -143,7 +143,7 @@ export default definePlugin({
             replacement: {
                 match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
                 replace: (m, src) =>
-                    `${m},Vencord.Plugins.plugins['Gif Collection'].makeMenu(${src}, arguments[2])`
+                    `${m},Vencord.Plugins.plugins['Gif Collection'].makeMenu(null, ${src}, arguments[2])`
             }
         },
         {
@@ -219,7 +219,7 @@ export default definePlugin({
         }
     },
 
-    collectionContextMenu(e, instance) {
+    collectionContextMenu(e: React.UIEvent, instance) {
         if (instance.props.item.name != null && instance.props.item.name.startsWith("gc:"))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
@@ -237,52 +237,37 @@ export default definePlugin({
 
         const gif = instance.props.item;
         if (gif.src && gif.url && gif.height != null && gif.width != null)
-            return ContextMenu.open(e, () => <Menu.ContextMenu
-                navId="gif-collection-bruh"
-                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                aria-label="add to collection"
-            >
-                <Menu.MenuItem
-                    key="delete-collection"
-                    id="delete-collection"
-                    label="Add to collection"
+            return ContextMenu.open(e, () =>
+                <Menu.ContextMenu
+                    navId="gif-collection-id"
+                    onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                    aria-label="Gif Collections"
                 >
-                    {this.collections.length ? this.collections.map(col => {
-                        const key = "add-to-collection-" + col.name;
-                        return (
-                            <Menu.MenuItem
-                                key={key}
-                                id={key}
-                                label={col.name.split(":")[1]}
-                                action={() => CollectionManager.addToCollection(col.name, { ...instance.props.item, id: uuidv4() })}
-                            />
-                        );
-                    }) : /* bruh */ <></>}
 
-                </Menu.MenuItem>
-            </Menu.ContextMenu>);
+                    {this.renderMenu({ ...gif, id: uuidv4() })}
+
+                </Menu.ContextMenu>
+            );
         return null;
     },
 
+    // for some reason this method bothering me
+    makeMenu(message: Message | null, url: string | null, target: HTMLDivElement | null) {
+        if (message && target && !url) {
+            const gif = getGifByTargetAndMessage(target, message);
+            if (!gif) return null;
 
-    // naming things is hard ok
-    getVideoGif(message: Message, target: Element) {
-        const videoElement = target.closest('[class^="imageWrapper"]')?.querySelector("video");
-        if (!target || !message || !videoElement || !message.embeds.length || !message.embeds.find(e => e.video?.proxyURL === videoElement.src)) return null;
-        return getGifByMessage(videoElement.src, message);
+            return this.renderMenu(gif);
+        }
+        if (url && target && !message) {
+            const gif = getGifByUrlAndTarget(url, target);
+            if (!gif) return null;
+
+            return this.renderMenu(gif);
+        }
     },
 
-    makeMenu(urlOrMessage: string | Message, target: HTMLElement) {
-        if (!urlOrMessage || !target) return null;
-        let gif: Gif;
-        if (typeof urlOrMessage === "string")
-            // youtube video url is a message link for some reason
-            gif = getGifByElement(urlOrMessage.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? urlOrMessage : urlOrMessage, target.closest("li"))!;
-        else
-            gif = this.getVideoGif(urlOrMessage, target)!;
-
-        if (!gif) return null;
-
+    renderMenu(gif: Gif) {
         return (
             <Menu.MenuItem
                 label="Add To Collection"
@@ -296,7 +281,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={col.name.split(":")[1]}
-                            action={() => CollectionManager.addToCollection(col.name, gif!)}
+                            action={() => CollectionManager.addToCollection(col.name, gif)}
                         />
                     );
                 }) : /* bruh */ <></>}
@@ -312,7 +297,7 @@ export default definePlugin({
                                 <ModalHeader>
                                     <Forms.FormText>Create Collection</Forms.FormText>
                                 </ModalHeader>
-                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif!} />
+                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif} />
                             </ModalRoot>
                         ));
                     }}

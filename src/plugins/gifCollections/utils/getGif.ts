@@ -24,21 +24,30 @@ import { Message } from "discord-types/general";
 import { Gif } from "../types";
 import { uuidv4 } from "./uuidv4";
 
-export function getGifByElement(url: string, listItem?: HTMLLIElement | null): Gif | null {
-    if (!listItem || !listItem.id) return null;
+export function getGifByTarget(url: string, target?: HTMLElement | null): Gif | null {
+    const liElement = target?.closest("li");
+    if (!target || !liElement || !liElement.id) return null;
 
-    const [channelId, messageId] = listItem.id.split("-").slice(2);
+    const [channelId, messageId] = liElement.id.split("-").slice(2);
     // the isValidSnowFlake part may not be nessesery cuse either way (valid or not) message will be undefined if it doenst find a message /shrug
     if (!channelId || !messageId || !isValidSnowFlake(channelId) || !isValidSnowFlake(messageId)) return null;
 
     const message = MessageStore.getMessage(channelId, messageId);
     if (!message || !message.embeds.length && !message.attachments.length) return null;
 
-    return getGifByMessage(url, message);
+    return getGifByMessageAndUrl(url, message);
 }
 
 
-export function getGifByMessage(url: string, message: Message): Gif | null {
+export function getGifByMessageAndTarget(target: HTMLDivElement, message: Message) {
+    const url = target.closest('[class^="imageWrapper"]')?.querySelector("video")?.src ?? target.closest('[class^="imageWrapper"]')?.querySelector("img")?.src;
+
+    if (!url) return null;
+
+    return getGifByMessageAndUrl(url, message);
+}
+
+export function getGifByMessageAndUrl(url: string, message: Message): Gif | null {
     if (!message.embeds.length && !message.attachments.length)
         return null;
 
