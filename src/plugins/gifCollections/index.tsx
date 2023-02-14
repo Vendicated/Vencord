@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// Plugin idea by brainfreeze (668137937333911553) 😎
+
 import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
@@ -25,6 +27,7 @@ import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextIn
 import { Message } from "discord-types/general";
 
 import * as CollectionManager from "./CollectionManager";
+import { GIF_COLLECTION_PREFIX, GIF_ITEM_PREFIX } from "./constants";
 import { Category, Collection, Gif, Props } from "./types";
 import { getFormat } from "./utils/getFormat";
 import { getGifByMessageAndTarget as getGifByTargetAndMessage, getGifByTarget as getGifByUrlAndTarget } from "./utils/getGif";
@@ -110,7 +113,7 @@ export default definePlugin({
             replacement: {
                 match: /(function .{1,3}\((?<query>.{1,3}),.{1,3}\){.{1,200}dispatch\({type:"GIF_PICKER_QUERY".{1,20};)/,
                 replace:
-                    `$1 if($<query>.startsWith('gc:')) {
+                    `$1 if($<query>.startsWith('${GIF_COLLECTION_PREFIX}')) {
                     const collection = Vencord.Plugins.plugins["Gif Collection"].collections.find(c => c.name === $<query>);
                     if(collection != null) { return };
                 };`
@@ -174,7 +177,7 @@ export default definePlugin({
     },
 
     renderContent(instance) {
-        if (instance.props.query.startsWith("gc:")) {
+        if (instance.props.query.startsWith(GIF_COLLECTION_PREFIX)) {
             this.sillyContentInstance = instance;
             const collection = this.collections.find(c => c.name === instance.props.query);
             if (!collection) return;
@@ -211,14 +214,14 @@ export default definePlugin({
     },
 
     collectionContextMenu(e: React.UIEvent, instance) {
-        if (instance.props.item.name != null && instance.props.item.name.startsWith("gc:"))
+        if (instance.props.item.name != null && instance.props.item.name.startsWith(GIF_COLLECTION_PREFIX))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="collection"
                     onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.name} />
             );
-        if (instance.props.item?.id?.startsWith("gc-moment:"))
+        if (instance.props.item?.id?.startsWith(GIF_ITEM_PREFIX))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="gif"
@@ -227,7 +230,7 @@ export default definePlugin({
                 />);
 
         const gif = instance.props.item;
-        if (gif.src && gif.url && gif.height != null && gif.width != null)
+        if (gif && !gif.id?.startsWith(GIF_ITEM_PREFIX) && gif.src && gif.url && gif.height != null && gif.width != null)
             return ContextMenu.open(e, () =>
                 <Menu.ContextMenu
                     navId="gif-collection-id"

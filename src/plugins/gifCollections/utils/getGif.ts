@@ -68,7 +68,7 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
             height: embed.video.height,
             width: embed.video.width,
             src: embed.video.proxyURL,
-            url: embed.video.url,
+            url: embed.provider?.name === "Tenor" ? embed.url ?? embed.video.url : embed.video.url,
         };
 
         // Youtube thumbnails and other stuff idk
