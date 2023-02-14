@@ -76,8 +76,15 @@ function shouldBeNative() {
     return false;
 }
 
-export function showNotification(data: NotificationData) {
-    if (shouldBeNative()) {
+export async function requestPermission() {
+    return (
+        Notification.permission === "granted" ||
+        (Notification.permission !== "denied" && (await Notification.requestPermission()) === "granted")
+    );
+}
+
+export async function showNotification(data: NotificationData) {
+    if (shouldBeNative() && await requestPermission()) {
         const { title, body, icon, image, onClick = null, onClose = null } = data;
         const n = new Notification(title, {
             body,
