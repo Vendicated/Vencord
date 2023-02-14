@@ -22,9 +22,10 @@ import { MessageStore, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { Gif } from "../types";
+import { isAudio } from "./isAudio";
 import { uuidv4 } from "./uuidv4";
 
-export function getGifByTarget(url: string, target?: HTMLElement | null): Gif | null {
+export function getGifByTarget(url: string, target?: HTMLDivElement | null): Gif | null {
     const liElement = target?.closest("li");
     if (!target || !liElement || !liElement.id) return null;
 
@@ -48,7 +49,7 @@ export function getGifByMessageAndTarget(target: HTMLDivElement, message: Messag
 }
 
 export function getGifByMessageAndUrl(url: string, message: Message): Gif | null {
-    if (!message.embeds.length && !message.attachments.length)
+    if (!message.embeds.length && !message.attachments.length || isAudio(url))
         return null;
 
     // find embed with matching url or image/thumbnail url
@@ -85,8 +86,8 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
     const attachment = message.attachments.find(a => a.url === url || a.proxy_url === url);
     if (attachment) return {
         id: uuidv4(),
-        height: attachment.height!,
-        width: attachment.width!,
+        height: attachment.height ?? 50,
+        width: attachment.width ?? 50,
         src: attachment.proxy_url,
         url: attachment.url
     };

@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Format } from "../types";
 import { getUrlExtension } from "./getUrlExtension";
 
-const videoExtensions = ["mp4", "ogg", "webm", "avi", "wmv", "flv", "mov", "mkv", "m4v"];
+const audioExtensions = ["mp3", "wav", "ogg", "aac", "m4a", "wma", "flac"];
 
-export function getFormat(url: string) {
+
+export function isAudio(url: string) {
     const extension = getUrlExtension(url);
-    return url.startsWith("https://media.tenor") || extension == null || videoExtensions.includes(extension) ? Format.VIDEO : Format.IMAGE;
+    return extension && audioExtensions.includes(extension);
 }
