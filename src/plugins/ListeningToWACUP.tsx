@@ -20,13 +20,15 @@ import { Link } from "@components/Link";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 const appIds = [
-    "412797059612278785"
+    "412797059612278785",
+    "752999910097289267",
+    "759604595810107412"
 ];
 export default definePlugin({
     name: "Listening To WACUP",
     description: "Adds \"Listening to\" type prefix to the user's rich presence when using WACUP.",
     authors: [{
-        id: 477660562533384213,
+        id: 477660562533384213n,
         name: "brenden",
     }],
     patches: [
