@@ -21,7 +21,6 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -43,11 +42,13 @@ const settings = definePluginSettings({
         description: "Import Collections",
         component: () =>
             <Button onClick={async () =>
+                // if they have collections show the warning
                 (await CollectionManager.getCollections()).length ? Alerts.show({
                     title: "Are you sure?",
                     body: "Importing collections will overwrite your current collections.",
                     confirmText: "Import",
-                    confirmColor: findByProps("colorRed")?.colorRed,
+                    // wow this works?
+                    confirmColor: Button.Colors.RED,
                     cancelText: "Nevermind",
                     onConfirm: async () => uploadGifCollections()
 
@@ -87,9 +88,8 @@ export default definePlugin({
                 },
                 // Replaces this.props.resultItems with the collection.gifs
                 {
-                    // ill improve the regex later
-                    match: /(.{1,2}\.renderContent=function\(\){)/,
-                    replace: "$1;Vencord.Plugins.plugins[\"Gif Collection\"].renderContent(this);"
+                    match: /(.{1,2}\.renderContent=function\(\){)(.{1,50}resultItems)/,
+                    replace: "$1;Vencord.Plugins.plugins[\"Gif Collection\"].renderContent(this);$2"
                 },
                 // Delete context menu for collection
                 {
@@ -122,21 +122,12 @@ export default definePlugin({
             find: "id:\"remove-reactions\"",
             replacement: [
                 {
-                    // adds our contextmenu after the delete / speak message menu item
+                    // adds our contextmenu after the end of the first message context menu group
                     match: /\[(""===.{1,200})\](.{1,10},)/,
                     replace: "[$1, Vencord.Plugins.plugins['Gif Collection'].makeMenu(arguments[0].message, arguments[0].itemHref, arguments[0]._vencordTarget)]$2"
                 }
             ]
         },
-        // {
-        //     find: "image-context",
-        //     replacement: [
-        //         {
-        //             match: /(,.{1,3}=.{1,10}\(.{1,3},.{1,3})(\);return)/,
-        //             replace: "$1,arguments[0].target$2"
-        //         }
-        //     ]
-        // },
         // Ven goated ong on me
         {
             find: "open-native-link",
