@@ -21,6 +21,7 @@ import { useSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { ErrorCard } from "@components/ErrorCard";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
@@ -141,6 +142,12 @@ function VencordSettings() {
 
 
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            {notifSettings.useNative !== "never" && Notification.permission === "denied" && (
+                <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
+                    <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
+                    <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
+                </ErrorCard>
+            )}
             <Forms.FormText className={Margins.bottom8}>
                 Some plugins may show you notifications. These come in two styles:
                 <ul>
