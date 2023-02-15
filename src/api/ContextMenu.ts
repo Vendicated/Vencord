@@ -16,12 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
 import React from "react";
 
 export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => void;
 
+const ContextMenuLogger = new Logger("ContextMenu");
+
 export const patches = new Map<string, Set<ContextMenuPatchCallback>>();
 
+/**
+ * Add a context menu patch
+ * @param navId The navId(s) for the context menu(s) to patch
+ * @param patch The patch to be applied
+ */
 export function addContextMenuPatch(navId: string | Array<string>, patch: ContextMenuPatchCallback) {
     if (!Array.isArray(navId)) navId = [navId];
     for (const id of navId) {
@@ -35,11 +43,21 @@ export function addContextMenuPatch(navId: string | Array<string>, patch: Contex
     }
 }
 
-export function removeContextMenuPatch(navId: string | Array<string>, patch: ContextMenuPatchCallback) {
-    if (!Array.isArray(navId)) navId = [navId];
-    for (const id of navId) {
-        patches.get(id)?.delete(patch);
+/**
+ * Remove a context menu patch
+ * @param navId The navId(s) for the context menu(s) to remove the patch
+ * @param patch The patch to be removed
+ * @returns Wheter the patch was sucessfully removed from the context menu(s)
+ */
+export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: ContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
+    const navIds = Array.isArray(navId) ? navId : [navId as string];
+
+    const results: Array<boolean> = [];
+    for (const id of navIds) {
+        results.push(patches.get(id)?.delete(patch) ?? false);
     }
+
+    return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : Array<boolean>;
 }
 
 /**
@@ -80,8 +98,17 @@ export function _patchContextMenu(props: ContextMenuProps) {
     const contextMenuPatches = patches.get(props.navId);
 
     if (contextMenuPatches) {
+        let previousChildren: Array<React.ReactElement> = [...props.children];
+
         for (const patch of contextMenuPatches) {
-            patch(props.children, props.contextMenuAPIArguments);
+            try {
+                patch(props.children, props.contextMenuAPIArguments);
+                previousChildren = [...props.children];
+            } catch (err) {
+                ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
+                ContextMenuLogger.info(`Restoring previous children for ${props.navId}...`, previousChildren);
+                props.children = previousChildren;
+            }
         }
     }
 }
