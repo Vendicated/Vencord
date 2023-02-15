@@ -52,7 +52,7 @@ addListener(listener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
-    description: "API for adding items to context menus.",
+    description: "API for adding/removing items to/from context menus.",
     authors: [Devs.Nuckyz],
     patches: [
         {
