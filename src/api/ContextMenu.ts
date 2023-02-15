@@ -18,11 +18,11 @@
 
 import React from "react";
 
-export type PatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => Array<any>;
+export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => Array<any>;
 
-export const patches = new Map<string, Set<PatchCallback>>();
+export const patches = new Map<string, Set<ContextMenuPatchCallback>>();
 
-export function addContextMenuPatch(navId: string, patch: PatchCallback) {
+export function addContextMenuPatch(navId: string, patch: ContextMenuPatchCallback) {
     let contextMenuPatches = patches.get(navId);
     if (!contextMenuPatches) {
         contextMenuPatches = new Set();
@@ -32,7 +32,7 @@ export function addContextMenuPatch(navId: string, patch: PatchCallback) {
     contextMenuPatches.add(patch);
 }
 
-export function removeContextMenuPatch(navId: string, patch: PatchCallback) {
+export function removeContextMenuPatch(navId: string, patch: ContextMenuPatchCallback) {
     patches.get(navId)?.delete(patch);
 }
 
