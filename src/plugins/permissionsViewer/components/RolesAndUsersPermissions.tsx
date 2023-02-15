@@ -85,6 +85,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 const user = UserStore.getUser(permission.id);
                                 const role = guild.roles[permission.id];
 
+                                console.log(user);
+
                                 return (
                                     <div
                                         className={["permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : ""].filter(Boolean).join(" ")}
@@ -100,7 +102,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         <Text variant="text-md/normal">{
                                             permission.type === PermissionType.Role
                                                 ? role?.name ?? "Unknown Role"
-                                                : user?.tag ?? requestSucess === undefined ? "Loading User..." : "Unknown User"
+                                                : (user?.tag) == null
+                                                    ? requestSucess === undefined ? "Loading User..." : "Unknown User"
+                                                    : user.tag
                                         }</Text>
                                     </div>
                                 );
