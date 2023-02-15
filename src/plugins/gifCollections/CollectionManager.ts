@@ -28,16 +28,16 @@ export const DATA_COLLECTION_NAME = "gif-collections-collections";
 // this is here bec async + react class component dont play nice and stutters happen. IF theres a better way of doing it pls let me know
 export let cache_collections: Collection[] = [];
 
-export const getCollections = async () => await DataStore.get<Collection[]>(DATA_COLLECTION_NAME) ?? [];
+export const getCollections = async (): Promise<Collection[]> => (await DataStore.get<Collection[]>(DATA_COLLECTION_NAME)) ?? [];
 
-export const getCollection = async (name: string) => {
+export const getCollection = async (name: string): Promise<Collection | undefined> => {
     const collections = await getCollections();
     return collections.find(c => c.name === name);
 };
 
-export const getCachedCollection = (name: string) => cache_collections.find(c => c.name === name);
+export const getCachedCollection = (name: string): Collection | undefined => cache_collections.find(c => c.name === name);
 
-export const createCollection = async (name: string, gifs: Gif[]) => {
+export const createCollection = async (name: string, gifs: Gif[]): Promise<void> => {
 
     const collections = await getCollections();
     const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
@@ -53,19 +53,20 @@ export const createCollection = async (name: string, gifs: Gif[]) => {
         });
 
     // gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
-    collections.push({
+    const latestGifSrc = gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage;
+    const collection = {
         name: `gc:${name}`,
-        src: gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage,
-        format: getFormat(gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage),
+        src: latestGifSrc,
+        format: getFormat(latestGifSrc),
         type: "Category",
         gifs
-    });
+    };
 
-    await DataStore.set(DATA_COLLECTION_NAME, collections);
+    await DataStore.set(DATA_COLLECTION_NAME, [...collections, collection]);
     return await refreshCacheCollection();
 };
 
-export const addToCollection = async (name: string, gif: Gif) => {
+export const addToCollection = async (name: string, gif: Gif): Promise<void> => {
     const collections = await getCollections();
     const collectionIndex = collections.findIndex(c => c.name === name);
     if (collectionIndex === -1) return console.warn("collection not found");
@@ -79,7 +80,7 @@ export const addToCollection = async (name: string, gif: Gif) => {
 
 };
 
-export const removeFromCollection = async (id: string) => {
+export const removeFromCollection = async (id: string): Promise<void> => {
     const collections = await getCollections();
     const collectionIndex = collections.findIndex(c => c.gifs.some(g => g.id === id));
     if (collectionIndex === -1) return console.warn("collection not found");
@@ -96,7 +97,7 @@ export const removeFromCollection = async (id: string) => {
     return await refreshCacheCollection();
 };
 
-export const deleteCollection = async name => {
+export const deleteCollection = async (name: string) => {
 
     const collections = await getCollections();
     const col = collections.filter(c => c.name !== name);

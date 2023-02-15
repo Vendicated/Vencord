@@ -214,14 +214,15 @@ export default definePlugin({
     },
 
     collectionContextMenu(e: React.UIEvent, instance) {
-        if (instance.props.item.name != null && instance.props.item.name.startsWith(GIF_COLLECTION_PREFIX))
+        const { item } = instance.props;
+        if (item?.name?.startsWith(GIF_COLLECTION_PREFIX))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="collection"
                     onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.name} />
             );
-        if (instance.props.item?.id?.startsWith(GIF_ITEM_PREFIX))
+        if (item?.id?.startsWith(GIF_ITEM_PREFIX))
             return ContextMenu.open(e, () =>
                 <RemoveItemContextMenu
                     type="gif"
@@ -229,8 +230,8 @@ export default definePlugin({
                     nameOrId={instance.props.item.id}
                 />);
 
-        const gif = instance.props.item;
-        if (gif && !gif.id?.startsWith(GIF_ITEM_PREFIX) && gif.src && gif.url && gif.height != null && gif.width != null)
+        const { src, url, height, width } = item;
+        if (src && url && height != null && width != null && !item.id?.startsWith(GIF_ITEM_PREFIX))
             return ContextMenu.open(e, () =>
                 <Menu.ContextMenu
                     navId="gif-collection-id"
@@ -238,7 +239,7 @@ export default definePlugin({
                     aria-label="Gif Collections"
                 >
 
-                    {this.renderMenu({ ...gif, id: uuidv4() })}
+                    {this.renderMenu({ ...item, id: uuidv4() })}
 
                 </Menu.ContextMenu>
             );
@@ -268,17 +269,14 @@ export default definePlugin({
                 key="add-to-collection"
                 id="add-to-collection"
             >
-                {this.collections.length ? this.collections.map(col => {
-                    const key = "add-to-collection-" + col.name;
-                    return (
-                        <Menu.MenuItem
-                            key={key}
-                            id={key}
-                            label={col.name.split(":")[1]}
-                            action={() => CollectionManager.addToCollection(col.name, gif)}
-                        />
-                    );
-                }) : /* bruh */ <></>}
+                {this.collections.map(col => (
+                    <Menu.MenuItem
+                        key={col.name}
+                        id={col.name}
+                        label={col.name.split(":")[1]}
+                        action={() => CollectionManager.addToCollection(col.name, gif)}
+                    />
+                ))}
 
                 <Menu.MenuSeparator />
                 <Menu.MenuItem
@@ -318,6 +316,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
                     title: "Are you sure?",
                     body: "Do you really want to delete this collection?",
                     confirmText: "Delete",
+                    confirmColor: Button.Colors.RED,
                     cancelText: "Nevermind",
                     onConfirm: async () => {
                         await CollectionManager.deleteCollection(nameOrId);
