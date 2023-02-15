@@ -82,7 +82,7 @@ export default definePlugin({
             <strong key="0">{a}</strong>,
             ", ",
             <strong key="2">{b}</strong>,
-            `, and ${c} others are typing...`
+            `, and ${c} other${c !== 1 ? "s" : ""} are typing...`
         ];
     },
 
