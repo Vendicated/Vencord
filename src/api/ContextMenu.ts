@@ -55,8 +55,8 @@ export function findGroupChildrenByChildId(id: string, children: Array<React.Rea
         let nextChildren = child.props?.children;
         if (nextChildren) {
             if (!Array.isArray(nextChildren)) {
-                child.props.children = [nextChildren];
                 nextChildren = [nextChildren];
+                child.props.children = nextChildren;
             }
 
             const found = findGroupChildrenByChildId(id, nextChildren, nextChildren);
