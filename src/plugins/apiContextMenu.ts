@@ -16,17 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
 
 function listener(exports: any, id: number) {
-    if (!Settings.plugins.ContextMenuAPI.enabled) return removeListener(listener);
-
     if (typeof exports !== "object" || exports === null) return;
 
-    for (const key in exports) if (key.length <= 3) {
+    for (const key in exports) {
         const prop = exports[key];
         if (typeof prop !== "function") continue;
 
@@ -37,15 +34,13 @@ function listener(exports: any, id: number) {
                 all: true,
                 noWarn: true,
                 find: "navId:",
-                replacement: {
-                    /** Regex explanation
-                     * Use of https://blog.stevenlevithan.com/archives/mimic-atomic-groups to mimick atomic groups: (?=(...))\1
-                     * Match ${id} and look behind it for the first match of `<variable name>=`: ${id}(?=(\i)=.+?)
-                     * Match rest of the code until it finds `<variable name>.${key},{`: .+?\2\.${key},{
-                     */
-                    match: RegExp(`(?=(${id}(?<=(\\i)=.+?).+?\\2\\.${key},{))\\1`, "g"),
-                    replace: "$&contextMenuApiArguments:arguments,"
-                }
+                replacement: [{
+                    match: RegExp(`(?<=\\b(\\i)=\\i\\(${id}\\)).+$`),
+                    replace: (code, varName) => {
+                        const regex = RegExp(`(?<=${varName}\\.${key},{)`, "g");
+                        return code.replace(regex, "contextMenuAPIArguments:arguments,");
+                    }
+                }]
             });
 
             removeListener(listener);
@@ -57,7 +52,7 @@ addListener(listener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
-    description: "API for adding/removing items to/from context menus.",
+    description: "API for adding items to context menus.",
     authors: [Devs.Nuckyz],
     patches: [
         {
