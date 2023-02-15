@@ -77,10 +77,16 @@ export default definePlugin({
         {
             find: ".PREMIUM_LOCKED;",
             predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
-            replacement: {
-                match: /(?<=(?<intention>\i)=\i\.intention.+?\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
-                replace: ",$<intention>"
-            }
+            replacement: [
+                {
+                    match: /(?<=(?<intention>\i)=\i\.intention.+?\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
+                    replace: ",$<intention>"
+                },
+                {
+                    match: /(?<=,\i=)\i\.\i\.can\(\i\.\i\.USE_EXTERNAL_EMOJIS,\i\)(?=;)/,
+                    replace: "true"
+                }
+            ]
         },
         {
             find: "canUseAnimatedEmojis:function",
