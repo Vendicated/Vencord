@@ -18,10 +18,9 @@
 
 import React from "react";
 
-type PatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => Array<any>;
+export type PatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => Array<any>;
 
-
-const patches = new Map<string, Set<PatchCallback>>();
+export const patches = new Map<string, Set<PatchCallback>>();
 
 export function addContextMenuPatch(navId: string, patch: PatchCallback) {
     let contextMenuPatches = patches.get(navId);
@@ -38,18 +37,18 @@ export function removeContextMenuPatch(navId: string, patch: PatchCallback) {
 }
 
 /**
- * A helper function for finding a group nested inside a context menu based on the id of one of its childs
+ * A helper function for finding the children array of a group nested inside a context menu based on the id of one of its childs
  * @param id The id of the child
  */
-export function findGroupByChildId(id: string, children: Array<React.ReactElement>, parent?: React.ReactElement): React.ReactElement | null {
+export function findGroupChildrenByChildId(id: string, children: Array<React.ReactElement>, itemsArray?: Array<React.ReactElement>): Array<React.ReactElement> | null {
     for (const child of children) {
         if (child === null) continue;
 
-        if (child.props?.id === id) return parent ?? null;
+        if (child.props?.id === id) return itemsArray ?? null;
 
         const nextChildren = child.props?.children;
         if (nextChildren) {
-            const found = findGroupByChildId(id, Array.isArray(nextChildren) ? nextChildren : [nextChildren], child);
+            const found = findGroupChildrenByChildId(id, Array.isArray(nextChildren) ? nextChildren : [nextChildren], nextChildren);
             if (found !== null) return found;
         }
     }
