@@ -194,8 +194,7 @@ export default definePlugin({
     },
 
     hidePrefix(props: Category) {
-        const res = props.name.split(":");
-        return res.length > 1 ? res[1] : res[0];
+        return props.name.split(":").length > 1 ? props.name.replace(/.+?:/, "") : props.name;
     },
 
     insertCollections(instance: { props: Props; }) {
@@ -255,7 +254,8 @@ export default definePlugin({
             return this.renderMenu(gif);
         }
         if (url && target && !message) {
-            const gif = getGifByUrlAndTarget(url, target);
+            // youtube thumbnail url is message link for some reason eh
+            const gif = getGifByUrlAndTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
             if (!gif) return null;
 
             return this.renderMenu(gif);
@@ -273,7 +273,7 @@ export default definePlugin({
                     <Menu.MenuItem
                         key={col.name}
                         id={col.name}
-                        label={col.name.split(":")[1]}
+                        label={col.name.replace(/.+?:/, "")}
                         action={() => CollectionManager.addToCollection(col.name, gif)}
                     />
                 ))}
