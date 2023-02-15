@@ -1,0 +1,75 @@
+.vc-channeltabs-icon {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+}
+
+.vc-channeltabs-guild-acronym-icon {
+    height: 20px;
+    width: 24px;
+    border-radius: 50%;
+    padding-top: 4px;
+    background-color: var(--background-primary);
+    overflow: hidden;
+}
+
+.vc-channeltabs-notification-dot {
+    height: 16px;
+    width: 16px;
+    min-width: 16px;
+    border-radius: 50%;
+    text-align: center;
+    background-color: var(--brand-experiment);
+}
+
+.vc-channeltabs-has-mention {
+    background-color: var(--status-danger);
+}
+
+.vc-channeltabs-channel-name-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.vc-channeltabs-tab-base {
+    border-radius: 8px;
+    padding: 2px;
+    padding-left: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}
+
+.vc-channeltabs-container {
+    padding: 2px;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.vc-channeltabs-channel-info {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.vc-channeltabs-tab {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0px 0px;
+    width: 16rem;
+    min-width: 0;
+}
+
+.vc-channeltabs-button {
+    background-color: transparent;
+}
+
+.vc-channeltabs-close-button {
+    padding: 0;
+    padding-right: 2px;
+}
