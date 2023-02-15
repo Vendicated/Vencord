@@ -16,19 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { UserUtils } from "@webpack/common";
 
 const USER_ID_REGEX = /<@!?(\d+)>/;
 
-
 export default definePlugin({
     name: "MentionCacheFix",
     description: "Force fetches uncached users from the API when they are mentioned",
-    authors: [{
-        name: "My-Name-Is-Jeff",
-        id: 150427554166210560n
-    }],
+    authors: [Devs.MyNameIsJeff],
     onMouseOver({ target }: MouseEvent) {
         if (!(target instanceof HTMLElement)) return;
         const message = target.closest("[id^=chat-messages-]");
