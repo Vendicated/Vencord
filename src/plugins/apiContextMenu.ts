@@ -28,7 +28,7 @@ function listener(exports: any, id: number) {
         if (typeof prop !== "function") continue;
 
         const str = Function.prototype.toString.call(prop);
-        if (str.includes("♫ ⊂(｡◕‿‿◕｡⊂) ♪")) {
+        if (str.includes('path:["empty"]')) {
             Vencord.Plugins.patches.push({
                 plugin: "ContextMenuAPI",
                 all: true,
@@ -52,7 +52,7 @@ addListener(listener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
-    description: "API for adding/removing items to/from context menus.",
+    description: "API for adding items to context menus.",
     authors: [Devs.Nuckyz],
     patches: [
         {
