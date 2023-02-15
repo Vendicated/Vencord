@@ -52,9 +52,14 @@ export function findGroupChildrenByChildId(id: string, children: Array<React.Rea
 
         if (child.props?.id === id) return itemsArray ?? null;
 
-        const nextChildren = child.props?.children;
+        let nextChildren = child.props?.children;
         if (nextChildren) {
-            const found = findGroupChildrenByChildId(id, Array.isArray(nextChildren) ? nextChildren : [nextChildren], nextChildren);
+            if (!Array.isArray(nextChildren)) {
+                child.props.children = [nextChildren];
+                nextChildren = [nextChildren];
+            }
+
+            const found = findGroupChildrenByChildId(id, nextChildren, nextChildren);
             if (found !== null) return found;
         }
     }
