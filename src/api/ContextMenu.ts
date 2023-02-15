@@ -18,7 +18,7 @@
 
 import React from "react";
 
-export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => Array<any>;
+export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => void;
 
 export const patches = new Map<string, Set<ContextMenuPatchCallback>>();
 
