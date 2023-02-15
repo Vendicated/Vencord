@@ -57,7 +57,7 @@ export const filters = {
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
-export type CallbackFn = (mod: any) => void;
+export type CallbackFn = (mod: any, id: number) => void;
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
@@ -82,26 +82,40 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
+    let found: any;
+    let foundId: any;
+
+    outer:
     for (const key in cache) {
         const mod = cache[key];
         if (!mod?.exports) continue;
 
-        if (filter(mod.exports))
-            return mod.exports;
+        if (filter(mod.exports)) {
+            found = mod.exports;
+            foundId = Number(key);
+            break;
+        }
 
         if (typeof mod.exports !== "object") continue;
 
-        if (mod.exports.default && filter(mod.exports.default))
-            return getDefault ? mod.exports.default : mod.exports;
+        if (mod.exports.default && filter(mod.exports.default)) {
+            found = getDefault ? mod.exports.default : mod.exports;
+            foundId = Number(key);
+            break;
+        }
 
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) return nested;
+            if (nested && filter(nested)) {
+                found = nested;
+                foundId = Number(key);
+                break outer;
+            }
         }
     }
 
-    if (!isWaitFor) {
+    if (!isWaitFor && !found) {
         const err = new Error("Didn't find module matching this filter");
         if (IS_DEV) {
             if (!devToolsOpen)
@@ -112,7 +126,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         }
     }
 
-    return null;
+    return isWaitFor ? [found ?? null, foundId ?? null] : found ?? null;
 });
 
 /**
@@ -347,8 +361,8 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const existing = find(filter!, true, true);
-    if (existing) return void callback(existing);
+    const [existing, id] = find(filter!, true, true);
+    if (existing) return void callback(existing, id);
 
     subscriptions.set(filter, callback);
 }
