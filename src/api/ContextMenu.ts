@@ -22,18 +22,24 @@ export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, arg
 
 export const patches = new Map<string, Set<ContextMenuPatchCallback>>();
 
-export function addContextMenuPatch(navId: string, patch: ContextMenuPatchCallback) {
-    let contextMenuPatches = patches.get(navId);
-    if (!contextMenuPatches) {
-        contextMenuPatches = new Set();
-        patches.set(navId, contextMenuPatches);
-    }
+export function addContextMenuPatch(navId: string | Array<string>, patch: ContextMenuPatchCallback) {
+    if (!Array.isArray(navId)) navId = [navId];
+    for (const id of navId) {
+        let contextMenuPatches = patches.get(id);
+        if (!contextMenuPatches) {
+            contextMenuPatches = new Set();
+            patches.set(id, contextMenuPatches);
+        }
 
-    contextMenuPatches.add(patch);
+        contextMenuPatches.add(patch);
+    }
 }
 
-export function removeContextMenuPatch(navId: string, patch: ContextMenuPatchCallback) {
-    patches.get(navId)?.delete(patch);
+export function removeContextMenuPatch(navId: string | Array<string>, patch: ContextMenuPatchCallback) {
+    if (!Array.isArray(navId)) navId = [navId];
+    for (const id of navId) {
+        patches.get(id)?.delete(patch);
+    }
 }
 
 /**
