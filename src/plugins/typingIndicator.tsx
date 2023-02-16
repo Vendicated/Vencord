@@ -57,8 +57,9 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    const currentUserId = UserStore.getCurrentUser().id;
-    const typingUsersArray = Object.keys(typingUsers).filter(user => currentUserId !== user);
+    delete typingUsers[UserStore.getCurrentUser().id];
+
+    const typingUsersArray = Object.keys(typingUsers);
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
