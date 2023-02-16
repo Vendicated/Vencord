@@ -110,7 +110,6 @@ export default definePlugin({
             guildId = channel.guild_id;
         }
 
-        logger.info(guildId);
         const member = GuildMemberStore.getMember(guildId, userId);
         if (!member) {
             return null;
