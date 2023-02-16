@@ -30,10 +30,13 @@ export default definePlugin({
         if (!(target instanceof HTMLElement)) return;
         const message = target.closest("[id^=chat-messages-]");
         if (!message) return;
-        const mentions: HTMLSpanElement[] = Array.from(message.querySelectorAll("span.mention"));
-        const nonCachedUsers = mentions.filter(m => !m.classList.contains("interactive") && USER_ID_REGEX.test(m.innerText));
+        const mentions: NodeListOf<HTMLSpanElement> = message.querySelectorAll("span[class^=roleMention]");
         const userIds = new Set<string>();
-        nonCachedUsers.forEach(m => userIds.add(USER_ID_REGEX.exec(m.innerText)![1]));
+        mentions.forEach(m => {
+            const match = USER_ID_REGEX.exec(m.innerText);
+            if (!match) return;
+            userIds.add(match[1]);
+        });
         if (userIds.size === 0) return;
 
         Promise.allSettled([...userIds].map(id => UserUtils.fetchUser(id))).then(() => {
