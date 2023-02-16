@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { User } from "discord-types/general";
 import { ComponentType, HTMLProps } from "react";
 
@@ -52,6 +53,7 @@ const Badges = new Set<ProfileBadge>();
  * @param badge The badge to register
  */
 export function addBadge(badge: ProfileBadge) {
+    badge.component &&= ErrorBoundary.wrap(badge.component, { noop: true });
     Badges.add(badge);
 }
 
