@@ -27,6 +27,17 @@ import { ChannelStore, UserStore } from "@webpack/common";
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 
+enum EmojiIntentions {
+    REACTION = 0,
+    STATUS = 1,
+    COMMUNITY_CONTENT = 2,
+    CHAT = 3,
+    GUILD_STICKER_RELATED_EMOJI = 4,
+    GUILD_ROLE_BENEFIT_EMOJI = 5,
+    COMMUNITY_CONTENT_ONLY = 6,
+    SOUNDBOARD = 7
+}
+
 interface BaseSticker {
     available: boolean;
     description: string;
@@ -64,17 +75,26 @@ export default definePlugin({
 
     patches: [
         {
-            find: "canUseAnimatedEmojis:function",
+            find: ".PREMIUM_LOCKED;",
             predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: [
-                "canUseAnimatedEmojis",
-                "canUseEmojisEverywhere"
-            ].map(func => {
-                return {
-                    match: new RegExp(`${func}:function\\(.+?\\{`),
-                    replace: "$&return true;"
-                };
-            })
+                {
+                    match: /(?<=(?<intention>\i)=\i\.intention.+?\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
+                    replace: ",$<intention>"
+                },
+                {
+                    match: /(?<=,\i=)\i\.\i\.can\(\i\.\i\.USE_EXTERNAL_EMOJIS,\i\)(?=;)/,
+                    replace: "true"
+                }
+            ]
+        },
+        {
+            find: "canUseAnimatedEmojis:function",
+            predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
+            replacement: {
+                match: /(?<=(?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){/g,
+                replace: `,fakeNitroIntention){return fakeNitroIntention===undefined||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention);`
+            }
         },
         {
             find: "canUseAnimatedEmojis:function",
