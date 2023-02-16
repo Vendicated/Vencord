@@ -17,13 +17,19 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
+import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { ChannelStore, Forms } from "@webpack/common";
 import Message from "discord-types/general/Message.js";
 
 import { ChannelsTabsContainer } from "./components";
 import { ChannelTabsUtils } from "./util.js";
+
+const Keybind = LazyComponent(() => findByCode(".keyClassName"));
+const KeybindClasses = findByPropsLazy("ddrArrows");
 
 export default definePlugin({
     name: "ChannelTabs",
@@ -69,6 +75,31 @@ export default definePlugin({
         };
         ChannelTabsUtils.createTab(tab, message.id);
     },
+
+    settingsAboutComponent: () => <>
+        <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
+        <Flex flexDirection="row">
+            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+                <Forms.FormText className={KeybindClasses.keybindDescription}>Switch between tabs</Forms.FormText>
+                <Keybind shortcut="mod+left" className={KeybindClasses.keybindKey} />
+                <Keybind shortcut="mod+right" className={KeybindClasses.keybindKey} />
+            </Forms.FormSection>
+            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+                <Forms.FormText className={KeybindClasses.keybindDescription}>Move tabs</Forms.FormText>
+                <Keybind shortcut="shift+left" className={KeybindClasses.keybindKey} />
+                <Keybind shortcut="shfit+right" className={KeybindClasses.keybindKey} />
+            </Forms.FormSection>
+            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+                <Forms.FormText className={KeybindClasses.keybindDescription}>Open new tab</Forms.FormText>
+                <Keybind shortcut="mod+n" className={KeybindClasses.keybindKey} />
+            </Forms.FormSection>
+            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+                <Forms.FormText className={KeybindClasses.keybindDescription}>Close Tab</Forms.FormText>
+                <Keybind shortcut="mod+w" className={KeybindClasses.keybindKey} />
+            </Forms.FormSection>
+        </Flex>
+        <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>
+    </>,
 
     // TODO: remove
     util: ChannelTabsUtils
