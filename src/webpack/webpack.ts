@@ -126,7 +126,10 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         }
     }
 
-    return isWaitFor ? [found ?? null, foundId ?? null] : found ?? null;
+    found ??= null;
+    foundId ??= null;
+
+    return isWaitFor ? [found, foundId] : found;
 });
 
 /**

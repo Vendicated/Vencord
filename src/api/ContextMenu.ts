@@ -19,28 +19,38 @@
 import Logger from "@utils/Logger";
 import React from "react";
 
-export type ContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => void;
+export type NavContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => void;
+export type GlobalContextMenuPatchCallback = (navId: string, children: Array<React.ReactElement>, args?: Array<any>) => void;
 
 const ContextMenuLogger = new Logger("ContextMenu");
 
-export const patches = new Map<string, Set<ContextMenuPatchCallback>>();
+export const navPatches = new Map<string, Set<NavContextMenuPatchCallback>>();
+export const globalPatches = new Set<GlobalContextMenuPatchCallback>();
 
 /**
  * Add a context menu patch
  * @param navId The navId(s) for the context menu(s) to patch
  * @param patch The patch to be applied
  */
-export function addContextMenuPatch(navId: string | Array<string>, patch: ContextMenuPatchCallback) {
+export function addContextMenuPatch(navId: string | Array<string>, patch: NavContextMenuPatchCallback) {
     if (!Array.isArray(navId)) navId = [navId];
     for (const id of navId) {
-        let contextMenuPatches = patches.get(id);
+        let contextMenuPatches = navPatches.get(id);
         if (!contextMenuPatches) {
             contextMenuPatches = new Set();
-            patches.set(id, contextMenuPatches);
+            navPatches.set(id, contextMenuPatches);
         }
 
         contextMenuPatches.add(patch);
     }
+}
+
+/**
+ * Add a global context menu patch that fires the patch for all context menus
+ * @param patch The patch to be applied
+ */
+export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback) {
+    globalPatches.add(patch);
 }
 
 /**
@@ -49,15 +59,23 @@ export function addContextMenuPatch(navId: string | Array<string>, patch: Contex
  * @param patch The patch to be removed
  * @returns Wheter the patch was sucessfully removed from the context menu(s)
  */
-export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: ContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
+export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
     const navIds = Array.isArray(navId) ? navId : [navId as string];
 
     const results: Array<boolean> = [];
     for (const id of navIds) {
-        results.push(patches.get(id)?.delete(patch) ?? false);
+        results.push(navPatches.get(id)?.delete(patch) ?? false);
     }
 
     return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : Array<boolean>;
+}
+
+/**
+ * Remove a global context menu patch
+ * @returns Wheter the patch was sucessfully removed from the context menu(s)
+ */
+export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback): boolean {
+    return globalPatches.delete(patch);
 }
 
 /**
@@ -95,7 +113,7 @@ interface ContextMenuProps {
 }
 
 export function _patchContextMenu(props: ContextMenuProps) {
-    const contextMenuPatches = patches.get(props.navId);
+    const contextMenuPatches = navPatches.get(props.navId);
 
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
@@ -104,6 +122,14 @@ export function _patchContextMenu(props: ContextMenuProps) {
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
             }
+        }
+    }
+
+    for (const patch of globalPatches) {
+        try {
+            patch(props.navId, props.children, props.contextMenuAPIArguments);
+        } catch (err) {
+            ContextMenuLogger.error("Global patch errored,", err);
         }
     }
 }
