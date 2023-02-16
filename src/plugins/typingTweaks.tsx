@@ -44,6 +44,15 @@ const settings = definePluginSettings({
     }
 });
 
+export function buildSeveralUsers({ a, b, c }: { a: string, b: string, c: number; }) {
+    return [
+        <strong key="0">{a}</strong>,
+        ", ",
+        <strong key="2">{b}</strong>,
+        `, and ${c} others are typing...`
+    ];
+}
+
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
@@ -77,14 +86,7 @@ export default definePlugin({
     ],
     settings,
 
-    buildSeveralUsers({ a, b, c }: { a: string, b: string, c: number; }) {
-        return [
-            <strong key="0">{a}</strong>,
-            ", ",
-            <strong key="2">{b}</strong>,
-            `, and ${c} others are typing...`
-        ];
-    },
+    buildSeveralUsers,
 
     mutateChildren(props: any, users: User[], children: any) {
         if (!Array.isArray(children)) return children;
