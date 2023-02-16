@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
-import { Settings } from "Vencord";
 
 import { buildSeveralUsers } from "./typingTweaks";
 
@@ -59,7 +58,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     }
 
 
-    const typingUsersArray = Object.keys(typingUsers);
+    const typingUsersArray = Object.keys(typingUsers).filter(user => UserStore.getCurrentUser().id !== user);
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
