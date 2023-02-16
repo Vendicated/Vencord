@@ -72,7 +72,7 @@ export function removeContextMenuPatch<T extends string | Array<string>>(navId: 
 
 /**
  * Remove a global context menu patch
- * @returns Wheter the patch was sucessfully removed from the context menu(s)
+ * @returns Wheter the patch was sucessfully removed
  */
 export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback): boolean {
     return globalPatches.delete(patch);
