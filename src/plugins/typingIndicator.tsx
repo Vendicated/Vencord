@@ -106,7 +106,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
 const settings = definePluginSettings({
     includeMutedChannels: {
         type: OptionType.BOOLEAN,
-        description: "Wheter to show the typing indicator for muted channels.",
+        description: "Whether to show the typing indicator for muted channels.",
         default: false
     }
 });
