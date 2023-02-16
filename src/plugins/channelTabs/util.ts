@@ -23,6 +23,7 @@ export interface ChannelTabsProps { guildId: string, channelId: string; }
 
 // TODO: replace with commons export when #450 is merged
 const NavigationRouter = mapMangledModuleLazy('"transitionToGuild', {
+    transitionTo: filters.byCode('"transitionTo '),
     transitionToGuild: filters.byCode('"transitionToGuild'),
 });
 
@@ -47,9 +48,10 @@ function moveToTabRelative(d: number) {
     if (chnl.channelId !== SelectedChannelStore.getChannelId())
         NavigationRouter.transitionToGuild(chnl.guildId, chnl.channelId);
 }
-function createTab(t: ChannelTabsProps) {
+function createTab(t: ChannelTabsProps, messageId?: string) {
     openChannels.push({ ...t });
     openChannelIndex = openChannels.length - 1;
+    if (messageId) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}/${messageId}`);
 }
 function closeTab(i: number) {
     openChannels.splice(i, 1);

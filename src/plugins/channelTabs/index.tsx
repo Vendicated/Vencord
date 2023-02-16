@@ -19,6 +19,8 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import definePlugin from "@utils/types";
+import { ChannelStore } from "@webpack/common";
+import Message from "discord-types/general/Message.js";
 
 import { ChannelsTabsContainer } from "./components";
 import { ChannelTabsUtils } from "./util.js";
@@ -27,18 +29,45 @@ export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
     authors: [Devs.TheSun],
-    patches: [{
-        find: ".LOADING_DID_YOU_KNOW",
-        replacement: {
-            match: /(===(\i)\?void 0:\i\.channelId\).{0,130})Fragment,{children:(\(0,\i\.jsxs\)\("div",{.{0,500}sidebarTheme:.{0,1000}\.CHANNEL_THREAD_VIEW\(.{0,1500}\(0,\i\.jsx\)\(.{0,100}\)]}\))/,
-            replace: "$1Fragment,{children:[$self.render($2),$3]"
+    patches: [
+        // add the channel tab container at the top
+        {
+            find: ".LOADING_DID_YOU_KNOW",
+            replacement: {
+                match: /(===(\i)\?void 0:\i\.channelId\).{0,130})Fragment,{children:(\(0,\i\.jsxs\)\("div",{.{0,500}sidebarTheme:.{0,1000}\.CHANNEL_THREAD_VIEW\(.{0,1500}\(0,\i\.jsx\)\(.{0,100}\)]}\))/,
+                replace: "$1Fragment,{children:[$self.render($2),$3]"
+            }
+        },
+        // ctrl click to open in new tab in inbox
+        {
+            find: ".messageContainer,onKeyDown",
+            replacement: {
+                match: /onJump:function\(\i\){(return \i\((\i),(\i).id)/,
+                replace: "onJump:function($2){ if($2.ctrlKey) return $self.open($3);$1"
+            }
+        },
+        // ctrl click to open in new tab in search results
+        {
+            find: ".searchResultFocusRing",
+            replacement: {
+                match: /jumpTo=function\((\i)\){.{0,100}(\i)=\i\.result.{0,50}\)\);/,
+                replace: "$&if($1.ctrlKey) return $self.open($2);"
+            }
         }
-    }],
+    ],
 
     render(props) {
         return <ErrorBoundary>
             <ChannelsTabsContainer {...props} />
         </ErrorBoundary>;
+    },
+
+    open(message: Message) {
+        const tab = {
+            channelId: message.channel_id,
+            guildId: ChannelStore.getChannel(message.channel_id)?.guild_id
+        };
+        ChannelTabsUtils.createTab(tab, message.id);
     },
 
     // TODO: remove
