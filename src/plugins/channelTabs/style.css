@@ -60,7 +60,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 8px 8px 0px 0px;
+    border-radius: 8px 8px 0 0;
     width: 16rem;
     min-width: 0;
 }
