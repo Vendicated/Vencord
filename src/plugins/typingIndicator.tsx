@@ -29,7 +29,7 @@ const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 function getDisplayName(guildId: string, userId: string) {
-    return GuildMemberStore.getMember(guildId, userId)?.nick ?? UserStore.getUser(userId).username;
+    return GuildMemberStore.getNick(guildId, userId) ?? UserStore.getUser(userId).username;
 }
 
 function TypingIndicator({ channelId }: { channelId: string; }) {
