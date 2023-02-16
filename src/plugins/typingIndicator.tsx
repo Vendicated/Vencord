@@ -70,7 +70,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             break;
         }
         default: {
-            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])}, ${getDisplayName(guildId, typingUsersArray[1])}, ${getDisplayName(guildId, typingUsersArray[2])} and ${typingUsersArray.length - 3} other${(typingUsersArray.length - 3) !== 1 ? "s" : ""} are typing...`;
+            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])}, ${getDisplayName(guildId, typingUsersArray[1])} and ${typingUsersArray.length - 2} others are typing...`;
             break;
         }
     }
