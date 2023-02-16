@@ -21,25 +21,24 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findStoreLazy } from "@webpack";
+import { find, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { Settings } from "Vencord";
+
+import { buildSeveralUsers } from "./typingTweaks";
 
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
+
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+
+const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
 
 function getDisplayName(guildId: string, userId: string) {
     return GuildMemberStore.getNick(guildId, userId) ?? UserStore.getUser(userId).username;
 }
 
 function TypingIndicator({ channelId }: { channelId: string; }) {
-    const guildId = ChannelStore.getChannel(channelId).guild_id;
-
-    if (!settings.store.includeMutedChannels) {
-        const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
-        if (isChannelMuted) return null;
-    }
-
     const typingUsers: Record<string, number> = useStateFromStores(
         [TypingStore],
         () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
@@ -52,25 +51,35 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
     );
 
+    const guildId = ChannelStore.getChannel(channelId).guild_id;
+
+    if (!settings.store.includeMutedChannels) {
+        const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
+        if (isChannelMuted) return null;
+    }
+
+
     const typingUsersArray = Object.keys(typingUsers);
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])} is typing...`;
+            tooltipText = Formatters.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
             break;
         }
         case 2: {
-            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])} and ${getDisplayName(guildId, typingUsersArray[1])} are typing...`;
+            tooltipText = Formatters.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
             break;
         }
         case 3: {
-            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])}, ${getDisplayName(guildId, typingUsersArray[1])} and ${getDisplayName(guildId, typingUsersArray[2])} are typing...`;
+            tooltipText = Formatters.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[1]) });
             break;
         }
         default: {
-            tooltipText = `${getDisplayName(guildId, typingUsersArray[0])}, ${getDisplayName(guildId, typingUsersArray[1])} and ${typingUsersArray.length - 2} others are typing...`;
+            tooltipText = Settings.plugins.TypingTweaks.enabled
+                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: typingUsersArray.length - 2 })
+                : Formatters.Messages.SEVERAL_USERS_TYPING;
             break;
         }
     }
