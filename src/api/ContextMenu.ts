@@ -98,16 +98,11 @@ export function _patchContextMenu(props: ContextMenuProps) {
     const contextMenuPatches = patches.get(props.navId);
 
     if (contextMenuPatches) {
-        let previousChildren: Array<React.ReactElement> = [...props.children];
-
         for (const patch of contextMenuPatches) {
             try {
                 patch(props.children, props.contextMenuAPIArguments);
-                previousChildren = [...props.children];
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
-                ContextMenuLogger.info(`Restoring previous children for ${props.navId}...`, previousChildren);
-                props.children = previousChildren;
             }
         }
     }
