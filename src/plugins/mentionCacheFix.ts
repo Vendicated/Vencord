@@ -21,6 +21,7 @@ import definePlugin from "@utils/types";
 import { UserUtils } from "@webpack/common";
 
 const USER_ID_REGEX = /<@!?(\d+)>/;
+const pendingUsers = new Set<string>();
 
 export default definePlugin({
     name: "MentionCacheFix",
@@ -35,11 +36,15 @@ export default definePlugin({
         mentions.forEach(m => {
             const match = USER_ID_REGEX.exec(m.innerText);
             if (!match) return;
-            userIds.add(match[1]);
+            const userId = match[1];
+            if (pendingUsers.has(userId)) return;
+            userIds.add(userId);
+            pendingUsers.add(userId);
         });
         if (userIds.size === 0) return;
 
-        Promise.allSettled([...userIds].map(id => UserUtils.fetchUser(id))).then(() => {
+        Promise.allSettled([...userIds].map(id => UserUtils.fetchUser(id))).then(_ => {
+            userIds.forEach(id => pendingUsers.delete(id));
             // TODO - get react to update the message without needing the user to unhover
         });
     },
