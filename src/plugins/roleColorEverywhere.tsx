@@ -18,7 +18,6 @@
 
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
@@ -42,8 +41,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-
-const logger = new Logger("RoleColorEverywhere");
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -98,30 +95,15 @@ export default definePlugin({
     ],
     settings,
 
-    getColor(userId, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
-        if (!guildId && !channelId) return null;
-
-        if (!guildId) {
-            const channel = ChannelStore.getChannel(channelId!);
-            if (!channel) {
-                return null;
-            }
-
-            guildId = channel.guild_id;
-        }
-
-        const member = GuildMemberStore.getMember(guildId, userId);
-        if (!member) {
-            return null;
-        }
-
-        return member?.colorString;
+    getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
+        if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
+        return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
     },
-    getUserColor(userId, ids) {
+    getUserColor(userId: string, ids: { channelId?: string; guildId?: string; }) {
         const colorString = this.getColor(userId, ids);
         return colorString && parseInt(colorString.slice(1), 16);
     },
-    roleGroupColor({ id, count, title, guildId, ...args }) {
+    roleGroupColor({ id, count, title, guildId }: { id: string; count: number; title: string; guildId: string; }) {
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id];
 
@@ -131,7 +113,7 @@ export default definePlugin({
             letterSpacing: ".05em"
         }}>{title} &mdash; {count}</span>;
     },
-    getVoiceProps({ user: { id: userId }, guildId }) {
+    getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {
             style: {
                 color: this.getColor(userId, { guildId })
