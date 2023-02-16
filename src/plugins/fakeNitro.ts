@@ -69,8 +69,8 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity],
-    description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain],
+    description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
     patches: [
@@ -134,6 +134,13 @@ export default definePlugin({
                 replace: ""
             }
         },
+        {
+            find: "canUseClientThemes:function",
+            replacement: {
+                match: /(?<=canUseClientThemes:function\(\i\){)/,
+                replace: "return true;"
+            }
+        }
     ],
 
     options: {
