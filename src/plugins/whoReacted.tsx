@@ -121,6 +121,13 @@ export default definePlugin({
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];
 
+        for (const user of users) {
+            FluxDispatcher.dispatch({
+                type: "USER_UPDATE",
+                user
+            });
+        }
+
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}

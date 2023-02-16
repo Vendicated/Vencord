@@ -263,7 +263,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Remove the divider and the open chat button for the HiddenChannelLockScreen
-                    match: /(?<=function \i\((?<props>\i)\).{1,1800}"more-options-popout"\)\);if\()/,
+                    match: /(?<=function \i\((?<props>\i)\).{1,2000}"more-options-popout"\)\);if\()/,
                     replace: "(!$self.isHiddenChannel($<props>.channel)||$<props>.inCall)&&"
                 },
                 {
