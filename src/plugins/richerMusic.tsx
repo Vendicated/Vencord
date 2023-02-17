@@ -46,7 +46,7 @@ export default definePlugin({
     ],
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3"What music apps are supported?</Forms.FormTitle>
+            <Forms.FormTitle tag="h3"What music apps are supported</Forms.FormTitle>
             <Forms.FormText>
                 Currently, Cider and WACUP (Winamp Community Update Project) are supported but other popular music apps will be supported later.
             </Forms.FormText>
