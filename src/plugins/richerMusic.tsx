@@ -20,14 +20,17 @@ import { Link } from "@components/Link";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 const appIds = [
+    "412797059612278785",
+    "752999910097289267",
+    "759604595810107412",
     "911790844204437504",
     "886578863147192350",
     "1020414178047041627",
     "1032800329332445255"
 ];
 export default definePlugin({
-    name: "richerCider",
-    description: "Enhances Cider (More details in info button) by adding the \"Listening to\" type prefix to the user's rich presence when an applicable ID is found.",
+    name: "richerMusic",
+    description: "Enhances popular music apps by adding the \"Listening to\" type prefix to the user's rich presence when an applicable ID is found.",
     authors: [{
         id: 191621342473224192n,
         name: "cryptofyre",
@@ -43,14 +46,9 @@ export default definePlugin({
     ],
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">Install Cider to use this Plugin</Forms.FormTitle>
+            <Forms.FormTitle tag="h3"What music apps are supported?</Forms.FormTitle>
             <Forms.FormText>
-                <Link href="https://cider.sh">Follow the link to our website</Link> to get Cider up and running, and then enable the plugin.
-            </Forms.FormText>
-            <br></br>
-            <Forms.FormTitle tag="h3">What is Cider?</Forms.FormTitle>
-            <Forms.FormText>
-                Cider is an open-source and community oriented Apple Music client for Windows, macOS, and Linux.
+                Currently, Cider and WACUP (Winamp Community Update Project) are supported but other popular music apps will be supported later.
             </Forms.FormText>
             <br></br>
             <Forms.FormTitle tag="h3">Recommended Optional Plugins</Forms.FormTitle>
