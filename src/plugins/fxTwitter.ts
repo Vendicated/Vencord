@@ -17,19 +17,34 @@
 */
 
 import { addPreSendListener, MessageObject, removePreSendListener } from "@api/MessageEvents";
+import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 const re = /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g;
+enum Services {
+    FxTwitter,
+    VxTwitter,
+}
 
 export default definePlugin({
     name: "FxTwitter",
     description: "Uses FxTwitter to improve embeds from twitter on send",
     authors: [Devs.Samu],
     dependencies: ["MessageEventsAPI"],
+    options: {
+        service: {
+            description: "Embed service",
+            type: OptionType.SELECT,
+            options: [
+                { label: "FxTwitter", value: Services.FxTwitter, default: true },
+                { label: "VxTwitter", value: Services.VxTwitter },
+            ],
+        },
+    },
 
     addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(re, "https://fxtwitter.com");
+        msg.content = msg.content.replace(re, Settings.plugins.FxTwitter.service === Services.FxTwitter ? "https://fxtwitter.com" : "https://vxtwitter.com");
     },
 
     start() {
