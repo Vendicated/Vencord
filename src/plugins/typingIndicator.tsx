@@ -73,7 +73,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             break;
         }
         case 3: {
-            tooltipText = Formatters.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = Formatters.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
             break;
         }
         default: {
