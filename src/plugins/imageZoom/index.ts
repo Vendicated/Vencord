@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -115,7 +115,7 @@ export default definePlugin({
             find: ".carouselModal,",
             replacement: {
                 match: /onClick:(.{1,3}),/,
-                replace: "onClick:Vencord.Settings.plugins.ImageZoom.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                replace: "onClick:Vencord.settings.store.ImageZoom.preventCarouselFromClosingOnClick ? () => {} : $1,"
             }
         }
     ],
@@ -132,8 +132,8 @@ export default definePlugin({
         if (instance.props.id === ELEMENT_ID) {
             if (!this.currentMagnifierElement) {
                 this.currentMagnifierElement = React.createElement(Magnifier, {
-                    size: Settings.plugins.ImageZoom.size ?? 100,
-                    zoom: Settings.plugins.ImageZoom.zoom ?? 2,
+                    size: settings.store.size,
+                    zoom: settings.store.zoom,
                     instance
                 });
                 ReactDOM.render(this.currentMagnifierElement, this.element);
