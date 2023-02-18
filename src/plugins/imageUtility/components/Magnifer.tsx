@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { LazyComponent } from "@utils/misc";
 import { React } from "@webpack/common";
 
@@ -75,6 +76,9 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("keydown", this.onKeyDown);
         document.removeEventListener("keyup", this.onKeyUp);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
+
+        Settings.plugins.ImageUtility.zoom = this.state.zoom;
+        Settings.plugins.ImageUtility.size = this.state.size;
 
     }
 
@@ -143,10 +147,10 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
 
     render() {
         if (!this.state.ready) return null;
-        const { instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
+        const { instance: { props: { src, animated } } } = this.props;
         const { position, opacity, imagePosition, zoom, size } = this.state;
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
-        const box = document.querySelector("#bruhjuhhh")!.getBoundingClientRect();
+        const box = this.element.getBoundingClientRect();
 
         return (
 
