@@ -71,7 +71,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("mousemove", this.updateMousePosition);
         document.removeEventListener("mousedown", this.updateMousePosition);
         document.removeEventListener("mouseup", this.updateMousePosition);
-        document.addEventListener("wheel", this.onWheel);
+        document.removeEventListener("wheel", this.onWheel);
         document.removeEventListener("keydown", this.onKeyDown);
         document.removeEventListener("keyup", this.onKeyUp);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
