@@ -20,8 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { requestMissingGuildMembers } from "@utils/guild";
 import { useForceUpdater } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Menu, Text, useEffect, UserStore, useState } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, Menu, PermissionsBits, Text, useEffect, UserStore, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 import { getPermissionString } from "../formatting";
@@ -38,8 +37,6 @@ export interface RoleOrUserPermission {
     overwriteAllow?: bigint;
     overwriteDeny?: bigint;
 }
-
-const Permissions: Record<string, bigint> = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
 function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
     return openModal(modalProps => <RolesAndUsersPermissions permissions={permissions} guild={guild} modalProps={modalProps} header={header} />);
@@ -109,7 +106,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                             })}
                         </div>
                         <div className="permviewer-perms-perms">
-                            {Object.entries(Permissions).map(([permissionName, bit]) => (
+                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
                                 <div className="permviewer-perms-perms-item">
                                     <div className="permviewer-perms-perms-item-icon">
                                         {(() => {

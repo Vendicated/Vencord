@@ -17,8 +17,8 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { Text, Tooltip, UserStore, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { PermissionsBits, Text, Tooltip, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
@@ -32,8 +32,6 @@ interface UserPermission {
 }
 
 type UserPermissions = Array<UserPermission>;
-
-const Permissions: Record<string, bigint> = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
 const RoleClasses: Record<"roles" | "rolePill" | "rolePillBorder", string> =
     findByPropsLazy("roles", "rolePill", "rolePillBorder");
@@ -64,7 +62,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
     sortUserRoles(userRoles);
 
-    for (const [permission, bit] of Object.entries(Permissions)) {
+    for (const [permission, bit] of Object.entries(PermissionsBits)) {
         for (const userRole of userRoles) {
             if ((userRole.permissions & bit) > 0n) {
                 userPermissions.push({
