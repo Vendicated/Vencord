@@ -91,7 +91,7 @@ async function getApplicationAsset(key: string): Promise<string> {
 function setActivity(activity: Activity | null) {
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: activity,
+        activity,
         socketId: "LastFM",
     });
 }
@@ -172,14 +172,15 @@ export default definePlugin({
             });
 
             const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            const json = await res.json().catch(() => null) as Record<string, any> | null;
-            if (!res.ok || !json || json.error) {
-                const apiError = json?.message
-                    ? `${json.error}: ${json.message}`
-                    : "no error message";
-                const errorString = `${res.status} ${res.statusText} (${apiError})`;
-                logger.error("Failed to query Last.fm API:", errorString);
-                return null;
+            let json: any | undefined;
+            try {
+                json = await res.json();
+                if (json.error) {
+                    logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
+                    return null;
+                }
+            } catch {
+                throw new Error(`${res.status} ${res.statusText}`);
             }
             const trackData = json.recenttracks?.track[0];
 
@@ -195,7 +196,8 @@ export default definePlugin({
                 imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
             };
         } catch (e) {
-            logger.error("Failed to query Last.fm API:", e);
+            logger.error("Failed to query Last.fm API", e);
+            // will clear the rich presence if API fails
             return null;
         }
     },
@@ -204,7 +206,7 @@ export default definePlugin({
         setActivity(await this.getActivity());
     },
 
-    async getActivity() {
+    async getActivity(): Promise<Activity | null> {
         if (settings.store.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
                 if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
@@ -217,20 +219,12 @@ export default definePlugin({
         const trackData = await this.fetchTrackData();
         if (!trackData) return null;
 
-        let assets: ActivityAssets;
-        if (trackData.imageUrl) {
-            assets = {
-                large_image: await getApplicationAsset(trackData.imageUrl),
-                large_text: trackData.album,
-                small_image: await getApplicationAsset("lastfm-small"),
-                small_text: "Last.fm",
-            };
-        } else {
-            assets = {
-                large_image: await getApplicationAsset("lastfm-large"),
-                large_text: trackData.album || "Last.fm",
-            };
-        }
+        const assets: ActivityAssets = {
+            large_image: await getApplicationAsset(trackData.imageUrl || "lastfm-large"),
+            large_text: trackData.album,
+            small_image: await getApplicationAsset("lastfm-small"),
+            small_text: "Last.fm",
+        };
 
         const buttons: ActivityButton[] = [
             {
