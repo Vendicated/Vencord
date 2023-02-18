@@ -21,9 +21,11 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { React, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { React, Text, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
+const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409");
+const classNames = findByPropsLazy("customStatusSection");
 
 import { getTimeString, getUserTimezone } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
@@ -120,10 +122,11 @@ export default definePlugin({
             },
         },
         {
-            find: "().popoutNoBannerPremium",
+            find: "().customStatusSection",
             replacement: {
-                match: /return(\(0,.\.jsx\)\(.\..,\{.*\}\))/,
-                replace: "return [$1, Vencord.Plugins.plugins.Timezones.getProfileTimezonesComponent(e)]"
+                // Inserts the timezone component right below the custom status.
+                match: /user:(\w),nickname:\w,.*?children.*?\(\)\.customStatusSection.*?\}\),/,
+                replace: "$&$self.getProfileTimezonesComponent({user:$1}),"
             }
         }
     ],
@@ -138,22 +141,27 @@ export default definePlugin({
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
         }, [user.id]);
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile || !timezone) {
+        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile) {
             return null;
         }
 
+        // thank you arjix very cool
         return (
-            <span style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                zIndex: 5,
-                background: "white",
-                borderRadius: "5px",
-                border: "4px solid white"
+            <Text variant="text-sm/normal" className={classNames.customStatusSection} onClick={() => {
+                return console.log("ahhh!");
+                // TODO create a modal to set timezone and make text clickable h
+            }} style={{
+                alignItems: "center",
+                // make it clickable
+                cursor: "pointer",
             }}>
-                {getTimeString(timezone)}
-            </span>
+                {(timezone) ? getTimeString(timezone) : "Click to set timezone"}
+                <span
+                    style={{ cursor: "pointer", position: "absolute" }}
+                >
+                    <EditIcon color="var(--primary-330)" height="16" width="16" style={{ marginLeft: "0.25vw" }} />
+                </span>
+            </Text>
         );
     }
     ,
