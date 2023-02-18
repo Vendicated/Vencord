@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, ReactDOM } from "@webpack/common";
 
-import { Magnifer, MagniferProps } from "./components/Magnifer";
+import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
 
 
@@ -58,12 +58,12 @@ export default definePlugin({
 
                 {
                     match: /(componentDidMount=function\(\){)/,
-                    replace: "$1$self.renderMagnifer(this);",
+                    replace: "$1$self.renderMagnifier(this);",
                 },
 
                 {
                     match: /(componentWillUnmount=function\(\){)/,
-                    replace: "$1$self.unMounntMagnifer();"
+                    replace: "$1$self.unMounntMagnifier();"
                 }
             ]
         },
@@ -121,28 +121,28 @@ export default definePlugin({
         },
     }),
     // to stop from rendering twice /shrug
-    currentMagniferElement: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
+    currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
     element: null as HTMLDivElement | null,
 
-    Magnifer,
+    Magnifier,
 
-    renderMagnifer(instance) {
+    renderMagnifier(instance) {
         if (instance.props.id === ELEMENT_ID) {
-            if (!this.currentMagniferElement) {
-                this.currentMagniferElement = React.createElement(Magnifer, {
+            if (!this.currentMagnifierElement) {
+                this.currentMagnifierElement = React.createElement(Magnifier, {
                     size: Settings.plugins.ImageZoom.size ?? 100,
                     zoom: Settings.plugins.ImageZoom.zoom ?? 2,
                     instance
                 });
-                ReactDOM.render(this.currentMagniferElement, this.element);
+                ReactDOM.render(this.currentMagnifierElement, this.element);
             }
         }
     },
 
-    unMounntMagnifer() {
-        if (this.currentMagniferElement) {
+    unMounntMagnifier() {
+        if (this.currentMagnifierElement) {
             ReactDOM.unmountComponentAtNode(this.element!);
-            this.currentMagniferElement = null;
+            this.currentMagnifierElement = null;
         }
     },
 
@@ -161,12 +161,12 @@ export default definePlugin({
 
     start() {
         this.element = document.createElement("div");
-        this.element.classList.add("magniferContainer");
+        this.element.classList.add("MagnifierContainer");
         document.getElementById("app-mount")!.appendChild(this.element);
     },
 
     stop() {
-        // so componenetWillUnMount gets called if magnifer component is still alive
+        // so componenetWillUnMount gets called if Magnifier component is still alive
         ReactDOM.unmountComponentAtNode(this.element!);
         this.element?.remove();
     }

@@ -23,13 +23,13 @@ import { React } from "@webpack/common";
 import { ELEMENT_ID } from "../constants";
 import { waitFor } from "../utils/waitFor";
 
-export interface MagniferProps {
+export interface MagnifierProps {
     zoom: number;
     size: number,
     instance: any;
 }
 
-export interface MagniferState {
+export interface MagnifierState {
     position: { x: number, y: number; },
     imagePosition: { x: number, y: number; },
     size: number,
@@ -39,12 +39,12 @@ export interface MagniferState {
     ready: boolean;
 }
 // class component because i like it more
-export const Magnifer = LazyComponent(() => class Magnifer extends React.PureComponent<MagniferProps, MagniferState> {
+export const Magnifier = LazyComponent(() => class Magnifier extends React.PureComponent<MagnifierProps, MagnifierState> {
     lens = React.createRef<HTMLDivElement>();
     imageRef = React.createRef<HTMLImageElement>();
     currentVideoElementRef = React.createRef<HTMLVideoElement>();
     videoElement!: HTMLVideoElement;
-    constructor(props: MagniferProps) {
+    constructor(props: MagnifierProps) {
         super(props);
 
     }
