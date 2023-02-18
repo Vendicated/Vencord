@@ -172,7 +172,6 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
             >
                 {animated ?
                     <video
-                        className="embedVideo-2ixt5A embedMedia-1mdWSP"
                         ref={this.currentVideoElementRef}
                         style={{
                             position: "absolute",
