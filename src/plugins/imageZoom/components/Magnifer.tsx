@@ -43,11 +43,14 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
     lens = React.createRef<HTMLDivElement>();
     imageRef = React.createRef<HTMLImageElement>();
     currentVideoElementRef = React.createRef<HTMLVideoElement>();
-    element!: HTMLDivElement;
     videoElement!: HTMLVideoElement;
     constructor(props: MagniferProps) {
         super(props);
-        this.element = document.querySelector(`#${ELEMENT_ID}`)!;
+
+    }
+
+    get element(): HTMLDivElement {
+        return document.querySelector(`#${ELEMENT_ID}`)!;
     }
 
 

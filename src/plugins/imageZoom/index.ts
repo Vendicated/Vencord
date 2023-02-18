@@ -78,6 +78,14 @@ export default definePlugin({
                     };`
                 }
             ]
+        },
+
+        {
+            find: ".carouselModal,",
+            replacement: {
+                match: /onClick:(.{1,3}),/,
+                replace: "onClick:Vencord.Settings.plugins.ImageZoom.preventCarouselFromClosingOnClick ? () => {} : $1,"
+            }
         }
     ],
 
@@ -87,6 +95,14 @@ export default definePlugin({
             description: "Whether to save zoom and lens size values",
             default: true,
         },
+
+        preventCarouselFromClosingOnClick: {
+            type: OptionType.BOOLEAN,
+            // Thanks chat gpt
+            description: "Allow the image modal in the carousel to remain open upon clicking on the image",
+            default: true,
+        },
+
         zoom: {
             description: "Zoom of the lens",
             type: OptionType.SLIDER,
