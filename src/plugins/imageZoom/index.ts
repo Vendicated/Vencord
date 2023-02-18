@@ -29,7 +29,7 @@ import { ELEMENT_ID } from "./constants";
 
 export default definePlugin({
     name: "ImageZoom",
-    description: "Lets you zoom in to images and gifs",
+    description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
     authors: [{
         name: "Syncxv",
         id: 549244932213309442n
@@ -84,7 +84,7 @@ export default definePlugin({
     settings: definePluginSettings({
         saveZoomValues: {
             type: OptionType.BOOLEAN,
-            description: "Weather to save zoom and lens size values",
+            description: "Whether to save zoom and lens size values",
             default: true,
         },
         zoom: {
