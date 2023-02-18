@@ -115,7 +115,7 @@ export default definePlugin({
             find: ".carouselModal,",
             replacement: {
                 match: /onClick:(.{1,3}),/,
-                replace: "onClick:Vencord.settings.store.ImageZoom.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                replace: "onClick:Vencord.Settings.plugins.ImageZoom.preventCarouselFromClosingOnClick ? () => {} : $1,"
             }
         }
     ],
