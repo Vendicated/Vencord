@@ -44,6 +44,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.addEventListener("mousemove", this.updateMousePosition);
         document.addEventListener("mousedown", this.updateMousePosition);
         document.addEventListener("mouseup", this.updateMousePosition);
+        document.addEventListener("wheel", this.onWheel);
 
         if (this.props.instance.props.animated) {
             await waitFor("#bruhjuhhh > video");
@@ -59,6 +60,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("mousemove", this.updateMousePosition);
         document.removeEventListener("mousedown", this.updateMousePosition);
         document.removeEventListener("mouseup", this.updateMousePosition);
+        document.addEventListener("wheel", this.onWheel);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes.bind(this));
 
     }
@@ -67,9 +69,18 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         this.currentVideoElementRef.current!.currentTime = this.videoElement.currentTime;
     }
 
+    onWheel = (e: WheelEvent) => {
+        const { instance } = this.props;
+        if (instance.state.mouseOver && instance.state.mouseDown) {
+            const val = this.state.zoom + e.deltaY / 100;
+            this.setState({ ...this.state, zoom: val <= 0 ? 1 : val });
+            this.updateMousePosition(e);
+        }
+    };
+
     updateMousePosition = (e: MouseEvent) => {
-        const { instance, zoom, size } = this.props;
-        console.log(this.props.instance.state.mouseOver, this.props.instance.state.mouseDown);
+        const { instance, size } = this.props;
+        const { zoom } = this.state;
         if (instance.state.mouseOver && instance.state.mouseDown) {
             const offset = size / 2;
             this.setLensPosition({ x: e.x - offset, y: e.y - offset });
@@ -92,14 +103,15 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
     state = {
         position: { x: 0, y: 0 },
         imagePosition: { x: 0, y: 0 },
+        zoom: this.props.zoom,
         opacity: 0,
         ready: false
     };
 
     render() {
         if (!this.state.ready) return null;
-        const { size, zoom, instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
-        const { position, opacity, imagePosition } = this.state;
+        const { size, instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
+        const { position, opacity, imagePosition, zoom } = this.state;
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
         const box = document.querySelector("#bruhjuhhh")!.getBoundingClientRect();
 
