@@ -47,6 +47,9 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
             await waitFor("#bruhjuhhh > video");
             this.videoElement = this.element.querySelector("video")!;
             this.videoElement.addEventListener("timeupdate", this.syncVidoes.bind(this));
+            this.setState({ ...this.state, ready: true });
+        } else {
+            this.setState({ ...this.state, ready: true });
         }
     }
 
@@ -85,9 +88,11 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         position: { x: 0, y: 0 },
         imagePosition: { x: 0, y: 0 },
         opacity: 0,
+        ready: false
     };
 
     render() {
+        if (!this.state.ready) return null;
         const { size, zoom, instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
         const { position, opacity, imagePosition } = this.state;
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
