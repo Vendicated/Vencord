@@ -126,6 +126,9 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
     }
 }
 
+// Cloud settings
+const cloudSettingsLogger = new Logger("CloudSettings", "purple");
+
 const toast = (type: number, message: string) =>
     Toasts.show({
         type,
@@ -157,13 +160,14 @@ export function authorizeCloud() {
                 });
                 const { secret } = await res.json();
                 if (secret) {
+                    cloudSettingsLogger.info("Authorized with secret");
                     await DataStore.set("Vencord_settingsSyncSecret", secret);
                     toast(Toasts.Type.SUCCESS, "Cloud settings sync enabled!");
                 } else {
                     toast(Toasts.Type.FAILURE, "Setup failed (no secret returned?).");
                 }
             } catch (e: any) {
-                new Logger("CloudSettings").error("Failed to authorize", e);
+                cloudSettingsLogger.error("Failed to authorize", e);
                 toast(Toasts.Type.FAILURE, `Setup failed (${e.toString()}).`);
             }
         }
@@ -198,6 +202,7 @@ export async function syncToCloud() {
         });
 
         if (!res.ok) {
+            cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
             toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
             return;
         }
@@ -205,9 +210,10 @@ export async function syncToCloud() {
         const { written } = await res.json();
         await DataStore.set("Vencord_settingsSyncWritten", written);
 
+        cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
     } catch (e) {
-        new Logger("CloudSettings").error("Failed to sync", e);
+        cloudSettingsLogger.error("Failed to sync up", e);
         toast(Toasts.Type.FAILURE, "Synchronization failed. Check console.");
     }
 }
@@ -223,6 +229,7 @@ export async function syncFromCloud() {
         });
 
         if (!res.ok) {
+            cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
             return;
         }
@@ -244,9 +251,10 @@ export async function syncFromCloud() {
         await importSettings(settings);
         await DataStore.set("Vencord_settingsSyncWritten", written);
 
+        cloudSettingsLogger.info("Settings loaded from cloud successfully");
         toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
     } catch (e: any) {
-        new Logger("CloudSettings").error("Failed to sync", e);
+        cloudSettingsLogger.error("Failed to sync down", e);
         toast(Toasts.Type.FAILURE, `Synchronization failed (${e.toString()}).`);
     }
 }
@@ -262,10 +270,9 @@ export async function checkCloudSettingsVersion() {
         });
 
         const version = parseInt(res.headers.get("etag") ?? "-1");
-        new Logger("CloudSettings").info(version);
         return version;
     } catch (e: any) {
-        new Logger("CloudSettings").error("Failed to check version", e);
+        cloudSettingsLogger.error("Failed to check version", e);
         return -1;
     }
 }
