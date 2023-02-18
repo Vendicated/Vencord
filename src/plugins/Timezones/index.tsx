@@ -18,17 +18,23 @@
 
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, Text, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
+
+
+
 const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409");
 const classNames = findByPropsLazy("customStatusSection");
-
-import { getTimeString, getUserTimezone } from "./Utils";
+import { timezones } from "./all_timezones";
+import { DATASTORE_KEY, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
+
+
 
 export default definePlugin({
     name: "Timezones",
@@ -58,20 +64,42 @@ export default definePlugin({
                     name: "user",
                     description: "User to set timezone for",
                     type: ApplicationCommandOptionType.USER,
+                    required: true
                 },
                 {
                     name: "timezone",
                     description: "Timezone id to set (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)",
                     type: ApplicationCommandOptionType.STRING,
+                    required: true
                 }
 
 
             ],
             execute(args, ctx) {
-                const user = findOption(args, "user");
-                const timezone = findOption(args, "timezone");
-                Vencord.Settings.plugins.Timezones[`timezones.${user}`] = timezone;
-                sendBotMessage(ctx.channel.id, { content: "Timezone set" });
+                const user: string | undefined = findOption(args, "user");
+                const timezone = (findOption(args, "timezone", timezones[timezones.indexOf("Etc/UTC")])?.trim() as typeof timezones[number] | undefined);
+
+
+                // Kinda hard to happen, but just to be safe...
+                if (!user || !timezone) return sendBotMessage(ctx.channel.id, { content: "PLease provider both a user and a timezone." });
+
+
+                if (timezone && !timezones.includes(timezone)) {
+                    sendBotMessage(ctx.channel.id, { content: "Invalid timezone.\nPlease look at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" });
+                    return;
+                }
+
+                DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
+                    oldValue = oldValue || {};
+
+                    oldValue[user] = timezone;
+                    return oldValue;
+                }).then(() => {
+                    sendBotMessage(ctx.channel.id, { content: "Timezone set!" });
+                }).catch(err => {
+                    console.error(err);
+                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
+                });
             },
         },
         {
@@ -83,16 +111,28 @@ export default definePlugin({
                     name: "user",
                     description: "User to delete timezone for",
                     type: ApplicationCommandOptionType.USER,
+                    required: true
                 },
             ],
             execute(args, ctx) {
-                const user = findOption(args, "user");
-                if (!Vencord.Settings.plugins.Timezones[`timezones.${user}`]) {
-                    sendBotMessage(ctx.channel.id, { content: "No timezone" });
-                    return;
-                }
-                delete Vencord.Settings.plugins.Timezones[`timezones.${user}`];
-                sendBotMessage(ctx.channel.id, { content: "Timezone deleted" });
+                const user: string | undefined = findOption(args, "user");
+                if (!user) return sendBotMessage(ctx.channel.id, { content: "Please provide a user." }) && undefined;
+
+                DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
+                    oldValue = oldValue || {};
+
+                    if (!Object.prototype.hasOwnProperty.call(oldValue, user))
+                        sendBotMessage(ctx.channel.id, { content: "No timezones were set for this user." });
+                    else {
+                        delete oldValue[user];
+                        sendBotMessage(ctx.channel.id, { content: "Timezone removed!." });
+                    }
+
+                    return oldValue;
+                }).catch(err => {
+                    console.error(err);
+                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
+                });
             }
         },
         {
@@ -100,13 +140,21 @@ export default definePlugin({
             description: "Get all timezones",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute(args, ctx) {
-                const timezones = Vencord.Settings.plugins.Timezones;
-                let str = Object.entries(timezones).filter(t => t.toString().startsWith("timezones.")).map(([user, timezone]) => `<@${user.slice(10)}>: ${timezone}`).join("\n");
+                DataStore.get(DATASTORE_KEY).then((timezones: TimezoneDB | undefined) => {
+                    if (!timezones || Object.keys(timezones).length === 0) {
+                        sendBotMessage(ctx.channel.id, { content: "No timezones are set." });
+                        return;
+                    }
 
-                if (str.length === 0) {
-                    str = "No timezones set";
-                }
-                sendBotMessage(ctx.channel.id, { content: str });
+                    sendBotMessage(ctx.channel.id, {
+                        content: "Timezones for " + Object.keys(timezones).length + " users:\n" + Object.keys(timezones).map(user => {
+                            return `<@${user}> - ${timezones[user]}`;
+                        }).join("\n")
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
+                });
             }
         }
     ],

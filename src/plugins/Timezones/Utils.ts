@@ -18,31 +18,37 @@
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
+import * as DataStore from "@api/DataStore";
 import { findLazy } from "@webpack";
+export const DATASTORE_KEY = "plugins.Timezones.savedTimezones";
+import type { timezones } from "./all_timezones";
+
+
+export interface TimezoneDB {
+    [userId: string]: typeof timezones[number];
+}
 
 const API_URL = "https://timezonedb.catvibers.me/";
 const Cache = new Map<string, string | null>();
 
-const getSettings = () => Vencord.Settings.plugins.Timezones;
-
 export async function getUserTimezone(discordID: string): Promise<string | null> {
-
-    if (getSettings()[`timezones.${discordID}`])
-        return getSettings()[`timezones.${discordID}`];
+    const timezone = (await DataStore.get(DATASTORE_KEY) as TimezoneDB | undefined)?.[discordID];
+    if (timezone) return timezone;
 
     if (Cache.has(discordID)) {
         return Cache.get(discordID) as string | null;
     }
 
     const response = await fetch(API_URL + "api/user/" + discordID);
-    const timezone = await response.json();
+    const timezone_res = await response.json();
 
     if (response.status !== 200) {
         Cache.set(discordID, null);
         return null;
     }
-    Cache.set(discordID, timezone.timezoneId);
-    return timezone.timezoneId;
+
+    Cache.set(discordID, timezone_res.timezoneId);
+    return timezone_res.timezoneId;
 }
 
 export function getTimeString(timezone: string, timestamp = new Date()): string {
