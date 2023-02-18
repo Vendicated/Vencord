@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import definePlugin from "@utils/types";
+import { ReactDOM } from "@webpack/common";
 
 import { Magnifer, MagniferProps } from "./components/Magnifer";
 
@@ -104,6 +105,8 @@ export default definePlugin({
     },
 
     stop() {
+        // so componenetWillUnMount gets called
+        ReactDOM.unmountComponentAtNode(document.querySelector(".magniferContainer")!);
         document.querySelector(".magniferContainer")?.remove();
     }
 });

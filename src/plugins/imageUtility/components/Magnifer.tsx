@@ -27,8 +27,17 @@ export interface MagniferProps {
     instance: any;
 }
 
+export interface MagniferState {
+    position: { x: number, y: number; },
+    imagePosition: { x: number, y: number; },
+    size: number,
+    zoom: number,
+    opacity: number,
+    isShiftDown: boolean,
+    ready: boolean;
+}
 // class component because i like it more
-export const Magnifer = LazyComponent(() => class Magnifer extends React.PureComponent<MagniferProps> {
+export const Magnifer = LazyComponent(() => class Magnifer extends React.PureComponent<MagniferProps, MagniferState> {
     lens = React.createRef<HTMLDivElement>();
     imageRef = React.createRef<HTMLImageElement>();
     currentVideoElementRef = React.createRef<HTMLVideoElement>();
@@ -45,11 +54,13 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.addEventListener("mousedown", this.updateMousePosition);
         document.addEventListener("mouseup", this.updateMousePosition);
         document.addEventListener("wheel", this.onWheel);
+        document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("keyup", this.onKeyUp);
 
         if (this.props.instance.props.animated) {
             await waitFor("#bruhjuhhh > video");
             this.videoElement = this.element.querySelector("video")!;
-            this.videoElement.addEventListener("timeupdate", this.syncVidoes.bind(this));
+            this.videoElement.addEventListener("timeupdate", this.syncVidoes);
             this.setState({ ...this.state, ready: true });
         } else {
             this.setState({ ...this.state, ready: true });
@@ -61,26 +72,46 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("mousedown", this.updateMousePosition);
         document.removeEventListener("mouseup", this.updateMousePosition);
         document.addEventListener("wheel", this.onWheel);
-        this.videoElement?.removeEventListener("timeupdate", this.syncVidoes.bind(this));
+        document.removeEventListener("keydown", this.onKeyDown);
+        document.removeEventListener("keyup", this.onKeyUp);
+        this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
 
     }
 
-    syncVidoes(e: Event) {
+    syncVidoes = (e: Event) => {
         this.currentVideoElementRef.current!.currentTime = this.videoElement.currentTime;
-    }
+    };
+
+    onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Shift") {
+            this.setState({ ...this.state, isShiftDown: true });
+        }
+    };
+
+    onKeyUp = (e: KeyboardEvent) => {
+        if (e.key === "Shift") {
+            this.setState({ ...this.state, isShiftDown: false });
+        }
+    };
 
     onWheel = (e: WheelEvent) => {
         const { instance } = this.props;
-        if (instance.state.mouseOver && instance.state.mouseDown) {
-            const val = this.state.zoom + e.deltaY / 100;
-            this.setState({ ...this.state, zoom: val <= 0 ? 1 : val });
+        if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
+            const val = this.state.zoom + e.deltaY / 200;
+            console.log("zoom: ", val);
+            this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
+            this.updateMousePosition(e);
+        } else {
+            const val = this.state.size + e.deltaY / 20;
+            console.log("size: ", val);
+            this.setState({ ...this.state, size: val <= 50 ? 50 : val });
             this.updateMousePosition(e);
         }
     };
 
     updateMousePosition = (e: MouseEvent) => {
-        const { instance, size } = this.props;
-        const { zoom } = this.state;
+        const { instance } = this.props;
+        const { zoom, size } = this.state;
         if (instance.state.mouseOver && instance.state.mouseDown) {
             const offset = size / 2;
             this.setLensPosition({ x: e.x - offset, y: e.y - offset });
@@ -103,15 +134,17 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
     state = {
         position: { x: 0, y: 0 },
         imagePosition: { x: 0, y: 0 },
+        size: this.props.size,
         zoom: this.props.zoom,
         opacity: 0,
+        isShiftDown: false,
         ready: false
     };
 
     render() {
         if (!this.state.ready) return null;
-        const { size, instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
-        const { position, opacity, imagePosition, zoom } = this.state;
+        const { instance: { props: { height: imageHeight, width: imageWidth, src, animated } } } = this.props;
+        const { position, opacity, imagePosition, zoom, size } = this.state;
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
         const box = document.querySelector("#bruhjuhhh")!.getBoundingClientRect();
 
