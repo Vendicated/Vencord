@@ -150,7 +150,6 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         const { instance: { props: { src, animated } } } = this.props;
         const { position, opacity, imagePosition, zoom, size } = this.state;
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
-        const imageTransformStyle = `translate(${imagePosition.x}px ${imagePosition.y}px)`;
         const box = this.element.getBoundingClientRect();
 
         return (
@@ -170,7 +169,8 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
                         ref={this.currentVideoElementRef}
                         style={{
                             position: "absolute",
-                            transform: imageTransformStyle,
+                            left: `${imagePosition.x}px`,
+                            top: `${imagePosition.y}px`
                         }}
                         width={`${box.width * zoom}px`}
                         height={`${box.height * zoom}px`}
