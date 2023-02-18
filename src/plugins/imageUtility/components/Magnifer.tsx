@@ -20,6 +20,7 @@ import { Settings } from "@api/settings";
 import { LazyComponent } from "@utils/misc";
 import { React } from "@webpack/common";
 
+import { ELEMENT_ID } from "../constants";
 import { waitFor } from "../utils/waitFor";
 
 export interface MagniferProps {
@@ -46,7 +47,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
     videoElement!: HTMLVideoElement;
     constructor(props: MagniferProps) {
         super(props);
-        this.element = document.querySelector("#bruhjuhhh")!;
+        this.element = document.querySelector(`#${ELEMENT_ID}`)!;
     }
 
 
@@ -59,7 +60,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.addEventListener("keyup", this.onKeyUp);
 
         if (this.props.instance.props.animated) {
-            await waitFor("#bruhjuhhh > video");
+            await waitFor(`#${ELEMENT_ID} > video`);
             this.videoElement = this.element.querySelector("video")!;
             this.videoElement.addEventListener("timeupdate", this.syncVidoes);
             this.setState({ ...this.state, ready: true });

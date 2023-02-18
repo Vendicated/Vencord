@@ -24,6 +24,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { ReactDOM } from "@webpack/common";
 
 import { Magnifer, MagniferProps } from "./components/Magnifer";
+import { ELEMENT_ID } from "./constants";
 
 
 export default definePlugin({
@@ -38,7 +39,7 @@ export default definePlugin({
             find: "\"renderLinkComponent\",\"maxWidth\"",
             replacement: {
                 match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
-                replace: "$1id: 'bruhjuhhh',$2"
+                replace: `$1id: '${ELEMENT_ID}',$2`
             }
         },
 
@@ -52,7 +53,6 @@ export default definePlugin({
                     onMouseOut: () => $self.onMouseOut(this),
                     onMouseDown: () => $self.onMouseDown(this),
                     onMouseUp: () => $self.onMouseUp(this),
-                    onMouseMove: () => $self.onMouseMove(this),
                     id: this.props.id,
                     onMouseEnter:`
 
@@ -61,7 +61,7 @@ export default definePlugin({
                 {
                     match: /(componentDidMount=function\(\){)/,
                     replace: `$1
-                    if(this.props.id === 'bruhjuhhh')  {
+                    if(this.props.id === '${ELEMENT_ID}')  {
                         if(!$self.currentMagniferElement) {
                             $self.currentMagniferElement = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageUtility.size ?? 100, zoom: Vencord.Settings.plugins.ImageUtility.zoom ?? 2, instance: this});
                             Vencord.Webpack.Common.ReactDOM.render($self.currentMagniferElement, document.querySelector('.magniferContainer'))
@@ -104,6 +104,7 @@ export default definePlugin({
     }),
     // to stop from rendering twice /shrug
     currentMagniferElement: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
+    element: null as HTMLDivElement | null,
 
     Magnifer,
 
@@ -119,11 +120,6 @@ export default definePlugin({
     onMouseUp(instance) {
         instance.setState((state: any) => ({ ...state, mouseDown: false }));
     },
-    onMouseMove(instance) {
-        if (instance.state.mouseOver && instance.state.mouseDown)
-            // console.log(instance.state, "HI start rendring zoom");
-            return;
-    },
 
     start() {
         this.element = document.createElement("div");
@@ -132,8 +128,8 @@ export default definePlugin({
     },
 
     stop() {
-        // so componenetWillUnMount gets called
+        // so componenetWillUnMount gets called if magnifer component is still alive
         ReactDOM.unmountComponentAtNode(document.querySelector(".magniferContainer")!);
-        document.querySelector(".magniferContainer")?.remove();
+        this.element?.remove();
     }
 });
