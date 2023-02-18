@@ -33,7 +33,7 @@ export default definePlugin({
     },],
     patches: [
         {
-            find: "OPEN_IN_BROWSER",
+            find: "\"renderLinkComponent\",\"maxWidth\"",
             replacement: {
                 match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
                 replace: "$1id: 'bruhjuhhh',$2"
@@ -60,8 +60,10 @@ export default definePlugin({
                     match: /(componentDidMount=function\(\){)/,
                     replace: `$1
                     if(this.props.id === 'bruhjuhhh')  {
-                        $self.what = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: 100, zoom: 2, instance: this});
-                        Vencord.Webpack.Common.ReactDOM.render($self.what, document.querySelector('.magniferContainer'))
+                        if(!$self.what) {
+                            $self.what = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageUtility.size ?? 100, zoom: Vencord.Settings.plugins.ImageUtility.zoom ?? 2, instance: this});
+                            Vencord.Webpack.Common.ReactDOM.render($self.what, document.querySelector('.magniferContainer'))
+                        }
                     };`
                 },
 
@@ -70,6 +72,7 @@ export default definePlugin({
                     replace: `$1
                     if($self.what)  {
                         Vencord.Webpack.Common.ReactDOM.unmountComponentAtNode(document.querySelector('.magniferContainer'))
+                        $self.what = null;
                     };`
                 }
             ]
