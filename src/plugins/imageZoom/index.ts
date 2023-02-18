@@ -27,6 +27,49 @@ import { React, ReactDOM } from "@webpack/common";
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
 
+export const settings = definePluginSettings({
+    saveZoomValues: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to save zoom and lens size values",
+        default: true,
+    },
+
+    preventCarouselFromClosingOnClick: {
+        type: OptionType.BOOLEAN,
+        // Thanks chat gpt
+        description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
+        default: true,
+    },
+
+    invertScroll: {
+        type: OptionType.BOOLEAN,
+        description: "Invert scroll",
+        default: true,
+    },
+
+    zoom: {
+        description: "Zoom of the lens",
+        type: OptionType.SLIDER,
+        markers: makeRange(1, 10, 0.5),
+        default: 2,
+        stickToMarkers: false,
+    },
+    size: {
+        description: "Radius / Size of the lens",
+        type: OptionType.SLIDER,
+        markers: makeRange(50, 1000, 50),
+        default: 100,
+        stickToMarkers: false,
+    },
+
+    zoomSpeed: {
+        description: "How fast the zoom / lens size changes",
+        type: OptionType.SLIDER,
+        markers: makeRange(0.1, 3, 0.1),
+        default: 0.5,
+        stickToMarkers: false,
+    },
+});
 
 export default definePlugin({
     name: "ImageZoom",
@@ -77,49 +120,8 @@ export default definePlugin({
         }
     ],
 
-    settings: definePluginSettings({
-        saveZoomValues: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to save zoom and lens size values",
-            default: true,
-        },
+    settings,
 
-        preventCarouselFromClosingOnClick: {
-            type: OptionType.BOOLEAN,
-            // Thanks chat gpt
-            description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
-            default: true,
-        },
-
-        invertScroll: {
-            type: OptionType.BOOLEAN,
-            description: "Invert scroll",
-            default: true,
-        },
-
-        zoom: {
-            description: "Zoom of the lens",
-            type: OptionType.SLIDER,
-            markers: makeRange(1, 10, 0.5),
-            default: 2,
-            stickToMarkers: false,
-        },
-        size: {
-            description: "Radius / Size of the lens",
-            type: OptionType.SLIDER,
-            markers: makeRange(50, 1000, 50),
-            default: 100,
-            stickToMarkers: false,
-        },
-
-        zoomSpeed: {
-            description: "How fast the zoom / lens size changes",
-            type: OptionType.SLIDER,
-            markers: makeRange(0.1, 3, 0.1),
-            default: 0.5,
-            stickToMarkers: false,
-        },
-    }),
     // to stop from rendering twice /shrug
     currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
     element: null as HTMLDivElement | null,

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
 import { LazyComponent } from "@utils/misc";
 import { React } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
+import { settings } from "../index";
 import { waitFor } from "../utils/waitFor";
 
 export interface MagnifierProps {
@@ -81,9 +81,9 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         document.removeEventListener("keyup", this.onKeyUp);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
 
-        if (Settings.plugins.ImageZoom.saveZoomValues) {
-            Settings.plugins.ImageZoom.zoom = this.state.zoom;
-            Settings.plugins.ImageZoom.size = this.state.size;
+        if (settings.store.saveZoomValues) {
+            settings.store.zoom = this.state.zoom;
+            settings.store.size = this.state.size;
         }
 
     }
@@ -107,12 +107,12 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
     onWheel = (e: WheelEvent) => {
         const { instance } = this.props;
         if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
-            const val = this.state.zoom + ((e.deltaY / 100) * Settings.plugins.ImageZoom.invertScroll ? -1 : 1) * Settings.plugins.ImageZoom.zoomSpeed;
+            const val = this.state.zoom + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
             this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
             this.updateMousePosition(e);
         }
         if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
-            const val = this.state.size + (e.deltaY * Settings.plugins.ImageZoom.invertScroll ? -1 : 1) * Settings.plugins.ImageZoom.zoomSpeed;
+            const val = this.state.size + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
             this.setState({ ...this.state, size: val <= 50 ? 50 : val });
             this.updateMousePosition(e);
         }
