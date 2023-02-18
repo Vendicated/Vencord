@@ -91,6 +91,12 @@ export default definePlugin({
             default: true,
         },
 
+        invertScroll: {
+            type: OptionType.BOOLEAN,
+            description: "Invert scroll",
+            default: true,
+        },
+
         zoom: {
             description: "Zoom of the lens",
             type: OptionType.SLIDER,
