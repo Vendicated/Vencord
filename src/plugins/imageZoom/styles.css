@@ -27,13 +27,13 @@
     /* user-drag: none; */
 }
 
-/* make the carousel take up less space so we can click the backdrop and exit out of it
-[class^="focusLock"] > div {
+/* make the carousel take up less space so we can click the backdrop and exit out of it */
+[class^="focusLock"] > [class^="carouselModal"] {
     height: fit-content;
 }
 
-[class^="focusLock"] > div > div {
+[class^="focusLock"] > [class^="carouselModal"] > div {
     height: fit-content;
     top: 50%;
     transform: translateY(-50%);
-} */
+}
