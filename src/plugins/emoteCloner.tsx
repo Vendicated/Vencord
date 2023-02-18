@@ -57,7 +57,7 @@ async function doClone(guildId: string, id: string, name: string, isAnimated: bo
     reader.onload = () => {
         uploadEmoji({
             guildId,
-            name,
+            name: name.split("~")[0],
             image: reader.result
         }).then(() => {
             Toasts.show({
@@ -187,7 +187,7 @@ export default definePlugin({
         find: "open-native-link",
         replacement: {
             match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-            replace: "$&,Vencord.Plugins.plugins.EmoteCloner.makeMenu(arguments[2])"
+            replace: "$&,$self.makeMenu(arguments[2])"
         },
 
     },

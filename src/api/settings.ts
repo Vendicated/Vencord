@@ -27,25 +27,43 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
+    autoUpdate: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
     frameless: boolean;
+    transparent: boolean;
+    winCtrlQ: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
             [setting: string]: any;
         };
     };
+
+    notifications: {
+        timeout: number;
+        position: "top-right" | "bottom-right";
+        useNative: "always" | "never" | "not-focused";
+    };
 }
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
+    autoUpdate: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
     frameless: false,
-    plugins: {}
+    transparent: false,
+    winCtrlQ: false,
+    plugins: {},
+
+    notifications: {
+        timeout: 5000,
+        position: "bottom-right",
+        useNative: "not-focused"
+    }
 };
 
 try {

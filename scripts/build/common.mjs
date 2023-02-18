@@ -68,11 +68,12 @@ export const globPlugins = {
                 if (!existsSync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
+                    if (file.startsWith(".")) continue;
                     if (file === "index.ts") {
                         continue;
                     }
                     const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/.tsx?$/, "")}";\n`;
+                    code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
                     plugins += `[${mod}.name]:${mod},\n`;
                     i++;
                 }

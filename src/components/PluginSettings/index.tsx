@@ -92,12 +92,9 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings();
-    const pluginSettings = settings.plugins[plugin.name];
+    const settings = useSettings([`plugins.${plugin.name}`]).plugins[plugin.name];
 
-    function isEnabled() {
-        return pluginSettings?.enabled || plugin.started;
-    }
+    const isEnabled = () => settings.enabled ?? false;
 
     function openModal() {
         openModalLazy(async () => {
@@ -119,7 +116,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 return;
             } else if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
-                pluginSettings.enabled = true;
+                settings.enabled = true;
                 onRestartNeeded(plugin.name);
                 return;
             }
@@ -127,14 +124,14 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
 
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches) {
-            pluginSettings.enabled = !wasEnabled;
+            settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name);
             return;
         }
 
         // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
         if (wasEnabled && !plugin.started) {
-            pluginSettings.enabled = !wasEnabled;
+            settings.enabled = !wasEnabled;
             return;
         }
 
@@ -147,7 +144,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
             return;
         }
 
-        pluginSettings.enabled = !wasEnabled;
+        settings.enabled = !wasEnabled;
     }
 
     return (
@@ -225,7 +222,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const enabled = settings.plugins[plugin.name]?.enabled || plugin.started;
+        const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
         if (!searchValue.value.length) return true;
@@ -299,7 +296,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection>
+        <Forms.FormSection className={Margins.marginTop16}>
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
@@ -329,7 +326,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
             <div className={cl("grid")}>
                 {plugins}
             </div>
-            <Forms.FormDivider />
+
+            <Forms.FormDivider className={Margins.marginTop20} />
+
             <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
                 Required Plugins
             </Forms.FormTitle>

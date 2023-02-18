@@ -22,12 +22,17 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MessagePopoverAPI",
     description: "API to add buttons to message popovers.",
-    authors: [Devs.KingFish],
+    authors: [Devs.KingFish, Devs.Ven],
     patches: [{
         find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
         replacement: {
-            match: /\?(?<makeButton>\i)\(.{1,35}\.Messages\.CONFIGURE.+?message:(?<message>\i).+?children:\[/,
-            replace: "$&...Vencord.Api.MessagePopover._buildPopoverElements($<message>,$<makeButton>),"
+            // foo && !bar ? createElement(blah,...makeElement(addReactionData))
+            match: /(\i&&!\i)\?\(0,\i\.jsxs?\)\(.{0,20}renderPopout:.{0,300}?(\i)\(.{3,20}\{key:"add-reaction".+?\}/,
+            replace: (m, bools, makeElement) => {
+                const msg = m.match(/message:(.{1,3}),/)?.[1];
+                if (!msg) throw new Error("Could not find message variable");
+                return `...(${bools}?Vencord.Api.MessagePopover._buildPopoverElements(${msg},${makeElement}):[]),${m}`;
+            }
         }
     }],
 });

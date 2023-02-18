@@ -153,34 +153,6 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Wraps a Function into a try catch block and logs any errors caught
- * Due to the nature of this function, not all paths return a result.
- * Thus, for consistency, the returned functions will always return void or Promise<void>
- *
- * @param name Name identifying the wrapped function. This will appear in the logged errors
- * @param func Function (async or sync both work)
- * @param thisObject Optional thisObject
- * @returns Wrapped Function
- */
-export function suppressErrors<F extends Function>(name: string, func: F, thisObject?: any): F {
-    return (func.constructor.name === "AsyncFunction"
-        ? async function (this: any) {
-            try {
-                await func.apply(thisObject ?? this, arguments);
-            } catch (e) {
-                console.error(`Caught an Error in ${name || "anonymous"}\n`, e);
-            }
-        }
-        : function (this: any) {
-            try {
-                func.apply(thisObject ?? this, arguments);
-            } catch (e) {
-                console.error(`Caught an Error in ${name || "anonymous"}\n`, e);
-            }
-        }) as any as F;
-}
-
-/**
  * Wrap the text in ``` with an optional language
  */
 export function makeCodeblock(text: string, language?: string) {
@@ -228,3 +200,7 @@ export const checkIntersecting = (el: Element) => {
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
 };
+
+export function identity<T>(value: T): T {
+    return value;
+}

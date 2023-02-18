@@ -23,8 +23,8 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
 import { classes, LazyComponent } from "@utils/misc";
-import { filters, find, findByCodeLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState } from "@webpack/common";
+import { filters, find } from "@webpack";
+import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SpotifyStore, Track } from "./SpotifyStore";
 
@@ -36,14 +36,6 @@ function msToHuman(ms: number) {
     const s = Math.floor((minutes - m) * 60);
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
-
-const useStateFromStores: <T>(
-    stores: typeof SpotifyStore[],
-    mapper: () => T,
-    idk?: null,
-    compare?: (old: T, newer: T) => boolean
-) => T
-    = findByCodeLazy("useStateFromStores");
 
 function Svg(path: string, label: string) {
     return () => (
