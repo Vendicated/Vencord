@@ -113,7 +113,6 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         }
         if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
             const val = this.state.size + e.deltaY / 20;
-            console.log("size: ", val);
             this.setState({ ...this.state, size: val <= 50 ? 50 : val });
             this.updateMousePosition(e);
         }
