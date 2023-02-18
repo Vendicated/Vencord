@@ -37,6 +37,7 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
         else if (!isValid) setError("Invalid input provided.");
         else {
             setState(newValue);
+            setError(null);
             onChange(newValue);
         }
     }
