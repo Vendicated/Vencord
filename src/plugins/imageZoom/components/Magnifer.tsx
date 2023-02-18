@@ -107,12 +107,12 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
     onWheel = (e: WheelEvent) => {
         const { instance } = this.props;
         if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
-            const val = this.state.zoom + e.deltaY / 200;
+            const val = this.state.zoom + (e.deltaY / 100) * Settings.plugins.ImageZoom.zoomSpeed;
             this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
             this.updateMousePosition(e);
         }
         if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
-            const val = this.state.size + e.deltaY / 20;
+            const val = this.state.size + e.deltaY * Settings.plugins.ImageZoom.zoomSpeed;
             this.setState({ ...this.state, size: val <= 50 ? 50 : val });
             this.updateMousePosition(e);
         }

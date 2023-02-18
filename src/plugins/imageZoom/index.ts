@@ -87,7 +87,7 @@ export default definePlugin({
         preventCarouselFromClosingOnClick: {
             type: OptionType.BOOLEAN,
             // Thanks chat gpt
-            description: "Allow the image modal in the carousel to remain open upon clicking on the image",
+            description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
             default: true,
         },
 
@@ -104,7 +104,15 @@ export default definePlugin({
             markers: makeRange(50, 1000, 50),
             default: 100,
             stickToMarkers: false,
-        }
+        },
+
+        zoomSpeed: {
+            description: "How fast the zoom / lens size changes",
+            type: OptionType.SLIDER,
+            markers: makeRange(0.1, 3, 0.1),
+            default: 0.5,
+            stickToMarkers: false,
+        },
     }),
     // to stop from rendering twice /shrug
     currentMagniferElement: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
