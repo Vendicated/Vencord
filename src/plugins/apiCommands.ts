@@ -50,10 +50,10 @@ export default definePlugin({
         },
         // Show plugin name instead of "Built-In"
         {
-            find: "().source,children",
+            find: ".source,children",
             replacement: {
                 // ...children: p?.name
-                match: /(?<=:(.{1,3})\.displayDescription\}.{0,200}\(\)\.source,children:)[^}]+/,
+                match: /(?<=:(.{1,3})\.displayDescription\}.{0,200}\.source,children:)[^}]+/,
                 replace: "$1.plugin||($&)"
             }
         }

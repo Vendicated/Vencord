@@ -55,7 +55,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = findByCodeLazy("STATUS_YELLOW", "TWITCH", "STATUS_GREY");
+const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
 const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
@@ -146,9 +146,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={
-                    props.decorations[1]?.find(i => i.key === "new-member")?.props.message?.author
-                } inline />
+                <PlatformIndicator user={props.message?.author} inline />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")

@@ -180,5 +180,25 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     pointy: {
         name: "pointy",
         id: 99914384989519872n
+    },
+    SammCheese: {
+        name: "Samm-Cheese",
+        id: 372148345894076416n
+    },
+    zt: {
+        name: "zt",
+        id: 289556910426816513n
+    },
+    captain: {
+        name: "Captain",
+        id: 347366054806159360n
+    },
+    whqwert: {
+        name: "whqwert",
+        id: 586239091520176128n
+    },
+    lewisakura: {
+        name: "lewisakura",
+        id: 96269247411400704n
     }
 });

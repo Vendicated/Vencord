@@ -25,7 +25,8 @@ const Engines = {
     Yandex: "https://yandex.com/images/search?rpt=imageview&url=",
     SauceNAO: "https://saucenao.com/search.php?url=",
     IQDB: "https://iqdb.org/?url=",
-    TinEye: "https://www.tineye.com/search?url="
+    TinEye: "https://www.tineye.com/search?url=",
+    ImgOps: "https://imgops.com/start?url="
 };
 
 export default definePlugin({
@@ -42,17 +43,18 @@ export default definePlugin({
         }
     }, {
         // pass the target to the open link menu so we can check if it's an image
-        find: "REMOVE_ALL_REACTIONS_CONFIRM_BODY,",
-        replacement: {
-            // url1 = url2 = props.attachment.url
-            // ...
-            // OpenLinks(url2 != null ? url2 : url1, someStuffs)
-            //
-            // the back references are needed because the code is like Z(a!=null?b:c,d), no way to match that
-            // otherwise
-            match: /(?<props>.).onHeightUpdate.{0,200}(.)=(.)=.\.url;.+?\(null!=\3\?\3:\2[^)]+/,
-            replace: "$&,$<props>.target"
-        }
+        find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+        replacement: [
+            {
+                match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
+                replace: "$&,_vencordTarget:arguments[0].target"
+            },
+            {
+                // var f = props.itemHref, .... MakeNativeMenu(null != f ? f : blah)
+                match: /(\i)=\i\.itemHref,.+?\(null!=\1\?\1:.{1,10}(?=\))/,
+                replace: "$&,arguments[0]._vencordTarget"
+            }
+        ]
     }],
 
     makeMenu(src: string, target: HTMLElement) {

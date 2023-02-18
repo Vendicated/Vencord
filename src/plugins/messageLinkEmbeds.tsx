@@ -44,7 +44,7 @@ let AutomodEmbed: React.ComponentType<any>,
     Endpoints: Record<string, any>;
 
 waitFor(["mle_AutomodEmbed"], m => (AutomodEmbed = m.mle_AutomodEmbed));
-waitFor(filters.byCode("().inlineMediaEmbed"), m => Embed = m);
+waitFor(filters.byCode(".inlineMediaEmbed"), m => Embed = m);
 waitFor(m => m.type?.toString()?.includes('["message","compact","className",'), m => ChannelMessage = m);
 waitFor(["MESSAGE_CREATE_ATTACHMENT_UPLOAD"], _ => Endpoints = _);
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
@@ -139,6 +139,16 @@ interface MessageEmbedProps {
     guildID: string;
 }
 
+function withEmbeddedBy(message: Message, embeddedBy: string[]) {
+    return new Proxy(message, {
+        get(_, prop) {
+            if (prop === "vencordEmbeddedBy") return embeddedBy;
+            // @ts-ignore ts so bad
+            return Reflect.get(...arguments);
+        }
+    });
+}
+
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
@@ -146,14 +156,13 @@ export default definePlugin({
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
         {
-            find: "().embedCard",
+            find: ".embedCard",
             replacement: [{
                 match: /{"use strict";(.{0,10})\(\)=>(.{1,2})}\);/,
                 replace: '{"use strict";$1()=>$2,me:()=>messageEmbed});'
             }, {
-                match: /function (.{1,2})\((.{1,2})\){var (.{1,2})=.{1,2}\.message,(.{1,2})=.{1,2}\.channel(.{0,300})\(\)\.embedCard(.{0,500})}\)}/,
-                replace: "function $1($2){var $3=$2.message,$4=$2.channel$5().embedCard$6})}\
-var messageEmbed={mle_AutomodEmbed:$1};"
+                match: /function (.{1,2})\(.{1,2}\){var .{1,2}=.{1,2}\.message,.{1,2}=.{1,2}\.channel.{0,300}\.embedCard.{0,500}}\)}/,
+                replace: "$&;var messageEmbed={mle_AutomodEmbed:$1};"
             }]
         }
     ],
@@ -195,19 +204,24 @@ var messageEmbed={mle_AutomodEmbed:$1};"
 
     messageEmbedAccessory(props) {
         const { message }: { message: Message; } = props;
+        // @ts-ignore
+        const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
         const accessories = [] as (JSX.Element | null)[];
 
         let match = null as RegExpMatchArray | null;
         while ((match = this.messageLinkRegex.exec(message.content!)) !== null) {
             const [_, guildID, channelID, messageID] = match;
+            if (embeddedBy.includes(messageID)) {
+                continue;
+            }
 
             const linkedChannel = ChannelStore.getChannel(channelID);
             if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
                 continue;
             }
 
-            let linkedMessage = messageCache[messageID]?.message as Message;
+            let linkedMessage = messageCache[messageID]?.message;
             if (!linkedMessage) {
                 linkedMessage ??= MessageStore.getMessage(channelID, messageID);
                 if (linkedMessage) messageCache[messageID] = { message: linkedMessage, fetched: true };
@@ -224,7 +238,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                 }
             }
             const messageProps: MessageEmbedProps = {
-                message: linkedMessage,
+                message: withEmbeddedBy(linkedMessage, [...embeddedBy, message.id]),
                 channel: linkedChannel,
                 guildID
             };
@@ -268,7 +282,7 @@ var messageEmbed={mle_AutomodEmbed:$1};"
                 }
             }}
             renderDescription={() => {
-                return <div key={message.id} className={classNames.join(" ")} >
+                return <div key={message.id} className={classNames.join(" ")}>
                     <ChannelMessage
                         id={`message-link-embeds-${message.id}`}
                         message={message}

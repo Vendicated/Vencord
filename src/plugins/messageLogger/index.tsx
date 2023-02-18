@@ -19,20 +19,23 @@
 import "./messageLogger.css";
 
 import { Settings } from "@api/settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Parser, UserStore } from "@webpack/common";
+import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
-function addDeleteStyleClass() {
+import overlayStyle from "./deleteStyleOverlay.css?managed";
+import textStyle from "./deleteStyleText.css?managed";
+
+function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
-        document.body.classList.remove("messagelogger-red-overlay");
-        document.body.classList.add("messagelogger-red-text");
+        enableStyle(textStyle);
+        disableStyle(overlayStyle);
     } else {
-        document.body.classList.remove("messagelogger-red-text");
-        document.body.classList.add("messagelogger-red-overlay");
+        disableStyle(textStyle);
+        enableStyle(overlayStyle);
     }
 }
 
@@ -41,28 +44,21 @@ export default definePlugin({
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
 
-    timestampModule: null as any,
-    moment: null as Function | null,
-
     start() {
-        this.moment = findByPropsLazy("relativeTimeRounding", "relativeTimeThreshold");
-        this.timestampModule = findByPropsLazy("messageLogger_TimestampComponent");
-
-        addDeleteStyleClass();
+        addDeleteStyle();
     },
 
     stop() {
-        document.querySelectorAll(".messageLogger-deleted").forEach(e => e.remove());
-        document.querySelectorAll(".messageLogger-edited").forEach(e => e.remove());
+        document.querySelectorAll(".messagelogger-deleted").forEach(e => e.remove());
+        document.querySelectorAll(".messagelogger-edited").forEach(e => e.remove());
         document.body.classList.remove("messagelogger-red-overlay");
         document.body.classList.remove("messagelogger-red-text");
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
-        const Timestamp = this.timestampModule.messageLogger_TimestampComponent;
         return (
             <ErrorBoundary noop>
-                <div className="messageLogger-edited">
+                <div className="messagelogger-edited">
                     {Parser.parse(edit.content)}
                     <Timestamp
                         timestamp={edit.timestamp}
@@ -78,7 +74,7 @@ export default definePlugin({
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: this.moment?.call(newMessage.edited_timestamp),
+            timestamp: moment?.call(newMessage.edited_timestamp),
             content: oldMessage.content
         };
     },
@@ -92,7 +88,7 @@ export default definePlugin({
                 { label: "Red text", value: "text", default: true },
                 { label: "Red overlay", value: "overlay" }
             ],
-            onChange: () => addDeleteStyleClass()
+            onChange: () => addDeleteStyle()
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -155,7 +151,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, false);" +
+                        "   cache = $self.handleDelete(cache, $1, false);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -165,7 +161,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, true);" +
+                        "   cache = $self.handleDelete(cache, $1, true);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -175,7 +171,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) :" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
                         ".update($3"
@@ -259,8 +255,8 @@ export default definePlugin({
                     replace: "$1,deleted=$2.attachment?.deleted,"
                 },
                 {
-                    match: /(hiddenSpoilers:\w,className:)/,
-                    replace: "$1 (deleted ? 'messageLogger-deleted-attachment ' : '') +"
+                    match: /\["className","attachment","inlineMedia".+?className:/,
+                    replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
                 }
             ]
         },
@@ -276,9 +272,9 @@ export default definePlugin({
                     replace: "var $1=$2.id,deleted=$2.message.deleted,"
                 },
                 {
-                    // Append messageLogger-deleted to classNames if deleted
+                    // Append messagelogger-deleted to classNames if deleted
                     match: /\)\("li",\{(.+?),className:/,
-                    replace: ")(\"li\",{$1,className:(deleted ? \"messageLogger-deleted \" : \"\")+"
+                    replace: ")(\"li\",{$1,className:(deleted ? \"messagelogger-deleted \" : \"\")+"
                 }
             ]
         },
@@ -291,7 +287,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), "
+                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
                 }
             ]
         },
@@ -310,17 +306,6 @@ export default definePlugin({
                     replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
-        },
-
-        {
-            // Message "(edited)" timestamp component
-            // Module 23552
-            find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
-            replacement: {
-                // Re-export the timestamp component under a findable name
-                match: /{(\w{1,2}:\(\)=>(\w{1,2}))}/,
-                replace: "{$1,messageLogger_TimestampComponent:()=>$2}"
-            }
         },
 
         {

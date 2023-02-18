@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "@utils/IpcEvents";
-import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
-import { join } from "path";
-
-import { get } from "./simpleGet";
-
-ipcMain.handleOnce(IpcEvents.DOWNLOAD_VENCORD_CSS, async () => {
-    const buf = await get("https://github.com/Vendicated/Vencord/releases/download/devbuild/renderer.css");
-    await writeFile(join(__dirname, "renderer.css"), buf);
-    return buf.toString("utf-8");
-});
-
+export function Badge({ text, color }): JSX.Element {
+    return (
+        <div className="vc-plugins-badge" style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto"
+        }}>
+            {text}
+        </div>
+    );
+}

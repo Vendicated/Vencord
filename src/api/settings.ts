@@ -19,7 +19,7 @@
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
-import { OptionType } from "@utils/types";
+import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -27,23 +27,43 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
+    autoUpdate: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    frameless: boolean;
+    transparent: boolean;
+    winCtrlQ: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
             [setting: string]: any;
         };
     };
+
+    notifications: {
+        timeout: number;
+        position: "top-right" | "bottom-right";
+        useNative: "always" | "never" | "not-focused";
+    };
 }
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
+    autoUpdate: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
-    plugins: {}
+    frameless: false,
+    transparent: false,
+    winCtrlQ: false,
+    plugins: {},
+
+    notifications: {
+        timeout: 5000,
+        position: "bottom-right",
+        useNative: "not-focused"
+    }
 };
 
 try {
@@ -144,6 +164,7 @@ export const Settings = makeProxy(settings);
  * @param paths An optional list of paths to whitelist for rerenders
  * @returns Settings
  */
+// TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
 export function useSettings(paths?: string[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
@@ -197,4 +218,20 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             break;
         }
     }
+}
+
+export function definePluginSettings<D extends SettingsDefinition, C extends SettingsChecks<D>>(def: D, checks?: C) {
+    const definedSettings: DefinedSettings<D> = {
+        get store() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        use: settings => useSettings(
+            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+        ).plugins[definedSettings.pluginName] as any,
+        def,
+        checks: checks ?? {},
+        pluginName: "",
+    };
+    return definedSettings;
 }

@@ -1,51 +1,30 @@
 # Vencord
 
-A Discord client mod that does things differently
+The cutest Discord client mod
 
 ## Features
 
--   Super easy to install, no git or node or anything else required
--   Many plugins built in: [See a list](https://gist.github.com/Vendicated/8696cde7b92548064a3ae92ead84d033)
-    -   Some highlights: SpotifyControls, Experiments, NoTrack, MessageLogger, QuickReply, Free Emotes/Stickers, custom slash commands, ShowHiddenChannels
--   Browser Support: Run Vencord in your Browser via extension or UserScript
+-   Super easy to install (one click installer)
+-   90+ plugins built in: [See a list](https://gist.github.com/Vendicated/8696cde7b92548064a3ae92ead84d033)
+    -   Some highlights: SpotifyControls, Experiments, NoTrack, MessageLogger, QuickReply, Free Emotes/Stickers, CustomCommands, ShowHiddenChannels, PronounDB
+-   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript
 -   Custom CSS and Themes: Inbuilt css editor with support to import any css files (including BetterDiscord themes)
 -   Works in all Electron versions (Confirmed working on versions 13-23)
+-   Maintained very actively, broken plugins are usually fixed within 12 hours
 
 ## Installing / Uninstalling
 
-If you're just a normal user, use [our simple gui installer!](https://github.com/Vendicated/VencordInstaller#usage)
-
-If you're a power user who wants to contribute and make plugins or just want to build from source and install manually, read [Megu's Installation Guide!](docs/1_INSTALLING.md)
+[![Download and run the Installer ](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#usage)
 
 ## Installing on Browser
 
-[![Get the Firefox extension](https://blog.mozilla.org/addons/files/2015/11/get-the-addon-small.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/)
+[![Get it on the Firefox Webstore](https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Get it on the Chrome Webstore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
 
-Or install the browser extension for
-- [![Chrome](https://img.shields.io/badge/chrome-ext-brightgreen)](https://github.com/Vendicated/Vencord/releases/latest/download/Vencord-for-Chrome-and-Edge.zip)
-- [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that QuickCSS, shiki and other plugins making use of external resources will not work with the UserScript.
+Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that QuickCSS and plugins making use of external resources will not work with the UserScript.
 
+## Building from Source
 
-You may also build them from source, to do that do the same steps as in the manual regular install method,
-except run `pnpm buildWeb` instead of `pnpm build`, and your outputs will be in the dist folder
-
-```sh
-pnpm buildWeb
-```
-
-You will find the built extension at dist/extension.zip. Now just install this extension in your Browser
-
-## Installing Plugins
-
-> **Note**
-> You can only use 3rd party plugins in the manual Vencord install for now.
-
-Vencord comes with a bunch of plugins out of the box!
-
-However, if you want to install your own ones, create a `userplugins` folder in the `src` directory and create or clone your plugins in there.
-Don't forget to rebuild!
-
-Want to learn how to create your own plugin, and maybe PR it into Vencord? See the [Contributing](#contributing) section below!
+See the docs folder
 
 ## Contributing
 

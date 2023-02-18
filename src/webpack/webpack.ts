@@ -50,6 +50,8 @@ export const filters = {
         }
         return true;
     },
+    byStoreName: (name: string): FilterFn => m =>
+        m.constructor?.displayName === name
 };
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
@@ -324,6 +326,20 @@ export function findByCode(...code: string[]) {
  */
 export function findByCodeLazy(...code: string[]) {
     return findLazy(filters.byCode(...code));
+}
+
+/**
+ * Find a store by its displayName
+ */
+export function findStore(name: string) {
+    return find(filters.byStoreName(name));
+}
+
+/**
+ * findByDisplayName but lazy
+ */
+export function findStoreLazy(name: string) {
+    return findLazy(filters.byStoreName(name));
 }
 
 /**

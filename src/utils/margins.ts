@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+let styleStr = "";
 
-export default definePlugin({
-    name: "SilentTyping",
-    authors: [Devs.Ven],
-    description: "Hide that you are typing",
-    patches: [{
-        find: "startTyping:",
-        replacement: {
-            match: /startTyping:.+?,stop/,
-            replace: "startTyping:()=>{},stop"
-        }
-    }]
-});
+export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
+
+for (const dir of ["top", "bottom", "left", "right"] as const) {
+    for (const size of [8, 16, 20] as const) {
+        const cl = `vc-m-${dir}-${size}`;
+        Margins[`${dir}${size}`] = cl;
+        styleStr += `.${cl}{margin-${dir}:${size}px;}`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () =>
+    document.head.append(Object.assign(document.createElement("style"), {
+        textContent: styleStr,
+        id: "vencord-margins"
+    })), { once: true });

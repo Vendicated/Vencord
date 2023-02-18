@@ -20,11 +20,11 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { PluginDef } from "@utils/types";
-import { find, findByPropsLazy } from "@webpack";
+import { find, findByCode, findByPropsLazy } from "@webpack";
 import { Menu } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
-const ImageModal = LazyComponent(() => find(m => m.prototype?.render?.toString().includes("OPEN_ORIGINAL_IMAGE")));
+const ImageModal = LazyComponent(() => findByCode(".MEDIA_MODAL_CLOSE,"));
 const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 
 const GuildBannerStore = findByPropsLazy("getGuildBannerURL");
@@ -48,7 +48,7 @@ export default new class ViewIcons implements PluginDef {
                     shouldAnimate={true}
                     original={url}
                     src={url}
-                    renderLinkComponent={() => <MaskedLink />}
+                    renderLinkComponent={MaskedLink}
                 />
             </ModalRoot>
         ));
@@ -63,7 +63,7 @@ export default new class ViewIcons implements PluginDef {
                 replace: (_, src) => `{src:${src},onClick:()=>${OPEN_URL}${src}),avatarDecoration`
             }
         }, {
-            find: "().popoutNoBannerPremium",
+            find: ".popoutNoBannerPremium",
             replacement: {
                 match: /style:.{0,10}\{\},(.{1,2})\)/,
                 replace: (m, style) =>
@@ -79,7 +79,7 @@ export default new class ViewIcons implements PluginDef {
                 },
                 {
                     match: /(id:"leave-guild".{0,200}),(\(0,.{1,3}\.jsxs?\).{0,200}function)/,
-                    replace: "$1,Vencord.Plugins.plugins.ViewIcons.buildGuildContextMenuEntries(_guild),$2"
+                    replace: "$1,$self.buildGuildContextMenuEntries(_guild),$2"
                 }
             ]
         }

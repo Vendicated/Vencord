@@ -1,0 +1,138 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+.vc-plugins-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-plugins-card {
+    background-color: var(--background-secondary-alt);
+    color: var(--interactive-active);
+    border-radius: 8px;
+    display: block;
+    height: 100%;
+    padding: 12px;
+    width: 100%;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
+}
+
+.vc-plugins-card-disabled {
+    opacity: 0.6;
+}
+
+.vc-plugins-card:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+}
+
+.vc-plugins-card-header {
+    margin-top: auto;
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    height: 1.5rem;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-plugins-info-button {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    margin-right: 8px;
+}
+
+.vc-plugins-settings-button:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-plugins-filter-controls {
+    display: grid;
+    height: 40px;
+    gap: 10px;
+    grid-template-columns: 1fr 150px;
+}
+
+.vc-plugins-badge {
+    padding: 0 6px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    border-radius: 8px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--white-500);
+    text-align: center;
+}
+
+.vc-plugins-note {
+    height: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    /* stylelint-disable-next-line property-no-unknown */
+    box-orient: vertical;
+}
+
+.vc-plugins-name {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-grow: 1;
+    gap: 8px;
+    cursor: "default";
+}
+
+.vc-plugins-dep-name {
+    margin: 0 auto;
+}
+
+.vc-plugins-info-card {
+    padding: 1em;
+    height: 8em;
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-plugins-info-card div {
+    line-height: 32px;
+}
+
+.vc-plugins-restart-card {
+    padding: 1em;
+    background: var(--info-warning-background);
+    border: 1px solid var(--info-warning-foreground);
+    color: var(--info-warning-text);
+}
+
+.vc-plugins-restart-card button {
+    margin-top: 0.5em;
+}
+
+.vc-plugins-info-button svg:not(:hover, :focus) {
+    color: var(--text-muted);
+}

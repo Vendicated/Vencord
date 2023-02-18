@@ -23,8 +23,6 @@ import type {
     IThemeRegistration,
 } from "@vap/shiki";
 
-import type { Settings } from "../../Vencord";
-
 /** This must be atleast a subset of the `@vap/shiki-worker` spec */
 export type ShikiSpec = {
     setOnigasm: ({ wasm }: { wasm: string; }) => Promise<void>;
@@ -63,16 +61,4 @@ export enum DeviconSetting {
     Disabled = "DISABLED",
     Greyscale = "GREYSCALE",
     Color = "COLOR"
-}
-
-type CommonSettings = {
-    [K in keyof Settings["plugins"][string]as K extends `${infer V}` ? K : never]: Settings["plugins"][string][K];
-};
-
-export interface ShikiSettings extends CommonSettings {
-    theme: string;
-    customTheme: string;
-    tryHljs: HljsSetting;
-    useDevIcon: DeviconSetting;
-    bgOpacity: number;
 }

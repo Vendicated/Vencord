@@ -22,10 +22,24 @@ import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, PermissionStore, UserStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+
+const USE_EXTERNAL_EMOJIS = 1n << 18n;
+const USE_EXTERNAL_STICKERS = 1n << 37n;
+
+enum EmojiIntentions {
+    REACTION = 0,
+    STATUS = 1,
+    COMMUNITY_CONTENT = 2,
+    CHAT = 3,
+    GUILD_STICKER_RELATED_EMOJI = 4,
+    GUILD_ROLE_BENEFIT_EMOJI = 5,
+    COMMUNITY_CONTENT_ONLY = 6,
+    SOUNDBOARD = 7
+}
 
 interface BaseSticker {
     available: boolean;
@@ -58,26 +72,39 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity],
-    description: "Allows you to stream in nitro quality and send fake emojis/stickers.",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain],
+    description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
     patches: [
         {
-            find: "canUseAnimatedEmojis:function",
+            find: ".PREMIUM_LOCKED;",
             predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: [
-                "canUseAnimatedEmojis",
-                "canUseEmojisEverywhere"
-            ].map(func => {
-                return {
-                    match: new RegExp(`${func}:function\\(.+?\\{`),
-                    replace: "$&return true;"
-                };
-            })
+                {
+                    match: /(?<=(?<intention>\i)=\i\.intention)/,
+                    replace: ",fakeNitroIntention=$<intention>"
+                },
+                {
+                    match: /(?<=\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
+                    replace: ",fakeNitroIntention"
+                },
+                {
+                    match: /(?<=&&!\i&&)!(?<canUseExternal>\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
+                    replace: `(!$<canUseExternal>&&![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
+                }
+            ]
         },
         {
             find: "canUseAnimatedEmojis:function",
+            predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
+            replacement: {
+                match: /(?<=(?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\((?<user>\i))\){(?<premiumCheck>.+?\))/g,
+                replace: `,fakeNitroIntention){$<premiumCheck>||fakeNitroIntention===undefined||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+            }
+        },
+        {
+            find: "canUseStickersEverywhere:function",
             predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
                 match: /canUseStickersEverywhere:function\(.+?\{/,
@@ -93,7 +120,7 @@ export default definePlugin({
             }
         },
         {
-            find: "canUseAnimatedEmojis:function",
+            find: "canStreamHighQuality:function",
             predicate: () => Settings.plugins.FakeNitro.enableStreamQualityBypass === true,
             replacement: [
                 "canUseHighVideoUploadQuality",
@@ -114,6 +141,13 @@ export default definePlugin({
                 replace: ""
             }
         },
+        {
+            find: "canUseClientThemes:function",
+            replacement: {
+                match: /(?<=canUseClientThemes:function\(\i\){)/,
+                replace: "return true;"
+            }
+        }
     ],
 
     options: {
@@ -159,6 +193,22 @@ export default definePlugin({
 
     get canUseStickers() {
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+    },
+
+    hasPermissionToUseExternalEmojis(channelId: string) {
+        const channel = ChannelStore.getChannel(channelId);
+
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
+
+        return PermissionStore.can(USE_EXTERNAL_EMOJIS, channel);
+    },
+
+    hasPermissionToUseExternalStickers(channelId: string) {
+        const channel = ChannelStore.getChannel(channelId);
+
+        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
+
+        return PermissionStore.can(USE_EXTERNAL_STICKERS, channel);
     },
 
     getStickerLink(stickerId: string) {
@@ -245,7 +295,7 @@ export default definePlugin({
                 if (!sticker)
                     break stickerBypass;
 
-                if (sticker.available !== false && (this.canUseStickers || (sticker as GuildSticker)?.guild_id === guildId))
+                if (sticker.available !== false && ((this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId)) || (sticker as GuildSticker)?.guild_id === guildId))
                     break stickerBypass;
 
                 let link = this.getStickerLink(sticker.id);
@@ -268,7 +318,7 @@ export default definePlugin({
                 }
             }
 
-            if (!this.canUseEmotes && settings.enableEmojiBypass) {
+            if ((!this.canUseEmotes || !this.hasPermissionToUseExternalEmojis(channelId)) && settings.enableEmojiBypass) {
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
@@ -284,22 +334,22 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        if (!this.canUseEmotes && settings.enableEmojiBypass) {
-            this.preEdit = addPreEditListener((_, __, messageObj) => {
-                const { guildId } = this;
+        this.preEdit = addPreEditListener((channelId, __, messageObj) => {
+            if (this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId)) return;
 
-                for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
-                    const emoji = EmojiStore.getCustomEmojiById(emojiId);
-                    if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
-                    if (!emoji.require_colons) continue;
+            const { guildId } = this;
 
-                    const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`);
-                    messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
-                    });
-                }
-            });
-        }
+            for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
+                const emoji = EmojiStore.getCustomEmojiById(emojiId);
+                if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
+                if (!emoji.require_colons) continue;
+
+                const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`);
+                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
+                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                });
+            }
+        });
     },
 
     stop() {

@@ -18,10 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { waitFor } from "@webpack";
-
-let GuildStore;
-waitFor(["getGuild"], m => GuildStore = m);
+import { GuildStore } from "@webpack/common";
 
 export default definePlugin({
     name: "ForceOwnerCrown",
@@ -33,7 +30,7 @@ export default definePlugin({
             find: ".renderOwner=",
             replacement: {
                 match: /isOwner;return null!=(\w+)?&&/g,
-                replace: "isOwner;if(Vencord.Plugins.plugins.ForceOwnerCrown.isGuildOwner(this.props)){$1=true;}return null!=$1&&"
+                replace: "isOwner;if($self.isGuildOwner(this.props)){$1=true;}return null!=$1&&"
             }
         },
     ],
