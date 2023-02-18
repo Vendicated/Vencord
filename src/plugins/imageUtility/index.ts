@@ -18,7 +18,9 @@
 
 import "./styles.css";
 
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/settings";
+import { makeRange } from "@components/PluginSettings/components";
+import definePlugin, { OptionType } from "@utils/types";
 import { ReactDOM } from "@webpack/common";
 
 import { Magnifer, MagniferProps } from "./components/Magnifer";
@@ -60,9 +62,9 @@ export default definePlugin({
                     match: /(componentDidMount=function\(\){)/,
                     replace: `$1
                     if(this.props.id === 'bruhjuhhh')  {
-                        if(!$self.what) {
-                            $self.what = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageUtility.size ?? 100, zoom: Vencord.Settings.plugins.ImageUtility.zoom ?? 2, instance: this});
-                            Vencord.Webpack.Common.ReactDOM.render($self.what, document.querySelector('.magniferContainer'))
+                        if(!$self.currentMagniferElement) {
+                            $self.currentMagniferElement = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageUtility.size ?? 100, zoom: Vencord.Settings.plugins.ImageUtility.zoom ?? 2, instance: this});
+                            Vencord.Webpack.Common.ReactDOM.render($self.currentMagniferElement, document.querySelector('.magniferContainer'))
                         }
                     };`
                 },
@@ -70,16 +72,38 @@ export default definePlugin({
                 {
                     match: /(componentWillUnmount=function\(\){)/,
                     replace: `$1
-                    if($self.what)  {
+                    if($self.currentMagniferElement)  {
                         Vencord.Webpack.Common.ReactDOM.unmountComponentAtNode(document.querySelector('.magniferContainer'))
-                        $self.what = null;
+                        $self.currentMagniferElement = null;
                     };`
                 }
             ]
         }
     ],
 
-    what: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
+    settings: definePluginSettings({
+        saveZoomValues: {
+            type: OptionType.BOOLEAN,
+            description: "Weather to save zoom and lens size values",
+            default: true,
+        },
+        zoom: {
+            description: "Zoom of the lens",
+            type: OptionType.SLIDER,
+            markers: makeRange(1, 10, 0.5),
+            default: 2,
+            stickToMarkers: false,
+        },
+        size: {
+            description: "Radius / Size of the lens",
+            type: OptionType.SLIDER,
+            markers: makeRange(50, 1000, 50),
+            default: 100,
+            stickToMarkers: false,
+        }
+    }),
+    // to stop from rendering twice /shrug
+    currentMagniferElement: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
 
     Magnifer,
 

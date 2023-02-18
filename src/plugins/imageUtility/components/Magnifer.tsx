@@ -77,8 +77,10 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("keyup", this.onKeyUp);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
 
-        Settings.plugins.ImageUtility.zoom = this.state.zoom;
-        Settings.plugins.ImageUtility.size = this.state.size;
+        if (Settings.plugins.ImageUtility.saveZoomValues) {
+            Settings.plugins.ImageUtility.zoom = this.state.zoom;
+            Settings.plugins.ImageUtility.size = this.state.size;
+        }
 
     }
 
@@ -105,7 +107,8 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
             console.log("zoom: ", val);
             this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
             this.updateMousePosition(e);
-        } else {
+        }
+        if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
             const val = this.state.size + e.deltaY / 20;
             console.log("size: ", val);
             this.setState({ ...this.state, size: val <= 50 ? 50 : val });
