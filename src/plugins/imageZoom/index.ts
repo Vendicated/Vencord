@@ -28,8 +28,8 @@ import { ELEMENT_ID } from "./constants";
 
 
 export default definePlugin({
-    name: "ImageUtility",
-    description: "hey",
+    name: "ImageZoom",
+    description: "Lets you zoom in to images and gifs",
     authors: [{
         name: "Syncxv",
         id: 549244932213309442n
@@ -63,7 +63,7 @@ export default definePlugin({
                     replace: `$1
                     if(this.props.id === '${ELEMENT_ID}')  {
                         if(!$self.currentMagniferElement) {
-                            $self.currentMagniferElement = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageUtility.size ?? 100, zoom: Vencord.Settings.plugins.ImageUtility.zoom ?? 2, instance: this});
+                            $self.currentMagniferElement = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageZoom.size ?? 100, zoom: Vencord.Settings.plugins.ImageZoom.zoom ?? 2, instance: this});
                             Vencord.Webpack.Common.ReactDOM.render($self.currentMagniferElement, document.querySelector('.magniferContainer'))
                         }
                     };`
