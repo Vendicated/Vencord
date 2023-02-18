@@ -139,7 +139,7 @@ export default definePlugin({
         }
     },
 
-    unMounntMagnifier() {
+    unMountMagnifier() {
         if (this.currentMagnifierElement) {
             ReactDOM.unmountComponentAtNode(this.element!);
             this.currentMagnifierElement = null;
