@@ -26,8 +26,8 @@ interface SwitchProps {
     disabled?: boolean;
 }
 
-const SWITCH_ON = "var(--status-green-600)";
-const SWITCH_OFF = "var(--primary-dark-400)";
+const SWITCH_ON = "var(--green-360)";
+const SWITCH_OFF = "var(--primary-400)";
 const SwitchClasses = findByPropsLazy("slider", "input", "container");
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {

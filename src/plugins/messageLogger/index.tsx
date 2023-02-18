@@ -19,19 +19,23 @@
 import "./messageLogger.css";
 
 import { Settings } from "@api/settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
-function addDeleteStyleClass() {
+import overlayStyle from "./deleteStyleOverlay.css?managed";
+import textStyle from "./deleteStyleText.css?managed";
+
+function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
-        document.body.classList.remove("messagelogger-red-overlay");
-        document.body.classList.add("messagelogger-red-text");
+        enableStyle(textStyle);
+        disableStyle(overlayStyle);
     } else {
-        document.body.classList.remove("messagelogger-red-text");
-        document.body.classList.add("messagelogger-red-overlay");
+        disableStyle(textStyle);
+        enableStyle(overlayStyle);
     }
 }
 
@@ -41,7 +45,7 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Ven],
 
     start() {
-        addDeleteStyleClass();
+        addDeleteStyle();
     },
 
     stop() {
@@ -84,7 +88,7 @@ export default definePlugin({
                 { label: "Red text", value: "text", default: true },
                 { label: "Red overlay", value: "overlay" }
             ],
-            onChange: () => addDeleteStyleClass()
+            onChange: () => addDeleteStyle()
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -147,7 +151,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, false);" +
+                        "   cache = $self.handleDelete(cache, $1, false);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -157,7 +161,7 @@ export default definePlugin({
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = Vencord.Plugins.plugins.MessageLogger.handleDelete(cache, $1, true);" +
+                        "   cache = $self.handleDelete(cache, $1, true);" +
                         "   $2commit(cache);" +
                         "},"
                 },
@@ -167,7 +171,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), Vencord.Plugins.plugins.MessageLogger.makeEdit($2.message, m)]) :" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
                         ".update($3"
@@ -283,7 +287,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => Vencord.Plugins.plugins.MessageLogger.renderEdit(edit)) : null), "
+                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
                 }
             ]
         },

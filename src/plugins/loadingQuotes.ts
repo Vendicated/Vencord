@@ -68,7 +68,7 @@ export default definePlugin({
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
                 match: /\._loadingText=.+?random\(.+?;/s,
-                replace: "._loadingText=Vencord.Plugins.plugins.LoadingQuotes.quote;",
+                replace: "._loadingText=$self.quote;",
             },
         },
     ],
