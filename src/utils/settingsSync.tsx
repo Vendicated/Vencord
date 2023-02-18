@@ -250,3 +250,22 @@ export async function syncFromCloud() {
         toast(Toasts.Type.FAILURE, `Synchronization failed (${e.toString()}).`);
     }
 }
+
+export async function checkCloudSettingsVersion() {
+    try {
+        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
+            method: "HEAD",
+            headers: new Headers({
+                Authorization: await getCloudAuth(),
+                Accept: "application/octet-stream"
+            }),
+        });
+
+        const version = parseInt(res.headers.get("etag") ?? "-1");
+        new Logger("CloudSettings").info(version);
+        return version;
+    } catch (e: any) {
+        new Logger("CloudSettings").error("Failed to check version", e);
+        return -1;
+    }
+}

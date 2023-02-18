@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { classes } from "@utils/misc";
-import { authorizeCloud, deauthorizeCloud, downloadSettingsBackup, syncFromCloud, syncToCloud, uploadSettingsBackup } from "@utils/settingsSync";
+import { authorizeCloud, checkCloudSettingsVersion, deauthorizeCloud, downloadSettingsBackup, syncFromCloud, syncToCloud, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Forms, Margins, Text } from "@webpack/common";
 
 function BackupRestoreTab() {
@@ -80,6 +80,9 @@ function BackupRestoreTab() {
                     <Button
                         onClick={() => syncFromCloud()}
                     >Sync from Cloud</Button>
+                    <Button
+                        onClick={() => checkCloudSettingsVersion()}
+                    >Log Cloud Version</Button>
                 </Flex>
             </Forms.FormSection>
         </>
