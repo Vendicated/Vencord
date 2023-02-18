@@ -21,7 +21,7 @@ import { React } from "@webpack/common";
 
 import { waitFor } from "../utils/waitFor";
 
-interface MagniferProps {
+export interface MagniferProps {
     zoom: number;
     size: number,
     instance: any;
@@ -42,6 +42,8 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
 
     async componentDidMount() {
         document.addEventListener("mousemove", this.updateMousePosition);
+        document.addEventListener("mousedown", this.updateMousePosition);
+        document.addEventListener("mouseup", this.updateMousePosition);
 
         if (this.props.instance.props.animated) {
             await waitFor("#bruhjuhhh > video");
@@ -55,6 +57,8 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
 
     componentWillUnmount(): void {
         document.removeEventListener("mousemove", this.updateMousePosition);
+        document.removeEventListener("mousedown", this.updateMousePosition);
+        document.removeEventListener("mouseup", this.updateMousePosition);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes.bind(this));
 
     }
@@ -65,6 +69,7 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
 
     updateMousePosition = (e: MouseEvent) => {
         const { instance, zoom, size } = this.props;
+        console.log(this.props.instance.state.mouseOver, this.props.instance.state.mouseDown);
         if (instance.state.mouseOver && instance.state.mouseDown) {
             const offset = size / 2;
             this.setLensPosition({ x: e.x - offset, y: e.y - offset });

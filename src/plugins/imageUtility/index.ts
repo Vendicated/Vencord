@@ -20,7 +20,7 @@ import "./styles.css";
 
 import definePlugin from "@utils/types";
 
-import { Magnifer } from "./components/Magnifer";
+import { Magnifer, MagniferProps } from "./components/Magnifer";
 
 
 export default definePlugin({
@@ -75,6 +75,8 @@ export default definePlugin({
         }
     ],
 
+    what: null as React.FunctionComponentElement<MagniferProps & JSX.IntrinsicAttributes> | null,
+
     Magnifer,
 
     onMouseOver(instance) {
@@ -84,9 +86,7 @@ export default definePlugin({
         instance.setState((state: any) => ({ ...state, mouseOver: false }));
     },
     onMouseDown(instance) {
-        if (instance.state.mouseOver) {
-            instance.setState((state: any) => ({ ...state, mouseDown: true }));
-        }
+        instance.setState((state: any) => ({ ...state, mouseDown: true }));
     },
     onMouseUp(instance) {
         instance.setState((state: any) => ({ ...state, mouseDown: false }));
