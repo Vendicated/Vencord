@@ -28,7 +28,6 @@ import SimpleGuild from "./types/SimpleGuild";
 
 const DMStore = findByPropsLazy("getSortedPrivateChannels");
 const GuildStore = findByPropsLazy("getGuilds", "getGuild");
-const Notifications = findByPropsLazy("showNotification", "requestPermission");
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
