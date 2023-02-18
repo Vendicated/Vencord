@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByPropsLazy, waitFor } from "../webpack";
+import { findByCodeLazy, findByPropsLazy, waitFor } from "../webpack";
 
 export let React: typeof import("react");
 export let useState: typeof React.useState;
@@ -26,6 +26,9 @@ export let useMemo: typeof React.useMemo;
 export let useRef: typeof React.useRef;
 
 export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/client") = findByPropsLazy("createPortal", "render");
+
+export const useDrag: typeof import("react-dnd").useDrag = findByCodeLazy(".disconnectDragSource(");
+export const useDrop: typeof import("react-dnd").useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 waitFor("useState", m => {
     React = m;

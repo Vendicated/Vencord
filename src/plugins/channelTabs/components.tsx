@@ -20,7 +20,7 @@ import "./style.css";
 
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { findByCode } from "@webpack";
-import { ChannelStore, GuildStore, ReadStateStore, Text, useEffect, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildStore, ReadStateStore, Text, useDrag, useDrop, useEffect, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, ChannelTabsUtils } from "./util.js";
@@ -85,7 +85,21 @@ function ChannelTab(props: ChannelTabsProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
     const user = UserStore.getUser(channel?.recipients?.[0]);
-    const tab = <div className={cl("tab-base")}>
+    const ref = useRef<HTMLDivElement>(null);
+    const [, drop] = useDrop(() => ({
+        accept: "vc_ChannelTab",
+        collect: monitor => ({
+            isOver: !!monitor.isOver(),
+        }),
+    }), []);
+    const [{ isDragging }, drag] = useDrag(() => ({
+        type: "vc_ChannelTab",
+        collect: monitor => ({
+            isDragging: !!monitor.isDragging()
+        }),
+    }));
+    drag(drop(ref));
+    const tab = <div className={cl("tab-base")} ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
         <ChannelTabContent {...props} guild={guild} channel={channel} user={user} />
     </div>;
     return tab;

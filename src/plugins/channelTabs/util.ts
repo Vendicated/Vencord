@@ -42,11 +42,7 @@ function moveToTab(i: number) {
 }
 function moveToTabRelative(d: number) {
     const i = d + openChannelIndex;
-    if (i < 0 || i >= openChannels.length) return;
-    const chnl = openChannels[i];
-    openChannelIndex = i;
-    if (chnl.channelId !== SelectedChannelStore.getChannelId())
-        NavigationRouter.transitionToGuild(chnl.guildId, chnl.channelId);
+    moveToTab(i);
 }
 function createTab(t: ChannelTabsProps, messageId?: string) {
     openChannels.push({ ...t });
