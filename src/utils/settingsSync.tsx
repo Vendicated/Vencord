@@ -127,7 +127,7 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 }
 
 // Cloud settings
-const cloudSettingsLogger = new Logger("CloudSettings", "purple");
+const cloudSettingsLogger = new Logger("CloudSettings", "#39b7e0");
 
 const toast = (type: number, message: string) =>
     Toasts.show({
