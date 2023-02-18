@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ReactDOM } from "@webpack/common";
+import { React, ReactDOM } from "@webpack/common";
 
 import { Magnifer, MagniferProps } from "./components/Magnifer";
 import { ELEMENT_ID } from "./constants";
@@ -58,22 +58,12 @@ export default definePlugin({
 
                 {
                     match: /(componentDidMount=function\(\){)/,
-                    replace: `$1
-                    if(this.props.id === '${ELEMENT_ID}')  {
-                        if(!$self.currentMagniferElement) {
-                            $self.currentMagniferElement = Vencord.Webpack.Common.React.createElement($self.Magnifer, {size: Vencord.Settings.plugins.ImageZoom.size ?? 100, zoom: Vencord.Settings.plugins.ImageZoom.zoom ?? 2, instance: this});
-                            Vencord.Webpack.Common.ReactDOM.render($self.currentMagniferElement, document.querySelector('.magniferContainer'))
-                        }
-                    };`
+                    replace: "$1$self.renderMagnifer(this);",
                 },
 
                 {
                     match: /(componentWillUnmount=function\(\){)/,
-                    replace: `$1
-                    if($self.currentMagniferElement)  {
-                        Vencord.Webpack.Common.ReactDOM.unmountComponentAtNode(document.querySelector('.magniferContainer'))
-                        $self.currentMagniferElement = null;
-                    };`
+                    replace: "$1$self.unMounntMagnifer();"
                 }
             ]
         },
@@ -122,6 +112,22 @@ export default definePlugin({
 
     Magnifer,
 
+    renderMagnifer(instance) {
+        if (instance.props.id === ELEMENT_ID) {
+            if (!this.currentMagniferElement) {
+                this.currentMagniferElement = React.createElement(Magnifer, { size: Vencord.Settings.plugins.ImageZoom.size ?? 100, zoom: Vencord.Settings.plugins.ImageZoom.zoom ?? 2, instance });
+                ReactDOM.render(this.currentMagniferElement, document.querySelector(".magniferContainer"));
+            }
+        }
+    },
+
+    unMounntMagnifer() {
+        if (this.currentMagniferElement) {
+            ReactDOM.unmountComponentAtNode(this.element!);
+            this.currentMagniferElement = null;
+        }
+    },
+
     onMouseOver(instance) {
         instance.setState((state: any) => ({ ...state, mouseOver: true }));
     },
@@ -143,7 +149,7 @@ export default definePlugin({
 
     stop() {
         // so componenetWillUnMount gets called if magnifer component is still alive
-        ReactDOM.unmountComponentAtNode(document.querySelector(".magniferContainer")!);
+        ReactDOM.unmountComponentAtNode(this.element!);
         this.element?.remove();
     }
 });
