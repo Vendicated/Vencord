@@ -63,7 +63,7 @@ export default definePlugin({
 
                 {
                     match: /(componentWillUnmount=function\(\){)/,
-                    replace: "$1$self.unMounntMagnifier();"
+                    replace: "$1$self.unMountMagnifier();"
                 }
             ]
         },
