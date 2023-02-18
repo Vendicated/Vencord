@@ -30,6 +30,7 @@
 /* make the carousel take up less space so we can click the backdrop and exit out of it */
 [class^="focusLock"] > [class^="carouselModal"] {
     height: fit-content;
+    box-shadow: none;
 }
 
 [class^="focusLock"] > [class^="carouselModal"] > div {
