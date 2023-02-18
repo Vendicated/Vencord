@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as DataStore from "@api/DataStore";
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
@@ -136,6 +137,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             }
             // And don't forget to persist the settings!
             VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            DataStore.set("Vencord_settingsLastSaved", Date.now());
             return true;
         }
     });

@@ -139,6 +139,10 @@ const toast = (type: number, message: string) =>
         }
     });
 
+export async function cloudSyncEnabled() {
+    return await DataStore.get("Vencord_settingsSyncSecret") !== null;
+}
+
 export function authorizeCloud() {
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
@@ -214,11 +218,11 @@ export async function syncToCloud() {
         toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
     } catch (e) {
         cloudSettingsLogger.error("Failed to sync up", e);
-        toast(Toasts.Type.FAILURE, "Synchronization failed. Check console.");
+        toast(Toasts.Type.FAILURE, "Settings synchronization failed. Check console.");
     }
 }
 
-export async function syncFromCloud() {
+export async function syncFromCloud(shouldToast = true) {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "GET",
@@ -238,10 +242,10 @@ export async function syncFromCloud() {
         const localWritten = await DataStore.get<number>("Vencord_settingsSyncWritten") ?? 0;
 
         if (written === localWritten) {
-            toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
+            if (shouldToast) toast(Toasts.Type.SUCCESS, "Your settings are up to date.");
             return;
         } else if (written < localWritten) {
-            toast(Toasts.Type.FAILURE, "Your settings are newer than the ones on the server.");
+            if (shouldToast) toast(Toasts.Type.FAILURE, "Your settings are newer than the ones on the server.");
             return;
         }
 
@@ -252,14 +256,14 @@ export async function syncFromCloud() {
         await DataStore.set("Vencord_settingsSyncWritten", written);
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
-        toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
+        if (shouldToast) toast(Toasts.Type.SUCCESS, "Synchronized your settings! Restart to apply changes.");
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync down", e);
-        toast(Toasts.Type.FAILURE, `Synchronization failed (${e.toString()}).`);
+        toast(Toasts.Type.FAILURE, `Settings synchronization failed (${e.toString()}).`);
     }
 }
 
-export async function checkCloudSettingsVersion() {
+export async function checkSyncRequirement() {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "HEAD",
@@ -270,9 +274,15 @@ export async function checkCloudSettingsVersion() {
         });
 
         const version = parseInt(res.headers.get("etag") ?? "-1");
-        return version;
+
+        // if these don't exist, the user has never synchronized before and hasn't changed their settings on this client,
+        // so we'll just pretend it's 0
+        const localVersion = await DataStore.get<number>("Vencord_settingsSyncWritten") ?? 0;
+        const lastWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
+
+        return (version > localVersion) && (lastWritten < version);
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to check version", e);
-        return -1;
+        return null;
     }
 }
