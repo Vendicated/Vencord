@@ -107,12 +107,12 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
     onWheel = (e: WheelEvent) => {
         const { instance } = this.props;
         if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
-            const val = this.state.zoom + (Settings.plugins.ImageZoom.invertScroll ? -(e.deltaY / 100) : (e.deltaY / 100)) * Settings.plugins.ImageZoom.zoomSpeed;
+            const val = this.state.zoom + ((e.deltaY / 100) * Settings.plugins.ImageZoom.invertScroll ? -1 : 1) * Settings.plugins.ImageZoom.zoomSpeed;
             this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
             this.updateMousePosition(e);
         }
         if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
-            const val = this.state.size + (Settings.plugins.ImageZoom.invertScroll ? -e.deltaY : e.deltaY) * Settings.plugins.ImageZoom.zoomSpeed;
+            const val = this.state.size + (e.deltaY * Settings.plugins.ImageZoom.invertScroll ? -1 : 1) * Settings.plugins.ImageZoom.zoomSpeed;
             this.setState({ ...this.state, size: val <= 50 ? 50 : val });
             this.updateMousePosition(e);
         }
