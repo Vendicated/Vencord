@@ -19,7 +19,7 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { findByPropsLazy } from "@webpack";
-import { RelationshipStore, UserUtils } from "@webpack/common";
+import { GuildStore, RelationshipStore, UserUtils } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
 import settings from "./settings";
@@ -27,7 +27,6 @@ import SimpleGroupChannel from "./types/SimpleGroupChannel";
 import SimpleGuild from "./types/SimpleGuild";
 
 const DMStore = findByPropsLazy("getSortedPrivateChannels");
-const GuildStore = findByPropsLazy("getGuilds", "getGuild");
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
