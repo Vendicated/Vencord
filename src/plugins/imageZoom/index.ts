@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -115,8 +115,12 @@ export default definePlugin({
     renderMagnifer(instance) {
         if (instance.props.id === ELEMENT_ID) {
             if (!this.currentMagniferElement) {
-                this.currentMagniferElement = React.createElement(Magnifer, { size: Vencord.Settings.plugins.ImageZoom.size ?? 100, zoom: Vencord.Settings.plugins.ImageZoom.zoom ?? 2, instance });
-                ReactDOM.render(this.currentMagniferElement, document.querySelector(".magniferContainer"));
+                this.currentMagniferElement = React.createElement(Magnifer, {
+                    size: Settings.plugins.ImageZoom.size ?? 100,
+                    zoom: Settings.plugins.ImageZoom.zoom ?? 2,
+                    instance
+                });
+                ReactDOM.render(this.currentMagniferElement, this.element);
             }
         }
     },
