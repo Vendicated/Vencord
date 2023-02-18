@@ -20,6 +20,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ReactDOM } from "@webpack/common";
 
@@ -30,10 +31,7 @@ import { ELEMENT_ID } from "./constants";
 export default definePlugin({
     name: "ImageZoom",
     description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
-    authors: [{
-        name: "Syncxv",
-        id: 549244932213309442n
-    },],
+    authors: [Devs.Aria],
     patches: [
         {
             find: "\"renderLinkComponent\",\"maxWidth\"",

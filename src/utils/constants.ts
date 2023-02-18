@@ -200,5 +200,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     lewisakura: {
         name: "lewisakura",
         id: 96269247411400704n
-    }
+    },
+    Aria: {
+        name: "Syncxv",
+        id: 549244932213309442n
+    },
 });
