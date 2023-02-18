@@ -81,9 +81,9 @@ export const Magnifer = LazyComponent(() => class Magnifer extends React.PureCom
         document.removeEventListener("keyup", this.onKeyUp);
         this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
 
-        if (Settings.plugins.ImageUtility.saveZoomValues) {
-            Settings.plugins.ImageUtility.zoom = this.state.zoom;
-            Settings.plugins.ImageUtility.size = this.state.size;
+        if (Settings.plugins.ImageZoom.saveZoomValues) {
+            Settings.plugins.ImageZoom.zoom = this.state.zoom;
+            Settings.plugins.ImageZoom.size = this.state.size;
         }
 
     }
