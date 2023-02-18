@@ -18,7 +18,7 @@
     transform: translate(-50%, -50%);
 }
 
-#magnify-thingy-image-so-how-was-your-day img {
+#magnify-modal img {
     -webkit-user-drag: none;
     -khtml-user-drag: none;
     -moz-user-drag: none;

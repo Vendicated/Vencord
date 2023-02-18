@@ -16,4 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const ELEMENT_ID = "magnify-thingy-image-so-how-was-your-day";
+export const ELEMENT_ID = "magnify-modal";
