@@ -55,7 +55,7 @@ export default definePlugin({
                 // return React.createElement(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /return ?(.{0,30}\(.{1,3},\{[^}]+?,showTaglessAccountPanel:.+?\}\))/,
                 // return [Player, Panel]
-                replace: "return [Vencord.Plugins.plugins.SpotifyControls.renderPlayer(),$1]"
+                replace: "return [$self.renderPlayer(),$1]"
             }
         },
     ],
