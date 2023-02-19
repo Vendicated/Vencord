@@ -39,7 +39,7 @@ const styles = findByPropsLazy("timestampInline");
 export default definePlugin({
     name: "Timezones",
     description: "Shows the timezones of users",
-    authors: [Devs.mantikafasi],
+    authors: [Devs.mantikafasi, Devs.Arjix],
     options: {
 
         showTimezonesInChat: {
