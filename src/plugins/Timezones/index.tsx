@@ -89,8 +89,7 @@ export default definePlugin({
             ],
             execute(args, ctx) {
                 const user: string | undefined = findOption(args, "user");
-                const timezone = (findOption(args, "timezone", timezones[timezones.indexOf("Etc/UTC")])?.trim() as typeof timezones[number] | undefined);
-
+                const timezone = (findOption(args, "timezone") as string | undefined)?.trim() as typeof timezones[number] | undefined;
 
                 // Kinda hard to happen, but just to be safe...
                 if (!user || !timezone) return sendBotMessage(ctx.channel.id, { content: "PLease provider both a user and a timezone." });
