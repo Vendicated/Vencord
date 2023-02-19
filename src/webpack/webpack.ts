@@ -82,40 +82,31 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
-    let found: any;
-    let foundId: any;
-
-    outer:
     for (const key in cache) {
         const mod = cache[key];
         if (!mod?.exports) continue;
 
         if (filter(mod.exports)) {
-            found = mod.exports;
-            foundId = Number(key);
-            break;
+            return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
         }
 
         if (typeof mod.exports !== "object") continue;
 
         if (mod.exports.default && filter(mod.exports.default)) {
-            found = getDefault ? mod.exports.default : mod.exports;
-            foundId = Number(key);
-            break;
+            const found = getDefault ? mod.exports.default : mod.exports;
+            return isWaitFor ? [found, Number(key)] : found;
         }
 
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) {
-                found = nested;
-                foundId = Number(key);
-                break outer;
+                return isWaitFor ? [nested, Number(key)] : nested;
             }
         }
     }
 
-    if (!isWaitFor && !found) {
+    if (!isWaitFor) {
         const err = new Error("Didn't find module matching this filter");
         if (IS_DEV) {
             if (!devToolsOpen)
@@ -126,10 +117,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         }
     }
 
-    found ??= null;
-    foundId ??= null;
-
-    return isWaitFor ? [found, foundId] : found;
+    return isWaitFor ? [null, null] : null;
 });
 
 /**
