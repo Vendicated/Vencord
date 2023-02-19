@@ -19,7 +19,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { Devs } from "@utils/constants";
+import { Devs, VENCORD_USER_AGENT } from "@utils/constants";
 import { classes, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -33,7 +33,7 @@ const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
 
 import { timezones } from "./all_timezones";
-import { DATASTORE_KEY, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
+import { API_URL, DATASTORE_KEY, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
 
 
@@ -55,6 +55,16 @@ export default definePlugin({
             description: "Show timezones in profile",
             default: true,
         },
+    },
+    settingsAboutComponent: () => {
+        const href = `${API_URL}?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
+        return (
+            <Text variant="text-md/normal">
+                A plugin that displays the local time for specific users using their timezone. <br />
+                By default the timezone will be fetched from the <a href={href} onClick={() => open(href)}>TimezoneDB</a> (if available), <br />
+                but you can override that with a custom timezone.
+            </Text>
+        );
     },
     commands: [
         {

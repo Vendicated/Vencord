@@ -30,7 +30,7 @@ export interface TimezoneDB {
     [userId: string]: typeof timezones[number];
 }
 
-const API_URL = "https://timezonedb.catvibers.me";
+export const API_URL = "https://timezonedb.catvibers.me";
 const Cache: Record<string, typeof timezones[number]> = {};
 
 export function getTimeString(timezone: string, timestamp = new Date()): string {
