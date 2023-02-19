@@ -326,11 +326,10 @@ export default definePlugin({
         );
     }
     ,
-    getTimezonesComponent: (e: any) => {
-        if (Vencord.Settings.plugins.showTimezonesInChat || e.user || e.message.author.id === UserStore.getCurrentUser().id)
-            return null;
 
-        const message = e.message as Message;
+    getTimezonesComponent: ({ message, user }: { message: Message, user: any; }) => {
+        if (Vencord.Settings.plugins.showTimezonesInChat || user || message.author.id === UserStore.getCurrentUser().id)
+            return null;
 
         const [timezone, setTimezone] = React.useState<string | undefined>();
 
