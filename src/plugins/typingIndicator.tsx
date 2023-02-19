@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "./typingTweaks";
 
@@ -30,7 +30,6 @@ const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.incl
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
-const RelationshipStore = findStoreLazy("RelationshipStore");
 
 const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
 
@@ -51,6 +50,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
     );
 
+    const myId = UserStore.getCurrentUser().id;
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
@@ -58,17 +58,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    if (!settings.store.includeBlockedUsers) {
-        Object.keys(typingUsers).forEach(userId => {
-            if (RelationshipStore.isBlocked(userId)) {
-                delete typingUsers[userId];
-            };
-        });
-    }
-
-    delete typingUsers[UserStore.getCurrentUser().id];
-
-    const typingUsersArray = Object.keys(typingUsers);
+    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
