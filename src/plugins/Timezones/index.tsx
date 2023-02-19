@@ -182,7 +182,6 @@ export default definePlugin({
     ],
 
     getProfileTimezonesComponent: (e: any) => {
-
         const user = e.user as User;
 
         const [timezone, setTimezone] = React.useState<string | undefined>();
@@ -192,6 +191,7 @@ export default definePlugin({
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
 
+            // Rerender every second to stay in sync.
             setInterval(forceUpdate, 1000);
         }, [user.id]);
 
@@ -248,17 +248,65 @@ export default definePlugin({
                 >
                     <EditIcon
                         style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
-                        onClick={() => { setIsInEditMode(old => !old); }}
+                        onClick={() => {
+                            if (isInEditMode) {
+                                if (timezone) {
+                                    DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
+                                        oldValue = oldValue || {};
+                                        oldValue[user.id] = timezone as typeof timezones[number];
+                                        return oldValue;
+                                    }).then(() => {
+                                        Toasts.show({
+                                            type: Toasts.Type.SUCCESS,
+                                            message: "Timezone set!",
+                                            id: Toasts.genId()
+                                        });
+                                        setIsInEditMode(false);
+                                    }).catch(err => {
+                                        console.error(err);
+                                        Toasts.show({
+                                            type: Toasts.Type.FAILURE,
+                                            message: "Something went wrong, please try again later.",
+                                            id: Toasts.genId()
+                                        });
+                                    });
+                                } else {
+                                    setIsInEditMode(false);
+                                }
+                            } else {
+                                setIsInEditMode(true);
+                            }
+                        }}
                         color="var(--primary-330)"
                         height="16"
                         width="16"
                     />
 
-
                     {isInEditMode &&
                         <DeleteIcon
                             style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
-                            onClick={() => { setTimezone(undefined); setIsInEditMode(false); }}
+                            onClick={() => {
+                                DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
+                                    oldValue = oldValue || {};
+                                    delete oldValue[user.id];
+                                    return oldValue;
+                                }).then(async () => {
+                                    Toasts.show({
+                                        type: Toasts.Type.SUCCESS,
+                                        message: "Timezone removed!",
+                                        id: Toasts.genId()
+                                    });
+                                    setIsInEditMode(false);
+                                    setTimezone(await getUserTimezone(user.id));
+                                }).catch(err => {
+                                    console.error(err);
+                                    Toasts.show({
+                                        type: Toasts.Type.FAILURE,
+                                        message: "Something went wrong, please try again later.",
+                                        id: Toasts.genId()
+                                    });
+                                });
+                            }}
                             color="var(--red-360)"
                             height="16"
                             width="16"

@@ -89,13 +89,12 @@ const bulkFetch = debounce(async () => {
 
 export function getUserTimezone(discordID: string): Promise<typeof timezones[number] | undefined> {
     return new Promise(res => {
-        if (discordID in Cache) res(Cache[discordID]);
-
         const timezone = (DataStore.get(DATASTORE_KEY) as Promise<TimezoneDB | undefined>).then(tzs => tzs?.[discordID]);
         timezone.then(tz => {
             if (tz) res(tz);
             else {
-                if (discordID in requestQueue) requestQueue[discordID].push(res);
+                if (discordID in Cache) res(Cache[discordID]);
+                else if (discordID in requestQueue) requestQueue[discordID].push(res);
                 // If not already added, then add it and call the debounced function to make sure the request gets executed
                 else {
                     requestQueue[discordID] = [res];
