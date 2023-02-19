@@ -50,13 +50,14 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
     );
 
-    const myId = UserStore.getCurrentUser().id;
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
     }
+
+    const myId = UserStore.getCurrentUser().id;
 
     const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
