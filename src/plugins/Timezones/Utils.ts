@@ -50,7 +50,7 @@ async function bulkFetchTimezones(ids: string[]): Promise<TimezoneDB | undefined
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "User-Agent": VENCORD_USER_AGENT
+                "X-User-Agent": VENCORD_USER_AGENT
             },
             body: JSON.stringify(ids),
         });
