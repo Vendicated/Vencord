@@ -30,6 +30,7 @@ const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.incl
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+const RelationshipStore = findStoreLazy("RelationshipStore");
 
 const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
 
@@ -55,6 +56,14 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
+    }
+
+    if (!settings.store.includeBlockedUsers) {
+        Object.keys(typingUsers).forEach(userId => {
+            if (RelationshipStore.isBlocked(userId)) {
+                delete typingUsers[userId];
+            };
+        });
     }
 
     delete typingUsers[UserStore.getCurrentUser().id];
@@ -108,13 +117,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
         default: false
+    },
+    includeBlockedUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for blocked users.",
+        default: false
     }
 });
 
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.obscurity],
     settings,
 
     patches: [
