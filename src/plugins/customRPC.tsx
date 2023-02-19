@@ -56,7 +56,7 @@ interface ActivityAssets {
 }
 
 interface Activity {
-    state: string;
+    state?: string;
     details?: string;
     timestamps?: {
         start?: Number;
@@ -93,13 +93,13 @@ const numOpt = (description: string) => ({
     onChange: setRpc
 }) as const;
 
-const choice = (label: string, value: any, _default?: Boolean) => ({
+const choice = (label: string, value: any, _default?: boolean) => ({
     label,
     value,
     default: _default
 }) as const;
 
-const choiceOpt = (description: string, options) => ({
+const choiceOpt = <T,>(description: string, options: T) => ({
     type: OptionType.SELECT,
     description,
     onChange: setRpc,
@@ -173,13 +173,13 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.buttons = [
             buttonOneText,
             buttonTwoText
-        ].filter(Boolean);
+        ].filter((s): s is string => !!s);
 
         activity.metadata = {
             button_urls: [
                 buttonOneURL,
                 buttonTwoURL
-            ].filter(Boolean)
+            ].filter((s): s is string => !!s)
         };
     }
 
