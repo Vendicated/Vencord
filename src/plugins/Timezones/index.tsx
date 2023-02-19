@@ -20,16 +20,18 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
-import { classes } from "@utils/misc";
+import { classes, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { React, Text, UserStore } from "@webpack/common";
+import { React, Select, Text, Toasts, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 
 
 const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409");
+const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
+
 import { timezones } from "./all_timezones";
 import { DATASTORE_KEY, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
@@ -184,30 +186,84 @@ export default definePlugin({
         const user = e.user as User;
 
         const [timezone, setTimezone] = React.useState<string | undefined>();
+        const [isInEditMode, setIsInEditMode] = React.useState(false);
+        const forceUpdate = useForceUpdater();
 
         React.useEffect(() => {
             getUserTimezone(user.id).then(timezone => setTimezone(timezone));
+
+            setInterval(forceUpdate, 1000);
         }, [user.id]);
 
         if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile) {
             return null;
         }
 
-        // thank you arjix very cool
         return (
-            <Text variant="text-sm/normal" className={classNames.customStatusSection} onClick={() => {
-                return console.log("ahhh!");
-                // TODO create a modal to set timezone and make text clickable h
-            }} style={{
-                alignItems: "center",
-                // make it clickable
-                cursor: "pointer",
-            }}>
-                {(timezone) ? getTimeString(timezone) : "Click to set timezone"}
-                <span
-                    style={{ cursor: "pointer", position: "absolute" }}
+            <Text variant="text-sm/normal" className={classNames.customStatusSection}
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    ...(isInEditMode ? {
+                        display: "flex",
+                        flexDirection: "column",
+                    } : {})
+                }}
+            >
+                {!isInEditMode && <span style={timezone ? { cursor: "pointer", } : {}} onClick={() => {
+                    if (timezone) {
+                        Toasts.show({
+                            type: Toasts.Type.MESSAGE,
+                            message: timezone,
+                            id: Toasts.genId()
+                        });
+                    }
+                }}>{(timezone) ? getTimeString(timezone) : "No timezone set"}</span>}
+
+                {isInEditMode && (
+                    <span style={{ width: "90%" }}>
+                        <Select
+                            placeholder="Pick a timezone"
+                            options={timezones.map(tz => ({ label: tz, value: tz }))}
+                            isSelected={tz => tz === timezone}
+                            select={value => setTimezone(value)}
+                            serialize={String}
+                        />
+                    </span>
+                )}
+
+
+                <span style={
+                    isInEditMode ? {
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-around",
+                        width: "60%",
+                        marginTop: "5%"
+                    } : {
+                        marginLeft: "5%"
+                    }}
                 >
-                    <EditIcon color="var(--primary-330)" height="16" width="16" style={{ marginLeft: "0.25vw" }} />
+                    <EditIcon
+                        style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
+                        onClick={() => { setIsInEditMode(old => !old); }}
+                        color="var(--primary-330)"
+                        height="16"
+                        width="16"
+                    />
+
+
+                    {isInEditMode &&
+                        <DeleteIcon
+                            style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
+                            onClick={() => { setTimezone(undefined); setIsInEditMode(false); }}
+                            color="var(--red-360)"
+                            height="16"
+                            width="16"
+                        />
+                    }
                 </span>
             </Text>
         );
@@ -222,7 +278,7 @@ export default definePlugin({
         const [timezone, setTimezone] = React.useState<string | undefined>();
 
         React.useEffect(() => {
-            getUserTimezone(e.message.author.id).then(timezone => setTimezone(timezone));
+            getUserTimezone(message.author.id).then(timezone => setTimezone(timezone));
         }, [message.author.id]);
 
         return (

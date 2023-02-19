@@ -277,6 +277,7 @@ export const timezones = [
     "Etc/GMT-9",
     "Etc/UTC",
     "Europe/Amsterdam",
+    "Europe/Athens",
     "Europe/Belfast",
     "Europe/Copenhagen",
     "Europe/Guernsey",

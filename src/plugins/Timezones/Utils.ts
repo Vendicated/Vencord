@@ -19,6 +19,7 @@
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
 import * as DataStore from "@api/DataStore";
+import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import { findLazy } from "@webpack";
 export const DATASTORE_KEY = "plugins.Timezones.savedTimezones";
@@ -48,10 +49,10 @@ async function bulkFetchTimezones(ids: string[]): Promise<TimezoneDB | undefined
         const req = await fetch(`${API_URL}/api/user/bulk`, {
             method: "POST",
             headers: {
-                "Accept": "application/json",
                 "Content-Type": "application/json",
+                "User-Agent": VENCORD_USER_AGENT
             },
-            body: JSON.stringify(ids)
+            body: JSON.stringify(ids),
         });
 
         return await req.json()
