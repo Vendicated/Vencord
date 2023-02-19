@@ -59,8 +59,8 @@ interface Activity {
     state?: string;
     details?: string;
     timestamps?: {
-        start?: Number;
-        end?: Number;
+        start?: number;
+        end?: number;
     };
     assets?: ActivityAssets;
     buttons?: Array<string>;
@@ -70,7 +70,7 @@ interface Activity {
         button_urls?: Array<string>;
     };
     type: ActivityType;
-    flags: Number;
+    flags: number;
 }
 
 enum ActivityType {
@@ -211,7 +211,7 @@ async function createActivity(): Promise<Activity | undefined> {
     return activity;
 }
 
-async function setRpc(disable?: Boolean) {
+async function setRpc(disable?: boolean) {
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
