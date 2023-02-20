@@ -212,7 +212,7 @@ export async function syncToCloud() {
         }
 
         const { written } = await res.json();
-        await DataStore.set("Vencord_settingsSyncWritten", written);
+        await DataStore.set("Vencord_settingsLastSaved", written);
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
@@ -239,13 +239,13 @@ export async function syncFromCloud(shouldToast = true) {
         }
 
         const written = parseInt(res.headers.get("etag")!);
-        const localWritten = await DataStore.get<number>("Vencord_settingsSyncWritten") ?? 0;
+        const localWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
 
         if (written === localWritten) {
             if (shouldToast) toast(Toasts.Type.SUCCESS, "Your settings are up to date.");
             return;
         } else if (written < localWritten) {
-            if (shouldToast) toast(Toasts.Type.FAILURE, "Your settings are newer than the ones on the server.");
+            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
             return;
         }
 
@@ -253,7 +253,9 @@ export async function syncFromCloud(shouldToast = true) {
 
         const settings = fflate.strFromU8(fflate.inflateSync(new Uint8Array(data)));
         await importSettings(settings);
-        await DataStore.set("Vencord_settingsSyncWritten", written);
+
+        // sync with server timestamp instead of local one
+        await DataStore.set("Vencord_settingsLastSaved", written);
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldToast) toast(Toasts.Type.SUCCESS, "Synchronized your settings! Restart to apply changes.");
@@ -277,10 +279,9 @@ export async function checkSyncRequirement() {
 
         // if these don't exist, the user has never synchronized before and hasn't changed their settings on this client,
         // so we'll just pretend it's 0
-        const localVersion = await DataStore.get<number>("Vencord_settingsSyncWritten") ?? 0;
         const lastWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
 
-        return (version > localVersion) && (lastWritten < version);
+        return lastWritten < version;
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to check version", e);
         return null;
