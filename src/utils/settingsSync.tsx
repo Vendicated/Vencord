@@ -247,12 +247,14 @@ export async function syncFromCloud(shouldToast = true, force = false) {
         const written = parseInt(res.headers.get("etag")!);
         const localWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
 
-        if (written === localWritten) {
-            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
-            return;
-        } else if (written < localWritten && !force) {
-            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
-            return;
+        if (!force) {
+            if (written === localWritten) {
+                if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
+                return;
+            } else if (written < localWritten) {
+                if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
+                return;
+            }
         }
 
         const data = await res.arrayBuffer();
