@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
 import { LazyComponent } from "@utils/misc.jsx";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { ChannelStore, Forms } from "@webpack/common";
 import Message from "discord-types/general/Message.js";
@@ -31,6 +32,15 @@ import { ChannelTabsUtils } from "./util.js";
 const Keybind = LazyComponent(() => findByCode(".keyClassName"));
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
+const settings = definePluginSettings({
+    rememberTabs: {
+        type: OptionType.BOOLEAN,
+        description: "Remember and restore tabs on launch",
+        default: false,
+    }
+});
+
+let hasInitialized = false;
 export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
@@ -62,7 +72,13 @@ export default definePlugin({
         }
     ],
 
+    settings,
+
     render(props) {
+        if (!hasInitialized) {
+            ChannelTabsUtils.initalize(settings, props);
+            return hasInitialized = true;
+        }
         return <ErrorBoundary>
             <ChannelsTabsContainer {...props} />
         </ErrorBoundary>;
@@ -79,21 +95,21 @@ export default definePlugin({
     settingsAboutComponent: () => <>
         <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
         <Flex flexDirection="row">
-            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+            <Forms.FormSection>
                 <Forms.FormText className={KeybindClasses.keybindDescription}>Switch between tabs</Forms.FormText>
                 <Keybind shortcut="mod+left" className={KeybindClasses.keybindKey} />
                 <Keybind shortcut="mod+right" className={KeybindClasses.keybindKey} />
             </Forms.FormSection>
-            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+            <Forms.FormSection>
                 <Forms.FormText className={KeybindClasses.keybindDescription}>Move tabs</Forms.FormText>
                 <Keybind shortcut="shift+left" className={KeybindClasses.keybindKey} />
                 <Keybind shortcut="shfit+right" className={KeybindClasses.keybindKey} />
             </Forms.FormSection>
-            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+            <Forms.FormSection>
                 <Forms.FormText className={KeybindClasses.keybindDescription}>Open new tab</Forms.FormText>
                 <Keybind shortcut="mod+n" className={KeybindClasses.keybindKey} />
             </Forms.FormSection>
-            <Forms.FormSection className={KeybindClasses.keybindShortcutList}>
+            <Forms.FormSection>
                 <Forms.FormText className={KeybindClasses.keybindDescription}>Close Tab</Forms.FormText>
                 <Keybind shortcut="mod+w" className={KeybindClasses.keybindKey} />
             </Forms.FormSection>

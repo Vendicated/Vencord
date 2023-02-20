@@ -25,7 +25,7 @@ import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, ChannelTabsUtils } from "./util.js";
 const {
-    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, shiftCurrentTab, setCurrentTabTo
+    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo
 } = ChannelTabsUtils;
 
 const twoChars = (n: number) => n > 99 ? "9+" : `${n}`;
@@ -106,7 +106,11 @@ function ChannelTab(props: ChannelTabsProps) {
 }
 
 export function ChannelsTabsContainer(props: ChannelTabsProps) {
-    const update = useForceUpdater();
+    const _update = useForceUpdater();
+    function update() {
+        _update();
+        saveChannels();
+    }
     const { openChannels } = ChannelTabsUtils;
     function handleKeybinds(e: KeyboardEvent) {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -138,7 +142,6 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
         };
     }, []);
 
-    if (!openChannels.length) createTab(props);
     if (!isEqualToCurrentTab(props)) setCurrentTabTo(props);
 
     return <div className={cl("container")}>

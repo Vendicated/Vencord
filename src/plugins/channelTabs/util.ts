@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index.js";
+import { DefinedSettings } from "@utils/types.js";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { SelectedChannelStore } from "@webpack/common";
+import { SelectedChannelStore, Toasts } from "@webpack/common";
 
 export interface ChannelTabsProps { guildId: string, channelId: string; }
 
@@ -65,7 +67,39 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     openChannels[openChannelIndex] = prev;
     openChannelIndex += direction;
 }
+async function initalize(settings: DefinedSettings, currentChannel: ChannelTabsProps) {
+    if (settings.store.rememberTabs) {
+        if (Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) Toasts.show({
+            id: Toasts.genId(),
+            message: "ChannelTabs - Not restoing tabs as KeepCurrentChannel is enabled",
+            type: Toasts.Type.FAILURE,
+            options: {
+                duration: 3000,
+                position: Toasts.Position.BOTTOM
+            }
+        });
+        else {
+            const openChannelData = await DataStore.get("ChannelTabs_openChannels");
+            if (openChannelData) {
+                ({ openChannelIndex } = openChannelData);
+                openChannelData.openChannels.forEach(c => openChannels.push(c));
+            }
+        }
+    }
+    // the reason this always transitions is to rerender the tabs component once it's initalized
+    // there is absolutely a better way to do this i'm just lazy
+    if (openChannels.length) NavigationRouter.transitionToGuild(
+        openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId
+    );
+    else {
+        openChannels.push(currentChannel);
+        NavigationRouter.transitionToGuild(currentChannel.guildId, currentChannel.channelId);
+    }
+}
+// data argument is only for testing purposes
+const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", data ?? { openChannels, openChannelIndex });
 
 export const ChannelTabsUtils = {
-    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, openChannels, shiftCurrentTab, setCurrentTabTo,
+    closeCurrentTab, closeTab, createTab, initalize, isEqualToCurrentTab, isTabSelected,
+    moveToTab, moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo
 };
