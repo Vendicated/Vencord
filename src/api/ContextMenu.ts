@@ -17,9 +17,18 @@
 */
 
 import Logger from "@utils/Logger";
-import React from "react";
+import type { ReactElement } from "react";
 
+/**
+ * @param children The rendered context menu elements
+ * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
+ */
 export type NavContextMenuPatchCallback = (children: Array<React.ReactElement>, args?: Array<any>) => void;
+/**
+ * @param The navId of the context menu being patched
+ * @param children The rendered context menu elements
+ * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
+ */
 export type GlobalContextMenuPatchCallback = (navId: string, children: Array<React.ReactElement>, args?: Array<any>) => void;
 
 const ContextMenuLogger = new Logger("ContextMenu");
@@ -62,10 +71,7 @@ export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback)
 export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
     const navIds = Array.isArray(navId) ? navId : [navId as string];
 
-    const results: Array<boolean> = [];
-    for (const id of navIds) {
-        results.push(navPatches.get(id)?.delete(patch) ?? false);
-    }
+    const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
 
     return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : Array<boolean>;
 }
@@ -104,9 +110,9 @@ export function findGroupChildrenByChildId(id: string, children: Array<React.Rea
 }
 
 interface ContextMenuProps {
-    contextMenuAPIArguments?: Array<any>;
+    contextMenuApiArguments?: Array<any>;
     navId: string;
-    children: Array<React.ReactElement>;
+    children: Array<ReactElement>;
     "aria-label": string;
     onSelect: (() => void) | undefined;
     onClose: (callback: (...args: Array<any>) => any) => void;
@@ -118,7 +124,7 @@ export function _patchContextMenu(props: ContextMenuProps) {
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
             try {
-                patch(props.children, props.contextMenuAPIArguments);
+                patch(props.children, props.contextMenuApiArguments);
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
             }
@@ -127,7 +133,7 @@ export function _patchContextMenu(props: ContextMenuProps) {
 
     for (const patch of globalPatches) {
         try {
-            patch(props.navId, props.children, props.contextMenuAPIArguments);
+            patch(props.navId, props.children, props.contextMenuApiArguments);
         } catch (err) {
             ContextMenuLogger.error("Global patch errored,", err);
         }
