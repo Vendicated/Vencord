@@ -52,7 +52,7 @@ async function syncSettings() {
                 location.reload();
             }
         );
-    } else return;
+    }
 }
 
 async function init() {
