@@ -41,8 +41,6 @@ async function syncSettings() {
     if (await cloudSyncEnabled()) {
         const needToSync = await checkSyncRequirement();
 
-        if (needToSync === null) return; // something went wrong or the user is not logged in
-
         if (!needToSync) return;
 
         await syncFromCloud(false);
