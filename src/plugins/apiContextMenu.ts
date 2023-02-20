@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
@@ -38,7 +39,7 @@ function listener(exports: any, id: number) {
                     match: RegExp(`(?<=\\b(\\i)=\\i\\(${id}\\)).+$`),
                     replace: (code, varName) => {
                         const regex = RegExp(`(?<=${varName}\\.${key},{)`, "g");
-                        return code.replace(regex, "contextMenuAPIArguments:arguments,");
+                        return code.replace(regex, "contextMenuApiArguments:arguments,");
                     }
                 }]
             });
@@ -48,7 +49,7 @@ function listener(exports: any, id: number) {
     }
 }
 
-addListener(listener);
+if (Settings.plugins.ContextMenuAPI.enabled) addListener(listener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
