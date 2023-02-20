@@ -21,6 +21,7 @@ import { findByProps } from "@webpack";
 import { Toasts, UserStore } from "@webpack/common";
 import * as fflate from "fflate";
 
+import { Settings } from "../Vencord";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 import { openModal } from "./modal";
@@ -139,11 +140,13 @@ const toast = (type: number, message: string) =>
         }
     });
 
-export async function cloudSyncEnabled() {
-    return await DataStore.get("Vencord_settingsSyncSecret") !== null;
+export async function cloudSyncConfigured() {
+    return await DataStore.get("Vencord_settingsSyncSecret") !== undefined;
 }
 
-export function authorizeCloud() {
+export async function authorizeCloud() {
+    if (await cloudSyncConfigured()) return;
+
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
     openModal((props: any) => <OAuth2AuthorizeModal
@@ -155,11 +158,13 @@ export function authorizeCloud() {
         clientId="1075583776979169361"
         cancelCompletesFlow={false}
         callback={async (u: string) => {
-            if (!u) return;
+            if (!u) {
+                Settings.settingsSync = false;
+                return;
+            }
 
             try {
-                const url = new URL(u);
-                const res = await fetch(url, {
+                const res = await fetch(u, {
                     headers: new Headers({ Accept: "application/json" })
                 });
                 const { secret } = await res.json();
@@ -173,16 +178,11 @@ export function authorizeCloud() {
             } catch (e: any) {
                 cloudSettingsLogger.error("Failed to authorize", e);
                 toast(Toasts.Type.FAILURE, `Setup failed (${e.toString()}).`);
+                Settings.settingsSync = false;
             }
         }
         }
     />);
-}
-
-export async function deauthorizeCloud() {
-    await DataStore.del("Vencord_settingsSyncSecret");
-    await DataStore.del("Vencord_settingsSyncWritten");
-    toast(Toasts.Type.SUCCESS, "Settings sync deauthorized.");
 }
 
 async function getCloudAuth() {
@@ -222,7 +222,7 @@ export async function syncToCloud() {
     }
 }
 
-export async function syncFromCloud(shouldToast = true) {
+export async function syncFromCloud(shouldToast = true, force = false) {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "GET",
@@ -231,6 +231,12 @@ export async function syncFromCloud(shouldToast = true) {
                 Accept: "application/octet-stream"
             }),
         });
+
+        if (res.status === 404) {
+            cloudSettingsLogger.info("No settings on the cloud");
+            if (shouldToast) toast(Toasts.Type.MESSAGE, "No settings found on the cloud.");
+            return;
+        }
 
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
@@ -242,9 +248,9 @@ export async function syncFromCloud(shouldToast = true) {
         const localWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
 
         if (written === localWritten) {
-            if (shouldToast) toast(Toasts.Type.SUCCESS, "Your settings are up to date.");
+            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
             return;
-        } else if (written < localWritten) {
+        } else if (written < localWritten && !force) {
             if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
             return;
         }
@@ -262,6 +268,31 @@ export async function syncFromCloud(shouldToast = true) {
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync down", e);
         toast(Toasts.Type.FAILURE, `Settings synchronization failed (${e.toString()}).`);
+    }
+}
+
+export async function deleteCloudData() {
+    try {
+        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
+            method: "DELETE",
+            headers: new Headers({
+                Authorization: await getCloudAuth()
+            }),
+        });
+
+        if (!res.ok) {
+            cloudSettingsLogger.error(`Failed to delete, API returned ${res.status}`);
+            toast(Toasts.Type.FAILURE, `Deletion failed (API returned ${res.status}).`);
+            return;
+        }
+
+        await DataStore.set("Vencord_settingsLastSaved", 0);
+
+        cloudSettingsLogger.info("Settings deleted from cloud successfully");
+        toast(Toasts.Type.SUCCESS, "Deleted your settings from the cloud!");
+    } catch (e: any) {
+        cloudSettingsLogger.error("Failed to delete", e);
+        toast(Toasts.Type.FAILURE, `Deletion failed (${e.toString()}).`);
     }
 }
 

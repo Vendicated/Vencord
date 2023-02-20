@@ -24,6 +24,7 @@ import { findByCodeLazy } from "@webpack";
 import { Forms, SettingsRouter, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
+import CloudSettingsTab from "./CloudSettingsTab";
 import PluginsTab from "./PluginsTab";
 import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
@@ -48,6 +49,7 @@ const SettingsTabs: Record<string, SettingsTab> = {
     VencordThemes: { name: "Themes", component: () => <ThemesTab /> },
     VencordUpdater: { name: "Updater" }, // Only show updater if IS_WEB is false
     VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
+    VencordCloudSettings: { name: "Cloud Settings", component: () => <CloudSettingsTab /> }
 };
 
 if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater />;

@@ -113,6 +113,13 @@ export default definePlugin({
             onClick: makeOnClick("VencordSettingsSync")
         });
 
+        cats.push({
+            section: "VencordCloudSettings",
+            label: "Cloud Settings",
+            element: () => <SettingsComponent tab="VencordCloudSettings" />,
+            onClick: makeOnClick("VencordCloudSettings")
+        });
+
         if (IS_DEV)
             cats.push({
                 section: "VencordPatchHelper",

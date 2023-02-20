@@ -29,6 +29,7 @@ const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     autoUpdate: boolean;
+    settingsSync: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -52,6 +53,7 @@ export interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     autoUpdate: false,
+    settingsSync: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
