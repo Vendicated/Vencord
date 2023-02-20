@@ -19,12 +19,12 @@
 import { Command } from "@api/Commands";
 import { Promisable } from "type-fest";
 
-import type { ReplaceFn } from "./patches";
-
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
 }
+
+export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {
     match: string | RegExp;

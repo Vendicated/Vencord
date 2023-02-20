@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PatchReplacement } from "./types";
-
-export type ReplaceFn = (match: string, ...groups: string[]) => string;
+import { PatchReplacement, ReplaceFn } from "./types";
 
 export function canonicalizeMatch(match: RegExp | string) {
     if (typeof match === "string") return match;
