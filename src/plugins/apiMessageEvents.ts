@@ -22,16 +22,16 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MessageEventsAPI",
     description: "Api required by anything using message events.",
-    authors: [Devs.Arjix],
+    authors: [Devs.Arjix, Devs.hunt],
     patches: [
         {
             find: "sendMessage:function",
             replacement: [{
-                match: /(?<=_sendMessage:function\([^)]+\)){/,
-                replace: "{if(Vencord.Api.MessageEvents._handlePreSend(...arguments)){return;};"
+                match: /(_sendMessage:function.*?{)(.*?)(},[^}]*?:function)/,
+                replace: "$1return Vencord.Api.MessageEvents._handlePreSend(...arguments).then(()=>{$2})$3"
             }, {
-                match: /(?<=\beditMessage:function\([^)]+\)){/,
-                replace: "{Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
+                match: /(editMessage:function.*?{)(.*?)(},[^}]*?:function)/,
+                replace: "$1return Vencord.Api.MessageEvents._handlePreEdit(...arguments).then(()=>{$2})$3"
             }]
         },
         {
