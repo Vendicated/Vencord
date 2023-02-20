@@ -220,7 +220,7 @@ export default definePlugin({
                     } : {})
                 }}
             >
-                {!isInEditMode && <span style={timezone ? { cursor: "pointer", } : {}} onClick={() => {
+                {!isInEditMode && <span style={{ fontSize: "1.2em", cursor: (timezone ? "pointer" : "") }} onClick={() => {
                     if (timezone) {
                         Toasts.show({
                             type: Toasts.Type.MESSAGE,
@@ -252,7 +252,8 @@ export default definePlugin({
                         width: "60%",
                         marginTop: "5%"
                     } : {
-                        marginLeft: "5%"
+                        marginLeft: "2%",
+                        display: "flex"
                     }}
                 >
                     <EditIcon
@@ -290,7 +291,6 @@ export default definePlugin({
                         height="16"
                         width="16"
                     />
-
                     {isInEditMode &&
                         <DeleteIcon
                             style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
@@ -322,7 +322,7 @@ export default definePlugin({
                         />
                     }
                 </span>
-            </Text>
+            </Text >
         );
     }
     ,
