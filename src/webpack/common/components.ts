@@ -45,6 +45,9 @@ export const Text = waitForComponent<t.Text>("Text", m => {
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 });
 export const Select = waitForComponent<t.Select>("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", m => {
+    return m.render && filters.byCode("popoutPosition", "autoFocus", "maxVisibleItems", "--icons-width")(m.render);
+});
 export const Slider = waitForComponent<t.Slider>("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
