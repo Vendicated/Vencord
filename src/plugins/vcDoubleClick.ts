@@ -50,8 +50,8 @@ export default definePlugin({
             // channel mentions
             find: ".shouldCloseDefaultModals",
             replacement: {
-                match: /onClick:(\w+),(.{0,30}className:"channelMention",)/,
-                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2)&&($1)(_vcEv),$2"
+                match: /onClick:(\i)(?=,.{0,30}className:"channelMention")/,
+                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2||_vcEv.target.className.includes('MentionText'))&&($1)()",
             }
         }
     ],
