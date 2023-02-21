@@ -32,12 +32,13 @@ const ReactionStore = findByPropsLazy("getReactions");
 
 const queue = new Queue();
 
-function fetchReactions(msg: Message, emoji: ReactionEmoji) {
+function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
     return RestAPI.get({
         url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${key}`,
         query: {
-            limit: 100
+            limit: 100,
+            type
         },
         oldFormErrors: true
     })
@@ -46,18 +47,19 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji) {
             channelId: msg.channel_id,
             messageId: msg.id,
             users: res.body,
-            emoji
+            emoji,
+            reactionType: type
         }))
         .catch(console.error)
         .finally(() => sleep(250));
 }
 
-function getReactionsWithQueue(msg: Message, e: ReactionEmoji) {
-    const key = `${msg.id}:${e.name}:${e.id ?? ""}`;
+function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
+    const key = `${msg.id}:${e.name}:${e.id ?? ""}:${type}`;
     const cache = ReactionStore.__getLocalVars().reactions[key] ??= { fetched: false, users: {} };
     if (!cache.fetched) {
         queue.unshift(() =>
-            fetchReactions(msg, e)
+            fetchReactions(msg, e, type)
         );
         cache.fetched = true;
     }
@@ -104,7 +106,7 @@ export default definePlugin({
         );
     },
 
-    _renderUsers({ message, emoji }: RootObject) {
+    _renderUsers({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
         React.useEffect(() => {
             const cb = (e: any) => {
@@ -116,8 +118,15 @@ export default definePlugin({
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
         }, [message.id]);
 
-        const reactions = getReactionsWithQueue(message, emoji);
+        const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];
+
+        for (const user of users) {
+            FluxDispatcher.dispatch({
+                type: "USER_UPDATE",
+                user
+            });
+        }
 
         return (
             <div

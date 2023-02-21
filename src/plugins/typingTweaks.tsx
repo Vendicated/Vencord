@@ -22,6 +22,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
 
@@ -42,6 +43,15 @@ const settings = definePluginSettings({
         description: "Show a more useful message when several users are typing"
     }
 });
+
+export function buildSeveralUsers({ a, b, c }: { a: string, b: string, c: number; }) {
+    return [
+        <strong key="0">{a}</strong>,
+        ", ",
+        <strong key="2">{b}</strong>,
+        `, and ${c} others are typing...`
+    ];
+}
 
 export default definePlugin({
     name: "TypingTweaks",
@@ -64,36 +74,21 @@ export default definePlugin({
                 replace: "return $1"
             }
         },
-        // Changes indicator to format message with the typing users
-        {
-            find: '"SEVERAL_USERS_TYPING":"',
-            replacement: {
-                match: /("SEVERAL_USERS_TYPING"):".+?"/,
-                replace: "$1:\"**!!{a}!!**, **!!{b}!!**, and {c} others are typing...\""
-            },
-            predicate: () => settings.store.alternativeFormatting
-        },
-        {
-            find: ",\"SEVERAL_USERS_TYPING\",\"",
-            replacement: {
-                match: /(?<="SEVERAL_USERS_TYPING",)".+?"/,
-                replace: '"**!!{a}!!**, **!!{b}!!**, and {c} others are typing..."'
-            },
-            predicate: () => settings.store.alternativeFormatting
-        },
         // Adds the alternative formatting for several users typing
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /(\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\).+?SEVERAL_USERS_TYPING/,
-                replace: "$&.format({a:$2,b:$3,c:$1.length-2})"
+                match: /((\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\)):.+?SEVERAL_USERS_TYPING/,
+                replace: "$1:$self.buildSeveralUsers({a:$3,b:$4,c:$2.length-2})"
             },
             predicate: () => settings.store.alternativeFormatting
         }
     ],
     settings,
 
-    mutateChildren(props, users, children) {
+    buildSeveralUsers,
+
+    mutateChildren(props: any, users: User[], children: any) {
         if (!Array.isArray(children)) return children;
 
         let element = 0;
@@ -101,7 +96,7 @@ export default definePlugin({
         return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]} /> : c);
     },
 
-    TypingUser: ErrorBoundary.wrap(({ user, guildId }) => {
+    TypingUser: ErrorBoundary.wrap(({ user, guildId }: { user: User, guildId: string; }) => {
         return <strong style={{
             display: "grid",
             gridAutoFlow: "column",

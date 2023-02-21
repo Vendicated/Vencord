@@ -56,7 +56,7 @@ function MemberCount() {
                     <div {...props}>
                         <span
                             style={{
-                                backgroundColor: "var(--status-green-600)",
+                                backgroundColor: "var(--green-360)",
                                 width: "12px",
                                 height: "12px",
                                 borderRadius: "50%",
@@ -64,7 +64,7 @@ function MemberCount() {
                                 marginRight: "0.5em"
                             }}
                         />
-                        <span style={{ color: "var(--status-green-600)" }}>{online}</span>
+                        <span style={{ color: "var(--green-360)" }}>{online}</span>
                     </div>
                 )}
             </Tooltip>
@@ -76,13 +76,13 @@ function MemberCount() {
                                 width: "6px",
                                 height: "6px",
                                 borderRadius: "50%",
-                                border: "3px solid var(--status-grey-500)",
+                                border: "3px solid var(--primary-400)",
                                 display: "inline-block",
                                 marginRight: "0.5em",
                                 marginLeft: "1em"
                             }}
                         />
-                        <span style={{ color: "var(--status-grey-500)" }}>{total}</span>
+                        <span style={{ color: "var(--primary-400)" }}>{total}</span>
                     </div>
                 )}
             </Tooltip>
