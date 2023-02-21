@@ -37,6 +37,7 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
+export let TypingStore: GenericStore;
 
 export let GuildStore: Stores.GuildStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
@@ -84,6 +85,7 @@ waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
+waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);

@@ -18,12 +18,14 @@
 
 import "./style.css";
 
+import { Settings } from "@api/settings.js";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
-import { findByCode } from "@webpack";
-import { ChannelStore, GuildStore, ReadStateStore, Text, useDrag, useDrop, useEffect, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { find, findByCode } from "@webpack";
+import { ChannelStore, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, ChannelTabsUtils } from "./util.js";
+
 const {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo
 } = ChannelTabsUtils;
@@ -48,6 +50,21 @@ const UserAvatar = ({ user }: { user: User; }) =>
         src={`https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${user?.id}/${user?.avatar}.png`}
         className={cl("icon")}
     />;
+const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
+function TypingIndicator(props: { channelId: string; }) {
+    const { channelId } = props;
+    const hasTypingIndicatorPlugin = Settings.plugins.TypingIndicator?.enabled;
+    const currentUserId = UserStore.getCurrentUser().id;
+    const isTyping = useStateFromStores(
+        [TypingStore],
+        (): boolean => !!((Object.keys(TypingStore.getTypingUsers(channelId)) as string[]).filter(id => id !== currentUserId).length),
+        null, (old, newer) => !hasTypingIndicatorPlugin && (old && !newer || !old && newer)
+    );
+    if (hasTypingIndicatorPlugin) return (Vencord.Plugins.plugins.TypingIndicator as any).TypingIndicator(channelId);
+    else return isTyping ?
+        <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div> :
+        null;
+}
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     let classes = cl("notification-dot");
     if (mentionCount) classes += ` ${cl("has-mention")}`;
@@ -59,7 +76,8 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel, user?: User; }) {
     const { guild, channel, user } = props;
     const [unreadCount, mentionCount] = useStateFromStores(
-        [ReadStateStore], () => [ReadStateStore.getUnreadCount(props.channelId), ReadStateStore.getMentionCount(props.channelId)]
+        [ReadStateStore], (): [number, number] => [ReadStateStore.getUnreadCount(props.channelId), ReadStateStore.getMentionCount(props.channelId)],
+        null, (_, newState) => newState.every(i => i !== 0)
     );
     if (props.guildId === "@me") return <>
         <FriendsIcon height={24} width={24} />
@@ -68,12 +86,13 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     if (guild && channel) return <>
         <GuildIcon guild={guild} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel.name}</Text>
+        <TypingIndicator channelId={channel.id} />
         <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-
     </>;
     if (user) return <>
         <UserAvatar user={user} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>@{user?.username}</Text>
+        <TypingIndicator channelId={props.channelId} />
         <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
     </>;
     else return <>
