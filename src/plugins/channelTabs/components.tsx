@@ -47,7 +47,10 @@ const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     </div>;
 const UserAvatar = ({ user }: { user: User; }) =>
     <img
-        src={`https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${user?.id}/${user?.avatar}.png`}
+        src={user.avatar
+            ? `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${user?.id}/${user?.avatar}.png`
+            : `https://${window.GLOBAL_ENV.CDN_HOST}/embed/avatars/${parseInt(user.discriminator, 10) % 5}.png`
+        }
         className={cl("icon")}
     />;
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
@@ -76,7 +79,8 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel, user?: User; }) {
     const { guild, channel, user } = props;
     const [unreadCount, mentionCount] = useStateFromStores(
-        [ReadStateStore], (): [number, number] => [ReadStateStore.getUnreadCount(props.channelId), ReadStateStore.getMentionCount(props.channelId)],
+        [ReadStateStore],
+        (): [number, number] => [ReadStateStore.getUnreadCount(props.channelId), ReadStateStore.getMentionCount(props.channelId)],
         null, (_, newState) => newState.every(i => i !== 0)
     );
     if (props.guildId === "@me") return <>
