@@ -17,9 +17,9 @@
 */
 
 import { DataStore } from "@api/index";
-import { Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 
+import { settings } from "./index";
 import { Collection, Gif } from "./types";
 import { getFormat } from "./utils/getFormat";
 
@@ -53,7 +53,7 @@ export const createCollection = async (name: string, gifs: Gif[]): Promise<void>
         });
 
     // gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
-    const latestGifSrc = gifs[gifs.length - 1]?.src ?? Settings.plugins["Gif Collection"].defaultEmptyCollectionImage;
+    const latestGifSrc = gifs[gifs.length - 1]?.src ?? settings.store.defaultEmptyCollectionImage;
     const collection = {
         name: `gc:${name}`,
         src: latestGifSrc,
@@ -89,7 +89,7 @@ export const removeFromCollection = async (id: string): Promise<void> => {
     collections[collectionIndex].gifs = collections[collectionIndex].gifs.filter(g => g.id !== id);
 
     const collection = collections[collectionIndex];
-    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : Settings.plugins["Gif Collection"].defaultEmptyCollectionImage;
+    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : settings.store.defaultEmptyCollectionImage;
     collections[collectionIndex].src = latestGifSrc;
     collections[collectionIndex].format = getFormat(latestGifSrc);
 

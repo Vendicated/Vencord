@@ -34,7 +34,7 @@ import { getGifByMessageAndTarget as getGifByTargetAndMessage, getGifByTarget as
 import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
 import { uuidv4 } from "./utils/uuidv4";
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     defaultEmptyCollectionImage: {
         description: "The image / gif that will be shown when a collection has no images / gifs",
         type: OptionType.STRING,
