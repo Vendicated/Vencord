@@ -48,10 +48,10 @@ export default definePlugin({
         },
         {
             // channel mentions
-            find: ".EMOJI_IN_MESSAGE_HOVER",
+            find: ".shouldCloseDefaultModals",
             replacement: {
-                match: /onClick:(\i)(?=,.{0,30}className:"channelMention")/,
-                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2||_vcEv.target.className.includes('MentionText'))&&($1)()",
+                match: /onClick:(\w+),/,
+                replace: "onClick:(_vcEv)=>(_vcEv.detail>=2)&&($1)(_vcEv),"
             }
         }
     ],
