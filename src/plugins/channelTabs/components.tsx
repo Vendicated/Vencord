@@ -53,6 +53,7 @@ const UserAvatar = ({ user }: { user: User; }) =>
         }
         className={cl("icon")}
     />;
+const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
 function TypingIndicator(props: { channelId: string; }) {
     const { channelId } = props;
@@ -76,8 +77,9 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
     </div> : null;
 };
 
-function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel, user?: User; }) {
-    const { guild, channel, user } = props;
+function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
+    const { guild, channel } = props;
+    const recipients = channel?.recipients;
     const [unreadCount, mentionCount] = useStateFromStores(
         [ReadStateStore],
         (): [number, number] => [ReadStateStore.getUnreadCount(props.channelId), ReadStateStore.getMentionCount(props.channelId)],
@@ -90,15 +92,27 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     if (guild && channel) return <>
         <GuildIcon guild={guild} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel.name}</Text>
+        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
         <TypingIndicator channelId={channel.id} />
-        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
     </>;
-    if (user) return <>
-        <UserAvatar user={user} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>@{user?.username}</Text>
-        <TypingIndicator channelId={props.channelId} />
-        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-    </>;
+    if (recipients?.length) {
+        if (recipients.length === 1) {
+            const user = UserStore.getUser(recipients[0]);
+            return <>
+                <UserAvatar user={user} />
+                <Text variant="text-md/semibold" className={cl("channel-name-text")}>@{user?.username}</Text>
+                <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
+                <TypingIndicator channelId={props.channelId} />
+            </>;
+        } else {
+            return <>
+                <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} />
+                <Text variant="text-md/semibold" className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
+                <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
+                <TypingIndicator channelId={props.channelId} />
+            </>;
+        }
+    }
     else return <>
         <QuestionIcon height={24} width={24} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>Unknown</Text>
@@ -107,7 +121,6 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
 function ChannelTab(props: ChannelTabsProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
-    const user = UserStore.getUser(channel?.recipients?.[0]);
     const ref = useRef<HTMLDivElement>(null);
     const [, drop] = useDrop(() => ({
         accept: "vc_ChannelTab",
@@ -123,7 +136,7 @@ function ChannelTab(props: ChannelTabsProps) {
     }));
     drag(drop(ref));
     const tab = <div className={cl("tab-base")} ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
-        <ChannelTabContent {...props} guild={guild} channel={channel} user={user} />
+        <ChannelTabContent {...props} guild={guild} channel={channel} />
     </div>;
     return tab;
 }
