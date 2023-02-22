@@ -102,7 +102,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Show a notification when you block or unblock a user",
         options: [{
-            label: "Blocking and Unblocking",
+            label: "Blocking and unblocking",
             value: "ALL",
             default: true,
         }, {
