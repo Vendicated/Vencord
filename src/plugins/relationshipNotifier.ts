@@ -52,7 +52,7 @@ const settings = definePluginSettings({
             value: "ALL",
             default: true,
         }, {
-            label: "Only When added",
+            label: "Only when added",
             value: "CREATE",
         }, {
             label: "Only when removed",
@@ -102,7 +102,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Show a notification when you block or unblock a user",
         options: [{
-            label: "Blocked and Unblocked",
+            label: "Blocking and Unblocking",
             value: "ALL",
             default: true,
         }, {
