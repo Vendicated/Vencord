@@ -21,7 +21,7 @@ import "./style.css";
 import { Settings } from "@api/settings.js";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
-import { ChannelStore, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useMemo, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, ChannelTabsUtils } from "./util.js";
@@ -105,8 +105,9 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
                 <TypingIndicator channelId={props.channelId} />
             </>;
         } else {
+            const users = useMemo(() => <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} />, [recipients]);
             return <>
-                <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} />
+                {users}
                 <Text variant="text-md/semibold" className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator channelId={props.channelId} />
