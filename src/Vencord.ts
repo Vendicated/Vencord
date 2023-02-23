@@ -38,7 +38,7 @@ import { SettingsRouter } from "./webpack/common";
 export let Components: any;
 
 async function syncSettings() {
-    if (Settings.settingsSync && await shouldCloudSync()) {
+    if (Settings.backend.settingsSync && await shouldCloudSync()) {
         await getCloudSettings(false);
 
         showNotice(
