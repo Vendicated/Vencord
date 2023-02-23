@@ -45,7 +45,8 @@ function CloudSettingsTab() {
                 </Forms.FormText>
                 <Switch
                     key="cloud-sync"
-                    value={settings.backend.enabled}
+                    disabled={!settings.backend.enabled}
+                    value={settings.backend.settingsSync}
                     onChange={v => { settings.backend.settingsSync = v; }}
                 >
                     Settings Sync
