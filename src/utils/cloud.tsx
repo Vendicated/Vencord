@@ -55,7 +55,7 @@ export async function authorizeCloud() {
         cancelCompletesFlow={false}
         callback={async (u: string) => {
             if (!u) {
-                Settings.settingsSync = false;
+                Settings.backend.enabled = false;
                 return;
             }
 
@@ -67,14 +67,14 @@ export async function authorizeCloud() {
                 if (secret) {
                     cloudLogger.info("Authorized with secret");
                     await DataStore.set("Vencord_cloudSecret", secret);
-                    toast(Toasts.Type.SUCCESS, "Cloud settings sync enabled!");
+                    toast(Toasts.Type.SUCCESS, "Cloud enabled!");
                 } else {
                     toast(Toasts.Type.FAILURE, "Setup failed (no secret returned?).");
                 }
             } catch (e: any) {
                 cloudLogger.error("Failed to authorize", e);
                 toast(Toasts.Type.FAILURE, `Setup failed (${e.toString()}).`);
-                Settings.settingsSync = false;
+                Settings.backend.enabled = false;
             }
         }
         }

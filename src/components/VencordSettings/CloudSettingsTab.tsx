@@ -29,24 +29,31 @@ function CloudSettingsTab() {
     return (
         <>
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
+                <Switch
+                    key="backend"
+                    value={settings.backend.enabled}
+                    onChange={v => { settings.backend.enabled = v; v && authorizeCloud(); }}
+                    note="This will request authorization if you have not yet set up cloud integration."
+                >
+                    Enable Cloud Integrations
+                </Switch>
+            </Forms.FormSection>
+            <Forms.FormSection title="Settings Sync" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                     minimal effort.
                 </Forms.FormText>
                 <Switch
                     key="cloud-sync"
-                    value={settings.settingsSync}
-                    onChange={v => { settings.settingsSync = v; v && authorizeCloud(); }}
-                    note="This will request authorization if you have not yet set up cloud sync."
+                    value={settings.backend.enabled}
+                    onChange={v => { settings.backend.settingsSync = v; }}
                 >
                     Settings Sync
                 </Switch>
-            </Forms.FormSection>
-            <Forms.FormSection title="Quick Actions">
                 <Card className="vc-settings-quick-actions-card">
                     <Button
                         size={Button.Sizes.SMALL}
-                        disabled={!settings.settingsSync}
+                        disabled={!settings.backend.settingsSync}
                         onClick={() => putCloudSettings()}
                     >Sync to Cloud</Button>
                     <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
@@ -56,7 +63,7 @@ function CloudSettingsTab() {
                                 onMouseEnter={onMouseEnter}
                                 size={Button.Sizes.SMALL}
                                 color={Button.Colors.RED}
-                                disabled={!settings.settingsSync}
+                                disabled={!settings.backend.settingsSync}
                                 onClick={() => getCloudSettings(true, true)}
                             >Sync from Cloud</Button>
                         )}
@@ -64,7 +71,7 @@ function CloudSettingsTab() {
                     <Button
                         size={Button.Sizes.SMALL}
                         color={Button.Colors.RED}
-                        disabled={!settings.settingsSync}
+                        disabled={!settings.backend.settingsSync}
                         onClick={() => deleteCloudSettings()}
                     >Delete Cloud Settings</Button>
                 </Card>

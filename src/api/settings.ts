@@ -29,7 +29,6 @@ const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     autoUpdate: boolean;
-    settingsSync: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -48,12 +47,16 @@ export interface Settings {
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
     };
+
+    backend: {
+        enabled: boolean;
+        settingsSync: boolean;
+    };
 }
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     autoUpdate: false,
-    settingsSync: false,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
@@ -66,6 +69,11 @@ const DefaultSettings: Settings = {
         timeout: 5000,
         position: "bottom-right",
         useNative: "not-focused"
+    },
+
+    backend: {
+        enabled: false,
+        settingsSync: false
     }
 };
 
