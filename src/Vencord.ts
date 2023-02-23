@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { checkSyncRequirement, cloudSyncConfigured, syncFromCloud } from "./utils/settingsSync";
+import { getCloudSettings, shouldCloudSync } from "./utils/settingsSync";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
@@ -38,12 +38,8 @@ import { SettingsRouter } from "./webpack/common";
 export let Components: any;
 
 async function syncSettings() {
-    if (await cloudSyncConfigured() && Settings.settingsSync) {
-        const needToSync = await checkSyncRequirement();
-
-        if (!needToSync) return;
-
-        await syncFromCloud(false);
+    if (Settings.settingsSync && await shouldCloudSync()) {
+        await getCloudSettings(false);
 
         showNotice(
             "Vencord settings have been updated from the cloud!",

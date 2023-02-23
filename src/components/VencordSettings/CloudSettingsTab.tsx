@@ -18,8 +18,9 @@
 
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { authorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
-import { authorizeCloud, deleteCloudData as deleteCloudSettings, syncFromCloud, syncToCloud } from "@utils/settingsSync";
+import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Button, Card, Forms, Switch, Tooltip } from "@webpack/common";
 
 function CloudSettingsTab() {
@@ -46,7 +47,7 @@ function CloudSettingsTab() {
                     <Button
                         size={Button.Sizes.SMALL}
                         disabled={!settings.settingsSync}
-                        onClick={() => syncToCloud()}
+                        onClick={() => putCloudSettings()}
                     >Sync to Cloud</Button>
                     <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
                         {({ onMouseLeave, onMouseEnter }) => (
@@ -56,7 +57,7 @@ function CloudSettingsTab() {
                                 size={Button.Sizes.SMALL}
                                 color={Button.Colors.RED}
                                 disabled={!settings.settingsSync}
-                                onClick={() => syncFromCloud(true, true)}
+                                onClick={() => getCloudSettings(true, true)}
                             >Sync from Cloud</Button>
                         )}
                     </Tooltip>

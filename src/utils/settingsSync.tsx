@@ -17,14 +17,12 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { findByProps } from "@webpack";
-import { Toasts, UserStore } from "@webpack/common";
+import { Toasts } from "@webpack/common";
 import * as fflate from "fflate";
 
-import { Settings } from "../Vencord";
+import { cloudConfigured, getCloudAuth } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
-import { openModal } from "./modal";
 
 export async function importSettings(data: string) {
     try {
@@ -69,17 +67,18 @@ export async function downloadSettingsBackup() {
     }
 }
 
-const toastSuccess = () => Toasts.show({
-    type: Toasts.Type.SUCCESS,
-    message: "Settings successfully imported. Restart to apply changes!",
-    id: Toasts.genId()
-});
+const toast = (type: number, message: string) =>
+    Toasts.show({
+        type,
+        message,
+        id: Toasts.genId()
+    });
 
-const toastFailure = (err: any) => Toasts.show({
-    type: Toasts.Type.FAILURE,
-    message: `Failed to import settings: ${String(err)}`,
-    id: Toasts.genId()
-});
+const toastSuccess = () =>
+    toast(Toasts.Type.SUCCESS, "Settings successfully imported. Restart to apply changes!");
+
+const toastFailure = (err: any) =>
+    toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
 
 export async function uploadSettingsBackup(showToast = true): Promise<void> {
     if (IS_WEB) {
@@ -128,71 +127,9 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 }
 
 // Cloud settings
-const cloudSettingsLogger = new Logger("CloudSettings", "#39b7e0");
+const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
-const toast = (type: number, message: string) =>
-    Toasts.show({
-        type,
-        message,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        }
-    });
-
-export async function cloudSyncConfigured() {
-    return await DataStore.get("Vencord_settingsSyncSecret") !== undefined;
-}
-
-export async function authorizeCloud() {
-    if (await cloudSyncConfigured()) return;
-
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
-    openModal((props: any) => <OAuth2AuthorizeModal
-        {...props}
-        scopes={["identify"]}
-        responseType="code"
-        redirectUri="https://vencord.vendicated.dev/api/v1/callback"
-        permissions={0n}
-        clientId="1075583776979169361"
-        cancelCompletesFlow={false}
-        callback={async (u: string) => {
-            if (!u) {
-                Settings.settingsSync = false;
-                return;
-            }
-
-            try {
-                const res = await fetch(u, {
-                    headers: new Headers({ Accept: "application/json" })
-                });
-                const { secret } = await res.json();
-                if (secret) {
-                    cloudSettingsLogger.info("Authorized with secret");
-                    await DataStore.set("Vencord_settingsSyncSecret", secret);
-                    toast(Toasts.Type.SUCCESS, "Cloud settings sync enabled!");
-                } else {
-                    toast(Toasts.Type.FAILURE, "Setup failed (no secret returned?).");
-                }
-            } catch (e: any) {
-                cloudSettingsLogger.error("Failed to authorize", e);
-                toast(Toasts.Type.FAILURE, `Setup failed (${e.toString()}).`);
-                Settings.settingsSync = false;
-            }
-        }
-        }
-    />);
-}
-
-async function getCloudAuth() {
-    const userId = UserStore.getCurrentUser().id;
-    const secret = await DataStore.get("Vencord_settingsSyncSecret");
-
-    return btoa(`${userId}:${secret}`);
-}
-
-export async function syncToCloud() {
+export async function putCloudSettings() {
     const settings = await exportSettings();
 
     try {
@@ -222,7 +159,7 @@ export async function syncToCloud() {
     }
 }
 
-export async function syncFromCloud(shouldToast = true, force = false) {
+export async function getCloudSettings(shouldToast = true, force = false) {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "GET",
@@ -273,7 +210,7 @@ export async function syncFromCloud(shouldToast = true, force = false) {
     }
 }
 
-export async function deleteCloudData() {
+export async function deleteCloudSettings() {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "DELETE",
@@ -298,7 +235,9 @@ export async function deleteCloudData() {
     }
 }
 
-export async function checkSyncRequirement() {
+export async function shouldCloudSync() {
+    if (!await cloudConfigured()) return false;
+
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "HEAD",
@@ -317,6 +256,6 @@ export async function checkSyncRequirement() {
         return lastWritten < version;
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to check version", e);
-        return null;
+        return false;
     }
 }
