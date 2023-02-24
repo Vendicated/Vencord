@@ -35,6 +35,7 @@ export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
 
 export type FilterFn = (mod: any) => boolean;
+export type Filterish = FilterFn | string | string[];
 
 export const filters = {
     byProps: (...props: string[]): FilterFn =>
@@ -118,8 +119,8 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
 /**
  * find but lazy
  */
-export function findLazy(filter: FilterFn, getDefault = true) {
-    return proxyLazy(() => find(filter, getDefault));
+export function findLazy<T = any>(filter: FilterFn, getDefault = true) {
+    return proxyLazy<T>(() => find(filter, getDefault));
 }
 
 export function findAll(filter: FilterFn, getDefault = true) {
@@ -346,7 +347,7 @@ export function findStoreLazy(name: string) {
  * Wait for a module that matches the provided filter to be registered,
  * then call the callback with the module as the first argument
  */
-export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
+export function waitFor(filter: Filterish, callback: CallbackFn) {
     if (typeof filter === "string")
         filter = filters.byProps(filter);
     else if (Array.isArray(filter))
@@ -358,6 +359,21 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     if (existing) return void callback(existing);
 
     subscriptions.set(filter, callback);
+}
+
+export function waitForAll<T extends any[]>(filters: Filterish[], callback: (...args: T) => void) {
+    const done = Array(filters.length).fill(false);
+    const mods = [] as any as T;
+
+    if (filters.length === 0) return void callback(...mods);
+
+    filters.forEach((filter, i) => {
+        waitFor(filter, (mod: any) => {
+            done[i] = true;
+            mods[i] = mod;
+            if (!done.includes(false)) setTimeout(() => callback(...mods), 0);
+        });
+    });
 }
 
 export function addListener(callback: CallbackFn) {

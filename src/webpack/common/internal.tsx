@@ -19,17 +19,34 @@
 import { LazyComponent } from "@utils/misc";
 
 // eslint-disable-next-line path-alias/no-relative
-import { FilterFn, filters, waitFor } from "../webpack";
+import { Filterish, filters, waitFor, waitForAll } from "../webpack";
 
-export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
+type WaitForComponentOpts<M extends any[]> = {
+    deps?: Filterish[];
+    factory: ((...mods: M) => Filterish),
+};
+export function waitForComponent<
+    T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>,
+    M extends any[] = any[],
+>(
+    name: string,
+    filter: Filterish | WaitForComponentOpts<M>,
+): T {
+    const isOpts = typeof filter === "object" && !Array.isArray(filter);
+    const factory = isOpts ? filter.factory : () => filter;
+    const deps = isOpts ? filter.deps ?? [] : [];
+
     let myValue: T = function () {
         throw new Error(`Vencord could not find the ${name} Component`);
     } as any;
 
     const lazyComponent = LazyComponent(() => myValue) as T;
-    waitFor(filter, (v: any) => {
-        myValue = v;
-        Object.assign(lazyComponent, v);
+
+    waitForAll<M>(deps, (...mods) => {
+        waitFor(factory(...mods), (v: any) => {
+            myValue = v;
+            Object.assign(lazyComponent, v);
+        });
     });
 
     return lazyComponent;

@@ -105,6 +105,9 @@ function patchPush() {
                             if (filter(exports)) {
                                 subscriptions.delete(filter);
                                 callback(exports);
+                            } else if (module.exports && filter(module.exports)) {
+                                subscriptions.delete(filter);
+                                callback(module.exports);
                             } else if (typeof exports === "object") {
                                 if (exports.default && filter(exports.default)) {
                                     subscriptions.delete(filter);
