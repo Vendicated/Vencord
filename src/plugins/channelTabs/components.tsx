@@ -31,6 +31,11 @@ const {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo
 } = ChannelTabsUtils;
 
+enum ChannelTypes {
+    DM = 1,
+    GROUP_DM = 3
+}
+
 const twoChars = (n: number) => n > 99 ? "9+" : `${n}`;
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
@@ -51,6 +56,14 @@ const UserAvatar = ({ user }: { user: User; }) =>
         src={user.avatar
             ? `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${user?.id}/${user?.avatar}.png`
             : `https://${window.GLOBAL_ENV.CDN_HOST}/embed/avatars/${parseInt(user.discriminator, 10) % 5}.png`
+        }
+        className={cl("icon")}
+    />;
+const ChannelIcon = ({ channel }: { channel: Channel; }) =>
+    <img
+        src={channel?.icon
+            ? `https://${window.GLOBAL_ENV.CDN_HOST}/channel-icons/${channel?.id}/${channel?.icon}.png`
+            : "https://discord.com/assets/c6851bd0b03f1cca5a8c1e720ea6ea17.png" // Default Group Icon
         }
         className={cl("icon")}
     />;
@@ -96,8 +109,8 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
         <TypingIndicator channelId={channel.id} />
     </>;
-    if (recipients?.length) {
-        if (recipients.length === 1) {
+    if (channel && recipients?.length) {
+        if (channel?.type === ChannelTypes.DM) {
             const user = UserStore.getUser(recipients[0]);
             return <>
                 <UserAvatar user={user} />
@@ -105,10 +118,9 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator channelId={props.channelId} />
             </>;
-        } else {
-            const users = useMemo(() => <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} />, [recipients]);
+        } else { // Group DM
             return <>
-                {users}
+                <ChannelIcon channel={channel} />
                 <Text variant="text-md/semibold" className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator channelId={props.channelId} />
