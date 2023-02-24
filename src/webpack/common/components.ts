@@ -32,7 +32,7 @@ export const Forms = {
     FormText: waitForComponent<t.FormText>("FormText", m => m.Types?.INPUT_PLACEHOLDER),
 };
 
-export const Card = waitForComponent<t.Card>("Card", m => m.Types?.PRIMARY === "cardPrimary");
+export const Card = waitForComponent<t.Card>("Card", m => m.Types?.PRIMARY && m.defaultProps);
 export const Button = waitForComponent<t.Button>("Button", ["Hovers", "Looks", "Sizes"]);
 export const Switch = waitForComponent<t.Switch>("Switch", filters.byCode("tooltipNote", "ringTarget"));
 export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", ["Positions", "Colors"]);
