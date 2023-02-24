@@ -17,11 +17,37 @@
 */
 
 import { DataStore } from "@api/index.js";
-import { DefinedSettings } from "@utils/types.js";
+import { definePluginSettings } from "@api/settings.js";
+import { OptionType } from "@utils/types.js";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { SelectedChannelStore, Toasts } from "@webpack/common";
 
+import { ChannelTabsPreivew } from "./components.jsx";
+
 export interface ChannelTabsProps { guildId: string, channelId: string; }
+
+export const channelTabsSettings = definePluginSettings({
+    onStartup: {
+        type: OptionType.SELECT,
+        description: "On startup",
+        options: [{
+            label: "Do nothing (open on the friends tab)",
+            value: "nothing",
+            default: true
+        }, {
+            label: "Remember tabs from last session",
+            value: "remember"
+        }, {
+            label: "Open on a specific set of tabs",
+            value: "preset"
+        }],
+    },
+    tabSet: {
+        component: ChannelTabsPreivew,
+        description: "Select which tabs to open at startup",
+        type: OptionType.COMPONENT,
+    }
+});
 
 // TODO: replace with commons export when #450 is merged
 const NavigationRouter = mapMangledModuleLazy('"transitionToGuild', {
@@ -67,11 +93,12 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     openChannels[openChannelIndex] = prev;
     openChannelIndex += direction;
 }
-async function initalize(settings: DefinedSettings, currentChannel: ChannelTabsProps) {
-    if (settings.store.rememberTabs) {
+async function initalize(currentChannel: ChannelTabsProps) {
+    const settings = channelTabsSettings;
+    if (["remember", "preset"].includes(settings.store.onStartup)) {
         if (Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) Toasts.show({
             id: Toasts.genId(),
-            message: "ChannelTabs - Not restoing tabs as KeepCurrentChannel is enabled",
+            message: "ChannelTabs - Not restoring tabs as KeepCurrentChannel is enabled",
             type: Toasts.Type.FAILURE,
             options: {
                 duration: 3000,
@@ -79,10 +106,14 @@ async function initalize(settings: DefinedSettings, currentChannel: ChannelTabsP
             }
         });
         else {
-            const openChannelData = await DataStore.get("ChannelTabs_openChannels");
-            if (openChannelData) {
-                ({ openChannelIndex } = openChannelData);
-                openChannelData.openChannels.forEach(c => openChannels.push(c));
+            const preferredTabs = settings.store.onStartup === "remember"
+                ? await DataStore.get("ChannelTabs_openChannels")
+                : settings.store.tabSet ?? [{ guildId: "@me", channelId: undefined as any } /* friends tab */];
+            if (Array.isArray(preferredTabs)) {
+                preferredTabs.forEach(c => openChannels.push(c));
+            } else if (preferredTabs) {
+                ({ openChannelIndex } = preferredTabs);
+                preferredTabs.openChannels.forEach(c => openChannels.push(c));
             }
         }
     }

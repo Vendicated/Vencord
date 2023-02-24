@@ -73,3 +73,20 @@
     padding: 0;
     padding-right: 2px;
 }
+
+.vc-channeltabs-preview-tab {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 12rem;
+    padding: 2px 0;
+    min-width: 0;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-accent);
+}
+
+.vc-channeltabs-preview-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
