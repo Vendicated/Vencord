@@ -19,12 +19,13 @@
 import "./style.css";
 
 import { Settings } from "@api/settings.js";
+import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
-import { ChannelStore, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelTabsProps, ChannelTabsUtils } from "./util.js";
+import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo
@@ -220,3 +221,60 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
     </div >;
 }
 
+export function ChannelTabsPreivew(p) {
+    const { setValue }: { setValue: (v: ChannelTabsProps[]) => void; } = p;
+    const { tabSet }: { tabSet: ChannelTabsProps[], onStartup: string; } = channelTabsSettings.use();
+    const placeholder = [{ guildId: "@me", channelId: undefined as any }];
+    const [currentTabs, setCurrentTabs] = useState(tabSet ?? placeholder);
+    const cl = (n: string) => `vc-channeltabs-preview-${n}`;
+    const Tab = ({ channelId, guildId }: ChannelTabsProps) => {
+        if (guildId === "@me") return <div className={cl("tab")}>
+            <FriendsIcon height={24} width={24} />
+            <Text variant="text-sm/semibold" className={cl("text")}>Friends</Text>
+        </div>;
+        const channel = ChannelStore.getChannel(channelId);
+        const guild = GuildStore.getGuild(guildId);
+        const recipients = channel?.recipients;
+        if (channel && guild) return <div className={cl("tab")}>
+            <GuildIcon guild={guild} />
+            <Text variant="text-sm/semibold" className={cl("text")}>#{channel.name}</Text>
+        </div>;
+        else if (recipients?.length) {
+            if (recipients.length === 1) {
+                const user = UserStore.getUser(recipients[0]);
+                return <div className={cl("tab")}>
+                    <UserAvatar user={user} />
+                    <Text variant="text-sm/semibold" className={cl("text")}>@{user?.username}</Text>
+                </div>;
+            } else {
+                const users = useMemo(() =>
+                    <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} renderMoreUsers={() => null} />, [recipients]
+                );
+                return <div className={cl("tab")}>
+                    {users}
+                    <Text variant="text-sm/semibold" className={cl("text")}>{channel?.name || "Group DM"}</Text>
+                </div>;
+            }
+        }
+        return <div className={cl("tab")}>
+            <QuestionIcon height={24} width={24} />;
+            <Text variant="text-sm/semibold" className={cl("text")}>Unknown {guildId}/{channelId}</Text>
+        </div>;
+    };
+    return <>
+        <Forms.FormTitle>Startup tabs</Forms.FormTitle>
+        <Flex flexDirection="row" style={{ gap: "2px" }}>
+            {currentTabs.map(t => <>
+                <Tab channelId={t.channelId} guildId={t.guildId} />
+            </>)}
+        </Flex>
+        <Flex flexDirection="row-reverse">
+            <Button
+                onClick={() => {
+                    setCurrentTabs([...ChannelTabsUtils.openChannels]);
+                    setValue([...ChannelTabsUtils.openChannels]);
+                }}
+            >Set to currently open tabs</Button>
+        </Flex>
+    </>;
+}
