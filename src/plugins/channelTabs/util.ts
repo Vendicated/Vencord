@@ -19,8 +19,7 @@
 import { DataStore } from "@api/index.js";
 import { definePluginSettings } from "@api/settings.js";
 import { OptionType } from "@utils/types.js";
-import { filters, mapMangledModuleLazy } from "@webpack";
-import { SelectedChannelStore, Toasts } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
@@ -47,12 +46,6 @@ export const channelTabsSettings = definePluginSettings({
         description: "Select which tabs to open at startup",
         type: OptionType.COMPONENT,
     }
-});
-
-// TODO: replace with commons export when #450 is merged
-const NavigationRouter = mapMangledModuleLazy('"transitionToGuild', {
-    transitionTo: filters.byCode('"transitionTo '),
-    transitionToGuild: filters.byCode('"transitionToGuild'),
 });
 
 let openChannelIndex = 0;
