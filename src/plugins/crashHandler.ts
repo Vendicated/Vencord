@@ -63,6 +63,8 @@ export default definePlugin({
     ],
 
     async maybePromptToUpdateVencord() {
+        if (IS_WEB) return;
+
         try {
             const outdated = await checkForUpdates();
             if (!outdated) return;
