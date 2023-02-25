@@ -1,0 +1,17 @@
+.BF-folderSidebar .wrapper-shyHJt>div:first-of-type,
+.BF-folderSidebar .wrapper-38slSD>div:first-of-type {
+    display: none;
+}
+
+.BF-folderSidebar [class*=expandedFolderBackground-] {
+    background-color: transparent;
+}
+
+.BF-folderSidebar {
+    display: flex;
+}
+
+.BF-fullscreen {
+    width: 0 !important;
+    visibility: hidden;
+}
