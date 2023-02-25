@@ -141,8 +141,8 @@ export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = 
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: string[]) {
-    return classes.filter(c => typeof c === "string").join(" ");
+export function classes(...classes: Array<string | null | undefined>) {
+    return classes.filter(Boolean).join(" ");
 }
 
 /**

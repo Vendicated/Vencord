@@ -1,0 +1,7 @@
+.vc-error-card {
+    padding: 2em;
+    background-color: #e7828430;
+    border: 1px solid #e78284;
+    border-radius: 5px;
+    color: var(--text-normal, white);
+}
