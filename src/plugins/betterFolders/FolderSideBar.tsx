@@ -47,7 +47,7 @@ export default function (self: any) {
         const guilds = document.querySelector(`.${classes.guilds}`);
         const Sidebar = <Guilds className={classes.guilds} bfGuildFolders={Array.from(expandedFolders)} />;
         const visible = !!expandedFolders.size;
-        const className = `BF-folderSidebar${fullscreen ? " BF-fullscreen" : ""}`;
+        const className = `bf-folder-sidebar${fullscreen ? " bf-fullscreen" : ""}`;
         if (!guilds || !Settings.plugins.BetterFolders.sidebarAnim)
             return visible ? <div className={className}>{Sidebar}</div> : null;
         const SidebarWidth = guilds.getBoundingClientRect().width;
