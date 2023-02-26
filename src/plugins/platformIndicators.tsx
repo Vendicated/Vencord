@@ -187,13 +187,18 @@ export default definePlugin({
 
     patches: [
         {
-            // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
             find: ".Masks.STATUS_ONLINE_MOBILE",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
             replacement: [
                 {
+                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
                     match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
                     replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                },
+                {
+                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
+                    match: /(switch\(\i\){case \i\.\i\.ONLINE:return )(\i)\?({.+?}):/,
+                    replace: (_, rest, isMobile, component) => `if(${isMobile})return${component};${rest}`
                 }
             ]
         },
@@ -210,15 +215,20 @@ export default definePlugin({
                     // Fix sizes for mobile indicators which aren't online
                     match: /(?<=\(\i\.status,)(\i)(?=,(\i),\i\))/,
                     replace: (_, userStatus, isMobile) => `${isMobile}?"online":${userStatus}`
+                },
+                {
+                    // Make isMobile true no matter the status
+                    match: /(?<=\i&&!\i)&&\i===\i\.\i\.ONLINE/,
+                    replace: ""
                 }
             ]
         },
         {
-            // Make isMobileOnline return true no matter what is the user status
             find: "isMobileOnline=function",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
             replacement: [
                 {
+                    // Make isMobileOnline return true no matter what is the user status
                     match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
                     replace: "!= null"
                 }
