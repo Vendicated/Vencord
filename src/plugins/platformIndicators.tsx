@@ -156,7 +156,7 @@ const indicatorLocations = {
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
-    authors: [Devs.kemo, Devs.TheSun],
+    authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz],
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
@@ -185,6 +185,47 @@ export default definePlugin({
         });
     },
 
+    patches: [
+        {
+            // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
+            find: ".Masks.STATUS_ONLINE_MOBILE",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: [
+                {
+                    match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
+                    replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                }
+            ]
+        },
+        {
+            find: ".AVATAR_STATUS_MOBILE_16;",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: [
+                {
+                    // Return the AVATAR_STATUS_MOBILE size mask if the user is on mobile, no matter the status
+                    match: /\i===\i\.\i\.ONLINE&&(?=.{0,70}\.AVATAR_STATUS_MOBILE_16;)/,
+                    replace: ""
+                },
+                {
+                    // Fix sizes for mobile indicators which aren't online
+                    match: /(?<=\(\i\.status,)(\i)(?=,(\i),\i\))/,
+                    replace: (_, userStatus, isMobile) => `${isMobile}?"online":${userStatus}`
+                }
+            ]
+        },
+        {
+            // Make isMobileOnline return true no matter what is the user status
+            find: "isMobileOnline=function",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: [
+                {
+                    match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
+                    replace: "!= null"
+                }
+            ]
+        }
+    ],
+
     options: {
         ...Object.fromEntries(
             Object.entries(indicatorLocations).map(([key, value]) => {
@@ -196,6 +237,12 @@ export default definePlugin({
                     default: true
                 }];
             })
-        )
+        ),
+        colorMobileIndicator: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to make the mobile indicator match the color of the user status.",
+            default: true,
+            restartNeeded: true
+        }
     }
 });
