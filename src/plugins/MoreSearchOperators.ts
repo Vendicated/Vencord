@@ -176,34 +176,34 @@ export default definePlugin({
     patches: [{
         find: "Messages.SEARCH_SHORTCUT",
         replacement: {
-            match: /(.)\((.),.\..{1,3}\.ANSWER_PINNED/,
+            match: /(\i)\((\i),\i\.\i\.ANSWER_PINNED/,
             replace: Object.keys(searchOperators).map(a => `$1($2,"${a}",$self.searchOperators.${a}),`).join("") + Object.keys(searchAnswers).map(a => `$1($2,"${a}",$self.searchAnswers.${a}),`).join("") + "$&"
         }
     }, {
         find: "Messages.SEARCH_ANSWER_FROM",
         replacement: {
-            match: /var .=.\[.\];switch\(.\)\{/,
-            replace: "$&" + Object.entries(searchAnswers).map(([k, v]) => `case "${k}":a.add(e.getData("${v['_dataKey']}"));break;`).join("")
+            match: /(?<=\i\.forEach\(\(function\((\i)\).{300,500})var (\i)=\i\[\i\];switch\(\i\)\{/,
+            replace: "$&" + Object.entries(searchAnswers).map(([k, v]) => `case "${k}":$2.add($1.getData("${v['_dataKey']}"));break;`).join("")
         }
     },
     {
         find: "Messages.SEARCH_ANSWER_FROM",
         replacement: {
-            match: /function .\(.\)\{switch\(.\)\{/,
+            match: /function \i\(\i\)\{switch\(\i\)\{/,
             replace: "$&" + Object.entries(searchOperators).map(([k, v]) => `case \"${k}\":return \"${v['_options']}\";`).join("")
         }
     },
     {
         find: "Messages.SEARCH_GROUP_HEADER",
         replacement: {
-            match: /(.{2})\((.{2}),.\..{3}\.FILTER_HAS,\{titleText:function\(\)\{return .\..\.Messages.SEARCH_GROUP_HEADER_HAS\}\}\)/,
+            match: /(\i)\((\i),\i\.\i\.FILTER_HAS,\{titleText:function\(\)\{return \i\.\i\.Messages.SEARCH_GROUP_HEADER_HAS\}\}\)/,
             replace: Object.entries(searchOperators).map(([k, v]) => `$1($2,\"${k}\",{titleText:()=>\"${v['_title']}\"}),`).join("") + "$&"
         }
     },
     {
         find: "displayName=\"SearchAutocompleteStore\"",
         replacement: {
-            match: /(.{2})\((.),.\..{3}\.FILTER_PINNED,!0\),/,
+            match: /(\i)\((\i),\i\.\i\.FILTER_PINNED,!0\),/,
             replace: "$&" + Object.keys(searchOperators).map(k => `$1($2,"${k}",true),`).join("")
         }
     }],
