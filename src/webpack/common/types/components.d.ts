@@ -90,7 +90,7 @@ export type Tooltip = ComponentType<{
 
     /** Tooltip.Colors.BLACK */
     color?: string;
-    /** Tooltip.Positions.TOP */
+    /** TooltipPositions.TOP */
     position?: string;
 
     tooltipClassName?: string;
@@ -99,7 +99,7 @@ export type Tooltip = ComponentType<{
     Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
 };
 
-export type TooltipPositions = Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
+export type TooltipPositions = Record<"BOTTOM" | "CENTER" | "LEFT" | "RIGHT" | "TOP" | "WINDOW_CENTER", string>;
 
 export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
     editable?: boolean;
