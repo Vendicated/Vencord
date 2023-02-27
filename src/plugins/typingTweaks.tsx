@@ -24,7 +24,7 @@ import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
+const Avatar = findByCodeLazy('"top",spacing:');
 
 const settings = definePluginSettings({
     showAvatars: {
