@@ -43,7 +43,7 @@ export default definePlugin({
         {
             find: '"Menu API',
             replacement: {
-                match: /function.{0,80}type===(.{1,3})\..{1,3}\).{0,50}navigable:.+?Menu API/s,
+                match: /function.{0,80}type===(\i)\).{0,50}navigable:.+?Menu API/s,
                 replace: (m, mod) => {
                     let nicenNames = "";
                     const redefines = [] as string[];
