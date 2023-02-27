@@ -18,6 +18,9 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import * as Webpack from "@webpack";
+import { extract, filters, findAll, search } from "@webpack";
+import { React } from "@webpack/common";
 
 const WEB_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
@@ -29,19 +32,48 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     getShortcuts() {
+        function newFindWrapper(filterFactory: (props: any) => Webpack.FilterFn) {
+            const cache = new Map<string, any>();
+
+            return function (filterProps: any) {
+                const cacheKey = String(filterProps);
+                if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+                const matches = findAll(filterFactory(filterProps));
+
+                const result = (() => {
+                    switch (matches.length) {
+                        case 0: return null;
+                        case 1: return matches[0];
+                        default:
+                            const uniqueMatches = [...new Set(matches)];
+                            if (uniqueMatches.length > 1)
+                                console.warn(`Warning: This filter matches ${matches.length} modules. Make it more specific!\n`, uniqueMatches);
+
+                            return matches[0];
+                    }
+                })();
+                if (result && cacheKey) cache.set(cacheKey, result);
+                return result;
+            };
+        }
+
         return {
-            toClip: IS_WEB ? WEB_ONLY("toClip") : window.DiscordNative.clipboard.copy,
-            fromClip: IS_WEB ? WEB_ONLY("fromClip") : window.DiscordNative.clipboard.read,
-            wp: Vencord.Webpack,
-            wpc: Vencord.Webpack.wreq.c,
-            wreq: Vencord.Webpack.wreq,
-            wpsearch: Vencord.Webpack.search,
-            wpex: Vencord.Webpack.extract,
+            wp: Webpack,
+            wpc: Webpack.wreq.c,
+            wreq: Webpack.wreq,
+            wpsearch: search,
+            wpex: extract,
             wpexs: (code: string) => Vencord.Webpack.extract(Vencord.Webpack.findModuleId(code)!),
-            findByProps: Vencord.Webpack.findByProps,
-            find: Vencord.Webpack.find,
-            Plugins: Vencord.Plugins,
-            React: Vencord.Webpack.Common.React,
+            find: newFindWrapper(f => f),
+            findAll,
+            findByProps: newFindWrapper(filters.byProps),
+            findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
+            findByCode: newFindWrapper(filters.byCode),
+            findAllByCode: (code: string) => findAll(filters.byCode(code)),
+            PluginsApi: Vencord.Plugins,
+            plugins: Vencord.Plugins.plugins,
+            React,
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
