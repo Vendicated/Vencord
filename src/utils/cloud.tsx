@@ -37,7 +37,7 @@ const toast = (type: number, message: string) =>
     });
 
 export async function cloudConfigured() {
-    return await DataStore.get("Vencord_cloudSecret") !== undefined;
+    return await DataStore.get("Vencord_cloudSecret") !== undefined && Settings.backend.enabled;
 }
 
 export async function authorizeCloud() {
