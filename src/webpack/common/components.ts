@@ -35,7 +35,7 @@ export const Forms = {
 export const Card = waitForComponent<t.Card>("Card", m => m.Types?.PRIMARY && m.defaultProps);
 export const Button = waitForComponent<t.Button>("Button", ["Hovers", "Looks", "Sizes"]);
 export const Switch = waitForComponent<t.Switch>("Switch", filters.byCode("tooltipNote", "ringTarget"));
-export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", ["Positions", "Colors"]);
+export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", filters.byCode("shouldShowTooltip:!1", "clickableOnMobile||"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const TextInput = waitForComponent<t.TextInput>("TextInput", ["defaultProps", "Sizes", "contextType"]);
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.byCode("handleSetRef", "textArea"));
