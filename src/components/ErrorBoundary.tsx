@@ -17,8 +17,9 @@
 */
 
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { LazyComponent } from "@utils/misc";
-import { Margins, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { ErrorCard } from "./ErrorCard";
 
@@ -84,15 +85,13 @@ const ErrorBoundary = LazyComponent(() => {
             const msg = this.props.message || "An error occurred while rendering this Component. More info can be found below and in your console.";
 
             return (
-                <ErrorCard style={{
-                    overflow: "hidden",
-                }}>
+                <ErrorCard style={{ overflow: "hidden" }}>
                     <h1>Oh no!</h1>
                     <p>{msg}</p>
                     <code>
                         {this.state.message}
                         {!!this.state.stack && (
-                            <pre className={Margins.marginTop8}>
+                            <pre className={Margins.top8}>
                                 {this.state.stack}
                             </pre>
                         )}
