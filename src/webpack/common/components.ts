@@ -45,7 +45,7 @@ export const Text = waitForComponent<t.Text>("Text", m => {
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 });
 export const Select = waitForComponent<t.Select>("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
-const searchableSelectFilter = filters.byCode("autoFocus", ".Messages.SELECT")(m.render);
+const searchableSelectFilter = filters.byCode("autoFocus", ".Messages.SELECT");
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", m => {
     return m.render && searchableSelectFilter(m.render);
 });
