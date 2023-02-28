@@ -25,7 +25,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { checkForUpdates, isNewer, rebuild, update, UpdateLogger } from "@utils/updater";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, NavigationRouter } from "@webpack/common";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 
 const UserActivityActions = mapMangledModuleLazy('dispatch({type:"MODAL_POP_ALL"})', {
     popAllModals: filters.byCode("MODAL_POP_ALL", "CHANNEL_SETTINGS_CLOSE", "EMAIL_VERIFICATION_MODAL_CLOSE")
