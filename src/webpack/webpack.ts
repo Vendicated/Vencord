@@ -308,13 +308,6 @@ export function findByPropsLazy(...props: string[]) {
 }
 
 /**
- * Find all modules that have the specified properties
- */
-export function findAllByProps(...props: string[]) {
-    return findAll(filters.byProps(...props));
-}
-
-/**
  * Find a function by its code
  */
 export function findByCode(...code: string[]) {

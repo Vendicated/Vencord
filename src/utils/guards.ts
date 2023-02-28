@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./ErrorCard.css";
+export function isTruthy<T>(item: T): item is Exclude<T, 0 | "" | false | null | undefined> {
+    return Boolean(item);
+}
 
-import { classes } from "@utils/misc";
-import type { HTMLProps } from "react";
-
-export function ErrorCard(props: React.PropsWithChildren<HTMLProps<HTMLDivElement>>) {
-    return (
-        <div {...props} className={classes(props.className, "vc-error-card")}>
-            {props.children}
-        </div>
-    );
+export function isNonNullish<T>(item: T): item is Exclude<T, null | undefined> {
+    return item != null;
 }
