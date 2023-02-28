@@ -50,7 +50,7 @@ export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling Discord crashes caused or not by Vencord.",
     authors: [Devs.Nuckyz],
-    defaultEnabled: true,
+    enabledByDefault: true,
 
     settings,
 
