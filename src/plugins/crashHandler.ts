@@ -50,7 +50,7 @@ export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling Discord crashes caused or not by Vencord.",
     authors: [Devs.Nuckyz],
-    required: true,
+    defaultEnabled: true,
 
     settings,
 
@@ -74,13 +74,13 @@ export default definePlugin({
     ],
 
     async maybePromptToUpdateVencord() {
-        if (IS_WEB) return;
+        if (IS_WEB || IS_DEV) return;
 
         try {
             const outdated = await checkForUpdates();
-            if (!outdated) return;
 
             if (isNewer) return alert("Vencord has found an update available that might fix this crash. However your local copy has more recent commits. Please stash or reset them.");
+            if (!outdated) return;
 
             if (confirm("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?")) {
                 try {
@@ -90,6 +90,7 @@ export default definePlugin({
                         else location.reload();
                     }
                 } catch (err) {
+                    alert("Vencord has failed to update.");
                     UpdateLogger.error("Failed to update", err);
                     CrashHandlerLogger.error("Failed to update Vencord.");
                 }
