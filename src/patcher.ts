@@ -79,7 +79,10 @@ if (!process.argv.includes("--vanilla")) {
                 options.webPreferences.sandbox = false;
                 if (settings.frameless) {
                     options.frame = false;
+                } else if (process.platform === "win32" && settings.winNativeTitleBar) {
+                    delete options.frame;
                 }
+
                 if (settings.transparent) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
