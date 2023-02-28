@@ -205,5 +205,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
+    },
+    Marvin: {
+        name: "Marvin",
+        id: 562415519454461962n
     }
 });
