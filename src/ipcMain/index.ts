@@ -91,7 +91,8 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         webPreferences: {
             preload: join(__dirname, "preload.js"),
             contextIsolation: true,
-            nodeIntegration: false
+            nodeIntegration: false,
+            sandbox: false
         }
     });
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
