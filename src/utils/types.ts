@@ -229,9 +229,12 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
     never;
+type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
+    O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
+) : O extends { default: infer T; } ? T : undefined;
 
 type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingType<D[K]>;
+    [K in keyof D]: PluginSettingType<D[K]> | PluginSettingDefaultType<D[K]>;
 };
 
 /** An instance of defined plugin settings */
