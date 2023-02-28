@@ -92,7 +92,7 @@ function GM_fetch(url, opt) {
                         resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
                         resp.text = () => blobTo("text", blob);
                         resp.json = async () => JSON.parse(await blobTo("text", blob));
-                        resp.headers = parseHeaders(resp.responseHeaders);
+                        resp.headers = new Headers(parseHeaders(resp.responseHeaders));
                         resolve(resp);
                     };
                     options.ontimeout = () => reject("fetch timeout");
