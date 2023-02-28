@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
@@ -173,13 +174,13 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.buttons = [
             buttonOneText,
             buttonTwoText
-        ].filter((s): s is string => !!s);
+        ].filter(isTruthy);
 
         activity.metadata = {
             button_urls: [
                 buttonOneURL,
                 buttonTwoURL
-            ].filter((s): s is string => !!s)
+            ].filter(isTruthy)
         };
     }
 
@@ -206,8 +207,6 @@ async function createActivity(): Promise<Activity | undefined> {
             delete activity[k];
     }
 
-    // WHAT DO YOU WANT FROM ME
-    // eslint-disable-next-line consistent-return
     return activity;
 }
 
