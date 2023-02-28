@@ -23,7 +23,13 @@ import Logger from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { checkForUpdates, isNewer, rebuild, update, UpdateLogger } from "@utils/updater";
-import { ContextMenu, FluxDispatcher, NavigationRouter } from "@webpack/common";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { FluxDispatcher, NavigationRouter } from "@webpack/common";
+import { ReactElement } from "react";
+
+const UserActivityActions = mapMangledModuleLazy('dispatch({type:"MODAL_POP_ALL"})', {
+    popAllModals: filters.byCode("MODAL_POP_ALL", "CHANNEL_SETTINGS_CLOSE", "EMAIL_VERIFICATION_MODAL_CLOSE")
+}) as { popAllModals: () => void; };
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -51,14 +57,19 @@ export default definePlugin({
     patches: [
         {
             find: ".Messages.ERRORS_UNEXPECTED_CRASH",
-            replacement: [
-                {
-                    match: /(?=this\.setState\()/,
-                    replace: ""
-                        + "$self.maybePromptToUpdateVencord();"
-                        + "$self.settings.store.attemptToPreventCrashes?$self.handlePreventCrash(this):"
-                }
-            ]
+            replacement: {
+                match: /(?=this\.setState\()/,
+                replace: ""
+                    + "$self.maybePromptToUpdateVencord();"
+                    + "$self.settings.store.attemptToPreventCrashes?$self.handlePreventCrash(this):"
+            }
+        },
+        {
+            find: 'dispatch({type:"MODAL_POP_ALL"})',
+            replacement: {
+                match: /(?<=\i:\(\)=>\i)(?=}.+?(?<popAll>\i)=function\(\){\(0,\i\.\i\)\(\);\i\.\i\.dispatch\({type:"MODAL_POP_ALL"}\))/,
+                replace: ",ch1:()=>$<popAll>"
+            }
         }
     ],
 
@@ -80,6 +91,7 @@ export default definePlugin({
                     }
                 } catch (err) {
                     UpdateLogger.error("Failed to update", err);
+                    CrashHandlerLogger.error("Failed to update Vencord.");
                 }
             }
         } catch (err) {
@@ -87,7 +99,7 @@ export default definePlugin({
         }
     },
 
-    handlePreventCrash(_this) {
+    handlePreventCrash(_this: ReactElement & { forceUpdate: () => void; }) {
         try {
             showNotification({
                 color: "#eed202",
@@ -97,9 +109,14 @@ export default definePlugin({
         } catch { }
 
         try {
-            ContextMenu.close();
+            FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close open context menu.", err);
+        }
+        try {
+            UserActivityActions.popAllModals();
+        } catch (err) {
+            CrashHandlerLogger.debug("Failed to close old modals.", err);
         }
         try {
             closeAllModals();
@@ -110,6 +127,11 @@ export default definePlugin({
             FluxDispatcher.dispatch({ type: "USER_PROFILE_MODAL_CLOSE" });
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close user popout.", err);
+        }
+        try {
+            FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+        } catch (err) {
+            CrashHandlerLogger.debug("Failed to pop all layers.", err);
         }
         if (settings.store.attemptToNavigateToHome) {
             try {
