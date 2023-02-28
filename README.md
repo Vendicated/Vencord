@@ -11,7 +11,7 @@ The cutest Discord client mod
 -   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript
 -   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience I recommend stable!)
 -   Custom CSS and Themes: Inbuilt css editor with support to import any css files (including BetterDiscord themes)
--   Privacy friendly, blocks trackers & crash reporting out of the box and has no telemetry
+-   Privacy friendly, blocks Discord analytics & crash reporting out of the box and has no telemetry
 -   Maintained very actively, broken plugins are usually fixed within 12 hours
 
 ## Installing / Uninstalling
