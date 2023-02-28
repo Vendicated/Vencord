@@ -68,7 +68,9 @@ ${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).joi
     start() {
         FluxDispatcher.subscribe("CHANNEL_SELECT", async ({ channelId }) => {
             if (channelId !== SUPPORT_CHANNEL_ID) return;
-            if (UserStore.getCurrentUser().id in Devs) return;
+
+            const myId = BigInt(UserStore.getCurrentUser().id);
+            if (Object.values(Devs).some(d => d.id === myId)) return;
 
             if (isOutdated && gitHash !== await DataStore.get(REMEMBER_DISMISS_KEY)) {
                 Alerts.show({
