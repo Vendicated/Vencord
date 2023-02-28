@@ -20,7 +20,14 @@ import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, NavigationRouter, RelationshipStore, UserStore } from "@webpack/common";
+import {
+    ChannelStore,
+    FluxDispatcher,
+    GuildStore,
+    NavigationRouter,
+    RelationshipStore,
+    UserStore
+} from "@webpack/common";
 
 interface user {
     avatar: string;
@@ -141,7 +148,7 @@ function onMessage(ev: { message: message; }) {
     for (const keyword of keywords) {
         if (content.includes(keyword)) {
             showNotification({
-                title: `Keyword alert by ${ev.message.author.display_name ?? ev.message.author.username}: ${keyword}`,
+                title: `Keyword in ${GuildStore.getGuild(guild_id).name} from @${ev.message.author.username}: ${keyword}`,
                 body: ev.message.content,
                 richBody: <KeywordText keyword={keyword}>{ev.message.content}</KeywordText>,
                 icon: `https://cdn.discordapp.com/avatars/${ev.message.author.id}/${ev.message.author.avatar}.png?size=128`,
