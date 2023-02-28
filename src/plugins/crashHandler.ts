@@ -22,26 +22,21 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { checkForUpdates, isNewer, rebuild, update, UpdateLogger } from "@utils/updater";
-import { filters, mapMangledModuleLazy } from "@webpack";
+import { maybePromptToUpdate } from "@utils/updater";
 import { FluxDispatcher, NavigationRouter } from "@webpack/common";
 import type { ReactElement } from "react";
-
-const UserActivityActions = mapMangledModuleLazy('dispatch({type:"MODAL_POP_ALL"})', {
-    popAllModals: filters.byCode("MODAL_POP_ALL", "CHANNEL_SETTINGS_CLOSE", "EMAIL_VERIFICATION_MODAL_CLOSE")
-}) as { popAllModals: () => void; };
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
         type: OptionType.BOOLEAN,
-        description: "Wheter to attempt to prevent Discord crashes.",
+        description: "Whether to attempt to prevent Discord crashes.",
         default: true
     },
     attemptToNavigateToHome: {
         type: OptionType.BOOLEAN,
-        description: "Wheter to attempt to navigate to the home when preventing Discord crashes.",
+        description: "Whether to attempt to navigate to the home when preventing Discord crashes.",
         default: false
     }
 });
@@ -52,6 +47,8 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
+    popAllModals: undefined as (() => void) | undefined,
+
     settings,
 
     patches: [
@@ -59,45 +56,27 @@ export default definePlugin({
             find: ".Messages.ERRORS_UNEXPECTED_CRASH",
             replacement: {
                 match: /(?=this\.setState\()/,
-                replace: ""
-                    + "$self.maybePromptToUpdateVencord();"
-                    + "$self.settings.store.attemptToPreventCrashes?$self.handlePreventCrash(this):"
+                replace: "$self.handleCrash(this)||"
             }
         },
         {
             find: 'dispatch({type:"MODAL_POP_ALL"})',
             replacement: {
-                match: /(?<=\i:\(\)=>\i)(?=}.+?(?<popAll>\i)=function\(\){\(0,\i\.\i\)\(\);\i\.\i\.dispatch\({type:"MODAL_POP_ALL"}\))/,
-                replace: ",ch1:()=>$<popAll>"
+                match: /(?<=(?<popAll>\i)=function\(\){\(0,\i\.\i\)\(\);\i\.\i\.dispatch\({type:"MODAL_POP_ALL"}\).+};)/,
+                replace: "$self.popAllModals=$<popAll>;"
             }
         }
     ],
 
-    async maybePromptToUpdateVencord() {
-        if (IS_WEB || IS_DEV) return;
+    handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
+        maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
 
-        try {
-            const outdated = await checkForUpdates();
-
-            if (isNewer) return alert("Vencord has found an update available that might fix this crash. However your local copy has more recent commits. Please stash or reset them.");
-            if (!outdated) return;
-
-            if (confirm("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?")) {
-                try {
-                    if (await update()) {
-                        const needFullRestart = await rebuild();
-                        if (needFullRestart) window.DiscordNative.app.relaunch();
-                        else location.reload();
-                    }
-                } catch (err) {
-                    alert("Vencord has failed to update.");
-                    UpdateLogger.error("Failed to update", err);
-                    CrashHandlerLogger.error("Failed to update Vencord.");
-                }
-            }
-        } catch (err) {
-            CrashHandlerLogger.error("Failed to check for updates.", err);
+        if (settings.store.attemptToPreventCrashes) {
+            this.handlePreventCrash(_this);
+            return true;
         }
+
+        return false;
     },
 
     handlePreventCrash(_this: ReactElement & { forceUpdate: () => void; }) {
@@ -115,7 +94,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to close open context menu.", err);
         }
         try {
-            UserActivityActions.popAllModals();
+            this.popAllModals?.();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close old modals.", err);
         }
