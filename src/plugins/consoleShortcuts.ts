@@ -59,7 +59,7 @@ export default definePlugin({
         }
 
         return {
-            wp: Webpack,
+            wp: Vencord.Webpack,
             wpc: Webpack.wreq.c,
             wreq: Webpack.wreq,
             wpsearch: search,
