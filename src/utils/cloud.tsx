@@ -20,7 +20,7 @@ import * as DataStore from "@api/DataStore";
 import { findByProps } from "@webpack";
 import { Toasts, UserStore } from "@webpack/common";
 
-import { Settings } from "../Vencord";
+import { Settings } from "@api/Settings";
 import Logger from "./Logger";
 import { openModal } from "./modal";
 
@@ -53,7 +53,7 @@ export async function authorizeCloud() {
         permissions={0n}
         clientId="1075583776979169361"
         cancelCompletesFlow={false}
-        callback={async (u: string) => {
+        callback={async (callbackUrl: string) => {
             if (!u) {
                 Settings.backend.enabled = false;
                 return;
@@ -85,5 +85,5 @@ export async function getCloudAuth() {
     const userId = UserStore.getCurrentUser().id;
     const secret = await DataStore.get("Vencord_cloudSecret");
 
-    return btoa(`${userId}:${secret}`);
+    return window.btoa(`${userId}:${secret}`);
 }

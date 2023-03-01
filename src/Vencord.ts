@@ -56,7 +56,7 @@ async function init() {
     startAllPlugins();
     Components = await import("./components");
 
-    await syncSettings();
+    syncSettings();
 
     if (!IS_WEB) {
         try {
