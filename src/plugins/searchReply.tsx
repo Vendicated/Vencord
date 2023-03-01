@@ -38,7 +38,7 @@ export default definePlugin({
         {
             find: 'navId:"message",onClose:',
             replacement: {
-                match: /(function .{1,3}\(.{1,3}\){.{1,100}message.{1,100}onSelect(.|\n){1,1000}{children:)\[(?<items>.{1,50})\]/,
+                match: /(function \i\(\i\){.{1,100}message.{1,100}onSelect(.|\n){1,1000}{children:)\[(?<items>.{1,50})\]/,
                 replace: "$1[$self.makeMenu(arguments[0]),$<items>]"
             }
         }
