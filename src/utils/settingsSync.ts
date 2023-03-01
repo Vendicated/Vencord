@@ -232,7 +232,10 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         return true;
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync down", e);
-        toast(Toasts.Type.FAILURE, `Settings synchronization failed (${e.toString()}).`);
+        showNotification({
+            title: "Cloud Settings",
+            body: `Settings synchronization failed (${e.toString()}).`
+        });
 
         return false;
     }
