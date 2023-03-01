@@ -18,7 +18,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
-import { Settings } from "@api/Settings";
+import { Settings } from "@api/settings";
 import { findByProps } from "@webpack";
 import { Toasts, UserStore } from "@webpack/common";
 
