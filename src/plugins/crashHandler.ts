@@ -69,14 +69,18 @@ export default definePlugin({
     ],
 
     handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
-        maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
+        try {
+            maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
 
-        if (settings.store.attemptToPreventCrashes) {
-            this.handlePreventCrash(_this);
-            return true;
+            if (settings.store.attemptToPreventCrashes) {
+                this.handlePreventCrash(_this);
+                return true;
+            }
+
+            return false;
+        } catch (err) {
+            CrashHandlerLogger.error("Failed to handle crash", err);
         }
-
-        return false;
     },
 
     handlePreventCrash(_this: ReactElement & { forceUpdate: () => void; }) {
@@ -121,6 +125,10 @@ export default definePlugin({
             }
         }
 
-        _this.forceUpdate();
+        try {
+            _this.forceUpdate();
+        } catch (err) {
+            CrashHandlerLogger.debug("Failed to update crash handler component.", err);
+        }
     }
 });
