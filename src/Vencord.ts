@@ -30,7 +30,8 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { getCloudSettings, shouldCloudSync } from "./utils/settingsSync";
+import { cloudConfigured } from "./utils/cloud";
+import { getCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
@@ -38,7 +39,7 @@ import { SettingsRouter } from "./webpack/common";
 export let Components: any;
 
 async function syncSettings() {
-    if (Settings.backend.settingsSync && await shouldCloudSync()) {
+    if (Settings.backend.settingsSync && await cloudConfigured()) {
         await getCloudSettings(false);
 
         showNotice(

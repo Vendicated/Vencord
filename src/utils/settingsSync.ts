@@ -17,10 +17,11 @@
 */
 
 import * as DataStore from "@api/DataStore";
+import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
-import * as fflate from "fflate";
+import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
 
-import { cloudConfigured, getCloudAuth } from "./cloud";
+import { getCloudAuth } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 
@@ -139,7 +140,7 @@ export async function putCloudSettings() {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
             }),
-            body: fflate.deflateSync(fflate.strToU8(settings))
+            body: deflateSync(strToU8(settings))
         });
 
         if (!res.ok) {
@@ -149,7 +150,7 @@ export async function putCloudSettings() {
         }
 
         const { written } = await res.json();
-        await DataStore.set("Vencord_settingsLastSaved", written);
+        Settings.backend.settingsSyncVersion = written;
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
@@ -165,7 +166,8 @@ export async function getCloudSettings(shouldToast = true, force = false) {
             method: "GET",
             headers: new Headers({
                 Authorization: await getCloudAuth(),
-                Accept: "application/octet-stream"
+                Accept: "application/octet-stream",
+                "if-none-match": Settings.backend.settingsSyncVersion.toString()
             }),
         });
 
@@ -182,7 +184,7 @@ export async function getCloudSettings(shouldToast = true, force = false) {
         }
 
         const written = parseInt(res.headers.get("etag")!);
-        const localWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
+        const localWritten = Settings.backend.settingsSyncVersion;
 
         if (!force) {
             if (written === localWritten) {
@@ -196,11 +198,11 @@ export async function getCloudSettings(shouldToast = true, force = false) {
 
         const data = await res.arrayBuffer();
 
-        const settings = fflate.strFromU8(fflate.inflateSync(new Uint8Array(data)));
+        const settings = strFromU8(inflateSync(new Uint8Array(data)));
         await importSettings(settings);
 
         // sync with server timestamp instead of local one
-        await DataStore.set("Vencord_settingsLastSaved", written);
+        PlainSettings.backend.settingsSyncVersion = written;
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldToast) toast(Toasts.Type.SUCCESS, "Synchronized your settings! Restart to apply changes.");
@@ -232,30 +234,5 @@ export async function deleteCloudSettings() {
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to delete", e);
         toast(Toasts.Type.FAILURE, `Deletion failed (${e.toString()}).`);
-    }
-}
-
-export async function shouldCloudSync() {
-    if (!await cloudConfigured()) return false;
-
-    try {
-        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
-            method: "HEAD",
-            headers: new Headers({
-                Authorization: await getCloudAuth(),
-                Accept: "application/octet-stream"
-            }),
-        });
-
-        const version = parseInt(res.headers.get("etag") ?? "-1");
-
-        // if these don't exist, the user has never synchronized before and hasn't changed their settings on this client,
-        // so we'll just pretend it's 0
-        const lastWritten = await DataStore.get<number>("Vencord_settingsLastSaved") ?? 0;
-
-        return lastWritten < version;
-    } catch (e: any) {
-        cloudSettingsLogger.error("Failed to check version", e);
-        return false;
     }
 }
