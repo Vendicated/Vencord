@@ -34,7 +34,7 @@ interface Activity {
     state: string;
     details?: string;
     timestamps?: {
-        start?: Number;
+        start?: number;
     };
     assets?: ActivityAssets;
     buttons?: Array<string>;
@@ -43,8 +43,8 @@ interface Activity {
     metadata?: {
         button_urls?: Array<string>;
     };
-    type: Number;
-    flags: Number;
+    type: number;
+    flags: number;
 }
 
 interface TrackData {
