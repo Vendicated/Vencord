@@ -43,7 +43,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "CrashHandler",
-    description: "Utility plugin for handling Discord crashes caused or not by Vencord.",
+    description: "Utility plugin for handling and possibly recovering from Crashes without a restart",
     authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
