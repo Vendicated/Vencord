@@ -174,19 +174,19 @@ export async function getCloudSettings(shouldToast = true, force = false) {
         if (res.status === 404) {
             cloudSettingsLogger.info("No settings on the cloud");
             if (shouldToast) toast(Toasts.Type.MESSAGE, "No settings found on the cloud.");
-            return;
+            return false;
         }
 
         if (res.status === 304) {
             cloudSettingsLogger.info("Settings up to date");
             if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
-            return;
+            return false;
         }
 
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
-            return;
+            return false;
         }
 
         const written = parseInt(res.headers.get("etag")!);
@@ -208,9 +208,13 @@ export async function getCloudSettings(shouldToast = true, force = false) {
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldToast) toast(Toasts.Type.SUCCESS, "Synchronized your settings! Restart to apply changes.");
+
+        return true;
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync down", e);
         toast(Toasts.Type.FAILURE, `Settings synchronization failed (${e.toString()}).`);
+
+        return false;
     }
 }
 

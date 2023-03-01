@@ -28,6 +28,7 @@ import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
 import { popNotice, showNotice } from "./api/Notices";
+import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { cloudConfigured } from "./utils/cloud";
@@ -39,16 +40,15 @@ import { SettingsRouter } from "./webpack/common";
 export let Components: any;
 
 async function syncSettings() {
-    if (Settings.backend.settingsSync && await cloudConfigured()) {
-        await getCloudSettings(false);
-
-        showNotice(
-            "Vencord settings have been updated from the cloud!",
-            "Restart",
-            () => {
-                location.reload();
-            }
-        );
+    if (
+        Settings.backend.settingsSync && // if it's enabled
+        await cloudConfigured() && // if cloud integrations are configured correctly
+        await getCloudSettings(false) // if we synchronized something (false means no sync)
+    ) {
+        showNotification({
+            title: "Cloud Settings",
+            body: "Your Vencord settings have been updated! Reload to apply changes."
+        });
     }
 }
 
