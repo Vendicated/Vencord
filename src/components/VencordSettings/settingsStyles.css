@@ -1,7 +1,6 @@
 .vc-settings-tab-bar {
     margin-top: 20px;
-    margin-bottom: -2px;
-    border-bottom: 2px solid var(--background-modifier-accent);
+    margin-bottom: 8px;
 }
 
 .vc-settings-tab-bar-item {
