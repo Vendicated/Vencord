@@ -22,7 +22,7 @@ import { Settings } from "@api/settings.js";
 import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
-import { Button, ChannelStore, Forms, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
@@ -63,7 +63,7 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
         src={channel?.icon
             ? `https://${window.GLOBAL_ENV.CDN_HOST}/channel-icons/${channel?.id}/${channel?.icon}.png`
-            : "https://discord.com/assets/c6851bd0b03f1cca5a8c1e720ea6ea17.png" // Default Group Icon
+            : `https://${window.GLOBAL_ENV.CDN_HOST}/assets/c6851bd0b03f1cca5a8c1e720ea6ea17.png` // Default Group Icon
         }
         className={cl("icon")}
     />;
@@ -247,11 +247,8 @@ export function ChannelTabsPreivew(p) {
                     <Text variant="text-sm/semibold" className={cl("text")}>@{user?.username}</Text>
                 </div>;
             } else {
-                const users = useMemo(() =>
-                    <UserSummaryItem users={recipients.map(i => UserStore.getUser(i))} max={3} renderMoreUsers={() => null} />, [recipients]
-                );
                 return <div className={cl("tab")}>
-                    {users}
+                    <ChannelIcon channel={channel} />
                     <Text variant="text-sm/semibold" className={cl("text")}>{channel?.name || "Group DM"}</Text>
                 </div>;
             }
