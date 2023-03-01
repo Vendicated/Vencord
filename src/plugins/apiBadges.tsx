@@ -24,9 +24,10 @@ import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Forms, Margins } from "@webpack/common";
+import { Forms } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
 
@@ -150,7 +151,7 @@ export default definePlugin({
                                         <Forms.FormText>
                                             This Badge is a special perk for Vencord Donors
                                         </Forms.FormText>
-                                        <Forms.FormText className={Margins.marginTop20}>
+                                        <Forms.FormText className={Margins.top20}>
                                             Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                         </Forms.FormText>
                                     </div>

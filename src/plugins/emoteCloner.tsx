@@ -20,11 +20,12 @@ import { migratePluginSettings, Settings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Forms, GuildStore, Margins, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Forms, GuildStore, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
@@ -96,7 +97,7 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
 
     return (
         <>
-            <Forms.FormTitle className={Margins.marginTop20}>Custom Name</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
             <CheckedTextInput
                 value={name}
                 onChange={setName}

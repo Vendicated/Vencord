@@ -322,7 +322,4 @@ export type Flex = ComponentType<PropsWithChildren<any>> & {
     Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
     Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
     Wrap: Record<"NO_WRAP" | "WRAP" | "WRAP_REVERSE", string>;
-
-    Content: ComponentType<PropsWithChildren<any>>;
-    Sidebar: ComponentType<PropsWithChildren<any>>;
 };

@@ -53,8 +53,4 @@ export const Slider = waitForComponent<t.Slider>("Slider", filters.byCode("close
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
-/**
- * @deprecated Use @utils/margins instead
- */
-export const Margins: t.Margins = findByPropsLazy("marginTop20");
 export const ButtonLooks: t.ButtonLooks = findByPropsLazy("BLANK", "FILLED", "INVERTED");
