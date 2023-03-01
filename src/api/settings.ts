@@ -149,8 +149,8 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 }
             }
             // And don't forget to persist the settings!
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             PlainSettings.backend.settingsSyncVersion = Date.now();
+            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }
     });
