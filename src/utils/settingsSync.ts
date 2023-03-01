@@ -146,7 +146,10 @@ export async function putCloudSettings() {
 
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
-            toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
+            showNotification({
+                title: "Cloud Settings",
+                body: `Synchronization failed (API returned ${res.status}).`
+            });
             return;
         }
 
@@ -154,10 +157,16 @@ export async function putCloudSettings() {
         Settings.backend.settingsSyncVersion = written;
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
-        toast(Toasts.Type.SUCCESS, "Synchronized your settings!");
-    } catch (e) {
+        showNotification({
+            title: "Cloud Settings",
+            body: "Synchronized your settings!"
+        });
+    } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
-        toast(Toasts.Type.FAILURE, "Settings synchronization failed. Check console.");
+        showNotification({
+            title: "Cloud Settings",
+            body: `Settings synchronization failed (${e.toString()}).`
+        });
     }
 }
 
