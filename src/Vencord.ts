@@ -45,9 +45,13 @@ async function syncSettings() {
         await cloudConfigured() && // if cloud integrations are configured correctly
         await getCloudSettings(false) // if we synchronized something (false means no sync)
     ) {
+        // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
+        // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
+        // there was an error to notify the user, but besides that we only want to show one notification instead of all
+        // of the possible ones it has (such as when your settings are newer).
         showNotification({
             title: "Cloud Settings",
-            body: "Your Vencord settings have been updated! Reload to apply changes."
+            body: "Your settings have been updated! Reload to apply changes."
         });
     }
 }

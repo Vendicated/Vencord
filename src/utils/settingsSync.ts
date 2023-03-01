@@ -17,6 +17,7 @@
 */
 
 import * as DataStore from "@api/DataStore";
+import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
@@ -160,7 +161,7 @@ export async function putCloudSettings() {
     }
 }
 
-export async function getCloudSettings(shouldToast = true, force = false) {
+export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
         const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
             method: "GET",
@@ -173,19 +174,30 @@ export async function getCloudSettings(shouldToast = true, force = false) {
 
         if (res.status === 404) {
             cloudSettingsLogger.info("No settings on the cloud");
-            if (shouldToast) toast(Toasts.Type.MESSAGE, "No settings found on the cloud.");
+            if (shouldNotify)
+                showNotification({
+                    title: "Cloud Settings",
+                    body: "There are no settings in the cloud."
+                });
             return false;
         }
 
         if (res.status === 304) {
             cloudSettingsLogger.info("Settings up to date");
-            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
+            if (shouldNotify)
+                showNotification({
+                    title: "Cloud Settings",
+                    body: "Your settings are up to date."
+                });
             return false;
         }
 
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
-            toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
+            showNotification({
+                title: "Cloud Settings",
+                body: `Could not synchronize settings (API returned ${res.status}).`
+            });
             return false;
         }
 
@@ -194,7 +206,11 @@ export async function getCloudSettings(shouldToast = true, force = false) {
 
         // don't need to check for written > localWritten because the server will return 304 due to if-none-match
         if (!force && written < localWritten) {
-            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
+            if (shouldNotify)
+                showNotification({
+                    title: "Cloud Settings",
+                    body: "Your local settings are newer than the cloud ones."
+                });
             return;
         }
 
@@ -207,7 +223,11 @@ export async function getCloudSettings(shouldToast = true, force = false) {
         PlainSettings.backend.settingsSyncVersion = written;
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
-        if (shouldToast) toast(Toasts.Type.SUCCESS, "Synchronized your settings! Restart to apply changes.");
+        if (shouldNotify)
+            showNotification({
+                title: "Cloud Settings",
+                body: "Your settings have been updated! Reload to apply changes."
+            });
 
         return true;
     } catch (e: any) {

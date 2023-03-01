@@ -20,22 +20,12 @@ import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/settings";
 import { findByProps } from "@webpack";
-import { Toasts, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import Logger from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-
-const toast = (type: number, message: string) =>
-    Toasts.show({
-        type,
-        message,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        }
-    });
 
 export async function cloudConfigured() {
     return await DataStore.get("Vencord_cloudSecret") !== undefined && Settings.backend.enabled;
