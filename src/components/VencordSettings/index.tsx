@@ -62,8 +62,8 @@ function Settings(props: SettingsProps) {
         <Text variant="heading-md/normal" tag="h2">Vencord Settings</Text>
 
         <TabBar
-            type="top-pill"
-            look="grey"
+            type="top"
+            look="brand"
             className={cl("tab-bar")}
             selectedItem={tab}
             onItemSelect={SettingsRouter.open}
