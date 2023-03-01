@@ -17,6 +17,7 @@
 */
 
 import * as DataStore from "@api/DataStore";
+import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { findByProps } from "@webpack";
 import { Toasts, UserStore } from "@webpack/common";
@@ -67,13 +68,22 @@ export async function authorizeCloud() {
                 if (secret) {
                     cloudLogger.info("Authorized with secret");
                     await DataStore.set("Vencord_cloudSecret", secret);
-                    toast(Toasts.Type.SUCCESS, "Cloud enabled!");
+                    showNotification({
+                        title: "Cloud Integration",
+                        body: "Cloud integrations enabled!"
+                    });
                 } else {
-                    toast(Toasts.Type.FAILURE, "Setup failed (no secret returned?).");
+                    showNotification({
+                        title: "Cloud Integration",
+                        body: "Setup failed (no secret returned?)."
+                    });
                 }
             } catch (e: any) {
                 cloudLogger.error("Failed to authorize", e);
-                toast(Toasts.Type.FAILURE, `Setup failed (${e.toString()}).`);
+                showNotification({
+                    title: "Cloud Integration",
+                    body: `Setup failed (${e.toString()}).`
+                });
                 Settings.backend.enabled = false;
             }
         }
