@@ -76,6 +76,10 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
+     * Whether this plugin should be enabled by default, but can be disabled
+     */
+    enabledByDefault?: boolean;
+    /**
      * Set this if your plugin only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
