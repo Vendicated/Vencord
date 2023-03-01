@@ -177,6 +177,12 @@ export async function getCloudSettings(shouldToast = true, force = false) {
             return;
         }
 
+        if (res.status === 304) {
+            cloudSettingsLogger.info("Settings up to date");
+            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
+            return;
+        }
+
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             toast(Toasts.Type.FAILURE, `Synchronization failed (API returned ${res.status}).`);
@@ -186,14 +192,10 @@ export async function getCloudSettings(shouldToast = true, force = false) {
         const written = parseInt(res.headers.get("etag")!);
         const localWritten = Settings.backend.settingsSyncVersion;
 
-        if (!force) {
-            if (written === localWritten) {
-                if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are up to date.");
-                return;
-            } else if (written < localWritten) {
-                if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
-                return;
-            }
+        // don't need to check for written > localWritten because the server will return 304 due to if-none-match
+        if (!force && written < localWritten) {
+            if (shouldToast) toast(Toasts.Type.MESSAGE, "Your settings are newer than the ones on the server.");
+            return;
         }
 
         const data = await res.arrayBuffer();
