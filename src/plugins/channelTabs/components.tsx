@@ -22,13 +22,17 @@ import { Settings } from "@api/settings.js";
 import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
-import { Button, ChannelStore, Forms, GuildStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import {
+    Button, ChannelStore, FluxDispatcher, Forms, GuildStore, ReadStateStore, Text, TypingStore,
+    useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores
+} from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
-    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo
+    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
+    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo, useStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -161,6 +165,7 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
         _update();
         saveChannels();
     }
+    useStartupTabs(props, update);
     const { openChannels } = ChannelTabsUtils;
     function handleKeybinds(e: KeyboardEvent) {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -187,8 +192,10 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
     }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);
+        FluxDispatcher.subscribe("CHANNEL_SELECT", () => saveChannels());
         return () => {
             document.removeEventListener("keydown", handleKeybinds);
+            FluxDispatcher.unsubscribe("CHANNEL_SELECT", () => saveChannels());
         };
     }, []);
 

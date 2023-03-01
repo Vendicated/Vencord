@@ -19,7 +19,7 @@
 import { DataStore } from "@api/index.js";
 import { definePluginSettings } from "@api/settings.js";
 import { OptionType } from "@utils/types.js";
-import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, Toasts, useState } from "@webpack/common";
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
@@ -86,9 +86,12 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     openChannels[openChannelIndex] = prev;
     openChannelIndex += direction;
 }
-async function initalize(currentChannel: ChannelTabsProps) {
-    const settings = channelTabsSettings;
-    if (["remember", "preset"].includes(settings.store.onStartup)) {
+function useStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
+    const [hasInit, setInit] = useState(false);
+    if (hasInit || openChannels.length) return;
+    let tabsToOpen: { openChannels: ChannelTabsProps[], openChannelIndex: number; } = { openChannels: [firstTab], openChannelIndex: 0 };
+    setInit(true);
+    if (["remember", "preset"].includes(channelTabsSettings.store.onStartup)) {
         if (Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) Toasts.show({
             id: Toasts.genId(),
             message: "ChannelTabs - Not restoring tabs as KeepCurrentChannel is enabled",
@@ -99,31 +102,38 @@ async function initalize(currentChannel: ChannelTabsProps) {
             }
         });
         else {
-            const preferredTabs = settings.store.onStartup === "remember"
-                ? await DataStore.get("ChannelTabs_openChannels")
-                : settings.store.tabSet ?? [{ guildId: "@me", channelId: undefined as any } /* friends tab */];
-            if (Array.isArray(preferredTabs)) {
-                preferredTabs.forEach(c => openChannels.push(c));
-            } else if (preferredTabs) {
-                ({ openChannelIndex } = preferredTabs);
-                preferredTabs.openChannels.forEach(c => openChannels.push(c));
+            if (channelTabsSettings.store.onStartup === "remember") {
+                DataStore.get("ChannelTabs_openChannels").then((t: typeof tabsToOpen) => {
+                    console.log(openChannels);
+                    if (openChannels.length !== 1) return Toasts.show({
+                        id: Toasts.genId(),
+                        message: "ChannelTabs - Failed to restore tabs",
+                        type: Toasts.Type.FAILURE,
+                        options: {
+                            duration: 3000,
+                            position: Toasts.Position.BOTTOM
+                        }
+                    });
+                    console.log(openChannels, t);
+                    openChannels.pop();
+                    ({ openChannelIndex } = t);
+                    t.openChannels.forEach(t => openChannels.push(t));
+                    console.log(openChannels, openChannelIndex, t.openChannels[t.openChannelIndex]);
+                    NavigationRouter.transitionToGuild(t.openChannels[t.openChannelIndex].guildId, t.openChannels[t.openChannelIndex].channelId);
+                });
+            } else {
+                tabsToOpen = { openChannels: channelTabsSettings.store.tabSet, openChannelIndex: 0 };
             }
         }
     }
-    // the reason this always transitions is to rerender the tabs component once it's initalized
-    // there is absolutely a better way to do this i'm just lazy
-    if (openChannels.length) NavigationRouter.transitionToGuild(
-        openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId
-    );
-    else {
-        openChannels.push(currentChannel);
-        NavigationRouter.transitionToGuild(currentChannel.guildId, currentChannel.channelId);
-    }
+    ({ openChannelIndex } = tabsToOpen);
+    tabsToOpen.openChannels.forEach(t => openChannels.push(t));
+    update();
 }
 // data argument is only for testing purposes
 const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", data ?? { openChannels, openChannelIndex });
 
 export const ChannelTabsUtils = {
-    closeCurrentTab, closeTab, createTab, initalize, isEqualToCurrentTab, isTabSelected,
-    moveToTab, moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo
+    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
+    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo, useStartupTabs
 };

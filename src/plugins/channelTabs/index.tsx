@@ -31,7 +31,6 @@ import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
 const Keybind = LazyComponent(() => findByCode(".keyClassName"));
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
-let hasInitialized = false;
 export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
@@ -66,10 +65,6 @@ export default definePlugin({
     settings: channelTabsSettings,
 
     render(props) {
-        if (!hasInitialized) {
-            ChannelTabsUtils.initalize(props);
-            return hasInitialized = true;
-        }
         return <ErrorBoundary>
             <ChannelsTabsContainer {...props} />
         </ErrorBoundary>;
