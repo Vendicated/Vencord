@@ -34,6 +34,7 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -57,6 +58,7 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    winNativeTitleBar: false,
     plugins: {},
 
     notifications: {
