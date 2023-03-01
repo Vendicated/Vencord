@@ -67,6 +67,7 @@ export async function authorizeCloud() {
                         title: "Cloud Integration",
                         body: "Setup failed (no secret returned?)."
                     });
+                    Settings.backend.enabled = false;
                 }
             } catch (e: any) {
                 cloudLogger.error("Failed to authorize", e);
