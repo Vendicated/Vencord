@@ -17,10 +17,10 @@
 */
 
 import * as DataStore from "@api/DataStore";
+import { Settings } from "@api/Settings";
 import { findByProps } from "@webpack";
 import { Toasts, UserStore } from "@webpack/common";
 
-import { Settings } from "@api/Settings";
 import Logger from "./Logger";
 import { openModal } from "./modal";
 
@@ -54,13 +54,13 @@ export async function authorizeCloud() {
         clientId="1075583776979169361"
         cancelCompletesFlow={false}
         callback={async (callbackUrl: string) => {
-            if (!u) {
+            if (!callbackUrl) {
                 Settings.backend.enabled = false;
                 return;
             }
 
             try {
-                const res = await fetch(u, {
+                const res = await fetch(callbackUrl, {
                     headers: new Headers({ Accept: "application/json" })
                 });
                 const { secret } = await res.json();
