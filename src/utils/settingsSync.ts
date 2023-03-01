@@ -230,6 +230,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         // sync with server timestamp instead of local one
         PlainSettings.backend.settingsSyncVersion = written;
+        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
