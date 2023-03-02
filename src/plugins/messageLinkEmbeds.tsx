@@ -168,8 +168,8 @@ function noContent(attachments: number, embeds: number) {
 
 function requiresRichEmbed(message: Message) {
     if (message.components.length) return true;
-    if (message.attachments.some(a => a.content_type?.startsWith("image/"))) return true;
-    if (message.embeds.some(e => e.type === "image" || (e.type === "gifv" && !tenorRegex.test(e.url!)))) return true;
+    if (message.attachments.some(a => !a.content_type?.startsWith("image/"))) return true;
+    if (message.embeds.some(e => e.type !== "image" && (e.type !== "gifv" || tenorRegex.test(e.url!)))) return true;
 
     return false;
 }
