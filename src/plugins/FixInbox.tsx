@@ -36,19 +36,21 @@ export default definePlugin({
     }],
 
     settingsAboutComponent() {
-        return <Forms.FormSection>
-            <Forms.FormTitle tag="h3">What's the problem?</Forms.FormTitle>
-            <Forms.FormText style={{ marginBottom: 8 }}>
-                By default, Discord emits a GUILD_SUBSCRIPTIONS event for every guild you're in.
-                When you're in a lot of guilds, this can cause the gateway to ratelimit you.
-                This causes the client to crash and get stuck in an infinite ratelimit loop as it tries to reconnect.
-            </Forms.FormText>
+        return (
+            <Forms.FormSection>
+                <Forms.FormTitle tag="h3">What's the problem?</Forms.FormTitle>
+                <Forms.FormText style={{ marginBottom: 8 }}>
+                    By default, Discord emits a GUILD_SUBSCRIPTIONS event for every guild you're in.
+                    When you're in a lot of guilds, this can cause the gateway to ratelimit you.
+                    This causes the client to crash and get stuck in an infinite ratelimit loop as it tries to reconnect.
+                </Forms.FormText>
 
-            <Forms.FormTitle tag="h3">How does it work?</Forms.FormTitle>
-            <Forms.FormText>
-                This plugin works by stopping the client from sending GUILD_SUBSCRIPTIONS events to the gateway when you open the unreads inbox.
-                This means that not all unreads will be shown, instead only already-subscribed guilds' unreads will be shown, but your client won't crash anymore.
-            </Forms.FormText>
-        </Forms.FormSection>;
+                <Forms.FormTitle tag="h3">How does it work?</Forms.FormTitle>
+                <Forms.FormText>
+                    This plugin works by stopping the client from sending GUILD_SUBSCRIPTIONS events to the gateway when you open the unreads inbox.
+                    This means that not all unreads will be shown, instead only already-subscribed guilds' unreads will be shown, but your client won't crash anymore.
+                </Forms.FormText>
+            </Forms.FormSection>
+        );
     }
 });
