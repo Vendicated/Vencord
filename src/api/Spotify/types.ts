@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FluxStore } from "@webpack/types";
+
 // Discord Spotify Types
 
 export interface SpotifySocket {
@@ -75,16 +77,14 @@ export interface SpotifyDevice {
 
 export type RepeatState = "off" | "track" | "context";
 
-export interface SpotifyStore {
+export interface SpotifyStore extends FluxStore {
     __getLocalVars(): {
         accounts: Record<string, Account>;
     };
     getActiveSocketAndDevice(): { socket: SpotifySocket; device: SpotifyDevice; };
 }
 
-export type SpotifyHttp = {
-    [K in "get" | "put" | "post"]: (accountId: string, accessToken: string, options: { url: string; }) => Promise<any>;
-};
+export type SpotifyHttp = Record<"get" | "put" | "post", (accountId: string, accessToken: string, options: { url: string; }) => Promise<any>>;
 
 // Spotify API Types
 

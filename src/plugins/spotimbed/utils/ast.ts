@@ -34,14 +34,20 @@ export function walk<K extends string>(root: ParserNode[], collect: K) {
     return collected as Extract<ParserNode, { type: K; }>[];
 }
 
+export function isLinkEmbeddable(content: string, link: string) {
+    for (const i of indexesOf(content, link)) {
+        if ((content[i + link.length] ?? "").match(/\s|^$/)) return true;
+    }
+    return false;
+}
+
 export function getEmbeddableLinks(content: string, domain?: string) {
     const ast = Parser.parseToAST(content) as ParserNode[];
     const links = walk(ast, "link").map(node => node.target);
     const embeddableLinks: string[] = [];
 
     new Set(links).forEach(link => {
-        const isEmbeddable = indexesOf(content, link)
-            .some(i => (content[i + link.length] ?? "").match(/\s|^$/));
+        const isEmbeddable = isLinkEmbeddable(content, link);
         const isDomain = domain ? parseUrl(link)?.hostname === domain : true;
 
         if (isEmbeddable && isDomain) embeddableLinks.push(link);

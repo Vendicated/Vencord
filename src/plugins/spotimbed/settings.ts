@@ -74,5 +74,10 @@ export const settings = definePluginSettings({
         description: "Native Links",
         type: OptionType.BOOLEAN,
         default: false,
+    },
+    numericMonth: {
+        description: "Display months as numbers",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 });

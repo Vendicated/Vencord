@@ -18,15 +18,23 @@
 
 import { Album, ResourceType, RestrictionReason, Track } from "@api/Spotify";
 
+import { settings } from "../settings";
 import { DisplayResource } from "../types";
-import { getMonth } from "./time";
 
-export function formatReleaseDate(date: string) {
-    const [year, month, day] = date.split("-");
-    const parts = [year];
-    if (month) parts.unshift(getMonth(+month - 1));
-    if (day) parts[0] = `${parts[0]} ${day}`;
-    return parts.join(", ");
+export function formatReleaseDate(dateStr: string) {
+    const [year, month, day] = dateStr.split("-") as [string, string?, string?];
+
+    const dateFormat = new Intl.DateTimeFormat(void 0, {
+        year: "numeric",
+        month: month != null ? (settings.store.numericMonth ? "numeric" : "long") : void 0,
+        day: day != null ? "numeric" : void 0,
+    });
+
+    const date = new Date();
+    date.setFullYear(+year);
+    if (month) date.setMonth(+month - 1);
+    if (day) date.setDate(+day);
+    return dateFormat.format(date);
 }
 
 export function getAlbumType(album: Album) {

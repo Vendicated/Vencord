@@ -38,11 +38,9 @@ export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 
 // All indexes of a substring in a string
-export function indexesOf(text: string, sub: string) {
-    const indexes: number[] = [];
+export function* indexesOf(text: string, sub: string) {
     let i = -1;
-    while ((i = text.indexOf(sub, i + 1)) !== -1) indexes.push(i);
-    return indexes;
+    while ((i = text.indexOf(sub, i + 1)) !== -1) yield i;
 }
 
 const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;

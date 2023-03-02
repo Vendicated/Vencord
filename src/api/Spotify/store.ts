@@ -23,11 +23,11 @@ import { Spotify } from ".";
 import { PlayerState, PlayerTrack, RepeatState, SpotifyDevice } from "./types";
 
 // Don't wanna run before Flux and Dispatcher are ready!
-export type SpotifyPlayerStore = typeof SpotifyPlayerStore;
-export const SpotifyPlayerStore = proxyLazy(() => {
+export type PlayerStore = typeof PlayerStore;
+export const PlayerStore = proxyLazy(() => {
     const { Store } = Flux;
 
-    class SpotifyPlayerStore extends Store {
+    class PlayerStore extends Store {
         private start = 0;
 
         mPosition = 0;
@@ -75,7 +75,7 @@ export const SpotifyPlayerStore = proxyLazy(() => {
         }
     }
 
-    const store = new SpotifyPlayerStore(FluxDispatcher, {
+    const store = new PlayerStore(FluxDispatcher, {
         SPOTIFY_PLAYER_STATE(player: PlayerState) {
             store.track = player.track;
             store.device = player.device ?? null;
@@ -83,7 +83,6 @@ export const SpotifyPlayerStore = proxyLazy(() => {
             store.volume = player.volumePercent ?? 0;
             store.repeat = player.actualRepeat || "off";
             store.position = player.position ?? 0;
-            // eslint-disable-next-line dot-notation
             store.isSettingPosition = false;
             store.emitChange();
         },

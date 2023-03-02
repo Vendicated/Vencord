@@ -18,9 +18,10 @@
 
 import IpcEvents from "@utils/IpcEvents";
 import { NonMethodsKeys } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
+import { useStateFromStores } from "@webpack/common";
 
-import { SpotifyPlayerStore as PlayerStore } from "./store";
+import { PlayerStore } from "./store";
 import { Album, Artist, MarketQuery, Pagination, Playlist, RepeatState, Resource, ResourceImage, SpotifyHttp, SpotifyStore, Track, User } from "./types";
 export * from "./types";
 
@@ -28,13 +29,6 @@ const API_BASE = "https://api.spotify.com/v1";
 
 const spotifyHttp: SpotifyHttp = findByPropsLazy("SpotifyAPIMarker");
 const spotifyStore: SpotifyStore = findByPropsLazy("getActiveSocketAndDevice");
-const useStateFromStores: <T>(
-    stores: any[],
-    mapper: () => T,
-    idk?: null,
-    compare?: (old: T, newer: T) => boolean
-) => T
-    = findByCodeLazy("useStateFromStores");
 
 const resourcePromiseCache = new Map<string, Promise<any>>();
 
@@ -158,13 +152,18 @@ export function getMarketName(code: string) {
     return regionNames.of(code);
 }
 
-export function getImageClosestTo(resource: Resource, size: number) {
+export function getImageSmallestAtLeast(resource: Resource, size: number) {
     let images: ResourceImage[] | null = null;
     if ("images" in resource) images = resource.images.slice();
     else if (resource.type === "track") images = resource.album.images.slice();
 
-    if (!images) return null;
+    if (!images || images.length === 0) return null;
 
-    images.sort((a, b) => Math.abs(size - a.width) - Math.abs(size - b.width));
-    return images[0];
+    return images.reduce((prev, curr) => {
+        let prevDiff = prev.width - size;
+        let currDiff = curr.width - size;
+        if (prevDiff < 0) prevDiff = Infinity;
+        if (currDiff < 0) currDiff = Infinity;
+        return currDiff < prevDiff ? curr : prev;
+    });
 }
