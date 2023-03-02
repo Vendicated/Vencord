@@ -18,7 +18,6 @@
 
 import "./style.css";
 
-import { Settings } from "@api/settings.js";
 import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
@@ -32,7 +31,7 @@ import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.
 
 const {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo, openStartupTabs
+    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -43,10 +42,10 @@ enum ChannelTypes {
 const twoChars = (n: number) => n > 99 ? "9+" : `${n}`;
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-const PlusIcon = () => <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path /* fill="var(--background-primary)"*/ d="M32 16a16 16 0 0 1-16 16A16 16 0 0 1 0 16a16 16 0 0 1 32 0z" /><path d="M16 6.667v18.667m-9.333-9.333h18.667" stroke="var(--text-normal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>;
-const XIcon = () => <svg height="16" width="16" viewBox="-28.797 -28.797 172.787 172.787"><path fill="transparent" d="M57.596-28.797a86.394 86.394 0 0 1 86.394 86.393 86.394 86.394 0 0 1-86.394 86.394 86.394 86.394 0 0 1-86.393-86.394 86.394 86.394 0 0 1 86.393-86.393z" /><path fill="var(--text-normal)" d="m71.27 57.599 42.785-42.781a3.885 3.885 0 0 0 0-5.497l-8.177-8.18a3.889 3.889 0 0 0-5.496 0L57.597 43.926 14.813 1.141a3.889 3.889 0 0 0-5.496 0l-8.178 8.18a3.885 3.885 0 0 0 0 5.497L43.924 57.6l-42.78 42.776a3.887 3.887 0 0 0 0 5.497l8.177 8.18a3.889 3.889 0 0 0 5.496 0l42.779-42.78 42.779 42.78a3.889 3.889 0 0 0 5.496 0l8.177-8.18a3.887 3.887 0 0 0 0-5.497L71.27 57.599z" /></svg>;
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
+const PlusIcon = () => <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path /* fill="var(--background-primary)"*/ d="M32 16a16 16 0 0 1-16 16A16 16 0 0 1 0 16a16 16 0 0 1 32 0z" /><path d="M16 6.667v18.667m-9.333-9.333h18.667" stroke="var(--text-normal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>;
+const XIcon = () => <svg height="16" width="16" viewBox="-28.797 -28.797 172.787 172.787"><path fill="transparent" d="M57.596-28.797a86.394 86.394 0 0 1 86.394 86.393 86.394 86.394 0 0 1-86.394 86.394 86.394 86.394 0 0 1-86.393-86.394 86.394 86.394 0 0 1 86.393-86.393z" /><path fill="var(--text-normal)" d="m71.27 57.599 42.785-42.781a3.885 3.885 0 0 0 0-5.497l-8.177-8.18a3.889 3.889 0 0 0-5.496 0L57.597 43.926 14.813 1.141a3.889 3.889 0 0 0-5.496 0l-8.178 8.18a3.885 3.885 0 0 0 0 5.497L43.924 57.6l-42.78 42.776a3.887 3.887 0 0 0 0 5.497l8.177 8.18a3.889 3.889 0 0 0 5.496 0l42.779-42.78 42.779 42.78a3.889 3.889 0 0 0 5.496 0l8.177-8.18a3.887 3.887 0 0 0 0-5.497L71.27 57.599z" /></svg>;
 const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     ? <img
         src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
@@ -67,15 +66,15 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
         src={channel?.icon
             ? `https://${window.GLOBAL_ENV.CDN_HOST}/channel-icons/${channel?.id}/${channel?.icon}.png`
-            : `https://${window.GLOBAL_ENV.CDN_HOST}/assets/c6851bd0b03f1cca5a8c1e720ea6ea17.png` // Default Group Icon
+            : "https://discord.com/assets/c6851bd0b03f1cca5a8c1e720ea6ea17.png" // Default Group Icon
         }
         className={cl("icon")}
     />;
-const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
+
+const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 function TypingIndicator(props: { channelId: string; }) {
     const { channelId } = props;
-    const hasTypingIndicatorPlugin = Settings.plugins.TypingIndicator?.enabled;
+    const hasTypingIndicatorPlugin = Vencord.Plugins.isPluginEnabled("TypingIndicator");
     const currentUserId = UserStore.getCurrentUser().id;
     const isTyping = useStateFromStores(
         [TypingStore],
@@ -83,10 +82,11 @@ function TypingIndicator(props: { channelId: string; }) {
         null, (old, newer) => !hasTypingIndicatorPlugin && (old && !newer || !old && newer)
     );
     if (hasTypingIndicatorPlugin) return (Vencord.Plugins.plugins.TypingIndicator as any).TypingIndicator(channelId);
-    else return isTyping ?
-        <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div> :
-        null;
+    else return isTyping
+        ? <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div>
+        : null;
 }
+
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     let classes = cl("notification-dot");
     if (mentionCount) classes += ` ${cl("has-mention")}`;
@@ -94,7 +94,6 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
         {twoChars(mentionCount || unreadCount)}
     </div> : null;
 };
-
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
     const { guild, channel } = props;
     const recipients = channel?.recipients;
@@ -109,12 +108,12 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     </>;
     if (guild && channel) return <>
         <GuildIcon guild={guild} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel.name}</Text>
+        <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel?.name}</Text>
         <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-        <TypingIndicator channelId={channel.id} />
+        <TypingIndicator channelId={channel?.id} />
     </>;
     if (channel && recipients?.length) {
-        if (channel?.type === ChannelTypes.DM) {
+        if (channel.type === ChannelTypes.DM) {
             const user = UserStore.getUser(recipients[0]);
             return <>
                 <UserAvatar user={user} />
@@ -139,6 +138,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
 function ChannelTab(props: ChannelTabsProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
+
     const ref = useRef<HTMLDivElement>(null);
     const [, drop] = useDrop(() => ({
         accept: "vc_ChannelTab",
@@ -153,6 +153,7 @@ function ChannelTab(props: ChannelTabsProps) {
         }),
     }));
     drag(drop(ref));
+
     const tab = <div className={cl("tab-base")} ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
         <ChannelTabContent {...props} guild={guild} channel={channel} />
     </div>;
@@ -192,14 +193,14 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
     }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);
-        FluxDispatcher.subscribe("CHANNEL_SELECT", () => saveChannels());
+        FluxDispatcher.subscribe("CHANNEL_SELECT", saveChannels);
         return () => {
             document.removeEventListener("keydown", handleKeybinds);
-            FluxDispatcher.unsubscribe("CHANNEL_SELECT", () => saveChannels());
+            FluxDispatcher.unsubscribe("CHANNEL_SELECT", saveChannels);
         };
     }, []);
 
-    if (!isEqualToCurrentTab(props)) setCurrentTabTo(props);
+    if (!isEqualToCurrentTab(props)) setCurrentTab(props);
 
     return <div className={cl("container")}>
         {openChannels.map((ch, i) => <div
@@ -232,6 +233,7 @@ export function ChannelTabsPreivew(p) {
     const { setValue }: { setValue: (v: ChannelTabsProps[]) => void; } = p;
     const { tabSet }: { tabSet: ChannelTabsProps[], onStartup: string; } = channelTabsSettings.use();
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
+
     const [currentTabs, setCurrentTabs] = useState(tabSet ?? placeholder);
     const cl = (n: string) => `vc-channeltabs-preview-${n}`;
     const Tab = ({ channelId, guildId }: ChannelTabsProps) => {

@@ -51,7 +51,7 @@ export const channelTabsSettings = definePluginSettings({
 let openChannelIndex = 0;
 const openChannels: ChannelTabsProps[] = [];
 
-const setCurrentTabTo = (t: ChannelTabsProps) => openChannels[openChannelIndex] = t;
+const setCurrentTab = (t: ChannelTabsProps) => openChannels[openChannelIndex] = t;
 const isTabSelected = (ch: ChannelTabsProps) => openChannels.indexOf(ch) === openChannelIndex;
 const isEqualToCurrentTab = (ch: ChannelTabsProps) => openChannels[openChannelIndex].channelId === ch.channelId;
 function moveToTab(i: number) {
@@ -132,5 +132,5 @@ const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", d
 
 export const ChannelTabsUtils = {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo, openStartupTabs
+    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
 };
