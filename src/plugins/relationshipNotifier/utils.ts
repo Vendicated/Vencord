@@ -36,9 +36,11 @@ const friends: { friends: string[]; requests: string[] } = {
 };
 
 export async function syncAndRunChecks() {
-    const oldGuilds: Map<string, SimpleGuild> | undefined = await DataStore.get("relationship-notifier-guilds");
-    const oldGroups: Map<string, SimpleGroupChannel> | undefined = await DataStore.get("relationship-notifier-groups");
-    const oldFriends: { friends: string[]; requests: string[] } | undefined = await DataStore.get("relationship-notifier-friends");
+    const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
+        "relationship-notifier-guilds",
+        "relationship-notifier-groups",
+        "relationship-notifier-friends"
+    ]) as [Map<string, SimpleGuild> | undefined, Map<string, SimpleGroupChannel> | undefined, Record<"friends" | "requests", string[]> | undefined];
 
     await syncGuilds();
     await syncGroups();
