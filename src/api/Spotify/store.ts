@@ -19,7 +19,7 @@
 import { proxyLazy } from "@utils/proxyLazy";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
-import { Spotify } from ".";
+import { SpotifyApi } from "./api";
 import { PlayerState, PlayerTrack, RepeatState, SpotifyDevice } from "./types";
 
 // Don't wanna run before Flux and Dispatcher are ready!
@@ -50,14 +50,14 @@ export const PlayerStore = proxyLazy(() => {
         }
 
         setVolume(percent: number) {
-            Spotify.setVolume(percent).then(() => {
+            SpotifyApi.setVolume(percent).then(() => {
                 this.volume = percent;
                 this.emitChange();
             });
         }
 
         setShuffle(state: boolean) {
-            Spotify.setShuffle(state).then(() => {
+            SpotifyApi.setShuffle(state).then(() => {
                 this.shuffle = state;
                 this.emitChange();
             });
@@ -68,7 +68,7 @@ export const PlayerStore = proxyLazy(() => {
 
             this.isSettingPosition = true;
 
-            return Spotify.seek(ms).catch((err: any) => {
+            return SpotifyApi.seek(ms).catch((err: any) => {
                 console.error("[VencordSpotifyAPI] Failed to seek", err);
                 this.isSettingPosition = false;
             });
