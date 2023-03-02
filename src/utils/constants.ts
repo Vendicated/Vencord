@@ -205,5 +205,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
+    },
+    AutumnVN: {
+        name: "AutumnVN",
+        id: 393694671383166998n
     }
 });
