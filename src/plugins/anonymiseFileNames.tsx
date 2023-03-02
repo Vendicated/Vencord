@@ -69,7 +69,7 @@ export default definePlugin({
             replacement: {
                 match: /\{children:\[(\i\?(.{1,60}\)\),).{1,60}function\(\){(.{1,50},(\i)\.id,\i,{))/,
                 // TODO: make a buildButton function to minmize the complexity of this patch
-                replace: (rest, addButtonFn, rerenderFn, file) =>
+                replace: (_, rest, addButtonFn, rerenderFn, file) =>
                     `{children:[${addButtonFn}tooltip:"Anonymise Filename",onClick:function(){${file}.anonymise=!${file}.anonymise; ${rerenderFn}})},children:${file}.anonymise?$self.AnonIcon():$self.NonAnonIcon()}),${rest}`
             }
         }
