@@ -32,7 +32,7 @@ import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.
 
 const {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo, useStartupTabs
+    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTabTo, openStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -165,7 +165,7 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
         _update();
         saveChannels();
     }
-    useStartupTabs(props, update);
+    openStartupTabs(props, update);
     const { openChannels } = ChannelTabsUtils;
     function handleKeybinds(e: KeyboardEvent) {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {

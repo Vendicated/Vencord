@@ -19,7 +19,7 @@
 import { DataStore } from "@api/index.js";
 import { definePluginSettings } from "@api/settings.js";
 import { OptionType } from "@utils/types.js";
-import { NavigationRouter, SelectedChannelStore, Toasts, useState } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
@@ -86,11 +86,9 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     openChannels[openChannelIndex] = prev;
     openChannelIndex += direction;
 }
-function useStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
-    const [hasInit, setInit] = useState(false);
-    if (hasInit || openChannels.length) return;
+function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
+    if (openChannels.length) return;
     let tabsToOpen: { openChannels: ChannelTabsProps[], openChannelIndex: number; } = { openChannels: [firstTab], openChannelIndex: 0 };
-    setInit(true);
     if (["remember", "preset"].includes(channelTabsSettings.store.onStartup)) {
         if (Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) Toasts.show({
             id: Toasts.genId(),
@@ -104,7 +102,6 @@ function useStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
         else {
             if (channelTabsSettings.store.onStartup === "remember") {
                 DataStore.get("ChannelTabs_openChannels").then((t: typeof tabsToOpen) => {
-                    console.log(openChannels);
                     if (openChannels.length !== 1) return Toasts.show({
                         id: Toasts.genId(),
                         message: "ChannelTabs - Failed to restore tabs",
@@ -114,10 +111,8 @@ function useStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
                             position: Toasts.Position.BOTTOM
                         }
                     });
-                    console.log(openChannels, t);
                     openChannels.pop();
                     ({ openChannelIndex } = t);
-                    t.openChannels.forEach(t => openChannels.push(t));
                     console.log(openChannels, openChannelIndex, t.openChannels[t.openChannelIndex]);
                     NavigationRouter.transitionToGuild(t.openChannels[t.openChannelIndex].guildId, t.openChannels[t.openChannelIndex].channelId);
                 });
@@ -128,6 +123,8 @@ function useStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
     }
     ({ openChannelIndex } = tabsToOpen);
     tabsToOpen.openChannels.forEach(t => openChannels.push(t));
+    if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
+        NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
     update();
 }
 // data argument is only for testing purposes
@@ -135,5 +132,5 @@ const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", d
 
 export const ChannelTabsUtils = {
     closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo, useStartupTabs
+    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTabTo, openStartupTabs
 };
