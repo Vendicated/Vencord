@@ -45,12 +45,12 @@ export const Text = waitForComponent<t.Text>("Text", m => {
     return (s.length < 1500 && s.includes("data-text-variant") && s.includes("always-white"));
 });
 export const Select = waitForComponent<t.Select>("Select", filters.byCode("optionClassName", "popoutPosition", "autoFocus", "maxVisibleItems"));
+const searchableSelectFilter = filters.byCode("autoFocus", ".Messages.SELECT");
+export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", m =>
+    m.render && searchableSelectFilter(m.render)
+);
 export const Slider = waitForComponent<t.Slider>("Slider", filters.byCode("closestMarkerIndex", "stickToMarkers"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
-/**
- * @deprecated Use @utils/margins instead
- */
-export const Margins: t.Margins = findByPropsLazy("marginTop20");
 export const ButtonLooks: t.ButtonLooks = findByPropsLazy("BLANK", "FILLED", "INVERTED");

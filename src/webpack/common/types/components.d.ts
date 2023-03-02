@@ -235,6 +235,49 @@ export type Select = ComponentType<PropsWithChildren<{
     "aria-labelledby"?: boolean;
 }>>;
 
+export type SearchableSelect = ComponentType<PropsWithChildren<{
+    placeholder?: string;
+    options: ReadonlyArray<SelectOption>; // TODO
+    value?: SelectOption;
+
+    /**
+     * - 0 ~ Filled
+     * - 1 ~ Custom
+     */
+    look?: 0 | 1;
+    className?: string;
+    popoutClassName?: string;
+    wrapperClassName?: string;
+    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    optionClassName?: string;
+
+    autoFocus?: boolean;
+    isDisabled?: boolean;
+    clearable?: boolean;
+    closeOnSelect?: boolean;
+    clearOnSelect?: boolean;
+    multi?: boolean;
+
+    onChange(value: any): void;
+    onSearchChange?(value: string): void;
+
+    onClose?(): void;
+    onOpen?(): void;
+    onBlur?(): void;
+
+    renderOptionPrefix?(option: SelectOption): ReactNode;
+    renderOptionSuffix?(option: SelectOption): ReactNode;
+
+    filter?(option: SelectOption[], query: string): SelectOption[];
+
+    centerCaret?: boolean;
+    debounceTime?: number;
+    maxVisibleItems?: number;
+    popoutWidth?: number;
+
+    "aria-labelledby"?: boolean;
+}>>;
+
 export type Slider = ComponentType<PropsWithChildren<{
     initialValue: number;
     defaultValue?: number;
@@ -279,7 +322,4 @@ export type Flex = ComponentType<PropsWithChildren<any>> & {
     Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
     Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
     Wrap: Record<"NO_WRAP" | "WRAP" | "WRAP_REVERSE", string>;
-
-    Content: ComponentType<PropsWithChildren<any>>;
-    Sidebar: ComponentType<PropsWithChildren<any>>;
 };
