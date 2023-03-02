@@ -158,11 +158,11 @@ export default definePlugin({
         {
             find: ".embedCard",
             replacement: [{
-                match: /{"use strict";(.{0,10})\(\)=>(.{1,2})}\);/,
-                replace: '{"use strict";$1()=>$2,me:()=>messageEmbed});'
+                match: /{"use strict";(.{0,10})\(\)=>(\i)}\);/,
+                replace: '{"use strict";$1()=>$2,me:()=>typeof messageEmbed !== "undefined" ? messageEmbed : null});'
             }, {
-                match: /function (.{1,2})\(.{1,2}\){var .{1,2}=.{1,2}\.message,.{1,2}=.{1,2}\.channel.{0,300}\.embedCard.{0,500}}\)}/,
-                replace: "$&;var messageEmbed={mle_AutomodEmbed:$1};"
+                match: /function (\i)\(\i\){var \i=\i\.message,\i=\i\.channel.{0,200}\.hideTimestamp/,
+                replace: "var messageEmbed={mle_AutomodEmbed:$1};$&"
             }]
         }
     ],
