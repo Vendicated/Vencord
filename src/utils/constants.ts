@@ -201,5 +201,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     lewisakura: {
         name: "lewisakura",
         id: 96269247411400704n
+    },
+    cloudburst: {
+        name: "cloudburst",
+        id: 892128204150685769n
     }
 });
