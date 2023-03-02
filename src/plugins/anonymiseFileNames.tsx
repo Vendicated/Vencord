@@ -67,8 +67,10 @@ export default definePlugin({
         {
             find: ".Messages.ATTACHMENT_UTILITIES_SPOILER",
             replacement: {
-                match: /\{children:\[(\i\?(.{1,60}\)\),).{1,60}function\(\){(.{1,50},(\i)\.id,\i))/,
-                replace: "{children:[$2tooltip:\"Anonymise Filename\",onClick:function(){$4.anonymise=!$4.anonymise; $3})},children:$4.anonymise?$self.AnonIcon():$self.NonAnonIcon()}),$1"
+                match: /\{children:\[(\i\?(.{1,60}\)\),).{1,60}function\(\){(.{1,50},(\i)\.id,\i,{))/,
+                // TODO: make a buildButton function to minmize the complexity of this patch
+                replace: (rest, addButtonFn, rerenderFn, file) =>
+                    `{children:[${addButtonFn}tooltip:\"Anonymise Filename\",onClick:function(){${file}.anonymise=!${file}.anonymise; ${rerenderFn}})},children:${file}.anonymise?$self.AnonIcon():$self.NonAnonIcon()}),${rest}`
             }
         }
     ],
