@@ -30,8 +30,8 @@ export default definePlugin({
         replacement: {
             // This function normally dispatches a subscribe event to every guild.
             // this is badbadbadbadbad so we just get rid of it.
-            match: /INBOX_OPEN:function.+?return!1},/,
-            replace: "INBOX_OPEN:function(){return true;},"
+            match: /INBOX_OPEN:function.+?\{/,
+            replace: "$&return true;"
         }
     }],
 
