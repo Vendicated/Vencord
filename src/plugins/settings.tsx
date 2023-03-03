@@ -115,9 +115,9 @@ export default definePlugin({
 
         cats.push({
             section: "VencordCloudSettings",
-            label: "Cloud Settings",
-            element: () => <SettingsComponent tab="VencordCloudSettings" />,
-            onClick: makeOnClick("VencordCloudSettings")
+            label: "Cloud",
+            element: () => <SettingsComponent tab="VencordCloud" />,
+            onClick: makeOnClick("VencordCloud")
         });
 
         if (IS_DEV)

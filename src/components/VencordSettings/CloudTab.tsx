@@ -33,7 +33,7 @@ function validateUrl(url: string) {
     }
 }
 
-function CloudSettingsTab() {
+function CloudTab() {
     const settings = useSettings();
 
     return (
@@ -101,4 +101,4 @@ function CloudSettingsTab() {
     );
 }
 
-export default ErrorBoundary.wrap(CloudSettingsTab);
+export default ErrorBoundary.wrap(CloudTab);
