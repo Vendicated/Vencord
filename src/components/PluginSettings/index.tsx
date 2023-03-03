@@ -30,11 +30,12 @@ import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
 import { ChangeList } from "@utils/ChangeList";
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -296,15 +297,15 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection className={Margins.marginTop16}>
+        <Forms.FormSection className={Margins.top16}>
             <ReloadRequiredCard required={changes.hasChanges} />
 
-            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+            <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
             </Forms.FormTitle>
 
             <div className={cl("filter-controls")}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.marginBottom20} />
+                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.bottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         className={InputStyles.inputDefault}
@@ -321,15 +322,15 @@ export default ErrorBoundary.wrap(function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
 
             <div className={cl("grid")}>
                 {plugins}
             </div>
 
-            <Forms.FormDivider className={Margins.marginTop20} />
+            <Forms.FormDivider className={Margins.top20} />
 
-            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+            <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
             </Forms.FormTitle>
             <div className={cl("grid")}>
