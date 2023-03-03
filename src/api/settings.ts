@@ -167,7 +167,7 @@ export const Settings = makeProxy(settings);
  * @returns Settings
  */
 // TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
-export function useSettings(paths?: string[]) {
+export function useSettings(paths?: (keyof Settings | string)[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
     const onUpdate: SubscriptionCallback = paths
