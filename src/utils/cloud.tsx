@@ -26,14 +26,31 @@ import Logger from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const getCloudUrl = () => Settings.backend.url;
+export const getCloudUrl = () => new URL(Settings.backend.url);
 
-export async function cloudConfigured() {
-    return await DataStore.get("Vencord_cloudSecret") !== undefined && Settings.backend.enabled;
+export async function getAuthorization() {
+    const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
+    return secrets[getCloudUrl().origin];
+}
+
+async function setAuthorization(secret: string) {
+    await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+        secrets ??= {};
+        secrets[getCloudUrl().origin] = secret;
+        return secrets;
+    });
+}
+
+export async function deauthorizeCloud() {
+    await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+        secrets ??= {};
+        delete secrets[getCloudUrl().origin];
+        return secrets;
+    });
 }
 
 export async function authorizeCloud() {
-    if (await DataStore.get("Vencord_cloudSecret") !== undefined) {
+    if (await getAuthorization() !== undefined) {
         Settings.backend.enabled = true;
         return;
     }
@@ -73,7 +90,7 @@ export async function authorizeCloud() {
                 const { secret } = await res.json();
                 if (secret) {
                     cloudLogger.info("Authorized with secret");
-                    await DataStore.set("Vencord_cloudSecret", secret);
+                    await setAuthorization(secret);
                     showNotification({
                         title: "Cloud Integration",
                         body: "Cloud integrations enabled!"
@@ -99,13 +116,9 @@ export async function authorizeCloud() {
     />);
 }
 
-export async function deauthorizeCloud() {
-    await DataStore.del("Vencord_cloudSecret");
-}
-
 export async function getCloudAuth() {
     const userId = UserStore.getCurrentUser().id;
-    const secret = await DataStore.get("Vencord_cloudSecret");
+    const secret = await getAuthorization();
 
     return window.btoa(`${userId}:${secret}`);
 }

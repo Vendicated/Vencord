@@ -31,7 +31,6 @@ import { popNotice, showNotice } from "./api/Notices";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { cloudConfigured } from "./utils/cloud";
 import { getCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
@@ -42,7 +41,7 @@ export let Components: any;
 async function syncSettings() {
     if (
         Settings.backend.settingsSync && // if it's enabled
-        await cloudConfigured() && // if cloud integrations are configured correctly
+        Settings.backend.enabled && // if cloud integrations are enabled
         await getCloudSettings(false) // if we synchronized something (false means no sync)
     ) {
         // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
