@@ -99,7 +99,7 @@ function CloudTab() {
                 </Switch>
                 <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
-                    Which backend to use when using cloud integration. Changing this value removes local authorization.
+                    Which backend to use when using cloud integration.
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
