@@ -34,7 +34,7 @@ function validateUrl(url: string) {
 }
 
 function SettingsSyncSection() {
-    const settings = useSettings();
+    const settings = useSettings(["settings.backend", "settings.backend.enabled", "settings.backend.settingsSync"]);
     const sectionEnabled = useMemo(
         () => settings.backend.enabled && settings.backend.settingsSync,
         [settings.backend.enabled, settings.backend.settingsSync]
@@ -84,7 +84,7 @@ function SettingsSyncSection() {
 }
 
 function CloudTab() {
-    const settings = useSettings();
+    const settings = useSettings(["settings.backend", "settings.backend.enabled", "settings.backend.url"]);
 
     return (
         <>
