@@ -35,8 +35,6 @@ export async function cloudConfigured() {
 export async function authorizeCloud() {
     if (await cloudConfigured()) return;
 
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
     try {
         const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", cloudUrl()));
         var { clientId, redirectUri } = await oauthConfiguration.json();
@@ -48,6 +46,8 @@ export async function authorizeCloud() {
         Settings.backend.enabled = false;
         return;
     }
+
+    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
     openModal((props: any) => <OAuth2AuthorizeModal
         {...props}
