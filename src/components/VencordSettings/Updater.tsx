@@ -59,7 +59,8 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                     </ErrorCard>
                 )
             });
-        } finally {
+        }
+        finally {
             dispatcher(false);
         }
     };
@@ -81,7 +82,7 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
         <Card style={{ padding: ".5em" }}>
             {updates.map(({ hash, author, message }) => (
                 <div>
-                    <code><HashLink {...{ repo, hash }} disabled={repoPending}/></code>
+                    <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
                         color: "var(--text-normal)"
@@ -178,7 +179,7 @@ function Newer(props: CommonProps) {
             <Forms.FormText className={Margins.bottom8}>
                 Your local copy has more recent commits. Please stash or reset them.
             </Forms.FormText>
-            <Changes {...props} updates={changes}/>
+            <Changes {...props} updates={changes} />
         </>
     );
 }
@@ -231,9 +232,9 @@ function Updater() {
                 <Link href={repo}>
                     {repo.split("/").slice(-2).join("/")}
                 </Link>
-            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending}/>)</Forms.FormText>
+            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8}/>
+            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
