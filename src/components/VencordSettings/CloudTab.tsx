@@ -86,7 +86,6 @@ function SettingsSyncSection() {
 function CloudTab() {
     const settings = useSettings();
 
-
     return (
         <>
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
