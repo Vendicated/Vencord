@@ -182,7 +182,7 @@ return type!==null?$2.botTag,type"
         {
             find: ",botType:",
             replacement: {
-                match: /,botType:(\i\((\i)\)),/,
+                match: /,botType:(\i\((\i)\)),/g,
                 replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
             }
         },
