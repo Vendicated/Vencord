@@ -17,11 +17,21 @@
 */
 
 import { useSettings } from "@api/settings";
+import { CheckedTextInput } from "@components/CheckedTextInput";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { authorizeCloud } from "@utils/cloud";
+import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Button, Card, Forms, Switch, Tooltip } from "@webpack/common";
+
+function validateUrl(url: string) {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return "Invalid URL";
+    }
+}
 
 function CloudSettingsTab() {
     const settings = useSettings();
@@ -37,6 +47,16 @@ function CloudSettingsTab() {
                 >
                     Enable Cloud Integrations
                 </Switch>
+                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
+                <Forms.FormText className={Margins.bottom8}>
+                    Which backend to use when using cloud integration. Changing this value removes local authorization.
+                </Forms.FormText>
+                <CheckedTextInput
+                    key="backendUrl"
+                    value={settings.backend.url}
+                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; deauthorizeCloud(); }}
+                    validate={validateUrl}
+                />
             </Forms.FormSection>
             <Forms.FormSection title="Settings Sync" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>

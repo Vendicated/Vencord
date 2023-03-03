@@ -50,6 +50,7 @@ export interface Settings {
 
     backend: {
         enabled: boolean;
+        url: string;
         settingsSync: boolean;
         settingsSyncVersion: number;
     };
@@ -75,6 +76,7 @@ const DefaultSettings: Settings = {
 
     backend: {
         enabled: false,
+        url: "https://vencord.vendicated.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
     }

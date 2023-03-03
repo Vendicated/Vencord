@@ -82,6 +82,10 @@ export async function authorizeCloud() {
     />);
 }
 
+export async function deauthorizeCloud() {
+    await DataStore.del("Vencord_cloudSecret");
+}
+
 export async function getCloudAuth() {
     const userId = UserStore.getCurrentUser().id;
     const secret = await DataStore.get("Vencord_cloudSecret");
