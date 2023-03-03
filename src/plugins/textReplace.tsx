@@ -165,7 +165,13 @@ export default definePlugin({
     replaceText(msg: MessageObject) {
         if (settings.store.rules) {
             for (const rule of settings.store.rules) {
-                if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
+                if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes) && rule.onlyIfIncludes !== "regex") continue;
+                if (rule.onlyIfIncludes === "regex") {
+                    const regex = new RegExp(rule.find, "g");
+                    if (!regex.test(msg.content)) continue;
+                    msg.content = msg.content.replace(regex, rule.replace);
+                    continue;
+                }
                 msg.content = msg.content.replace(new RegExp(this.escapeRegExp(rule.find), "g"), rule.replace);
             }
         }
