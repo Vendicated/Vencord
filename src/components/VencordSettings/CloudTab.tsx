@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Card, Forms, React, Switch, Tooltip } from "@webpack/common";
+import { Button, Card, Forms, React, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -33,8 +33,59 @@ function validateUrl(url: string) {
     }
 }
 
+function SettingsSyncSection() {
+    const settings = useSettings();
+    const sectionEnabled = useMemo(
+        () => settings.backend.enabled && settings.backend.settingsSync,
+        [settings.backend.enabled, settings.backend.settingsSync]
+    );
+
+    return (
+        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
+            <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+                Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
+                minimal effort.
+            </Forms.FormText>
+            <Switch
+                key="cloud-sync"
+                disabled={!settings.backend.enabled}
+                value={settings.backend.settingsSync}
+                onChange={v => { settings.backend.settingsSync = v; }}
+            >
+                Settings Sync
+            </Switch>
+            <Card className="vc-settings-quick-actions-card">
+                <Button
+                    size={Button.Sizes.SMALL}
+                    disabled={!sectionEnabled}
+                    onClick={() => putCloudSettings()}
+                >Sync to Cloud</Button>
+                <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
+                    {({ onMouseLeave, onMouseEnter }) => (
+                        <Button
+                            onMouseLeave={onMouseLeave}
+                            onMouseEnter={onMouseEnter}
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.RED}
+                            disabled={!sectionEnabled}
+                            onClick={() => getCloudSettings(true, true)}
+                        >Sync from Cloud</Button>
+                    )}
+                </Tooltip>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    color={Button.Colors.RED}
+                    disabled={!sectionEnabled}
+                    onClick={() => deleteCloudSettings()}
+                >Delete Cloud Settings</Button>
+            </Card>
+        </Forms.FormSection>
+    );
+}
+
 function CloudTab() {
     const settings = useSettings();
+
 
     return (
         <>
@@ -59,45 +110,7 @@ function CloudTab() {
                 />
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection>
-            <Forms.FormSection title="Settings Sync" className={Margins.top16}>
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
-                    minimal effort.
-                </Forms.FormText>
-                <Switch
-                    key="cloud-sync"
-                    disabled={!settings.backend.enabled}
-                    value={settings.backend.settingsSync}
-                    onChange={v => { settings.backend.settingsSync = v; }}
-                >
-                    Settings Sync
-                </Switch>
-                <Card className="vc-settings-quick-actions-card">
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        disabled={!settings.backend.settingsSync}
-                        onClick={() => putCloudSettings()}
-                    >Sync to Cloud</Button>
-                    <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <Button
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                size={Button.Sizes.SMALL}
-                                color={Button.Colors.RED}
-                                disabled={!settings.backend.settingsSync}
-                                onClick={() => getCloudSettings(true, true)}
-                            >Sync from Cloud</Button>
-                        )}
-                    </Tooltip>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.RED}
-                        disabled={!settings.backend.settingsSync}
-                        onClick={() => deleteCloudSettings()}
-                    >Delete Cloud Settings</Button>
-                </Card>
-            </Forms.FormSection>
+            <SettingsSyncSection />
         </>
     );
 }
