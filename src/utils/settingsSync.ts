@@ -22,7 +22,7 @@ import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
 
-import { getCloudUrl, getCloudAuth } from "./cloud";
+import { getCloudAuth, getCloudUrl } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 
