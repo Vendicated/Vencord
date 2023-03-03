@@ -185,7 +185,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
+    const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -216,6 +216,14 @@ function Updater() {
                 note="Automatically update Vencord without confirmation prompt"
             >
                 Automatically update
+            </Switch>
+            <Switch
+                value={settings.autoUpdateNotification}
+                onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                note="Shows a notification when Vencord automatically updates"
+                disabled={!settings.autoUpdate}
+            >
+                Notify auto-update completion
             </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>

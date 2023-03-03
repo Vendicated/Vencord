@@ -51,18 +51,19 @@ async function init() {
             if (Settings.autoUpdate) {
                 await update();
                 const needsFullRestart = await rebuild();
-                setTimeout(() => {
-                    showNotification({
-                        title: "Vencord has been updated!",
-                        body: "Click here to restart",
-                        onClick() {
-                            if (needsFullRestart)
-                                window.DiscordNative.app.relaunch();
-                            else
-                                location.reload();
-                        },
-                    })
-                }, 10_000);
+                if (Settings.autoUpdateNotification)
+                    setTimeout(() => {
+                        showNotification({
+                            title: "Vencord has been updated!",
+                            body: "Click here to restart",
+                            onClick() {
+                                if (needsFullRestart)
+                                    window.DiscordNative.app.relaunch();
+                                else
+                                    location.reload();
+                            },
+                        })
+                    }, 10_000);
                 return;
             }
 
