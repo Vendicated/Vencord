@@ -50,7 +50,9 @@ async function syncSettings() {
         // of the possible ones it has (such as when your settings are newer).
         showNotification({
             title: "Cloud Settings",
-            body: "Your settings have been updated! Reload to apply changes."
+            body: "Your settings have been updated! Click here to restart to fully apply changes!",
+            color: "var(--green-360)",
+            onClick: () => window.DiscordNative.app.relaunch()
         });
     }
 }

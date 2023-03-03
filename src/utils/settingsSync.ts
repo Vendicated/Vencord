@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
@@ -148,7 +147,8 @@ export async function putCloudSettings() {
             cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
             showNotification({
                 title: "Cloud Settings",
-                body: `Synchronization failed (API returned ${res.status}).`
+                body: `Could not synchronize settings (API returned ${res.status}).`,
+                color: "var(--red-360)"
             });
             return;
         }
@@ -159,13 +159,15 @@ export async function putCloudSettings() {
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         showNotification({
             title: "Cloud Settings",
-            body: "Synchronized your settings!"
+            body: "Synchronized your settings!",
+            color: "var(--green-360)"
         });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
             title: "Cloud Settings",
-            body: `Settings synchronization failed (${e.toString()}).`
+            body: `Could not synchronize settings (${e.toString()}).`,
+            color: "var(--red-360)"
         });
     }
 }
@@ -205,7 +207,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             showNotification({
                 title: "Cloud Settings",
-                body: `Could not synchronize settings (API returned ${res.status}).`
+                body: `Could not synchronize settings (API returned ${res.status}).`,
+                color: "var(--red-360)"
             });
             return false;
         }
@@ -236,7 +239,9 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         if (shouldNotify)
             showNotification({
                 title: "Cloud Settings",
-                body: "Your settings have been updated! Reload to apply changes."
+                body: "Your settings have been updated! Click here to restart to fully apply changes!",
+                color: "var(--green-360)",
+                onClick: () => window.DiscordNative.app.relaunch()
             });
 
         return true;
@@ -244,7 +249,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         cloudSettingsLogger.error("Failed to sync down", e);
         showNotification({
             title: "Cloud Settings",
-            body: `Settings synchronization failed (${e.toString()}).`
+            body: `Could not synchronize settings (${e.toString()}).`,
+            color: "var(--red-360)"
         });
 
         return false;
@@ -262,16 +268,26 @@ export async function deleteCloudSettings() {
 
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to delete, API returned ${res.status}`);
-            toast(Toasts.Type.FAILURE, `Deletion failed (API returned ${res.status}).`);
+            showNotification({
+                title: "Cloud Settings",
+                body: `Could not delete settings (API returned ${res.status}).`,
+                color: "var(--red-360)"
+            });
             return;
         }
 
-        await DataStore.set("Vencord_settingsLastSaved", 0);
-
         cloudSettingsLogger.info("Settings deleted from cloud successfully");
-        toast(Toasts.Type.SUCCESS, "Deleted your settings from the cloud!");
+        showNotification({
+            title: "Cloud Settings",
+            body: "Settings deleted from cloud!",
+            color: "var(--green-360)"
+        });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to delete", e);
-        toast(Toasts.Type.FAILURE, `Deletion failed (${e.toString()}).`);
+        showNotification({
+            title: "Cloud Settings",
+            body: `Could not delete settings (${e.toString()}).`,
+            color: "var(--red-360)"
+        });
     }
 }
