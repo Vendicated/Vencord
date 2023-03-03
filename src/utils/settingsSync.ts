@@ -22,7 +22,7 @@ import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
 
-import { cloudUrl, getCloudAuth } from "./cloud";
+import { getCloudUrl, getCloudAuth } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 
@@ -135,7 +135,7 @@ export async function putCloudSettings() {
     const settings = await exportSettings();
 
     try {
-        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
+        const res = await fetch(new URL("/api/v1/settings", getCloudUrl()), {
             method: "PUT",
             headers: new Headers({
                 Authorization: await getCloudAuth(),
@@ -172,7 +172,7 @@ export async function putCloudSettings() {
 
 export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
-        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
+        const res = await fetch(new URL("/api/v1/settings", getCloudUrl()), {
             method: "GET",
             headers: new Headers({
                 Authorization: await getCloudAuth(),
@@ -253,7 +253,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
 export async function deleteCloudSettings() {
     try {
-        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
+        const res = await fetch(new URL("/api/v1/settings", getCloudUrl()), {
             method: "DELETE",
             headers: new Headers({
                 Authorization: await getCloudAuth()

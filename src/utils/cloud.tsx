@@ -26,7 +26,7 @@ import Logger from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const cloudUrl = () => new URL(Settings.backend.url);
+export const getCloudUrl = () => Settings.backend.url;
 
 export async function cloudConfigured() {
     return await DataStore.get("Vencord_cloudSecret") !== undefined && Settings.backend.enabled;
@@ -39,7 +39,7 @@ export async function authorizeCloud() {
     }
 
     try {
-        const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", cloudUrl()));
+        const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", getCloudUrl()));
         var { clientId, redirectUri } = await oauthConfiguration.json();
     } catch {
         showNotification({

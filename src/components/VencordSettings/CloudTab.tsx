@@ -93,7 +93,7 @@ function CloudTab() {
                     key="backend"
                     value={settings.backend.enabled}
                     onChange={v => { v && authorizeCloud(); if (!v) settings.backend.enabled = v; }}
-                    note="This will request authorization if you have not yet set up cloud integration."
+                    note="This will request authorization if you have not yet set up cloud integrations."
                 >
                     Enable Cloud Integrations
                 </Switch>
