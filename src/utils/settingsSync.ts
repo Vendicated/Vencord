@@ -22,7 +22,7 @@ import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
 
-import { getCloudAuth } from "./cloud";
+import { cloudUrl, getCloudAuth } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 
@@ -135,7 +135,7 @@ export async function putCloudSettings() {
     const settings = await exportSettings();
 
     try {
-        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
+        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
             method: "PUT",
             headers: new Headers({
                 Authorization: await getCloudAuth(),
@@ -172,7 +172,7 @@ export async function putCloudSettings() {
 
 export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
-        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
+        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
             method: "GET",
             headers: new Headers({
                 Authorization: await getCloudAuth(),
@@ -253,7 +253,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
 export async function deleteCloudSettings() {
     try {
-        const res = await fetch("https://vencord.vendicated.dev/api/v1/settings", {
+        const res = await fetch(new URL("/api/v1/settings", cloudUrl()), {
             method: "DELETE",
             headers: new Headers({
                 Authorization: await getCloudAuth()

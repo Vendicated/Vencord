@@ -26,6 +26,7 @@ import Logger from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
+export const cloudUrl = () => new URL(Settings.backend.url);
 
 export async function cloudConfigured() {
     return await DataStore.get("Vencord_cloudSecret") !== undefined && Settings.backend.enabled;
@@ -36,13 +37,25 @@ export async function authorizeCloud() {
 
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
 
+    try {
+        const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", cloudUrl()));
+        var { clientId, redirectUri } = await oauthConfiguration.json();
+    } catch {
+        showNotification({
+            title: "Cloud Integration",
+            body: "Setup failed (couldn't retrieve OAuth configuration)."
+        });
+        Settings.backend.enabled = false;
+        return;
+    }
+
     openModal((props: any) => <OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
         responseType="code"
-        redirectUri="https://vencord.vendicated.dev/api/v1/callback"
+        redirectUri={redirectUri}
         permissions={0n}
-        clientId="1075583776979169361"
+        clientId={clientId}
         cancelCompletesFlow={false}
         callback={async (callbackUrl: string) => {
             if (!callbackUrl) {
