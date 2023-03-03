@@ -75,6 +75,7 @@ export async function authorizeCloud() {
                         title: "Cloud Integration",
                         body: "Cloud integrations enabled!"
                     });
+                    Settings.backend.enabled = true;
                 } else {
                     showNotification({
                         title: "Cloud Integration",

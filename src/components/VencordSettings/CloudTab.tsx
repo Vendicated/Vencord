@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Card, Forms, Switch, Tooltip } from "@webpack/common";
+import { Button, Card, Forms, React, Switch, Tooltip } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -57,6 +57,7 @@ function CloudTab() {
                     onChange={v => { settings.backend.url = v; settings.backend.enabled = false; deauthorizeCloud(); }}
                     validate={validateUrl}
                 />
+                <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection>
             <Forms.FormSection title="Settings Sync" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
