@@ -33,7 +33,10 @@ export async function cloudConfigured() {
 }
 
 export async function authorizeCloud() {
-    if (await cloudConfigured()) return;
+    if (await DataStore.get("Vencord_cloudSecret") !== undefined) {
+        Settings.backend.enabled = true;
+        return;
+    }
 
     try {
         const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", cloudUrl()));
