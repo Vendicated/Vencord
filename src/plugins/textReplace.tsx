@@ -83,8 +83,9 @@ const settings = definePluginSettings({
                             }}
                             style={{
                                 color: "var(--text-normal)",
-                                borderRadius: "4px",
-                                padding: "8px"
+                                borderRadius: "50%",
+                                padding: "9px 7px 9px",
+                                marginLeft: "4px"
                             }}
                         >
                             ➕
@@ -134,8 +135,9 @@ const settings = definePluginSettings({
                                     }}
                                     style={{
                                         color: "var(--text-normal)",
-                                        borderRadius: "4px",
-                                        padding: "8px"
+                                        borderRadius: "50%",
+                                        padding: "9px 7px 9px",
+                                        marginLeft: "4px"
                                     }}
                                 >
                                     ❌
