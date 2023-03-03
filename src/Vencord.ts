@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import {showNotification} from "@api/Notifications";
+
 export * as Api from "./api";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";
@@ -50,30 +52,29 @@ async function init() {
                 await update();
                 const needsFullRestart = await rebuild();
                 setTimeout(() => {
-                    showNotice(
-                        "Vencord has been updated!",
-                        "Restart",
-                        () => {
+                    showNotification({
+                        title: "Vencord has been updated!",
+                        body: "Click here to restart",
+                        onClick() {
                             if (needsFullRestart)
                                 window.DiscordNative.app.relaunch();
                             else
                                 location.reload();
-                        }
-                    );
+                        },
+                    })
                 }, 10_000);
                 return;
             }
 
             if (Settings.notifyAboutUpdates)
                 setTimeout(() => {
-                    showNotice(
-                        "A Vencord update is available!",
-                        "View Update",
-                        () => {
-                            popNotice();
+                    showNotification({
+                        title: "A Vencord update is available!",
+                        body: "Click here to view the update",
+                        onClick() {
                             SettingsRouter.open("VencordUpdater");
                         }
-                    );
+                    });
                 }, 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
