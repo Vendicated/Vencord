@@ -52,31 +52,27 @@ async function init() {
                 await update();
                 const needsFullRestart = await rebuild();
                 if (Settings.autoUpdateNotification)
-                    setTimeout(() => {
-                        showNotification({
-                            title: "Vencord has been updated!",
-                            body: "Click here to restart",
-                            onClick() {
-                                if (needsFullRestart)
-                                    window.DiscordNative.app.relaunch();
-                                else
-                                    location.reload();
-                            },
-                        })
-                    }, 10_000);
+                    await showNotification({
+                        title: "Vencord has been updated!",
+                        body: "Click here to restart",
+                        onClick() {
+                            if (needsFullRestart)
+                                window.DiscordNative.app.relaunch();
+                            else
+                                location.reload();
+                        },
+                    })
                 return;
             }
 
             if (Settings.notifyAboutUpdates)
-                setTimeout(() => {
-                    showNotification({
-                        title: "A Vencord update is available!",
-                        body: "Click here to view the update",
-                        onClick() {
-                            SettingsRouter.open("VencordUpdater");
-                        }
-                    });
-                }, 10_000);
+                await showNotification({
+                    title: "A Vencord update is available!",
+                    body: "Click here to view the update",
+                    onClick() {
+                        SettingsRouter.open("VencordUpdater");
+                    }
+                });
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
