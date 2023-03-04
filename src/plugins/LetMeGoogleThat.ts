@@ -39,7 +39,7 @@ export default definePlugin({
 
         execute(args) {
             const query = args[0].value.replace(" ", "+");
-            let link = "https://letmegooglethat.com/?q=" + query;
+            const link = "https://letmegooglethat.com/?q=" + query;
             return {
                 content: link
             };
