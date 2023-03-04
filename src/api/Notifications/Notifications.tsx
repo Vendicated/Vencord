@@ -54,6 +54,8 @@ export interface NotificationData {
     onClick?(): void;
     onClose?(): void;
     color?: string;
+    /** Whether this notification should not have a timeout */
+    permanent?: boolean;
 }
 
 function _showNotification(notification: NotificationData, id: number) {
