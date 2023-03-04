@@ -24,7 +24,7 @@ import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const Avatar = findByCodeLazy(".Positions.TOP,spacing:");
+const Avatar = findByCodeLazy('"top",spacing:');
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -105,7 +105,7 @@ export default definePlugin({
         }}>
             {settings.store.showAvatars && <div style={{ marginTop: "4px" }}>
                 <Avatar
-                    size={Avatar.Sizes.SIZE_16}
+                    size="SIZE_16"
                     src={user.getAvatarURL(guildId, 128)} />
             </div>}
             {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
