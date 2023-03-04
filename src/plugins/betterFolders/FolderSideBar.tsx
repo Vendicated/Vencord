@@ -17,50 +17,47 @@
 */
 
 import { Settings } from "@api/settings";
-import { find, findByProps } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { React, useStateFromStores } from "@webpack/common";
 
-export default function (self: any) {
-    if (self._FolderSideBar) return self._FolderSideBar;
+const classes = findByPropsLazy("sidebar", "guilds");
+const i18n = findLazy(m => m.Messages?.["en-US"]);
 
-    const classes = findByProps("sidebar", "guilds");
-    const { Messages } = find(m => m.Messages?.["en-US"]);
+const Animations = findByPropsLazy("useTransition");
+const FullscreenStore = findByPropsLazy("isFullscreenInContext");
+const ExpandedFolderStore = findByPropsLazy("getExpandedFolders");
 
-    const Animations = findByProps("useTransition");
-    const FullscreenStore = findByProps("isFullscreenInContext");
-    const ExpandedFolderStore = findByProps("getExpandedFolders");
+const Guilds = props => {
+    // @ts-expect-error
+    const res = Vencord.Plugins.plugins.BetterFolders.Guilds(props);
+    const scrollerProps = res.props.children?.props?.children?.[1]?.props;
+    if (scrollerProps?.children) {
+        const servers = scrollerProps.children.find(c => c?.props?.["aria-label"] === i18n.Messages.SERVERS);
+        if (servers) scrollerProps.children = servers;
+    }
+    return res;
+};
 
-    const Guilds = props => {
-        const res = self.Guilds(props);
-        const scrollerProps = res.props.children?.props?.children?.[1]?.props;
-        if (scrollerProps?.children) {
-            const servers = scrollerProps.children.find(c => c?.props?.["aria-label"] === Messages.SERVERS);
-            if (servers) scrollerProps.children = servers;
-        }
-        return res;
-    };
+export default () => {
+    const expandedFolders = useStateFromStores([ExpandedFolderStore], () => ExpandedFolderStore.getExpandedFolders());
+    const fullscreen = useStateFromStores([FullscreenStore], () => FullscreenStore.isFullscreenInContext());
 
-    return self._FolderSideBar = () => {
-        const expandedFolders = useStateFromStores([ExpandedFolderStore], () => ExpandedFolderStore.getExpandedFolders());
-        const fullscreen = useStateFromStores([FullscreenStore], () => FullscreenStore.isFullscreenInContext());
-
-        const guilds = document.querySelector(`.${classes.guilds}`);
-        const Sidebar = <Guilds className={classes.guilds} bfGuildFolders={Array.from(expandedFolders)} />;
-        const visible = !!expandedFolders.size;
-        const className = `bf-folder-sidebar${fullscreen ? " bf-fullscreen" : ""}`;
-        if (!guilds || !Settings.plugins.BetterFolders.sidebarAnim)
-            return visible ? <div className={className}>{Sidebar}</div> : null;
-        const SidebarWidth = guilds.getBoundingClientRect().width;
-        return <Animations.Transition
-            items={visible}
-            from={{ width: 0 }}
-            enter={{ width: SidebarWidth }}
-            leave={{ width: 0 }}
-            config={{ duration: 200 }}
-        >{(style, show) => show &&
-            <Animations.animated.div style={style} className={className}>
-                {Sidebar}
-            </Animations.animated.div>}
-        </Animations.Transition>;
-    };
-}
+    const guilds = document.querySelector(`.${classes.guilds}`);
+    const Sidebar = <Guilds className={classes.guilds} bfGuildFolders={Array.from(expandedFolders)} />;
+    const visible = !!expandedFolders.size;
+    const className = `vc-bf-folder-sidebar${fullscreen ? " vc-bf-fullscreen" : ""}`;
+    if (!guilds || !Settings.plugins.BetterFolders.sidebarAnim)
+        return visible ? <div className={className}>{Sidebar}</div> : null;
+    const SidebarWidth = guilds.getBoundingClientRect().width;
+    return <Animations.Transition
+        items={visible}
+        from={{ width: 0 }}
+        enter={{ width: SidebarWidth }}
+        leave={{ width: 0 }}
+        config={{ duration: 200 }}
+    >{(style, show) => show &&
+        <Animations.animated.div style={style} className={className}>
+            {Sidebar}
+        </Animations.animated.div>}
+    </Animations.Transition>;
+};

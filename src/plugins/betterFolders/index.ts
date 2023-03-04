@@ -21,10 +21,15 @@ import "./betterFolders.css";
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByProps } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
+
+const GuildsTree = findLazy(m => m.prototype?.convertToFolder);
+const GuildFolderStore = findByPropsLazy("getSortedGuilds");
+const ExpandedFolderStore = findByPropsLazy("getExpandedFolders");
+const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 export default definePlugin({
     name: "BetterFolders",
@@ -77,7 +82,7 @@ export default definePlugin({
             predicate: () => Settings.plugins.BetterFolders.sidebar,
             replacement: {
                 match: /(\(0,\i\.jsx\))\(.{1,3}\..,{className:.{1,3}\(\)\.guilds,themeOverride:\i}\)/,
-                replace: "$&,$1($self.FolderSideBar($self),{})"
+                replace: "$&,$1($self.FolderSideBar,{})"
             }
         },
         {
@@ -124,16 +129,8 @@ export default definePlugin({
     },
 
     start() {
-        const GuildFolderStore = findByProps("getSortedGuilds");
-        const ExpandedFolderStore = findByProps("getExpandedFolders");
-        const { toggleGuildFolderExpand } = findByProps("move", "toggleGuildFolderExpand");
         const getGuildFolderIdx = id => GuildFolderStore.guildFolders.findIndex(e => e.guildIds.indexOf(id) !== -1);
         const getGuildFolder = id => GuildFolderStore.guildFolders[getGuildFolderIdx(id)];
-
-        this.closeFolders = () => {
-            const expandedFolders = ExpandedFolderStore.getExpandedFolders();
-            for (const id of expandedFolders) toggleGuildFolderExpand(id);
-        };
 
         const { closeAllFolders, closeOthers, forceOpen } = Settings.plugins.BetterFolders;
         if (closeAllFolders || forceOpen) FluxDispatcher.subscribe("CHANNEL_SELECT", this.onSwitch = data => {
@@ -142,7 +139,7 @@ export default definePlugin({
                 const guildFolder = getGuildFolder(data.guildId);
                 if (guildFolder?.folderId) {
                     if (forceOpen && !ExpandedFolderStore.isFolderExpanded(guildFolder.folderId))
-                        toggleGuildFolderExpand(guildFolder.folderId);
+                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
                 } else if (closeAllFolders) this.closeFolders();
             }
         });
@@ -151,7 +148,7 @@ export default definePlugin({
                 const expandedFolders = ExpandedFolderStore.getExpandedFolders();
                 if (expandedFolders.size > 1) {
                     this.dispatching = true;
-                    for (const id of expandedFolders) if (id !== e.folderId) toggleGuildFolderExpand(id);
+                    for (const id of expandedFolders) if (id !== e.folderId) FolderUtils.toggleGuildFolderExpand(id);
                     this.dispatching = false;
                 }
             });
@@ -163,11 +160,14 @@ export default definePlugin({
     },
 
     FolderSideBar: FolderSideBar,
-    getGuildsTree: function (folders, oldTree) {
-        if (!this.GuildsTree) this.GuildsTree = find(m => m.prototype?.convertToFolder);
-        const tree = new this.GuildsTree;
+    getGuildsTree(folders, oldTree) {
+        const tree = new GuildsTree;
         tree.root.children = oldTree.root.children.filter(e => folders.includes(e.id));
         tree.nodes = folders.map(id => oldTree.nodes[id]);
         return tree;
+    },
+    closeFolders() {
+        const expandedFolders = ExpandedFolderStore.getExpandedFolders();
+        for (const id of expandedFolders) FolderUtils.toggleGuildFolderExpand(id);
     },
 });

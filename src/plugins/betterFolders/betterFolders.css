@@ -1,16 +1,16 @@
-.bf-folder-sidebar [class*="wrapper-"] > div:first-of-type {
+.vc-bf-folder-sidebar [class*="wrapper-"] > div:first-of-type {
     display: none;
 }
 
-.bf-folder-sidebar [class*="expandedFolderBackground-"] {
+.vc-bf-folder-sidebar [class*="expandedFolderBackground-"] {
     background-color: transparent;
 }
 
-.bf-folder-sidebar {
+.vc-bf-folder-sidebar {
     display: flex;
 }
 
-.bf-fullscreen {
+.vc-bf-fullscreen {
     width: 0 !important;
     visibility: hidden;
 }
