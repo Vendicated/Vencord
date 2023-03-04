@@ -37,7 +37,7 @@ Install `pnpm`:
 npm i -g pnpm
 ```
 
-> :exclamation: **IMPORTANT** Make sure you aren't using an admin/sudo terminal from here onwards. It **will** mess up your Discord/Vencord instance and you **will** most likely have to reinstall.
+> :exclamation: **IMPORTANT** Make sure you aren't using an admin/root terminal from here onwards. It **will** mess up your Discord/Vencord instance and you **will** most likely have to reinstall.
 
 Clone Vencord:
 
