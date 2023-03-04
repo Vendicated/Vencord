@@ -37,7 +37,7 @@ export default definePlugin({
     authors: [Devs.juby],
     patches: [
         {
-            find: "(\"guildsnav\")",
+            find: '("guildsnav")',
             predicate: () => Settings.plugins.BetterFolders.sidebar,
             replacement: [
                 {
