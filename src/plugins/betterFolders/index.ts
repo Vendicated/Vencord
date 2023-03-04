@@ -27,8 +27,8 @@ import { FluxDispatcher } from "@webpack/common";
 import FolderSideBar from "./FolderSideBar";
 
 const GuildsTree = findLazy(m => m.prototype?.convertToFolder);
-const GuildFolderStore = findByPropsLazy("getSortedGuilds");
-const ExpandedFolderStore = findByPropsLazy("getExpandedFolders");
+const GuildFolderStore = findStoreLazy("SortedGuildStore");
+const ExpandedFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 export default definePlugin({
@@ -41,7 +41,7 @@ export default definePlugin({
             predicate: () => Settings.plugins.BetterFolders.sidebar,
             replacement: [
                 {
-                    match: /(\w{1,3})\(\){return \w{1,3}\(\(0,\i\.jsx\)\("div",{className:\w{1,3}\(\)\.guildSeparator}\)\)}/,
+                    match: /(\i)\(\){return \i\(\(0,\i\.jsx\)\("div",{className:\i\(\)\.guildSeparator}\)\)}/,
                     replace: "$&$self.Separator=$1;"
                 },
 
@@ -51,22 +51,22 @@ export default definePlugin({
                     replace: "$&bfHideServers=$1.bfHideServers,"
                 },
                 {
-                    match: /\w{1,3}\(\(function\(\i,\i,\i\){var \i=\i\.key;return.+\(\i\)},\i\)}\)\)/,
+                    match: /\i\(\(function\(\i,\i,\i\){var \i=\i\.key;return.+\(\i\)},\i\)}\)\)/,
                     replace: "bfHideServers?null:$&"
                 },
                 // END
 
                 // BEGIN Guilds component patch
                 {
-                    match: /(\i)\.themeOverride,(.{15,25}\(function\(\){var \i=)(\w{1,3}\.\i\.getGuildsTree\(\))/,
+                    match: /(\i)\.themeOverride,(.{15,25}\(function\(\){var \i=)(\i\.\i\.getGuildsTree\(\))/,
                     replace: "$1.themeOverride,bfPatch=$1.bfGuildFolders,$2bfPatch?$self.getGuildsTree(bfPatch,$3):$3"
                 },
                 {
-                    match: /\((\i)\)({switch\(\i\.type\){case \w{1,3}\.\w{1,3}\.FOLDER)/,
+                    match: /\((\i)\)({switch\(\i\.type\){case \i\.\i\.FOLDER)/,
                     replace: "($1,bfIndex)$2"
                 },
                 {
-                    match: /return(\(0,\i\.jsx\))(\(\w{1,3},{)(folderNode:\i,setNodeRef:\i\.setNodeRef,draggable:!0,.+},\i\.id\));case/,
+                    match: /return(\(0,\i\.jsx\))(\(\i,{)(folderNode:\i,setNodeRef:\i\.setNodeRef,draggable:!0,.+},\i\.id\));case/,
                     replace: "var folder=$1$2bfHideServers:!bfPatch,$3;return bfPatch&&bfIndex?[$1($self.Separator,{}),folder]:folder;case"
                 },
                 // END
