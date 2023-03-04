@@ -87,11 +87,11 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
-                    replace: ",fakeNitroIntention"
+                    replace: ',typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
                 },
                 {
                     match: /(?<=&&!\i&&)!(?<canUseExternal>\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
-                    replace: `(!$<canUseExternal>&&(fakeNitroIntention==null||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
+                    replace: `(!$<canUseExternal>&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
                 }
             ]
         },

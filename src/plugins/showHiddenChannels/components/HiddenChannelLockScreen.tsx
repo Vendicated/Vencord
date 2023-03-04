@@ -22,8 +22,8 @@ import { formatDuration } from "@utils/text";
 import { find, findByPropsLazy } from "@webpack";
 import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
+import type { ComponentType } from "react";
 
-import { ChannelBeginHeader, EmojiComponent } from "..";
 
 enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -73,6 +73,17 @@ enum VideoQualityModes {
 enum ChannelFlags {
     PINNED = 1 << 1,
     REQUIRE_TAG = 1 << 4
+}
+
+let EmojiComponent: ComponentType<any>;
+let ChannelBeginHeader: ComponentType<any>;
+
+export function setEmojiComponent(component: ComponentType<any>) {
+    EmojiComponent = component;
+}
+
+export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
+    ChannelBeginHeader = component;
 }
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");

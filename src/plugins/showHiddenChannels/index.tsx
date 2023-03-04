@@ -25,12 +25,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
-import type { ComponentType } from "react";
 
-import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
-
-export let EmojiComponent: ComponentType<any>;
-export let ChannelBeginHeader: ComponentType<any>;
+import HiddenChannelLockScreen, { setChannelBeginHeaderComponent, setEmojiComponent } from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
 
@@ -329,13 +325,8 @@ export default definePlugin({
         }
     ],
 
-    setEmojiComponent(component: ComponentType<any>) {
-        EmojiComponent = component;
-    },
-
-    setChannelBeginHeaderComponent(component: ComponentType<any>) {
-        ChannelBeginHeader = component;
-    },
+    setEmojiComponent,
+    setChannelBeginHeaderComponent,
 
     isHiddenChannel(channel: Channel & { channelId?: string; }) {
         if (!channel) return false;
