@@ -89,4 +89,6 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             )}
         </button>
     );
+}, {
+    onError: ({ props }) => props.onClose!()
 });
