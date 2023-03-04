@@ -34,7 +34,7 @@ function validateUrl(url: string) {
 }
 
 function SettingsSyncSection() {
-    const settings = useSettings(["backend", "backend.enabled", "backend.settingsSync"]);
+    const settings = useSettings(["backend.enabled", "backend.settingsSync"]);
     const sectionEnabled = useMemo(
         () => settings.backend.enabled && settings.backend.settingsSync,
         [settings.backend.enabled, settings.backend.settingsSync]
@@ -84,7 +84,7 @@ function SettingsSyncSection() {
 }
 
 function CloudTab() {
-    const settings = useSettings(["backend", "backend.enabled", "backend.url"]);
+    const settings = useSettings(["backend.enabled", "backend.url"]);
 
     return (
         <>
@@ -99,7 +99,7 @@ function CloudTab() {
                 </Switch>
                 <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
-                    Which backend to use when using cloud integration.
+                    Which backend to use when using cloud integrations.
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
