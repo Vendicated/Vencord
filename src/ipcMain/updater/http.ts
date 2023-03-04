@@ -42,11 +42,11 @@ async function githubGet(endpoint: string) {
     });
 }
 
-async function calculateGitChanges() {
-    const isOutdated = await fetchUpdates();
+async function calculateGitChanges(branch: string) {
+    const isOutdated = await fetchUpdates(branch);
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...HEAD`);
+    const res = await githubGet(`/compare/${gitHash}...${branch}`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
@@ -57,8 +57,8 @@ async function calculateGitChanges() {
     }));
 }
 
-async function fetchUpdates() {
-    const release = await githubGet("/releases/latest");
+async function fetchUpdates(branch: string) {
+    const release = await githubGet(`/releases/tag/${branch === "main" ? "devbuild" : "release"}`);
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -81,8 +81,17 @@ async function applyUpdates() {
     return true;
 }
 
+async function switchBranch(newBranch: string) {
+    const fetchRes = await fetchUpdates(newBranch);
+    if (!fetchRes) return false;
+    return applyUpdates();
+}
+
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
+ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
+ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(() => ["main", "release"]));
+ipcMain.handle(IpcEvents.FETCH_BRANCHES, serializeErrors(() => undefined));
+ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(newBranch)));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors((_, branch: string) => fetchUpdates(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

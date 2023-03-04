@@ -26,6 +26,7 @@ import plugins from "~plugins";
 
 const logger = new Logger("Settings");
 export interface Settings {
+    branch: string;
     notifyAboutUpdates: boolean;
     autoUpdate: boolean;
     useQuickCss: boolean;
@@ -50,6 +51,7 @@ export interface Settings {
 }
 
 const DefaultSettings: Settings = {
+    branch: "main",
     notifyAboutUpdates: true,
     autoUpdate: false,
     useQuickCss: true,

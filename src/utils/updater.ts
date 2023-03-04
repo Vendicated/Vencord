@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
+
 import gitHash from "~git-hash";
 
 import IpcEvents from "./IpcEvents";
@@ -38,7 +40,8 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    console.log(Settings.branch);
+    changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES, Settings.branch));
     if (changes.some(c => c.hash === gitHash)) {
         isNewer = true;
         return (isOutdated = false);
@@ -49,7 +52,7 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE));
+    const res = await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE, Settings.branch));
 
     if (res)
         isOutdated = false;
