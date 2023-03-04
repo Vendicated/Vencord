@@ -22,15 +22,38 @@
     gap: 1.25rem;
 }
 
+.vc-notification-content {
+    width: 100%;
+}
+
+.vc-notification-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.vc-notification-title {
+    color: var(--header-primary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    text-transform: uppercase;
+}
+
+.vc-notification-close-btn {
+    color: var(--interactive-normal);
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.vc-notification-close-btn:hover {
+    color: var(--interactive-hover);
+    opacity: 1;
+}
+
 .vc-notification-icon {
     height: 4rem;
     width: 4rem;
     border-radius: 6px;
-}
-
-/* Discord adding 3km margin to generic tags */
-.vc-notification h2 {
-    margin: unset;
 }
 
 .vc-notification-progressbar {
