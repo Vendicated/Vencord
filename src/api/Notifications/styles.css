@@ -33,16 +33,16 @@
 
 .vc-notification-title {
     color: var(--header-primary);
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
-    line-height: 20px;
+    line-height: 1.25rem;
     text-transform: uppercase;
 }
 
 .vc-notification-close-btn {
     color: var(--interactive-normal);
     opacity: 0.5;
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .vc-notification-close-btn:hover {

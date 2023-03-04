@@ -77,19 +77,23 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 <div className="vc-notification-content">
                     <div className="vc-notification-header">
                         <h2 className="vc-notification-title">{title}</h2>
-                        <svg
-                            className="vc-notification-close-btn"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
+                        <button
+                            style={{ all: "unset", cursor: "pointer" }}
                             onClick={e => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 onClose!();
                             }}
                         >
-                            <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-                        </svg>
+                            <svg
+                                className="vc-notification-close-btn"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                            >
+                                <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+                            </svg>
+                        </button>
                     </div>
                     <div>
                         {richBody ?? <p className="vc-notification-p">{body}</p>}
