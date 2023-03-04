@@ -131,7 +131,7 @@ export default definePlugin({
         {
             find: ".activeCommandOption",
             replacement: {
-                match: /(.)\.push.{1,50}\(.{1,3},\{.{1,30}\},"gift"\)\)/,
+                match: /(.)\.push.{1,50}\(\i,\{.{1,30}\},"gift"\)\)/,
                 replace: "$&;try{$1.push($self.chatBarIcon())}catch{}",
             }
         },
