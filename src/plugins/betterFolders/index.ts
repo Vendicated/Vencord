@@ -18,10 +18,10 @@
 
 import "./betterFolders.css";
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
@@ -31,6 +31,39 @@ const GuildFolderStore = findStoreLazy("SortedGuildStore");
 const ExpandedFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
+const settings = definePluginSettings({
+    sidebar: {
+        type: OptionType.BOOLEAN,
+        description: "Display servers from folder on dedicated sidebar",
+        default: true,
+    },
+    sidebarAnim: {
+        type: OptionType.BOOLEAN,
+        description: "Folder sidebar animation",
+        default: true,
+    },
+    closeAllFolders: {
+        type: OptionType.BOOLEAN,
+        description: "Close all folders when selecting a server not in a folder",
+        default: false,
+    },
+    closeAllHomeButton: {
+        type: OptionType.BOOLEAN,
+        description: "Close all folders when clicking on the home button",
+        default: false,
+    },
+    closeOthers: {
+        type: OptionType.BOOLEAN,
+        description: "Close other folders when opening a folder",
+        default: false,
+    },
+    forceOpen: {
+        type: OptionType.BOOLEAN,
+        description: "Force a folder to open when switching to a server of that folder",
+        default: false,
+    },
+});
+
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
@@ -38,23 +71,18 @@ export default definePlugin({
     patches: [
         {
             find: '("guildsnav")',
-            predicate: () => Settings.plugins.BetterFolders.sidebar,
+            predicate: () => settings.store.sidebar,
             replacement: [
                 {
                     match: /(\i)\(\){return \i\(\(0,\i\.jsx\)\("div",{className:\i\(\)\.guildSeparator}\)\)}/,
                     replace: "$&$self.Separator=$1;"
                 },
 
-                // BEGIN Folder component patch
-                {
-                    match: /\i=(\i)\.folderIconContent,\i=\i\.id,\i=\i\.name,/,
-                    replace: "$&bfHideServers=$1.bfHideServers,"
-                },
+                // Folder component patch
                 {
                     match: /\i\(\(function\(\i,\i,\i\){var \i=\i\.key;return.+\(\i\)},\i\)}\)\)/,
-                    replace: "bfHideServers?null:$&"
+                    replace: "arguments[0].bfHideServers?null:$&"
                 },
-                // END
 
                 // BEGIN Guilds component patch
                 {
@@ -62,12 +90,8 @@ export default definePlugin({
                     replace: "$1.themeOverride,bfPatch=$1.bfGuildFolders,$2bfPatch?$self.getGuildsTree(bfPatch,$3):$3"
                 },
                 {
-                    match: /\((\i)\)({switch\(\i\.type\){case \i\.\i\.FOLDER)/,
-                    replace: "($1,bfIndex)$2"
-                },
-                {
                     match: /return(\(0,\i\.jsx\))(\(\i,{)(folderNode:\i,setNodeRef:\i\.setNodeRef,draggable:!0,.+},\i\.id\));case/,
-                    replace: "var folder=$1$2bfHideServers:!bfPatch,$3;return bfPatch&&bfIndex?[$1($self.Separator,{}),folder]:folder;case"
+                    replace: "var folder=$1$2bfHideServers:!bfPatch,$3;return bfPatch&&arguments[1]?[$1($self.Separator,{}),folder]:folder;case"
                 },
                 // END
 
@@ -79,15 +103,15 @@ export default definePlugin({
         },
         {
             find: "APPLICATION_LIBRARY,render",
-            predicate: () => Settings.plugins.BetterFolders.sidebar,
+            predicate: () => settings.store.sidebar,
             replacement: {
                 match: /(\(0,\i\.jsx\))\(.{1,3}\..,{className:.{1,3}\(\)\.guilds,themeOverride:\i}\)/,
                 replace: "$&,$1($self.FolderSideBar,{})"
             }
         },
         {
-            find: "(\"guildsnav\")",
-            predicate: () => Settings.plugins.BetterFolders.closeAllHomeButton,
+            find: '("guildsnav")',
+            predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 match: ",onClick:function(){if(!__OVERLAY__){",
                 replace: "$&$self.closeFolders();"
@@ -95,56 +119,24 @@ export default definePlugin({
         }
     ],
 
-    options: {
-        sidebar: {
-            type: OptionType.BOOLEAN,
-            description: "Display servers from folder on dedicated sidebar",
-            default: true,
-        },
-        sidebarAnim: {
-            type: OptionType.BOOLEAN,
-            description: "Folder sidebar animation",
-            default: true,
-        },
-        closeAllFolders: {
-            type: OptionType.BOOLEAN,
-            description: "Close all folders when selecting a server not in a folder",
-            default: false,
-        },
-        closeAllHomeButton: {
-            type: OptionType.BOOLEAN,
-            description: "Close all folders when clicking on the home button",
-            default: false,
-        },
-        closeOthers: {
-            type: OptionType.BOOLEAN,
-            description: "Close other folders when opening a folder",
-            default: false,
-        },
-        forceOpen: {
-            type: OptionType.BOOLEAN,
-            description: "Force a folder to open when switching to a server of that folder",
-            default: false,
-        },
-    },
+    settings,
 
     start() {
-        const getGuildFolderIdx = id => GuildFolderStore.guildFolders.findIndex(e => e.guildIds.indexOf(id) !== -1);
-        const getGuildFolder = id => GuildFolderStore.guildFolders[getGuildFolderIdx(id)];
+        const getGuildFolder = id => GuildFolderStore.guildFolders.find(f => f.guildIds.includes(id));
 
-        const { closeAllFolders, closeOthers, forceOpen } = Settings.plugins.BetterFolders;
-        if (closeAllFolders || forceOpen) FluxDispatcher.subscribe("CHANNEL_SELECT", this.onSwitch = data => {
+        FluxDispatcher.subscribe("CHANNEL_SELECT", this.onSwitch = data => {
+            if (!settings.store.closeAllFolders && !settings.store.forceOpen) return;
             if (this.lastGuildId !== data.guildId) {
                 this.lastGuildId = data.guildId;
                 const guildFolder = getGuildFolder(data.guildId);
                 if (guildFolder?.folderId) {
-                    if (forceOpen && !ExpandedFolderStore.isFolderExpanded(guildFolder.folderId))
+                    if (settings.store.forceOpen && !ExpandedFolderStore.isFolderExpanded(guildFolder.folderId))
                         FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
-                } else if (closeAllFolders) this.closeFolders();
+                } else if (settings.store.closeAllFolders) this.closeFolders();
             }
         });
-        if (closeOthers) FluxDispatcher.subscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder = e => {
-            if (!this.dispatching) FluxDispatcher.wait(() => {
+        FluxDispatcher.subscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder = e => {
+            if (settings.store.closeOthers && !this.dispatching) FluxDispatcher.wait(() => {
                 const expandedFolders = ExpandedFolderStore.getExpandedFolders();
                 if (expandedFolders.size > 1) {
                     this.dispatching = true;
@@ -159,7 +151,7 @@ export default definePlugin({
         if (this.onToggleFolder) FluxDispatcher.unsubscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder);
     },
 
-    FolderSideBar: FolderSideBar,
+    FolderSideBar,
     getGuildsTree(folders, oldTree) {
         const tree = new GuildsTree;
         tree.root.children = oldTree.root.children.filter(e => folders.includes(e.id));
