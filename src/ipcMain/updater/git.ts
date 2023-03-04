@@ -90,9 +90,7 @@ async function getBranches() {
 
 async function switchBranch(currentBranch: string, newBranch: string) {
     const switchRes = await git("switch", newBranch);
-    if (!switchRes.stdout.includes("Switched to")) return false;
-
-    await pull();
+    if (!switchRes.stderr.includes("Switched to")) return false;
 
     const buildRes = await build();
     if (!buildRes) {
