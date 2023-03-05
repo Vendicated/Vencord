@@ -45,6 +45,7 @@ export async function checkForUpdates() {
         isNewer = true;
         return (isOutdated = false);
     }
+    isNewer = false;
     return (isOutdated = changes.length > 0);
 }
 
