@@ -65,7 +65,6 @@ export function getRepo() {
 }
 
 export async function getBranches() {
-    await Unwrap(VencordNative.ipc.invoke<IpcRes<undefined>>(IpcEvents.FETCH_BRANCHES));
     return Unwrap(VencordNative.ipc.invoke<IpcRes<Array<string>>>(IpcEvents.GET_BRANCHES));
 }
 

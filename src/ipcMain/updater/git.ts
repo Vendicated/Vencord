@@ -78,11 +78,8 @@ async function build() {
     return !res.stderr.includes("Build failed");
 }
 
-async function fetchBranches() {
-    await git("fetch", "--all");
-}
-
 async function getBranches() {
+    await git("fetch", "--all");
     return (await git("branch", "--list")).stdout
         .replace("*", "")
         .trim()
@@ -107,7 +104,6 @@ ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((branch: string) => calculateGitChanges(branch)));
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
-ipcMain.handle(IpcEvents.FETCH_BRANCHES, serializeErrors(fetchBranches));
 ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors((branch: string) => pull(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));
