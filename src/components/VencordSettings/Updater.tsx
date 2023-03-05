@@ -24,7 +24,7 @@ import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { classes, useAwaiter, useForceUpdater } from "@utils/misc";
+import { classes, useAwaiter } from "@utils/misc";
 import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts } from "@webpack/common";
 
@@ -187,7 +187,8 @@ function Updater() {
     const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo..." });
     const [branches, branchesErr] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
 
-    const forceUpdate = useForceUpdater();
+    const [isSwitching, setIsSwitching] = React.useState(false);
+    const [selectedBranch, setSelectedBranch] = React.useState(settings.branch);
 
     React.useEffect(() => {
         if (repoErr) UpdateLogger.error("Failed to retrieve repo", repoErr);
@@ -199,25 +200,24 @@ function Updater() {
         repoPending
     };
 
-    let selectedBranch = settings.branch;
-
     async function onBranchSelect(branch: string) {
-        selectedBranch = branch;
+        setIsSwitching(true);
+        setSelectedBranch(branch);
         try {
             if (await switchBranch(branch)) {
                 settings.branch = branch;
 
                 await checkForUpdates();
-                forceUpdate();
+                setIsSwitching(false);
             } else
                 throw new Error("Failed to build or fetch new branch.");
         } catch (err) {
+            setIsSwitching(false);
             UpdateLogger.error(err);
             showNotification({
                 title: "Failed to switch branch",
                 body: "Your branch was changed back to what it was before. Check your console!"
             });
-            forceUpdate();
         }
     }
 
@@ -256,6 +256,7 @@ function Updater() {
                 </Forms.FormText>
                 <Select
                     options={branches.map(branch => ({ label: branch, value: branch, default: branch === selectedBranch }))}
+                    isDisabled={isSwitching}
                     serialize={String}
                     select={onBranchSelect}
                     isSelected={v => v === selectedBranch}
