@@ -28,9 +28,9 @@ import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
 import { popNotice, showNotice } from "./api/Notices";
-import { PlainSettings, Settings } from "./api/settings";
+import { DefaultSettings, PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { changes, checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
+import { changes, checkForUpdates, getBranches, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -40,6 +40,9 @@ async function init() {
     await onceReady;
     startAllPlugins();
     Components = await import("./components");
+
+    const branches = await getBranches();
+    if (!branches.some(branch => branch === Settings.branch)) Settings.branch = DefaultSettings.branch;
 
     if (!IS_WEB) {
         try {

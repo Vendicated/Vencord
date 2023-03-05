@@ -50,7 +50,7 @@ export interface Settings {
     };
 }
 
-const DefaultSettings: Settings = {
+export const DefaultSettings: Settings = {
     branch: IS_STANDALONE ? "release" : "main",
     notifyAboutUpdates: true,
     autoUpdate: false,
