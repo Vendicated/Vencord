@@ -41,10 +41,14 @@ async function init() {
     startAllPlugins();
     Components = await import("./components");
 
-    const branches = await getBranches();
-    if (!branches.some(branch => branch === Settings.branch)) Settings.branch = DefaultSettings.branch;
-
     if (!IS_WEB) {
+        try {
+            const branches = await getBranches();
+            if (!branches.some(branch => branch === Settings.branch)) Settings.branch = DefaultSettings.branch;
+        } catch (err) {
+            UpdateLogger.error("Failed to check if selected branch still exists.", err);
+        }
+
         try {
             const isOutdated = await checkForUpdates();
             if (!isOutdated) return;
