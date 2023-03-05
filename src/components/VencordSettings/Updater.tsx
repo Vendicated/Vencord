@@ -185,7 +185,7 @@ function Updater() {
     const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
 
     const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo..." });
-    const [branches, branchesErr] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
+    const [branches, branchesErr, branchesPending] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
 
     const [isSwitching, setIsSwitching] = React.useState(false);
 
@@ -256,7 +256,7 @@ function Updater() {
                 </Forms.FormText>
                 <Select
                     options={branches.map(branch => ({ label: branch, value: branch, default: branch === settings.branch }))}
-                    isDisabled={isSwitching}
+                    isDisabled={branchesPending || isSwitching}
                     serialize={String}
                     select={onBranchSelect}
                     isSelected={v => v === settings.branch}
