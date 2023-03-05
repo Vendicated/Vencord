@@ -252,7 +252,7 @@ function Updater() {
                                 <Link href={repo}>
                                     {repo.split("/").slice(-2).join("/")}
                                 </Link>
-                            )}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+                            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
                 </Forms.FormText>
                 <Select
                     options={branches.map(branch => ({ label: branch, value: branch, default: branch === settings.branch }))}
