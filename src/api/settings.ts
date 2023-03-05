@@ -34,6 +34,7 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -57,6 +58,7 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    winNativeTitleBar: false,
     plugins: {},
 
     notifications: {
@@ -90,7 +92,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 // Return empty for plugins with no settings
                 if (path === "plugins" && p in plugins)
                     return target[p] = makeProxy({
-                        enabled: plugins[p].required ?? false
+                        enabled: plugins[p].required ?? plugins[p].enabledByDefault ?? false
                     }, root, `plugins.${p}`);
 
                 // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -165,11 +167,11 @@ export const Settings = makeProxy(settings);
  * @returns Settings
  */
 // TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
-export function useSettings(paths?: string[]) {
+export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
     const onUpdate: SubscriptionCallback = paths
-        ? (value, path) => paths.includes(path) && forceUpdate()
+        ? (value, path) => paths.includes(path as UseSettings<Settings>) && forceUpdate()
         : forceUpdate;
 
     React.useEffect(() => {
@@ -227,7 +229,7 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
             return Settings.plugins[definedSettings.pluginName] as any;
         },
         use: settings => useSettings(
-            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
         ).plugins[definedSettings.pluginName] as any,
         def,
         checks: checks ?? {},
@@ -235,3 +237,15 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
     };
     return definedSettings;
 }
+
+type UseSettings<T extends object> = ResolveUseSettings<T>[keyof T];
+
+type ResolveUseSettings<T extends object> = {
+    [Key in keyof T]:
+    Key extends string
+    ? T[Key] extends Record<string, unknown>
+    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
+    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
+    : Key
+    : never;
+};
