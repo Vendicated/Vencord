@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
+import { changes, checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -48,6 +48,7 @@ async function init() {
 
             if (Settings.autoUpdate) {
                 await update();
+                changes.splice(0, changes.length - 1);
                 const needsFullRestart = await rebuild();
                 setTimeout(() => {
                     showNotice(
