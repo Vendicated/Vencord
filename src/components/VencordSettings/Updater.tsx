@@ -70,6 +70,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
 interface CommonProps {
     repo: string;
     repoPending: boolean;
+    switchingBranches: boolean;
 }
 
 function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
@@ -120,7 +121,7 @@ function Updatable(props: CommonProps) {
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && <Button
                     size={Button.Sizes.SMALL}
-                    disabled={isUpdating || isChecking}
+                    disabled={isUpdating || isChecking || props.switchingBranches}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
                             changes.splice(0, changes.length - 1);
@@ -148,7 +149,7 @@ function Updatable(props: CommonProps) {
                 </Button>}
                 <Button
                     size={Button.Sizes.SMALL}
-                    disabled={isUpdating || isChecking}
+                    disabled={isUpdating || isChecking || props.switchingBranches}
                     onClick={withDispatcher(setIsChecking, async () => {
                         const outdated = await checkForUpdates();
                         if (!outdated) {
@@ -196,7 +197,8 @@ function Updater() {
 
     const commonProps: CommonProps = {
         repo,
-        repoPending
+        repoPending,
+        switchingBranches: isSwitching
     };
 
     async function onBranchSelect(branch: string) {
@@ -265,7 +267,7 @@ function Updater() {
                 />
             </div>
 
-            <Forms.FormDivider className={Margins.top8 + " a" + Margins.bottom8} />
+            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
