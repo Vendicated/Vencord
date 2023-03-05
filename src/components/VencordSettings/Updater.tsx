@@ -217,7 +217,7 @@ function Updater() {
                 title: "Failed to switch branch",
                 body: "Your branch was changed back to what it was before. Check your console!"
             });
-            selectedBranch = settings.branch;
+            forceUpdate();
         }
     }
 
