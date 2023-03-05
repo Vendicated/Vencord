@@ -48,10 +48,9 @@ async function getRepo() {
 
 async function calculateGitChanges(branch: string) {
     await git("fetch");
-    const existsOnOrigin = await git("ls-remote", "--exit-code", "origin", branch);
-    console.log(existsOnOrigin);
 
-    const res = await git("log", `${branch}...origin/${branch}`, "--pretty=format:%an/%h/%s");
+    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
+    const res = await git("log", `${branch}...origin/${existsOnOrigin ? branch : "HEAD"}`, "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
