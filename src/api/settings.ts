@@ -51,7 +51,7 @@ export interface Settings {
 }
 
 const DefaultSettings: Settings = {
-    branch: "main",
+    branch: IS_STANDALONE ? "release" : "main",
     notifyAboutUpdates: true,
     autoUpdate: false,
     useQuickCss: true,
