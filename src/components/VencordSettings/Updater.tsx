@@ -26,7 +26,7 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter, useForceUpdater } from "@utils/misc";
 import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts, useState } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -187,8 +187,6 @@ function Updater() {
     const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo..." });
     const [branches, branchesErr] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
 
-    const [selectedBranch, setSelectedBranch] = useState(settings.branch);
-
     const forceUpdate = useForceUpdater();
 
     React.useEffect(() => {
@@ -201,8 +199,10 @@ function Updater() {
         repoPending
     };
 
+    let selectedBranch = settings.branch;
+
     async function onBranchSelect(branch: string) {
-        setSelectedBranch(branch);
+        selectedBranch = branch;
         try {
             if (await switchBranch(branch)) {
                 settings.branch = branch;
@@ -217,7 +217,7 @@ function Updater() {
                 title: "Failed to switch branch",
                 body: "Your branch was changed back to what it was before. Check your console!"
             });
-            setSelectedBranch(settings.branch);
+            selectedBranch = settings.branch;
         }
     }
 
