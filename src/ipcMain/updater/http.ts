@@ -89,8 +89,8 @@ async function switchBranch(newBranch: string) {
 
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((branch: string) => calculateGitChanges(branch)));
+ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(() => ["main", "release"]));
-ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((currentBranch: string, newBranch: string) => switchBranch(newBranch)));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors((branch: string) => fetchUpdates(branch)));
+ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(newBranch)));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors((_, branch: string) => fetchUpdates(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

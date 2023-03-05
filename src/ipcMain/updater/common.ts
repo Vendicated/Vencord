@@ -44,7 +44,7 @@ export function serializeErrors(func: (...args: any[]) => any) {
         try {
             return {
                 ok: true,
-                value: await func(...Array.from(arguments).slice(1))
+                value: await func(...arguments)
             };
         } catch (e: any) {
             return {

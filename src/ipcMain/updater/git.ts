@@ -102,8 +102,8 @@ async function switchBranch(currentBranch: string, newBranch: string) {
 
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((branch: string) => calculateGitChanges(branch)));
+ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
-ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors((branch: string) => pull(branch)));
+ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors((_, branch: string) => pull(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));
