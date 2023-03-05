@@ -202,20 +202,15 @@ function Updater() {
     };
 
     async function onBranchSelect(branch: string) {
-        if (isNewer) {
-            showNotification({
-                title: "Failed to switch branch",
-                body: "Your local copy has more recent commits. Please stash or reset them."
-            });
-        }
-
         setSelectedBranch(branch);
         try {
             if (await switchBranch(branch)) {
                 settings.branch = branch;
+
                 await checkForUpdates();
                 forceUpdate();
-            } else throw new Error("Failed to build or fetch new branch.");
+            } else
+                throw new Error("Failed to build or fetch new branch.");
         } catch (err) {
             UpdateLogger.error(err);
             showNotification({

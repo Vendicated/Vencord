@@ -61,8 +61,9 @@ async function calculateGitChanges(branch: string) {
     }) : [];
 }
 
-async function pull() {
-    const res = await git("pull");
+async function pull(branch: string) {
+    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
+    const res = await git("pull", existsOnOrigin ? branch : "HEAD");
     return res.stdout.includes("Fast-forward");
 }
 
@@ -108,5 +109,5 @@ ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((branch: string) => calcul
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
 ipcMain.handle(IpcEvents.FETCH_BRANCHES, serializeErrors(fetchBranches));
 ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors((branch: string) => pull(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));
