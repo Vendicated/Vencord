@@ -70,7 +70,7 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /return \i\.Z\.getName\(.,.\.props\.channel\.id,(.)\)/,
+                match: /return \i\.\i\.getName\(.,.\.props\.channel\.id,(.)\)/,
                 replace: "return $1"
             }
         },

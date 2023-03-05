@@ -87,11 +87,11 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
-                    replace: ",fakeNitroIntention"
+                    replace: ',typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
                 },
                 {
                     match: /(?<=&&!\i&&)!(?<canUseExternal>\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
-                    replace: `(!$<canUseExternal>&&![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
+                    replace: `(!$<canUseExternal>&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
                 }
             ]
         },
@@ -100,7 +100,7 @@ export default definePlugin({
             predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: {
                 match: /(?<=(?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\((?<user>\i))\){(?<premiumCheck>.+?\))/g,
-                replace: `,fakeNitroIntention){$<premiumCheck>||fakeNitroIntention===undefined||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+                replace: `,fakeNitroIntention){$<premiumCheck>||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
             }
         },
         {
