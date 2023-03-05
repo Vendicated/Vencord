@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotification } from "@api/Notifications";
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
@@ -24,8 +25,8 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
-import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
+import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
+import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts, useState } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -187,17 +188,42 @@ function Newer(props: CommonProps) {
 function Updater() {
     const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
 
-    const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
+    const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo..." });
+    const [branches, branchesErr] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
+
+    const [selectedBranch, setSelectedBranch] = useState(settings.branch);
 
     React.useEffect(() => {
-        if (err)
-            UpdateLogger.error("Failed to retrieve repo", err);
-    }, [err]);
+        if (repoErr) UpdateLogger.error("Failed to retrieve repo", repoErr);
+        if (branchesErr) UpdateLogger.error("Failed to retrieve branches", branchesErr);
+    }, [repoErr, branchesErr]);
 
     const commonProps: CommonProps = {
         repo,
         repoPending
     };
+
+    async function onBranchSelect(branch: string) {
+        if (isNewer) {
+            showNotification({
+                title: "Failed to switch branch",
+                body: "Your local copy has more recent commits. Please stash or reset them."
+            });
+        }
+
+        setSelectedBranch(branch);
+        try {
+            if (await switchBranch(branch)) settings.branch = branch;
+            else throw new Error("Failed to build or fetch new branch.");
+        } catch (err) {
+            UpdateLogger.error(err);
+            showNotification({
+                title: "Failed to switch branch",
+                body: "Your branch was changed back to what it was before. Check your console!"
+            });
+            setSelectedBranch(settings.branch);
+        }
+    }
 
     return (
         <Forms.FormSection className={Margins.top16}>
@@ -220,11 +246,27 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
-                <Link href={repo}>
-                    {repo.split("/").slice(-2).join("/")}
-                </Link>
-            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
+            <div className="vc-updater-repo-container">
+                <Forms.FormText>
+                    {repoErr
+                        ? "Failed to retrieve repo - check console"
+                        : repoPending
+                            ? repo
+                            : (
+                                <Link href={repo}>
+                                    {repo.split("/").slice(-2).join("/")}
+                                </Link>
+                            )}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+                </Forms.FormText>
+                <Select
+                    options={branches.map(branch => ({ label: branch, value: branch, default: branch === selectedBranch }))}
+                    serialize={String}
+                    select={onBranchSelect}
+                    isSelected={v => v === selectedBranch}
+                    closeOnSelect={true}
+                    className="vc-updater-branch-select-menu"
+                />
+            </div>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 

@@ -40,7 +40,6 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    console.log(Settings.branch);
     changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES, Settings.branch));
     if (changes.some(c => c.hash === gitHash)) {
         isNewer = true;
@@ -62,6 +61,15 @@ export async function update() {
 
 export function getRepo() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
+}
+
+export async function getBranches() {
+    await Unwrap(VencordNative.ipc.invoke<IpcRes<undefined>>(IpcEvents.FETCH_BRANCHES));
+    return Unwrap(VencordNative.ipc.invoke<IpcRes<Array<string>>>(IpcEvents.GET_BRANCHES));
+}
+
+export async function switchBranch(newBranch: string) {
+    return Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.SWITCH_BRANCH, Settings.branch, newBranch));
 }
 
 type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js" | "renderer.css", string>;

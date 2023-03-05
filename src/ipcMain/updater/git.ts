@@ -89,8 +89,7 @@ async function getBranches() {
 }
 
 async function switchBranch(currentBranch: string, newBranch: string) {
-    const switchRes = await git("switch", newBranch);
-    if (!switchRes.stderr.includes("Switched to")) return false;
+    await git("switch", newBranch);
 
     const buildRes = await build();
     if (!buildRes) {
@@ -104,9 +103,9 @@ async function switchBranch(currentBranch: string, newBranch: string) {
 
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
+ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((branch: string) => calculateGitChanges(branch)));
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
 ipcMain.handle(IpcEvents.FETCH_BRANCHES, serializeErrors(fetchBranches));
-ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
+ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));

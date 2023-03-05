@@ -38,3 +38,13 @@
     color: var(--info-warning-text);
     margin-top: 0;
 }
+
+.vc-updater-repo-container {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+.vc-updater-branch-select-menu {
+    width: 50%;
+}
