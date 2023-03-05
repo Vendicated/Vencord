@@ -80,11 +80,16 @@ async function build() {
 
 async function getBranches() {
     await git("fetch", "--all");
-    return (await git("branch", "--list")).stdout
+
+    const branches = (await git("branch", "--list")).stdout
         .replace("*", "")
         .trim()
         .split("\n")
-        .map(str => str.trim());
+        .map(str => str.trim())
+        .filter(branch => branch !== "main");
+    branches.unshift("main");
+
+    return branches;
 }
 
 async function switchBranch(currentBranch: string, newBranch: string) {

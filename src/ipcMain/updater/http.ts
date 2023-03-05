@@ -84,8 +84,11 @@ async function applyUpdates() {
 async function getBranches() {
     const releases = await githubGet("/releases");
 
-    const data = JSON.parse(releases.toString()).map(release => release.tag_name) as Array<string>;
-    return data.filter(release => release !== "devbuild").concat("main", "latest");
+    const data = JSON.parse(releases.toString()).map(release => release.tag_name)
+        .filter(release => release !== "devbuild") as Array<string>;
+    data.unshift("latest", "main");
+
+    return data;
 }
 
 async function switchBranch(newBranch: string) {
