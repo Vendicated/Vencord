@@ -33,6 +33,11 @@ declare module "~git-remote" {
     export default remote;
 }
 
+declare module "~git-tag" {
+    const tag: string;
+    export default tag;
+}
+
 declare module "~fileContent/*" {
     const content: string;
     export default content;

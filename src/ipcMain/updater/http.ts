@@ -42,11 +42,11 @@ async function githubGet(endpoint: string) {
     });
 }
 
-async function calculateGitChanges(branch: string) {
-    const isOutdated = await fetchUpdates(branch);
+async function calculateGitChanges(tag: string) {
+    const isOutdated = await fetchUpdates(tag);
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...${branch}`);
+    const res = await githubGet(`/compare/${gitHash}...${tag === "latest" ? "release" : tag}`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
@@ -57,8 +57,8 @@ async function calculateGitChanges(branch: string) {
     }));
 }
 
-async function fetchUpdates(branch: string) {
-    const release = await githubGet(`/releases/tag/${branch === "main" ? "devbuild" : "release"}`);
+async function fetchUpdates(tag: string) {
+    const release = await githubGet(`/releases/${tag === "latest" ? "latest" : `tags/${tag === "main" ? "devbuild" : tag}`}`);
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -81,8 +81,15 @@ async function applyUpdates() {
     return true;
 }
 
-async function switchBranch(newBranch: string) {
-    const fetchRes = await fetchUpdates(newBranch);
+async function getBranches() {
+    const releases = await githubGet("/releases");
+
+    const data = JSON.parse(releases.toString()).map(release => release.tag_name) as Array<string>;
+    return data.filter(release => release !== "devbuild").concat("main", "latest");
+}
+
+async function switchBranch(newTag: string) {
+    const fetchRes = await fetchUpdates(newTag);
     if (!fetchRes) return false;
     return applyUpdates();
 }
@@ -90,7 +97,7 @@ async function switchBranch(newBranch: string) {
 ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
-ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(() => ["main", "release"]));
+ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
 ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(newBranch)));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors((_, branch: string) => fetchUpdates(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
