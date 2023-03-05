@@ -24,7 +24,7 @@ import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes, useAwaiter, useForceUpdater } from "@utils/misc";
 import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts, useState } from "@webpack/common";
 
@@ -95,15 +95,14 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
 }
 
 function Updatable(props: CommonProps) {
-    const [updates, setUpdates] = React.useState(changes);
     const [isChecking, setIsChecking] = React.useState(false);
     const [isUpdating, setIsUpdating] = React.useState(false);
 
-    const isOutdated = (updates?.length ?? 0) > 0;
+    const isOutdated = (changes?.length ?? 0) > 0;
 
     return (
         <>
-            {!updates && updateError ? (
+            {!changes && updateError ? (
                 <>
                     <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
                     <ErrorCard style={{ padding: "1em" }}>
@@ -112,11 +111,11 @@ function Updatable(props: CommonProps) {
                 </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
+                    {isOutdated ? `There are ${changes.length} Updates` : "Up to Date!"}
                 </Forms.FormText>
             )}
 
-            {isOutdated && <Changes updates={updates} {...props} />}
+            {isOutdated && <Changes updates={changes} {...props} />}
 
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && <Button
@@ -124,7 +123,7 @@ function Updatable(props: CommonProps) {
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
-                            setUpdates([]);
+                            changes.splice(0, changes.length - 1);
                             const needFullRestart = await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
@@ -152,10 +151,7 @@ function Updatable(props: CommonProps) {
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsChecking, async () => {
                         const outdated = await checkForUpdates();
-                        if (outdated) {
-                            setUpdates(changes);
-                        } else {
-                            setUpdates([]);
+                        if (!outdated) {
                             Toasts.show({
                                 message: "No updates found!",
                                 id: Toasts.genId(),
@@ -193,6 +189,8 @@ function Updater() {
 
     const [selectedBranch, setSelectedBranch] = useState(settings.branch);
 
+    const forceUpdate = useForceUpdater();
+
     React.useEffect(() => {
         if (repoErr) UpdateLogger.error("Failed to retrieve repo", repoErr);
         if (branchesErr) UpdateLogger.error("Failed to retrieve branches", branchesErr);
@@ -213,8 +211,11 @@ function Updater() {
 
         setSelectedBranch(branch);
         try {
-            if (await switchBranch(branch)) settings.branch = branch;
-            else throw new Error("Failed to build or fetch new branch.");
+            if (await switchBranch(branch)) {
+                settings.branch = branch;
+                await checkForUpdates();
+                forceUpdate();
+            } else throw new Error("Failed to build or fetch new branch.");
         } catch (err) {
             UpdateLogger.error(err);
             showNotification({
