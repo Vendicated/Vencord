@@ -31,7 +31,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Build
-              run: pnpm build --standalone --tag=${{ github.ref_name }}
+              run: pnpm build --standalone
 
             - name: Create release and upload assets
               run: |

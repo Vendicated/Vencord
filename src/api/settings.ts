@@ -22,7 +22,6 @@ import { mergeDefaults } from "@utils/misc";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
-import gitTag from "~git-tag";
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
@@ -52,7 +51,7 @@ export interface Settings {
 }
 
 export const DefaultSettings: Settings = {
-    branch: IS_STANDALONE && !IS_WEB ? gitTag : "main",
+    branch: IS_STANDALONE ? "latest" : "main",
     notifyAboutUpdates: true,
     autoUpdate: false,
     useQuickCss: true,

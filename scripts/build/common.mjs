@@ -25,7 +25,6 @@ import { promisify } from "util";
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
-export const gitTag = process.argv.find(arg => arg.includes("--tag="))?.replace("--tag=", "") ?? "main";
 export const banner = {
     js: `
 // Vencord ${gitHash}
@@ -100,19 +99,6 @@ export const gitHashPlugin = {
         }));
         build.onLoad({ filter, namespace: "git-hash" }, () => ({
             contents: `export default "${gitHash}"`
-        }));
-    }
-};
-
-export const gitTagPlugin = {
-    name: "git-tag-plugin",
-    setup: build => {
-        const filter = /^~git-tag$/;
-        build.onResolve({ filter }, args => ({
-            namespace: "git-tag", path: args.path
-        }));
-        build.onLoad({ filter, namespace: "git-tag" }, () => ({
-            contents: `export default "${gitTag}"`
         }));
     }
 };
@@ -198,8 +184,8 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
-    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, gitTagPlugin, stylePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote", "~git-tag"],
+    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
+    external: ["~plugins", "~git-hash", "~git-remote"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
