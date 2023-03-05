@@ -25,7 +25,7 @@ import { promisify } from "util";
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
-export const gitTag = process.argv.find(arg => arg.includes("--tag="))?.replace("--tag=", "") ?? "latest";
+export const gitTag = process.argv.find(arg => arg.includes("--tag="))?.replace("--tag=", "") ?? "main";
 export const banner = {
     js: `
 // Vencord ${gitHash}

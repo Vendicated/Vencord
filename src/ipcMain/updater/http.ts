@@ -42,11 +42,11 @@ async function githubGet(endpoint: string) {
     });
 }
 
-async function calculateGitChanges(tag: string) {
-    const isOutdated = await fetchUpdates(tag);
+async function calculateGitChanges(branch: string) {
+    const isOutdated = await fetchUpdates(branch);
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...${tag === "latest" ? "release" : tag}`);
+    const res = await githubGet(`/compare/${gitHash}...${branch === "latest" ? "release" : branch}`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
@@ -57,8 +57,8 @@ async function calculateGitChanges(tag: string) {
     }));
 }
 
-async function fetchUpdates(tag: string) {
-    const release = await githubGet(`/releases/${tag === "latest" ? "latest" : `tags/${tag === "main" ? "devbuild" : tag}`}`);
+async function fetchUpdates(branch: string) {
+    const release = await githubGet(`/releases/${branch === "latest" ? "latest" : `tags/${branch === "main" ? "devbuild" : branch}`}`);
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -88,8 +88,8 @@ async function getBranches() {
     return data.filter(release => release !== "devbuild").concat("main", "latest");
 }
 
-async function switchBranch(newTag: string) {
-    const fetchRes = await fetchUpdates(newTag);
+async function switchBranch(newBranch: string) {
+    const fetchRes = await fetchUpdates(newBranch);
     if (!fetchRes) return false;
     return applyUpdates();
 }

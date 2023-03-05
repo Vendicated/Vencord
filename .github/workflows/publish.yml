@@ -30,6 +30,15 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            - name: Build
+              run: pnpm build --standalone --tag=${{ github.ref_name }}
+
+            - name: Create release and upload assets
+              run: |
+                  gh release create ${{ github.ref_name }} --latest dist/*
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: Build web
               run: pnpm buildWeb --standalone
 
@@ -58,17 +67,3 @@ jobs:
                   # Firefox
                   WEB_EXT_API_KEY: ${{ secrets.WEBEXT_USER }}
                   WEB_EXT_API_SECRET: ${{ secrets.WEBEXT_SECRET }}
-
-            - name: Clean extension build
-              run: |
-                  rm -rf dist/extension*
-                  rmdir dist/extension*
-
-            - name: Build
-              run: pnpm build --standalone
-
-            - name: Create release and upload assets
-              run: |
-                  gh release create ${{ github.ref_name }} --latest dist/*
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
