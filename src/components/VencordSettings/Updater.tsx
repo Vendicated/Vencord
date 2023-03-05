@@ -188,7 +188,6 @@ function Updater() {
     const [branches, branchesErr] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
 
     const [isSwitching, setIsSwitching] = React.useState(false);
-    const [selectedBranch, setSelectedBranch] = React.useState(settings.branch);
 
     React.useEffect(() => {
         if (repoErr) UpdateLogger.error("Failed to retrieve repo", repoErr);
@@ -202,7 +201,7 @@ function Updater() {
 
     async function onBranchSelect(branch: string) {
         setIsSwitching(true);
-        setSelectedBranch(branch);
+
         try {
             if (await switchBranch(branch)) {
                 settings.branch = branch;
@@ -213,6 +212,7 @@ function Updater() {
                 throw new Error("Failed to build or fetch new branch.");
         } catch (err) {
             setIsSwitching(false);
+
             UpdateLogger.error(err);
             showNotification({
                 title: "Failed to switch branch",
@@ -255,17 +255,17 @@ function Updater() {
                             )}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
                 </Forms.FormText>
                 <Select
-                    options={branches.map(branch => ({ label: branch, value: branch, default: branch === selectedBranch }))}
+                    options={branches.map(branch => ({ label: branch, value: branch, default: branch === settings.branch }))}
                     isDisabled={isSwitching}
                     serialize={String}
                     select={onBranchSelect}
-                    isSelected={v => v === selectedBranch}
+                    isSelected={v => v === settings.branch}
                     closeOnSelect={true}
                     className="vc-updater-branch-select-menu"
                 />
             </div>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+            <Forms.FormDivider className={Margins.top8 + " a" + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
