@@ -64,29 +64,29 @@ export default definePlugin({
     patches: [
         {
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
-            find: ".CannotShow",
+            find: ".CannotShow=",
             // These replacements only change the necessary CannotShow's
             replacement: [
                 {
-                    match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
-                    replace: "this.category.isCollapsed?$<RenderLevels>.WouldShowIfUncollapsed:$<RenderLevels>.Show"
+                    match: /(?<=isChannelGatedAndVisible\(this\.record\.guild_id,this\.record\.id\).+?renderLevel:)(\i)\..+?(?=,)/,
+                    replace: (_, RenderLevels) => `this.category.isCollapsed?${RenderLevels}.WouldShowIfUncollapsed:${RenderLevels}.Show`
                 },
                 // Move isChannelGatedAndVisible renderLevel logic to the bottom to not show hidden channels in case they are muted
                 {
-                    match: /(?<=(?<permissionCheck>if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{)if\(this\.id===\i\).+?};)(?<isChannelGatedAndVisibleCondition>if\(!\i\.\i\.isChannelGatedAndVisible\(.+?})(?<restOfFunction>.+?)(?=return{renderLevel:\i\.Show.{1,40}return \i)/,
-                    replace: "$<restOfFunction>$<permissionCheck>$<isChannelGatedAndVisibleCondition>}"
+                    match: /(?<=(if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{)if\(this\.id===\i\).+?};)(if\(!\i\.\i\.isChannelGatedAndVisible\(.+?})(.+?)(?=return{renderLevel:\i\.Show.{0,40}?return \i)/,
+                    replace: (_, permissionCheck, isChannelGatedAndVisibleCondition, rest) => `${rest}${permissionCheck}${isChannelGatedAndVisibleCondition}}`
                 },
                 {
-                    match: /(?<=renderLevel:(?<renderLevelExpression>\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
-                    replace: "$<renderLevelExpression>"
+                    match: /(?<=renderLevel:(\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
+                    replace: (_, renderLevelExpression) => renderLevelExpression
                 },
                 {
-                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(?<RenderLevels>\i)\..+?(?=,)/,
-                    replace: "$<RenderLevels>.Show"
+                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(\i)\..+?(?=,)/,
+                    replace: (_, RenderLevels) => `${RenderLevels}.Show`
                 },
                 {
-                    match: /(?<=getRenderLevel=function.+?return ).+?\?(?<renderLevelExpressionWithoutPermCheck>.+?):\i\.CannotShow(?=})/,
-                    replace: "$<renderLevelExpressionWithoutPermCheck>"
+                    match: /(?<=getRenderLevel=function.+?return ).+?\?(.+?):\i\.CannotShow(?=})/,
+                    replace: (_, renderLevelExpressionWithoutPermCheck) => renderLevelExpressionWithoutPermCheck
                 }
             ]
         },
@@ -95,18 +95,18 @@ export default definePlugin({
             replacement: [
                 {
                     // Do not show confirmation to join a voice channel when already connected to another if clicking on a hidden voice channel
-                    match: /(?<=getCurrentClientVoiceChannelId\(\i\.guild_id\);if\()(?=.+?\((?<channel>\i)\))/,
-                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                    match: /(?<=getCurrentClientVoiceChannelId\((\i)\.guild_id\);if\()/,
+                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
                     // Make Discord think we are connected to a voice channel so it shows us inside it
-                    match: /(?=\|\|\i\.default\.selectVoiceChannel\((?<channel>\i)\.id\))/,
-                    replace: "||$self.isHiddenChannel($<channel>)"
+                    match: /(?=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord think we are connected to a voice channel so it shows us inside it
-                    match: /(?<=\|\|\i\.default\.selectVoiceChannel\((?<channel>\i)\.id\);!__OVERLAY__&&\()/,
-                    replace: "$self.isHiddenChannel($<channel>)||"
+                    match: /(?<=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\);!__OVERLAY__&&\()/,
+                    replace: (_, channel) => `$self.isHiddenChannel(${channel})||`
                 }
             ]
         },
@@ -119,7 +119,7 @@ export default definePlugin({
                     "renderInviteButton",
                     "renderOpenChatButton"
                 ].map(func => ({
-                    match: new RegExp(`(?<=\\i\\.${func}=function\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
+                    match: new RegExp(`(?<=${func}=function\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
                     replace: "if($self.isHiddenChannel(this.props.channel))return null;"
                 }))
             ]
@@ -129,8 +129,8 @@ export default definePlugin({
             predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
                 // Lock Icon
-                match: /(?=switch\((?<channel>\i)\.type\).{1,30}\.GUILD_ANNOUNCEMENT.{1,30}\(0,\i\.\i\))/,
-                replace: "if($self.isHiddenChannel($<channel>))return $self.LockIcon;"
+                match: /(?=switch\((\i)\.type\).{0,30}\.GUILD_ANNOUNCEMENT.{0,30}\(0,\i\.\i\))/,
+                replace: (_, channel) => `if($self.isHiddenChannel(${channel}))return $self.LockIcon;`
             }
         },
         {
@@ -138,8 +138,8 @@ export default definePlugin({
             predicate: () => settings.store.hideUnreads === true,
             replacement: {
                 // Hide unreads
-                match: /(?<=\i\.connected,\i=)(?=(?<props>\i)\.unread)/,
-                replace: "$self.isHiddenChannel($<props>.channel)?false:"
+                match: /(?<=\i\.connected,\i=)(?=(\i)\.unread)/,
+                replace: (_, props) => `$self.isHiddenChannel(${props}.channel)?false:`
             }
         },
         {
@@ -148,18 +148,18 @@ export default definePlugin({
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
-                    match: /(?<=\i\.name,\i=)(?=(?<props>\i)\.muted)/,
-                    replace: "$self.isHiddenChannel($<props>.channel)?true:"
+                    match: /(?<=\i\.name,\i=)(?=(\i)\.muted)/,
+                    replace: (_, props) => `$self.isHiddenChannel(${props}.channel)?true:`
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
-                    match: /(?<=(?<channel>\i)=\i\.channel,.+?\(\)\.children.+?:null)/,
-                    replace: ",$self.isHiddenChannel($<channel>)?$self.HiddenChannelIcon():null"
+                    match: /\(\).children.+?:null(?<=(\i)=\i\.channel,.+?)/,
+                    replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.HiddenChannelIcon():null`
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<=\i\(\)\.wrapper:\i\(\)\.notInteractive,)(?<otherClasses>.+?)(?<mutedClassExpression>(?<isMuted>\i)\?\i\.MUTED)/,
-                    replace: "$<mutedClassExpression>:\"\",$<otherClasses>$<isMuted>?\"\""
+                    match: /(?<=\.wrapper:\i\(\)\.notInteractive,)(.+?)((\i)\?\i\.MUTED)/,
+                    replace: (_, otherClasses, mutedClassExpression, isMuted) => `${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
                 }
             ]
         },
@@ -168,16 +168,16 @@ export default definePlugin({
             find: ".UNREAD_HIGHLIGHT",
             predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: {
-                match: /(?<=(?<channel>\i)=\i\.channel,.+?\.LOCKED:\i)/,
-                replace: "&&!($self.settings.store.hideUnreads===false&&$self.isHiddenChannel($<channel>))"
+                match: /\.LOCKED:\i(?<=(\i)=\i\.channel,.+?)/,
+                replace: (m, channel) => `${m}&&!($self.settings.store.hideUnreads===false&&$self.isHiddenChannel(${channel}))`
             }
         },
         {
             // Hide New unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
-                match: /(?<=return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
-                replace: "&&!$self.isHiddenChannel($<channel>)"
+                match: /(?<=return null!=(\i))(?=.{0,130}?hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
+                replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
         // Only render the channel header and buttons that work when transitioning to a hidden channel
@@ -185,20 +185,20 @@ export default definePlugin({
             find: "Missing channel in Channel.renderHeaderToolbar",
             replacement: [
                 {
-                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_TEXT:)(?=.+?;(?<pushNotificationButtonExpression>.+?{channel:(?<channel>\i)},"notifications"\)\);))/,
-                    replace: "if($self.isHiddenChannel($<channel>)){$<pushNotificationButtonExpression>break;}"
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_TEXT:)(?=.+?;(.+?{channel:(\i)},"notifications"\)\);))/,
+                    replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression}break;}`
                 },
                 {
-                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:if\(!\i\){)(?=.+?;(?<pushNotificationButtonExpression>.+?{channel:(?<channel>\i)},"notifications"\)\)))/,
-                    replace: "if($self.isHiddenChannel($<channel>)){$<pushNotificationButtonExpression>;break;}"
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:if\(!\i\){)(?=.+?;(.+?{channel:(\i)},"notifications"\)\)))/,
+                    replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
-                    match: /(?<=(?<this>\i)\.renderMobileToolbar=function.+?case \i\.\i\.GUILD_FORUM:)/,
-                    replace: "if($self.isHiddenChannel($<this>.props.channel))break;"
+                    match: /renderMobileToolbar=function.+?case \i\.\i\.GUILD_FORUM:(?<=(\i)\.renderMobileToolbar.+?)/,
+                    replace: (m, that) => `${m}if($self.isHiddenChannel(${that}.props.channel))break;`
                 },
                 {
-                    match: /(?<=renderHeaderBar=function.+?hideSearch:(?<channel>\i)\.isDirectory\(\))/,
-                    replace: "||$self.isHiddenChannel($<channel>)"
+                    match: /(?<=renderHeaderBar=function.+?hideSearch:(\i)\.isDirectory\(\))/,
+                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
                     match: /(?<=renderSidebar=function\(\){)/,
@@ -215,8 +215,8 @@ export default definePlugin({
             find: '"MessageManager"',
             replacement: [
                 {
-                    match: /(?<=if\(null!=(?<channelId>\i)\).{1,100}"Skipping fetch because channelId is a static route".{1,10}else{)/,
-                    replace: "if($self.isHiddenChannel({channelId:$<channelId>}))return;"
+                    match: /"Skipping fetch because channelId is a static route"\);else{(?=.+?getChannel\((\i)\))/,
+                    replace: (m, channelId) => `${m}if($self.isHiddenChannel({channelId:${channelId}}))return;`
                 },
             ]
         },
@@ -224,14 +224,14 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /(?<=getChannel\(\i\);return null!=(?<channel>\i))(?=.{1,130}hasRelevantUnread\(\i\))/,
-                replace: "&&!$self.isHiddenChannel($<channel>)"
+                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,130}?hasRelevantUnread\(\i\))/,
+                replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
             find: '"alt+down"',
             replacement: {
-                match: /(?<=getState\(\)\.channelId.{1,30}\(0,\i\.\i\)\(\i\))(?=\.map\()/,
+                match: /(?<=getState\(\)\.channelId.{0,30}?\(0,\i\.\i\)\(\i\))(?=\.map\()/,
                 replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
         },
@@ -239,8 +239,8 @@ export default definePlugin({
         {
             find: 'jumboable?"jumbo":"default"',
             replacement: {
-                match: /(?<=(?<component>\i)=function.{1,20}node,\i=\i.isInteracting.+?}}\)},)/,
-                replace: "shcEmojiComponentExport=($self.setEmojiComponent($<component>),void 0),"
+                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function.+?)/,
+                replace: (m, component) => `${m}shcEmojiComponentExport=($self.setEmojiComponent(${component}),void 0),`
             }
         },
         {
@@ -248,13 +248,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Export the channel beggining header
-                    match: /(?<=function (?<component>\i)\(.{1,600}computePermissionsForRoles.+?}\)})(?=var)/,
-                    replace: "$self.setChannelBeginHeaderComponent($<component>);"
+                    match: /computePermissionsForRoles.+?}\)}(?<=function (\i)\(.+?)(?=var)/,
+                    replace: (m, component) => `${m}$self.setChannelBeginHeaderComponent(${component});`
                 },
                 {
                     // Patch the header to only return allowed users and roles if it's a hidden channel (Like when it's used on the HiddenChannelLockScreen)
-                    match: /(?<=MANAGE_ROLES.{1,60}return)(?=\(.+?(?<component>\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(?<channel>\i)\.guild_id.+?roleColor.+?]}\)))/,
-                    replace: " $self.isHiddenChannel($<channel>)?$<component>:"
+                    match: /MANAGE_ROLES.{0,60}?return(?=\(.+?(\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(\i)\.guild_id.+?roleColor.+?]}\)))/,
+                    replace: (m, component, channel) => `${m} $self.isHiddenChannel(${channel})?${component}:`
                 }
             ]
         },
@@ -263,23 +263,23 @@ export default definePlugin({
             replacement: [
                 {
                     // Remove the divider and the open chat button for the HiddenChannelLockScreen
-                    match: /(?<=function \i\((?<props>\i)\).{1,2000}"more-options-popout"\)\);if\()/,
-                    replace: "(!$self.isHiddenChannel($<props>.channel)||$<props>.inCall)&&"
+                    match: /"more-options-popout"\)\);if\((?<=function \i\((\i)\).+?)/,
+                    replace: (m, props) => `${m}(!$self.isHiddenChannel(${props}.channel)||${props}.inCall)&&`
                 },
                 {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
-                    match: /(?<=renderContent=function.{1,1700}children:)/,
-                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?$self.HiddenChannelLockScreen(this.props.channel):"
+                    match: /this\.renderVoiceChannelEffects.+?children:(?<=renderContent=function.+?)/,
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?$self.HiddenChannelLockScreen(this.props.channel):"
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of voice channels
-                    match: /(?<=renderContent=function.{1,1600}disableGradients:)/,
-                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)||"
+                    match: /this\.renderVoiceChannelEffects.+?disableGradients:(?<=renderContent=function.+?)/,
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)||"
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
-                    match: /(?<=renderContent=function.{1,800}render(?!Header).{0,30}:)(?!void)/g,
-                    replace: "!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
+                    match: /(?:{|,)render(?!Header).{0,30}?:(?<=renderContent=function.{0,900}?)(?!void)/g,
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
                 }
             ]
         },
@@ -288,38 +288,38 @@ export default definePlugin({
             replacement: [
                 {
                     // Render our HiddenChannelLockScreen component instead of the main stage channel component
-                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,1400}children:)(?=.{1,20}}\)}function)/,
-                    replace: "$self.isHiddenChannel($<channel>)?$self.HiddenChannelLockScreen($<channel>):"
+                    match: /Guild voice channel without guild id.+?children:(?<=(\i)\.getGuildId\(\).+?)(?=.{0,20}?}\)}function)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?$self.HiddenChannelLockScreen(${channel}):`
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of stage channels
-                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,1000}render(?!Header).{0,30}:)/g,
-                    replace: "$self.isHiddenChannel($<channel>)?null:"
+                    match: /render(?!Header).{0,30}?:(?<=(\i)\.getGuildId\(\).+?Guild voice channel without guild id.+?)/g,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?null:`
                 },
                 // Prevent Discord from replacing our route if we aren't connected to the stage channel
                 {
-                    match: /(?<=if\()(?=!\i&&!\i&&!\i.{1,80}(?<channel>\i)\.getGuildId\(\).{1,50}Guild voice channel without guild id\.)/,
-                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                    match: /(?=!\i&&!\i&&!\i.{0,80}(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
+                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of stage channels
-                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600}disableGradients:)/,
-                    replace: "$self.isHiddenChannel($<channel>)||"
+                    match: /Guild voice channel without guild id.+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})||`
                 },
                 {
                     // Disable strange styles applied to the header for the HiddenChannelLockScreen of stage channels
-                    match: /(?<=(?<channel>\i)\.getGuildId\(\).{1,30}Guild voice channel without guild id\..{1,600}style:)/,
-                    replace: "$self.isHiddenChannel($<channel>)?undefined:"
+                    match: /Guild voice channel without guild id.+?style:(?<=(\i)\.getGuildId\(\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?undefined:`
                 },
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
-                    match: /\(0,\i\.jsx\)\(\i\.\i\.Divider.+?}\)]}\)(?=.+?:(?<channel>\i)\.guild_id)/,
-                    replace: "$self.isHiddenChannel($<channel>)?null:($&)"
+                    match: /\(0,\i\.jsx\)\(\i\.\i\.Divider.+?}\)]}\)(?=.+?:(\i)\.guild_id)/,
+                    replace: (m, channel) => `$self.isHiddenChannel(${channel})?null:(${m})`
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /(?<=null,)(?=.{1,120}channelId:(?<channel>\i)\.id,.+?toggleRequestToSpeakSidebar:\i,iconClassName:\i\(\)\.buttonIcon)/,
-                    replace: "!$self.isHiddenChannel($<channel>)&&"
+                    match: /"recents".+?null,(?=.{0,120}?channelId:(\i)\.id)/,
+                    replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
         }
