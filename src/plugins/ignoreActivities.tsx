@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Tooltip } from "webpack/common";
 
 enum ActivitiesTypes {
@@ -37,7 +37,7 @@ interface IgnoredActivity {
 const RegisteredGamesClasses = findByPropsLazy("overlayToggleIconOff", "overlayToggleIconOn");
 const TryItOutClasses = findByPropsLazy("tryItOutBadge", "tryItOutBadgeIcon");
 const BaseShapeRoundClasses = findByPropsLazy("baseShapeRound", "baseShapeRoundLeft", "baseShapeRoundRight");
-const RunningGameStore = findByPropsLazy("getRunningGames", "getGamesSeen");
+const RunningGameStore = findStoreLazy("RunningGameStore");
 
 function ToggleIconOff() {
     return (
