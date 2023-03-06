@@ -145,8 +145,11 @@ export default definePlugin({
     patches: [{
         find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
         replacement: {
-            match: /var .=(?<props>.)\.overlay.+?"aria-label":.\..\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}}\)/,
-            replace: "$&,$self.renderToggleGameActivityButton($<props>)"
+            match: /!(\i)\|\|(null==\i\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
+            replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
+                + `${restWithoutPlatformCheck}`
+                + `(${platformCheck}?${children}:[])`
+                + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
         }
     }, {
         find: ".overlayBadge",
