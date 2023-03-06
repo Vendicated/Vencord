@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {showNotification} from "@api/Notifications";
 
 export * as Api from "./api";
 export * as Plugins from "./plugins";
@@ -29,7 +28,7 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { popNotice, showNotice } from "./api/Notices";
+import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
@@ -61,7 +60,7 @@ async function init() {
                             else
                                 location.reload();
                         },
-                    })
+                    });
                 return;
             }
 
