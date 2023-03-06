@@ -85,7 +85,7 @@ async function getBranches() {
         .replace("*", "")
         .split("\n")
         .map(str => str.trim())
-        .filter(branch => branch !== "main");
+        .filter(branch => branch !== "main" && branch.length > 0);
     branches.unshift("main");
 
     return branches;
