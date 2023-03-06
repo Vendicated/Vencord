@@ -83,7 +83,6 @@ async function getBranches() {
 
     const branches = (await git("branch", "--list")).stdout
         .replace("*", "")
-        .trim()
         .split("\n")
         .map(str => str.trim())
         .filter(branch => branch !== "main");
