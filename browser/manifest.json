@@ -6,6 +6,7 @@
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
+    "update_url": "https://vencord.github.io/builds/manifest.json",
     "icons": {
         "128": "icon.png"
     },
