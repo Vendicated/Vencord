@@ -142,28 +142,32 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
     description: "Ignore certain activities (like games and actual activities) from showing up on your status. You can configure which ones are ignored from the Registered Games and Activities tabs.",
-    patches: [{
-        find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
-        replacement: {
-            match: /!(\i)\|\|(null==\i\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
-            replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
-                + `${restWithoutPlatformCheck}`
-                + `(${platformCheck}?${children}:[])`
-                + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
+    patches: [
+        {
+            find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
+            replacement: {
+                match: /!(\i)\|\|(null==\i\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
+                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
+                    + `${restWithoutPlatformCheck}`
+                    + `(${platformCheck}?${children}:[])`
+                    + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
+            }
+        },
+        {
+            find: ".overlayBadge",
+            replacement: {
+                match: /(?<=\(\)\.badgeContainer.+?(\i)\.name}\):null)/,
+                replace: (_, props) => `$self.renderToggleActivityButton(${props})`
+            }
+        },
+        {
+            find: '.displayName="LocalActivityStore"',
+            replacement: {
+                match: /LISTENING.+?\)\);(?<=(\i)\.push.+?)/,
+                replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
+            }
         }
-    }, {
-        find: ".overlayBadge",
-        replacement: {
-            match: /.badgeContainer.+?.\?\(0,.\.jsx\)\(.{1,2},{name:(?<props>.)\.name}\):null/,
-            replace: "$&,$self.renderToggleActivityButton($<props>)"
-        }
-    }, {
-        find: '.displayName="LocalActivityStore"',
-        replacement: {
-            match: /(?<activities>.)\.push\(.\({type:.\..{1,3}\.LISTENING.+?\)\)/,
-            replace: "$&;$<activities>=$<activities>.filter($self.isActivityNotIgnored);"
-        }
-    }],
+    ],
 
     async start() {
         const ignoredActivitiesData = await DataStore.get<string[] | Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities") ?? new Map<IgnoredActivity["id"], IgnoredActivity>();

@@ -278,7 +278,7 @@ export default definePlugin({
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
-                    match: /(?:{|,)render(?!Header).{0,30}?:(?<=renderContent=function.{0,900}?)(?!void)/g,
+                    match: /(?:{|,)render(?!Header|ExternalHeader).{0,30}?:(?<=renderContent=function.+?)(?!void)/g,
                     replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
                 }
             ]
@@ -298,7 +298,7 @@ export default definePlugin({
                 },
                 // Prevent Discord from replacing our route if we aren't connected to the stage channel
                 {
-                    match: /(?=!\i&&!\i&&!\i.{0,80}(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
+                    match: /(?=!\i&&!\i&&!\i.{0,80}?(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
