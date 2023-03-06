@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export * as Api from "./api";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";
@@ -54,6 +53,7 @@ async function init() {
                     await showNotification({
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
+                        permanent: true,
                         onClick() {
                             if (needsFullRestart)
                                 window.DiscordNative.app.relaunch();
@@ -68,6 +68,7 @@ async function init() {
                 await showNotification({
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
+                    permanent: true,
                     onClick() {
                         SettingsRouter.open("VencordUpdater");
                     }
