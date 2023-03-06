@@ -38,6 +38,19 @@ export default definePlugin({
                 match: /window\.DiscordSentry=function.+\}\(\)/,
                 replace: "",
             }
+        },
+        {
+            find: ".METRICS,",
+            replacement: [
+                {
+                    match: /this\._intervalId.+?12e4\)/,
+                    replace: ""
+                },
+                {
+                    match: /(?<=increment=function\(\i\){)/,
+                    replace: "return;"
+                }
+            ]
         }
     ]
 });
