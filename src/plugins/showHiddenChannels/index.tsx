@@ -26,7 +26,7 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen, { setChannelBeginHeaderComponent, setEmojiComponent } from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
 
@@ -239,8 +239,8 @@ export default definePlugin({
         {
             find: 'jumboable?"jumbo":"default"',
             replacement: {
-                match: /(?<=\i:\(\)=>\i)(?=}.+?(?<component>\i)=function.{1,20}node,\i=\i.isInteracting)/,
-                replace: ",hc1:()=>$<component>" // Blame Ven length check for the small name :pensive_cry:
+                match: /(?<=(?<component>\i)=function.{1,20}node,\i=\i.isInteracting.+?}}\)},)/,
+                replace: "shcEmojiComponentExport=($self.setEmojiComponent($<component>),void 0),"
             }
         },
         {
@@ -248,8 +248,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Export the channel beggining header
-                    match: /(?<=\i:\(\)=>\i)(?=}.+?function (?<component>\i).{1,600}computePermissionsForRoles)/,
-                    replace: ",hc2:()=>$<component>"
+                    match: /(?<=function (?<component>\i)\(.{1,600}computePermissionsForRoles.+?}\)})(?=var)/,
+                    replace: "$self.setChannelBeginHeaderComponent($<component>);"
                 },
                 {
                     // Patch the header to only return allowed users and roles if it's a hidden channel (Like when it's used on the HiddenChannelLockScreen)
@@ -324,6 +324,9 @@ export default definePlugin({
             ],
         }
     ],
+
+    setEmojiComponent,
+    setChannelBeginHeaderComponent,
 
     isHiddenChannel(channel: Channel & { channelId?: string; }) {
         if (!channel) return false;
