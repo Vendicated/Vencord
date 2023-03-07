@@ -334,7 +334,7 @@ export default definePlugin({
             find: ".shouldCloseDefaultModals",
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
-                match: /(?<=getChannel\((\i)\)\)(?=.{0,100}selectVoiceChannel))/,
+                match: /(?<=getChannel\((\i)\)\)(?=.{0,100}?selectVoiceChannel))/,
                 replace: (_, channelId) => `&&!$self.isHiddenChannel({channelId:${channelId}})`
             }
         }
