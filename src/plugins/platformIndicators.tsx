@@ -27,7 +27,7 @@ import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const SessionStore = findStoreLazy("SessionsStore");
+const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -70,7 +70,7 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
-        const sessions = SessionStore.getSessions();
+        const sessions = SessionsStore.getSessions();
         if (typeof sessions !== "object") return null;
         const sortedSessions = Object.values(sessions).sort(({ status: a }: any, { status: b }: any) => {
             if (a === b) return 0;
