@@ -226,13 +226,11 @@ export default definePlugin({
         {
             find: "isMobileOnline=function",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
-            replacement: [
-                {
-                    // Make isMobileOnline return true no matter what is the user status
-                    match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
-                    replace: "!= null"
-                }
-            ]
+            replacement: {
+                // Make isMobileOnline return true no matter what is the user status
+                match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
+                replace: "!= null"
+            }
         }
     ],
 
