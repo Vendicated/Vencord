@@ -23,7 +23,7 @@ import { Devs, VENCORD_USER_AGENT } from "@utils/constants";
 import { classes, useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { React, Select, Text, Toasts, UserStore } from "@webpack/common";
+import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 
@@ -232,12 +232,10 @@ export default definePlugin({
 
                 {isInEditMode && (
                     <span style={{ width: "90%" }}>
-                        <Select
+                        <SearchableSelect
                             placeholder="Pick a timezone"
                             options={timezones.map(tz => ({ label: tz, value: tz }))}
-                            isSelected={tz => tz === timezone}
-                            select={value => setTimezone(value)}
-                            serialize={String}
+                            onChange={value => setTimezone(value)}
                         />
                     </span>
                 )}
