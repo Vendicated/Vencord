@@ -135,15 +135,6 @@ export default definePlugin({
         },
         {
             find: ".UNREAD_HIGHLIGHT",
-            predicate: () => settings.store.hideUnreads === true,
-            replacement: {
-                // Hide unreads
-                match: /(?<=\i\.connected,\i=)(?=(\i)\.unread)/,
-                replace: (_, props) => `$self.isHiddenChannel(${props}.channel)?false:`
-            }
-        },
-        {
-            find: ".UNREAD_HIGHLIGHT",
             predicate: () => settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: [
                 // Make the channel appear as muted if it's hidden
@@ -163,14 +154,22 @@ export default definePlugin({
                 }
             ]
         },
-        // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
         {
             find: ".UNREAD_HIGHLIGHT",
-            predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
-            replacement: {
-                match: /\.LOCKED:\i(?<=(\i)=\i\.channel,.+?)/,
-                replace: (m, channel) => `${m}&&!($self.settings.store.hideUnreads===false&&$self.isHiddenChannel(${channel}))`
-            }
+            replacement: [
+                {
+                    // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
+                    predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
+                    match: /\.LOCKED:\i(?<=(\i)=\i\.channel,.+?)/,
+                    replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
+                },
+                {
+                    // Hide unreads
+                    predicate: () => settings.store.hideUnreads === true,
+                    match: /(?<=\i\.connected,\i=)(?=(\i)\.unread)/,
+                    replace: (_, props) => `$self.isHiddenChannel(${props}.channel)?false:`
+                }
+            ]
         },
         {
             // Hide New unreads box for hidden channels
@@ -213,12 +212,10 @@ export default definePlugin({
         // Avoid trying to fetch messages from hidden channels
         {
             find: '"MessageManager"',
-            replacement: [
-                {
-                    match: /"Skipping fetch because channelId is a static route"\);else{(?=.+?getChannel\((\i)\))/,
-                    replace: (m, channelId) => `${m}if($self.isHiddenChannel({channelId:${channelId}}))return;`
-                },
-            ]
+            replacement: {
+                match: /"Skipping fetch because channelId is a static route"\);else{(?=.+?getChannel\((\i)\))/,
+                replace: (m, channelId) => `${m}if($self.isHiddenChannel({channelId:${channelId}}))return;`
+            }
         },
         // Patch keybind handlers so you can't accidentally jump to hidden channels
         {
@@ -239,7 +236,7 @@ export default definePlugin({
         {
             find: 'jumboable?"jumbo":"default"',
             replacement: {
-                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function.+?)/,
+                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function\(\i\){var \i=\i\.node.+?)/,
                 replace: (m, component) => `${m}shcEmojiComponentExport=($self.setEmojiComponent(${component}),void 0),`
             }
         },
@@ -322,6 +319,24 @@ export default definePlugin({
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
+        },
+        {
+            // The module wasn't being found, so lets just escape everything
+            // eslint-disable-next-line no-useless-escape
+            find: "\^https\:\/\/\(\?\:canary\.\|ptb\.\)\?discord.com\/channels\/\(\\\\\d\+\|",
+            replacement: {
+                // Make mentions of hidden channels work
+                match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,\i\)/,
+                replace: "true"
+            },
+        },
+        {
+            find: ".shouldCloseDefaultModals",
+            replacement: {
+                // Show inside voice channel instead of trying to join them when clicking on a channel mention
+                match: /(?<=getChannel\((\i)\)\)(?=.{0,100}selectVoiceChannel))/,
+                replace: (_, channelId) => `&&!$self.isHiddenChannel({channelId:${channelId}})`
+            }
         }
     ],
 

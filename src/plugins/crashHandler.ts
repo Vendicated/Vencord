@@ -64,7 +64,7 @@ export default definePlugin({
         {
             find: 'dispatch({type:"MODAL_POP_ALL"})',
             replacement: {
-                match: /"MODAL_POP_ALL".+};(?<=(\i)=function.+?)/,
+                match: /"MODAL_POP_ALL".+?};(?<=(\i)=function.+?)/,
                 replace: (m, popAll) => `${m}$self.popAllModals=${popAll};`
             }
         }
