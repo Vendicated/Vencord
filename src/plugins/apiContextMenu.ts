@@ -24,7 +24,7 @@ import { addListener, removeListener } from "@webpack";
 function listener(exports: any, id: number) {
     if (typeof exports !== "object" || exports === null) return;
 
-    for (const key in exports) {
+    for (const key in exports) if (key.length <= 3) {
         const prop = exports[key];
         if (typeof prop !== "function") continue;
 
@@ -33,13 +33,12 @@ function listener(exports: any, id: number) {
             Vencord.Plugins.patches.push({
                 plugin: "ContextMenuAPI",
                 all: true,
-                noWarn: true,
                 find: "navId:",
                 replacement: [{
-                    match: RegExp(`(?<=\\b(\\i)=\\i\\(${id}\\)).+$`),
+                    match: RegExp(`${id}(?<=(\\i)=.+?).+$`),
                     replace: (code, varName) => {
-                        const regex = RegExp(`(?<=${varName}\\.${key},{)`, "g");
-                        return code.replace(regex, "contextMenuApiArguments:arguments,");
+                        const regex = RegExp(`${key},{(?<=${varName}\\.${key},{)`, "g");
+                        return code.replace(regex, "$&contextMenuApiArguments:arguments,");
                     }
                 }]
             });
