@@ -16,11 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreSendListener, MessageObject, removePreSendListener } from "@api/MessageEvents";
+import { DataStore } from "@api/index";
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
+
+let rules = [] as any;
 
 const settings = definePluginSettings({
     replace: {
@@ -28,78 +32,93 @@ const settings = definePluginSettings({
         description: "",
         component: () =>
             <>
-                <table>
-                    <tr>
-                        <td>
-                            <TextInput
-                                placeholder="Find"
-                                value={settings.store.find}
-                                onChange={e => {
-                                    settings.store.find = e;
-                                    settings.store.showError = false;
-                                }}
-                                spellCheck={false}
-                            />
-                        </td>
-                        <td>
-                            <TextInput
-                                placeholder="Replace to"
-                                value={settings.store.replace}
-                                onChange={e => {
-                                    settings.store.replace = e;
-                                    settings.store.showError = false;
-                                }}
-                                spellCheck={false}
-                            />
-                        </td>
-                        <td>
-                            <TextInput
-                                placeholder="Only if includes"
-                                value={settings.store.onlyIfIncludes}
-                                onChange={e => {
-                                    settings.store.onlyIfIncludes = e;
-                                    settings.store.showError = false;
-                                }}
-                                spellCheck={false}
-                            />
-                        </td>
-                        <Button
-                            color={Button.Colors.GREEN}
-                            size={Button.Sizes.MIN}
-                            onClick={() => {
-                                if (!settings.store.rules) settings.store.rules = [];
-                                if (settings.store.find && settings.store.replace) {
-                                    settings.store.rules.push({
-                                        find: settings.store.find,
-                                        replace: settings.store.replace,
-                                        onlyIfIncludes: settings.store.onlyIfIncludes
-                                    });
-                                    settings.store.find = "";
-                                    settings.store.replace = "";
-                                    settings.store.onlyIfIncludes = "";
-                                } else {
-                                    settings.store.showError = true;
+                <TextReplace />
+            </>
+    },
+});
+
+const TextReplace = () => {
+    const [find, setFind] = useState("");
+    const [replace, setReplace] = useState("");
+    const [onlyIfIncludes, setOnlyIfIncludes] = useState("");
+    const [error, setError] = useState("");
+    const update = useForceUpdater();
+
+    async function onClickAdd() {
+        if (!find || !replace) return setError("Find and Replace must not be empty");
+        rules.push({
+            find,
+            replace,
+            onlyIfIncludes
+        });
+        await DataStore.set("TextReplace_rules", rules);
+        setFind("");
+        setReplace("");
+        setOnlyIfIncludes("");
+    }
+
+    async function onClickRemove(index: number) {
+        rules.splice(index, 1);
+        await DataStore.set("TextReplace_rules", rules);
+        update();
+    }
+
+    return (
+        <>
+            <table>
+                <tr>
+                    <td>
+                        <TextInput
+                            value={find}
+                            onChange={
+                                e => {
+                                    setFind(e);
+                                    setError("");
                                 }
-                            }}
-                            style={{
-                                borderRadius: "50%",
-                                padding: "9px 7px 9px",
-                                marginLeft: "4px"
-                            }}
-                        >
-                            ➕
-                        </Button>
-                    </tr>
-                </table>
+                            }
+                            placeholder="Find"
+                            spellCheck={false}
+                        />
+                    </td>
+                    <td>
+                        <TextInput
+                            value={replace}
+                            onChange={
+                                e => {
+                                    setReplace(e);
+                                    setError("");
+                                }
+                            }
+                            placeholder="Replace"
+                            spellCheck={false}
+                        />
+                    </td>
+                    <td>
+                        <TextInput
+                            value={onlyIfIncludes}
+                            onChange={setOnlyIfIncludes}
+                            placeholder="Only if includes"
+                            spellCheck={false}
+                        />
+                    </td>
+                    <Button
+                        color={Button.Colors.GREEN}
+                        size={Button.Sizes.MIN}
+                        onClick={onClickAdd}
+                        style={{
+                            borderRadius: "50%",
+                            padding: "9px 7px 9px",
+                            marginLeft: "4px"
+                        }}
+                    >
+                        ➕
+                    </Button>
+                </tr>
+            </table>
+            <Forms.FormText type={Forms.FormText.Types.ERROR}>{error}</Forms.FormText>
+            <table>
                 {
-                    (settings.store.showError) && (
-                        <Forms.FormText type={Forms.FormText.Types.ERROR}>
-                            "Find" and "Replace to" must not be empty
-                        </Forms.FormText>
-                    )
-                }
-                <table>
-                    {settings.store.rules && settings.store.rules.map((rule, index) => (
+                    rules.map((rule: any, index: number) =>
                         <tr>
                             <td>
                                 <TextInput
@@ -122,31 +141,25 @@ const settings = definePluginSettings({
                                     spellCheck={false}
                                 />
                             </td>
-                            <td>
-                                <Button
-                                    color={Button.Colors.RED}
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => {
-                                        settings.store.rules.splice(index, 1);
-                                        // This is to force update the table after deleting a rule
-                                        settings.store.owo = "owo";
-                                        settings.store.owo = "uwu";
-                                    }}
-                                    style={{
-                                        borderRadius: "50%",
-                                        padding: "9px 7px 9px",
-                                        marginLeft: "4px"
-                                    }}
-                                >
-                                    ❌
-                                </Button>
-                            </td>
+                            <Button
+                                color={Button.Colors.RED}
+                                size={Button.Sizes.MIN}
+                                onClick={() => onClickRemove(index)}
+                                style={{
+                                    borderRadius: "50%",
+                                    padding: "9px 7px 9px",
+                                    marginLeft: "4px"
+                                }}
+                            >
+                                ❌
+                            </Button>
                         </tr>
-                    ))}
-                </table>
-            </>
-    },
-});
+                    )
+                }
+            </table>
+        </>
+    );
+};
 
 export default definePlugin({
     name: "TextReplace",
@@ -160,9 +173,11 @@ export default definePlugin({
         return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     },
 
-    replaceText(msg: MessageObject) {
-        if (settings.store.rules) {
-            for (const rule of settings.store.rules) {
+    async start() {
+        rules = await DataStore.get("TextReplace_rules");
+        this.preSend = addPreSendListener((_, msg) => {
+            if (!rules) return;
+            for (const rule of rules) {
                 if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes) && rule.onlyIfIncludes !== "regex") continue;
                 if (rule.onlyIfIncludes === "regex") {
                     const regex = new RegExp(rule.find, "g");
@@ -172,11 +187,7 @@ export default definePlugin({
                 }
                 msg.content = msg.content.replace(new RegExp(this.escapeRegExp(rule.find), "g"), rule.replace);
             }
-        }
-    },
-
-    start() {
-        this.preSend = addPreSendListener((_, msg) => this.replaceText(msg));
+        });
     },
 
     stop() {
