@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -29,40 +30,21 @@ const Engines = {
     ImgOps: "https://imgops.com/start?url="
 };
 
-export default definePlugin({
-    name: "ReverseImageSearch",
-    description: "Adds ImageSearch to image context menus",
-    authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["MenuItemDeobfuscatorAPI"],
-    patches: [
-        {
-            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
-            replacement: [
-                {
-                    match: /(?<=(?<target>\i)\.getAttribute\("data-type"\).+?favoriteableType:\i,)/,
-                    replace: 'reverseImageSearchType:$<target>.getAttribute("data-role"),'
-                },
-                {
-                    match: /var \i=(?<props>\i)\.message,\i=\i\.channel,\i=\i\.textSelection,\i=\i\.favoriteableType.+?(?<itemHref>\i)=\i\.itemHref,(?<itemSrc>\i)=\i\.itemSrc.+?]}\)}/,
-                    replace: (mod, props, itemHref, itemSrc) => {
-                        mod = mod.replace(RegExp(`(?<=${props}\\.navId,)`), `reverseImageSearchType=${props}.reverseImageSearchType,`);
-                        const targetItems = mod.match(RegExp(`(?<=,).{1,2}(?==\\(0,.{1,2}\\..{1,2}\\)\\(null!=${itemHref})`));
+function search(src: string, engine: string) {
+    open(engine + encodeURIComponent(src), "_blank");
+}
 
-                        if (targetItems) {
-                            mod = mod.replace(RegExp(`(?<=children:${targetItems[0]})`), `.concat(Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${itemHref}??${itemSrc},reverseImageSearchType)).filter(Boolean)`);
-                        }
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
+    if (!args?.[0]) return;
+    const { reverseImageSearchType, itemHref, itemSrc } = args[0];
 
-                        return mod;
-                    }
-                }
-            ]
-        }
-    ],
+    if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
 
-    makeMenu(src: string, type: string) {
-        if (type !== "img") return null;
+    const src = itemHref ?? itemSrc;
 
-        return (
+    const group = findGroupChildrenByChildId("save-image", children);
+    if (group && !group.some(child => child?.props?.id === "search-image")) {
+        group.push((
             <Menu.MenuItem
                 label="Search Image"
                 key="search-image"
@@ -75,7 +57,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={engine}
-                            action={() => this.search(src, Engines[engine])}
+                            action={() => search(src, Engines[engine])}
                         />
                     );
                 })}
@@ -83,14 +65,33 @@ export default definePlugin({
                     key="search-image-all"
                     id="search-image-all"
                     label="All"
-                    action={() => Object.values(Engines).forEach(e => this.search(src, e))}
+                    action={() => Object.values(Engines).forEach(e => search(src, e))}
                 />
             </Menu.MenuItem>
-        );
+        ));
+    }
+};
+
+export default definePlugin({
+    name: "ReverseImageSearch",
+    description: "Adds ImageSearch to image context menus",
+    authors: [Devs.Ven, Devs.Nuckyz],
+    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
+    patches: [
+        {
+            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+            replacement: {
+                match: /(?<=favoriteableType:\i,)(?<=(\i)\.getAttribute\("data-type"\).+?)/,
+                replace: (_, target) => `reverseImageSearchType:${target}.getAttribute("data-role"),`
+            }
+        }
+    ],
+
+    start() {
+        addContextMenuPatch("message", imageContextMenuPatch);
     },
 
-    // openUrl is a mangled export, so just match it in the module and pass it
-    search(src: string, engine: string) {
-        open(engine + encodeURIComponent(src), "_blank");
+    stop() {
+        removeContextMenuPatch("message", imageContextMenuPatch);
     }
 });
