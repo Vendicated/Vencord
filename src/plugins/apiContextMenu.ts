@@ -22,7 +22,10 @@ import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
 
 function listener(exports: any, id: number) {
-    if (!Settings.plugins.ContextMenuAPI.enabled) return;
+    if (!Settings.plugins.ContextMenuAPI.enabled) {
+        removeListener(listener);
+        return;
+    }
 
     if (typeof exports !== "object" || exports === null) return;
 
