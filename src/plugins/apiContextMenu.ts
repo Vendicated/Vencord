@@ -33,6 +33,7 @@ function listener(exports: any, id: number) {
             Vencord.Plugins.patches.push({
                 plugin: "ContextMenuAPI",
                 all: true,
+                noWarn: true,
                 find: "navId:",
                 replacement: [{
                     match: RegExp(`${id}(?<=(\\i)=.+?).+$`),
