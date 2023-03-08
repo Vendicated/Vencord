@@ -40,8 +40,8 @@ function listener(exports: any, id: number) {
                 replacement: [{
                     match: RegExp(`${id}(?<=(\\i)=.+?).+$`),
                     replace: (code, varName) => {
-                        const regex = RegExp(`(?<=${key},{)(?<=${varName}\\.${key},{)`, "g");
-                        return code.replace(regex, "contextMenuApiArguments:arguments,");
+                        const regex = RegExp(`${key},{(?<=${varName}\\.${key},{)`, "g");
+                        return code.replace(regex, "$&contextMenuApiArguments:arguments,");
                     }
                 }]
             });
