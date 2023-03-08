@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, ContextMenuPatchCallback, findGroupChildrenByChildId, removeContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -121,7 +121,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     );
 }
 
-function makeContextMenuPatch(childId: string, type?: MenuItemParentType): ContextMenuPatchCallback {
+function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, args) => {
         if (!args) return children;
 
