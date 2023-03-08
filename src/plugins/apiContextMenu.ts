@@ -22,10 +22,7 @@ import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
 
 function listener(exports: any, id: number) {
-    if (!Settings.plugins.ContextMenuAPI.enabled) {
-        removeListener(listener);
-        return;
-    }
+    if (!Settings.plugins.ContextMenuAPI.enabled) return removeListener(listener);
 
     if (typeof exports !== "object" || exports === null) return;
 
@@ -70,5 +67,5 @@ export default definePlugin({
                 replace: (_, props) => `Vencord.Api.ContextMenu._patchContextMenu(${props});`
             }
         }
-    ],
+    ]
 });
