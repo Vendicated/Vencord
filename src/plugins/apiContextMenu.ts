@@ -35,13 +35,10 @@ function listener(exports: any, id: number) {
                 all: true,
                 noWarn: true,
                 find: "navId:",
-                replacement: [{
-                    match: RegExp(`${id}(?<=(\\i)=.+?).+$`),
-                    replace: (code, varName) => {
-                        const regex = RegExp(`${key},{(?<=${varName}\\.${key},{)`, "g");
-                        return code.replace(regex, "$&contextMenuApiArguments:arguments,");
-                    }
-                }]
+                replacement: {
+                    match: RegExp(`(?=(${id}(?<=(\\i)=.+?).+?\\2\\.${key},{))\\1`, "g"),
+                    replace: "$&contextMenuApiArguments:arguments,"
+                }
             });
 
             removeListener(listener);
