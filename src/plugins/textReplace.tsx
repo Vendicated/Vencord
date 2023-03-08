@@ -102,16 +102,17 @@ const TextReplace = () => {
                         />
                     </td>
                     <Button
-                        color={Button.Colors.GREEN}
                         size={Button.Sizes.MIN}
                         onClick={onClickAdd}
                         style={{
-                            borderRadius: "50%",
-                            padding: "9px 7px 9px",
-                            marginLeft: "4px"
+                            background: "none",
+                            bottom: "-7px",
+                            marginLeft: "3px"
                         }}
                     >
-                        ➕
+                        <svg fill="#43b581" width="26px" height="26px" viewBox="2.7 3.2 26.5 27" xmlns="http://www.w3.org/2000/svg" transform="rotate(0)">
+                            <path d="M15.5 29.5c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.938 15.938c0-0.552-0.448-1-1-1h-4v-4c0-0.552-0.447-1-1-1h-1c-0.553 0-1 0.448-1 1v4h-4c-0.553 0-1 0.448-1 1v1c0 0.553 0.447 1 1 1h4v4c0 0.553 0.447 1 1 1h1c0.553 0 1-0.447 1-1v-4h4c0.552 0 1-0.447 1-1v-1z" />
+                        </svg>
                     </Button>
                 </tr>
             </table>
@@ -142,16 +143,17 @@ const TextReplace = () => {
                                 />
                             </td>
                             <Button
-                                color={Button.Colors.RED}
                                 size={Button.Sizes.MIN}
                                 onClick={() => onClickRemove(index)}
                                 style={{
-                                    borderRadius: "50%",
-                                    padding: "9px 7px 9px",
-                                    marginLeft: "4px"
+                                    background: "none",
+                                    bottom: "-7px",
+                                    marginLeft: "3px"
                                 }}
                             >
-                                ❌
+                                <svg fill="#f04747" width="26px" height="26px" viewBox="2.7 3.2 26.5 27" xmlns="http://www.w3.org/2000/svg" transform="rotate(45)">
+                                    <path d="M15.5 29.5c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.938 15.938c0-0.552-0.448-1-1-1h-4v-4c0-0.552-0.447-1-1-1h-1c-0.553 0-1 0.448-1 1v4h-4c-0.553 0-1 0.448-1 1v1c0 0.553 0.447 1 1 1h4v4c0 0.553 0.447 1 1 1h1c0.553 0 1-0.447 1-1v-4h4c0.552 0 1-0.447 1-1v-1z" />
+                                </svg>
                             </Button>
                         </tr>
                     )
