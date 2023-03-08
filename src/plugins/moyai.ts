@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
@@ -54,15 +54,36 @@ const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
 
+const settings = definePluginSettings({
+    volume: {
+        description: "Volume of the 🗿🗿🗿",
+        type: OptionType.SLIDER,
+        markers: makeRange(0, 1, 0.1),
+        default: 0.5,
+        stickToMarkers: false
+    },
+    triggerWhenUnfocused: {
+        description: "Trigger the 🗿 even when the window is unfocused",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    ignoreBots: {
+        description: "Ignore bots",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
+
 export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
+    settings,
 
     async onMessage(e: IMessageCreate) {
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
-        if (Settings.plugins.Moyai.ignoreBots && e.message.author?.bot) return;
+        if (settings.store.ignoreBots && e.message.author?.bot) return;
         if (!e.message.content) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -76,7 +97,7 @@ export default definePlugin({
 
     onReaction(e: IReactionAdd) {
         if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
-        if (Settings.plugins.Moyai.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
+        if (settings.store.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
         if (e.channelId !== SelectedChannelStore.getChannelId()) return;
 
         const name = e.emoji.name.toLowerCase();
@@ -103,28 +124,6 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
         FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
         FluxDispatcher.unsubscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
-    },
-
-    options: {
-        volume: {
-            description: "Volume of the 🗿🗿🗿",
-            type: OptionType.SLIDER,
-            markers: makeRange(0, 1, 0.1),
-            default: 0.5,
-            stickToMarkers: false,
-        },
-        triggerWhenUnfocused: {
-            description: "Trigger the 🗿 even when the window is unfocused",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: false,
-        },
-        ignoreBots: {
-            description: "Ignore bots",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: false,
-        }
     }
 });
 
@@ -158,9 +157,9 @@ function getMoyaiCount(message: string) {
 }
 
 function boom() {
-    if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
+    if (!settings.store.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
-    audioElement.volume = Settings.plugins.Moyai.volume;
+    audioElement.volume = settings.store.volume;
     audioElement.play();
 }

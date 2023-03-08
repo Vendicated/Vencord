@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -24,49 +24,71 @@ import { Forms, React } from "@webpack/common";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
 
+const settings = definePluginSettings({
+    enableIsStaff: {
+        description: "Enable isStaff",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
+    forceStagingBanner: {
+        description: "Whether to force Staging banner under user area.",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "Experiments",
+    description: "Enable Access to Experiments in Discord!",
     authors: [
         Devs.Megu,
         Devs.Ven,
         Devs.Nickyux,
-        Devs.BanTheNons
+        Devs.BanTheNons,
+        Devs.Nuckyz
     ],
-    description: "Enable Access to Experiments in Discord!",
-    patches: [{
-        find: "Object.defineProperties(this,{isDeveloper",
-        replacement: {
-            match: /(?<={isDeveloper:\{[^}]+,get:function\(\)\{return )\w/,
-            replace: "true"
+    settings,
+
+    patches: [
+        {
+            find: "Object.defineProperties(this,{isDeveloper",
+            replacement: {
+                match: /(?<={isDeveloper:\{[^}]+?,get:function\(\)\{return )\w/,
+                replace: "true"
+            }
         },
-    }, {
-        find: 'type:"user",revision',
-        replacement: {
-            match: /!(\w{1,3})&&"CONNECTION_OPEN".+?;/g,
-            replace: "$1=!0;"
+        {
+            find: 'type:"user",revision',
+            replacement: {
+                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
+                replace: "$1=!0;"
+            }
         },
-    }, {
-        find: ".isStaff=function(){",
-        predicate: () => Settings.plugins.Experiments.enableIsStaff === true,
-        replacement: [
-            {
-                match: /return\s*(\w+)\.hasFlag\((.+?)\.STAFF\)}/,
-                replace: "return Vencord.Webpack.Common.UserStore.getCurrentUser().id===$1.id||$1.hasFlag($2.STAFF)}"
-            },
-            {
-                match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*\|\|/,
-                replace: "hasFreePremium=function(){return ",
-            },
-        ],
-    }],
-    options: {
-        enableIsStaff: {
-            description: "Enable isStaff (requires restart)",
-            type: OptionType.BOOLEAN,
-            default: false,
-            restartNeeded: true,
+        {
+            find: ".isStaff=function(){",
+            predicate: () => settings.store.enableIsStaff,
+            replacement: [
+                {
+                    match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
+                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser().id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                },
+                {
+                    match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
+                    replace: "hasFreePremium=function(){return ",
+                }
+            ]
+        },
+        {
+            find: ".Messages.DEV_NOTICE_STAGING",
+            predicate: () => settings.store.forceStagingBanner,
+            replacement: {
+                match: /"staging"===window\.GLOBAL_ENV\.RELEASE_CHANNEL/,
+                replace: "true"
+            }
         }
-    },
+    ],
 
     settingsAboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");

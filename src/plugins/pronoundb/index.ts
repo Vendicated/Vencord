@@ -41,7 +41,7 @@ export default definePlugin({
                 replace: "[$1, $self.PronounsChatComponent(e)]"
             }
         },
-        // Hijack the discord pronouns section (hidden without experiment) and add a wrapper around the text section
+        // Hijack the discord pronouns section and add a wrapper around the text section
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
@@ -49,12 +49,12 @@ export default definePlugin({
                 replace: "$<fullProps>&&$self.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
             }
         },
-        // Make pronouns experiment be enabled by default
+        // Force enable pronouns component ignoring the experiment value
         {
-            find: "2022-01_pronouns",
+            find: ".Messages.USER_POPOUT_PRONOUNS",
             replacement: {
-                match: "!1", // false
-                replace: "!0"
+                match: /\i\.\i\.useExperiment\({}\)\.showPronouns/,
+                replace: "true"
             }
         }
     ],

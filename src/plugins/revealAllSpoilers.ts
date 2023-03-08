@@ -32,8 +32,8 @@ export default definePlugin({
         {
             find: ".removeObscurity=function",
             replacement: {
-                match: /\.removeObscurity=function\((\i)\){/,
-                replace: ".removeObscurity=function($1){$self.reveal($1);"
+                match: /(?<=\.removeObscurity=function\((\i)\){)/,
+                replace: (_, event) => `$self.reveal(${event});`
             }
         }
     ],

@@ -16,53 +16,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    noSpotifyAutoPause: {
+        description: "Disable Spotify auto-pause",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    keepSpotifyActivityOnIdle: {
+        description: "Keep Spotify activity playing when idling",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    }
+});
 
 migratePluginSettings("SpotifyCrack", "Ify");
 export default definePlugin({
     name: "SpotifyCrack",
     description: "Free listen along, no auto-pausing in voice chat, and allows activity to continue playing when idling",
-    authors: [
-        Devs.Cyn,
-        Devs.Nuckyz
-    ],
+    authors: [Devs.Cyn, Devs.Nuckyz],
+    settings,
 
-    patches: [{
-        find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
-        replacement: [{
-            match: /(function\((.{1,2})\){)(.{1,6}dispatch\({type:"SPOTIFY_PROFILE_UPDATE")/,
-            replace: (_, functionStart, data, functionBody) => `${functionStart}${data}.body.product="premium";${functionBody}`
-        }],
-    }, {
-        find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins.SpotifyCrack.noSpotifyAutoPause,
-        replacement: {
-            match: /function (.{1,2})\(\).{0,200}SPOTIFY_AUTO_PAUSED\);.{0,}}}}/,
-            replace: "function $1(){}"
-        }
-    }, {
-        find: '.displayName="SpotifyStore"',
-        predicate: () => Settings.plugins.SpotifyCrack.keepSpotifyActivityOnIdle,
-        replacement: {
-            match: /(shouldShowActivity=function\(\){.{1,50})&&!.{1,6}\.isIdle\(\)(.{0,}?})/,
-            replace: (_, functionDeclarationAndExpression, restOfFunction) => `${functionDeclarationAndExpression}${restOfFunction}`
-        }
-    }],
+    patches: [
+        {
 
-    options: {
-        noSpotifyAutoPause: {
-            description: "Disable Spotify auto-pause",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
+            find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
+            replacement: {
+                match: /SPOTIFY_PROFILE_UPDATE.+?isPremium:(?="premium"===(\i)\.body\.product)/,
+                replace: (m, req) => `${m}(${req}.body.product="premium")&&`
+            },
         },
-        keepSpotifyActivityOnIdle: {
-            description: "Keep Spotify activity playing when idling",
-            type: OptionType.BOOLEAN,
-            default: false,
-            restartNeeded: true,
+        {
+            find: '.displayName="SpotifyStore"',
+            replacement: [
+                {
+                    predicate: () => settings.store.noSpotifyAutoPause,
+                    match: /(?<=function \i\(\){)(?=.{0,200}SPOTIFY_AUTO_PAUSED\))/,
+                    replace: "return;"
+                },
+                {
+                    predicate: () => settings.store.keepSpotifyActivityOnIdle,
+                    match: /(?<=shouldShowActivity=function\(\){.{0,50})&&!\i\.\i\.isIdle\(\)/,
+                    replace: ""
+                }
+            ]
         }
-    }
+    ]
 });

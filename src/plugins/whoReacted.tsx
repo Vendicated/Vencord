@@ -93,8 +93,8 @@ export default definePlugin({
     patches: [{
         find: ",reactionRef:",
         replacement: {
-            match: /((.)=(.{1,3})\.hideCount)(,.+?reactionCount.+?\}\))/,
-            replace: "$1,whoReactedProps=$3$4,$2?null:$self.renderUsers(whoReactedProps)"
+            match: /(?<=(\i)=(\i)\.hideCount,)(.+?reactionCount.+?\}\))/,
+            replace: (_, hideCount, props, rest) => `whoReactedProps=${props},${rest},${hideCount}?null:$self.renderUsers(whoReactedProps)`
         }
     }],
 
