@@ -82,8 +82,8 @@ export default definePlugin({
             find: ".activeCommandOption",
             predicate: () => settings.store.showIcon,
             replacement: {
-                match: /\i=\i\.activeCommand,\i=\i\.activeCommandOption,.{1,133}(.)=\[\];/,
-                replace: "$&;$1.push($self.chatBarIcon());",
+                match: /(.)\.push.{1,50}\(\i,\{.{1,30}\},"gift"\)\)/,
+                replace: "$&;try{$1.push($self.chatBarIcon())}catch{}",
             }
         },
     ],

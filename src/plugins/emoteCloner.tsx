@@ -20,10 +20,11 @@ import { migratePluginSettings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Forms, GuildStore, Margins, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Forms, GuildStore, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
@@ -95,7 +96,7 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
 
     return (
         <>
-            <Forms.FormTitle className={Margins.marginTop20}>Custom Name</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
             <CheckedTextInput
                 value={name}
                 onChange={setName}
@@ -181,15 +182,6 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Nuckyz],
     dependencies: ["MenuItemDeobfuscatorAPI"],
 
-<<<<<<< HEAD
-    patches: [{
-        // Literally copy pasted from ReverseImageSearch lol
-        find: "open-native-link",
-        replacement: {
-            match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-            replace: "$&,$self.makeMenu(arguments[2])"
-        },
-=======
     patches: [
         {
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
@@ -203,7 +195,6 @@ export default definePlugin({
                     replace: (mod, props, favoriteableType, favoriteableId, itemHref, itemSrc) => {
                         mod = mod.replace(RegExp(`(?<=${props}\\.navId,)`), `emoteClonerDataAlt=${props}.emoteClonerDataAlt,`);
                         const targetItems = mod.match(RegExp(`(?<=,).{1,2}(?==\\(0,.{1,2}\\..{1,2}\\)\\(null!=${itemHref})`));
->>>>>>> 5f762e0 (Fix Emote Cloner)
 
                         if (targetItems) {
                             mod = mod.replace(RegExp(`(?<=children:${targetItems[0]})`), `.concat(Vencord.Plugins.plugins.EmoteCloner.makeMenu(${favoriteableId},emoteClonerDataAlt,${itemHref}??${itemSrc},${favoriteableType})).filter(Boolean)`);

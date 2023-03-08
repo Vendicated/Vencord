@@ -20,10 +20,11 @@ import { Settings } from "@api/settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, Margins, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
 
 interface VoiceState {
     userId: string;
@@ -304,7 +305,7 @@ export default definePlugin({
                 </Forms.FormText>
                 {hasEnglishVoices && (
                     <>
-                        <Forms.FormTitle className={Margins.marginTop20} tag="h3">Play Example Sounds</Forms.FormTitle>
+                        <Forms.FormTitle className={Margins.top20} tag="h3">Play Example Sounds</Forms.FormTitle>
                         <div
                             style={{
                                 display: "grid",
