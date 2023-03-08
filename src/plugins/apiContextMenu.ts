@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
@@ -51,8 +50,6 @@ function listener(exports: any, id: number) {
     }
 }
 
-if (Settings.plugins.ContextMenuAPI.enabled) addListener(listener);
-
 export default definePlugin({
     name: "ContextMenuAPI",
     description: "API for adding/removing items to/from context menus.",
@@ -65,5 +62,9 @@ export default definePlugin({
                 replace: (_, props) => `Vencord.Api.ContextMenu._patchContextMenu(${props});`
             }
         }
-    ]
+    ],
+
+    start() {
+        addListener(listener);
+    }
 });
