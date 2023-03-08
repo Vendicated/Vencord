@@ -18,6 +18,7 @@
 
 import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
+import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
@@ -93,3 +94,8 @@ export const Styles = $Styles;
  * An API allowing you to display notifications
  */
 export const Notifications = $Notifications;
+
+/**
+ * An api allowing you to patch and add/remove items to/from context menus
+ */
+export const ContextMenu = $ContextMenu;
