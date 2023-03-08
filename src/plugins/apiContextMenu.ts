@@ -1,0 +1,69 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { Settings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { addListener, removeListener } from "@webpack";
+
+function listener(exports: any, id: number) {
+    if (typeof exports !== "object" || exports === null) return;
+
+    for (const key in exports) if (key.length <= 3) {
+        const prop = exports[key];
+        if (typeof prop !== "function") continue;
+
+        const str = Function.prototype.toString.call(prop);
+        if (str.includes('path:["empty"]')) {
+            Vencord.Plugins.patches.push({
+                plugin: "ContextMenuAPI",
+                all: true,
+                noWarn: true,
+                find: "navId:",
+                replacement: {
+                    /** Regex explanation
+                     * Use of https://blog.stevenlevithan.com/archives/mimic-atomic-groups to mimick atomic groups: (?=(...))\1
+                     * Match ${id} and look behind it for the first match of `<variable name>=`: ${id}(?=(\i)=.+?)
+                     * Match rest of the code until it finds `<variable name>.${key},{`: .+?\2\.${key},{
+                     */
+                    match: RegExp(`(?=(${id}(?<=(\\i)=.+?).+?\\2\\.${key},{))\\1`, "g"),
+                    replace: "$&contextMenuApiArguments:arguments,"
+                }
+            });
+
+            removeListener(listener);
+        }
+    }
+}
+
+if (Settings.plugins.ContextMenuAPI.enabled) addListener(listener);
+
+export default definePlugin({
+    name: "ContextMenuAPI",
+    description: "API for adding/removing items to/from context menus.",
+    authors: [Devs.Nuckyz],
+    patches: [
+        {
+            find: "♫ (つ｡◕‿‿◕｡)つ ♪",
+            replacement: {
+                match: /(?<=function \i\((\i)\){)(?=var \i,\i=\i\.navId)/,
+                replace: (_, props) => `Vencord.Api.ContextMenu._patchContextMenu(${props});`
+            }
+        }
+    ]
+});
