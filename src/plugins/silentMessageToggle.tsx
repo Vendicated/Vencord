@@ -29,7 +29,7 @@ function SilentMessageToggle() {
         const listener: SendListener = (_, message) => {
             if (enabled) {
                 setEnabled(false);
-                if (message.content.slice(0, 8) !== "@silent ") message.content = "@silent " + message.content;
+                if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
 
