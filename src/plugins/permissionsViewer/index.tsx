@@ -158,9 +158,9 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /(?<=guild:(?<guild>\i),guildMember:(?<guildMember>\i),showBorder:.{0,60}}\),)/,
-                replace: "$self.UserPermissions($<guild>,$<guildMember>),",
-            },
+                match: /(?<=showBorder:.{0,60}}\),)(?<=guild:(\i),guildMember:(\i),.+?)/,
+                replace: (_, guild, guildMember) => `$self.UserPermissions(${guild},${guildMember}),`
+            }
         }
     ],
 
