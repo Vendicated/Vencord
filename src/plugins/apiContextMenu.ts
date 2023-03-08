@@ -22,6 +22,8 @@ import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
 
 function listener(exports: any, id: number) {
+    if (!Settings.plugins.ContextMenuAPI.enabled) return removeListener(listener);
+
     if (typeof exports !== "object" || exports === null) return;
 
     for (const key in exports) if (key.length <= 3) {
@@ -51,7 +53,7 @@ function listener(exports: any, id: number) {
     }
 }
 
-if (Settings.plugins.ContextMenuAPI.enabled) addListener(listener);
+addListener(listener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
