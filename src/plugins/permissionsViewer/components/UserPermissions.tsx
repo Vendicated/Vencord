@@ -67,7 +67,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             if ((userRole.permissions & bit) > 0n) {
                 userPermissions.push({
                     permission: getPermissionString(permission),
-                    roleColor: userRole.colorString ?? "var(--primary-dark-300)",
+                    roleColor: userRole.colorString ?? "var(--primary-300)",
                     rolePosition: userRole.position
                 });
 
