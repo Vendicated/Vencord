@@ -36,6 +36,11 @@ function listener(exports: any, id: number) {
                 noWarn: true,
                 find: "navId:",
                 replacement: {
+                    /** Regex explanation
+                     * Use of https://blog.stevenlevithan.com/archives/mimic-atomic-groups to mimick atomic groups: (?=(...))\1
+                     * Match ${id} and look behind it for the first match of `<variable name>=`: ${id}(?=(\i)=.+?)
+                     * Match rest of the code until it finds `<variable name>.${key},{`: .+?\2\.${key},{
+                     */
                     match: RegExp(`(?=(${id}(?<=(\\i)=.+?).+?\\2\\.${key},{))\\1`, "g"),
                     replace: "$&contextMenuApiArguments:arguments,"
                 }
