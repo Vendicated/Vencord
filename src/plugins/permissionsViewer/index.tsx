@@ -168,7 +168,7 @@ export default definePlugin({
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
     channelContextMenuPatch: makeContextMenuPatch("mute-channel", MenuItemParentType.Channel),
-    guildContextMenuPatch: makeContextMenuPatch("guild-settings", MenuItemParentType.Guild),
+    guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
 
     start() {
         addContextMenuPatch("user-context", this.userContextMenuPatch);
