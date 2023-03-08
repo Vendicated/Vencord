@@ -123,7 +123,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, args) => {
-        if (!args) return children;
+        if (!args?.[0]) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
