@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { addListener, removeListener } from "@webpack";
 
 function listener(exports: any, id: number) {
+    if (!Settings.plugins.ContextMenuAPI.enabled) return;
+
     if (typeof exports !== "object" || exports === null) return;
 
     for (const key in exports) if (key.length <= 3) {
@@ -50,6 +53,8 @@ function listener(exports: any, id: number) {
     }
 }
 
+addListener(listener);
+
 export default definePlugin({
     name: "ContextMenuAPI",
     description: "API for adding/removing items to/from context menus.",
@@ -63,8 +68,4 @@ export default definePlugin({
             }
         }
     ],
-
-    start() {
-        addListener(listener);
-    }
 });
