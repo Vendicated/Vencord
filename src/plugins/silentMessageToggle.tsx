@@ -42,7 +42,7 @@ function SilentMessageToggle() {
             {tooltipProps => (
                 <Button
                     {...tooltipProps}
-                    onClick={() => setEnabled(!enabled)}
+                    onClick={() => setEnabled(prev => !prev)}
                     size=""
                     look={ButtonLooks.BLANK}
                     innerClassName={ButtonWrapperClasses.button}
