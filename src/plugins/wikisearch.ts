@@ -48,47 +48,54 @@ export default definePlugin({
                     });
                 }
 
-                fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${word}`)
-                    .then(response => response.json())
-                    .then(async data => {
-                        if (!data.query) return sendBotMessage(ctx.channel.id, { content: "No reply was given from Wikipedia. Check console for errors" });
-
-                        if (!data.query.search[0]) return sendBotMessage(ctx.channel.id, { content: "No results :(" });
-
-                        const firstres = data.query.search[0];
-
-                        let alt_data;
-                        let thumbnail;
-
-                        await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${firstres.pageid}&formatversion=2&origin=*`)
-                            .then(data => data.json())
-                            .then(data => alt_data = data.query.pages[0] || null);
-
-                        const thumbnail_data = alt_data.thumbnail;
-
-                        if (!thumbnail_data) thumbnail = null;
-                        else thumbnail = {
-                            url: thumbnail_data.source.replace(/(50px-)/ig, "1000px-"),
-                            height: thumbnail_data.height * 100,
-                            width: thumbnail_data.width * 100
-                        };
-
-                        sendBotMessage(ctx.channel.id, {
-                            embeds: [
-                                {
-                                    type: "rich",
-                                    title: data.query.search[0].title,
-                                    url: `https://wikipedia.org/w/index.php?curid=${firstres.pageid}`,
-                                    color: "0x8663BE",
-                                    description: firstres.snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
-                                    image: thumbnail,
-                                    footer: {
-                                        text: "Powered by the Wikimedia API",
-                                    },
-                                }
-                            ] as any
-                        });
+                const data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${word}`).then(response => response.json())
+                    .catch(err => {
+                        console.log(err);
+                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Please report this issue on the Vencord repository." });
                     });
+
+                if (!data.query) {
+                    console.log(data);
+                    return sendBotMessage(ctx.channel.id, { content: "No reply was given from Wikipedia. Check console for errors" });
+                }
+
+                if (!data.query.search[0]) return sendBotMessage(ctx.channel.id, { content: "No results :(" });
+
+                let thumbnail;
+
+                let alt_data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
+                    .then(data => data.json())
+                    .catch(err => {
+                        console.log(err);
+                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Please report this issue on the Vencord repository." });
+                    });
+
+                alt_data = alt_data.query.pages[0] ?? null;
+
+                const thumbnail_data = alt_data.thumbnail;
+
+                if (!thumbnail_data) thumbnail = null;
+                else thumbnail = {
+                    url: thumbnail_data.source.replace(/(50px-)/ig, "1000px-"),
+                    height: thumbnail_data.height * 100,
+                    width: thumbnail_data.width * 100
+                };
+
+                sendBotMessage(ctx.channel.id, {
+                    embeds: [
+                        {
+                            type: "rich",
+                            title: data.query.search[0].title,
+                            url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
+                            color: "0x8663BE",
+                            description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
+                            image: thumbnail,
+                            footer: {
+                                text: "Powered by the Wikimedia API",
+                            },
+                        }
+                    ] as any
+                });
             }
         }
     ]
