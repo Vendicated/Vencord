@@ -18,6 +18,8 @@
 
 import { find, findLazy } from "@webpack";
 
+import { Settings } from "./settings";
+
 interface Setting<T> {
     /**
      * Get the setting value
@@ -40,6 +42,8 @@ interface Setting<T> {
  * @param name The name of the setting
  */
 export function getSettingStore<T = any>(group: string, name: string): Setting<T> | undefined {
+    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
+
     return find(m => m?.settingsStoreApiGroup === group && m?.settingsStoreApiName === name);
 }
 
@@ -47,5 +51,7 @@ export function getSettingStore<T = any>(group: string, name: string): Setting<T
  * getSettingStore but lazy
  */
 export function getSettingStoreLazy<T = any>(group: string, name: string): Setting<T> | undefined {
+    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
+
     return findLazy(m => m?.settingsStoreApiGroup === group && m?.settingsStoreApiName === name);
 }
