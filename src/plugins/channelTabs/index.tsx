@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu.js";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
 import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { ChannelStore, Forms } from "@webpack/common";
-import Message from "discord-types/general/Message.js";
+import { ChannelStore, Forms, Menu } from "@webpack/common";
+import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
 import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
@@ -31,15 +32,40 @@ import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
 const Keybind = LazyComponent(() => findByCode(".keyClassName"));
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
+const messageLinkRegex = /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/;
+const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
+    if (!args?.[0]) return;
+    const { message, messageId, channel, itemHref }: { message?: Message, messageId?: string, channel: Channel, itemHref: string; } = args[0];
+    const isChannelMention = !!messageId; // "discord embeds" experiment
+    if (!isChannelMention && !messageLinkRegex.test(itemHref)) return;
+
+    const group = findGroupChildrenByChildId(isChannelMention ? "channel-copy-link" : "open-native-link", children);
+    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
+        group.push(
+            <Menu.MenuItem
+                label="Open In New Tab"
+                id="open-link-in-tab"
+                key="open-link-in-tab"
+                action={() => ChannelTabsUtils.createTab({
+                    guildId: channel.guild_id,
+                    channelId: channel.id
+                }, messageId ?? message!.id)}
+            />
+        );
+    }
+};
+
 export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
     authors: [Devs.TheSun],
+    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
     patches: [
         // add the channel tab container at the top
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
+                // TODO: remake patch
                 match: /(===(\i)\?void 0:\i\.channelId\).{0,130})Fragment,{children:(\(0,\i\.jsxs\)\("div",{.{0,500}sidebarTheme:.{0,1000}\.CHANNEL_THREAD_VIEW\(.{0,1500}\(0,\i\.jsx\)\(.{0,100}\)]}\))/,
                 replace: "$1Fragment,{children:[$self.render($2),$3]"
             }
@@ -63,6 +89,11 @@ export default definePlugin({
     ],
 
     settings: channelTabsSettings,
+
+    start() {
+        addContextMenuPatch("message", messageLinkContextMenuPatch);
+        addContextMenuPatch("channel-mention-context", messageLinkContextMenuPatch);
+    },
 
     render(props) {
         return <ErrorBoundary>
