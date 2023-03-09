@@ -233,8 +233,8 @@ export default definePlugin({
         {
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=favoriteableType:\i,)(?<=(\i)\.getAttribute\("data-type"\).+?)/,
-                replace: (_, target) => `emoteClonerDataAlt:${target}.alt,`
+                match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
+                replace: (m, target) => `${m}emoteClonerDataAlt:${target}.alt,`
             }
         }
     ],

@@ -81,8 +81,8 @@ export default definePlugin({
         {
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=favoriteableType:\i,)(?<=(\i)\.getAttribute\("data-type"\).+?)/,
-                replace: (_, target) => `reverseImageSearchType:${target}.getAttribute("data-role"),`
+                match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
+                replace: (m, target) => `${m}reverseImageSearchType:${target}.getAttribute("data-role"),`
             }
         }
     ],
