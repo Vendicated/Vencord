@@ -1,3 +1,19 @@
 [class*="withTagAsButton"] {
     min-width: 88px;
 }
+
+.game-activity-toggle-btn {
+    all: unset;
+    color: var(--interactive-normal);
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-activity-toggle-btn:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-selected);
+}
