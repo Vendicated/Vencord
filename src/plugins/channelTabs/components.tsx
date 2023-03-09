@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { find, findByCode } from "@webpack";
 import {
-    Button, ChannelStore, FluxDispatcher, Forms, GuildStore, ReadStateStore, Text, TypingStore,
+    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
     useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
@@ -86,7 +86,6 @@ function TypingIndicator(props: { channelId: string; }) {
         ? <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div>
         : null;
 }
-
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     let classes = cl("notification-dot");
     if (mentionCount) classes += ` ${cl("has-mention")}`;
@@ -94,6 +93,34 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
         {twoChars(mentionCount || unreadCount)}
     </div> : null;
 };
+function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number, update: () => void; }) {
+    const { channelInfo, pos, update } = props;
+    const channel = ChannelStore.getChannel(channelInfo.channelId);
+    return <Menu.ContextMenu
+        navId="channeltabs-channel-context"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="Channel Tab Context Menu"
+    >
+        <Menu.MenuItem
+            key="mark-as-read"
+            id="mark-as-read"
+            label="Mark as Read"
+            action={() => FluxDispatcher.dispatch({
+                type: "CHANNEL_ACK",
+                channelId: channel.id,
+                immediate: true,
+                force: true
+            })}
+        />
+        <Menu.MenuItem
+            key="close-tab"
+            id="close-tab"
+            label="Close Tab"
+            action={() => { closeTab(pos); update(); }}
+        />
+    </Menu.ContextMenu>;
+}
+
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
     const { guild, channel } = props;
     const recipients = channel?.recipients;
@@ -207,6 +234,7 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
             className={cl("tab")}
             style={isTabSelected(ch) ? { backgroundColor: "var(--background-modifier-selected)" } : undefined}
             key={i}
+            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu channelInfo={ch} pos={i} update={update} />)}
         >
             <button className={`${cl("button")} ${cl("channel-info")}`} onClick={() => {
                 moveToTab(i);

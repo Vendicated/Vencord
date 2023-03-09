@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu.js";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu.js";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
@@ -93,6 +93,11 @@ export default definePlugin({
     start() {
         addContextMenuPatch("message", messageLinkContextMenuPatch);
         addContextMenuPatch("channel-mention-context", messageLinkContextMenuPatch);
+    },
+
+    stop() {
+        removeContextMenuPatch("message", messageLinkContextMenuPatch);
+        removeContextMenuPatch("channel-mention-context", messageLinkContextMenuPatch);
     },
 
     render(props) {
