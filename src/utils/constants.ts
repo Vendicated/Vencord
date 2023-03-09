@@ -22,6 +22,7 @@ import gitRemote from "~git-remote";
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
+export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 // Add yourself here if you made a plugin
 export const Devs = /* #__PURE__*/ Object.freeze({
@@ -204,5 +205,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RuiNtD: {
         name: "RuiNtD",
         id: 157917665162297344n
+    },
+    cloudburst: {
+        name: "cloudburst",
+        id: 892128204150685769n
     }
 });
