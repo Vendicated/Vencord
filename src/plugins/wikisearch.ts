@@ -51,34 +51,28 @@ export default definePlugin({
                 const data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${word}`).then(response => response.json())
                     .catch(err => {
                         console.log(err);
-                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Please report this issue on the Vencord repository." });
+                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
                     });
 
-                if (!data.query) {
+                if (!data.query?.search?.length) {
                     console.log(data);
-                    return sendBotMessage(ctx.channel.id, { content: "No reply was given from Wikipedia. Check console for errors" });
+                    return sendBotMessage(ctx.channel.id, { content: "No results given" });
                 }
 
-                if (!data.query.search[0]) return sendBotMessage(ctx.channel.id, { content: "No results :(" });
-
-                let thumbnail;
-
-                let alt_data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
-                    .then(data => data.json())
+                const altData = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
+                    .then(res => res.json())
+                    .then(data => data.query.pages[0])
                     .catch(err => {
                         console.log(err);
-                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Please report this issue on the Vencord repository." });
+                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
                     });
 
-                alt_data = alt_data.query.pages[0] ?? null;
+                const thumbnailData = altData.thumbnail;
 
-                const thumbnail_data = alt_data.thumbnail;
-
-                if (!thumbnail_data) thumbnail = null;
-                else thumbnail = {
-                    url: thumbnail_data.source.replace(/(50px-)/ig, "1000px-"),
-                    height: thumbnail_data.height * 100,
-                    width: thumbnail_data.width * 100
+                const thumbnail = thumbnailData && {
+                    url: thumbnailData.source.replace(/(50px-)/ig, "1000px-"),
+                    height: thumbnailData.height * 100,
+                    width: thumbnailData.width * 100
                 };
 
                 sendBotMessage(ctx.channel.id, {
