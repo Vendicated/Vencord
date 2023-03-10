@@ -19,15 +19,20 @@
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
+import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import {
+    Button, ButtonLooks, ButtonWrapperClasses,
     ChannelStore,
-    FluxDispatcher,
+    FluxDispatcher, Forms,
     GuildStore,
     NavigationRouter,
-    RelationshipStore,
-    UserStore
+    RelationshipStore, Tooltip,
+    UserStore,
 } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+
+const createBotMessage = findByCodeLazy('username:"Clyde"');
 
 interface user {
     avatar: string;
@@ -80,6 +85,12 @@ const settings = definePluginSettings({
         description: "Whether or not to match case",
         default: false
     },
+    subString: {
+        type: OptionType.BOOLEAN,
+        description: "Whether or not to match if the keyword is within another word",
+        default: true,
+        onChange: () => plugin.UpdateKeywordRegex()
+    },
     highlightInChat: {
         type: OptionType.BOOLEAN,
         description: "Whether or not to highlight the keyword in chat",
@@ -112,7 +123,23 @@ const settings = definePluginSettings({
     }
 });
 
+function fakeMessage(message: message, keyword: string, real: boolean = true) {
+    // we have to camelCase channelId because discord™.
+    const msg = createBotMessage({
+        channelId: message.channel_id,
+        content: message.content,
+        guildId: message.guild_id,
+        author: message.author
+    })
+    // the above message now has the functions hasFlag() and stuff,
+    // which makes it valid for the component 👍.
 
+    msg.keyword = keyword;
+    msg.id = message.id;
+    msg.flags = 0;
+    msg.real = real;
+    return msg;
+}
 const KeywordText = ({ keyword, children }) => {
     // escape the regex
     const escaped = keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -133,42 +160,81 @@ const KeywordText = ({ keyword, children }) => {
 
 
 function onMessage(ev: { message: message; }) {
-    const { author_id, channel_id, guild_id, id } = plugin.getChannelGuildAndAuthorIds(ev.message);
+    const {author_id, channel_id, guild_id, id} = plugin.getChannelGuildAndAuthorIds(ev.message);
     if ([author_id, channel_id, guild_id].includes(undefined)) return;
 
     if (!plugin.shouldHighlightMessage(ev.message)) return;
+    let {content} = ev.message;
 
-    let keywords = settings.store.keywords.split(",");
-    let { content } = ev.message;
-    if (!settings.store.caseSensitive) {
-        keywords = keywords.map(keyword => keyword.toLowerCase());
-        content = content.toLowerCase();
-    }
-
-    for (const keyword of keywords) {
-        if (content.includes(keyword)) {
-            showNotification({
-                title: `Keyword in ${GuildStore.getGuild(guild_id).name} from @${ev.message.author.username}: ${keyword}`,
-                body: ev.message.content,
-                richBody: <KeywordText keyword={keyword}>{ev.message.content}</KeywordText>,
-                icon: `https://cdn.discordapp.com/avatars/${ev.message.author.id}/${ev.message.author.avatar}.png?size=128`,
-                onClick () {
-                    const link = "/channels/" + guild_id + "/" + channel_id + "/" + id;
-                    // focus discord
-                    window.focus();
-                    NavigationRouter.transitionTo(link);
-                }
-            });
-            break;
-        }
+    const matches = content.match(plugin.KeywordRegex);
+    if (matches != null && matches.length > 0 && matches[0].length > 0) {
+        const keyword = matches[0];
+        recentHighlights.push(fakeMessage(ev.message, keyword));
+        showNotification({
+            title: `Keyword in ${GuildStore.getGuild(guild_id).name} from @${ev.message.author.username}: ${keyword}`,
+            body: ev.message.content,
+            richBody: <KeywordText keyword={keyword}>{ev.message.content}</KeywordText>,
+            icon: `https://cdn.discordapp.com/avatars/${ev.message.author.id}/${ev.message.author.avatar}.png?size=128`,
+            onClick() {
+                const link = "/channels/" + guild_id + "/" + channel_id + "/" + id;
+                // focus discord
+                window.focus();
+                NavigationRouter.transitionTo(link);
+            }
+        });
     }
 }
 
+
+interface HighlightMessage extends message {
+    real: boolean;
+    keyword: string;
+}
+
+let recentHighlights: HighlightMessage[] = [];
 
 const plugin = definePlugin({
     name: "KeywordAlerts",
     description: "Sends a notification whenever someone sends a keyword.",
     authors: [Devs.captain],
+    recentHighlightsModal: function (props) {
+        if (!IS_DEV) {
+            recentHighlights = recentHighlights.filter(m => m.real);
+            recentHighlights.push({
+                ...createBotMessage(
+                    {
+                        channelId: "1015931590741872712",
+                        content: "testing test yes"
+                    }),
+                flags: 0,
+                author: UserStore.getCurrentUser(),
+                keyword: "test"
+            })
+        }
+        return (
+            <ModalRoot {...props}>
+                <ModalHeader>
+                    <Forms.FormTitle tag="h4">Recent Highlights</Forms.FormTitle>
+                </ModalHeader>
+
+                <ModalContent>
+                    {recentHighlights.map((highlight) =>  <>
+                            <plugin.messageComponent compact={false}
+                                                     flashKey={undefined}
+                                                     groupId={Math.ceil(Math.random() * 100000).toString()}
+                                                     isHighlight={false}
+                                                     isLastItem={false}
+                                                     renderContentOnly={false}
+                                                     id={`chat-messages-${highlight.channel_id}-${highlight.id}`}
+                                                     message={highlight}
+                                                     channel={ChannelStore.getChannel(highlight.channel_id!)} />
+                            <Forms.FormDivider />
+                        </>
+                    )}
+                </ModalContent>
+            </ModalRoot>
+        );
+    },
     start: function() {
         FluxDispatcher.subscribe("MESSAGE_CREATE", onMessage);
         this.UpdateKeywordRegex();
@@ -176,12 +242,54 @@ const plugin = definePlugin({
     stop: function() {
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", onMessage);
     },
+    highlightIcon() {
+        return (
+            // yoinkity-sploinkitied from InvisibleChat
+            <Tooltip text="Recent highlights" position="bottom">
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <Button
+                        aria-haspopup="dialog"
+                        aria-label="Recent highlights"
+                        size=""
+                        look={ButtonLooks.BLANK}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        innerClassName={ButtonWrapperClasses.button}
+                        onClick={() => openModal(props => <this.recentHighlightsModal {...props} />, { modalKey: "KA-Modal" })}
+                        style={{ marginRight: "2px" }}
+                    >
+                        <div className={ButtonWrapperClasses.buttonWrapper}>
+                            <svg style={{ borderRadius: "50%" }} color={Button.Colors.WHITE} width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                                <rect id="svg_6" height="13.94872" width="13.94872" y="-2.35897" x="-2.5641" fill="currentColor"/>
+                                <rect id="svg_8" height="14.46154" width="14.46154" y="12.46154" x="12.3077" fill="currentColor"/>
+                            </svg>
+                        </div>
+                    </Button>
+                )}
+            </Tooltip>
+        );
+    },
     patches: [ // stole this from invisible-chat
         {
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /var .,.,.=(.)\.className,.=.\.message,.=.\.children,.=.\.content,.=.\.onUpdate/gm,
                 replace: "try {if ($1 && $self.settings.store.highlightInChat) $1.content = $self.replaceMessageContent($1); } catch {};$&"
+            }
+        },
+        // uncomment when you get it working you lazy captain
+        // { // thanks nookies
+        //     find: ".Messages.UPDATE_AVAILABLE",
+        //     replacement: {
+        //         match: /(toolbar:function\(\).+?children:\[.+?)]/,
+        //         replace: "$1,$self.highlightIcon()]"
+        //     },
+        // },
+        {
+            find: "\"Message must not be a thread starter message\"",
+            replacement: {
+                match: /function (\i)(\(\i\)){(var \i=\i.id)/,
+                replace: "function $1$2{$self.setMessageComp($1);$3"
             }
         }
     ],
@@ -207,6 +315,10 @@ const plugin = definePlugin({
 
         return { author_id, channel_id, guild_id, id };
     },
+    messageComponent: () => <></>,
+    setMessageComp(func) {
+        this.messageComponent = func; // poggers
+    },
     shouldHighlightMessage(message: message) {
         const { author_id, channel_id, guild_id } = this.getChannelGuildAndAuthorIds(message);
         if ([author_id, channel_id, guild_id].includes(undefined)) return false;
@@ -216,11 +328,11 @@ const plugin = definePlugin({
         // the indentation is like this because it's easier to read imo.
         if (
             (settings.store.ignoredUsers !== "" &&
-                settings.store.ignoredUsers.split(",").includes(author_id) !== settings.store.whitelist) ||
+                settings.store.ignoredUsers.split(",").includes(author_id!) !== settings.store.whitelist) ||
             (settings.store.ignoredChannels !== "" &&
-                settings.store.ignoredChannels.split(",").includes(channel_id) !== settings.store.whitelist) ||
+                settings.store.ignoredChannels.split(",").includes(channel_id!) !== settings.store.whitelist) ||
             (settings.store.ignoredGuilds !== "" &&
-                settings.store.ignoredGuilds.split(",").includes(guild_id) !== settings.store.whitelist)
+                settings.store.ignoredGuilds.split(",").includes(guild_id!) !== settings.store.whitelist)
         ) return false;
 
         // check if the user is blocked or yourself.
@@ -264,13 +376,15 @@ const plugin = definePlugin({
     UpdateKeywordRegex () {
         // update the regex. has to be escaped because the keywords are provided by the user.
         this.KeywordRegex = new RegExp(
-            "(" + settings.store.keywords.split(",").map(keyword => keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|") + ")",
+            (settings.store.subString ? "(" : "\\b(")
+            + settings.store.keywords.split(",").map(keyword => keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|")
+            + (settings.store.subString ? ")" : ")\\b"),
             settings.store.caseSensitive ? "g" : "gi"
         );
     },
     // since we can't access store before the plugin is initialized, this regex should not match anything.
     KeywordRegex: new RegExp("a^", "g"),
-    KeywordHighlightComponent: props => <span style={{ color: settings.store.highlightColor }}>{props.children}</span>,
+    KeywordHighlightComponent: props => <span className={"KA-Highlight"} style={{ color: settings.store.highlightColor }}>{props.children}</span>,
     settings
 });
 
