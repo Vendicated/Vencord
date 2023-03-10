@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput, useState } from "@webpack/common";
+import { Button, TextInput } from "@webpack/common";
 
 let rulesString = [
     {
