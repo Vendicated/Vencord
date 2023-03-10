@@ -63,7 +63,7 @@ function fetchMissingFriendProfiles() {
     }
 }
 
-function FriendsOnServerModal({ guildId, modalProps }: { guildId: string; modalProps: ModalProps; }) {
+function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps: ModalProps; }) {
     const friendIds = useStateFromStores(
         [UserProfileStore],
         () => Object.entries(UserProfileStore.__getLocalVars().mutualGuilds)
@@ -77,11 +77,11 @@ function FriendsOnServerModal({ guildId, modalProps }: { guildId: string; modalP
     const forceUpdate = useForceUpdater();
 
     React.useEffect(() => {
+        const fetchQueueFinishCallback = () => forceUpdate();
+        fetchQueueFinishCallbacks.add(fetchQueueFinishCallback);
+
         fetchMissingFriendProfiles();
 
-        const fetchQueueFinishCallback = () => forceUpdate();
-
-        fetchQueueFinishCallbacks.add(fetchQueueFinishCallback);
         return () => void fetchQueueFinishCallbacks.delete(fetchQueueFinishCallback);
     }, []);
 
@@ -140,7 +140,7 @@ const guildContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
                 id="friends-on-server"
                 key="friends-on-server"
                 label="Friends On Server"
-                action={() => openModal(modalProps => <FriendsOnServerModal guildId={args[0].guild.id} modalProps={modalProps} />)}
+                action={() => openModal(modalProps => <FriendsOnServer guildId={args[0].guild.id} modalProps={modalProps} />)}
             />
         ));
 };
