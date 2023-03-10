@@ -69,9 +69,9 @@ export const globPlugins = {
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
                     if (file.startsWith(".")) continue;
-                    if (file === "index.ts") {
-                        continue;
-                    }
+                    if (file === "index.ts") continue;
+                    if (!watch && (file.endsWith(".dev.ts") || file.endsWith(".dev.tsx"))) continue;
+
                     const mod = `p${i}`;
                     code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
                     plugins += `[${mod}.name]:${mod},\n`;
