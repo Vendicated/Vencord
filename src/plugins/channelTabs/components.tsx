@@ -20,7 +20,7 @@ import "./style.css";
 
 import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
-import { find, findByCode } from "@webpack";
+import { filters, find, findByCode, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
     useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores
@@ -30,14 +30,17 @@ import { Channel, Guild, User } from "discord-types/general";
 import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
-    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
+    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, isEqualToCurrentTab, isTabSelected,
+    moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
     DM = 1,
     GROUP_DM = 3
 }
+const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
+    markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
+});
 
 const twoChars = (n: number) => n > 99 ? "9+" : `${n}`;
 const cl = (name: string) => `vc-channeltabs-${name}`;
@@ -96,28 +99,47 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
 function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number, update: () => void; }) {
     const { channelInfo, pos, update } = props;
     const channel = ChannelStore.getChannel(channelInfo.channelId);
+    const { openChannels } = ChannelTabsUtils;
     return <Menu.ContextMenu
         navId="channeltabs-channel-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="Channel Tab Context Menu"
     >
-        <Menu.MenuItem
-            key="mark-as-read"
-            id="mark-as-read"
-            label="Mark as Read"
-            action={() => FluxDispatcher.dispatch({
-                type: "CHANNEL_ACK",
-                channelId: channel.id,
-                immediate: true,
-                force: true
-            })}
-        />
-        <Menu.MenuItem
-            key="close-tab"
-            id="close-tab"
-            label="Close Tab"
-            action={() => { closeTab(pos); update(); }}
-        />
+        {channel && <Menu.MenuGroup>
+            <Menu.MenuItem
+                key="mark-as-read"
+                id="mark-as-read"
+                label="Mark as Read"
+                action={() => ReadStateUtils.markAsRead(channel)}
+            />
+        </Menu.MenuGroup>}
+        {openChannels.length !== 1 && <Menu.MenuGroup>
+            <Menu.MenuItem
+                key="close-tab"
+                id="close-tab"
+                label="Close Tab"
+                action={() => { closeTab(pos); update(); }}
+            />
+            <Menu.MenuItem
+                key="close-other-tabs"
+                id="close-other-tabs"
+                label="Close Other Tabs"
+                action={() => {
+                    closeOtherTabs(pos);
+                    update();
+                }}
+            />
+            <Menu.MenuItem
+                key="close-right-tabs"
+                id="close-right-tabs"
+                label="Close Tabs to the Right"
+                disabled={openChannels.length === (pos + 1)}
+                action={() => {
+                    closeTabsToTheRight(pos);
+                    update();
+                }}
+            />
+        </Menu.MenuGroup>}
     </Menu.ContextMenu>;
 }
 

@@ -75,6 +75,23 @@ function closeTab(i: number) {
     if (openChannelIndex === i) moveToTab(Math.max(i - 1, 0));
     if (openChannelIndex > i) openChannelIndex--;
 }
+function closeOtherTabs(i: number) {
+    const { length } = openChannels;
+    const channel = openChannels[i];
+    const lastCurrentChannel = openChannels[openChannelIndex];
+    for (let n = 0; n < length; n++) openChannels.pop();
+    openChannels.push(channel);
+    openChannelIndex = 0;
+    if (channel.channelId !== lastCurrentChannel.channelId) moveToTab(openChannelIndex);
+}
+function closeTabsToTheRight(i: number) {
+    const { length } = openChannels;
+    for (let n = i; n < length - 1; n++) openChannels.pop();
+    if (openChannelIndex > (openChannels.length - 1)) {
+        openChannelIndex = openChannels.length - 1;
+        moveToTab(openChannelIndex);
+    }
+}
 function closeCurrentTab() {
     openChannels.splice(openChannelIndex, 1);
     moveToTab(Math.max(openChannelIndex - 1, 0));
@@ -131,6 +148,6 @@ function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
 const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", data ?? { openChannels, openChannelIndex });
 
 export const ChannelTabsUtils = {
-    closeCurrentTab, closeTab, createTab, isEqualToCurrentTab, isTabSelected, moveToTab,
-    moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
+    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, isEqualToCurrentTab, isTabSelected,
+    moveToTab, moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
 };
