@@ -224,6 +224,7 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
+    dependencies: ["ContextMenuAPI"],
 
     start() {
         initWs();
