@@ -1,0 +1,34 @@
+.frds-on-svr-title {
+    flex-grow: 1;
+}
+
+.frds-on-svr-fetching-container {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: var(--background-tertiary);
+    text-align: center;
+}
+
+.frds-on-svr-frds-container {
+    margin-top: 8px;
+    padding: 16px;
+    border-radius: 5px;
+    background-color: var(--background-tertiary);
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.frds-on-svr-open-modal-btn {
+    all: unset;
+    cursor: pointer;
+}
+
+.frds-on-svr-avatar-img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}

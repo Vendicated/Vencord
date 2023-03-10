@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -92,31 +94,28 @@ function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps:
                 size={ModalSize.MEDIUM}
             >
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Friends on this server:</Text>
+                    <Text className="frds-on-svr-title" variant="heading-lg/semibold">Friends on this server:</Text>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
                 <ModalContent>
-                    {fetchQueue.size > 0 && (
-                        <Text variant="text-md/semibold" style={{ marginTop: 8, padding: 8, borderRadius: 5, backgroundColor: "var(--background-tertiary)", textAlign: "center" }}
-                        >Fetching friends...</Text>
-                    )}
-                    <div style={{ marginTop: 8, padding: 16, borderRadius: 5, backgroundColor: "var(--background-tertiary)", display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", textAlign: "center" }}>
+                    {fetchQueue.size > 0 && <Text className="frds-on-svr-fetching-container" variant="text-md/semibold">Fetching friends...</Text>}
+                    <div className="frds-on-svr-frds-container">
                         {friendIds.length === 0
                             ? <Text variant="text-md/normal">There are no friends on this server :/</Text>
                             : friendIds.map(friendId => {
                                 const user = UserStore.getUser(friendId);
 
                                 return (
-                                    <Tooltip text={user.tag}>
+                                    <Tooltip text={user?.tag ?? "Unknown User"}>
                                         {tooltipProps => (
                                             <button
                                                 {...tooltipProps}
+                                                className="frds-on-svr-open-modal-btn"
                                                 onClick={() => FluxDispatcher.dispatch({ type: "USER_PROFILE_MODAL_OPEN", userId: friendId })}
-                                                style={{ all: "unset", cursor: "pointer" }}
                                             >
                                                 <img
-                                                    src={user.getAvatarURL(void 0, void 0, false)}
-                                                    style={{ borderRadius: "50%", width: 50, height: 50 }}
+                                                    className="frds-on-svr-avatar-img"
+                                                    src={user?.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             </button>
                                         )}
@@ -126,7 +125,7 @@ function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps:
                     </div>
                 </ModalContent>
             </ModalRoot>
-        </ErrorBoundary >
+        </ErrorBoundary>
     );
 }
 
@@ -134,7 +133,7 @@ const guildContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
     if (!args?.[0]) return;
 
     const group = findGroupChildrenByChildId("privacy", children);
-    if (group && !group.some(child => child?.props?.id === "friends-on-server"))
+    if (group && !group.some(child => child?.props?.id === "friends-on-server")) {
         group.push((
             <Menu.MenuItem
                 id="friends-on-server"
@@ -143,11 +142,12 @@ const guildContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
                 action={() => openModal(modalProps => <FriendsOnServer guildId={args[0].guild.id} modalProps={modalProps} />)}
             />
         ));
+    }
 };
 
 export default definePlugin({
     name: "FriendsOnServer",
-    description: "Adds an option to guild context menus to show what friends are on that guild.",
+    description: "Adds an option to server context menus to show what friends are on that server.",
     authors: [Devs.Nuckyz],
 
     patches: [
