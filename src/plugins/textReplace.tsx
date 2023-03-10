@@ -251,7 +251,7 @@ export default definePlugin({
         });
     },
 
-    async stop() {
+    stop() {
         removePreSendListener(this.preSend);
     }
 });
