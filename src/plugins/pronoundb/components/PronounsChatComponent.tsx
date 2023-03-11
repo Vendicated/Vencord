@@ -28,6 +28,9 @@ import { PronounMapping } from "../types";
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
 export default function PronounsChatComponentWrapper({ message }: { message: Message; }) {
+    // Respect showInProfile
+    if (!Settings.plugins.PronounDB.showInMessages)
+        return null;
     // Don't bother fetching bot or system users
     if (message.author.bot || message.author.system)
         return null;

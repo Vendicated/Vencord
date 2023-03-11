@@ -25,8 +25,12 @@ import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../t
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
     const user = UserStore.getUser(profileProps.userId) ?? {};
+    // Respect showInMessages
+    if (!Settings.plugins.PronounDB.showInProfile)
+        return null;
     // Don't bother fetching bot or system users
-    if (user.bot || user.system) return null;
+    if (user.bot || user.system)
+        return null;
     // Respect showSelf options
     if (!Settings.plugins.PronounDB.showSelf && user.id === UserStore.getCurrentUser().id)
         return null;

@@ -79,6 +79,16 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Enable or disable showing pronouns for the current user",
             default: true
+        },
+        showInMessages: {
+            type: OptionType.BOOLEAN,
+            description: "Show in messages",
+            default: true
+        },
+        showInProfile: {
+            type: OptionType.BOOLEAN,
+            description: "Show in profile",
+            default: true
         }
     },
     settingsAboutComponent: PronounsAboutComponent,
