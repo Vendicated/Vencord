@@ -27,12 +27,12 @@ export default definePlugin({
         {
             find: '("ApplicationStreamPreviewUploadManager")',
             replacement: [
-                ".\\.default\\.makeChunkedRequest\\(",
-                ".{1,2}\\..\\.post\\({url:"
+                "\\i\\.default\\.makeChunkedRequest\\(",
+                "\\i\\.\\i\\.post\\({url:"
             ].map(match => ({
-                match: new RegExp(`return\\[(?<code>\\d),${match}.\\..{1,3}\\.STREAM_PREVIEW.+?}\\)\\];`),
-                replace: 'return[$<code>,Promise.resolve({body:"",status:204})];'
+                match: new RegExp(`(?=return\\[(\\d),${match}\\i\\.\\i\\.STREAM_PREVIEW.+?}\\)\\];)`),
+                replace: (_, code) => `return[${code},Promise.resolve({body:"",status:204})];`
             }))
-        },
-    ],
+        }
+    ]
 });
