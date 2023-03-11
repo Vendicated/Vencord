@@ -32,14 +32,14 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     getShortcuts() {
-        function newFindWrapper(filterFactory: (props: any) => Webpack.FilterFn) {
-            const cache = new Map<string, any>();
+        function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
+            const cache = new Map<string, unknown>();
 
-            return function (filterProps: any) {
+            return function (...filterProps: unknown[]) {
                 const cacheKey = String(filterProps);
                 if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-                const matches = findAll(filterFactory(filterProps));
+                const matches = findAll(filterFactory(...filterProps));
 
                 const result = (() => {
                     switch (matches.length) {

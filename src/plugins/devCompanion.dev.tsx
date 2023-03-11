@@ -112,7 +112,7 @@ function initWs(isManual = false) {
     });
 
     ws.addEventListener("close", e => {
-        if (!wasConnected && !hasErrored) return;
+        if (!wasConnected || hasErrored) return;
 
         logger.info("Dev Companion Disconnected:", e.code, e.reason);
 
@@ -204,8 +204,9 @@ function initWs(isManual = false) {
                             return reply("Unknown Find Type " + type);
                     }
 
-                    if (results.length === 0) throw "No results";
-                    if (results.length > 1) throw "Found more than one result! Make this filter more specific";
+                    const uniqueResultsCount = new Set(results).size;
+                    if (uniqueResultsCount === 0) throw "No results";
+                    if (uniqueResultsCount > 1) throw "Found more than one result! Make this filter more specific";
                 } catch (err) {
                     return reply("Failed to find: " + err);
                 }
