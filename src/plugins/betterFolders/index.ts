@@ -91,7 +91,7 @@ export default definePlugin({
                 },
                 {
                     match: /return(\(0,\i\.jsx\))(\(\i,{)(folderNode:\i,setNodeRef:\i\.setNodeRef,draggable:!0,.+},\i\.id\));case/,
-                    replace: "var folder=$1$2bfHideServers:!bfPatch,$3;return bfPatch&&arguments[1]?[$1($self.Separator,{}),folder]:folder;case"
+                    replace: "var bfHideServers=typeof bfPatch==='undefined',folder=$1$2bfHideServers,$3;return !bfHideServers&&arguments[1]?[$1($self.Separator,{}),folder]:folder;case"
                 },
                 // END
 

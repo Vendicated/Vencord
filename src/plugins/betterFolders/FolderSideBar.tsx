@@ -23,7 +23,7 @@ import { React, useStateFromStores } from "@webpack/common";
 const classes = findByPropsLazy("sidebar", "guilds");
 const i18n = findLazy(m => m.Messages?.["en-US"]);
 
-const Animations = findByPropsLazy("useTransition");
+const Animations = findByPropsLazy("a", "animated", "useTransition");
 const FullscreenStore = findByPropsLazy("isFullscreenInContext");
 const ExpandedFolderStore = findByPropsLazy("getExpandedFolders");
 
