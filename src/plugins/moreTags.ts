@@ -20,13 +20,12 @@ import { definePluginSettings, migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/proxyLazy.js";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByPropsLazy, waitFor, } from "@webpack";
+import { find, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
 // PermissionStore.computePermissions is not the same function and doesn't work here
-let computePermissions: ({ ...args }) => bigint;
-waitFor(["computePermissions", "canEveryoneRole"], m => ({ computePermissions } = m));
+const PermissionUtil: { computePermissions: ({ ...args }) => bigint; } = findByPropsLazy("computePermissions", "canEveryoneRole");
 const Permissions: Record<string, bigint> = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS");
 const Tags: Record<string, number> = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types);
 
@@ -191,7 +190,7 @@ return type!==null?$2.botTag,type"
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
-        const permissions = computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
+        const permissions = PermissionUtil.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
         return Object.entries(Permissions).map(([perm, permInt]) =>
             permissions & permInt ? perm : ""
         ).filter(Boolean);
