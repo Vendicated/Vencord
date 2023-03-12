@@ -19,14 +19,20 @@
 import { FluxDispatcher, GuildMemberStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+interface GuildMembersChunkEvent {
+    guildId: string;
+    members: Array<{ user: User; }>;
+    notFound: Array<string>;
+}
+
 /**
- * Request uncached Guild Members through the Gateway
- * @param ids The ids to request. Already cached Guild Members are ignored.
+ * Request uncached Guild Members through the Gateway. This method also checks for receiving non existing Guild Members (Not in the guild).
+ * @param ids The user ids to request. Already cached Guild Members are ignored.
  * @param guildId The id of the guild.
  * @param timeoutMs The timeout in milliseconds to reject the promise
- * @returns Whether the Guild Members were sucessfully requested and cached.
+ * @returns Whether the Guild Members were sucessfully requested and received.
  */
-export async function requestMissingGuildMembers(ids: Array<string>, guildId: string, timeoutMs: number = 15 * 1000) {
+export async function requestMissingGuildMembers(guildId: string, ids: Array<string>, timeoutMs: number = 15 * 1000) {
     const userIdsChunks: Array<Array<string>> = [];
 
     for (const id of ids) {
@@ -51,9 +57,14 @@ export async function requestMissingGuildMembers(ids: Array<string>, guildId: st
             let chunksReceived = 0;
             const timeout = setTimeout(rej, timeoutMs);
 
-            FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", ({ guildId: chunkGuildId, members }: { guildId: string; members: Array<{ user: User; }>; }) => {
-                if (chunkGuildId === guildId && members.some(member => allUserIds.includes(member.user.id))) {
-                    chunksReceived += 1;
+            FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", ({ guildId: chunkGuildId, members, notFound }: GuildMembersChunkEvent) => {
+                if (chunkGuildId === guildId) {
+                    if (
+                        members.some(member => allUserIds.includes(member.user.id))
+                        || notFound.some(id => allUserIds.includes(id))
+                    ) {
+                        chunksReceived += 1;
+                    }
                 }
 
                 if (chunksReceived === userIdsChunks.length) {

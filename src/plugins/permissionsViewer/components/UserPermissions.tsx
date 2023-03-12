@@ -17,6 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { PermissionsBits, Text, Tooltip, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
@@ -84,10 +85,9 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 <Text className="permviewer-userperms-title" variant="eyebrow">Permissions</Text>
                 <div>
                     <Tooltip text="Details">
-                        {({ onMouseLeave, onMouseEnter }) => (
+                        {tooltipProps => (
                             <svg
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
+                                {...tooltipProps}
                                 className="permviewer-userperms-permdetails-btn"
                                 width="24"
                                 height="24"
@@ -99,10 +99,9 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                         )}
                     </Tooltip>
                     <Tooltip text="Toggle Permissions">
-                        {({ onMouseLeave, onMouseEnter }) => (
+                        {tooltipProps => (
                             <svg
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
+                                {...tooltipProps}
                                 className="permviewer-userperms-toggleperms-btn"
                                 width="24"
                                 height="24"
@@ -117,14 +116,14 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 </div>
             </div>
             {viewPermissions && userPermissions.length > 0 && (
-                <div className={[RolePillClasses.root, RoleClasses.roles].join(" ")}>
+                <div className={classes(RolePillClasses.root, RoleClasses.roles)}>
                     {userPermissions.map(permission => (
-                        <div className={[RolePillClasses.role, RoleClasses.rolePill, RoleClasses.rolePillBorder].join(" ")}>
+                        <div className={classes(RolePillClasses.role, RoleClasses.rolePill, RoleClasses.rolePillBorder)}>
                             <div className={RolePillClasses.roleRemoveButton}>
                                 <span className={RoleCircleClasses.roleCircle} style={{ backgroundColor: permission.roleColor }} />
                             </div>
                             <div className={RolePillClasses.roleName}>
-                                <Text className={[RolePillClasses.roleNameOverflow].join(" ")} variant="text-xs/medium">{permission.permission}</Text>
+                                <Text className={RolePillClasses.roleNameOverflow} variant="text-xs/medium">{permission.permission}</Text>
                             </div>
                         </div>
                     ))}

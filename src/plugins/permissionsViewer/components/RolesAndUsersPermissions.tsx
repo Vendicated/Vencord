@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { requestMissingGuildMembers } from "@utils/guild";
-import { useForceUpdater } from "@utils/misc";
+import { classes, useForceUpdater } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { ContextMenu, FluxDispatcher, Menu, PermissionsBits, Text, useEffect, UserStore, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
@@ -49,7 +49,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     let requestSucess: boolean | undefined = undefined;
 
     useEffect(() => {
-        requestMissingGuildMembers(permissions.filter(permission => permission.type === PermissionType.User).map(({ id }) => id), guild.id)
+        requestMissingGuildMembers(guild.id, permissions.filter(permission => permission.type === PermissionType.User).map(({ id }) => id))
             .then(sucess => {
                 requestSucess = sucess;
                 forceUpdate();
@@ -84,7 +84,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                                 return (
                                     <div
-                                        className={["permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : ""].filter(Boolean).join(" ")}
+                                        className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
                                         onClick={() => selectItem(index)}
                                         onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
                                     >
@@ -92,13 +92,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }} />
                                         )}
                                         {permission.type === PermissionType.User && user !== undefined && (
-                                            <img className="permviewer-perms-user-img" src={user.getAvatarURL(undefined, undefined, false)} />
+                                            <img className="permviewer-perms-user-img" src={user.getAvatarURL(void 0, void 0, false)} />
                                         )}
                                         <Text variant="text-md/normal">{
                                             permission.type === PermissionType.Role
                                                 ? role?.name ?? "Unknown Role"
                                                 : (user?.tag) == null
-                                                    ? requestSucess === undefined ? "Loading User..." : "Unknown User"
+                                                    ? requestSucess === void 0 ? "Loading User..." : "Unknown User"
                                                     : user.tag
                                         }</Text>
                                     </div>
@@ -193,7 +193,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     return (
         <Menu.ContextMenu
             navId="permviewer-role-context-menu"
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            onClose={ContextMenu.close}
             aria-label="Role Options"
         >
             <Menu.MenuItem
@@ -201,7 +201,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 id="view-as-role"
                 label="View As Role"
                 action={() => {
-                    if (!guild.roles[roleId]) return;
+                    if (guild.roles[roleId] == null) return;
 
                     onClose();
 
