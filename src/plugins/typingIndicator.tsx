@@ -121,8 +121,8 @@ export default definePlugin({
         {
             find: ".UNREAD_HIGHLIGHT",
             replacement: {
-                match: /(?<=(?<channel>\i)=\i\.channel,.+?\(\)\.children.+?:null)/,
-                replace: ",$self.TypingIndicator($<channel>.id)"
+                match: /\(\).children.+?:null(?<=(\i)=\i\.channel,.+?)/,
+                replace: (m, channel) => `${m},$self.TypingIndicator(${channel}.id)`
             }
         }
     ],
