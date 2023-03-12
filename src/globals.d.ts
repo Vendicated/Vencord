@@ -51,8 +51,7 @@ declare global {
      * Only available when running in Electron, undefined on web.
      * Thus, avoid using this or only use it inside an {@link IS_WEB} guard.
      *
-     * If you really must use it, mark your plugin as Desktop App only via
-     * `target: "DESKTOP"`
+     * If you really must use it, mark your plugin as Desktop App only by naming it Foo.desktop.ts(x)
      */
     export var DiscordNative: any;
 
