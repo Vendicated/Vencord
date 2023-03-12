@@ -30,7 +30,7 @@ export enum PronounsFormat {
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman],
+    authors: [Devs.Tyman, Devs.TheKodeToad],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
         // Patch the chat timestamp element
