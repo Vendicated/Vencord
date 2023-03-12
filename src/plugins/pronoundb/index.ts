@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
-import PronounsChatComponent from "./components/PronounsChatComponent";
+import { PronounsChatComponentWrapper, CompactPronounsChatComponentWrapper } from "./components/PronounsChatComponent";
 import PronounsProfileWrapper from "./components/PronounsProfileWrapper";
 
 export enum PronounsFormat {
@@ -33,12 +35,19 @@ export default definePlugin({
     authors: [Devs.Tyman, Devs.TheKodeToad],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
+        {
+            find: "showCommunicationDisabledStyles",
+            replacement: {
+                match: /children:(i)/,
+                replace: "children: [$1, $self.CompactPronounsChatComponentWrapper(e)]"
+            }
+        },
         // Patch the chat timestamp element
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, $self.PronounsChatComponent(e)]"
+                replace: "[$1, $self.PronounsChatComponentWrapper(e)]"
             }
         },
         // Hijack the discord pronouns section and add a wrapper around the text section
@@ -93,6 +102,7 @@ export default definePlugin({
     },
     settingsAboutComponent: PronounsAboutComponent,
     // Re-export the components on the plugin object so it is easily accessible in patches
-    PronounsChatComponent,
+    PronounsChatComponentWrapper,
+    CompactPronounsChatComponentWrapper,
     PronounsProfileWrapper
 });

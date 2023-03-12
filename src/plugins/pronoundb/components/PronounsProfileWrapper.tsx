@@ -20,7 +20,7 @@ import { Settings } from "@api/settings";
 import { useAwaiter } from "@utils/misc";
 import { UserStore } from "@webpack/common";
 
-import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
+import { awaitAndFormatPronouns, fetchPronouns, formatPronouns } from "../pronoundbUtils";
 import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
@@ -49,15 +49,12 @@ function ProfilePronouns(
         leProps: UserProfilePronounsProps;
     }
 ) {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(userId), {
-        fallbackValue: null,
-        onError: e => console.error("Fetching pronouns failed: ", e),
-    });
+    const result = awaitAndFormatPronouns(userId);
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then render
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
+    if (result != null) {
         // First child is the header, second is a div with the actual text
-        leProps.currentPronouns ||= formatPronouns(result);
+        leProps.currentPronouns ||= result;
         return <Component {...leProps} />;
     }
 

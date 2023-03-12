@@ -1,0 +1,7 @@
+.vc-pronoundb-compact {
+	display: none;
+}
+
+div[class*=compact] .vc-pronoundb-compact {
+	display: inline;
+}
