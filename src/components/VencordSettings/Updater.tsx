@@ -124,7 +124,7 @@ function Updatable(props: CommonProps) {
                     disabled={isUpdating || isChecking || props.switchingBranches}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
-                            changes.splice(0, changes.length - 1);
+                            changes.length = 0;
                             const needFullRestart = await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
