@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
-import { PronounsChatComponentWrapper, CompactPronounsChatComponentWrapper } from "./components/PronounsChatComponent";
+import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./components/PronounsChatComponent";
 import PronounsProfileWrapper from "./components/PronounsProfileWrapper";
 
 export enum PronounsFormat {
@@ -38,8 +38,8 @@ export default definePlugin({
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /children:(i)/,
-                replace: "children: [$1, $self.CompactPronounsChatComponentWrapper(e)]"
+                match: /(\"span\",{id:.{1,2},className:.{1,2},children:)(.{1,2})}/,
+                replace: "$1 [$2, $self.CompactPronounsChatComponentWrapper(e)]}"
             }
         },
         // Patch the chat timestamp element

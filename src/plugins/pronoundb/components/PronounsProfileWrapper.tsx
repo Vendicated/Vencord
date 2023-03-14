@@ -17,11 +17,10 @@
 */
 
 import { Settings } from "@api/settings";
-import { useAwaiter } from "@utils/misc";
 import { UserStore } from "@webpack/common";
 
-import { awaitAndFormatPronouns, fetchPronouns, formatPronouns } from "../pronoundbUtils";
-import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
+import { awaitAndFormatPronouns } from "../pronoundbUtils";
+import { UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
     const user = UserStore.getUser(profileProps.userId) ?? {};

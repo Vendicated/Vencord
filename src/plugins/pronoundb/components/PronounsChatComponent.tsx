@@ -17,13 +17,12 @@
 */
 
 import { Settings } from "@api/settings";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { awaitAndFormatPronouns, fetchPronouns, formatPronouns } from "../pronoundbUtils";
-import { PronounMapping } from "../types";
+import { awaitAndFormatPronouns } from "../pronoundbUtils";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
@@ -39,7 +38,7 @@ function shouldShow(message: Message): boolean {
         return false;
 
     return true;
-};
+}
 
 export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
     if (!shouldShow(message))
@@ -73,7 +72,7 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
     if (result != null) {
         return (
             <span
-                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
+                className={classes(styles.latin12CompactTimeStamp, styles.timestamp, "vc-pronoundb-compact")}
             >• {result}</span>
         );
     }
