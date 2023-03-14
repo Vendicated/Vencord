@@ -22,15 +22,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
 import { Menu, RestAPI, UserStore } from "@webpack/common";
 
-const settings = definePluginSettings({
-    delay: {
-        description: "Bulk Actions delay (milliseconds)",
-        type: OptionType.NUMBER,
-        default: 0,
-        stickToMarkers: true,
-    }
-});
-
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 
@@ -38,32 +29,18 @@ function sendPatch(channel, body, bypass = false) {
     const usersVoice = VoiceStateStore.getVoiceStatesForChannel(channel.id); // Get voice states by channel id
     const myId = UserStore.getCurrentUser().id; // Get my user id
 
-    if (settings.store.delay === 0) {
-        Object.keys(usersVoice).forEach(function (key) {
-            const userVoice = usersVoice[key];
+    Object.keys(usersVoice).forEach(function (key, index) {
+        const userVoice = usersVoice[key];
 
-            if (bypass || userVoice.userId !== myId) {
+        if (bypass || userVoice.userId !== myId) {
+            setTimeout(() => {
                 RestAPI.patch({
                     url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
                     body: body
                 });
-            }
-        });
-    } else {
-        Object.keys(usersVoice).forEach(function (key, index) {
-            const userVoice = usersVoice[key];
-
-            if (bypass || userVoice.userId !== myId) {
-                setTimeout(() => {
-                    RestAPI.patch({
-                        url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
-                        body: body
-                    });
-                }, index * settings.store.delay);
-            }
-        });
-    }
-
+            }, index * 500);
+        }
+    });
 }
 
 const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
@@ -171,7 +148,6 @@ export default definePlugin({
         }
 
     ],
-    settings,
     patches: [],
     // Delete these two below if you are only using code patches
     start() {
