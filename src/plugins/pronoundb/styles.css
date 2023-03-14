@@ -3,5 +3,6 @@
 }
 
 div[class*=compact] .vc-pronoundb-compact {
-	display: inline;
+	display: inline-block;
+	margin-left: -2px;
 }

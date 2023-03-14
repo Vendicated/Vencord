@@ -72,7 +72,7 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
     if (result != null) {
         return (
             <span
-                className={classes(styles.latin12CompactTimeStamp, styles.timestamp, "vc-pronoundb-compact")}
+                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
             >• {result}</span>
         );
     }
