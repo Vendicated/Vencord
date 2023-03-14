@@ -16,31 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/settings";
-import { WEBPACK_CHUNK } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findByPropsLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
-
-
-var userToken;
-
-function getUserToken() {
-    if (userToken) {
-        return userToken;
-    } else {
-        let m;
-        const token = (window[WEBPACK_CHUNK].push([[""], {}, e => { m = []; for (const c in e.c) m.push(e.c[c]); }]), m).find(m => m?.exports?.default?.getToken !== void 0).exports.default.getToken();
-        if (token) {
-            userToken = token;
-            return token;
-        }
-    }
-
-}
-
+import { findByProps, findStoreLazy } from "@webpack";
+import { Menu, RestAPI, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     delay: {
@@ -51,43 +31,35 @@ const settings = definePluginSettings({
     }
 });
 
+const VoiceStateStore = findStoreLazy("VoiceStateStore");
+
+
 function sendPatch(channel, body, bypass = false) {
-    var VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel"); // Get Voice States Modules
-    var patch = findByProps("V8APIError", "patch"); // Get patch modules
-    var usersVoice = VoiceStateStore.getVoiceStatesForChannel(channel); // Get voice states by channel id
+    const usersVoice = VoiceStateStore.getVoiceStatesForChannel(channel.id); // Get voice states by channel id
     const myId = UserStore.getCurrentUser().id; // Get my user id
 
     if (settings.store.delay === 0) {
-        usersVoice.forEach(userVoice => {
-            if (bypass || userVoice.member.userId !== myId) {
-                var patchPayload = {
-                    url: "https://discord.com/api/v9/guilds/" + userVoice.member.guildId + "/members/" + userVoice.member.userId,
-                    headers: {
-                        authorization: getUserToken(),
-                    },
-                    body: {}
-                };
-                patchPayload.body = body;
+        Object.keys(usersVoice).forEach(function (key) {
+            const userVoice = usersVoice[key];
 
-                patch.patch(patchPayload);
+            if (bypass || userVoice.userId !== myId) {
+                RestAPI.patch({
+                    url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
+                    body: body
+                });
             }
         });
     } else {
-        usersVoice.forEach((userVoice, index) => {
-            if (bypass || userVoice.member.userId !== myId) {
+        Object.keys(usersVoice).forEach(function (key, index) {
+            const userVoice = usersVoice[key];
+
+            if (bypass || userVoice.userId !== myId) {
                 setTimeout(() => {
-                    var patchPayload = {
-                        url: "https://discord.com/api/v9/guilds/" + userVoice.member.guildId + "/members/" + userVoice.member.userId,
-                        headers: {
-                            authorization: getUserToken(),
-                        },
-                        body: {}
-                    };
-                    patchPayload.body = body;
-
-                    patch.patch(patchPayload);
+                    RestAPI.patch({
+                        url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
+                        body: body
+                    });
                 }, index * settings.store.delay);
-
             }
         });
     }
@@ -210,3 +182,4 @@ export default definePlugin({
         removeContextMenuPatch("channel-context", voiceChannelContextMenuPatch);
     },
 });
+
