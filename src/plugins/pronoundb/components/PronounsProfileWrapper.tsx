@@ -24,7 +24,7 @@ import { UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
     const user = UserStore.getUser(profileProps.userId) ?? {};
-    // Respect showInMessages
+    // Respect showInProfile
     if (!Settings.plugins.PronounDB.showInProfile)
         return null;
     // Don't bother fetching bot or system users

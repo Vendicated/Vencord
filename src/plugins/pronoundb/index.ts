@@ -35,10 +35,11 @@ export default definePlugin({
     authors: [Devs.Tyman, Devs.TheKodeToad],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
+        // Add next to username
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(\"span\",{id:.{1,2},className:.{1,2},children:.{1,2}}\))/,
+                match: /(\"span\",{id:.\i,className:.\i,children:.\i}\))/,
                 replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
             }
         },

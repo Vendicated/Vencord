@@ -2,7 +2,7 @@
 	display: none;
 }
 
-div[class*=compact] .vc-pronoundb-compact {
+[class*=compact] .vc-pronoundb-compact {
 	display: inline-block;
 	margin-left: -2px;
 	margin-right: .25rem;

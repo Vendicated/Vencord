@@ -27,7 +27,7 @@ import { awaitAndFormatPronouns } from "../pronoundbUtils";
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
 function shouldShow(message: Message): boolean {
-    // Respect showInProfile
+    // Respect showInMessages
     if (!Settings.plugins.PronounDB.showInMessages)
         return false;
     // Don't bother fetching bot or system users
