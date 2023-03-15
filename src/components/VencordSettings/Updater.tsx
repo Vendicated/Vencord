@@ -185,15 +185,10 @@ function Newer(props: CommonProps) {
 function Updater() {
     const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
 
-    const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo..." });
-    const [branches, branchesErr, branchesPending] = useAwaiter(getBranches, { fallbackValue: [settings.branch] });
+    const [repo, repoErr, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading repo...", onError: e => UpdateLogger.error("Failed to retrieve repo", e) });
+    const [branches, , branchesPending] = useAwaiter(getBranches, { fallbackValue: [settings.branch], onError: e => UpdateLogger.error("Failed to retrieve branches", e) });
 
     const [isSwitching, setIsSwitching] = React.useState(false);
-
-    React.useEffect(() => {
-        if (repoErr) UpdateLogger.error("Failed to retrieve repo", repoErr);
-        if (branchesErr) UpdateLogger.error("Failed to retrieve branches", branchesErr);
-    }, [repoErr, branchesErr]);
 
     const commonProps: CommonProps = {
         repo,

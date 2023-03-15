@@ -31,6 +31,12 @@ import { calculateHashes, serializeErrors } from "./common";
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
 
+function getReleasePathFromBranch(branch: string) {
+    if (branch === "latest-release") return "/releases/latest";
+    if (branch === "main") return "/releases/tags/devbuild";
+    return `/releases/tags/$${branch}`;
+}
+
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
@@ -58,7 +64,7 @@ async function calculateGitChanges(branch: string) {
 }
 
 async function fetchUpdates(branch: string) {
-    const release = await githubGet(`/releases/${branch === "latest-release" ? "latest" : `tags/${branch === "main" ? "devbuild" : branch}`}`);
+    const release = await githubGet(getReleasePathFromBranch(branch));
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
