@@ -42,6 +42,7 @@ export default strEnum({
     GET_REPO: "VencordGetRepo",
     GET_HASHES: "VencordGetHashes",
     GET_BRANCHES: "VencordGetBranches",
+    GET_CURRENT_GIT_BRANCH: "VencordGetCurrentGitBranch",
     SWITCH_BRANCH: "VencordSwitchBranch",
     UPDATE: "VencordUpdate",
     BUILD: "VencordBuild",

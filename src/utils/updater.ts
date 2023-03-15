@@ -68,6 +68,11 @@ export async function getBranches() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<Array<string>>>(IpcEvents.GET_BRANCHES));
 }
 
+export async function getCurrentBranch() {
+    if (IS_STANDALONE) return Settings.branch;
+    return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_CURRENT_GIT_BRANCH));
+}
+
 export async function switchBranch(newBranch: string) {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.SWITCH_BRANCH, Settings.branch, newBranch));
 }

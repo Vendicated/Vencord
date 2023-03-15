@@ -91,6 +91,10 @@ async function getBranches() {
     return branches;
 }
 
+async function getCurrentBranch() {
+    return (await git("branch", "--show-current")).stdout.trim();
+}
+
 async function switchBranch(currentBranch: string, newBranch: string) {
     await git("switch", newBranch);
 
@@ -108,6 +112,7 @@ ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors((_, branch: string) => calculateGitChanges(branch)));
 ipcMain.handle(IpcEvents.GET_BRANCHES, serializeErrors(getBranches));
+ipcMain.handle(IpcEvents.GET_CURRENT_GIT_BRANCH, serializeErrors(getCurrentBranch));
 ipcMain.handle(IpcEvents.SWITCH_BRANCH, serializeErrors((_, currentBranch: string, newBranch: string) => switchBranch(currentBranch, newBranch)));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors((_, branch: string) => pull(branch)));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));

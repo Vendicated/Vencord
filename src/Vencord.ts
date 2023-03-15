@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { DefaultSettings, PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { changes, checkForUpdates, getBranches, rebuild, update, UpdateLogger } from "./utils/updater";
+import { changes, checkForUpdates, getBranches, getCurrentBranch, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -42,6 +42,13 @@ async function init() {
     Components = await import("./components");
 
     if (!IS_WEB) {
+        try {
+            const selectedBranch = await getCurrentBranch();
+            if (selectedBranch !== Settings.branch) Settings.branch = selectedBranch;
+        } catch (err) {
+            UpdateLogger.error("Failed to check if selected branch matches the one stored in settings.", err);
+        }
+
         try {
             const branches = await getBranches();
             if (!branches.some(branch => branch === Settings.branch)) Settings.branch = DefaultSettings.branch;
