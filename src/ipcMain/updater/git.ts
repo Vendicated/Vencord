@@ -63,7 +63,7 @@ async function calculateGitChanges(branch: string) {
 
 async function pull(branch: string) {
     const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
-    const res = await git("pull", existsOnOrigin ? branch : "HEAD");
+    const res = await git("pull", "origin", existsOnOrigin ? branch : "HEAD");
     return res.stdout.includes("Fast-forward");
 }
 
