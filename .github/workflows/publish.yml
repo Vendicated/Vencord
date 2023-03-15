@@ -42,7 +42,7 @@ jobs:
 
             - name: Create release and upload assets
             id: create_release
-            if: always()
+            continue-on-error: true
             run: |
                 gh release create ${{ github.ref_name }} --latest dist/*
             env:
@@ -50,7 +50,7 @@ jobs:
 
             - name: Publish extension
             id: publish_extension
-            if: always()
+            continue-on-error: true
             run: |
                 cd dist/extension-unpacked
                 # Do not fail so that even if chrome fails, firefox gets a shot. But also store exit code to fail workflow later
@@ -73,7 +73,6 @@ jobs:
                 WEB_EXT_API_SECRET: ${{ secrets.WEBEXT_SECRET }}
 
             - name: Check for workflow failure
-            if: always()
             run: |
                 if [[ "${{ steps.create_release.outcome }}" == "failure" || "${{ steps.publish_extension.outcome }}" == "failure" ]]; then
                     exit 1
