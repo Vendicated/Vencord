@@ -34,7 +34,7 @@ let PendingUpdates = [] as [string, string][];
 function getReleasePathFromBranch(branch: string) {
     if (branch === "latest-release") return "/releases/latest";
     if (branch === "main") return "/releases/tags/devbuild";
-    return `/releases/tags/$${branch}`;
+    return `/releases/tags/${branch}`;
 }
 
 async function githubGet(endpoint: string) {

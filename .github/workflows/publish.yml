@@ -41,16 +41,12 @@ jobs:
                 rm -rf dist/extension* Vencord.user.css
 
             - name: Create release and upload assets
-            id: create_release
-            continue-on-error: true
             run: |
                 gh release create ${{ github.ref_name }} --latest dist/*
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Publish extension
-            id: publish_extension
-            continue-on-error: true
             run: |
                 cd dist/extension-unpacked
                 # Do not fail so that even if chrome fails, firefox gets a shot. But also store exit code to fail workflow later
@@ -71,9 +67,3 @@ jobs:
                 # Firefox
                 WEB_EXT_API_KEY: ${{ secrets.WEBEXT_USER }}
                 WEB_EXT_API_SECRET: ${{ secrets.WEBEXT_SECRET }}
-
-            - name: Check for workflow failure
-            run: |
-                if [[ "${{ steps.create_release.outcome }}" == "failure" || "${{ steps.publish_extension.outcome }}" == "failure" ]]; then
-                    exit 1
-                fi
