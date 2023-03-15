@@ -62,7 +62,7 @@ async function init() {
 
             if (Settings.autoUpdate) {
                 await update();
-                changes.splice(0, changes.length - 1);
+                changes.length = 0;
                 const needsFullRestart = await rebuild();
                 setTimeout(() => {
                     showNotice(
