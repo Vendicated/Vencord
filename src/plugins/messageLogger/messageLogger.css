@@ -4,11 +4,11 @@
 
 .messagelogger-deleted-attachment {
     filter: grayscale(1);
+    transition: 150ms filter ease-in-out;
 }
 
 .messagelogger-deleted-attachment:hover {
     filter: grayscale(0);
-    transition: 250ms filter linear;
 }
 
 .theme-dark .messagelogger-edited {
