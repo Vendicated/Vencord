@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Card, Forms, React, Switch, Tooltip, useMemo } from "@webpack/common";
+import { Button, Card, Flex, Forms, React, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -104,9 +104,21 @@ function CloudTab() {
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.backend.url}
-                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; deauthorizeCloud(); }}
+                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; }}
                     validate={validateUrl}
                 />
+                <Flex className={Margins.top8}>
+                    <Tooltip text="This will remove the locally saved secret for this backend. You can reauthorize later.">
+                        {({ onMouseEnter, onMouseLeave }) => (<Button
+                            onMouseLeave={onMouseLeave}
+                            onMouseEnter={onMouseEnter}
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.RED}
+                            disabled={!settings.backend.enabled}
+                            onClick={() => { settings.backend.enabled = false; deauthorizeCloud(); }}
+                        >Deauthorize</Button>)}
+                    </Tooltip>
+                </Flex>
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection>
             <SettingsSyncSection />
