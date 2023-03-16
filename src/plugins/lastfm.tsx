@@ -73,6 +73,7 @@ enum ActivityFlag {
 }
 
 const applicationId = "1043533871037284423";
+const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
 
@@ -125,6 +126,25 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
+    useLogo: {
+        description: "Use Last.fm logo as large image",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "When album is unknown or Last.fm has no album art",
+                value: "noAlbumOrArt",
+                default: true
+            },
+            {
+                label: "When the album is unknown",
+                value: "noAlbum"
+            },
+            {
+                label: "Never (Add placeholder art)",
+                value: "never"
+            }
+        ],
+    }
 });
 
 export default definePlugin({
@@ -219,12 +239,20 @@ export default definePlugin({
         const trackData = await this.fetchTrackData();
         if (!trackData) return null;
 
-        const assets: ActivityAssets = {
-            large_image: await getApplicationAsset(trackData.imageUrl || "lastfm-large"),
-            large_text: trackData.album,
-            small_image: await getApplicationAsset("lastfm-small"),
-            small_text: "Last.fm",
-        };
+        const assets: ActivityAssets = (
+            settings.store.useLogo === "never" ||
+            (settings.store.useLogo === "noAlbum" && trackData.imageUrl) ||
+            (settings.store.useLogo === "noAlbumOrArt" && !trackData.imageUrl?.includes(placeholderId))
+        ) ?
+            {
+                large_image: await getApplicationAsset(trackData.imageUrl || "placeholder"),
+                large_text: trackData.album,
+                small_image: await getApplicationAsset("lastfm-small"),
+                small_text: "Last.fm",
+            } : {
+                large_image: await getApplicationAsset("lastfm-large"),
+                large_text: trackData.album,
+            };
 
         const buttons: ActivityButton[] = [
             {
