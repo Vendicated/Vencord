@@ -52,8 +52,8 @@ export default definePlugin({
             find: 'className:"mention"',
             replacement: [
                 {
-                    match: /user:(\i),channelId:(\i).{0,300}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2})"
+                    match: /user:(\i),channel:(\i).{0,300}?"@"\.concat\(.+?\)/,
+                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2.id})"
                 }
             ],
             predicate: () => settings.store.chatMentions,
