@@ -184,7 +184,7 @@ export default definePlugin({
             }
             const trackData = json.recenttracks?.track[0];
 
-            if (!trackData || !trackData["@attr"].nowplaying)
+            if (!trackData || !trackData["@attr"]?.nowplaying)
                 return null;
 
             // why does the json api have xml structure
