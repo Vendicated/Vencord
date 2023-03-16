@@ -154,7 +154,8 @@ export async function putCloudSettings() {
         }
 
         const { written } = await res.json();
-        Settings.backend.settingsSyncVersion = written;
+        PlainSettings.backend.settingsSyncVersion = written;
+        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         showNotification({
