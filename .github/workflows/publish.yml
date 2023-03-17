@@ -5,7 +5,7 @@ on:
             - v*
 
 jobs:
-    Publish Chrome Extension:
+    publish_chrome_extension:
         runs-on: ubuntu-latest
 
         steps:
@@ -43,7 +43,7 @@ jobs:
                 CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
                 REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
 
-    Publish Firefox Extension:
+    publish_firefox_extension:
         runs-on: ubuntu-latest
 
         steps:
@@ -79,7 +79,7 @@ jobs:
                 WEB_EXT_API_KEY: ${{ secrets.WEBEXT_USER }}
                 WEB_EXT_API_SECRET: ${{ secrets.WEBEXT_SECRET }}
 
-    Create Release:
+    create_release:
         runs-on: ubuntu-latest
 
         steps:
