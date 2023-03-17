@@ -5,9 +5,9 @@ on:
             - v*
 
 jobs:
-    publish_chrome_extension:
+    setup:
+        #...
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v3
 
@@ -33,6 +33,11 @@ jobs:
             - name: Build web
               run: pnpm buildWeb --standalone
 
+    publish_chrome_extension:
+        runs-on: ubuntu-latest
+        needs: setup
+
+        steps:
             - name: Publish extension
               run: |
                 cd dist/extension-unpacked
@@ -45,31 +50,9 @@ jobs:
 
     publish_firefox_extension:
         runs-on: ubuntu-latest
+        needs: setup
 
         steps:
-            - uses: actions/checkout@v3
-
-            - name: check that tag matches package.json version
-              run: |
-                pkg_version="v$(jq -r .version < package.json)"
-                if [[ "${{ github.ref_name }}" != "$pkg_version" ]]; then
-                    echo "Tag ${{ github.ref_name }} does not match package.json version $pkg_version" >&2
-                    exit 1
-                fi
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
-
-            - name: Use Node.js 19
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 19
-                  cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Build web
-              run: pnpm buildWeb --standalone
-
             - name: Publish extension
               run: |
                 cd dist/extension-unpacked
@@ -81,35 +64,9 @@ jobs:
 
     create_release:
         runs-on: ubuntu-latest
+        needs: setup
 
         steps:
-            - uses: actions/checkout@v3
-
-            - name: check that tag matches package.json version
-              run: |
-                pkg_version="v$(jq -r .version < package.json)"
-                if [[ "${{ github.ref_name }}" != "$pkg_version" ]]; then
-                    echo "Tag ${{ github.ref_name }} does not match package.json version $pkg_version" >&2
-                    exit 1
-                fi
-
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
-
-            - name: Use Node.js 19
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 19
-                  cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Build web
-              run: pnpm buildWeb --standalone
-
-            - name: Build
-              run: pnpm build --standalone
-
             - name: Clean up obsolete files
               run: |
                 rm -rf dist/extension* Vencord.user.css
