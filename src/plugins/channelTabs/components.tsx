@@ -110,6 +110,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number,
                 key="mark-as-read"
                 id="mark-as-read"
                 label="Mark as Read"
+                disabled={!ReadStateStore.hasUnread(channel.id)}
                 action={() => ReadStateUtils.markAsRead(channel)}
             />
         </Menu.MenuGroup>}
