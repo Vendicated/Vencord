@@ -34,10 +34,10 @@ jobs:
               run: pnpm buildWeb --standalone
 
             - name: Publish extension
-            run: |
+              run: |
                 cd dist/extension-unpacked
                 pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
-            env:
+              env:
                 EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
                 CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
                 CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
@@ -115,7 +115,7 @@ jobs:
                 rm -rf dist/extension* Vencord.user.css
 
             - name: Create release and upload assets
-            run: |
+              run: |
                 gh release create ${{ github.ref_name }} --latest dist/*
-            env:
+              env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
