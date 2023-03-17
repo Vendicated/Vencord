@@ -79,7 +79,7 @@ async function build() {
 }
 
 async function getBranches() {
-    await git("fetch", "--all");
+    await git("fetch");
 
     const branches = (await git("branch", "--list")).stdout
         .replace("*", "")
