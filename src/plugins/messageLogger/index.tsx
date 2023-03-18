@@ -25,11 +25,10 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { Webpack } from "Vencord";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
-import { Webpack } from "Vencord";
-import { proxyLazy } from "@utils/proxyLazy";
 
 const i18n = Webpack.findLazy(m => m.Messages?.["en-US"]);
 const styles = Webpack.findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
