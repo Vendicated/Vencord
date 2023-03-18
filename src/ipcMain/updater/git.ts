@@ -124,6 +124,7 @@ async function switchBranch(currentBranch: string, newBranch: string, shouldBuil
     console.log(isCurrentBranchTag);
 
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
+    console.log(parsedBranch);
     const isNewBranchTag = parsedBranch.match(tagRegex) !== null;
     console.log(isNewBranchTag);
 
