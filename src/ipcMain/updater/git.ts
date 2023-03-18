@@ -50,7 +50,6 @@ async function getTags() {
 
 async function getBranchFromPossiblyFakeBranchName(branch: string) {
     const tags = await getTags();
-    console.log(tags);
 
     if (branch === "latest-release") return tags[0] ?? "main";
     return branch;
@@ -64,18 +63,21 @@ async function getRepo() {
 }
 
 async function calculateGitChanges(branch: string) {
-    await git("fetch");
+    await git("fetch", "--tags");
 
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
-    const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
-    const res = await git("log", `${parsedBranch}...origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s");
 
-    console.log(await git("log", `${parsedBranch}...origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s"));
-    console.log(await git("log", `${parsedBranch}`, "--pretty=format:%an/%h/%s"));
-    console.log(await git("log", `origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s"));
+    const isTag = parsedBranch.match(tagRegex) !== null;
+    const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
+
+    const res = await git(
+        "log",
+        `${parsedBranch}${isTag === false ? `...origin/${existsOnOrigin ? parsedBranch : "HEAD"}` : ""}`,
+        "--pretty=format:%an/%h/%s"
+    );
 
     const commits = res.stdout.trim();
-    return commits ? commits.split("\n").map(line => {
+    return commits.length > 0 ? commits.split("\n").map(line => {
         const [author, hash, ...rest] = line.split("/");
         return {
             hash, author, message: rest.join("/")
@@ -103,7 +105,7 @@ async function build() {
 }
 
 async function getBranches() {
-    await git("fetch");
+    await git("fetch", "--tags");
 
     const branches = (await git("branch", "--list")).stdout
         .replace("*", "")

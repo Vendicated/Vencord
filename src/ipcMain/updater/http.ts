@@ -61,6 +61,7 @@ async function getReleasePathFromBranch(branch: string) {
     if (branch === "main") return "/releases/tags/devbuild";
     return `/releases/tags/${branch}`;
 }
+
 async function calculateGitChanges(branch: string) {
     const isOutdated = await fetchUpdates(branch);
     if (!isOutdated) return [];
@@ -82,8 +83,7 @@ async function fetchUpdates(branch: string) {
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
-    if (hash === gitHash)
-        return false;
+    if (hash === gitHash) return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
         if (["patcher.js", "preload.js", "renderer.js", "renderer.css"].some(s => name.startsWith(s))) {
