@@ -25,13 +25,13 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
-import { Webpack } from "Vencord";
+import { findLazy, findByPropsLazy } from "@webpack";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 
-const i18n = Webpack.findLazy(m => m.Messages?.["en-US"]);
-const styles = Webpack.findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const i18n = findLazy(m => m.Messages?.["en-US"]);
+const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
