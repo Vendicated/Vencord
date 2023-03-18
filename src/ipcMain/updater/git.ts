@@ -119,16 +119,18 @@ async function getCurrentBranch() {
 
 async function switchBranch(currentBranch: string, newBranch: string, shouldBuild = true) {
     const isCurrentBranchTag = currentBranch.match(tagRegex) !== null;
+    console.log(isCurrentBranchTag);
 
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
     const isNewBranchTag = parsedBranch.match(tagRegex) !== null;
+    console.log(isNewBranchTag);
 
-    await git("switch", parsedBranch, isNewBranchTag ? "--detach" : "");
+    await git("switch", parsedBranch + isNewBranchTag ? "--detach" : "");
 
     if (shouldBuild) {
         const buildRes = await build();
         if (!buildRes) {
-            await git("switch", currentBranch, isCurrentBranchTag ? "--detach" : "");
+            await git("switch", currentBranch + isCurrentBranchTag ? "--detach" : "");
             await build();
             return false;
         }
