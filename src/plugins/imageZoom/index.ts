@@ -142,7 +142,6 @@ export default definePlugin({
                 });
                 const root = ReactDOM.createRoot(this.element!);
                 root.render(this.currentMagnifierElement);
-                console.log(instance);
             }
         }
     },
