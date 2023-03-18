@@ -36,6 +36,8 @@ if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.
 function git(...args: string[]) {
     const opts = { cwd: VENCORD_SRC_DIR };
 
+    console.log(args);
+
     if (isFlatpak) return execFile("flatpak-spawn", ["--host", "git", ...args], opts);
     else return execFile("git", args, opts);
 }
