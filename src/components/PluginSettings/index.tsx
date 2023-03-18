@@ -93,7 +93,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings([`plugins.${plugin.name}`]).plugins[plugin.name];
+    const settings = useSettings([`plugins.${plugin.name}.enabled`]).plugins[plugin.name];
 
     const isEnabled = () => settings.enabled ?? false;
 
