@@ -24,10 +24,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+
+const i18n = findLazy(m => m.Messages?.["en-US"]);
+const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -65,7 +69,7 @@ export default definePlugin({
                         isEdited={true}
                         isInline={false}
                     >
-                        <span>{" "}(edited)</span>
+                        <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
                     </Timestamp>
                 </div>
             </ErrorBoundary>
