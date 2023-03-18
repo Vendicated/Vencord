@@ -88,7 +88,7 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,300}limitResponsiveWidth(.|\n){1,600})onMouseEnter:/,
+                    match: /(render=function\(\){.{1,500}limitResponsiveWidth(.|\n){1,600})onMouseEnter:/,
                     replace:
                         `$1onMouseOver: () => $self.onMouseOver(this),
                     onMouseOut: () => $self.onMouseOut(this),
