@@ -17,11 +17,10 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { requestMissingGuildMembers } from "@utils/guild";
-import { classes, useForceUpdater } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, Menu, PermissionsBits, Text, useEffect, UserStore, useState } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { type Guild } from "discord-types/general";
 
 import { getPermissionString } from "../formatting";
 
@@ -45,15 +44,23 @@ function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermissi
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     permissions.sort(({ type: a }, { type: b }) => a - b);
 
-    const forceUpdate = useForceUpdater();
-    let requestSucess: boolean | undefined = undefined;
+    useStateFromStores(
+        [GuildMemberStore],
+        () => GuildMemberStore.getMemberIds(guild.id),
+        null,
+        (old, current) => old.length === current.length
+    );
+
+    const usersToRequest = permissions.filter(permission => permission.type === PermissionType.User)
+        .map(({ id }) => id)
+        .filter(id => !GuildMemberStore.isMember(guild.id, id));
 
     useEffect(() => {
-        requestMissingGuildMembers(guild.id, permissions.filter(permission => permission.type === PermissionType.User).map(({ id }) => id))
-            .then(sucess => {
-                requestSucess = sucess;
-                forceUpdate();
-            });
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [guild.id],
+            userIds: usersToRequest
+        });
     }, []);
 
     const [selectedItemIndex, selectItem] = useState<number>(0);
@@ -97,9 +104,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         <Text variant="text-md/normal">{
                                             permission.type === PermissionType.Role
                                                 ? role?.name ?? "Unknown Role"
-                                                : (user?.tag) == null
-                                                    ? requestSucess === void 0 ? "Loading User..." : "Unknown User"
-                                                    : user.tag
+                                                : (user?.tag) ?? "Unknown User"
                                         }</Text>
                                     </div>
                                 );

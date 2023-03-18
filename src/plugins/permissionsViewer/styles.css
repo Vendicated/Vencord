@@ -70,8 +70,8 @@
     border-radius: 50%;
     width: 12px;
     height: 12px;
-    margin-left: 4px;
-    margin-right: 6px;
+    margin-left: 3px;
+    margin-right: 11px;
     flex-shrink: 0;
 }
 
@@ -79,7 +79,6 @@
     border-radius: 50%;
     width: 20px;
     height: 20px;
-    margin-left: 4px;
     margin-right: 6px;
 }
 

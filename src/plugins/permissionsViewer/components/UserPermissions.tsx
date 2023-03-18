@@ -24,7 +24,7 @@ import { Guild, GuildMember, Role } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
 import { getPermissionString } from "../formatting";
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal, { type RoleOrUserPermission, PermissionType } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
@@ -34,12 +34,9 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const RoleClasses: Record<"roles" | "rolePill" | "rolePillBorder", string> =
-    findByPropsLazy("roles", "rolePill", "rolePillBorder");
-const RoleCircleClasses: Record<"desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase", string> =
-    findByPropsLazy("roleCircle", "dotBorderBase", "dotBorderColor");
-const RolePillClasses: Record<"flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string> =
-    findByPropsLazy("roleNameOverflow", "root", "roleName", "roleRemoveButton");
+const RoleClasses = findByPropsLazy("roles", "rolePill", "rolePillBorder") as Record<"roles" | "rolePill" | "rolePillBorder", string>;
+const RoleCircleClasses = findByPropsLazy("roleCircle", "dotBorderBase", "dotBorderColor") as Record<"desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase", string>;
+const RolePillClasses = findByPropsLazy("roleNameOverflow", "root", "roleName", "roleRemoveButton") as Record<"flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
     const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
