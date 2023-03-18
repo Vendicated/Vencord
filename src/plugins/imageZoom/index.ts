@@ -165,7 +165,7 @@ export default definePlugin({
     start() {
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
-        document.getElementById("app-mount")!.appendChild(this.element);
+        document.body.appendChild(this.element);
     },
 
     stop() {
