@@ -70,6 +70,8 @@ async function calculateGitChanges(branch: string) {
     const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
     const res = await git("log", `${parsedBranch}...origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s");
 
+    console.log(res);
+
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
         const [author, hash, ...rest] = line.split("/");
