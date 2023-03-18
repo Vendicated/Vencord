@@ -28,6 +28,12 @@ import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+import { Webpack } from "Vencord";
+import { proxyLazy } from "@utils/proxyLazy";
+
+const i18ns = proxyLazy(() => Webpack.findAll(Webpack.filters.byProps("DM_TEXTAREA_PLACEHOLDER")));
+const i18n = proxyLazy(() => i18ns[i18ns.length - 1]); // last element, because 2 i18n exist if discord is set to a native language
+const styles = Webpack.findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -65,7 +71,7 @@ export default definePlugin({
                         isEdited={true}
                         isInline={false}
                     >
-                        <span className="edited-1v5nT8">{" "}(edited)</span>
+                        <span className={styles.edited}>{" "}({i18n.MESSAGE_EDITED})</span>
                     </Timestamp>
                 </div>
             </ErrorBoundary>
