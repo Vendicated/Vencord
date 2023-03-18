@@ -30,10 +30,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".revealSpoiler=function",
+            find: ".removeObscurity=function",
             replacement: {
-                match: /\.revealSpoiler=function\((.{1,2})\){/,
-                replace: ".revealSpoiler=function($1){$self.reveal($1);"
+                match: /(?<=\.removeObscurity=function\((\i)\){)/,
+                replace: (_, event) => `$self.reveal(${event});`
             }
         }
     ],

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,23 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "NoSystemBadge",
-    description: "Disables the taskbar and system tray unread count badge.",
-    authors: [Devs.rushii],
-    target: "DESKTOP",
-    patches: [
-        {
-            find: "setSystemTrayApplications:function",
-            replacement: [
-                {
-                    match: /setBadge:function.+?},/,
-                    replace: "setBadge:function(){},"
-                },
-                {
-                    match: /setSystemTrayIcon:function.+?},/,
-                    replace: "setSystemTrayIcon:function(){},"
-                }
-            ]
+    name: "F8Break",
+    description: "Pause the client when you press F8 with DevTools (+ breakpoints) open.",
+    authors: [Devs.lewisakura],
+
+    start() {
+        window.addEventListener("keydown", this.event);
+    },
+
+    stop() {
+        window.removeEventListener("keydown", this.event);
+    },
+
+    event(e: KeyboardEvent) {
+        if (e.code === "F8") {
+            // Hi! You've just paused the client. Pressing F8 in DevTools or in the main window will unpause it again.
+            // It's up to you on what to do, friend. Happy travels!
+            debugger;
         }
-    ]
+    }
 });
