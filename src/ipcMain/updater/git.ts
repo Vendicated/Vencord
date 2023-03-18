@@ -40,6 +40,13 @@ function git(...args: string[]) {
     else return execFile("git", args, opts);
 }
 
+function getLogRevisionRange(branch: string, existsOnOrigin: boolean, isTag: boolean) {
+    let res = branch;
+    if (!existsOnOrigin) return res += "origin/HEAD";
+    if (!isTag) res += "origin/";
+    return res += branch;
+}
+
 async function getTags() {
     return (await git("tag", "--sort=committerdate")).stdout
         .trim()
@@ -70,11 +77,7 @@ async function calculateGitChanges(branch: string) {
     const isTag = parsedBranch.match(tagRegex) !== null;
     const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
 
-    const res = await git(
-        "log",
-        `${parsedBranch}...${isTag === false ? "origin/" : ""}${existsOnOrigin ? parsedBranch : "HEAD"}`,
-        "--pretty=format:%an/%h/%s"
-    );
+    const res = await git("log", getLogRevisionRange(parsedBranch, existsOnOrigin, isTag), "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits.length > 0 ? commits.split("\n").map(line => {
