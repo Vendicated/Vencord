@@ -23,7 +23,7 @@ export function waitFor(selector: string): Promise<Element> {
             return resolve(match);
 
         const observer = new MutationObserver(mutations => {
-            const match = document.querySelector(selector)
+            const match = document.querySelector(selector);
             if (match) {
                 observer.disconnect();
                 resolve(match);
