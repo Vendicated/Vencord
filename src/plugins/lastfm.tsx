@@ -192,16 +192,14 @@ export default definePlugin({
             });
 
             const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            let json: any | undefined;
-            try {
-                json = await res.json();
-                if (json.error) {
-                    logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
-                    return null;
-                }
-            } catch {
-                throw new Error(`${res.status} ${res.statusText}`);
+            if (!res.ok) throw `${res.status} ${res.statusText}`;
+
+            const json = await res.json();
+            if (json.error) {
+                logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
+                return null;
             }
+
             const trackData = json.recenttracks?.track[0];
 
             if (!trackData || !trackData["@attr"]?.nowplaying)
