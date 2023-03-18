@@ -136,7 +136,8 @@ export default definePlugin({
                     zoom: settings.store.zoom,
                     instance
                 });
-                ReactDOM.render(this.currentMagnifierElement, this.element);
+                const root = ReactDOM.createRoot(this.element!);
+                root.render(this.currentMagnifierElement);
             }
         }
     },
