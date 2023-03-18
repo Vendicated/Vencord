@@ -19,10 +19,11 @@
 import { useSettings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Card, Flex, Forms, React, Switch, Tooltip, useMemo } from "@webpack/common";
+import { Button, Card, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -89,6 +90,11 @@ function CloudTab() {
     return (
         <>
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
+                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+                    Vencord comes with a cloud integration that adds goodies like settings sync across devices. It
+                    <Link href="https://vencord.vendicated.dev/privacy">respects your privacy</Link> and you can even
+                    <Link href="https://github.com/Vencord/Backend">selfhost it</Link>!
+                </Forms.FormText>
                 <Switch
                     key="backend"
                     value={settings.backend.enabled}
@@ -104,21 +110,9 @@ function CloudTab() {
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.backend.url}
-                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; }}
+                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; deauthorizeCloud(); }}
                     validate={validateUrl}
                 />
-                <Flex className={Margins.top8}>
-                    <Tooltip text="This will remove the locally saved secret for this backend. You can reauthorize later.">
-                        {({ onMouseEnter, onMouseLeave }) => (<Button
-                            onMouseLeave={onMouseLeave}
-                            onMouseEnter={onMouseEnter}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.RED}
-                            disabled={!settings.backend.enabled}
-                            onClick={() => { settings.backend.enabled = false; deauthorizeCloud(); }}
-                        >Deauthorize</Button>)}
-                    </Tooltip>
-                </Flex>
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection>
             <SettingsSyncSection />
