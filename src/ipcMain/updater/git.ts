@@ -117,7 +117,7 @@ async function getCurrentBranch() {
 
 async function switchBranch(currentBranch: string, newBranch: string) {
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
-    await git("switch", parsedBranch);
+    await git("switch", parsedBranch, "--detach");
 
     const buildRes = await build();
     if (!buildRes) {
