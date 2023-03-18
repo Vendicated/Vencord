@@ -126,22 +126,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    useLogo: {
-        description: "Use Last.fm logo as large image",
+    missingArt: {
+        description: "When album or album art is missing",
         type: OptionType.SELECT,
         options: [
             {
-                label: "When album is unknown or Last.fm has no album art",
-                value: "noAlbumOrArt",
+                label: "Use large Last.fm logo",
+                value: "lastfmLogo",
                 default: true
             },
             {
-                label: "When the album is unknown",
-                value: "noAlbum"
-            },
-            {
-                label: "Never (Add placeholder art)",
-                value: "never"
+                label: "Use generic placeholder",
+                value: "placeholder"
             }
         ],
     }
@@ -224,6 +220,14 @@ export default definePlugin({
         setActivity(await this.getActivity());
     },
 
+    getLargeImage(track: TrackData): string | undefined {
+        if (track.imageUrl && !track.imageUrl.includes(placeholderId))
+            return track.imageUrl;
+
+        if (settings.store.missingArt === "placeholder")
+            return "placeholder";
+    },
+
     async getActivity(): Promise<Activity | null> {
         if (settings.store.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
@@ -237,13 +241,10 @@ export default definePlugin({
         const trackData = await this.fetchTrackData();
         if (!trackData) return null;
 
-        const assets: ActivityAssets = (
-            settings.store.useLogo === "never" ||
-            (settings.store.useLogo === "noAlbum" && trackData.imageUrl) ||
-            (settings.store.useLogo === "noAlbumOrArt" && !trackData.imageUrl?.includes(placeholderId))
-        ) ?
+        const largeImage = this.getLargeImage(trackData);
+        const assets: ActivityAssets = largeImage ?
             {
-                large_image: await getApplicationAsset(trackData.imageUrl || "placeholder"),
+                large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
                 small_image: await getApplicationAsset("lastfm-small"),
                 small_text: "Last.fm",
