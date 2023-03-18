@@ -18,15 +18,15 @@
 
 export function waitFor(selector: string): Promise<Element> {
     return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            resolve(document.querySelector(selector)!);
-            return;
-        }
+        const match = document.querySelector(selector);
+        if (match)
+            return resolve(match);
 
         const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                resolve(document.querySelector(selector)!);
+            const match = document.querySelector(selector)
+            if (match) {
                 observer.disconnect();
+                resolve(match);
             }
         });
 
