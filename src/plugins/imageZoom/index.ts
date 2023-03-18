@@ -114,7 +114,7 @@ export default definePlugin({
         {
             find: ".carouselModal,",
             replacement: {
-                match: /onClick:(.{1,3}),/,
+                match: /onClick:(\i),/,
                 replace: "onClick:$self.preventCarouselFromClosingOnClick ? () => {} : $1,"
             }
         }
