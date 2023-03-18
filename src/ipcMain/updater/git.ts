@@ -72,7 +72,7 @@ async function calculateGitChanges(branch: string) {
 
     console.log(await git("log", `${parsedBranch}...origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s"));
     console.log(await git("log", `${parsedBranch}`, "--pretty=format:%an/%h/%s"));
-    console.log(await git("log", `origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s"));
+    console.log(await git("log", `upstream/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s"));
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
