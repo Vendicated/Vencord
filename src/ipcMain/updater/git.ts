@@ -25,6 +25,7 @@ import { promisify } from "util";
 import { calculateHashes, serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
+const tagRegex = /v\d+?\.\d+?\.\d+?/;
 
 const execFile = promisify(cpExecFile);
 
@@ -62,6 +63,9 @@ async function getRepo() {
 }
 
 async function calculateGitChanges(branch: string) {
+    const isTag = branch.match(tagRegex) !== null;
+    if (isTag) throw new Error("Cannot check for updates on a tagged branch.");
+
     await git("fetch");
 
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
@@ -78,9 +82,13 @@ async function calculateGitChanges(branch: string) {
 }
 
 async function pull(branch: string) {
-    const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
-    const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
-    const res = await git("pull", "origin", existsOnOrigin ? parsedBranch : "HEAD");
+    if (branch === "latest-release") return switchBranch(branch, branch, false);
+
+    const isTag = branch.match(tagRegex) !== null;
+    if (isTag) throw new Error("Cannot update on a tagged branch.");
+
+    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
+    const res = await git("pull", "origin", existsOnOrigin ? branch : "HEAD");
     return res.stdout.includes("Fast-forward");
 }
 
@@ -115,15 +123,21 @@ async function getCurrentBranch() {
     return (await git("branch", "--show-current")).stdout.trim();
 }
 
-async function switchBranch(currentBranch: string, newBranch: string) {
-    const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
-    await git("switch", parsedBranch, "--detach");
+async function switchBranch(currentBranch: string, newBranch: string, shouldBuild = true) {
+    const isCurrentBranchTag = currentBranch.match(tagRegex) !== null;
 
-    const buildRes = await build();
-    if (!buildRes) {
-        await git("switch", currentBranch);
-        await build();
-        return false;
+    const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
+    const isNewBranchTag = parsedBranch.match(tagRegex) !== null;
+
+    await git("switch", parsedBranch, isNewBranchTag ? "--detach" : "");
+
+    if (shouldBuild) {
+        const buildRes = await build();
+        if (!buildRes) {
+            await git("switch", currentBranch, isCurrentBranchTag ? "--detach" : "");
+            await build();
+            return false;
+        }
     }
 
     return true;
