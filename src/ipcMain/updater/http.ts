@@ -31,12 +31,6 @@ import { calculateHashes, serializeErrors } from "./common";
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
 
-function getReleasePathFromBranch(branch: string) {
-    if (branch === "latest-release") return "/releases/latest";
-    if (branch === "main") return "/releases/tags/devbuild";
-    return `/releases/tags/${branch}`;
-}
-
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
@@ -48,11 +42,31 @@ async function githubGet(endpoint: string) {
     });
 }
 
+async function getTags() {
+    const tags = await githubGet("/releases");
+
+    return JSON.parse(tags.toString()).map(release => release.tag_name)
+        .filter(release => release !== "devbuild") as Array<string>;
+}
+
+async function getBranchFromPossiblyFakeBranchName(branch: string) {
+    const tags = await getTags();
+
+    if (branch === "latest-release") return tags[0] ?? "main";
+    return branch;
+}
+
+async function getReleasePathFromBranch(branch: string) {
+    if (branch === "latest-release") return "/releases/latest";
+    if (branch === "main") return "/releases/tags/devbuild";
+    return `/releases/tags/${branch}`;
+}
 async function calculateGitChanges(branch: string) {
     const isOutdated = await fetchUpdates(branch);
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...${branch}`);
+    const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
+    const res = await githubGet(`/compare/${gitHash}...${parsedBranch}`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
@@ -64,7 +78,7 @@ async function calculateGitChanges(branch: string) {
 }
 
 async function fetchUpdates(branch: string) {
-    const release = await githubGet(getReleasePathFromBranch(branch));
+    const release = await githubGet(await getReleasePathFromBranch(branch));
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -88,13 +102,10 @@ async function applyUpdates() {
 }
 
 async function getBranches() {
-    const releases = await githubGet("/releases");
+    const tags = await getTags();
+    tags.unshift("latest-release", "main");
 
-    const data = JSON.parse(releases.toString()).map(release => release.tag_name)
-        .filter(release => release !== "devbuild") as Array<string>;
-    data.unshift("latest-release", "main");
-
-    return data;
+    return tags;
 }
 
 async function switchBranch(newBranch: string) {
