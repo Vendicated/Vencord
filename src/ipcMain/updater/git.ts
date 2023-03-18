@@ -104,7 +104,7 @@ async function getBranches() {
         .replace("*", "")
         .split("\n")
         .map(str => str.trim())
-        .filter(branch => branch !== "main" && branch.length > 0);
+        .filter(branch => branch !== "main" && branch.length > 0 && !branch.startsWith("HEAD detached at "));
     branches.unshift("main", "latest-release");
 
     const tags = await getTags();

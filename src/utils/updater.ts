@@ -70,7 +70,9 @@ export async function getBranches() {
 
 export async function getCurrentBranch() {
     if (IS_STANDALONE) return Settings.branch;
-    return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_CURRENT_GIT_BRANCH));
+
+    const branch = await Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_CURRENT_GIT_BRANCH));
+    return branch.length > 0 ? branch : Settings.branch;
 }
 
 export async function switchBranch(newBranch: string) {
