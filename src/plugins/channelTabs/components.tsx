@@ -156,6 +156,12 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         <FriendsIcon height={24} width={24} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>Friends</Text>
     </>;
+    if (props.guildId === "@favorites") return <>
+        <GuildIcon guild={GuildStore.getGuild(channel!.guild_id)} />
+        <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel?.name}</Text>
+        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
+        <TypingIndicator channelId={props.channelId} />
+    </>;
     if (guild && channel) return <>
         <GuildIcon guild={guild} />
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel?.name}</Text>
