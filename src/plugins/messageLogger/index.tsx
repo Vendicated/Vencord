@@ -31,8 +31,8 @@ import textStyle from "./deleteStyleText.css?managed";
 import { Webpack } from "Vencord";
 import { proxyLazy } from "@utils/proxyLazy";
 
-const i18ns = proxyLazy(() => Webpack.findAll(Webpack.filters.byProps("DM_TEXTAREA_PLACEHOLDER")));
-const i18n = proxyLazy(() => i18ns[i18ns.length - 1]); // last element, because 2 i18n exist if discord is set to a native language
+// last element, because 2 i18n exist if discord is set to a native language
+const i18n = proxyLazy(() => Webpack.findAll(Webpack.filters.byProps("DM_TEXTAREA_PLACEHOLDER")).at(-1));
 const styles = Webpack.findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
