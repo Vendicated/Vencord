@@ -25,13 +25,13 @@ export default definePlugin({
     authors: [Devs.Arjix, Devs.hunt],
     patches: [
         {
-            find: "sendMessage:function",
+            find: '"MessageActionCreators"',
             replacement: [{
-                match: /(_sendMessage:function.*?{)(.*?)(},[^}]*?:function)/,
-                replace: "$1return Vencord.Api.MessageEvents._handlePreSend(...arguments).then(()=>{$2})$3"
+                match: /(_sendMessage:function\((?:\i,?).+?\){)(.+?)(?=},.{1,30}:function)/,
+                replace: "$1return Vencord.Api.MessageEvents._handlePreSend(...arguments).then(()=>{$2})"
             }, {
-                match: /(editMessage:function.*?{)(.*?)(},[^}]*?:function)/,
-                replace: "$1return Vencord.Api.MessageEvents._handlePreEdit(...arguments).then(()=>{$2})$3"
+                match: /(editMessage:function\((?:\i,?).+?\){)(.+?)(?=},.{1,30}:function)/,
+                replace: "$1return Vencord.Api.MessageEvents._handlePreEdit(...arguments).then(()=>{$2})"
             }]
         },
         {
