@@ -45,6 +45,10 @@
     align-items: center;
 }
 
+.vc-updater-repo-container > [class*="spinningCircle"] {
+    width: unset;
+}
+
 .vc-updater-branch-select-menu {
     width: 50%;
 }

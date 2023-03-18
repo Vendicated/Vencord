@@ -26,9 +26,12 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, isBranchATag, useAwaiter } from "@utils/misc";
 import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
+import { findByCodeLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
+
+const Spinner = findByCodeLazy("WANDERING_CUBES", "spinningCircleInner");
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -279,6 +282,7 @@ function Updater() {
                     closeOnSelect={true}
                     className="vc-updater-branch-select-menu"
                 />
+                {(branchesPending || isSwitching) && <Spinner type={"spinningCircle"} />}
             </div>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
