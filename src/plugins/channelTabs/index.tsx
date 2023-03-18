@@ -32,26 +32,58 @@ import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
 const Keybind = LazyComponent(() => findByCode(".keyClassName"));
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
-const messageLinkRegex = /https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/;
+const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
 const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
     if (!args?.[0]) return;
-    const { message, messageId, channel, itemHref }: { message?: Message, messageId?: string, channel: Channel, itemHref: string; } = args[0];
-    const isChannelMention = !!messageId; // "discord embeds" experiment
-    if (!isChannelMention && !messageLinkRegex.test(itemHref)) return;
-
-    const group = findGroupChildrenByChildId(isChannelMention ? "channel-copy-link" : "open-native-link", children);
+    const { itemHref }: { itemHref?: string; } = args[0];
+    if (!itemHref) return;
+    const [_, guildId, channelId, messageId] = itemHref.match(messageLinkRegex) ?? [];
+    if (!channelId) return;
+    const group = findGroupChildrenByChildId("copy-native-link", children);
     if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
-        group.push(
-            <Menu.MenuItem
-                label="Open In New Tab"
-                id="open-link-in-tab"
-                key="open-link-in-tab"
-                action={() => ChannelTabsUtils.createTab({
-                    guildId: channel.guild_id,
-                    channelId: channel.id
-                }, messageId ?? message!.id)}
-            />
-        );
+        group.push(<Menu.MenuItem
+            label="Open In New Tab"
+            id="open-link-in-tab"
+            key="open-link-in-tab"
+            action={() => ChannelTabsUtils.createTab({
+                guildId,
+                channelId
+            }, messageId ?? true)}
+        />);
+    }
+};
+
+const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
+    if (!args?.[0]) return;
+    const { channel, messageId }: { channel: Channel, messageId?: string; } = args[0];
+    const group = findGroupChildrenByChildId("channel-copy-link", children);
+    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
+        group.push(<Menu.MenuItem
+            label="Open In New Tab"
+            id="open-link-in-tab"
+            key="open-link-in-tab"
+            action={() => ChannelTabsUtils.createTab({
+                guildId: channel.guild_id,
+                channelId: channel.id
+            }, messageId ?? true)}
+        />);
+    }
+};
+
+const channelContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
+    if (!args?.[0]) return;
+    const { channel }: { channel: Channel; } = args[0];
+    const group = findGroupChildrenByChildId("channel-copy-link", children);
+    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
+        group.push(<Menu.MenuItem
+            label="Open In New Tab"
+            id="open-link-in-tab"
+            key="open-link-in-tab"
+            action={() => ChannelTabsUtils.createTab({
+                guildId: channel.guild_id,
+                channelId: channel.id
+            }, true)}
+        />);
     }
 };
 
@@ -92,12 +124,14 @@ export default definePlugin({
 
     start() {
         addContextMenuPatch("message", messageLinkContextMenuPatch);
-        addContextMenuPatch("channel-mention-context", messageLinkContextMenuPatch);
+        addContextMenuPatch("channel-mention-context", channelMentionContextMenuPatch);
+        addContextMenuPatch("channel-context", channelContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("message", messageLinkContextMenuPatch);
-        removeContextMenuPatch("channel-mention-context", messageLinkContextMenuPatch);
+        removeContextMenuPatch("channel-mention-context", channelContextMenuPatch);
+        removeContextMenuPatch("channel-context", channelContextMenuPatch);
     },
 
     render(props) {

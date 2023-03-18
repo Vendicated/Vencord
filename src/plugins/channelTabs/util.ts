@@ -65,10 +65,10 @@ function moveToTabRelative(d: number) {
     const i = d + openChannelIndex;
     moveToTab(i);
 }
-function createTab(t: ChannelTabsProps, messageId?: string) {
+function createTab(t: ChannelTabsProps, jumpTo?: string | boolean) {
     openChannels.push({ ...t });
     openChannelIndex = openChannels.length - 1;
-    if (messageId) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}/${messageId}`);
+    if (jumpTo) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}${window._.isString(jumpTo) ? `/${jumpTo}` : ""}`);
 }
 function closeTab(i: number) {
     openChannels.splice(i, 1);
