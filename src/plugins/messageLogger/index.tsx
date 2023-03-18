@@ -65,7 +65,7 @@ export default definePlugin({
                         isEdited={true}
                         isInline={false}
                     >
-                        <span>{" "}(edited)</span>
+                        <span className="edited-1v5nT8">{" "}(edited)</span>
                     </Timestamp>
                 </div>
             </ErrorBoundary>
