@@ -23,6 +23,7 @@ import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
 import { waitFor } from "../utils/waitFor";
 
+type Vec2 = { x: number, y: number; };
 export interface MagnifierProps {
     zoom: number;
     size: number,
@@ -30,8 +31,8 @@ export interface MagnifierProps {
 }
 
 export interface MagnifierState {
-    position: { x: number, y: number; },
-    imagePosition: { x: number, y: number; },
+    position: Vec2,
+    imagePosition: Vec2,
     size: number,
     zoom: number,
     opacity: number,
@@ -104,17 +105,16 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         }
     };
 
-    onWheel = (e: WheelEvent) => {
+    onWheel = async (e: WheelEvent) => {
         const { instance } = this.props;
         if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
             const val = this.state.zoom + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            this.setState({ ...this.state, zoom: val <= 1 ? 1 : val });
-            this.updateMousePosition(e);
+            this.setState({ ...this.state, zoom: val <= 1 ? 1 : val }, () => this.updateMousePosition(e));
+
         }
         if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
             const val = this.state.size + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            this.setState({ ...this.state, size: val <= 50 ? 50 : val });
-            this.updateMousePosition(e);
+            this.setState({ ...this.state, size: val <= 50 ? 50 : val }, () => this.updateMousePosition(e));
         }
     };
 
@@ -123,21 +123,16 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         const { zoom, size } = this.state;
         if (instance.state.mouseOver && instance.state.mouseDown) {
             const offset = size / 2;
-            this.setLensPosition({ x: e.x - offset, y: e.y - offset });
             const pos = { x: e.pageX, y: e.pageY };
             const x = -((pos.x - this.element.getBoundingClientRect().left) * zoom - offset);
             const y = -((pos.y - this.element.getBoundingClientRect().top) * zoom - offset);
-            this.setImagePosition({ x, y });
+            this.setPositions({ x: e.x - offset, y: e.y - offset }, { x, y });
         }
         else this.setState({ ...this.state, opacity: 0 });
     };
 
-    setImagePosition = (imagePosition: { x: number; y: number; }) => {
-        this.setState({ ...this.state, imagePosition });
-    };
-
-    setLensPosition = (position: { x: number; y: number; }) => {
-        this.setState({ ...this.state, opacity: 1, position: position });
+    setPositions = (position: Vec2, imagePosition: Vec2) => {
+        this.setState({ ...this.state, opacity: 1, imagePosition, position });
     };
 
     state = {
@@ -157,6 +152,7 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
         const box = this.element.getBoundingClientRect();
 
+        console.log(zoom, size);
         return (
 
             <div
