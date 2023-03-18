@@ -21,71 +21,36 @@ import "./style.css";
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { sleep, useForceUpdater } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { FluxDispatcher, Menu, React, RelationshipStore, Text, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
-
-const UserProfileStore = findStoreLazy("UserProfileStore");
-
-const fetchQueueFinishCallbacks: Set<() => any> = new Set();
-const fetchQueue = new Proxy(new Queue(), {
-    set(_, p, newValue) {
-        if (p === "promise" && newValue === undefined) {
-            for (const fetchQueueFinishCallback of fetchQueueFinishCallbacks) {
-                fetchQueueFinishCallback();
-            }
-        }
-
-        // @ts-expect-error
-        return Reflect.set(...arguments);
-    }
-});
-
-let fetchUserProfile: (id: string, options: { withMutualGuilds: boolean; }) => any;
-function setFetchUserProfile(func: (id: string, options: { withMutualGuilds: boolean; }) => any) {
-    fetchUserProfile = func;
-}
-
-function fetchMissingFriendProfiles() {
-    if (fetchQueue.size > 0) return;
-
-    const friendsIds = RelationshipStore.getFriendIDs();
-
-    const { mutualGuilds } = UserProfileStore.__getLocalVars();
-    const friendsIdsToFetch = friendsIds.filter(friendId => mutualGuilds[friendId] === void 0);
-
-    for (const friendId of friendsIdsToFetch) {
-        fetchQueue.push(async () => {
-            await fetchUserProfile?.(friendId, { withMutualGuilds: true });
-            await sleep(750);
-        });
-    }
-}
+import { FluxDispatcher, GuildMemberStore, Menu, React, RelationshipStore, Text, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps: ModalProps; }) {
     const friendIds = useStateFromStores(
-        [UserProfileStore],
-        () => Object.entries(UserProfileStore.__getLocalVars().mutualGuilds)
-            .filter(([, mutualGuilds]) => (mutualGuilds as any)
-                .some(({ guild }) => guild.id === guildId))
-            .map(([friendId]) => friendId),
+        [RelationshipStore],
+        () => RelationshipStore.getFriendIDs(),
         null,
         (old, current) => JSON.stringify(old) === JSON.stringify(current)
     );
 
-    const forceUpdate = useForceUpdater();
+    useStateFromStores(
+        [GuildMemberStore],
+        () => GuildMemberStore.getMemberIds(guildId),
+        null,
+        (old, current) => old.length === current.length
+    );
+
+    const friendsToRequest = friendIds.filter(friendId => !GuildMemberStore.isMember(guildId, friendId));
 
     React.useEffect(() => {
-        const fetchQueueFinishCallback = () => forceUpdate();
-        fetchQueueFinishCallbacks.add(fetchQueueFinishCallback);
-
-        fetchMissingFriendProfiles();
-
-        return () => void fetchQueueFinishCallbacks.delete(fetchQueueFinishCallback);
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [guildId],
+            userIds: friendsToRequest
+        });
     }, []);
+
+    const friendsInGuild = friendIds.filter(friendId => GuildMemberStore.isMember(guildId, friendId));
 
     return (
         <ErrorBoundary>
@@ -98,11 +63,10 @@ function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps:
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
                 <ModalContent>
-                    {fetchQueue.size > 0 && <Text className="frds-on-svr-fetching-container" variant="text-md/semibold">Fetching friends...</Text>}
                     <div className="frds-on-svr-frds-container">
-                        {friendIds.length === 0
+                        {friendsInGuild.length === 0
                             ? <Text variant="text-md/normal">There are no friends on this server :/</Text>
-                            : friendIds.map(friendId => {
+                            : friendsInGuild.map(friendId => {
                                 const user = UserStore.getUser(friendId);
 
                                 return (
@@ -150,17 +114,6 @@ export default definePlugin({
     description: "Adds an option to server context menus to show what friends are on that server.",
     authors: [Devs.Nuckyz],
 
-    patches: [
-        {
-            find: '("UserProfileModalActionCreators")',
-            replacement: {
-                match: /USER_PROFILE_FETCH_START.+?apply\(this,arguments\)}(?<=function (\i)\(\){\i=.+?)/,
-                replace: (m, func) => `${m}$self.setFetchUserProfile(${func});`
-            }
-        }
-    ],
-
-    setFetchUserProfile,
 
     start() {
         addContextMenuPatch("guild-context", guildContextMenuPatch);

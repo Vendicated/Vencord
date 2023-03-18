@@ -2,14 +2,6 @@
     flex-grow: 1;
 }
 
-.frds-on-svr-fetching-container {
-    margin-top: 8px;
-    padding: 8px;
-    border-radius: 5px;
-    background-color: var(--background-tertiary);
-    text-align: center;
-}
-
 .frds-on-svr-frds-container {
     margin-top: 8px;
     padding: 16px;
