@@ -225,6 +225,20 @@ function Updater() {
                 const isTag = isBranchATag(settings.branch);
                 if (!isTag) await checkForUpdates();
 
+                await new Promise<void>(r => {
+                    Alerts.show({
+                        title: "Sucessfully switched branch!",
+                        body: "Restart now to apply the changes?",
+                        confirmText: "Restart",
+                        cancelText: "Not now!",
+                        onConfirm() {
+                            window.DiscordNative.app.relaunch();
+                            r();
+                        },
+                        onCancel: r
+                    });
+                });
+
                 setIsSwitching(false);
             } else
                 throw new Error("Failed to build or fetch new branch.");

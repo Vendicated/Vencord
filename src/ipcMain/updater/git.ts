@@ -41,8 +41,8 @@ function git(...args: string[]) {
 }
 
 function getLogRevisionRange(branch: string, existsOnOrigin: boolean, isTag: boolean) {
+    if (!existsOnOrigin) return `origin/HEAD...${branch}`;
     let res = "";
-    if (!existsOnOrigin) return res += `origin/HEAD...${branch}`;
     if (!isTag) res += "origin/";
     return res += `${branch}...${branch}`;
 }
