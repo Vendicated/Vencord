@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
-import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
+import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Button, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
