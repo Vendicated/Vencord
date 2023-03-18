@@ -23,6 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, ReactDOM } from "@webpack/common";
+import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
@@ -121,7 +122,7 @@ export default definePlugin({
     element: null as HTMLDivElement | null,
 
     Magnifier,
-
+    root: null as Root | null,
     makeProps(instance) {
         return {
             onMouseOver: () => this.onMouseOver(instance),
@@ -135,22 +136,17 @@ export default definePlugin({
     renderMagnifier(instance) {
         if (instance.props.id === ELEMENT_ID) {
             if (!this.currentMagnifierElement) {
-                this.currentMagnifierElement = React.createElement(Magnifier, {
-                    size: settings.store.size,
-                    zoom: settings.store.zoom,
-                    instance
-                });
-                const root = ReactDOM.createRoot(this.element!);
-                root.render(this.currentMagnifierElement);
+                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                this.root = ReactDOM.createRoot(this.element!);
+                this.root.render(this.currentMagnifierElement);
             }
         }
     },
 
     unMountMagnifier() {
-        if (this.currentMagnifierElement) {
-            ReactDOM.unmountComponentAtNode(this.element!);
-            this.currentMagnifierElement = null;
-        }
+        this.root?.unmount();
+        this.currentMagnifierElement = null;
+        this.root = null;
     },
 
     onMouseOver(instance) {
@@ -174,7 +170,7 @@ export default definePlugin({
 
     stop() {
         // so componenetWillUnMount gets called if Magnifier component is still alive
-        ReactDOM.unmountComponentAtNode(this.element!);
+        this.root && this.root.unmount();
         this.element?.remove();
     }
 });

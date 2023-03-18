@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/misc";
-import { React } from "@webpack/common";
+import { React, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -30,168 +29,147 @@ export interface MagnifierProps {
     instance: any;
 }
 
-export interface MagnifierState {
-    position: Vec2,
-    imagePosition: Vec2,
-    size: number,
-    zoom: number,
-    opacity: number,
-    isShiftDown: boolean,
-    ready: boolean;
-}
-// class component because i like it more
-export const Magnifier = LazyComponent(() => class Magnifier extends React.PureComponent<MagnifierProps, MagnifierState> {
-    lens = React.createRef<HTMLDivElement>();
-    imageRef = React.createRef<HTMLImageElement>();
-    currentVideoElementRef = React.createRef<HTMLVideoElement>();
-    videoElement!: HTMLVideoElement;
-    constructor(props: MagnifierProps) {
-        super(props);
-
-    }
-
-    get element(): HTMLDivElement {
-        return document.querySelector(`#${ELEMENT_ID}`)!;
-    }
+export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
+    const [ready, setReady] = useState(false);
 
 
-    async componentDidMount() {
-        document.addEventListener("mousemove", this.updateMousePosition);
-        document.addEventListener("mousedown", this.updateMousePosition);
-        document.addEventListener("mouseup", this.updateMousePosition);
-        document.addEventListener("wheel", this.onWheel);
-        document.addEventListener("keydown", this.onKeyDown);
-        document.addEventListener("keyup", this.onKeyUp);
+    const [lensPosition, setLensPosition] = useState<Vec2>({ x: 0, y: 0 });
+    const [imagePosition, setImagePosition] = useState<Vec2>({ x: 0, y: 0 });
+    const [opacity, setOpacity] = useState(0);
 
-        waitFor(() => this.props.instance.state.readyState === "READY", () => {
-            this.element.firstElementChild!.setAttribute("draggable", "false");
-            if (this.props.instance.props.animated) {
-                this.videoElement = this.element.querySelector("video")!;
-                this.videoElement.addEventListener("timeupdate", this.syncVidoes);
-                this.setState({ ...this.state, ready: true });
+    const isShiftDown = useRef(false);
+
+    const zoom = useRef(initalZoom);
+    const size = useRef(initialSize);
+
+    const element = useRef<HTMLDivElement | null>(null);
+    const currentVideoElementRef = useRef<HTMLVideoElement | null>(null);
+    const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
+    const imageRef = useRef<HTMLImageElement | null>(null);
+
+
+    const onKeyDown = React.useCallback((e: KeyboardEvent) => {
+        if (e.key === "Shift") {
+            isShiftDown.current = true;
+        }
+    }, []);
+
+    const onKeyUp = React.useCallback((e: KeyboardEvent) => {
+        if (e.key === "Shift") {
+            isShiftDown.current = false;
+        }
+    }, []);
+
+    const syncVideos = React.useCallback(() => {
+        currentVideoElementRef.current!.currentTime = originalVideoElementRef.current!.currentTime;
+    }, [currentVideoElementRef, originalVideoElementRef]);
+
+
+    const onWheel = React.useCallback(async (e: WheelEvent) => {
+        if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
+            const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
+            zoom.current = val <= 1 ? 1 : val;
+            updateMousePosition(e);
+        }
+        if (instance.state.mouseOver && instance.state.mouseDown && isShiftDown.current) {
+            const val = size.current + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
+            size.current = val <= 50 ? 50 : val;
+            updateMousePosition(e);
+        }
+    }, [isShiftDown]);
+
+    const updateMousePosition = React.useCallback((e: MouseEvent) => {
+        if (instance.state.mouseOver && instance.state.mouseDown) {
+            const offset = size.current / 2;
+            const pos = { x: e.pageX, y: e.pageY };
+            const x = -((pos.x - element.current!.getBoundingClientRect().left) * zoom.current - offset);
+            const y = -((pos.y - element.current!.getBoundingClientRect().top) * zoom.current - offset);
+            setLensPosition({ x: e.x - offset, y: e.y - offset });
+            setImagePosition({ x, y });
+            setOpacity(1);
+        } else {
+            setOpacity(0);
+        }
+    }, [zoom, size]);
+
+    // since we accessing document im gonna use useLayoutEffect
+    React.useLayoutEffect(() => {
+
+        waitFor(() => instance.state.readyState === "READY", () => {
+            const elem = document.getElementById(ELEMENT_ID) as HTMLDivElement;
+            element.current = elem;
+            elem.firstElementChild!.setAttribute("draggable", "false");
+            if (instance.props.animated) {
+                originalVideoElementRef.current = elem!.querySelector("video")!;
+                originalVideoElementRef.current.addEventListener("timeupdate", syncVideos);
+                setReady(true);
             } else {
-                this.setState({ ...this.state, ready: true });
+                setReady(true);
             }
         });
-    }
+        document.addEventListener("keydown", onKeyDown);
+        document.addEventListener("keyup", onKeyUp);
+        document.addEventListener("mousemove", updateMousePosition);
+        document.addEventListener("mousedown", updateMousePosition);
+        document.addEventListener("mouseup", updateMousePosition);
+        document.addEventListener("wheel", onWheel);
+        return () => {
+            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("keyup", onKeyUp);
+            document.removeEventListener("mousemove", updateMousePosition);
+            document.removeEventListener("mousedown", updateMousePosition);
+            document.removeEventListener("mouseup", updateMousePosition);
+            document.removeEventListener("wheel", onWheel);
 
-    componentWillUnmount(): void {
-        document.removeEventListener("mousemove", this.updateMousePosition);
-        document.removeEventListener("mousedown", this.updateMousePosition);
-        document.removeEventListener("mouseup", this.updateMousePosition);
-        document.removeEventListener("wheel", this.onWheel);
-        document.removeEventListener("keydown", this.onKeyDown);
-        document.removeEventListener("keyup", this.onKeyUp);
-        this.videoElement?.removeEventListener("timeupdate", this.syncVidoes);
+            if (settings.store.saveZoomValues) {
+                settings.store.zoom = zoom.current;
+                settings.store.size = size.current;
+            }
+        };
+    }, []);
 
-        if (settings.store.saveZoomValues) {
-            settings.store.zoom = this.state.zoom;
-            settings.store.size = this.state.size;
-        }
+    if (!ready) return null;
 
-    }
+    const box = element.current!.getBoundingClientRect();
 
-    syncVidoes = () => {
-        this.currentVideoElementRef.current!.currentTime = this.videoElement.currentTime;
-    };
-
-    onKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Shift") {
-            this.setState({ ...this.state, isShiftDown: true });
-        }
-    };
-
-    onKeyUp = (e: KeyboardEvent) => {
-        if (e.key === "Shift") {
-            this.setState({ ...this.state, isShiftDown: false });
-        }
-    };
-
-    onWheel = async (e: WheelEvent) => {
-        const { instance } = this.props;
-        if (instance.state.mouseOver && instance.state.mouseDown && !this.state.isShiftDown) {
-            const val = this.state.zoom + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            this.setState({ ...this.state, zoom: val <= 1 ? 1 : val }, () => this.updateMousePosition(e));
-
-        }
-        if (instance.state.mouseOver && instance.state.mouseDown && this.state.isShiftDown) {
-            const val = this.state.size + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            this.setState({ ...this.state, size: val <= 50 ? 50 : val }, () => this.updateMousePosition(e));
-        }
-    };
-
-    updateMousePosition = (e: MouseEvent) => {
-        const { instance } = this.props;
-        const { zoom, size } = this.state;
-        if (instance.state.mouseOver && instance.state.mouseDown) {
-            const offset = size / 2;
-            const pos = { x: e.pageX, y: e.pageY };
-            const x = -((pos.x - this.element.getBoundingClientRect().left) * zoom - offset);
-            const y = -((pos.y - this.element.getBoundingClientRect().top) * zoom - offset);
-            this.setPositions({ x: e.x - offset, y: e.y - offset }, { x, y });
-        }
-        else this.setState({ ...this.state, opacity: 0 });
-    };
-
-    setPositions = (position: Vec2, imagePosition: Vec2) => {
-        this.setState({ ...this.state, opacity: 1, imagePosition, position });
-    };
-
-    state = {
-        position: { x: 0, y: 0 },
-        imagePosition: { x: 0, y: 0 },
-        size: this.props.size,
-        zoom: this.props.zoom,
-        opacity: 0,
-        isShiftDown: false,
-        ready: false
-    };
-
-    render() {
-        if (!this.state.ready) return null;
-        const { instance: { props: { src, animated } } } = this.props;
-        const { position, opacity, imagePosition, zoom, size } = this.state;
-        const transformStyle = `translate(${position.x}px, ${position.y}px)`;
-        const box = this.element.getBoundingClientRect();
-
-        return (
-
-            <div
-                className="lens"
-                style={{
-                    opacity,
-                    width: size + "px",
-                    height: size + "px",
-                    transform: transformStyle,
-                }}
-            >
-                {animated ?
+    return (
+        <div
+            className="lens"
+            style={{
+                opacity,
+                width: size.current + "px",
+                height: size.current + "px",
+                transform: `translate(${lensPosition.x}px, ${lensPosition.y}px)`,
+            }}
+        >
+            {instance.props.animated ?
+                (
                     <video
-                        ref={this.currentVideoElementRef}
+                        ref={currentVideoElementRef}
                         style={{
                             position: "absolute",
                             left: `${imagePosition.x}px`,
                             top: `${imagePosition.y}px`
                         }}
-                        width={`${box.width * zoom}px`}
-                        height={`${box.height * zoom}px`}
-                        poster={src}
-                        src={this.videoElement.src ?? src}
+                        width={`${box.width * zoom.current}px`}
+                        height={`${box.height * zoom.current}px`}
+                        poster={instance.props.src}
+                        src={originalVideoElementRef.current?.src ?? instance.props.src}
                         autoPlay
                         loop
-                    /> : <img
-                        ref={this.imageRef}
+                    />
+                ) : (
+                    <img
+                        ref={imageRef}
                         style={{
                             position: "absolute",
-                            left: `${imagePosition.x}px`,
-                            top: `${imagePosition.y}px`
+                            transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`
                         }}
-                        width={`${box.width * zoom}px`}
-                        height={`${box.height * zoom}px`}
-                        src={src} alt=""
-                    />}
-            </div>
-        );
-    }
-});
-
+                        width={`${box.width * zoom.current}px`}
+                        height={`${box.height * zoom.current}px`}
+                        src={instance.props.src} alt=""
+                    />
+                )}
+        </div>
+    );
+};
