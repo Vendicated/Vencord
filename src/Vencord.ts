@@ -30,6 +30,7 @@ import "./webpack/patchWebpack";
 import { popNotice, showNotice } from "./api/Notices";
 import { DefaultSettings, PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
+import { isBranchATag } from "./utils/misc";
 import { changes, checkForUpdates, getBranches, getCurrentBranch, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
@@ -57,6 +58,9 @@ async function init() {
         }
 
         try {
+            const isTag = isBranchATag(Settings.branch);
+            if (isTag) return;
+
             const isOutdated = await checkForUpdates();
             if (!isOutdated) return;
 

@@ -17,14 +17,14 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes, isBranchATag, useAwaiter } from "@utils/misc";
 import { changes, checkForUpdates, getBranches, getRepo, isNewer, rebuild, switchBranch, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Switch, Toasts } from "@webpack/common";
 
@@ -123,6 +123,14 @@ function Updatable(props: CommonProps) {
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking || props.switchingBranches}
                     onClick={withDispatcher(setIsUpdating, async () => {
+                        const isTag = isBranchATag(Settings.branch);
+                        if (isTag) {
+                            return Alerts.show({
+                                title: "Oops!",
+                                body: "Cannot update on tagged branches."
+                            });
+                        }
+
                         if (await update()) {
                             changes.length = 0;
                             const needFullRestart = await rebuild();
@@ -151,6 +159,14 @@ function Updatable(props: CommonProps) {
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking || props.switchingBranches}
                     onClick={withDispatcher(setIsChecking, async () => {
+                        const isTag = isBranchATag(Settings.branch);
+                        if (isTag) {
+                            return Alerts.show({
+                                title: "Oops!",
+                                body: "Cannot check for updates on tagged branches."
+                            });
+                        }
+
                         const outdated = await checkForUpdates();
                         if (!outdated) {
                             Toasts.show({
@@ -203,7 +219,9 @@ function Updater() {
             if (await switchBranch(branch)) {
                 settings.branch = branch;
 
-                await checkForUpdates();
+                const isTag = isBranchATag(settings.branch);
+                if (!isTag) await checkForUpdates();
+
                 setIsSwitching(false);
             } else
                 throw new Error("Failed to build or fetch new branch.");
@@ -213,7 +231,7 @@ function Updater() {
             UpdateLogger.error(err);
             showNotification({
                 title: "Failed to switch branch",
-                body: `Your branch was changed back to what it was before. ${(err.stderr as string).endsWith("\n") ? err.stderr.slice(0, -1) : err.stderr}`,
+                body: `Your branch was changed back to what it was before. ${(err.stderr?.endsWith("\n") ? err.stderr?.slice(0, -1) : err.stderr) ?? ""}`,
                 color: "var(--status-danger)"
             });
         }

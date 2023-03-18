@@ -204,3 +204,7 @@ export const checkIntersecting = (el: Element) => {
 export function identity<T>(value: T): T {
     return value;
 }
+
+export function isBranchATag(branch: string) {
+    return branch.match(/v\d+?\.\d+?\.\d+?/) !== null;
+}

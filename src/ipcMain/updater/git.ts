@@ -24,8 +24,8 @@ import { promisify } from "util";
 
 import { calculateHashes, serializeErrors } from "./common";
 
-const VENCORD_SRC_DIR = join(__dirname, "..");
 const tagRegex = /v\d+?\.\d+?\.\d+?/;
+const VENCORD_SRC_DIR = join(__dirname, "..");
 
 const execFile = promisify(cpExecFile);
 
@@ -63,9 +63,6 @@ async function getRepo() {
 }
 
 async function calculateGitChanges(branch: string) {
-    const isTag = branch.match(tagRegex) !== null;
-    if (isTag) throw new Error("Cannot check for updates on a tagged branch.");
-
     await git("fetch");
 
     const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
@@ -83,9 +80,6 @@ async function calculateGitChanges(branch: string) {
 
 async function pull(branch: string) {
     if (branch === "latest-release") return switchBranch(branch, branch, false);
-
-    const isTag = branch.match(tagRegex) !== null;
-    if (isTag) throw new Error("Cannot update on a tagged branch.");
 
     const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
     const res = await git("pull", "origin", existsOnOrigin ? branch : "HEAD");
