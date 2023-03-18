@@ -101,7 +101,7 @@ export default definePlugin({
 
                 {
                     match: /(componentDidMount=function\(\){)/,
-                    replace: "$1$self.renderMagnifier(this);",
+                    replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
