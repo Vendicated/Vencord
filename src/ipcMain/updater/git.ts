@@ -128,12 +128,12 @@ async function switchBranch(currentBranch: string, newBranch: string, shouldBuil
     const isNewBranchTag = parsedBranch.match(tagRegex) !== null;
     console.log(isNewBranchTag);
 
-    await git("switch", parsedBranch + isNewBranchTag ? "--detach" : "");
+    await git("switch", parsedBranch + (isNewBranchTag ? " --detach" : ""));
 
     if (shouldBuild) {
         const buildRes = await build();
         if (!buildRes) {
-            await git("switch", currentBranch + isCurrentBranchTag ? "--detach" : "");
+            await git("switch", currentBranch + (isCurrentBranchTag ? " --detach" : ""));
             await build();
             return false;
         }
