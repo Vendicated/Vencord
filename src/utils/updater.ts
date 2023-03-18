@@ -42,6 +42,7 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 export async function checkForUpdates() {
     changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES, Settings.branch));
     if (changes.some(c => c.hash === gitHash)) {
+        console.log("is newer");
         isNewer = true;
         return (isOutdated = false);
     }
