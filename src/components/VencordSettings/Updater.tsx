@@ -207,13 +207,14 @@ function Updater() {
                 setIsSwitching(false);
             } else
                 throw new Error("Failed to build or fetch new branch.");
-        } catch (err) {
+        } catch (err: any) {
             setIsSwitching(false);
 
             UpdateLogger.error(err);
             showNotification({
                 title: "Failed to switch branch",
-                body: "Your branch was changed back to what it was before. Check your console!"
+                body: `Your branch was changed back to what it was before. ${(err.stderr as string).endsWith("\n") ? err.stderr.slice(0, -1) : err.stderr}`,
+                color: "var(--status-danger)"
             });
         }
     }

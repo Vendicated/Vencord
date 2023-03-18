@@ -39,6 +39,21 @@ function git(...args: string[]) {
     else return execFile("git", args, opts);
 }
 
+async function getTags() {
+    return (await git("tag", "--sort=committerdate")).stdout
+        .trim()
+        .split("\n")
+        .filter(tag => tag !== "devbuild")
+        .reverse();
+}
+
+async function getBranchFromPossiblyFakeBranchName(branch: string) {
+    const tags = await getTags();
+
+    if (branch === "latest-release") return tags[0] ?? "main";
+    return branch;
+}
+
 async function getRepo() {
     const res = await git("remote", "get-url", "origin");
     return res.stdout.trim()
@@ -49,8 +64,9 @@ async function getRepo() {
 async function calculateGitChanges(branch: string) {
     await git("fetch");
 
-    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
-    const res = await git("log", `${branch}...origin/${existsOnOrigin ? branch : "HEAD"}`, "--pretty=format:%an/%h/%s");
+    const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
+    const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
+    const res = await git("log", `${parsedBranch}...origin/${existsOnOrigin ? parsedBranch : "HEAD"}`, "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
@@ -62,8 +78,9 @@ async function calculateGitChanges(branch: string) {
 }
 
 async function pull(branch: string) {
-    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
-    const res = await git("pull", "origin", existsOnOrigin ? branch : "HEAD");
+    const parsedBranch = await getBranchFromPossiblyFakeBranchName(branch);
+    const existsOnOrigin = (await git("ls-remote", "origin", parsedBranch)).stdout.length > 0;
+    const res = await git("pull", "origin", existsOnOrigin ? parsedBranch : "HEAD");
     return res.stdout.includes("Fast-forward");
 }
 
@@ -86,7 +103,10 @@ async function getBranches() {
         .split("\n")
         .map(str => str.trim())
         .filter(branch => branch !== "main" && branch.length > 0);
-    branches.unshift("main");
+    branches.unshift("main", "latest-release");
+
+    const tags = await getTags();
+    branches.push(...tags);
 
     return branches;
 }
@@ -96,7 +116,8 @@ async function getCurrentBranch() {
 }
 
 async function switchBranch(currentBranch: string, newBranch: string) {
-    await git("switch", newBranch);
+    const parsedBranch = await getBranchFromPossiblyFakeBranchName(newBranch);
+    await git("switch", parsedBranch);
 
     const buildRes = await build();
     if (!buildRes) {
