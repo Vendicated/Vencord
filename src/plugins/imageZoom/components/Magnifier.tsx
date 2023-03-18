@@ -152,7 +152,6 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         const transformStyle = `translate(${position.x}px, ${position.y}px)`;
         const box = this.element.getBoundingClientRect();
 
-        console.log(zoom, size);
         return (
 
             <div
