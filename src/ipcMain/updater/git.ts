@@ -36,8 +36,6 @@ if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.
 function git(...args: string[]) {
     const opts = { cwd: VENCORD_SRC_DIR };
 
-    console.log(args);
-
     if (isFlatpak) return execFile("flatpak-spawn", ["--host", "git", ...args], opts);
     else return execFile("git", args, opts);
 }
@@ -106,7 +104,7 @@ async function getBranches() {
         .replace("*", "")
         .split("\n")
         .map(str => str.trim())
-        .filter(branch => branch !== "main" && branch.length > 0 && !branch.startsWith("HEAD detached at "));
+        .filter(branch => branch !== "main" && branch.length > 0 && !branch.startsWith("(HEAD detached at "));
     branches.unshift("main", "latest-release");
 
     const tags = await getTags();
