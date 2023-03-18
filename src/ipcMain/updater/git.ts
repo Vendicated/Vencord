@@ -39,11 +39,12 @@ function git(...args: string[]) {
     else return execFile("git", args, opts);
 }
 
-async function getTags() {
+async function getTags(withPrefix = false) {
     return (await git("tag", "--sort=committerdate")).stdout
         .trim()
         .split("\n")
         .filter(tag => tag !== "devbuild")
+        .map(tag => tag.startsWith("v") ? tag.slice(1) : tag)
         .reverse();
 }
 
@@ -105,7 +106,7 @@ async function getBranches() {
         .filter(branch => branch !== "main" && branch.length > 0);
     branches.unshift("main", "latest-release");
 
-    const tags = await getTags();
+    const tags = await getTags(true);
     branches.push(...tags);
 
     return branches;
