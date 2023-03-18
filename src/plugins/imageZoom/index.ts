@@ -90,13 +90,7 @@ export default definePlugin({
                 {
                     match: /(render=function\(\){.{1,500}limitResponsiveWidth(.|\n){1,600})onMouseEnter:/,
                     replace:
-                        `$1onMouseOver: () => $self.onMouseOver(this),
-                    onMouseOut: () => $self.onMouseOut(this),
-                    onMouseDown: () => $self.onMouseDown(this),
-                    onMouseUp: () => $self.onMouseUp(this),
-                    id: this.props.id,
-                    onMouseEnter:`
-
+                        "$1...$self.makeProps(this),onMouseEnter:"
                 },
 
                 {
@@ -127,6 +121,16 @@ export default definePlugin({
     element: null as HTMLDivElement | null,
 
     Magnifier,
+
+    makeProps(instance) {
+        return {
+            onMouseOver: () => this.onMouseOver(instance),
+            onMouseOut: () => this.onMouseOut(instance),
+            onMouseDown: () => this.onMouseDown(instance),
+            onMouseUp: () => this.onMouseUp(instance),
+            id: instance.props.id,
+        };
+    },
 
     renderMagnifier(instance) {
         if (instance.props.id === ELEMENT_ID) {
