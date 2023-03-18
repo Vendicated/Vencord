@@ -244,12 +244,12 @@ export default definePlugin({
         ) ?
             {
                 large_image: await getApplicationAsset(trackData.imageUrl || "placeholder"),
-                large_text: trackData.album,
+                large_text: trackData.album || undefined,
                 small_image: await getApplicationAsset("lastfm-small"),
                 small_text: "Last.fm",
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
-                large_text: trackData.album,
+                large_text: trackData.album || undefined,
             };
 
         const buttons: ActivityButton[] = [
