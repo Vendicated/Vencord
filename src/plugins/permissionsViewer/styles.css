@@ -11,10 +11,12 @@
 }
 
 .permviewer-userperms-permdetails-btn {
+    all: unset;
     cursor: pointer;
 }
 
 .permviewer-userperms-toggleperms-btn {
+    all: unset;
     cursor: pointer;
 }
 
@@ -45,6 +47,11 @@
     display: flex;
     flex-direction: column;
     border-right: 2px solid var(--background-modifier-active);
+}
+
+.permviewer-perms-list-item-btn {
+    all: unset;
+    cursor: pointer;
 }
 
 .permviewer-perms-list-item {

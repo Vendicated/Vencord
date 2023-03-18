@@ -90,23 +90,27 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 const role = guild.roles[permission.id];
 
                                 return (
-                                    <div
-                                        className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
+                                    <button
+                                        className="permviewer-perms-list-item-btn"
                                         onClick={() => selectItem(index)}
-                                        onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
                                     >
-                                        {permission.type === PermissionType.Role && (
-                                            <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }} />
-                                        )}
-                                        {permission.type === PermissionType.User && user !== undefined && (
-                                            <img className="permviewer-perms-user-img" src={user.getAvatarURL(void 0, void 0, false)} />
-                                        )}
-                                        <Text variant="text-md/normal">{
-                                            permission.type === PermissionType.Role
-                                                ? role?.name ?? "Unknown Role"
-                                                : (user?.tag) ?? "Unknown User"
-                                        }</Text>
-                                    </div>
+                                        <div
+                                            className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
+                                            onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
+                                        >
+                                            {permission.type === PermissionType.Role && (
+                                                <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }} />
+                                            )}
+                                            {permission.type === PermissionType.User && user !== undefined && (
+                                                <img className="permviewer-perms-user-img" src={user.getAvatarURL(void 0, void 0, false)} />
+                                            )}
+                                            <Text variant="text-md/normal">{
+                                                permission.type === PermissionType.Role
+                                                    ? role?.name ?? "Unknown Role"
+                                                    : (user?.tag) ?? "Unknown User"
+                                            }</Text>
+                                        </div>
+                                    </button>
                                 );
                             })}
                         </div>
