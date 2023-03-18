@@ -35,16 +35,18 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, args) =>
     if (!args?.[0]) return;
     const [{ message }] = args as [{ message: Message; }];
 
+    // make sure they are in the same channel as the message
     if (!message || SelectedChannelStore.getChannelId() !== (message.channel_id ?? message.getChannelId())) return;
 
     const channel = ChannelStore.getChannel(message.channel_id ?? message.getChannelId());
 
     if (!channel) return;
 
-    const group = findGroupChildrenByChildId("pin", children);
-    if (group && !group.some(child => child?.props?.id === "reply")) {
-        const pinIndex = group.findIndex(c => c.props.id === "pin");
-        group.splice(pinIndex + 1, 0, (
+    // dms and group chats
+    const dmGroup = findGroupChildrenByChildId("pin", children);
+    if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
+        const pinIndex = dmGroup.findIndex(c => c.props.id === "pin");
+        return dmGroup.splice(pinIndex + 1, 0, (
             <Menu.MenuItem
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
@@ -53,6 +55,20 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, args) =>
             />
         ));
     }
+
+    // servers
+    const serverGroup = findGroupChildrenByChildId("mark-unread", children);
+    if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
+        return serverGroup.unshift((
+            <Menu.MenuItem
+                id="reply"
+                label={i18n.Messages.MESSAGE_ACTION_REPLY}
+                icon={ReplyIcon}
+                action={(e: React.MouseEvent) => replyFn(channel, message, e)}
+            />
+        ));
+    }
+
 };
 
 
