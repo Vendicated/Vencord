@@ -72,7 +72,7 @@ async function calculateGitChanges(branch: string) {
 
     const res = await git(
         "log",
-        `${parsedBranch}${isTag === false ? `...origin/${existsOnOrigin ? parsedBranch : "HEAD"}` : ""}`,
+        `${parsedBranch}...${isTag === false ? "origin/" : ""}${existsOnOrigin ? parsedBranch : "HEAD"}`,
         "--pretty=format:%an/%h/%s"
     );
 
