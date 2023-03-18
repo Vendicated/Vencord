@@ -63,15 +63,16 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         document.addEventListener("keydown", this.onKeyDown);
         document.addEventListener("keyup", this.onKeyUp);
 
-        if (this.props.instance.props.animated) {
-            await waitFor(`#${ELEMENT_ID} > video`);
-            this.videoElement = this.element.querySelector("video")!;
-            this.videoElement.addEventListener("timeupdate", this.syncVidoes);
-            this.setState({ ...this.state, ready: true });
-        } else {
-            this.setState({ ...this.state, ready: true });
-        }
-        this.element.firstElementChild!.setAttribute("draggable", "false");
+        waitFor(() => this.props.instance.state.readyState === "READY", () => {
+            this.element.firstElementChild!.setAttribute("draggable", "false");
+            if (this.props.instance.props.animated) {
+                this.videoElement = this.element.querySelector("video")!;
+                this.videoElement.addEventListener("timeupdate", this.syncVidoes);
+                this.setState({ ...this.state, ready: true });
+            } else {
+                this.setState({ ...this.state, ready: true });
+            }
+        });
     }
 
     componentWillUnmount(): void {
@@ -90,7 +91,7 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
 
     }
 
-    syncVidoes = (e: Event) => {
+    syncVidoes = () => {
         this.currentVideoElementRef.current!.currentTime = this.videoElement.currentTime;
     };
 

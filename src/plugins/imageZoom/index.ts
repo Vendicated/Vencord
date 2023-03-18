@@ -109,7 +109,7 @@ export default definePlugin({
             find: ".carouselModal,",
             replacement: {
                 match: /onClick:(\i),/,
-                replace: "onClick:$self.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                replace: "onClick:$self.settings.store.preventCarouselFromClosingOnClick ? () => {} : $1,"
             }
         }
     ],
@@ -142,6 +142,7 @@ export default definePlugin({
                 });
                 const root = ReactDOM.createRoot(this.element!);
                 root.render(this.currentMagnifierElement);
+                console.log(instance);
             }
         }
     },

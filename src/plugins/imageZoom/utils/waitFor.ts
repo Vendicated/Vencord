@@ -16,23 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function waitFor(selector: string): Promise<Element> {
-    return new Promise(resolve => {
-        const match = document.querySelector(selector);
-        if (match)
-            return resolve(match);
-
-        const observer = new MutationObserver(mutations => {
-            const match = document.querySelector(selector);
-            if (match) {
-                observer.disconnect();
-                resolve(match);
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    });
-}
+export const waitFor = (condition: () => boolean, cb: () => void) => {
+    if (condition()) {
+        cb();
+    } else {
+        setTimeout(() => waitFor(condition, cb), 1);
+    }
+};
