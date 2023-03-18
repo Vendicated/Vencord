@@ -50,6 +50,7 @@ async function getTags() {
 
 async function getBranchFromPossiblyFakeBranchName(branch: string) {
     const tags = await getTags();
+    console.log(tags);
 
     if (branch === "latest-release") return tags[0] ?? "main";
     return branch;
