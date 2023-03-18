@@ -23,7 +23,7 @@ import { Link } from "@components/Link";
 import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings as deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Card, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
+import { Button, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -55,7 +55,7 @@ function SettingsSyncSection() {
             >
                 Settings Sync
             </Switch>
-            <Card className="vc-settings-quick-actions-card">
+            <div className="vc-cloud-settings-sync-grid">
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
@@ -79,7 +79,7 @@ function SettingsSyncSection() {
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
                 >Delete Cloud Settings</Button>
-            </Card>
+            </div>
         </Forms.FormSection>
     );
 }

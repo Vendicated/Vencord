@@ -38,3 +38,9 @@
     color: var(--info-warning-text);
     margin-top: 0;
 }
+
+.vc-cloud-settings-sync-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 1em;
+}
