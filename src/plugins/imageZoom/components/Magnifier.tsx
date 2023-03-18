@@ -71,6 +71,7 @@ export const Magnifier = LazyComponent(() => class Magnifier extends React.PureC
         } else {
             this.setState({ ...this.state, ready: true });
         }
+        this.element.firstElementChild!.setAttribute("draggable", "false");
     }
 
     componentWillUnmount(): void {

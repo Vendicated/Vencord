@@ -18,15 +18,6 @@
     transform: translate(-50%, -50%);
 }
 
-#magnify-modal img {
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-
-    /* user-drag: none; */
-}
-
 /* make the carousel take up less space so we can click the backdrop and exit out of it */
 [class^="focusLock"] > [class^="carouselModal"] {
     height: fit-content;
