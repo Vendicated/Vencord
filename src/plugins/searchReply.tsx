@@ -31,9 +31,9 @@ const i18n = findLazy(m => m.Messages?.MESSAGE_ACTION_REPLY);
 
 const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const [{ message }] = args as [{ message: Message; }];
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { message } = props as { message: Message; };
 
     // make sure they are in the same channel as the message
     if (!message || SelectedChannelStore.getChannelId() !== (message.channel_id ?? message.getChannelId())) return;
