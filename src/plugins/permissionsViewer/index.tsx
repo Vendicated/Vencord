@@ -122,23 +122,23 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 }
 
 function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
-    return (children, args) => {
-        if (!args?.[0]) return children;
+    return (children, props) => {
+        if (!props) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
         if (group && !group.some(child => child?.props?.id === "perm-viewer-permissions")) {
             switch (type) {
                 case MenuItemParentType.User: {
-                    group.push(MenuItem(args[0].guildId, args[0].user.id, type));
+                    group.push(MenuItem(props.guildId, props.user.id, type));
                     break;
                 }
                 case MenuItemParentType.Channel: {
-                    group.push(MenuItem(args[0].guild.id, args[0].channel.id, type));
+                    group.push(MenuItem(props.guild.id, props.channel.id, type));
                     break;
                 }
                 case MenuItemParentType.Guild: {
-                    group.push(MenuItem(args[0].guild.id));
+                    group.push(MenuItem(props.guild.id));
                     break;
                 }
             }
