@@ -97,7 +97,7 @@ export const removeFromCollection = async (id: string): Promise<void> => {
     return await refreshCacheCollection();
 };
 
-export const deleteCollection = async (name: string) => {
+export const deleteCollection = async (name: string): Promise<void> => {
 
     const collections = await getCollections();
     const col = collections.filter(c => c.name !== name);
@@ -106,7 +106,7 @@ export const deleteCollection = async (name: string) => {
 };
 
 
-export const refreshCacheCollection = async () => {
+export const refreshCacheCollection = async (): Promise<void> => {
     cache_collections = await getCollections();
 };
 

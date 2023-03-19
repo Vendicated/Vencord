@@ -18,19 +18,18 @@
 
 // Plugin idea by brainfreeze (668137937333911553) 😎
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { makeLazy } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import * as CollectionManager from "./CollectionManager";
 import { GIF_COLLECTION_PREFIX, GIF_ITEM_PREFIX } from "./constants";
 import { Category, Collection, Gif, Props } from "./types";
 import { getFormat } from "./utils/getFormat";
-import { getGifByMessageAndTarget as getGifByTargetAndMessage, getGifByTarget as getGifByUrlAndTarget } from "./utils/getGif";
+import { getGif } from "./utils/getGif";
 import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
 import { uuidv4 } from "./utils/uuidv4";
 
@@ -69,6 +68,26 @@ export const settings = definePluginSettings({
     }
 });
 
+
+const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+
+    const { message, itemSrc, itemHref, target } = props;
+
+    const gif = getGif(message, itemSrc ?? itemHref, target);
+
+    if (!gif) return;
+
+    const group = findGroupChildrenByChildId("open-native-link", children) ?? findGroupChildrenByChildId("copy-link", children);
+    if (group && !group.some(child => child?.props?.id === "add-to-collection")) {
+        group.push(
+            // if i do it the normal way i get a invalid context menu thingy error -> Menu API only allows Items and groups of Items as children.
+            MenuThingy({ gif }) as any
+        );
+    }
+};
+
+
 export default definePlugin({
     name: "Gif Collection",
     // need better description eh
@@ -81,23 +100,23 @@ export default definePlugin({
             replacement: [
                 // This patch adds the collections to the gif part yk
                 {
-                    match: /(.{1,2}\.render=function\(\){)(.{1,50}getItemGrid)/,
-                    replace: "$1;Vencord.Plugins.plugins[\"Gif Collection\"].insertCollections(this);$2"
+                    match: /(\i\.render=function\(\){)(.{1,50}getItemGrid)/,
+                    replace: "$1;$self.insertCollections(this);$2"
                 },
                 // Hides the gc: from the name gc:monkeh -> monkeh
                 {
-                    match: /(.{1,2}\.renderCategoryExtras=function\((.)\){)var (.{1,2})=.{1,2}\.name,/,
-                    replace: (_, first, props, varName) => `${first}var ${varName}=Vencord.Plugins.plugins["Gif Collection"].hidePrefix(${props}),`
+                    match: /(\i\.renderCategoryExtras=function\((?<props>\i)\){)var (?<varName>\i)=\i\.name,/,
+                    replace: "$1var $<varName>=$self.hidePrefix($<props>),"
                 },
                 // Replaces this.props.resultItems with the collection.gifs
                 {
-                    match: /(.{1,2}\.renderContent=function\(\){)(.{1,50}resultItems)/,
-                    replace: "$1;Vencord.Plugins.plugins[\"Gif Collection\"].renderContent(this);$2"
+                    match: /(\i\.renderContent=function\(\){)(.{1,50}resultItems)/,
+                    replace: "$1;$self.renderContent(this);$2"
                 },
                 // Delete context menu for collection
                 {
-                    match: /(.{1,2}\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
-                    replace: "$1onContextMenu: (e) => Vencord.Plugins.plugins[\"Gif Collection\"].collectionContextMenu(e, this),"
+                    match: /(\i\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
+                    replace: "$1onContextMenu: (e) => $self.collectionContextMenu(e, this),"
                 },
             ]
         },
@@ -111,52 +130,11 @@ export default definePlugin({
         {
             find: "type:\"GIF_PICKER_QUERY\"",
             replacement: {
-                match: /(function .{1,3}\((?<query>.{1,3}),.{1,3}\){.{1,200}dispatch\({type:"GIF_PICKER_QUERY".{1,20};)/,
+                match: /(function \i\((?<query>\i),\i\){.{1,200}dispatch\({type:"GIF_PICKER_QUERY".{1,20};)/,
                 replace:
-                    `$1 if($<query>.startsWith('${GIF_COLLECTION_PREFIX}')) {
-                    const collection = Vencord.Plugins.plugins["Gif Collection"].collections.find(c => c.name === $<query>);
-                    if(collection != null) { return };
-                };`
+                    "$&if($self.shouldStopFetch($<query>)) return;"
             }
         },
-
-        {
-            // Stolen from message logger
-            find: "id:\"remove-reactions\"",
-            replacement: [
-                {
-                    // adds our contextmenu after the end of the first message context menu group
-                    match: /\[(""===.{1,200})\](.{1,10},)/,
-                    replace: "[$1, Vencord.Plugins.plugins['Gif Collection'].makeMenu(arguments[0].message, arguments[0].itemHref, arguments[0]._vencordTarget)]$2"
-                }
-            ]
-        },
-        // Ven goated ong on me
-        {
-            find: "open-native-link",
-            replacement: {
-                match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-                replace: (m, src) =>
-                    `${m},Vencord.Plugins.plugins['Gif Collection'].makeMenu(null, ${src}, arguments[2])`
-            }
-        },
-        {
-            // pass the target to the open link menu so we can check if it's an image
-            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
-            predicate: makeLazy(() => !Settings.plugins.ReverseImageSearch.enabled),
-            noWarn: true,
-            replacement: [
-                {
-                    match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
-                    replace: "$&,_vencordTarget:arguments[0].target"
-                },
-                {
-                    // var f = props.itemHref, .... MakeNativeMenu(null != f ? f : blah)
-                    match: /(\i)=\i\.itemHref,.+?\(null!=\1\?\1:.{1,10}(?=\))/,
-                    replace: "$&,arguments[0]._vencordTarget"
-                }
-            ]
-        }
     ],
 
     settings,
@@ -164,6 +142,12 @@ export default definePlugin({
 
     start() {
         CollectionManager.refreshCacheCollection();
+
+        addContextMenuPatch("message", addCollectionContextMenuPatch);
+    },
+
+    stop() {
+        removeContextMenuPatch("message", addCollectionContextMenuPatch);
     },
     CollectionManager,
 
@@ -212,6 +196,15 @@ export default definePlugin({
         }
     },
 
+    shouldStopFetch(query: string) {
+        if (query.startsWith(GIF_COLLECTION_PREFIX)) {
+            const collection = this.collections.find(c => c.name === query);
+            if (collection != null) return true;
+
+            return false;
+        }
+    },
+
     collectionContextMenu(e: React.UIEvent, instance) {
         const { item } = instance.props;
         if (item?.name?.startsWith(GIF_COLLECTION_PREFIX))
@@ -238,66 +231,17 @@ export default definePlugin({
                     aria-label="Gif Collections"
                 >
 
-                    {this.renderMenu({ ...item, id: uuidv4() })}
+                    {/* if i do it the normal way i get a invalid context menu thingy error -> Menu API only allows Items and groups of Items as children.*/}
+                    {MenuThingy({ gif: { ...item, id: uuidv4() } })}
+
 
                 </Menu.ContextMenu>
             );
         return null;
     },
-
-    // for some reason this method bothering me
-    makeMenu(message: Message | null, url: string | null, target: HTMLDivElement | null) {
-        if (message && target && !url) {
-            const gif = getGifByTargetAndMessage(target, message);
-            if (!gif) return null;
-
-            return this.renderMenu(gif);
-        }
-        if (url && target && !message) {
-            // youtube thumbnail url is message link for some reason eh
-            const gif = getGifByUrlAndTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
-            if (!gif) return null;
-
-            return this.renderMenu(gif);
-        }
-    },
-
-    renderMenu(gif: Gif) {
-        return (
-            <Menu.MenuItem
-                label="Add To Collection"
-                key="add-to-collection"
-                id="add-to-collection"
-            >
-                {this.collections.map(col => (
-                    <Menu.MenuItem
-                        key={col.name}
-                        id={col.name}
-                        label={col.name.replace(/.+?:/, "")}
-                        action={() => CollectionManager.addToCollection(col.name, gif)}
-                    />
-                ))}
-
-                <Menu.MenuSeparator />
-                <Menu.MenuItem
-                    key="create-collection"
-                    id="create-collectiohn1"
-                    label="Create Collection"
-                    action={() => {
-                        openModal(modalProps => (
-                            <ModalRoot {...modalProps}>
-                                <ModalHeader>
-                                    <Forms.FormText>Create Collection</Forms.FormText>
-                                </ModalHeader>
-                                <CreateCollectionModal onClose={modalProps.onClose} createCollection={CollectionManager.createCollection} gif={gif} />
-                            </ModalRoot>
-                        ));
-                    }}
-                />
-            </Menu.MenuItem>
-        );
-    }
 });
+
+
 
 // stolen from spotify controls
 const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "collection", nameOrId: string, onConfirm: () => void; }) => (
@@ -331,14 +275,51 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
 
 
 
+const MenuThingy: React.FC<{ gif: Gif; }> = ({ gif }) => {
+    CollectionManager.refreshCacheCollection();
+    const collections = CollectionManager.cache_collections;
+
+    return (
+        <Menu.MenuItem
+            label="Add To Collection"
+            key="add-to-collection"
+            id="add-to-collection"
+        >
+            {collections.map(col => (
+                <Menu.MenuItem
+                    key={col.name}
+                    id={col.name}
+                    label={col.name.replace(/.+?:/, "")}
+                    action={() => CollectionManager.addToCollection(col.name, gif)}
+                />
+            ))}
+
+            <Menu.MenuSeparator />
+            <Menu.MenuItem
+                key="create-collection"
+                id="create-collection"
+                label="Create Collection"
+                action={() => {
+                    openModal(modalProps => (
+                        <ModalRoot {...modalProps}>
+                            <ModalHeader>
+                                <Forms.FormText>Create Collection</Forms.FormText>
+                            </ModalHeader>
+                            <CreateCollectionModal onClose={modalProps.onClose} gif={gif} />
+                        </ModalRoot>
+                    ));
+                }}
+            />
+        </Menu.MenuItem>
+    );
+};
 
 interface CreateCollectionModalProps {
     gif: Gif;
     onClose: () => void,
-    createCollection: (name: string, gifs: Gif[]) => void;
 }
 
-function CreateCollectionModal({ gif, createCollection, onClose }: CreateCollectionModalProps) {
+function CreateCollectionModal({ gif, onClose }: CreateCollectionModalProps) {
 
     const [name, setName] = React.useState("");
     return (
@@ -356,7 +337,7 @@ function CreateCollectionModal({ gif, createCollection, onClose }: CreateCollect
                     disabled={!name.length}
                     onClick={() => {
                         if (!name.length) return;
-                        createCollection(name, [gif]);
+                        CollectionManager.createCollection(name, [gif]);
                         onClose();
                     }}
                 >

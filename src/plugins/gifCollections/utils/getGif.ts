@@ -22,6 +22,7 @@ import { MessageStore, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { Gif } from "../types";
+import { cleanUrl } from "./cleanUrl";
 import { isAudio } from "./isAudio";
 import { uuidv4 } from "./uuidv4";
 
@@ -51,6 +52,8 @@ export function getGifByMessageAndTarget(target: HTMLDivElement, message: Messag
 export function getGifByMessageAndUrl(url: string, message: Message): Gif | null {
     if (!message.embeds.length && !message.attachments.length || isAudio(url))
         return null;
+
+    url = cleanUrl(url);
 
     // find embed with matching url or image/thumbnail url
     const embed = message.embeds.find(e => e.url === url || e.image?.url === url || e.image?.proxyURL === url || e.video?.proxyURL === url || e.thumbnail?.proxyURL === url); // no point in checking thumbnail/video url because no way of getting it eh. discord renders the img/video element with proxy urls
@@ -94,6 +97,28 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
 
     return null;
 }
+
+export const getGif = (message: Message | null, url: string | null, target: HTMLDivElement | null) => {
+    if (message && url) {
+        const gif = getGifByMessageAndUrl(url, message);
+        if (!gif) return null;
+
+        return gif;
+    }
+    if (message && target && !url) {
+        const gif = getGifByMessageAndTarget(target, message);
+        if (!gif) return null;
+
+        return gif;
+    }
+    if (url && target && !message) {
+        // youtube thumbnail url is message link for some reason eh
+        const gif = getGifByTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
+        if (!gif) return null;
+
+        return gif;
+    }
+};
 
 function isValidSnowFlake(snowflake: string) {
     return !Number.isNaN(SnowflakeUtils.extractTimestamp(snowflake));
