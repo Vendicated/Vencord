@@ -59,7 +59,7 @@ async function init() {
                                 window.DiscordNative.app.relaunch();
                             else
                                 location.reload();
-                        },
+                        }
                     });
                 return;
             }
