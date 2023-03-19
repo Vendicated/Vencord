@@ -176,9 +176,9 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
     );
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { favoriteableId, emoteClonerDataAlt, itemHref, itemSrc, favoriteableType } = args[0];
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { favoriteableId, emoteClonerDataAlt, itemHref, itemSrc, favoriteableType } = props;
 
     if (!emoteClonerDataAlt || favoriteableType !== "emoji") return;
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
@@ -221,6 +221,21 @@ function initWs(isManual = false) {
     });
 }
 
+const contextMenuPatch: NavContextMenuPatchCallback = kids => {
+    if (kids.some(k => k?.props?.id === NAV_ID)) return;
+
+    kids.unshift(
+        <Menu.MenuItem
+            id={NAV_ID}
+            label="Reconnect Dev Companion"
+            action={() => {
+                socket?.close(1000, "Reconnecting");
+                initWs(true);
+            }}
+        />
+    );
+};
+
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
@@ -229,24 +244,12 @@ export default definePlugin({
 
     start() {
         initWs();
-        addContextMenuPatch("user-settings-cog", kids => {
-            if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
-            kids.unshift(
-                <Menu.MenuItem
-                    id={NAV_ID}
-                    label="Reconnect Dev Companion"
-                    action={() => {
-                        socket?.close(1000, "Reconnecting");
-                        initWs(true);
-                    }}
-                />
-            );
-        });
+        addContextMenuPatch("user-settings-cog", contextMenuPatch);
     },
 
     stop() {
         socket?.close(1000, "Plugin Stopped");
         socket = void 0;
+        removeContextMenuPatch("user-settings-cog", contextMenuPatch);
     }
 });

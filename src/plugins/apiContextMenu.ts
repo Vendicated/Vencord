@@ -18,8 +18,27 @@
 
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { type PatchReplacement } from "@utils/types";
 import { addListener, removeListener } from "@webpack";
+
+/**
+ * The last var name corresponding to the Context Menu API (Discord, not ours) module
+ */
+let lastVarName = "";
+
+/**
+ * @param target The patch replacement object
+ * @param exportKey The key exporting the build Context Menu component function
+ */
+function makeReplacementProxy(target: PatchReplacement, exportKey: string) {
+    return new Proxy(target, {
+        get(_, p) {
+            if (p === "match") return RegExp(`${exportKey},{(?<=${lastVarName}\\.${exportKey},{)`, "g");
+            // @ts-expect-error
+            return Reflect.get(...arguments);
+        }
+    });
+}
 
 function listener(exports: any, id: number) {
     if (!Settings.plugins.ContextMenuAPI.enabled) return removeListener(listener);
@@ -37,13 +56,24 @@ function listener(exports: any, id: number) {
                 all: true,
                 noWarn: true,
                 find: "navId:",
-                replacement: [{
-                    match: RegExp(`${id}(?<=(\\i)=.+?).+$`),
-                    replace: (code, varName) => {
-                        const regex = RegExp(`${key},{(?<=${varName}\\.${key},{)`, "g");
-                        return code.replace(regex, "$&contextMenuApiArguments:arguments,");
-                    }
-                }]
+                replacement: [
+                    {
+                        // Set the lastVarName for our proxy to use
+                        match: RegExp(`${id}(?<=(\\i)=.+?)`),
+                        replace: (id, varName) => {
+                            lastVarName = varName;
+                            return id;
+                        }
+                    },
+                    /**
+                     * We are using a proxy here to utilize the whole code the patcher gives us, instead of matching the entire module (which is super slow)
+                     * Our proxy returns the corresponding match for that module utilizing lastVarName, which is set by the patch before
+                     */
+                    makeReplacementProxy({
+                        match: "", // Needed to canonicalizeDescriptor
+                        replace: "$&contextMenuApiArguments:arguments,",
+                    }, key)
+                ]
             });
 
             removeListener(listener);
