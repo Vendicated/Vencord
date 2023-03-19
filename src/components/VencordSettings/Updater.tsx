@@ -205,7 +205,7 @@ function Updater() {
             <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                note="Shows a toast on startup"
+                note="Shows a notification on startup"
                 disabled={settings.autoUpdate}
             >
                 Get notified about new updates
@@ -223,7 +223,7 @@ function Updater() {
                 note="Shows a notification when Vencord automatically updates"
                 disabled={!settings.autoUpdate}
             >
-                Notify auto-update completion
+                Get notified when an automatic update completes
             </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
