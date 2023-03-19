@@ -50,7 +50,7 @@ async function init() {
                 await update();
                 const needsFullRestart = await rebuild();
                 if (Settings.autoUpdateNotification)
-                    await showNotification({
+                    showNotification({
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
@@ -65,7 +65,7 @@ async function init() {
             }
 
             if (Settings.notifyAboutUpdates)
-                await showNotification({
+                showNotification({
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
