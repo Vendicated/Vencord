@@ -43,13 +43,12 @@ function sendPatch(channel, body, bypass = false) {
     });
 }
 
-const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-
-    if (!args?.[0]) return;
-    if (args[0].channel && !args[0].channel.bitrate_) { return; }
+const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props || (props.channel && !props.channel_bitrate)) return;
+    const { channel as propsChannel } = props;
 
     var channels = findByProps("getChannels");
-    const guildChannels = channels.getChannels(args[0].channel.guild_id);
+    const guildChannels = channels.getChannels(propsChannel.guild_id);
     const voiceChannels = guildChannels.VOCAL.map(({ channel }) => channel);
 
     const group = findGroupChildrenByChildId("mute-channel", children);
@@ -64,7 +63,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                     key="voice-tools-disconnect-all"
                     id="voice-tools-disconnect-all"
                     label="Disconnect all"
-                    action={() => sendPatch(args[0].channel, {
+                    action={() => sendPatch(propsChannel, {
                         channel_id: null,
                     })}
                 />
@@ -73,7 +72,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                     key="voice-tools-mute-all"
                     id="voice-tools-mute-all"
                     label="Mute all"
-                    action={() => sendPatch(args[0].channel, {
+                    action={() => sendPatch(propsChannel, {
                         mute: true,
                     })}
                 />
@@ -82,7 +81,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                     key="voice-tools-unmute-all"
                     id="voice-tools-unmute-all"
                     label="Unmute all"
-                    action={() => sendPatch(args[0].channel, {
+                    action={() => sendPatch(propsChannel, {
                         mute: false,
                     })}
                 />
@@ -91,7 +90,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                     key="voice-tools-deafen-all"
                     id="voice-tools-deafen-all"
                     label="Deafen all"
-                    action={() => sendPatch(args[0].channel, {
+                    action={() => sendPatch(propsChannel, {
                         deaf: true,
                     })}
                 />
@@ -100,7 +99,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                     key="voice-tools-undeafen-all"
                     id="voice-tools-undeafen-all"
                     label="Undeafen all"
-                    action={() => sendPatch(args[0].channel, {
+                    action={() => sendPatch(propsChannel, {
                         deaf: false,
                     })}
                 />
@@ -117,7 +116,7 @@ const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, arg
                                 key={channel.id}
                                 id={channel.id}
                                 label={channel.name}
-                                action={() => sendPatch(args[0].channel, {
+                                action={() => sendPatch(propsChannel, {
                                     channel_id: channel.id,
                                 }, true)}
                             />
