@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "./typingTweaks";
 
@@ -57,9 +57,9 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    delete typingUsers[UserStore.getCurrentUser().id];
+    const myId = UserStore.getCurrentUser().id;
 
-    const typingUsersArray = Object.keys(typingUsers);
+    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
@@ -108,13 +108,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
         default: false
+    },
+    includeBlockedUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for blocked users.",
+        default: false
     }
 });
 
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.obscurity],
     settings,
 
     patches: [
