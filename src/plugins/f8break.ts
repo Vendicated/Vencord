@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,23 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "MessagePopoverAPI",
-    description: "API to add buttons to message popovers.",
-    authors: [Devs.KingFish, Devs.Ven],
-    patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-        replacement: {
-            // foo && !bar ? createElement(blah,...makeElement(addReactionData))
-            match: /(\i&&!\i)\?\(0,\i\.jsxs?\)\(.{0,200}renderPopout:.{0,300}?(\i)\(.{3,20}\{key:"add-reaction".+?\}/,
-            replace: (m, bools, makeElement) => {
-                const msg = m.match(/message:(.{1,3}),/)?.[1];
-                if (!msg) throw new Error("Could not find message variable");
-                return `...(${bools}?Vencord.Api.MessagePopover._buildPopoverElements(${msg},${makeElement}):[]),${m}`;
-            }
+    name: "F8Break",
+    description: "Pause the client when you press F8 with DevTools (+ breakpoints) open.",
+    authors: [Devs.lewisakura],
+
+    start() {
+        window.addEventListener("keydown", this.event);
+    },
+
+    stop() {
+        window.removeEventListener("keydown", this.event);
+    },
+
+    event(e: KeyboardEvent) {
+        if (e.code === "F8") {
+            // Hi! You've just paused the client. Pressing F8 in DevTools or in the main window will unpause it again.
+            // It's up to you on what to do, friend. Happy travels!
+            debugger;
         }
-    }],
+    }
 });
