@@ -33,9 +33,9 @@ const Keybind = LazyComponent(() => findByCode(".keyClassName"));
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
 const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
-const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { itemHref }: { itemHref?: string; } = args[0];
+const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { itemHref }: { itemHref?: string; } = props;
     if (!itemHref) return;
     const [_, guildId, channelId, messageId] = itemHref.match(messageLinkRegex) ?? [];
     if (!channelId) return;
@@ -53,9 +53,9 @@ const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, args
     }
 };
 
-const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { channel, messageId }: { channel: Channel, messageId?: string; } = args[0];
+const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
     const group = findGroupChildrenByChildId("channel-copy-link", children);
     if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
         group.push(<Menu.MenuItem
@@ -70,9 +70,9 @@ const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, a
     }
 };
 
-const channelContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { channel }: { channel: Channel; } = args[0];
+const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { channel }: { channel: Channel; } = props;
     const group = findGroupChildrenByChildId("channel-copy-link", children);
     if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
         group.push(<Menu.MenuItem
