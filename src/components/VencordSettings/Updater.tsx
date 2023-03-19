@@ -22,9 +22,10 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
+import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
 import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Switch, Toasts } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -109,14 +110,14 @@ function Updatable(props: CommonProps) {
                     </ErrorCard>
                 </>
             ) : (
-                <Forms.FormText className={Margins.marginBottom8}>
+                <Forms.FormText className={Margins.bottom8}>
                     {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
                 </Forms.FormText>
             )}
 
             {isOutdated && <Changes updates={updates} {...props} />}
 
-            <Flex className={classes(Margins.marginBottom8, Margins.marginTop8)}>
+            <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && <Button
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}
@@ -175,7 +176,7 @@ function Updatable(props: CommonProps) {
 function Newer(props: CommonProps) {
     return (
         <>
-            <Forms.FormText className={Margins.marginBottom8}>
+            <Forms.FormText className={Margins.bottom8}>
                 Your local copy has more recent commits. Please stash or reset them.
             </Forms.FormText>
             <Changes {...props} updates={changes} />
@@ -184,7 +185,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
+    const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -199,12 +200,12 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection className={Margins.marginTop16}>
+        <Forms.FormSection className={Margins.top16}>
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                note="Shows a toast on startup"
+                note="Shows a notification on startup"
                 disabled={settings.autoUpdate}
             >
                 Get notified about new updates
@@ -216,6 +217,14 @@ function Updater() {
             >
                 Automatically update
             </Switch>
+            <Switch
+                value={settings.autoUpdateNotification}
+                onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                note="Shows a notification when Vencord automatically updates"
+                disabled={!settings.autoUpdate}
+            >
+                Get notified when an automatic update completes
+            </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
@@ -225,7 +234,7 @@ function Updater() {
                 </Link>
             )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
 
-            <Forms.FormDivider className={Margins.marginTop8 + " " + Margins.marginBottom8} />
+            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
