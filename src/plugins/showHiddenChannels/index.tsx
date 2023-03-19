@@ -321,9 +321,7 @@ export default definePlugin({
             ],
         },
         {
-            // The module wasn't being found, so lets just escape everything
-            // eslint-disable-next-line no-useless-escape
-            find: "\^https\:\/\/\(\?\:canary\.\|ptb\.\)\?discord.com\/channels\/\(\\\\\d\+\|",
+            find: "\"^/guild-stages/(\\\\d+)(?:/)?(\\\\d+)?\"",
             replacement: {
                 // Make mentions of hidden channels work
                 match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,\i\)/,
