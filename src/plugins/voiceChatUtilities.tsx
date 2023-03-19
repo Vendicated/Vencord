@@ -45,7 +45,7 @@ function sendPatch(channel, body, bypass = false) {
 
 const voiceChannelContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!props || (props.channel && !props.channel_bitrate)) return;
-    const { channel as propsChannel } = props;
+    const { channel: propsChannel } = props;
 
     var channels = findByProps("getChannels");
     const guildChannels = channels.getChannels(propsChannel.guild_id);
