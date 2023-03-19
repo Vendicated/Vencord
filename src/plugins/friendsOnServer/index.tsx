@@ -93,8 +93,8 @@ function FriendsOnServer({ guildId, modalProps }: { guildId: string; modalProps:
     );
 }
 
-const guildContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
+const guildContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
 
     const group = findGroupChildrenByChildId("privacy", children);
     if (group && !group.some(child => child?.props?.id === "friends-on-server")) {
@@ -103,7 +103,7 @@ const guildContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
                 id="friends-on-server"
                 key="friends-on-server"
                 label="Friends On Server"
-                action={() => openModal(modalProps => <FriendsOnServer guildId={args[0].guild.id} modalProps={modalProps} />)}
+                action={() => openModal(modalProps => <FriendsOnServer guildId={props.guild.id} modalProps={modalProps} />)}
             />
         ));
     }
