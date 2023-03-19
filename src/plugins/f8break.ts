@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-migratePluginSettings("NoRPC", "No RPC");
 export default definePlugin({
-    name: "NoRPC",
-    description: "Disables Discord's RPC server.",
-    authors: [Devs.Cyn],
-    target: "DESKTOP",
-    patches: [
-        {
-            find: '.ensureModule("discord_rpc")',
-            replacement: {
-                match: /\.ensureModule\("discord_rpc"\)\.then\(\(.+?\)\)}/,
-                replace: '.ensureModule("discord_rpc")}',
-            },
-        },
-    ],
+    name: "F8Break",
+    description: "Pause the client when you press F8 with DevTools (+ breakpoints) open.",
+    authors: [Devs.lewisakura],
+
+    start() {
+        window.addEventListener("keydown", this.event);
+    },
+
+    stop() {
+        window.removeEventListener("keydown", this.event);
+    },
+
+    event(e: KeyboardEvent) {
+        if (e.code === "F8") {
+            // Hi! You've just paused the client. Pressing F8 in DevTools or in the main window will unpause it again.
+            // It's up to you on what to do, friend. Happy travels!
+            debugger;
+        }
+    }
 });

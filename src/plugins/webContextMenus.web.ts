@@ -23,7 +23,7 @@ export default definePlugin({
     name: "WebContextMenus",
     description: "Re-adds some of context menu items missing on the web version of Discord, namely Copy/Open Link",
     authors: [Devs.Ven],
-    target: "WEB",
+    enabledByDefault: true,
 
     patches: [{
         // There is literally no reason for Discord to make this Desktop only.

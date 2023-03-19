@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
@@ -112,7 +112,7 @@ function initWs(isManual = false) {
     });
 
     ws.addEventListener("close", e => {
-        if (!wasConnected && !hasErrored) return;
+        if (!wasConnected || hasErrored) return;
 
         logger.info("Dev Companion Disconnected:", e.code, e.reason);
 
@@ -204,8 +204,9 @@ function initWs(isManual = false) {
                             return reply("Unknown Find Type " + type);
                     }
 
-                    if (results.length === 0) throw "No results";
-                    if (results.length > 1) throw "Found more than one result! Make this filter more specific";
+                    const uniqueResultsCount = new Set(results).size;
+                    if (uniqueResultsCount === 0) throw "No results";
+                    if (uniqueResultsCount > 1) throw "Found more than one result! Make this filter more specific";
                 } catch (err) {
                     return reply("Failed to find: " + err);
                 }
@@ -220,6 +221,21 @@ function initWs(isManual = false) {
     });
 }
 
+const contextMenuPatch: NavContextMenuPatchCallback = kids => {
+    if (kids.some(k => k?.props?.id === NAV_ID)) return;
+
+    kids.unshift(
+        <Menu.MenuItem
+            id={NAV_ID}
+            label="Reconnect Dev Companion"
+            action={() => {
+                socket?.close(1000, "Reconnecting");
+                initWs(true);
+            }}
+        />
+    );
+};
+
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
@@ -228,24 +244,12 @@ export default definePlugin({
 
     start() {
         initWs();
-        addContextMenuPatch("user-settings-cog", kids => {
-            if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
-            kids.unshift(
-                <Menu.MenuItem
-                    id={NAV_ID}
-                    label="Reconnect Dev Companion"
-                    action={() => {
-                        socket?.close(1000, "Reconnecting");
-                        initWs(true);
-                    }}
-                />
-            );
-        });
+        addContextMenuPatch("user-settings-cog", contextMenuPatch);
     },
 
     stop() {
         socket?.close(1000, "Plugin Stopped");
         socket = void 0;
+        removeContextMenuPatch("user-settings-cog", contextMenuPatch);
     }
 });
