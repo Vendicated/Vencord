@@ -20,6 +20,7 @@ import { addPreEditListener, addPreSendListener, removePreEditListener, removePr
 import { migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
+import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, UserStore } from "@webpack/common";
@@ -184,7 +185,7 @@ export default definePlugin({
     },
 
     get guildId() {
-        return window.location.href.split("channels/")[1].split("/")[0];
+        return getCurrentGuild()?.id;
     },
 
     get canUseEmotes() {
