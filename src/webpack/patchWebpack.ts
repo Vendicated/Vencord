@@ -92,9 +92,11 @@ function patchPush() {
                         return;
                     }
 
+                    const numberId = Number(id);
+
                     for (const callback of listeners) {
                         try {
-                            callback(exports);
+                            callback(exports, numberId);
                         } catch (err) {
                             logger.error("Error in webpack listener", err);
                         }
@@ -104,17 +106,17 @@ function patchPush() {
                         try {
                             if (filter(exports)) {
                                 subscriptions.delete(filter);
-                                callback(exports);
+                                callback(exports, numberId);
                             } else if (typeof exports === "object") {
                                 if (exports.default && filter(exports.default)) {
                                     subscriptions.delete(filter);
-                                    callback(exports.default);
+                                    callback(exports.default, numberId);
                                 }
 
                                 for (const nested in exports) if (nested.length <= 3) {
                                     if (exports[nested] && filter(exports[nested])) {
                                         subscriptions.delete(filter);
-                                        callback(exports[nested]);
+                                        callback(exports[nested], numberId);
                                     }
                                 }
                             }

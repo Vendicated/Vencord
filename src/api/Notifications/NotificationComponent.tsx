@@ -20,7 +20,7 @@ import "./styles.css";
 
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Forms, React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
+import { React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
 
@@ -32,7 +32,8 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     icon,
     onClick,
     onClose,
-    image
+    image,
+    permanent
 }: NotificationData) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
@@ -43,7 +44,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     const start = useMemo(() => Date.now(), [timeout, isHover, hasFocus]);
 
     useEffect(() => {
-        if (isHover || !hasFocus || timeout === 0) return void setElapsed(0);
+        if (isHover || !hasFocus || timeout === 0 || permanent) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
@@ -74,14 +75,36 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             <div className="vc-notification">
                 {icon && <img className="vc-notification-icon" src={icon} alt="" />}
                 <div className="vc-notification-content">
-                    <Forms.FormTitle tag="h2">{title}</Forms.FormTitle>
+                    <div className="vc-notification-header">
+                        <h2 className="vc-notification-title">{title}</h2>
+                        <button
+                            style={{ all: "unset", cursor: "pointer" }}
+                            onClick={e => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onClose!();
+                            }}
+                        >
+                            <svg
+                                className="vc-notification-close-btn"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                role="img"
+                                aria-labelledby="vc-notification-dismiss-title"
+                            >
+                                <title id="vc-notification-dismiss-title">Dismiss Notification</title>
+                                <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+                            </svg>
+                        </button>
+                    </div>
                     <div>
                         {richBody ?? <p className="vc-notification-p">{body}</p>}
                     </div>
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}
-            {timeout !== 0 && (
+            {timeout !== 0 && !permanent && (
                 <div
                     className="vc-notification-progressbar"
                     style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-experiment)" }}
@@ -89,4 +112,6 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             )}
         </button>
     );
+}, {
+    onError: ({ props }) => props.onClose!()
 });
