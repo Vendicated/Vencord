@@ -50,7 +50,7 @@ async function init() {
                 await update();
                 const needsFullRestart = await rebuild();
                 if (Settings.autoUpdateNotification)
-                    showNotification({
+                    setTimeout(() => showNotification({
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
@@ -60,19 +60,19 @@ async function init() {
                             else
                                 location.reload();
                         }
-                    });
+                    }), 10_000);
                 return;
             }
 
             if (Settings.notifyAboutUpdates)
-                showNotification({
+                setTimeout(() => showNotification({
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
                     onClick() {
                         SettingsRouter.open("VencordUpdater");
                     }
-                });
+                }), 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }

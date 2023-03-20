@@ -335,6 +335,14 @@ export default definePlugin({
                 match: /(?<=getChannel\((\i)\)\)(?=.{0,100}?selectVoiceChannel))/,
                 replace: (_, channelId) => `&&!$self.isHiddenChannel({channelId:${channelId}})`
             }
+        },
+        {
+            find: '.displayName="GuildChannelStore"',
+            replacement: {
+                // Make GuildChannelStore contain hidden channels for users in voice channels to appear in the guild tooltip
+                match: /isChannelGated\(.+?\)(?=\|\|)/,
+                replace: m => `${m}||true`
+            }
         }
     ],
 

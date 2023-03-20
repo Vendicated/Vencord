@@ -37,16 +37,19 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: "displayName=\"MessageStore\"",
+        ...[
+            'displayName="MessageStore"',
+            'displayName="ReadStateStore"'
+        ].map(find => ({
+            find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=MESSAGE_CREATE:function\((\w)\){var \w=\w\.channelId,\w=\w\.message,\w=\w\.isPushNotification,\w=\w\.\w\.getOrCreate\(\w\));/,
-                    replace: ";if($self.isBlocked(n))return;"
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
-        }
+        }))
     ],
     options: {
         ignoreBlockedMessages: {
