@@ -17,7 +17,7 @@
 */
 
 import IpcEvents from "@utils/IpcEvents";
-import { NonMethodsKeys } from "@utils/types";
+import { NonMethodKeys } from "@utils/types";
 import { useStateFromStores } from "@webpack/common";
 
 import { SpotifyApi } from "./api";
@@ -25,7 +25,7 @@ import { PlayerStore } from "./store";
 import { Resource, ResourceImage } from "./types";
 export * from "./types";
 
-type PlayerStoreStates = NonMethodsKeys<PlayerStore>;
+type PlayerStoreStates = NonMethodKeys<PlayerStore>;
 
 export const Spotify = {
     openExternal(path: string) {
