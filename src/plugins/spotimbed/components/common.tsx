@@ -17,29 +17,36 @@
 */
 
 import { Artist, Resource, User } from "@api/Spotify";
-import { parseUrl } from "@utils/misc";
+import { intersperse, parseUrl } from "@utils/misc";
 
 import { settings } from "../settings";
 import { cl } from "../utils/misc";
 
 type Person = Artist | User;
-export function Byline(people: Person[]) {
+export function Byline({ people }: { people: Person[]; }) {
     const by = people[0].type === "user"
-        ? ResourceLink(people[0])
-        : ResourceLinks(people);
-    return AttributionLine("by", by);
+        ? <ResourceLink resource={people[0]} />
+        : <ResourceLinks resources={people} />;
+    return <AttributionLine prep="by">{by}</AttributionLine>;
 }
 
-export function AttributionLine(prep: string, entity: React.ReactNode) {
+export function AttributionLine({ prep, children }: {
+    prep: string;
+    children: React.ReactNode;
+}) {
     return (
         <div className={cl("infoline")}>
             <span>{prep} </span>
-            {entity}
+            {children}
         </div>
     );
 }
 
-export function ResourceLink(resource: Resource, className: string = "", title?: string) {
+export function ResourceLink({ resource, className = "", title }: {
+    resource: Resource;
+    className?: string;
+    title?: string;
+}) {
     const { nativeLinks } = settings.use(["nativeLinks"]);
     const name = resource.type === "user" ? resource.display_name : resource.name;
     const url = parseUrl(resource.external_urls.spotify);
@@ -55,10 +62,11 @@ export function ResourceLink(resource: Resource, className: string = "", title?:
     >{name}</a>;
 }
 
-export function ResourceLinks(resources: Resource[], className: string = "") {
+export function ResourceLinks({ resources, className = "" }: {
+    resources: Resource[];
+    className?: string;
+}) {
     const names = resources.map(r => r.name).join(", ");
-    const links = resources
-        .map(r => ResourceLink(r, className))
-        .reduce((prev, curr) => <>{prev}, {curr}</>);
-    return <span title={names}>{links}</span>;
+    const links = resources.map(r => <ResourceLink key={r.id} resource={r} className={className} />);
+    return <span title={names}>{intersperse(links, ", ")}</span>;
 }

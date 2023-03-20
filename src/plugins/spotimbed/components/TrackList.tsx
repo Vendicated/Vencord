@@ -85,8 +85,10 @@ function TrackRow({ track, position, isSelected, onClick }: TrackRowProps) {
         >
             <div className={cl("trackrow-index", "mono")}>{position}</div>
             <div className={cl("trackrow-info")}>
-                {ResourceLink(track, cl("trackrow-title"))}
-                <div className={cl("trackrow-infoline")}>{Byline(track.artists)}</div>
+                <ResourceLink resource={track} className={cl("trackrow-title")} />
+                <div className={cl("trackrow-infoline")}>
+                    <Byline people={track.artists} />
+                </div>
             </div>
             <div className={cl("trackrow-length", "mono")}>{formatDuration(track.duration_ms)}</div>
         </div>

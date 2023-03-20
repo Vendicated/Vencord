@@ -213,3 +213,7 @@ export const checkIntersecting = (el: Element) => {
 export function identity<T>(value: T): T {
     return value;
 }
+
+export function intersperse<T, S>(array: T[], separator: S): (T | S)[] {
+    return array.flatMap((a, i) => i > 0 ? [separator, a] : [a]);
+}

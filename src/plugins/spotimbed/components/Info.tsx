@@ -47,7 +47,7 @@ function InfoBody(resource: InfoProps["resource"]) {
 
     return <>
         <div className={cl("titleline")}>
-            {ResourceLink(resource, cl("title"))}
+            <ResourceLink resource={resource} className={cl("title")} />
             <div className={cl("title-spacer")} />
             {fields.tags?.map((tag, i) => (
                 <span key={i} className={cl("title-tag", "mono")}>
@@ -79,8 +79,10 @@ function getInfoFields(resource: DisplayResource): InfoFields {
         case ResourceType.Track: return {
             tags: [formatDuration(resource.duration_ms)],
             infolines: [
-                Byline(resource.artists),
-                AttributionLine("on", ResourceLink(resource.album, cl("track-album"))),
+                <Byline people={resource.artists} />,
+                <AttributionLine prep="on">
+                    <ResourceLink resource={resource.album} className={cl("track-album")} />
+                </AttributionLine>
             ],
         };
         case ResourceType.Album: {
@@ -89,7 +91,7 @@ function getInfoFields(resource: DisplayResource): InfoFields {
                 secondaryInfo.push(`${resource.tracks.total} songs`);
             return {
                 tags: [getAlbumType(resource)],
-                infolines: [Byline(resource.artists)],
+                infolines: [<Byline people={resource.artists} />],
                 secondaryLines: [secondaryInfo.join(" \u2022 ")]
             };
         }
@@ -112,7 +114,7 @@ function getInfoFields(resource: DisplayResource): InfoFields {
 
             return {
                 tags: [duration],
-                infolines: [Byline([resource.owner])],
+                infolines: [<Byline people={[resource.owner]} />],
                 secondaryLines,
             };
         }
