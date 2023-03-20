@@ -321,9 +321,7 @@ export default definePlugin({
             ],
         },
         {
-            // The module wasn't being found, so lets just escape everything
-            // eslint-disable-next-line no-useless-escape
-            find: "\^https\:\/\/\(\?\:canary\.\|ptb\.\)\?discord.com\/channels\/\(\\\\\d\+\|",
+            find: "\"^/guild-stages/(\\\\d+)(?:/)?(\\\\d+)?\"",
             replacement: {
                 // Make mentions of hidden channels work
                 match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,\i\)/,
@@ -336,6 +334,14 @@ export default definePlugin({
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
                 match: /(?<=getChannel\((\i)\)\)(?=.{0,100}?selectVoiceChannel))/,
                 replace: (_, channelId) => `&&!$self.isHiddenChannel({channelId:${channelId}})`
+            }
+        },
+        {
+            find: '.displayName="GuildChannelStore"',
+            replacement: {
+                // Make GuildChannelStore contain hidden channels for users in voice channels to appear in the guild tooltip
+                match: /isChannelGated\(.+?\)(?=\|\|)/,
+                replace: m => `${m}||true`
             }
         }
     ],

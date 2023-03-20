@@ -174,6 +174,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m =>" +
+                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +

@@ -27,7 +27,6 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { popNotice, showNotice } from "./api/Notices";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
@@ -72,32 +71,30 @@ async function init() {
             if (Settings.autoUpdate) {
                 await update();
                 const needsFullRestart = await rebuild();
-                setTimeout(() => {
-                    showNotice(
-                        "Vencord has been updated!",
-                        "Restart",
-                        () => {
+                if (Settings.autoUpdateNotification)
+                    setTimeout(() => showNotification({
+                        title: "Vencord has been updated!",
+                        body: "Click here to restart",
+                        permanent: true,
+                        onClick() {
                             if (needsFullRestart)
                                 window.DiscordNative.app.relaunch();
                             else
                                 location.reload();
                         }
-                    );
-                }, 10_000);
+                    }), 10_000);
                 return;
             }
 
             if (Settings.notifyAboutUpdates)
-                setTimeout(() => {
-                    showNotice(
-                        "A Vencord update is available!",
-                        "View Update",
-                        () => {
-                            popNotice();
-                            SettingsRouter.open("VencordUpdater");
-                        }
-                    );
-                }, 10_000);
+                setTimeout(() => showNotification({
+                    title: "A Vencord update is available!",
+                    body: "Click here to view the update",
+                    permanent: true,
+                    onClick() {
+                        SettingsRouter.open("VencordUpdater");
+                    }
+                }), 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
