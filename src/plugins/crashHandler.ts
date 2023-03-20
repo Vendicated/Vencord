@@ -41,6 +41,8 @@ const settings = definePluginSettings({
     }
 });
 
+let crashCount: number = 0;
+
 export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from Crashes without a restart",
@@ -62,15 +64,29 @@ export default definePlugin({
         {
             find: 'dispatch({type:"MODAL_POP_ALL"})',
             replacement: {
-                match: /(?<=(?<popAll>\i)=function\(\){\(0,\i\.\i\)\(\);\i\.\i\.dispatch\({type:"MODAL_POP_ALL"}\).+};)/,
-                replace: "$self.popAllModals=$<popAll>;"
+                match: /"MODAL_POP_ALL".+?};(?<=(\i)=function.+?)/,
+                replace: (m, popAll) => `${m}$self.popAllModals=${popAll};`
             }
         }
     ],
 
     handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
+        if (++crashCount > 5) {
+            try {
+                showNotification({
+                    color: "#eed202",
+                    title: "Discord has crashed!",
+                    body: "Awn :( Discord has crashed more than five times, not attempting to recover.",
+                });
+            } catch { }
+
+            return false;
+        }
+
+        setTimeout(() => crashCount--, 60_000);
+
         try {
-            maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
+            if (crashCount === 1) maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
 
             if (settings.store.attemptToPreventCrashes) {
                 this.handlePreventCrash(_this);
@@ -80,6 +96,7 @@ export default definePlugin({
             return false;
         } catch (err) {
             CrashHandlerLogger.error("Failed to handle crash", err);
+            return false;
         }
     },
 

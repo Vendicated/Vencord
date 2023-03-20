@@ -19,7 +19,8 @@
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
 import { makeCodeblock } from "@utils/misc";
-import { canonicalizeMatch, canonicalizeReplace, ReplaceFn } from "@utils/patches";
+import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
+import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Clipboard, Forms, Parser, React, Switch, Text, TextInput } from "@webpack/common";
 

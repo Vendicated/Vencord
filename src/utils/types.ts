@@ -19,12 +19,12 @@
 import { Command } from "@api/Commands";
 import { Promisable } from "type-fest";
 
-import type { ReplaceFn } from "./patches";
-
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
 }
+
+export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {
     match: string | RegExp;
@@ -79,10 +79,6 @@ export interface PluginDef {
      * Whether this plugin should be enabled by default, but can be disabled
      */
     enabledByDefault?: boolean;
-    /**
-     * Set this if your plugin only works on Browser or Desktop, not both
-     */
-    target?: "WEB" | "DESKTOP" | "BOTH";
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
