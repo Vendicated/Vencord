@@ -16,12 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const MONTH_NAMES = "January February March April May June July August September October November December".split(" ");
 const SECOND = 1e3;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
-
-export const getMonth = (n: number) => MONTH_NAMES[n];
 
 export const formatDuration = (ms: number) => {
     const parts = [Math.floor(ms / SECOND % 60).toString().padStart(2, "0")];
