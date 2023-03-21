@@ -31,7 +31,9 @@ export interface ArtProps {
 
 export function Art({ src, pending }: ArtProps) {
     if (src) {
-        return <img draggable="false" className={cl("art")} src={src} />;
+        return <div className={cl("art")} style={{
+            backgroundImage: `url(${src})`
+        }} />;
     }
 
     if (pending) {
