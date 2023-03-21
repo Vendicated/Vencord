@@ -43,9 +43,14 @@ async function initThemes() {
         document.head.appendChild(themesStyle);
     }
 
-    const { themeLinks } = Settings;
-    const links = themeLinks.map(link => `@import url("${link.trim()}");`).join("\n");
-    themesStyle.textContent = links;
+    const { themeLinks, enabledThemes } = Settings;
+    const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}`);
+
+    const links = IS_WEB
+        ? themeLinks
+        : [...themeLinks, ...localThemes];
+
+    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -54,4 +59,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initThemes();
     addSettingsListener("themeLinks", initThemes);
+    addSettingsListener("enabledThemes", initThemes);
 });

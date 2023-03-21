@@ -18,9 +18,10 @@
 
 import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import { THEMES_DIR } from "ipcMain/constants";
 import { dirname, join } from "path";
 
-import { initIpc } from "./ipcMain";
+import { ensureSafePath, initIpc } from "./ipcMain";
 import { installExt } from "./ipcMain/extensions";
 import { readSettings } from "./ipcMain/index";
 
@@ -122,6 +123,16 @@ if (!process.argv.includes("--vanilla")) {
         electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
             let url = unsafeUrl.slice("vencord://".length);
             if (url.endsWith("/")) url = url.slice(0, -1);
+            if (url.startsWith("/themes/")) {
+                const theme = url.slice("/themes/".length);
+                const safeUrl = ensureSafePath(THEMES_DIR, theme);
+                if (!safeUrl) {
+                    cb({ statusCode: 403 });
+                    return;
+                }
+                cb(safeUrl);
+                return;
+            }
             switch (url) {
                 case "renderer.js.map":
                 case "preload.js.map":
@@ -165,7 +176,7 @@ if (!process.argv.includes("--vanilla")) {
                 const csp = parsePolicy(headers[header][0]);
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                    csp[directive] = ["*", "blob:", "data:", "'unsafe-inline'"];
+                    csp[directive] = ["*", "blob:", "data:", "vencord:", "'unsafe-inline'"];
                 }
                 // TODO: Restrict this to only imported packages with fixed version.
                 // Perhaps auto generate with esbuild

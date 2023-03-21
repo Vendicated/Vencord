@@ -61,6 +61,6 @@ window.VencordNative = {
         off(event: string, listener: () => {}) {
             return listeners[event]?.delete(listener);
         },
-        invoke: (event: string, ...args: any[]) => Promise.resolve(onEvent(event, ...args))
+        invoke: async (event: string, ...args: any[]) => onEvent(event, ...args)
     },
 };

@@ -23,17 +23,47 @@ import IpcEvents from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
-import { open, readFile, writeFile } from "fs/promises";
-import { join } from "path";
+import { open, readdir, readFile, writeFile } from "fs/promises";
+import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./constants";
+import { getThemeInfo, stripBOM, UserThemeHeader } from "./userThemes";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
+mkdirSync(THEMES_DIR, { recursive: true });
+
+export function ensureSafePath(basePath: string, path: string) {
+    const normalizedBasePath = normalize(basePath);
+    const newPath = join(basePath, path);
+    const normalizedPath = normalize(newPath);
+    return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
+}
 
 function readCss() {
     return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
+}
+
+async function listThemes(): Promise<UserThemeHeader[]> {
+    const files = await readdir(THEMES_DIR).catch(() => []);
+
+    const themeInfo: UserThemeHeader[] = [];
+
+    for (const fileName of files) {
+        const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
+        if (!data) continue;
+        const parsed = getThemeInfo(data, fileName);
+        themeInfo.push(parsed);
+    }
+
+    return themeInfo;
+}
+
+function getThemeData(fileName: string) {
+    const safePath = ensureSafePath(THEMES_DIR, fileName);
+    if (!safePath) return Promise.reject(`Unsafe path ${fileName}`);
+    return readFile(safePath, "utf-8");
 }
 
 export function readSettings() {
@@ -65,6 +95,10 @@ ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
     cssWriteQueue.push(() => writeFile(QUICKCSS_PATH, css))
 );
+
+ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
+ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
+ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
