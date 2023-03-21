@@ -109,9 +109,11 @@ function ThemeCard({ theme, enabled, onChange }: ThemeCardProps) {
             .map<React.ReactNode>(t => t) // make TS happy
             .reduce((prev, curr) => [
                 prev,
-                <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span>,
+                // Ugly but blame stable for being electron 13.
+                // TODO: When stable is on newer electron, remove this stupid ternary and remove the default value ([]) of the reducer.
+                (prev as React.ReactNode[]).length ? <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span> : null,
                 curr
-            ]);
+            ], []);
     }
 
 
