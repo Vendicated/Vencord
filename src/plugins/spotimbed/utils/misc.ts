@@ -20,12 +20,8 @@ import { classNameFactory } from "@api/Styles";
 
 export const cl = classNameFactory("spotimbed-");
 
-export const sortBy = <T, R extends string | number>(valueFn: (elem: T) => R, reverse = false) => (a: T, b: T) => {
-    const aVal = valueFn(a);
-    const bVal = valueFn(b);
-    if (aVal > bVal) return +!reverse; // 1 if not reverse
-    if (aVal < bVal) return ~reverse; // -1 if not reverse
-    return 0;
+export const sortBy = <T, R extends number>(valueFn: (elem: T) => R) => (a: T, b: T) => {
+    return valueFn(a) - valueFn(b);
 };
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
