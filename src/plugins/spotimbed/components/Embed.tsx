@@ -23,6 +23,7 @@ import { useIntersection } from "@utils/react";
 import { React } from "@webpack/common";
 
 import repoSlug from "~git-remote";
+
 import { useCachedAwaiter } from "../hooks/useCachedAwaiter";
 import { usePaletteStyle } from "../hooks/usePaletteStyle";
 import { usePreviewUrl } from "../hooks/usePreviewUrl";

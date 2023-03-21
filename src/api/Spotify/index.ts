@@ -54,13 +54,13 @@ export function getMarketName(code: string) {
 }
 
 export function getImageSmallestAtLeast(resource: Resource, size: number) {
-    let images: ResourceImage[] | null = null;
-    if ("images" in resource) images = resource.images;
-    else if (resource.type === "track") images = resource.album.images;
+    let imgs: ResourceImage[] | null = null;
+    if ("images" in resource) imgs = resource.images;
+    else if (resource.type === "track") imgs = resource.album.images;
 
-    if (!images?.length) return null;
+    if (!imgs?.length) return null;
 
-    return images.reduce((prev, curr) => {
+    return imgs.reduce((prev, curr) => {
         let prevDiff = prev.width - size;
         let currDiff = curr.width - size;
         if (prevDiff < 0) prevDiff = Infinity;

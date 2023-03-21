@@ -71,7 +71,7 @@ export default definePlugin({
 
         return new Proxy(message, {
             get(target, prop) {
-                if (prop === 'embeds') return embeds;
+                if (prop === "embeds") return embeds;
                 return Reflect.get(target, prop);
             }
         });
