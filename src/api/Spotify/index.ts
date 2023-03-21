@@ -58,7 +58,7 @@ export function getImageSmallestAtLeast(resource: Resource, size: number) {
     if ("images" in resource) images = resource.images.slice();
     else if (resource.type === "track") images = resource.album.images.slice();
 
-    if (!images || images.length === 0) return null;
+    if (!images?.length) return null;
 
     return images.reduce((prev, curr) => {
         let prevDiff = prev.width - size;
