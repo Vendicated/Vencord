@@ -63,7 +63,10 @@ export default ErrorBoundary.wrap(function NotificationComponent({
         <button
             className="vc-notification-root"
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
-            onClick={() => onClick?.(onClose!)}
+            onClick={() => {
+                onClose!();
+                onClick?.();
+            }}
             onContextMenu={e => {
                 e.preventDefault();
                 e.stopPropagation();

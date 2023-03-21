@@ -18,10 +18,11 @@
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
 import { Menu } from "@webpack/common";
 
@@ -65,6 +66,14 @@ interface FindData {
     args: Array<StringNode | FunctionNode>;
 }
 
+const settings = definePluginSettings({
+    notifyOnAutoConnect: {
+        description: "Wheter to notify when Dev Companion has automatically connected.",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
+
 function parseNode(node: Node) {
     switch (node.type) {
         case "string":
@@ -91,7 +100,7 @@ function initWs(isManual = false) {
 
         logger.info("Connected to WebSocket");
 
-        showNotification({
+        (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
             body: "Connected to WebSocket"
         });
@@ -241,6 +250,7 @@ export default definePlugin({
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
     dependencies: ["ContextMenuAPI"],
+    settings,
 
     start() {
         initWs();
