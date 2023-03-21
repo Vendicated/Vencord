@@ -64,31 +64,3 @@ export function pickColor(style: ColorStyle, palette: RgbPalette) {
     ));
     return hsvPalette[0];
 }
-//     vibrant(palette) {
-//         const hsvPalette = palette.map(rgb2hsv);
-//         // Pick color closest to 100% saturation and 100% value
-//         hsvPalette.sort(sortBy(([h, s, v]) => (1 - s) * (1 - v)));
-//         return hsvPalette[0];
-//     },
-//     pastel(palette) {
-//         const hsvPalette = palette.map(rgb2hsv);
-//         hsvPalette.sort(sortBy(
-//             // Pick color closest to 30% saturation and 100% value
-//             ([h, s, v]) => Math.abs(s - 0.3) * (1 - v),
-//             true,
-//         ));
-//         return hsvPalette[0];
-//     },
-//     muted(palette) {
-//         const hsvPalette = palette.map(rgb2hsv);
-//         hsvPalette.sort(sortBy(
-//             // Pick color closest to 25% saturation and 30% value
-//             ([h, s, v]) => Math.abs(s - 0.25) * Math.abs(v - 0.3),
-//             true,
-//         ));
-//         return hsvPalette[0];
-//     },
-//     discord() {
-//         return [0, 0, 0];
-//     },
-// } satisfies Record<string, (palette: RgbPalette) => RgbPalette[number]>;
