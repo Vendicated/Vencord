@@ -38,9 +38,12 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
 
     function handleChange(newValue) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+
+        setError(null);
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
-        else if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
+
+        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
             setState(`${Number.MAX_SAFE_INTEGER}`);
             onChange(serialize(newValue));
         } else {
