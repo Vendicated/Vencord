@@ -18,6 +18,7 @@
 
 
 import { ResourceType, Spotify } from "@api/Spotify";
+import { logger } from "../logger";
 
 import { settings } from "../settings";
 import { ArtistWithTracks, DisplayResource } from "../types";
@@ -56,7 +57,7 @@ export function useResource(id: string, type: string, noop = false) {
     });
 
     if (error instanceof Error) throw error;
-    else if (error) console.error(error);
+    else if (error) logger.error(error);
 
     return resource;
 }
