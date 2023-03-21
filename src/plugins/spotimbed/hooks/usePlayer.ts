@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, useEffect, useRef } from "@webpack/common";
+import { useForceUpdater } from "@utils/misc";
+import { useEffect, useRef } from "@webpack/common";
 
 let player: symbol | null = null;
 const dispatchers = new Set<React.DispatchWithoutAction>();
@@ -24,7 +25,7 @@ const dispatchers = new Set<React.DispatchWithoutAction>();
 export function usePlayer() {
     const playerRef = useRef(Symbol());
 
-    const [, update] = React.useReducer(() => ({}), {});
+    const update = useForceUpdater();
     useEffect(() => {
         dispatchers.add(update);
         return () => void dispatchers.delete(update);
