@@ -22,7 +22,7 @@ import { useStateFromStores } from "@webpack/common";
 
 import { SpotifyApi } from "./api";
 import { PlayerStore } from "./store";
-import { Resource, ResourceImage } from "./types";
+import { Resource } from "./types";
 export * from "./types";
 
 type PlayerStoreStates = NonMethodKeys<PlayerStore>;
@@ -54,13 +54,15 @@ export function getMarketName(code: string) {
 }
 
 export function getImageSmallestAtLeast(resource: Resource, size: number) {
-    let imgs: ResourceImage[] | null = null;
-    if ("images" in resource) imgs = resource.images;
-    else if (resource.type === "track") imgs = resource.album.images;
+    const images = (() => {
+        if ("images" in resource) return resource.images;
+        else if (resource.type === "track") return resource.album.images;
+        return null;
+    })();
 
-    if (!imgs?.length) return null;
+    if (!images?.length) return null;
 
-    return imgs.reduce((prev, curr) => {
+    return images.reduce((prev, curr) => {
         let prevDiff = prev.width - size;
         let currDiff = curr.width - size;
         if (prevDiff < 0) prevDiff = Infinity;
