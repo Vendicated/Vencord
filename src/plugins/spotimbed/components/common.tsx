@@ -53,7 +53,7 @@ export function ResourceLink({ resource, className = "", title }: {
     const href = nativeLinks ? `spotify:/${url?.pathname}` : url?.href;
 
     return <a
-        className={[cl("link")].concat(className.split(" ")).join(" ")}
+        className={[cl("link"), ...className.split(" ")].join(" ")}
         href={href}
         data-resource-link={true}
         target="_blank"
