@@ -32,13 +32,15 @@ export interface ArtProps {
 export function Art({ src, pending }: ArtProps) {
     if (src) {
         return <img draggable="false" className={cl("art")} src={src} />;
-    } else if (pending) {
+    }
+
+    if (pending) {
         return (
             <div className={cl("art", "art-loading")}>
                 <Spinner type={SpinnerType.SpinningCircle} />
             </div>
         );
-    } else {
-        return DEFAULT_ART();
     }
+
+    return DEFAULT_ART();
 }
