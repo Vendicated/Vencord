@@ -188,7 +188,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const src = itemHref ?? itemSrc;
     const isAnimated = new URL(src).pathname.endsWith(".gif");
 
-    const group = findGroupChildrenByChildId("save-image", children);
+    const group = findGroupChildrenByChildId("copy-link", children);
     if (group && !group.some(child => child?.props?.id === "emote-cloner")) {
         group.push((
             <Menu.MenuItem
