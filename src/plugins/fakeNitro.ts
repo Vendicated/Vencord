@@ -91,7 +91,7 @@ export default definePlugin({
                     replace: '$&,typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
                 },
                 {
-                    match: /(&&!\i&&!)(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
+                    match: /(&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
                     replace: (_, rest, canUseExternal) => `${rest}(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
                 }
             ]
