@@ -96,7 +96,6 @@ export default definePlugin({
     settings,
 
     getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
-        if (!guildId && !channelId) return null;
         if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
         return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
     },
