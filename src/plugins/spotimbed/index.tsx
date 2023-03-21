@@ -39,8 +39,8 @@ export default definePlugin({
             replacement: {
                 // .renderEmbeds = function(message) { ... }
                 match: /\.renderEmbeds=function\((\i)\)\{/,
-                // .renderEmbeds = function(message) { message = { ...message, embeds: patchedEmbeds }; ... }
-                replace: "$&$1={...$1,embeds:$self.patchEmbeds($1)};",
+                // .renderEmbeds = function(message) { message = patchedMessage }
+                replace: "$&$1=$self.patchMessage($1);",
             }
         },
         {
@@ -63,12 +63,17 @@ export default definePlugin({
     // exports
     createSpotimbed,
     Spotimbed,
-    patchEmbeds: (message: Message): Embed[] => {
+    patchMessage: (message: Message): Message => {
         const embeds = message.embeds.filter(e => e.provider?.name !== "Spotify");
 
         const links = getEmbeddableLinks(message.content, "open.spotify.com");
         embeds.push(...links.map(link => createEmbedData(link) as Embed));
 
-        return embeds;
+        return new Proxy(message, {
+            get(target, prop) {
+                if (prop === 'embeds') return embeds;
+                return Reflect.get(target, prop);
+            }
+        });
     },
 });
