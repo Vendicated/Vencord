@@ -6,6 +6,8 @@ To ensure your contribution is robust, please follow the below guide!
 
 For a friendly introduction to plugins, see [Megu's Plugin Guide!](docs/2_PLUGINS.md)
 
+Make sure to go over the [Code of Conduct](CODE_OF_CONDUCT.md) before opening a PR.
+
 ## Style Guide
 
 -   This project has a very minimal .editorconfig. Make sure your editor supports this!
