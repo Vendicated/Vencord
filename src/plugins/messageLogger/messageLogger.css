@@ -2,12 +2,14 @@
     display: none;
 }
 
-.messagelogger-deleted-attachment, .messagelogger-deleted div iframe {
+.messagelogger-deleted-attachment,
+.messagelogger-deleted div iframe {
     filter: grayscale(1);
     transition: 150ms filter ease-in-out;
 }
 
-.messagelogger-deleted-attachment:hover, .messagelogger-deleted div iframe:hover {
+.messagelogger-deleted-attachment:hover,
+.messagelogger-deleted div iframe:hover {
     filter: grayscale(0);
 }
 
