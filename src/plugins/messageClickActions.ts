@@ -33,7 +33,7 @@ migratePluginSettings("MessageClickActions", "MessageQuickActions");
 
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Delete and click to delete, double click to edit",
+    description: "Hold Backspace and click to delete, double click to edit",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
