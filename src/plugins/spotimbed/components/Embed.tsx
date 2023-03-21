@@ -67,7 +67,7 @@ function isSupported(type: string): type is ResourceType {
 
 export function createSpotimbed({ embed: { url: src, thumbnail }, tempSettings }: EmbedProps) {
     const url = parseUrl(src);
-    if (!url) return <></>;
+    if (!url) return null;
 
     const resourceType = url.pathname.split("/")[1];
     if (!isSupported(resourceType)) return UnsupportedEmbed();
