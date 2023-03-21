@@ -85,11 +85,6 @@ const settings = definePluginSettings({
         description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
         type: OptionType.BOOLEAN
     },
-    clydeSystemTag: {
-        description: "Show system tag for Clyde",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
     ...Object.fromEntries(tags.map(t => [
         `visibility_${t.name}`, {
             description: `Show ${t.displayName} tags (${t.description})`,
@@ -209,7 +204,10 @@ return type!==null?$2.botTag,type"
         const settings = this.settings.store;
         const perms = this.getPermissions(user, channel);
 
-        if (location === "chat" && user.id === "1" && settings.clydeSystemTag) return Tags.OFFICIAL;
+        if (location === "chat" && user.id === "1") return Tags.OFFICIAL;
+        // there's no difference between clyde and a regular webhook message from the message object
+        // exept maybe `user.avatar === "clyde"` but that's worse imo
+        if (user.id === "1081004946872352958") return Tags.AI;
         tags.forEach(tag => {
             if (![location, "always"].includes(settings[`visibility_${tag.name}`])) return;
 
