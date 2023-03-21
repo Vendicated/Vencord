@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
 import { proxyLazy } from "@utils/proxyLazy";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 import { SpotifyApi } from "./api";
 import { PlayerState, PlayerTrack, RepeatState, SpotifyDevice } from "./types";
+
+const logger = new Logger("SpotifyStore");
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export type PlayerStore = typeof PlayerStore;
@@ -69,7 +72,7 @@ export const PlayerStore = proxyLazy(() => {
             this.isSettingPosition = true;
 
             return SpotifyApi.seek(ms).catch((err: any) => {
-                console.error("[VencordSpotifyAPI] Failed to seek", err);
+                logger.error("Failed to seek", err);
                 this.isSettingPosition = false;
             });
         }
