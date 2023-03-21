@@ -22,11 +22,12 @@ import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, PermissionStore, UserStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -148,6 +149,19 @@ export default definePlugin({
                 match: /canUseClientThemes:function\(\i\){/,
                 replace: "$&return true;"
             }
+        },
+        {
+            find: '.displayName="UserSettingsProtoStore"',
+            replacement: [
+                {
+                    match: /CONNECTION_OPEN:function\((\i)\){/,
+                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                },
+                {
+                    match: /=(\i)\.local;/,
+                    replace: (m, props) => `${m}${props}.local||$self.handleProtoChange(${props}.settings.proto);`
+                }
+            ]
         }
     ],
 
@@ -194,6 +208,21 @@ export default definePlugin({
 
     get canUseStickers() {
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+    },
+
+    handleProtoChange(proto: any, user: any) {
+        const premiumType = user?.premium_type ?? UserStore.getCurrentUser().premiumType ?? 0;
+
+        if (premiumType === 0) {
+            const themeId = UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value;
+
+            if (themeId != null) {
+                proto.appearance ??= {};
+                proto.appearance.clientThemeSettings ??= {};
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId ??= {};
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId.value = themeId;
+            }
+        }
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
