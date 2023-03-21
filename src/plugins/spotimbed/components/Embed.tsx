@@ -22,7 +22,7 @@ import { parseUrl } from "@utils/misc";
 import { useIntersection } from "@utils/react";
 import { React } from "@webpack/common";
 
-import { repository } from "../../../../package.json";
+import repoSlug from "~git-remote";
 import { useCachedAwaiter } from "../hooks/useCachedAwaiter";
 import { usePaletteStyle } from "../hooks/usePaletteStyle";
 import { usePreviewUrl } from "../hooks/usePreviewUrl";
@@ -36,7 +36,7 @@ import { AudioControls } from "./AudioControls";
 import { Info } from "./Info";
 import { TrackList } from "./TrackList";
 
-const REPO_ISSUES_URL = `${repository.url.slice(4, -4)}/issues/new`;
+const REPO_ISSUES_URL = `https://github.com/${repoSlug}/issues/new`;
 
 function UnsupportedEmbed() {
     return <div className={cl("unsupported")}>This Spotify embed is not supported by SpotiMbed, please <a href={REPO_ISSUES_URL} target="_blank">open an issue</a> and include the above link</div>;
