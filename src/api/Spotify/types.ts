@@ -139,6 +139,7 @@ export interface Track extends ApiResource {
     preview_url: string | null;
     track_number: number;
     popularity: number;
+    available_markets: string[];
 }
 export interface Album<HasTracks = true> extends ApiResource {
     type: ResourceType.Album;
@@ -154,6 +155,7 @@ export interface Album<HasTracks = true> extends ApiResource {
     release_date_precision: "year" | "month" | "day";
     label: string;
     popularity: number;
+    available_markets: string[];
 }
 export interface PlaylistItem {
     added_at: string;

@@ -17,20 +17,30 @@
 */
 
 
-import { ResourceType, Spotify } from "@api/Spotify";
+import { Album, ResourceType, RestrictionReason, Spotify, Track } from "@api/Spotify";
 import { logger } from "../logger";
 
 import { settings } from "../settings";
 import { ArtistWithTracks, DisplayResource } from "../types";
 import { useCachedAwaiter } from "./useCachedAwaiter";
 
+async function followMarket<T extends Album | Track>(
+    getter: (market: string) => Promise<T>,
+    market: string,
+): Promise<T> {
+    let resource = await getter(market);
+    if (resource.restrictions?.reason === RestrictionReason.Market && resource.available_markets.length > 0)
+        resource = await getter(resource.available_markets[0]);
+    return resource;
+}
+
 export async function getResource(id: string, type: string): Promise<DisplayResource | null> {
     switch (type) {
         case ResourceType.Track: {
-            return Spotify.getTrack(id, { market: settings.store.market });
+            return followMarket((market) => Spotify.getTrack(id, { market }), settings.store.market);
         }
         case ResourceType.Album: {
-            return Spotify.getAlbum(id, { market: settings.store.market });
+            return followMarket((market) => Spotify.getAlbum(id, { market }), settings.store.market);
         }
         case ResourceType.Playlist: {
             return Spotify.getPlaylist(id, { market: settings.store.market });
