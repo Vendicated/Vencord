@@ -16,31 +16,30 @@ The cutest Discord client mod
 
 ## Installing / Uninstalling
 
-[![Download and run the Installer ](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#usage)
+[![Download and run the Installer](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#usage)
 
 ## Installing on Browser
 
-[![Get it on the Firefox Webstore](https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Get it on the Chrome Webstore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
+<a href="https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/"><img src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png" alt="Get it on the Firefox Webstore" height="60"/></a>
+<a href="https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb"><img src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png" alt="Get it on the Chrome Webstore" height="60"/></a>
+<a href="https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js"><img src="https://user-images.githubusercontent.com/58097612/226626570-56e3fc64-b1e9-4f1e-825b-4b4797095a93.png" alt="Get the userscript" height="60"/></a>
 
-Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that the CSS Editor, Themes loaded from remote sources and co. will not work in the UserScript. Use the extension if you need any of those
+> **Note**
+> Please note that the CSS Editor, Themes loaded from remote sources and co. will not work in the UserScript. Use the extension if you need any of those
 
 ## Building from Source
 
-See the docs folder
+See the [docs folder](docs)
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [Megu's Plugin Guide!](docs/2_PLUGINS.md)
 
-[contribute]: CONTRIBUTING.md
+## Support server
 
-[contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute] [contribute]
+Join the offical server to get support, discuss updates, and talk about the cat
 
-## Join
-
-[join]: https://discord.gg/D9uwnFnqmd
-
-[join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join] [join]
+[![Join us on Discord](https://invidget.switchblade.xyz/D9uwnFnqmd?theme=dark)](https://discord.gg/D9uwnFnqmd)
 
 ## Disclaimer
 
