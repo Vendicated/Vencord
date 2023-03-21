@@ -135,7 +135,7 @@
     padding: 0.1875rem 0.375rem;
 }
 
-.spotimbed-title-tag+.spotimbed-title-tag {
+.spotimbed-title-tag + .spotimbed-title-tag {
     margin-left: 0.5rem;
 }
 
@@ -295,7 +295,7 @@
     display: none;
 }
 
-.spotimbed-controls [class*="durationTimeWrapper"]>[class*="durationTime"] {
+.spotimbed-controls [class*="durationTimeWrapper"] > [class*="durationTime"] {
     display: none;
 }
 
