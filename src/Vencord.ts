@@ -69,7 +69,8 @@ async function init() {
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
-                    onClick() {
+                    onClick(closeNotification) {
+                        closeNotification();
                         SettingsRouter.open("VencordUpdater");
                     }
                 }), 10_000);

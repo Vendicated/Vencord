@@ -63,7 +63,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
         <button
             className="vc-notification-root"
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
-            onClick={onClick}
+            onClick={() => onClick?.(onClose!)}
             onContextMenu={e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -78,7 +78,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                     <div className="vc-notification-header">
                         <h2 className="vc-notification-title">{title}</h2>
                         <button
-                            style={{ all: "unset", cursor: "pointer" }}
+                            className="vc-notification-close-btn"
                             onClick={e => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -86,7 +86,6 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                             }}
                         >
                             <svg
-                                className="vc-notification-close-btn"
                                 width="24"
                                 height="24"
                                 viewBox="0 0 24 24"

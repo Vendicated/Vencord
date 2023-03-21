@@ -51,7 +51,7 @@ export interface NotificationData {
     icon?: string;
     /** Large image. Optimally, this should be around 16x9 but it doesn't matter much. Desktop Notifications might not support this */
     image?: string;
-    onClick?(): void;
+    onClick?(closeNotification: () => void): void;
     onClose?(): void;
     color?: string;
     /** Whether this notification should not have a timeout */
@@ -93,7 +93,9 @@ export async function showNotification(data: NotificationData) {
             icon,
             image
         });
-        n.onclick = onClick;
+        n.onclick = () => {
+            onClick?.(n.close);
+        };
         n.onclose = onClose;
     } else {
         NotificationQueue.push(() => _showNotification(data, id++));
