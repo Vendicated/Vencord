@@ -211,7 +211,7 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        const premiumType = user?.premium_type ?? UserStore.getCurrentUser().premiumType ?? 0;
+        const premiumType = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
 
         if (premiumType === 0) {
             const themeId = UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value;
