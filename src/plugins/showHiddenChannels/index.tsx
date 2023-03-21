@@ -246,18 +246,18 @@ export default definePlugin({
             find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
             replacement: [
                 {
-                    // Export the channel beggining header
+                    // Export the channel beginning header
                     match: /computePermissionsForRoles.+?}\)}(?<=function (\i)\(.+?)(?=var)/,
                     replace: (m, component) => `${m}$self.setChannelBeginHeaderComponent(${component});`
                 },
                 {
                     // Change the role permission check to CONNECT if the channel is locked
-                    match: /ADMINISTRATOR\)\|\|(?=(.+?\((\i),\i\.\i\.)VIEW_CHANNEL)/,
-                    replace: (m, permCheck, channel) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
+                    match: /ADMINISTRATOR\)\|\|(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
+                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
-                    match: /permissionOverwrites\[.+?\?(\i):.+?\i=(?=(.+?)VIEW_CHANNEL)/,
+                    match: /permissionOverwrites\[.+?\i=(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
                     replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
