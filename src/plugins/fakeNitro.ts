@@ -22,11 +22,13 @@ import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, PermissionStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+const ProtoPreloadedUserSettings = findLazy(m => m.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -87,12 +89,12 @@ export default definePlugin({
                     replace: (_, intention) => `,fakeNitroIntention=${intention}`
                 },
                 {
-                    match: /(?<=\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i)(?=\))/g,
-                    replace: ',typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
+                    match: /\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i(?=\))/g,
+                    replace: '$&,typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
                 },
                 {
-                    match: /(?<=&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
-                    replace: (_, canUseExternal) => `(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
+                    match: /(&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
+                    replace: (_, rest, canUseExternal) => `${rest}(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
                 }
             ]
         },
@@ -100,16 +102,16 @@ export default definePlugin({
             find: "canUseAnimatedEmojis:function",
             predicate: () => Settings.plugins.FakeNitro.enableEmojiBypass === true,
             replacement: {
-                match: /(?<=(?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))/g,
-                replace: (_, premiumCheck) => `,fakeNitroIntention){${premiumCheck}||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+                match: /((?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))/g,
+                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
             }
         },
         {
             find: "canUseStickersEverywhere:function",
             predicate: () => Settings.plugins.FakeNitro.enableStickerBypass === true,
             replacement: {
-                match: /(?<=canUseStickersEverywhere:function\(\i\){)/,
-                replace: "return true;"
+                match: /canUseStickersEverywhere:function\(\i\){/,
+                replace: "$&return true;"
             },
         },
         {
@@ -129,8 +131,8 @@ export default definePlugin({
                 "canStreamMidQuality"
             ].map(func => {
                 return {
-                    match: new RegExp(`(?<=${func}:function\\(\\i\\){)`),
-                    replace: "return true;"
+                    match: new RegExp(`${func}:function\\(\\i\\){`),
+                    replace: "$&return true;"
                 };
             })
         },
@@ -145,8 +147,28 @@ export default definePlugin({
         {
             find: "canUseClientThemes:function",
             replacement: {
-                match: /(?<=canUseClientThemes:function\(\i\){)/,
-                replace: "return true;"
+                match: /canUseClientThemes:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
+        {
+            find: '.displayName="UserSettingsProtoStore"',
+            replacement: [
+                {
+                    match: /CONNECTION_OPEN:function\((\i)\){/,
+                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                },
+                {
+                    match: /=(\i)\.local;/,
+                    replace: (m, props) => `${m}${props}.local||$self.handleProtoChange(${props}.settings.proto);`
+                }
+            ]
+        },
+        {
+            find: "updateTheme:function",
+            replacement: {
+                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\)/,
+                replace: (_, rest, backgroundGradientPresetId, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme});`
             }
         }
     ],
@@ -194,6 +216,60 @@ export default definePlugin({
 
     get canUseStickers() {
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+    },
+
+    handleProtoChange(proto: any, user: any) {
+        const premiumType: number = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
+
+        if (premiumType === 0) {
+            const appearanceDummyProto = ProtoPreloadedUserSettings.create({
+                appearance: {}
+            });
+
+            proto.appearance ??= appearanceDummyProto.appearance;
+
+            if (UserSettingsProtoStore.settings.appearance?.theme != null) {
+                proto.appearance.theme = UserSettingsProtoStore.settings.appearance.theme;
+            }
+
+            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
+                const clientThemeSettingsDummyProto = ProtoPreloadedUserSettings.create({
+                    appearance: {
+                        clientThemeSettings: {
+                            backgroundGradientPresetId: {
+                                value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
+                            }
+                        }
+                    }
+                });
+
+                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummyProto.appearance.clientThemeSettings;
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.appearance.clientThemeSettings.backgroundGradientPresetId;
+            }
+        }
+    },
+
+    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number) {
+        const proto = ProtoPreloadedUserSettings.create({
+            appearance: {
+                theme,
+                clientThemeSettings: {
+                    backgroundGradientPresetId: backgroundGradientPresetId != null ? {
+                        value: backgroundGradientPresetId
+                    } : void 0
+                }
+            }
+        });
+
+        FluxDispatcher.dispatch({
+            type: "USER_SETTINGS_PROTO_UPDATE",
+            local: true,
+            partial: true,
+            settings: {
+                type: 1,
+                proto
+            }
+        });
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
