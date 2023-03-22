@@ -5,8 +5,8 @@
 }
 
 .vc-settings-theme-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: column;
     background-color: var(--background-secondary-alt);
     color: var(--interactive-active);
     border-radius: 8px;

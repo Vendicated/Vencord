@@ -33,6 +33,8 @@ export default strEnum({
     QUICK_CSS_UPDATE: "VencordQuickCssUpdate",
     GET_QUICK_CSS: "VencordGetQuickCss",
     SET_QUICK_CSS: "VencordSetQuickCss",
+    UPLOAD_THEME: "VencordUploadTheme",
+    DELETE_THEME: "VencordDeleteTheme",
     GET_THEMES_DIR: "VencordGetThemesDir",
     GET_THEMES_LIST: "VencordGetThemesList",
     GET_THEME_DATA: "VencordGetThemeData",

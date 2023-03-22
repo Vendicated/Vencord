@@ -44,11 +44,20 @@ async function initThemes() {
     }
 
     const { themeLinks, enabledThemes } = Settings;
-    const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}`);
 
-    const links = IS_WEB
-        ? themeLinks
-        : [...themeLinks, ...localThemes];
+    const links: string[] = [...themeLinks];
+
+    if (IS_WEB) {
+        for (const theme of enabledThemes) {
+            const themeData: string = await VencordNative.ipc.invoke(IpcEvents.GET_THEME_DATA, theme).catch(() => null);
+            if (!themeData) continue;
+            const blob = new Blob([themeData], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
+    } else {
+        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}`);
+        links.push(...localThemes);
+    }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
 }

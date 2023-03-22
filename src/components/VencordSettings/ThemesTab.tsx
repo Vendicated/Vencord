@@ -30,6 +30,15 @@ import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
 
+type FileInput = React.ComponentType<{
+    ref: React.Ref<HTMLInputElement>;
+    onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+    multiple?: boolean;
+    filters?: { name?: string; extensions: string[]; }[];
+}>;
+
+const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
+const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
@@ -87,9 +96,10 @@ interface ThemeCardProps {
     theme: UserThemeHeader;
     enabled: boolean;
     onChange: (enabled: boolean) => void;
+    onDelete: () => void;
 }
 
-function ThemeCard({ theme, enabled, onChange }: ThemeCardProps) {
+function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
     function renderLinks() {
         const links: (JSX.Element | string)[] = [];
 
@@ -119,16 +129,25 @@ function ThemeCard({ theme, enabled, onChange }: ThemeCardProps) {
 
     return (
         <div className={cl("card")} data-dnd-name={theme.fileName}>
+            <Flex flexDirection="row" style={{ justifyContent: "space-between" }}>
+                <div style={{ display: "grid" }}>
+                    <Text tag="h2" variant="text-md/bold" className={cl("card-text")}>{theme.name}</Text>
+                    <Text variant="text-sm/medium" className={cl("card-text")}>By {theme.author}</Text>
+                </div>
+                <Flex flexDirection="row" style={{ gap: "1em" }}>
+                    <Switch checked={enabled} onChange={onChange} />
+                    {IS_WEB && (
+                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
+                            <TrashIcon />
+                        </div>
+                    )}
+                </Flex>
+            </Flex>
             <div style={{ display: "grid" }}>
-                <Text tag="h2" variant="text-md/bold" className={cl("card-text")}>{theme.name}</Text>
-                <Text variant="text-sm/medium" className={cl("card-text")}>By {theme.author}</Text>
                 <Text variant="text-sm/normal" className={cl("card-text")}>{theme.description}</Text>
                 <Flex flexDirection="row" style={{ gap: 0 }}>
                     {renderLinks()}
                 </Flex>
-            </div>
-            <div>
-                <Switch checked={enabled} onChange={onChange} />
             </div>
         </div>
     );
@@ -142,30 +161,52 @@ enum ThemeTab {
 export default ErrorBoundary.wrap(function () {
     const settings = useSettings();
 
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = React.useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = React.useState(settings.themeLinks.join("\n"));
     const [userThemes, setUserThemes] = React.useState<UserThemeHeader[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_THEMES_DIR).catch(() => ""));
 
     React.useEffect(() => {
-        if (IS_WEB) return;
         refreshLocalThemes();
     }, []);
 
     async function refreshLocalThemes() {
-        if (IS_WEB) return;
         const themes = await VencordNative.ipc.invoke<UserThemeHeader[]>(IpcEvents.GET_THEMES_LIST).catch(() => []);
         setUserThemes(themes);
     }
 
     // When a local theme is enabled/disabled, update the settings
     function onLocalThemeChange(fileName: string, value: boolean) {
-        if (IS_WEB) return;
         if (value) {
             if (settings.enabledThemes.includes(fileName)) return;
             settings.enabledThemes = [...settings.enabledThemes, fileName];
         } else {
             settings.enabledThemes = [...settings.enabledThemes.filter(f => f !== fileName)];
+        }
+    }
+
+    async function onFileUpload(e: React.SyntheticEvent<HTMLInputElement>) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!e.currentTarget?.files?.length) return;
+        const { files } = e.currentTarget;
+
+        const decoder = new TextDecoder("utf-8");
+
+        for (const file of files) {
+            const { name } = file;
+            if (!name.endsWith(".css")) continue;
+
+            const buffer = await file.arrayBuffer();
+            if (!buffer) continue;
+
+            const text = decoder.decode(buffer);
+            if (!text) continue;
+
+            VencordNative.ipc.invoke(IpcEvents.UPLOAD_THEME, name, text)
+                .then(() => { refreshLocalThemes(); })
+                .catch(console.error);
         }
     }
 
@@ -185,13 +226,30 @@ export default ErrorBoundary.wrap(function () {
 
                 <Forms.FormSection title="Local Themes">
                     <div className={cl("button-flex")}>
-                        <Button
-                            onClick={() => window.DiscordNative.fileManager.showItemInFolder(themeDir)}
-                            size={Button.Sizes.SMALL}
-                            disabled={themeDirPending}
-                        >
-                            Open Themes Folder
-                        </Button>
+                        {IS_WEB ?
+                            (
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    disabled={themeDirPending}
+                                >
+                                    Upload Theme
+                                    <FileInput
+                                        ref={fileInputRef}
+                                        onChange={onFileUpload}
+                                        multiple={true}
+                                        filters={[{ extensions: ["*.css"] }]}
+                                    />
+                                </Button>
+                            ) : (
+
+                                <Button
+                                    onClick={() => window.DiscordNative.fileManager.showItemInFolder(themeDir)}
+                                    size={Button.Sizes.SMALL}
+                                    disabled={themeDirPending}
+                                >
+                                    Open Themes Folder
+                                </Button>
+                            )}
                         <Button
                             onClick={refreshLocalThemes}
                             size={Button.Sizes.SMALL}
@@ -206,6 +264,11 @@ export default ErrorBoundary.wrap(function () {
                                 key={theme.fileName}
                                 enabled={settings.enabledThemes.includes(theme.fileName)}
                                 onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
+                                onDelete={() => {
+                                    onLocalThemeChange(theme.fileName, false);
+                                    VencordNative.ipc.invoke(IpcEvents.DELETE_THEME, theme.fileName)
+                                        .then(() => { refreshLocalThemes(); });
+                                }}
                                 theme={theme}
                             />
                         ))}
@@ -273,33 +336,31 @@ export default ErrorBoundary.wrap(function () {
         );
     }
 
-    return IS_WEB
-        ? renderOnlineThemes()
-        : (
-            <>
-                <TabBar
-                    type="top"
-                    look="brand"
-                    className="vc-settings-tab-bar"
-                    selectedItem={currentTab}
-                    onItemSelect={setCurrentTab}
+    return (
+        <>
+            <TabBar
+                type="top"
+                look="brand"
+                className="vc-settings-tab-bar"
+                selectedItem={currentTab}
+                onItemSelect={setCurrentTab}
+            >
+                <TabBar.Item
+                    className="vc-settings-tab-bar-item"
+                    id={ThemeTab.LOCAL}
                 >
-                    <TabBar.Item
-                        className="vc-settings-tab-bar-item"
-                        id={ThemeTab.LOCAL}
-                    >
-                        Local Themes
-                    </TabBar.Item>
-                    <TabBar.Item
-                        className="vc-settings-tab-bar-item"
-                        id={ThemeTab.ONLINE}
-                    >
-                        Online Themes
-                    </TabBar.Item>
-                </TabBar>
+                    Local Themes
+                </TabBar.Item>
+                <TabBar.Item
+                    className="vc-settings-tab-bar-item"
+                    id={ThemeTab.ONLINE}
+                >
+                    Online Themes
+                </TabBar.Item>
+            </TabBar>
 
-                {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
-                {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
-            </>
-        );
+            {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
+            {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
+        </>
+    );
 });

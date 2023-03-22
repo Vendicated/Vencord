@@ -17,17 +17,31 @@
 */
 
 import * as DataStore from "../src/api/DataStore";
+import { getThemeInfo } from "../src/ipcMain/userThemes";
 import IpcEvents from "../src/utils/IpcEvents";
-
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
 
 // listeners for ipc.on
 const listeners = {} as Record<string, Set<Function>>;
 
+const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
+
 const handlers = {
     [IpcEvents.GET_REPO]: () => "https://github.com/Vendicated/Vencord", // shrug
     [IpcEvents.GET_SETTINGS_DIR]: () => "LocalStorage",
+
+    [IpcEvents.UPLOAD_THEME]: (fileName: string, fileData: string) => {
+        DataStore.set(fileName, fileData, themeStore);
+    },
+    [IpcEvents.DELETE_THEME]: (fileName: string) => {
+        DataStore.del(fileName, themeStore);
+    },
+    [IpcEvents.GET_THEMES_LIST]: () => {
+        return DataStore.entries(themeStore)
+            .then(entries => entries.map(([k, v]) => getThemeInfo(v, k.toString())));
+    },
+    [IpcEvents.GET_THEME_DATA]: (fileName: string) => DataStore.get(fileName, themeStore),
 
     [IpcEvents.GET_QUICK_CSS]: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
     [IpcEvents.SET_QUICK_CSS]: (css: string) => {
