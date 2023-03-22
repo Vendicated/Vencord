@@ -22,12 +22,13 @@ import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, PermissionStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+const ProtoPreloadedUserSettings = findLazy(m => m.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -162,6 +163,13 @@ export default definePlugin({
                     replace: (m, props) => `${m}${props}.local||$self.handleProtoChange(${props}.settings.proto);`
                 }
             ]
+        },
+        {
+            find: "updateTheme:function",
+            replacement: {
+                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\)/,
+                replace: (_, rest, backgroundGradientPresetId, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme});`
+            }
         }
     ],
 
@@ -211,18 +219,57 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        const premiumType = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
+        const premiumType: number = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
 
         if (premiumType === 0) {
-            const themeId = UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value;
+            const appearanceDummyProto = ProtoPreloadedUserSettings.create({
+                appearance: {}
+            });
 
-            if (themeId != null) {
-                proto.appearance ??= {};
-                proto.appearance.clientThemeSettings ??= {};
-                proto.appearance.clientThemeSettings.backgroundGradientPresetId ??= {};
-                proto.appearance.clientThemeSettings.backgroundGradientPresetId.value = themeId;
+            proto.appearance ??= appearanceDummyProto.appearance;
+
+            if (UserSettingsProtoStore.settings.appearance?.theme != null) {
+                proto.appearance.theme = UserSettingsProtoStore.settings.appearance.theme;
+            }
+
+            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
+                const clientThemeSettingsDummyProto = ProtoPreloadedUserSettings.create({
+                    appearance: {
+                        clientThemeSettings: {
+                            backgroundGradientPresetId: {
+                                value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
+                            }
+                        }
+                    }
+                });
+
+                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummyProto.appearance.clientThemeSettings;
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.appearance.clientThemeSettings.backgroundGradientPresetId;
             }
         }
+    },
+
+    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number) {
+        const proto = ProtoPreloadedUserSettings.create({
+            appearance: {
+                theme,
+                clientThemeSettings: {
+                    backgroundGradientPresetId: backgroundGradientPresetId != null ? {
+                        value: backgroundGradientPresetId
+                    } : void 0
+                }
+            }
+        });
+
+        FluxDispatcher.dispatch({
+            type: "USER_SETTINGS_PROTO_UPDATE",
+            local: true,
+            partial: true,
+            settings: {
+                type: 1,
+                proto
+            }
+        });
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
