@@ -53,7 +53,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,300}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2.id})"
+                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2?.id})"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -65,7 +65,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /function \i\((\i)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
-                    replace: "$&color:$self.getUserColor($1.id,{guildId:$1.guildId}),"
+                    replace: "$&color:$self.getUserColor($1.id,{guildId:$1?.guildId}),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
