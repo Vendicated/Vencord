@@ -21,6 +21,7 @@ import { migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
+import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
@@ -28,7 +29,21 @@ import { ChannelStore, FluxDispatcher, PermissionStore, UserStore } from "@webpa
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
-const ProtoPreloadedUserSettings = findLazy(m => m.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
+const PreloadedUserSettingsProtoHandler = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
+const ReaderFactory = findByPropsLazy("readerFactory");
+
+function searchProtoClass(localName: string, parentProtoClass: any) {
+    if (!parentProtoClass) return;
+
+    const field = parentProtoClass.fields.find(field => field.localName === localName);
+    if (!field) return;
+
+    const getter: any = Object.values(field).find(value => typeof value === "function");
+    return getter?.();
+}
+
+const AppearanceSettingsProto = proxyLazy(() => searchProtoClass("appearance", PreloadedUserSettingsProtoHandler.ProtoClass));
+const ClientThemeSettingsProto = proxyLazy(() => searchProtoClass("clientThemeSettings", AppearanceSettingsProto));
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -167,8 +182,8 @@ export default definePlugin({
         {
             find: "updateTheme:function",
             replacement: {
-                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\)/,
-                replace: (_, rest, backgroundGradientPresetId, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme});`
+                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)(\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\))/,
+                replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
             }
         }
     ],
@@ -219,47 +234,55 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        const premiumType: number = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
+        if ((!proto.appearance && !AppearanceSettingsProto) || !UserSettingsProtoStore) return;
 
-        if (premiumType === 0) {
-            const appearanceDummyProto = ProtoPreloadedUserSettings.create({
-                appearance: {}
-            });
+        const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
-            proto.appearance ??= appearanceDummyProto.appearance;
+        if (premiumType !== 2) {
+            proto.appearance ??= AppearanceSettingsProto.create();
 
             if (UserSettingsProtoStore.settings.appearance?.theme != null) {
                 proto.appearance.theme = UserSettingsProtoStore.settings.appearance.theme;
             }
 
-            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
-                const clientThemeSettingsDummyProto = ProtoPreloadedUserSettings.create({
-                    appearance: {
-                        clientThemeSettings: {
-                            backgroundGradientPresetId: {
-                                value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
-                            }
-                        }
+            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null && ClientThemeSettingsProto) {
+                const clientThemeSettingsDummyProto = ClientThemeSettingsProto.create({
+                    backgroundGradientPresetId: {
+                        value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
                     }
                 });
 
-                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummyProto.appearance.clientThemeSettings;
-                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.appearance.clientThemeSettings.backgroundGradientPresetId;
+                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummyProto;
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.backgroundGradientPresetId;
             }
         }
     },
 
-    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number) {
-        const proto = ProtoPreloadedUserSettings.create({
-            appearance: {
-                theme,
-                clientThemeSettings: {
-                    backgroundGradientPresetId: backgroundGradientPresetId != null ? {
-                        value: backgroundGradientPresetId
-                    } : void 0
-                }
+    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
+        const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
+        if (premiumType === 2 || backgroundGradientPresetId == null) return original();
+
+        if (!AppearanceSettingsProto || !ClientThemeSettingsProto || !ReaderFactory) return;
+
+        const currentAppearanceProto = PreloadedUserSettingsProtoHandler.getCurrentValue().appearance;
+
+        const newAppearanceProto = currentAppearanceProto != null
+            ? AppearanceSettingsProto.fromBinary(AppearanceSettingsProto.toBinary(currentAppearanceProto), ReaderFactory)
+            : AppearanceSettingsProto.create();
+
+        newAppearanceProto.theme = theme;
+
+        const clientThemeSettingsDummyProto = ClientThemeSettingsProto.create({
+            backgroundGradientPresetId: {
+                value: backgroundGradientPresetId
             }
         });
+
+        newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummyProto;
+        newAppearanceProto.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.backgroundGradientPresetId;
+
+        const proto = PreloadedUserSettingsProtoHandler.ProtoClass.create();
+        proto.appearance = newAppearanceProto;
 
         FluxDispatcher.dispatch({
             type: "USER_SETTINGS_PROTO_UPDATE",
