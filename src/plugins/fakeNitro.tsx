@@ -188,6 +188,7 @@ export default definePlugin({
         },
         {
             find: 'jumboable?"jumbo":"default"',
+            predicate: () => Settings.plugins.FakeNitro.transformEmojis === true,
             replacement: {
                 match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function\(\i\){var \i=\i\.node.+?)/,
                 replace: (m, component) => `${m}fakeNitroEmojiComponentExport=($self.EmojiComponent=${component},void 0),`
@@ -195,6 +196,7 @@ export default definePlugin({
         },
         {
             find: '["strong","em","u","text","inlineCode","s","spoiler"]',
+            predicate: () => Settings.plugins.FakeNitro.transformEmojis === true,
             replacement: [
                 {
                     match: /1!==(\i)\.length\|\|1!==\i\.length/,
@@ -208,6 +210,7 @@ export default definePlugin({
         },
         {
             find: "renderEmbeds=function",
+            predicate: () => Settings.plugins.FakeNitro.transformEmojis === true,
             replacement: {
                 match: /renderEmbeds=function\(\i\){.+?embeds\.map\(\(function\((\i)\){/,
                 replace: (m, embed) => `${m}if(${embed}.url?.startsWith("https://cdn.discordapp.com/emojis/"))return null;`
@@ -227,6 +230,12 @@ export default definePlugin({
             type: OptionType.SLIDER,
             default: 48,
             markers: [32, 48, 64, 128, 160, 256, 512],
+        },
+        transformEmojis: {
+            description: "Whether to transform fake emojis into real ones",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: true,
         },
         enableStickerBypass: {
             description: "Allow sending fake stickers",
