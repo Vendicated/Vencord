@@ -260,10 +260,10 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
-        if (!AppearanceSettingsProto || !ClientThemeSettingsProto || !ReaderFactory) return original();
-
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
-        if (premiumType === 2) return original();
+        if (premiumType === 2 || backgroundGradientPresetId == null) return original();
+
+        if (!AppearanceSettingsProto || !ClientThemeSettingsProto || !ReaderFactory) return;
 
         const currentAppearanceProto = PreloadedUserSettingsProtoHandler.getCurrentValue().appearance;
 
