@@ -185,6 +185,33 @@ export default definePlugin({
                 match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)(\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\))/,
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
             }
+        },
+        {
+            find: 'jumboable?"jumbo":"default"',
+            replacement: {
+                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function\(\i\){var \i=\i\.node.+?)/,
+                replace: (m, component) => `${m}fakeNitroEmojiComponentExport=($self.EmojiComponent=${component},void 0),`
+            }
+        },
+        {
+            find: '["strong","em","u","text","inlineCode","s","spoiler"]',
+            replacement: [
+                {
+                    match: /1!==(\i)\.length\|\|1!==\i\.length/,
+                    replace: (m, content) => `${m}||${content}[0].target?.startsWith("https://cdn.discordapp.com/emojis/")`
+                },
+                {
+                    match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
+                    replace: (_, content) => `${content}=$self.patchFakeNitroEmojis(${content});`
+                }
+            ]
+        },
+        {
+            find: "renderEmbeds=function",
+            replacement: {
+                match: /renderEmbeds=function\(\i\){.+?embeds\.map\(\(function\((\i)\){/,
+                replace: (m, embed) => `${m}if(${embed}.url?.startsWith("https://cdn.discordapp.com/emojis/"))return null;`
+            }
         }
     ],
 
@@ -293,6 +320,39 @@ export default definePlugin({
                 proto
             }
         });
+    },
+
+    EmojiComponent: null as any,
+
+    patchFakeNitroEmojis(content: Array<any>) {
+        if (!this.EmojiComponent) return content;
+
+        const newContent: Array<any> = [];
+
+        for (const element of content) {
+            if (element.props?.trusted == null) {
+                newContent.push(element);
+                continue;
+            }
+
+            const fakeNitroMatch = element.props.href.match(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+?)\.(png|webp|gif).+?(?=\s|$)/);
+            if (!fakeNitroMatch) {
+                newContent.push(element);
+                continue;
+            }
+
+            newContent.push((
+                <this.EmojiComponent node={{
+                    type: "customEmoji",
+                    jumboable: content.length === 1,
+                    animated: fakeNitroMatch[2] === "gif",
+                    name: ":FakeNitroEmoji:",
+                    emojiId: fakeNitroMatch[1]
+                }} />
+            ));
+        }
+
+        return newContent;
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
