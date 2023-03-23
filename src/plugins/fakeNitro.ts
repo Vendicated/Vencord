@@ -273,9 +273,9 @@ export default definePlugin({
         newAppearanceProto.theme = theme;
 
         const clientThemeSettingsDummyProto = ClientThemeSettingsProto.create({
-            backgroundGradientPresetId: backgroundGradientPresetId != null ? {
+            backgroundGradientPresetId: {
                 value: backgroundGradientPresetId
-            } : void 0
+            }
         });
 
         newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummyProto;
