@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { PluginDef } from "@utils/types";
+import definePlugin from "@utils/types";
 import { find, findByCode, findByPropsLazy } from "@webpack";
 import { Menu } from "@webpack/common";
 import type { Guild } from "discord-types/general";
@@ -30,12 +30,12 @@ const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MA
 const GuildBannerStore = findByPropsLazy("getGuildBannerURL");
 
 const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
-export default new class ViewIcons implements PluginDef {
-    name = "ViewIcons";
-    authors = [Devs.Ven];
-    description = "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon.";
+export default definePlugin({
+    name: "ViewIcons",
+    authors: [Devs.Ven],
+    description: "Makes Avatars/Banners in user profiles clickable, and adds Guild Context Menu Entries to View Banner/Icon.",
 
-    dependencies = ["MenuItemDeobfuscatorAPI"];
+    dependencies: ["MenuItemDeobfuscatorAPI"],
 
     openImage(url: string) {
         const u = new URL(url);
@@ -52,9 +52,9 @@ export default new class ViewIcons implements PluginDef {
                 />
             </ModalRoot>
         ));
-    }
+    },
 
-    patches = [
+    patches: [
         {
             find: "onAddFriend:",
             replacement: {
@@ -83,7 +83,7 @@ export default new class ViewIcons implements PluginDef {
                 }
             ]
         }
-    ];
+    ],
 
     buildGuildContextMenuEntries(guild: Guild) {
         return (
@@ -107,4 +107,4 @@ export default new class ViewIcons implements PluginDef {
             </Menu.MenuGroup>
         );
     }
-};
+});
