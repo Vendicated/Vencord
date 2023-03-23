@@ -45,7 +45,6 @@ function searchProtoClass(localName: string, parentProtoClass: any) {
 const AppearanceSettingsProto = proxyLazy(() => searchProtoClass("appearance", PreloadedUserSettingsProtoHandler.ProtoClass));
 const ClientThemeSettingsProto = proxyLazy(() => searchProtoClass("clientThemeSettings", AppearanceSettingsProto));
 
-
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
 
