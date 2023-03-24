@@ -16,38 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+import hoverControlsStyles from "./hoverControls.css?managed";
 import { Player } from "./PlayerComponent";
 
-function toggleHoverControls(value: boolean) {
-    document.getElementById("vc-spotify-hover-controls")?.remove();
-    if (value) {
-        const style = document.createElement("style");
-        style.id = "vc-spotify-hover-controls";
-        style.textContent = `
-.vc-spotify-button-row { height: 0; opacity: 0; will-change: height, opacity; transition: height .2s, opacity .05s; }
-#vc-spotify-player:hover .vc-spotify-button-row { opacity: 1; height: 32px; }
-`;
-        document.head.appendChild(style);
-    }
+function toggleHoverControls(enabled: boolean) {
+    (enabled ? enableStyle : disableStyle)(hoverControlsStyles);
 }
+
+const settings = definePluginSettings({
+    hoverControls: {
+        description: "Show controls on hover",
+        type: OptionType.BOOLEAN,
+        default: false,
+        onChange: v => toggleHoverControls(v)
+    },
+});
 
 export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
     dependencies: ["MenuItemDeobfuscatorAPI"],
-    options: {
-        hoverControls: {
-            description: "Show controls on hover",
-            type: OptionType.BOOLEAN,
-            default: false,
-            onChange: v => toggleHoverControls(v)
-        },
-    },
+    settings,
     patches: [
         {
             find: "showTaglessAccountPanel:",
@@ -75,6 +70,6 @@ export default definePlugin({
             }
         }
     ],
-    start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
+    start: () => toggleHoverControls(settings.store.hoverControls),
     renderPlayer: () => <Player />
 });

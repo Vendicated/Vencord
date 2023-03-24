@@ -1,0 +1,10 @@
+.vc-spotify-button-row {
+    height: 0;
+    opacity: 0;
+    transition: height 0.2s, opacity 0.05s;
+}
+
+#vc-spotify-player:hover .vc-spotify-button-row {
+    opacity: 1;
+    height: 32px;
+}
