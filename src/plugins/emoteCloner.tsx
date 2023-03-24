@@ -215,7 +215,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
     if (!favoriteableId || favoriteableType !== "emoji") return;
 
-    const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.(?:gif|png)`));
+    const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
     if (!match) return;
     const name = match[1] ?? "FakeNitroEmoji";
 
