@@ -30,9 +30,8 @@ function Validator({ link }: { link: string; }) {
     const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
-        if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
+        if (!contentType?.startsWith("text/css") && !link.endsWith(".css"))
             throw "Not a CSS file. Remember to use the raw link!";
-
         return "Okay!";
     }));
 
