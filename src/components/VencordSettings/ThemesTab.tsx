@@ -27,7 +27,9 @@ import { Card, Forms, React, TextArea } from "@webpack/common";
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 function Validator({ link }: { link: string; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+    const [res, err, pending] = useAwaiter(() => fetch(link, {
+        method: "HEAD",
+    }).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
         if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
