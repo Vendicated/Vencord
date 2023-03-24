@@ -33,7 +33,7 @@ type VoiceChannelFieldProps = {
 
 export const VoiceChannelField = ({ channel, label }: VoiceChannelFieldProps) => (
     <div
-        className="voiceChannelField"
+        className="voice-channel-field"
         onClick={() => {
             if (PermissionStore.can(CONNECT, channel))
                 ChannelActions.selectVoiceChannel(channel.id);
