@@ -215,12 +215,13 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
     if (!favoriteableId || favoriteableType !== "emoji") return;
 
-    const name = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>`))?.[1];
+    let name = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https:(//)cdn.discordapp.com/emojis/${favoriteableId}.(?:gif|png)`))?.[1];
     if (!name) return;
+    if (name === "//") name = "FakeNitroEmoji";
 
     const group = findGroupChildrenByChildId("copy-link", children);
     if (group && !group.some(child => child?.props?.id === "emote-cloner"))
-        group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
+        group.push(buildMenuItem(favoriteableId, name === "cdn.discordapp.com" ? "FakeEmote" : name, isGifUrl(itemHref ?? itemSrc)));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
