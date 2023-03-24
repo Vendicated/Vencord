@@ -38,7 +38,7 @@ const cache = new Map<string, string>();
 
 export default definePlugin({
     name: "PrettierCodeblocks",
-    description: "Formats code in codeblock with Prettier.",
+    description: "Formats code in codeblocks with Prettier.",
     dependencies: ["MessageEventsAPI"],
     authors: [Devs.Duro],
     settings,
