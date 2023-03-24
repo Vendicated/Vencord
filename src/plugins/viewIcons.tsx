@@ -29,7 +29,7 @@ const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MA
 
 const GuildBannerStore = findByPropsLazy("getGuildBannerURL");
 
-const OPEN_URL = "Vencord.Plugins.plugins.ViewIcons.openImage(";
+const OPEN_URL = "$self.openImage(";
 export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven],

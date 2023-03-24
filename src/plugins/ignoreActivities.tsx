@@ -151,7 +151,7 @@ export default definePlugin({
                 replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
                     + `${restWithoutPlatformCheck}`
                     + `(${platformCheck}?${children}:[])`
-                    + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
+                    + `.concat($self.renderToggleGameActivityButton(${props}))`
             }
         },
         {
