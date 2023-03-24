@@ -221,7 +221,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
     const group = findGroupChildrenByChildId("copy-link", children);
     if (group && !group.some(child => child?.props?.id === "emote-cloner"))
-        group.push(buildMenuItem(favoriteableId, name === "cdn.discordapp.com" ? "FakeEmote" : name, isGifUrl(itemHref ?? itemSrc)));
+        group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
