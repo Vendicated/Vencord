@@ -20,9 +20,30 @@ import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+
 const settings = definePluginSettings({
-    ignoreSilent: {
-        description: 'Ignore "silent" messages',
+    allowSilent: {
+        description: "Allow notifications from silent messages",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    allowGroupDMRemove: {
+        description: "Allow notifications for group DM removals",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    allowSpammers: {
+        description: "Allow notifications from spammer accounts",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    allowLurkedGuilds: {
+        description: "Allow notifications from guilds that you are lurking",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    allowBlockedUsers: {
+        description: "Allow notifications from blocked users",
         type: OptionType.BOOLEAN,
         default: false
     }
@@ -35,7 +56,32 @@ export default definePlugin({
         find: ".RECIPIENT_REMOVE)",
         replacement: {
             match: /null!=\i.flags.{0,30}SUPPRESS_NOTIFICATIONS\)/,
-            replace: "$& && !$self.settings.ignoreSilent"
+            replace: "$& && !$self.settings.store.allowSilent"
+        }
+    }, {
+        find: ".RECIPIENT_REMOVE)",
+        replacement: {
+            match: /\i\.type.{5,10}RECIPIENT_REMOVE/,
+            replace: "!$self.settings.store.allowGroupDMRemove && $&"
+        }
+    }, {
+        find: ".RECIPIENT_REMOVE)",
+        replacement: {
+            match: /\i\.hasFlag\(.{2,10}SPAMMER/,
+            replace: "!$self.settings.store.allowSpammers && $&"
+        }
+    }, {
+        find: ".RECIPIENT_REMOVE)",
+        replacement: {
+            match: /\i\.\i\.isLurking\(\i\)/,
+            replace: "($& && !$self.settings.store.allowLurkedGuilds)"
+        }
+    }, {
+        find: ".RECIPIENT_REMOVE)",
+        replacement: {
+            // Global to replace both occurrences of the isBlocked check within the module
+            match: /\i\.\i\.isBlocked\(\i\.id\)/g,
+            replace: "($& && !$self.settings.store.allowBlockedUsers)"
         }
     }],
     settings
