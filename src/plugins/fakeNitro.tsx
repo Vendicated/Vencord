@@ -459,7 +459,7 @@ export default definePlugin({
         for (const item of message.content.split(" ")) {
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
-                const stickerName = StickerStore.getStickerById(imgMatch[1]) ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
