@@ -17,11 +17,10 @@
 */
 
 import { Settings } from "@api/settings";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { React, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { i18n, React, useStateFromStores } from "@webpack/common";
 
 const classes = findByPropsLazy("sidebar", "guilds");
-const i18n = findLazy(m => m.Messages?.["en-US"]);
 
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const FullscreenStore = findByPropsLazy("isFullscreenInContext");
