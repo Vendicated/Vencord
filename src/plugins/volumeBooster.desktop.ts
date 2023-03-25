@@ -74,10 +74,10 @@ export default definePlugin({
             find: '.displayName="MediaEngineStore"',
             replacement: [
                 {
-                    match: /(?<=\.settings\.audioContextSettings.+?)(\i\[\i\])=(\i\.volume)(.+?setLocalVolume\(\i,).+?\)/,
-                    replace: (_, localVolume, syncVolume, rest) => ""
+                    match: /(\.settings\.audioContextSettings.+?)(\i\[\i\])=(\i\.volume)(.+?setLocalVolume\(\i,).+?\)/,
+                    replace: (_, rest1, localVolume, syncVolume, rest2) => rest1
                         + `(${localVolume}>200?void 0:${localVolume}=${syncVolume})`
-                        + rest
+                        + rest2
                         + `${localVolume}??${syncVolume})`
                 }
             ]

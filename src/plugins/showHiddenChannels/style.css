@@ -103,4 +103,5 @@
 .shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
     margin-left: 10px;
     flex-wrap: wrap;
+    justify-content: center;
 }
