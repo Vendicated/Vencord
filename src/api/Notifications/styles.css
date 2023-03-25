@@ -40,6 +40,8 @@
 }
 
 .vc-notification-close-btn {
+    all: unset;
+    cursor: pointer;
     color: var(--interactive-normal);
     opacity: 0.5;
     transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
