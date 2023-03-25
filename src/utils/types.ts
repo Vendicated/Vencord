@@ -279,7 +279,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingAtom
 type PluginSettingTypeWithDefault<O extends PluginSettingDef> = PluginSettingType<O> extends never ? never : (PluginSettingType<O> | PluginSettingDefaultType<O>);
 
 type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingTypeWithDefault<D[K]> extends Array<infer T> ? T : PluginSettingTypeWithDefault<D[K]>;
+    [K in keyof D]: PluginSettingTypeWithDefault<D[K]> extends Array<infer T> ? T[] : PluginSettingTypeWithDefault<D[K]>;
 };
 
 /** An instance of defined plugin settings */
