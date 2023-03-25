@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
@@ -33,36 +34,38 @@ const settings = definePluginSettings({
     }
 });
 
+const getVoiceChannelField = (props: any) => {
+    // console.log(e);
+    const { user } = props;
+    const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
+    if (!channelId) return;
+    const channel = ChannelStore.getChannel(channelId);
+    const guild = GuildStore.getGuild(channel.guild_id);
+
+    const result = `${guild.name} | ${channel.name}`;
+    // console.log(result);
+
+    return (
+        <VoiceChannelField
+            channel={channel}
+            label={result}
+        />
+    );
+};
+
 export default definePlugin({
     name: "User Voice Show",
     description: "See the channel a user is sitting in and click join that channel",
-    authors: [
-        {
-            id: 319460781567639554n,
-            name: "LordElias",
-        },
-    ],
+    authors: [Devs.LordElias],
     settings,
 
-    getVoiceChannelField(props: any, origin: string) {
-        if (origin === "modal" && !settings.store.showInUserProfileModal) return;
+    patchModal(props: any) {
+        if (settings.store.showInUserProfileModal)
+            return getVoiceChannelField(props);
+    },
 
-        // console.log(e);
-        const { user } = props;
-        const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
-        if (!channelId) return;
-        const channel = ChannelStore.getChannel(channelId);
-        const guild = GuildStore.getGuild(channel.guild_id);
-
-        const result = `${guild.name} | ${channel.name}`;
-        // console.log(result);
-
-        return (
-            <VoiceChannelField
-                channel={channel}
-                label={result}
-            />
-        );
+    patchPopout(props: any) {
+        return getVoiceChannelField(props);
     },
 
     patches: [
@@ -74,7 +77,7 @@ export default definePlugin({
                 // $3: my actual match
                 match: /(?<=function \w+\()(\w)(.*)(\(0,\w\.jsx\))(?=(.(?!\3))+?canDM)/,
                 // paste my fancy custom button above the message field
-                replace: "$1$2$self.getVoiceChannelField($1, \"popout\"),$3",
+                replace: "$1$2$self.patchPopout($1),$3",
             }
         },
         {
@@ -85,7 +88,7 @@ export default definePlugin({
                 // $3: my actual match
                 match: /(?<=function \w+\()(\w)(.*)((\(0,\w\.jsx\))(.(?!\4))+?user:\w{1,2}}\))/,
                 // paste my fancy custom button above the message field
-                replace: "$1$2$3,$self.getVoiceChannelField($1, \"modal\")",
+                replace: "$1$2$3,$self.patchModal($1)",
             }
         }
     ],
