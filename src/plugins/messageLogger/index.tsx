@@ -18,6 +18,7 @@
 
 import "./messageLogger.css";
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -25,7 +26,7 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { FluxDispatcher, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -43,20 +44,48 @@ function addDeleteStyle() {
     }
 }
 
+const MENU_ITEM_ID = "message-logger-remove-history";
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    const { message } = props;
+    const { deleted, editHistory, id, channel_id } = message;
+
+    if (!deleted && !editHistory?.length) return;
+    if (children.some(c => c?.props?.id === MENU_ITEM_ID)) return;
+
+    children.push((
+        <Menu.MenuItem
+            id={MENU_ITEM_ID}
+            key={MENU_ITEM_ID}
+            label="Remove Message History"
+            action={() => {
+                if (message.deleted) {
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_DELETE",
+                        channelId: channel_id,
+                        id,
+                        mlDeleted: true
+                    });
+                } else {
+                    message.editHistory = [];
+                }
+            }}
+        />
+    ));
+};
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
+    dependencies: ["ContextMenuAPI", "MenuItemDeobfuscatorAPI"],
 
     start() {
         addDeleteStyle();
+        addContextMenuPatch("message", patchMessageContextMenu);
     },
 
     stop() {
-        document.querySelectorAll(".messagelogger-deleted").forEach(e => e.remove());
-        document.querySelectorAll(".messagelogger-edited").forEach(e => e.remove());
-        document.body.classList.remove("messagelogger-red-overlay");
-        document.body.classList.remove("messagelogger-red-text");
+        removeContextMenuPatch("message", patchMessageContextMenu);
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
@@ -106,7 +135,7 @@ export default definePlugin({
         }
     },
 
-    handleDelete(cache: any, data: { ids: string[], id: string; }, isBulk: boolean) {
+    handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
@@ -118,7 +147,8 @@ export default definePlugin({
                 if (!msg) return;
 
                 const EPHEMERAL = 64;
-                const shouldIgnore = (msg.flags & EPHEMERAL) === EPHEMERAL ||
+                const shouldIgnore = data.mlDeleted ||
+                    (msg.flags & EPHEMERAL) === EPHEMERAL ||
                     ignoreBots && msg.author?.bot ||
                     ignoreSelf && msg.author?.id === myId;
 
@@ -174,6 +204,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m =>" +
+                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -271,14 +302,9 @@ export default definePlugin({
             find: "Message must not be a thread starter message",
             replacement: [
                 {
-                    // Write message.deleted to deleted var
-                    match: /var (\w)=(\w).id,(?=\w=\w.message)/,
-                    replace: "var $1=$2.id,deleted=$2.message.deleted,"
-                },
-                {
                     // Append messagelogger-deleted to classNames if deleted
                     match: /\)\("li",\{(.+?),className:/,
-                    replace: ")(\"li\",{$1,className:(deleted ? \"messagelogger-deleted \" : \"\")+"
+                    replace: ")(\"li\",{$1,className:(arguments[0].message.deleted ? \"messagelogger-deleted \" : \"\")+"
                 }
             ]
         },
