@@ -39,7 +39,7 @@ export default definePlugin({
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(\"span\",{id:.\i,className:.\i,children:.\i}\))/,
+                match: /("span",{id:\i,className:\i,children:\i}\))/,
                 replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
             }
         },
