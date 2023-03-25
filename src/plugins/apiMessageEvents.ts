@@ -27,17 +27,17 @@ export default definePlugin({
         {
             find: '"MessageActionCreators"',
             replacement: [{
-                match: /(_sendMessage:function\((?:\i,?).+?\){)(.+?)(?=},.{1,30}:function)/,
-                replace: "$1return Vencord.Api.MessageEvents._handlePreSend(...arguments).then(()=>{$2})"
+                match: /_sendMessage:(function\([^)]+\)){/,
+                replace: "_sendMessage:async $1{if(await Vencord.Api.MessageEvents._handlePreSend(...arguments))return;"
             }, {
-                match: /(editMessage:function\((?:\i,?).+?\){)(.+?)(?=},.{1,30}:function)/,
-                replace: "$1return Vencord.Api.MessageEvents._handlePreEdit(...arguments).then(()=>{$2})"
+                match: /\beditMessage:(function\([^)]+\)){/,
+                replace: "editMessage:async $1{await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
             }]
         },
         {
             find: '("interactionUsernameProfile',
             replacement: {
-                match: /var \w=(\w)\.id,\w=(\w)\.id;return .{1,2}\.useCallback\(\(?function\((.{1,2})\){/,
+                match: /var \i=(\i)\.id,\i=(\i)\.id;return \i\.useCallback\(\(?function\((\i)\){/,
                 replace: (m, message, channel, event) =>
                     // the message param is shadowed by the event param, so need to alias them
                     `var _msg=${message},_chan=${channel};${m}Vencord.Api.MessageEvents._handleClick(_msg, _chan, ${event});`
