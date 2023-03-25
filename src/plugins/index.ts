@@ -43,8 +43,8 @@ export function isPluginEnabled(p: string) {
 
 const pluginsValues = Object.values(Plugins);
 
-// First roundtrip to mark and force enable dependencies
-for (const p of pluginsValues) {
+// First roundtrip to mark and force enable dependencies (only for enabled plugins)
+for (const p of pluginsValues) if (settings[p.name]?.enabled) {
     p.dependencies?.forEach(d => {
         const dep = Plugins[d];
         if (dep) {
