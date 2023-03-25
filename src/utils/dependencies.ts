@@ -81,3 +81,8 @@ export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wa
 
 // @ts-expect-error SHUT UP
 export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+
+// @ts-expect-error
+export const getPrettier = makeLazy(() => import("https://unpkg.com/prettier@2.8.6/esm/standalone.mjs"));
+// @ts-expect-error
+export const getPrettierParser = makeLazy(() => import("https://unpkg.com/prettier@2.8.6/esm/parser-babel.mjs"));

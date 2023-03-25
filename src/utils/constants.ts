@@ -205,5 +205,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
-    }
+    },
+    Duro: {
+        name: "Duro",
+        id: 283312847478325251n,
+    },
 });
