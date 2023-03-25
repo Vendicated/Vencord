@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Menu, i18n, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
