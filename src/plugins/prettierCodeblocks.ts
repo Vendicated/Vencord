@@ -84,18 +84,18 @@ export default definePlugin({
 
         try {
             if (lang?.toLowerCase() === "json") {
-                const formatted = JSON.stringify(JSON.parse(code), null, 2);
+                const formatted = JSON.stringify(JSON.parse(code), null, 2).trim();
                 this.updateCache(code, formatted);
 
                 return formatted;
             }
 
-            const formatted = formatter(code);
+            const formatted = formatter(code).trim();
             this.updateCache(code, formatted);
 
             return formatted;
         } catch (_) {
-            return code;
+            return code.trim();
         }
     },
 
