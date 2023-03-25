@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, Forms } from "@webpack/common";
@@ -28,6 +29,12 @@ interface ActivityAssets {
     large_text?: string;
     small_image?: string;
     small_text?: string;
+}
+
+
+interface ActivityButton {
+    label: string;
+    url: string;
 }
 
 interface Activity {
@@ -66,6 +73,9 @@ enum ActivityFlag {
 }
 
 const applicationId = "1043533871037284423";
+const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
+
+const logger = new Logger("LastFMRichPresence");
 
 const presenceStore = findByPropsLazy("getLocalPresence");
 const assetManager = mapMangledModuleLazy(
@@ -79,14 +89,64 @@ async function getApplicationAsset(key: string): Promise<string> {
     return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
 }
 
-function setActivity(activity?: Activity) {
-    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: activity });
+function setActivity(activity: Activity | null) {
+    FluxDispatcher.dispatch({
+        type: "LOCAL_ACTIVITY_UPDATE",
+        activity,
+        socketId: "LastFM",
+    });
 }
+
+const settings = definePluginSettings({
+    username: {
+        description: "last.fm username",
+        type: OptionType.STRING,
+    },
+    apiKey: {
+        description: "last.fm api key",
+        type: OptionType.STRING,
+    },
+    shareUsername: {
+        description: "show link to last.fm profile",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    hideWithSpotify: {
+        description: "hide last.fm presence if spotify is running",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+    statusName: {
+        description: "text shown in status",
+        type: OptionType.STRING,
+        default: "some music",
+    },
+    useListeningStatus: {
+        description: 'show "Listening to" status instead of "Playing"',
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    missingArt: {
+        description: "When album or album art is missing",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Use large Last.fm logo",
+                value: "lastfmLogo",
+                default: true
+            },
+            {
+                label: "Use generic placeholder",
+                value: "placeholder"
+            }
+        ],
+    }
+});
 
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn],
+    authors: [Devs.dzshn, Devs.RuiNtD],
 
     settingsAboutComponent: () => (
         <>
@@ -104,30 +164,9 @@ export default definePlugin({
         </>
     ),
 
-    options: {
-        username: {
-            description: "last.fm username",
-            type: OptionType.STRING,
-        },
-        apiKey: {
-            description: "last.fm api key",
-            type: OptionType.STRING,
-        },
-        hideWithSpotify: {
-            description: "hide last.fm presence if spotify is running",
-            type: OptionType.BOOLEAN,
-            default: true,
-        },
-        useListeningStatus: {
-            description: 'show "Listening to" status instead of "Playing"',
-            type: OptionType.BOOLEAN,
-            default: false,
-        }
-    },
+    settings,
 
     start() {
-        this.settings = Settings.plugins.LastFMRichPresence;
-
         this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
 
@@ -136,73 +175,112 @@ export default definePlugin({
     },
 
     async fetchTrackData(): Promise<TrackData | null> {
-        if (!this.settings.username || !this.settings.apiKey) return null;
+        if (!settings.store.username || !settings.store.apiKey)
+            return null;
 
-        const response = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&api_key=${this.settings.apiKey}&user=${this.settings.username}&limit=1&format=json`);
-        const trackData = (await response.json()).recenttracks.track[0];
+        try {
+            const params = new URLSearchParams({
+                method: "user.getrecenttracks",
+                api_key: settings.store.apiKey,
+                user: settings.store.username,
+                limit: "1",
+                format: "json"
+            });
 
-        if (!trackData["@attr"]?.nowplaying) return null;
+            const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+            if (!res.ok) throw `${res.status} ${res.statusText}`;
 
-        // why does the json api have xml structure
-        return {
-            name: trackData.name || "Unknown",
-            album: trackData.album["#text"],
-            artist: trackData.artist["#text"] || "Unknown",
-            url: trackData.url,
-            imageUrl: (trackData.image || []).filter(x => x.size === "large")[0]?.["#text"]
-        };
+            const json = await res.json();
+            if (json.error) {
+                logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
+                return null;
+            }
+
+            const trackData = json.recenttracks?.track[0];
+
+            if (!trackData || !trackData["@attr"]?.nowplaying)
+                return null;
+
+            // why does the json api have xml structure
+            return {
+                name: trackData.name || "Unknown",
+                album: trackData.album["#text"],
+                artist: trackData.artist["#text"] || "Unknown",
+                url: trackData.url,
+                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
+            };
+        } catch (e) {
+            logger.error("Failed to query Last.fm API", e);
+            // will clear the rich presence if API fails
+            return null;
+        }
     },
 
     async updatePresence() {
-        if (this.settings.hideWithSpotify) {
+        setActivity(await this.getActivity());
+    },
+
+    getLargeImage(track: TrackData): string | undefined {
+        if (track.imageUrl && !track.imageUrl.includes(placeholderId))
+            return track.imageUrl;
+
+        if (settings.store.missingArt === "placeholder")
+            return "placeholder";
+    },
+
+    async getActivity(): Promise<Activity | null> {
+        if (settings.store.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
                 if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
-                    // there is already music status (probably only spotify can do this currently)
-                    setActivity();
-                    return;
+                    // there is already music status because of Spotify or richerCider (probably more)
+                    return null;
                 }
             }
         }
 
         const trackData = await this.fetchTrackData();
+        if (!trackData) return null;
 
-        if (!trackData) {
-            setActivity();
-            return;
-        }
-
-        const hideAlbumName = !trackData.album || trackData.album === trackData.name;
-
-        let assets: ActivityAssets;
-        if (trackData.imageUrl) {
-            assets = {
-                large_image: await getApplicationAsset(trackData.imageUrl),
-                large_text: trackData.name,
+        const largeImage = this.getLargeImage(trackData);
+        const assets: ActivityAssets = largeImage ?
+            {
+                large_image: await getApplicationAsset(largeImage),
+                large_text: trackData.album || undefined,
                 small_image: await getApplicationAsset("lastfm-small"),
                 small_text: "Last.fm",
-            };
-        } else {
-            assets = {
+            } : {
                 large_image: await getApplicationAsset("lastfm-large"),
-                large_text: "Last.fm",
+                large_text: trackData.album || undefined,
             };
-        }
 
-        setActivity({
+        const buttons: ActivityButton[] = [
+            {
+                label: "View Song",
+                url: trackData.url,
+            },
+        ];
+
+        if (settings.store.shareUsername)
+            buttons.push({
+                label: "Last.fm Profile",
+                url: `https://www.last.fm/user/${settings.store.username}`,
+            });
+
+        return {
             application_id: applicationId,
-            name: "some music",
+            name: settings.store.statusName,
 
             details: trackData.name,
-            state: hideAlbumName ? trackData.artist : `${trackData.artist} - ${trackData.album}`,
+            state: trackData.artist,
             assets,
 
-            buttons: ["Open in Last.fm"],
+            buttons: buttons.map(v => v.label),
             metadata: {
-                button_urls: [trackData.url]
+                button_urls: buttons.map(v => v.url),
             },
 
-            type: this.settings.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
+            type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
             flags: ActivityFlag.INSTANCE,
-        });
+        };
     }
 });
