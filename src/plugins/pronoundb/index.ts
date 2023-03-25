@@ -35,7 +35,7 @@ export default definePlugin({
     authors: [Devs.Tyman, Devs.TheKodeToad],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
-        // Add next to username
+        // Add next to username (compact mode)
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
@@ -43,11 +43,11 @@ export default definePlugin({
                 replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
             }
         },
-        // Patch the chat timestamp element
+        // Patch the chat timestamp element (normal mode)
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\))/,
+                match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
                 replace: "[$1, $self.PronounsChatComponentWrapper(e)]"
             }
         },
@@ -55,7 +55,7 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /\(0,.\.jsx\)\((?<PronounComponent>.{1,2}\..),(?<pronounProps>{currentPronouns.+?:(?<fullProps>.{1,2})\.pronouns.+?})\)/,
+                match: /\(0,.\.jsx\)\((?<PronounComponent>\i\..),(?<pronounProps>{currentPronouns.+?:(?<fullProps>\i)\.pronouns.+?})\)/,
                 replace: "$<fullProps>&&$self.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
             }
         },
