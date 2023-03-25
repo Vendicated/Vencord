@@ -20,18 +20,20 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { PermissionStore, UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
+const MANAGE_CHANNELS = 1n << 4n;
+
 migratePluginSettings("MessageClickActions", "MessageQuickActions");
 
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Delete and click to delete, double click to edit",
+    description: "Hold Backspace and click to delete, double click to edit",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
@@ -50,8 +52,6 @@ export default definePlugin({
 
     start() {
         const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-        const PermissionStore = findByPropsLazy("can", "initialize");
-        const Permissions = findLazy(m => typeof m.MANAGE_MESSAGES === "bigint");
         const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 
         document.addEventListener("keydown", keydown);
@@ -64,7 +64,7 @@ export default definePlugin({
                     MessageActions.startEditMessage(chan.id, msg.id, msg.content);
                     event.preventDefault();
                 }
-            } else if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick && (isMe || PermissionStore.can(Permissions.MANAGE_MESSAGES, chan))) {
+            } else if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, chan))) {
                 MessageActions.deleteMessage(chan.id, msg.id);
                 event.preventDefault();
             }
