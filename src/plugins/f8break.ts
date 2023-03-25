@@ -20,23 +20,23 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "AlwaysTrust",
-    description: "Removes the annoying untrusted domain and suspicious file popup",
-    authors: [Devs.zt],
-    patches: [
-        {
-            find: ".displayName=\"MaskedLinkStore\"",
-            replacement: {
-                match: /\.isTrustedDomain=function\(.\){return.+?};/,
-                replace: ".isTrustedDomain=function(){return true};"
-            }
-        },
-        {
-            find: '"7z","ade","adp"',
-            replacement: {
-                match: /JSON\.parse\('\[.+?'\)/,
-                replace: "[]"
-            }
+    name: "F8Break",
+    description: "Pause the client when you press F8 with DevTools (+ breakpoints) open.",
+    authors: [Devs.lewisakura],
+
+    start() {
+        window.addEventListener("keydown", this.event);
+    },
+
+    stop() {
+        window.removeEventListener("keydown", this.event);
+    },
+
+    event(e: KeyboardEvent) {
+        if (e.code === "F8") {
+            // Hi! You've just paused the client. Pressing F8 in DevTools or in the main window will unpause it again.
+            // It's up to you on what to do, friend. Happy travels!
+            debugger;
         }
-    ]
+    }
 });
