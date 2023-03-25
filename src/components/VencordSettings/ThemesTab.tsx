@@ -108,7 +108,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
         }
 
         if (theme.invite) {
-            const invite = /^\w+$/.test(theme.invite)
+            const invite = /^[-\w]+$/.test(theme.invite)
                 ? `https://discord.gg/${theme.invite}`
                 : theme.invite;
 
