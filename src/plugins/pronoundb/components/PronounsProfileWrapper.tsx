@@ -17,16 +17,19 @@
 */
 
 import { Settings } from "@api/settings";
-import { useAwaiter } from "@utils/misc";
 import { UserStore } from "@webpack/common";
 
-import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
-import { PronounMapping, UserProfilePronounsProps, UserProfileProps } from "../types";
+import { awaitAndFormatPronouns } from "../pronoundbUtils";
+import { UserProfilePronounsProps, UserProfileProps } from "../types";
 
 export default function PronounsProfileWrapper(PronounsComponent: React.ElementType<UserProfilePronounsProps>, props: UserProfilePronounsProps, profileProps: UserProfileProps) {
     const user = UserStore.getUser(profileProps.userId) ?? {};
+    // Respect showInProfile
+    if (!Settings.plugins.PronounDB.showInProfile)
+        return null;
     // Don't bother fetching bot or system users
-    if (user.bot || user.system) return null;
+    if (user.bot || user.system)
+        return null;
     // Respect showSelf options
     if (!Settings.plugins.PronounDB.showSelf && user.id === UserStore.getCurrentUser().id)
         return null;
@@ -45,15 +48,12 @@ function ProfilePronouns(
         leProps: UserProfilePronounsProps;
     }
 ) {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(userId), {
-        fallbackValue: null,
-        onError: e => console.error("Fetching pronouns failed: ", e),
-    });
+    const result = awaitAndFormatPronouns(userId);
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then render
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
+    if (result != null) {
         // First child is the header, second is a div with the actual text
-        leProps.currentPronouns ||= formatPronouns(result);
+        leProps.currentPronouns ||= result;
         return <Component {...leProps} />;
     }
 
