@@ -1,4 +1,4 @@
-.spotimbed-embed {
+.vc-spotimbed-embed {
     border-radius: 4px;
     color: var(--text-normal);
     display: grid;
@@ -11,12 +11,12 @@
     user-select: none;
 }
 
-.spotimbed-has-player {
+.vc-spotimbed-has-player {
     grid-template-rows: 5rem auto 2rem;
     grid-template-areas: "art info" "content content" "controls controls";
 }
 
-.spotimbed-unavailable::after {
+.vc-spotimbed-unavailable::after {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,13 +35,13 @@
     text-align: center;
 }
 
-.spotimbed-dismissed::after {
+.vc-spotimbed-dismissed::after {
     opacity: 0;
     backdrop-filter: brightness(0) blur(0);
     pointer-events: none;
 }
 
-.spotimbed-art-wrap {
+.vc-spotimbed-art-wrap {
     grid-area: art;
     align-items: center;
     display: flex;
@@ -52,11 +52,11 @@
     overflow: hidden;
 }
 
-.spotimbed-has-player .spotimbed-art-wrap {
+.vc-spotimbed-has-player .vc-spotimbed-art-wrap {
     border-radius: 4px 0 0;
 }
 
-.spotimbed-art {
+.vc-spotimbed-art {
     width: 5rem;
     height: 5rem;
     background-size: cover;
@@ -64,7 +64,7 @@
     background-repeat: no-repeat;
 }
 
-.spotimbed-art-default {
+.vc-spotimbed-art-default {
     background: var(--background-secondary-alt);
     color: inherit;
     height: 2.5rem;
@@ -73,13 +73,13 @@
 }
 
 /* descender cut-off fix: https://stackoverflow.com/a/64039674 */
-.spotimbed-title,
-.spotimbed-infoline,
-.spotimbed-infoline-secondary {
+.vc-spotimbed-title,
+.vc-spotimbed-infoline,
+.vc-spotimbed-infoline-secondary {
     padding-bottom: 0.14em;
 }
 
-.spotimbed-info {
+.vc-spotimbed-info {
     grid-area: info;
     justify-content: space-evenly;
     box-sizing: border-box;
@@ -91,15 +91,15 @@
     overflow: hidden;
 }
 
-.spotimbed-link {
+.vc-spotimbed-link {
     color: inherit;
 }
 
-.spotimbed-link:hover {
+.vc-spotimbed-link:hover {
     text-decoration: underline;
 }
 
-.spotimbed-info .spotimbed-placeholder {
+.vc-spotimbed-info .vc-spotimbed-placeholder {
     background-color: var(--text-normal);
     border-radius: 9999px;
     color: transparent;
@@ -107,24 +107,24 @@
     padding-right: 6.25rem;
 }
 
-.spotimbed-titleline {
+.vc-spotimbed-titleline {
     align-items: center;
     font-weight: bold;
 }
 
-.spotimbed-title {
+.vc-spotimbed-title {
     color: var(--header-primary);
 }
 
-.spotimbed-title-spacer {
+.vc-spotimbed-title-spacer {
     flex: 1;
 }
 
-.spotimbed-mono {
+.vc-spotimbed-mono {
     font-family: var(--font-code);
 }
 
-.spotimbed-title-tag {
+.vc-spotimbed-title-tag {
     background-color: rgb(0 0 0 / 60%);
     border-radius: 4px;
     color: rgb(255 255 255 / 80%);
@@ -135,100 +135,100 @@
     padding: 0.1875rem 0.375rem;
 }
 
-.spotimbed-title-tag + .spotimbed-title-tag {
+.vc-spotimbed-title-tag+.vc-spotimbed-title-tag {
     margin-left: 0.5rem;
 }
 
-.spotimbed-titleline,
-.spotimbed-infoline-wrap {
+.vc-spotimbed-titleline,
+.vc-spotimbed-infoline-wrap {
     display: flex;
     white-space: pre;
 }
 
-.spotimbed-title,
-.spotimbed-infoline {
+.vc-spotimbed-title,
+.vc-spotimbed-infoline {
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.spotimbed-infoline-secondary {
+.vc-spotimbed-infoline-secondary {
     font-size: 90%;
 }
 
-.spotimbed-content {
+.vc-spotimbed-content {
     grid-area: content;
     background-color: rgb(0 0 0 / 12%);
 }
 
-.spotimbed-content::-webkit-scrollbar-track {
+.vc-spotimbed-content::-webkit-scrollbar-track {
     background: rgb(0 0 0 / 20%);
 }
 
-.spotimbed-embed:not(.theme-custom) .spotimbed-content::-webkit-scrollbar-thumb {
+.vc-spotimbed-embed:not(.theme-custom) .vc-spotimbed-content::-webkit-scrollbar-thumb {
     background-color: var(--spotimbed-accent);
 }
 
-.spotimbed-tracklist {
+.vc-spotimbed-tracklist {
     height: 12.5rem;
     overflow-y: auto;
 }
 
-.spotimbed-trackrow {
+.vc-spotimbed-trackrow {
     align-items: center;
     display: flex;
     height: 2.5rem;
 }
 
-.spotimbed-embed.theme-dark {
+.vc-spotimbed-embed.theme-dark {
     --background-modifier-hover: rgb(255 255 255 / 10%);
     --background-modifier-selected: rgb(255 255 255 / 30%);
 }
 
-.spotimbed-embed.theme-light {
+.vc-spotimbed-embed.theme-light {
     --background-modifier-hover: rgb(0 0 0 / 10%);
     --background-modifier-selected: rgb(0 0 0 / 20%);
 }
 
-.spotimbed-trackrow:not(.spotimbed-active, .spotimbed-disabled) {
+.vc-spotimbed-trackrow:not(.vc-spotimbed-active, .vc-spotimbed-disabled) {
     cursor: pointer;
 }
 
-.spotimbed-trackrow:not(.spotimbed-disabled):hover {
+.vc-spotimbed-trackrow:not(.vc-spotimbed-disabled):hover {
     background-color: var(--background-modifier-hover);
 }
 
-.spotimbed-trackrow.spotimbed-active {
+.vc-spotimbed-trackrow.vc-spotimbed-active {
     background-color: var(--background-modifier-selected);
     color: var(--interactive-active);
 }
 
-.spotimbed-trackrow.spotimbed-disabled {
+.vc-spotimbed-trackrow.vc-spotimbed-disabled {
     opacity: 0.5;
 }
 
-.spotimbed-trackrow-index {
+.vc-spotimbed-trackrow-index {
     margin: 0 0.625rem;
     width: 1.25rem;
     text-align: right;
 }
 
-.spotimbed-trackrow-length {
+.vc-spotimbed-trackrow-length {
     margin: 0 1rem 0 0.625rem;
     font-size: 90%;
 }
 
-.spotimbed-trackrow-info {
+.vc-spotimbed-trackrow-info {
     flex: 1;
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.spotimbed-trackrow-title {
+.vc-spotimbed-trackrow-title {
     font-weight: 600;
 }
 
-.spotimbed-controls {
+.vc-spotimbed-controls {
     background-color: rgb(0 0 0 / 60%);
     border-radius: 0 0 4px 4px;
     color: #fff;
@@ -237,11 +237,11 @@
     display: flex;
 }
 
-.spotimbed-media-player {
+.vc-spotimbed-media-player {
     flex: 1;
 }
 
-.spotimbed-queue-btn {
+.vc-spotimbed-queue-btn {
     background: none;
     color: inherit;
     box-sizing: border-box;
@@ -251,24 +251,24 @@
     opacity: 0.6;
 }
 
-.spotimbed-queue-btn:hover {
+.vc-spotimbed-queue-btn:hover {
     opacity: 1;
 }
 
-.spotimbed-queue-btn[data-state="complete"] {
+.vc-spotimbed-queue-btn[data-state="complete"] {
     color: var(--status-green-500);
     opacity: 0.8;
     cursor: default;
     pointer-events: none;
 }
 
-.spotimbed-queue-btn[data-state="pending"] {
+.vc-spotimbed-queue-btn[data-state="pending"] {
     opacity: 0.4;
     cursor: default;
     pointer-events: none;
 }
 
-.spotimbed-queue-btn[data-state="error"] {
+.vc-spotimbed-queue-btn[data-state="error"] {
     padding: 6px;
     color: var(--status-red-400);
     opacity: 0.8;
@@ -276,30 +276,30 @@
     pointer-events: none;
 }
 
-.spotimbed-controls [class*="audioMetadata"] {
+.vc-spotimbed-controls [class*="audioMetadata"] {
     display: none;
 }
 
-.spotimbed-controls [class*="audioControls"] {
+.vc-spotimbed-controls [class*="audioControls"] {
     background-color: transparent;
     border-radius: 0 0 4px 4px;
     margin-top: 0;
 }
 
-.spotimbed-controls [class*="videoButton"] {
+.vc-spotimbed-controls [class*="videoButton"] {
     margin-right: 0 !important;
 }
 
-.spotimbed-controls [class*="durationTimeWrapper"] {
+.vc-spotimbed-controls [class*="durationTimeWrapper"] {
     transform: translateY(-15%);
     display: none;
 }
 
-.spotimbed-controls [class*="durationTimeWrapper"] > [class*="durationTime"] {
+.vc-spotimbed-controls [class*="durationTimeWrapper"]>[class*="durationTime"] {
     display: none;
 }
 
-.spotimbed-controls [class*="horizontal"]::before {
+.vc-spotimbed-controls [class*="horizontal"]::before {
     content: "Preview";
     font-family: var(--font-code);
     text-transform: uppercase;
@@ -312,14 +312,14 @@
     justify-content: center;
 }
 
-.spotimbed-controls .spotimbed-placeholder-wrap {
+.vc-spotimbed-controls .vc-spotimbed-placeholder-wrap {
     flex: 1;
     align-items: center;
     display: flex;
     height: 100%;
 }
 
-.spotimbed-controls .spotimbed-placeholder {
+.vc-spotimbed-controls .vc-spotimbed-placeholder {
     background: var(--text-normal);
     border-radius: 9999px;
     width: 4.125rem;
@@ -327,49 +327,49 @@
     opacity: 1;
 }
 
-.spotimbed-controls .spotimbed-placeholder-scrubber {
+.vc-spotimbed-controls .vc-spotimbed-placeholder-scrubber {
     height: 0.5rem;
     flex: 1;
     margin-left: 0.5rem;
     opacity: 0.5;
 }
 
-.spotimbed-controls .spotimbed-placeholder-btn {
+.vc-spotimbed-controls .vc-spotimbed-placeholder-btn {
     width: 1rem;
     height: 1rem;
     margin: 0 0.5rem;
 }
 
-.spotimbed-embed:not(.theme-custom) .spotimbed-controls .spotimbed-placeholder {
+.vc-spotimbed-embed:not(.theme-custom) .vc-spotimbed-controls .vc-spotimbed-placeholder {
     background: var(--spotimbed-accent);
 }
 
-.spotimbed-embed:not(.theme-custom) .spotimbed-media-player {
+.vc-spotimbed-embed:not(.theme-custom) .vc-spotimbed-media-player {
     --brand-experiment: var(--spotimbed-accent);
     --brand-experiment-560: var(--spotimbed-accent);
 }
 
-.spotimbed-embed:not(.theme-custom) .spotimbed-controls [class*="horizontal"]::before {
+.vc-spotimbed-embed:not(.theme-custom) .vc-spotimbed-controls [class*="horizontal"]::before {
     color: var(--spotimbed-accent);
 }
 
-.spotimbed-embed.theme-light .spotimbed-controls [class*="horizontal"]::before {
+.vc-spotimbed-embed.theme-light .vc-spotimbed-controls [class*="horizontal"]::before {
     filter: brightness(1.4);
 }
 
-.spotimbed-embed.theme-dark .spotimbed-controls [class*="horizontal"]::before {
+.vc-spotimbed-embed.theme-dark .vc-spotimbed-controls [class*="horizontal"]::before {
     filter: brightness(2.8);
 }
 
-.spotimbed-embed.theme-light .spotimbed-controls [class*="mediaBarProgress"] {
+.vc-spotimbed-embed.theme-light .vc-spotimbed-controls [class*="mediaBarProgress"] {
     filter: brightness(0.8) saturate(2);
 }
 
-.spotimbed-embed.theme-dark .spotimbed-controls [class*="mediaBarProgress"] {
+.vc-spotimbed-embed.theme-dark .vc-spotimbed-controls [class*="mediaBarProgress"] {
     filter: brightness(1.6) saturate(1.5);
 }
 
-.spotimbed-unsupported {
+.vc-spotimbed-unsupported {
     background: var(--background-secondary);
     border-radius: 4px;
     box-sizing: border-box;
@@ -381,7 +381,7 @@
     width: 25rem;
 }
 
-.spotimbed-blinking {
+.vc-spotimbed-blinking {
     animation: 1s ease infinite alternate spotimbed-blinking;
 }
 

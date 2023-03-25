@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@api/Styles";
 
-export const cl = classNameFactory("spotimbed-");
+export const cl = classNameFactory("vc-spotimbed-");
 
 export const sortBy = <T, R extends number>(valueFn: (elem: T) => R) => (a: T, b: T) => {
     return valueFn(a) - valueFn(b);
