@@ -42,7 +42,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
 
     const src = itemHref ?? itemSrc;
 
-    const group = findGroupChildrenByChildId("save-image", children);
+    const group = findGroupChildrenByChildId("copy-link", children);
     if (group && !group.some(child => child?.props?.id === "search-image")) {
         group.push((
             <Menu.MenuItem
