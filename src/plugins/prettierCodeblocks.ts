@@ -73,7 +73,7 @@ export default definePlugin({
             const lang = m.split("\n")[0]?.replace("```", "");
             const lines = m.split("\n").filter(l => !l.trim().includes("```"));
 
-            return makeCodeblock(this.format(lines.join("\n")), lang);
+            return makeCodeblock(this.format(lines.join("\n"), lang), lang);
         });
     },
 
