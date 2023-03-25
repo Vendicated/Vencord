@@ -19,6 +19,7 @@
 import { Settings } from "@api/settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
+import { useAwaiter } from "@utils/misc";
 
 import { PronounsFormat } from ".";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
@@ -38,6 +39,19 @@ const bulkFetch = debounce(async () => {
         delete requestQueue[id];
     }
 });
+
+export function awaitAndFormatPronouns(id: string): string | null {
+    const [result, , isPending] = useAwaiter(() => fetchPronouns(id), {
+        fallbackValue: null,
+        onError: e => console.error("Fetching pronouns failed: ", e)
+    });
+
+    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
+    if (!isPending && result && result !== "unspecified" && PronounMapping[result])
+        return formatPronouns(result);
+
+    return null;
+}
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
 export function fetchPronouns(id: string): Promise<PronounCode> {
