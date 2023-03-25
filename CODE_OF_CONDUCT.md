@@ -13,3 +13,8 @@ DON'T
 - use offensive or derogatory language
 - troll or spam
 - personally attack or harass others
+
+Repetitive violations of these guidelines might get your access to the repository restricted.
+
+
+If you feel like a user is violating these guidelines or feel treated unfairly, please refrain from publicly challenging them and instead contact a Moderator on our Discord server or send an email to vendicated+conduct@riseup.net!
