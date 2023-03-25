@@ -59,7 +59,7 @@ function Settings(props: SettingsProps) {
     const CurrentTab = SettingsTabs[tab]?.component;
 
     return <Forms.FormSection>
-        <Text variant="heading-md/normal" tag="h2">Vencord Settings</Text>
+        <Text variant="heading-lg/semibold" style={{ color: "var(--header-primary)" }} tag="h2">Vencord Settings</Text>
 
         <TabBar
             type="top"
