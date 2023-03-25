@@ -48,11 +48,14 @@ export default definePlugin({
                     });
                 }
 
-                const data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${word}`).then(response => response.json())
+                const data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${encodeURIComponent(word.toString())}`).then(response => response.json())
                     .catch(err => {
                         console.log(err);
-                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                        return null;
                     });
+
+                if (!data) return;
 
                 if (!data.query?.search?.length) {
                     console.log(data);
@@ -64,8 +67,11 @@ export default definePlugin({
                     .then(data => data.query.pages[0])
                     .catch(err => {
                         console.log(err);
-                        return sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                        return null;
                     });
+
+                if (!altData) return;
 
                 const thumbnailData = altData.thumbnail;
 
