@@ -44,6 +44,9 @@ export function isPluginEnabled(p: string) {
 const pluginsValues = Object.values(Plugins);
 
 // First roundtrip to mark and force enable dependencies (only for enabled plugins)
+//
+// FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
+// goes for the top level and their children, but for now this works okay with the current API plugins
 for (const p of pluginsValues) if (settings[p.name]?.enabled) {
     p.dependencies?.forEach(d => {
         const dep = Plugins[d];
