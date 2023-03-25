@@ -20,26 +20,19 @@ import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCal
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByCode, findByCodeLazy, findLazy } from "@webpack";
-import { ChannelStore, Menu, SelectedChannelStore } from "@webpack/common";
+import { findByCode, findByCodeLazy } from "@webpack";
+import { ChannelStore, i18n, Menu, SelectedChannelStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const ReplyIcon = LazyComponent(() => findByCode("M10 8.26667V4L3 11.4667L10 18.9333V14.56C15 14.56 18.5 16.2667 21 20C20 14.6667 17 9.33333 10 8.26667Z"));
 
-// for people who speak different languages
-const i18n = findLazy(m => m.Messages?.MESSAGE_ACTION_REPLY);
-
 const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (!props) return;
-    const { message } = props as { message: Message; };
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+    // make sure the message is in the selected channel
+    if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
 
-    // make sure they are in the same channel as the message
-    if (!message || SelectedChannelStore.getChannelId() !== (message.channel_id ?? message.getChannelId())) return;
-
-    const channel = ChannelStore.getChannel(message.channel_id ?? message.getChannelId());
-
+    const channel = ChannelStore.getChannel(message?.channel_id);
     if (!channel) return;
 
     // dms and group chats
@@ -85,5 +78,3 @@ export default definePlugin({
         removeContextMenuPatch("message", messageContextMenuPatch);
     }
 });
-
-
