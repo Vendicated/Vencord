@@ -19,7 +19,7 @@
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
-import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
+import { DefinedSettings, OptionType, PluginSettingPureDef, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -71,7 +71,7 @@ const DefaultSettings: Settings = {
 };
 
 try {
-    var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
+    var settings = parseSettings(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS));
     mergeDefaults(settings, DefaultSettings);
 } catch (err) {
     var settings = mergeDefaults({} as Settings, DefaultSettings);
@@ -139,10 +139,126 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 }
             }
             // And don't forget to persist the settings!
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, stringifySettings(root));
             return true;
         }
     });
+}
+
+const IMPURE_TYPES = new Set([
+    OptionType.REGEX,
+    OptionType.MAP,
+    OptionType.ARRAY,
+] as const);
+type ImpureDef = Extract<PluginSettingPureDef, { type: typeof IMPURE_TYPES extends Set<infer T> ? T : never; }>;
+function isImpure(def: PluginSettingPureDef): def is ImpureDef {
+    return IMPURE_TYPES.has(def.type as ImpureDef["type"]);
+}
+
+/**
+ * Iterates over every plugin setting with an impure type with some context.
+ * Impure settings are settings that are not plainly JSON-serializable.
+ */
+function forEachImpure(settings: Settings, cb: (ctx: {
+    pluginName: string;
+    settingName: string;
+    def: ImpureDef;
+    value: any; // TODO: type this better
+}) => void) {
+    for (const [pluginName, pluginSettings] of Object.entries(settings.plugins)) {
+        const plugin = plugins[pluginName];
+        if (!plugin) continue;
+
+        const settingDefs = plugin.settings;
+        if (!settingDefs) continue;
+
+        for (const [settingName, value] of Object.entries(pluginSettings)) {
+            const settingDef = settingDefs.def[settingName];
+            if (!settingDef || !isImpure(settingDef)) continue;
+
+            cb({ pluginName, settingName, def: settingDef, value });
+        }
+    }
+}
+
+function parseSettings(json: string) {
+    const settings = JSON.parse(json) as Settings;
+    forEachImpure(settings, ({
+        pluginName,
+        settingName,
+        def,
+        value,
+    }) => {
+        settings.plugins[pluginName][settingName] = deserialize(def, value);
+    });
+    return settings;
+}
+function stringifySettings(settings: Settings) {
+    const marked = new Map();
+
+    forEachImpure(settings, ({
+        def,
+        value,
+    }) => {
+        if (!marked.has(value))
+            marked.set(value, serialize(def, value));
+    });
+
+    return JSON.stringify(settings, (key, value) => {
+        if (marked.has(value)) return marked.get(value)!;
+        return value;
+    }, 4);
+}
+
+function deserialize(def: ImpureDef, serialized: any): any {
+    // TODO: type the params better
+    switch (def.type) {
+        case OptionType.REGEX: try {
+            return new RegExp(serialized[0], serialized[1]);
+        } catch {
+            return new RegExp("");
+        }
+        case OptionType.ARRAY:
+            if (!Array.isArray(serialized)) return [];
+            const itemDef = def.items;
+            if (isImpure(itemDef)) return serialized.map(v => deserialize(itemDef, v));
+            else return serialized;
+        case OptionType.MAP:
+            const map = new Map();
+            if (!Array.isArray(serialized)) return map;
+            const keyDef = def.keys;
+            const valueDef = def.values;
+            for (const [key, value] of serialized) {
+                map.set(
+                    isImpure(keyDef) ? deserialize(keyDef, key) : key,
+                    isImpure(valueDef) ? deserialize(valueDef, value) : value,
+                );
+            }
+            return map;
+    }
+}
+function serialize(def: ImpureDef, impureVal: any): any {
+    switch (def.type) {
+        case OptionType.REGEX:
+            return [impureVal.source, impureVal.flags];
+        case OptionType.ARRAY:
+            if (!Array.isArray(impureVal)) return [];
+            const itemDef = def.items;
+            if (isImpure(itemDef)) return impureVal.map(v => serialize(itemDef, v));
+            else return impureVal;
+        case OptionType.MAP:
+            const entries: any[] = [];
+            if (!(impureVal instanceof Map)) return entries;
+            const keyDef = def.keys;
+            const valueDef = def.values;
+            for (const [key, value] of impureVal.entries()) {
+                entries.push([
+                    isImpure(keyDef) ? serialize(keyDef, key) : key,
+                    isImpure(valueDef) ? serialize(valueDef, value) : value,
+                ]);
+            }
+            return entries;
+    }
 }
 
 /**

@@ -111,6 +111,9 @@ export enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    REGEX,
+    ARRAY,
+    MAP,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -119,14 +122,20 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (
+export type PluginSettingAtomDef =
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef
     | PluginSettingSelectDef
     | PluginSettingSliderDef
-    | PluginSettingComponentDef
-) & PluginSettingCommon;
+    | PluginSettingRegexDef
+    | PluginSettingComponentDef;
+export type PluginSettingCollectionDef =
+    | PluginSettingArrayDef<PluginSettingAtomDef>
+    | PluginSettingMapDef<PluginSettingAtomDef, PluginSettingAtomDef>;
+
+export type PluginSettingPureDef = PluginSettingCollectionDef | PluginSettingAtomDef;
+export type PluginSettingDef = PluginSettingPureDef & PluginSettingCommon;
 
 export interface PluginSettingCommon {
     description: string;
@@ -152,6 +161,19 @@ interface IsValid<T, D = unknown> {
     isValid?(this: D, value: T): boolean | string;
 }
 
+export type PluginSettingArrayDef<T extends PluginSettingAtomDef> = {
+    type: OptionType.ARRAY;
+    default?: PluginSettingAtomType<T>[];
+    items: T;
+};
+
+export type PluginSettingMapDef<K extends PluginSettingAtomDef, V extends PluginSettingAtomDef> = {
+    type: OptionType.MAP;
+    default?: Map<PluginSettingAtomType<K>, PluginSettingAtomType<V>>;
+    keys: K;
+    values: V;
+};
+
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
     default?: string;
@@ -167,6 +189,18 @@ export interface PluginSettingBigIntDef {
 export interface PluginSettingBooleanDef {
     type: OptionType.BOOLEAN;
     default?: boolean;
+}
+export interface PluginSettingRegexDef {
+    type: OptionType.REGEX;
+    default?: RegExp;
+    defaultFlags?: Partial<{
+        global: boolean;
+        ignoreCase: boolean;
+        multiline: boolean;
+        dotAll: boolean;
+        unicode: boolean;
+        sticky: boolean;
+    }>;
 }
 
 export interface PluginSettingSelectDef {
@@ -220,21 +254,32 @@ export interface PluginSettingComponentDef {
     component: (props: IPluginOptionComponentProps) => JSX.Element;
 }
 
-/** Maps a `PluginSettingDef` to its value type */
-type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
+/** Maps a `PluginSettingAtomDef` to its value type */
+type PluginSettingAtomType<O extends PluginSettingAtomDef> = O extends PluginSettingStringDef ? string :
     O extends PluginSettingNumberDef ? number :
     O extends PluginSettingBigIntDef ? BigInt :
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
+    O extends PluginSettingRegexDef ? RegExp :
     O extends PluginSettingComponentDef ? any :
     never;
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
 
+type PluginSettingCollectionType<O extends PluginSettingCollectionDef> = O extends PluginSettingArrayDef<infer V> ? PluginSettingAtomType<V>[] :
+    O extends PluginSettingMapDef<infer K, infer V> ? Map<PluginSettingAtomType<K>, PluginSettingAtomType<V>> :
+    never;
+
+type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingAtomDef ? PluginSettingAtomType<O> :
+    O extends PluginSettingCollectionDef ? PluginSettingCollectionType<O> :
+    never;
+
+type PluginSettingTypeWithDefault<O extends PluginSettingDef> = PluginSettingType<O> extends never ? never : (PluginSettingType<O> | PluginSettingDefaultType<O>);
+
 type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingType<D[K]> | PluginSettingDefaultType<D[K]>;
+    [K in keyof D]: PluginSettingTypeWithDefault<D[K]> extends Array<infer T> ? T : PluginSettingTypeWithDefault<D[K]>;
 };
 
 /** An instance of defined plugin settings */

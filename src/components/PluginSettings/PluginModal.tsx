@@ -38,6 +38,8 @@ import {
     SettingSliderComponent,
     SettingTextComponent
 } from "./components";
+import { SettingArrayComponent } from "./components/SettingArrayComponent";
+import { SettingRegexComponent } from "./components/SettingRegexComponent";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
@@ -69,7 +71,10 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.BOOLEAN]: SettingBooleanComponent,
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+    [OptionType.COMPONENT]: SettingCustomComponent,
+    [OptionType.REGEX]: SettingRegexComponent,
+    [OptionType.ARRAY]: SettingArrayComponent,
+    [OptionType.MAP]: () => null,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
