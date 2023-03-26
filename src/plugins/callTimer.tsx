@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -24,7 +24,7 @@ import { React } from "@webpack/common";
 
 function formatDuration(ms: number) {
     // here be dragons (moment fucking sucks)
-    const human = Settings.plugins.CallTimer.format === "human";
+    const human = settings.store.format === "human";
 
     const format = (n: number) => human ? n : n.toString().padStart(2, "0");
     const unit = (s: string) => human ? s : "";
@@ -45,6 +45,24 @@ function formatDuration(ms: number) {
     return res;
 }
 
+const settings = definePluginSettings({
+    format: {
+        type: OptionType.SELECT,
+        description: "The timer format. This can be any valid moment.js format",
+        options: [
+            {
+                label: "30d 23:00:42",
+                value: "stopwatch",
+                default: true
+            },
+            {
+                label: "30d 23h 00m 42s",
+                value: "human"
+            }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "CallTimer",
     description: "Adds a timer to vcs",
@@ -53,23 +71,7 @@ export default definePlugin({
     startTime: 0,
     interval: void 0 as NodeJS.Timeout | undefined,
 
-    options: {
-        format: {
-            type: OptionType.SELECT,
-            description: "The timer format. This can be any valid moment.js format",
-            options: [
-                {
-                    label: "30d 23:00:42",
-                    value: "stopwatch",
-                    default: true
-                },
-                {
-                    label: "30d 23h 00m 42s",
-                    value: "human"
-                }
-            ]
-        }
-    },
+    settings,
 
     patches: [{
         find: ".renderConnectionStatus=",
