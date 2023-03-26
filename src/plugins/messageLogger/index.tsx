@@ -18,8 +18,8 @@
 
 import "./messageLogger.css";
 
-import { definePluginSettings } from "@api/settings";
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
