@@ -17,7 +17,7 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { migratePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -29,7 +29,18 @@ const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = 
 
 const MANAGE_CHANNELS = 1n << 4n;
 
-migratePluginSettings("MessageClickActions", "MessageQuickActions");
+const settings = definePluginSettings({
+    enableDeleteOnClick: {
+        type: OptionType.BOOLEAN,
+        description: "Enable delete on click",
+        default: true
+    },
+    enableDoubleClickToEdit: {
+        type: OptionType.BOOLEAN,
+        description: "Enable double click to edit",
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "MessageClickActions",
@@ -37,18 +48,7 @@ export default definePlugin({
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
-    options: {
-        enableDeleteOnClick: {
-            type: OptionType.BOOLEAN,
-            description: "Enable delete on click",
-            default: true
-        },
-        enableDoubleClickToEdit: {
-            type: OptionType.BOOLEAN,
-            description: "Enable double click to edit",
-            default: true
-        }
-    },
+    settings,
 
     start() {
         const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
@@ -60,11 +60,11 @@ export default definePlugin({
         this.onClick = addClickListener((msg, chan, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
-                if (Vencord.Settings.plugins.MessageClickActions.enableDoubleClickToEdit && (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id))) {
+                if (settings.store.enableDoubleClickToEdit && (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id))) {
                     MessageActions.startEditMessage(chan.id, msg.id, msg.content);
                     event.preventDefault();
                 }
-            } else if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, chan))) {
+            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, chan))) {
                 MessageActions.deleteMessage(chan.id, msg.id);
                 event.preventDefault();
             }
