@@ -158,7 +158,8 @@ function initWs(isManual = false) {
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
-                let src = String(candidates[keys[0]]);
+                const mod = candidates[keys[0]];
+                let src = String(mod.original ?? mod);
 
                 let i = 0;
 
