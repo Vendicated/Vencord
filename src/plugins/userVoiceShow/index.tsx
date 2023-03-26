@@ -22,7 +22,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-import { VoiceChannelField } from "./components/VoiceChannelField";
+import { VoiceChannelField } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
@@ -41,6 +41,7 @@ const getVoiceChannelField = (props: any) => {
     if (!channelId) return;
     const channel = ChannelStore.getChannel(channelId);
     const guild = GuildStore.getGuild(channel.guild_id);
+    if (!guild) return; // When in DM call
 
     const result = `${guild.name} | ${channel.name}`;
     // console.log(result);

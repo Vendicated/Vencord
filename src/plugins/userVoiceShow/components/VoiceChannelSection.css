@@ -1,0 +1,33 @@
+.voice-channel-field {
+    margin: 5px 0;
+    text-align: center;
+    padding: 5px;
+    color: #fff !important;
+    font-size: 16px !important;
+    border-radius: 7px;
+
+    /* Fix \n */
+    white-space: pre-wrap;
+
+    /* Fix colors in light profile */
+    mix-blend-mode: screen;
+}
+
+.voice-channel-field:hover {
+    background: #06c;
+    cursor: pointer;
+}
+
+.voice-channel-button > div {
+    white-space: normal !important;
+}
+
+.voice-channel-section-header {
+    margin-bottom: 8px;
+    color: var(--header-primary);
+    font-size: 12px;
+    line-height: 16px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+}
