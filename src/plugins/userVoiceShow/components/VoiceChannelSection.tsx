@@ -19,7 +19,7 @@
 import "./VoiceChannelSection.css";
 
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
+import { Button, PermissionStore, Toasts } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
@@ -44,7 +44,7 @@ export const VoiceChannelField = ({ channel, label }: VoiceChannelFieldProps) =>
                 height: "unset",
             }}
             size={Button.Sizes.SMALL}
-    
+
             onClick={() => {
                 if (PermissionStore.can(CONNECT, channel))
                     ChannelActions.selectVoiceChannel(channel.id);
