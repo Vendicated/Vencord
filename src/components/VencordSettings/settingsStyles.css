@@ -38,3 +38,11 @@
     color: var(--info-warning-text);
     margin-top: 0;
 }
+
+/* Needed to fix bad themes that hide certain textarea elements for whatever eldritch reason */
+.vc-settings-theme-links {
+    display: inline-block !important;
+    color: var(--text-normal) !important;
+    padding: 0.5em;
+    border: 1px solid var(--background-modifier-accent);
+}
