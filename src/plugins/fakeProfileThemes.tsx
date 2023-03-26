@@ -1,0 +1,120 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+// This plugin is a port from Alyxia's Vendetta plugin
+import { definePluginSettings } from "@api/settings";
+import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
+import { Button } from "@webpack/common";
+import { User } from "discord-types/general";
+
+interface UserProfile extends User {
+    themeColors?: Array<number>;
+}
+
+function encode(primary: number, accent: number): string {
+    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
+    const padding = "";
+    const encoded = Array.from(message)
+        .map(x => x.codePointAt(0))
+        .filter(x => x! >= 0x20 && x! <= 0x7f)
+        .map(x => String.fromCodePoint(x! + 0xe0000))
+        .join("");
+
+    return (padding || "") + " " + encoded;
+}
+
+// Courtesy of Cynthia.
+function decode(bio: string): Array<number> | null {
+    if (bio == null) return null;
+
+    const colorString = bio.match(
+        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
+    );
+    if (colorString != null) {
+        const parsed = [...colorString[0]]
+            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
+            .join("");
+        const colors = parsed
+            .substring(1, parsed.length - 1)
+            .split(",")
+            .map(x => parseInt(x.replace("#", "0x"), 16));
+
+        return colors;
+    } else {
+        return null;
+    }
+}
+
+const settings = definePluginSettings({
+    nitroFirst: {
+        description: "Default color source if both are present",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Nitro", value: true, default: true },
+            { label: "Fake", value: false },
+        ],
+    },
+});
+
+export default definePlugin({
+    name: "FakeProfileThemes",
+    description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding.",
+    authors: [Devs.Alyxia, Devs.Remty],
+    patches: [
+        {
+            find: "getUserProfile=",
+            replacement: {
+                match: /(getUserProfile=function\(\i\){return )(\i\[\i\])/,
+                replace: "$1$self.colorDecodeHook($2)"
+            }
+        }, {
+            find: ".USER_SETTINGS_PROFILE_THEME_ACCENT",
+            replacement: {
+                match: /ACCENT}\)}\)}\)(?<=(?<=},color:(\i).+)},color:(\i).+)/,
+                replace: "$&,$self.addCopy3y3Button($1,$2)"
+            }
+        },
+    ],
+    settings,
+    colorDecodeHook(user: UserProfile) {
+        if (user) {
+            // don't replace colors if already set with nitro
+            if (settings.store.nitroFirst && user.themeColors) return user;
+            const colors = decode(user.bio);
+            if (colors) {
+                user.premiumType = 2;
+                user.themeColors = colors;
+            }
+        }
+        return user;
+    },
+    addCopy3y3Button(primary: number, accent: number) {
+        return <Button
+            onClick={() => {
+                const colorString = encode(primary, accent);
+                copyWithToast(colorString);
+            }}
+            color={Button.Colors.PRIMARY}
+            size={Button.Sizes.XLARGE}
+            style={{ marginLeft: "16px" }}
+        >Copy 3y3
+        </Button >;
+    },
+});
