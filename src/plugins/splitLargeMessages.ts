@@ -139,24 +139,14 @@ export default definePlugin({
         {
             find: ".MESSAGE_TOO_LONG",
             replacement: {
-                // match: /;if\((\w+\.length>\w+)\)({\w+&&null)/,
-                // match: /;if\((\i\.length>\i)\)({\i&&null)/,
-                // match: /.*\\Kfunction\s\w+\((\w+)\)(?=.*;if\((\w+\.length>\w+)\)({\w+&&null))/,
-                // match: /;if\(\w+\.length>\w+\){\w+&&null(?<=function\s\w+\((\w+)\).+?;if\((\w+\.length>\w+)\)({\w+&&null))/,
                 match: /;if\(\i\.length>\i\){\i&&null(?<=function\s\i\((\i)\).+?;if\((\i\.length>\i)\)({\i&&null))/,
-                // replace: ";if(($1)&&(e.type.analyticsName!=\"normal\"))$2"
-                // replace: ";if(($2)&&(b.type.analyticsName!=\"normal\"))$3"
                 replace: ";if(($2)&&($1.type.analyticsName!=\"normal\"))$3"
             }
         },
         {
             find: ".PREMIUM_MESSAGE_LENGTH_CHATBOX_FLAIR.format",
             replacement: {
-                // match: /{children:I}\)\)}/,
-                // match: /,{children:\w+}\)\)}}\)]}\)(?<=function\s\w+\((\w+)\)[.\s\S]+?,{children:(\w+)}\)\)}}\)]}\))/,
                 match: /,{children:\w+}\)\)}}\)]}\)(?<=function\s\w+\((\w+)\){var \w+,(\w+)=\w+\.type,(\w+)=\w+.textValue[.\s\S]+?,{children:(\w+)}\)\)}}\)]}\))/,
-                // replace: "{children:C}))}"
-                // replace: ",{children:(($1.type!=null)&&($1.type.analyticsName===\"normal\"))?$1.textValue.length:$2}))}})]})"
                 replace: ",{children:$2.analyticsName===\"normal\"?$3.length:$4}))}})]})"
             }
         }
