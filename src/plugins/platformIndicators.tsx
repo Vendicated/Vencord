@@ -180,22 +180,8 @@ export default definePlugin({
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
-        const _settings = settings.store as any;
-        const { displayMode } = _settings;
-
-        // transfer settings from the old ones, which had a select menu instead of booleans
-        if (displayMode) {
-            if (displayMode !== "both") _settings[displayMode] = true;
-            else {
-                _settings.list = true;
-                _settings.badges = true;
-            }
-            _settings.messages = true;
-            delete _settings.displayMode;
-        }
-
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (_settings[key]) value.onEnable();
+            if (settings.store[key]) value.onEnable();
         });
     },
 
