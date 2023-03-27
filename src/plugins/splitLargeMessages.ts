@@ -139,8 +139,14 @@ export default definePlugin({
         {
             find: ".MESSAGE_TOO_LONG",
             replacement: {
-                match: /;if\(\w+\.length>\w+\)({\w+&&null)/,
-                replace: ";if(false)$1"
+                // match: /;if\((\w+\.length>\w+)\)({\w+&&null)/,
+                // match: /;if\((\i\.length>\i)\)({\i&&null)/,
+                // match: /.*\\Kfunction\s\w+\((\w+)\)(?=.*;if\((\w+\.length>\w+)\)({\w+&&null))/,
+                // match: /;if\(\w+\.length>\w+\){\w+&&null(?<=function\s\w+\((\w+)\).+?;if\((\w+\.length>\w+)\)({\w+&&null))/,
+                match: /;if\(\i\.length>\i\){\i&&null(?<=function\s\i\((\i)\).+?;if\((\i\.length>\i)\)({\i&&null))/,
+                // replace: ";if(($1)&&(e.type.analyticsName!=\"normal\"))$2"
+                // replace: ";if(($2)&&(b.type.analyticsName!=\"normal\"))$3"
+                replace: ";if(($2)&&($1.type.analyticsName!=\"normal\"))$3"
             }
         }
     ],
