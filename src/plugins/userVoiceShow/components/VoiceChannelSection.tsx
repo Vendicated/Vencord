@@ -30,11 +30,12 @@ const CONNECT = 1n << 20n;
 type VoiceChannelFieldProps = {
     channel: Channel;
     label: string;
+    showVoiceChannelSectionHeader: boolean;
 };
 
-export const VoiceChannelField = ({ channel, label }: VoiceChannelFieldProps) => (
+export const VoiceChannelSection = ({ channel, label, showVoiceChannelSectionHeader }: VoiceChannelFieldProps) => (
     <UserPopoutSection>
-        <h3 className="voice-channel-section-header">In a voice channel</h3>
+        {showVoiceChannelSectionHeader ? <h3 className="voice-channel-section-header">In a voice channel</h3> : null}
         <Button
             className="voice-channel-button"
             color={Button.Colors.TRANSPARENT}

@@ -22,7 +22,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-import { VoiceChannelField } from "./components/VoiceChannelSection";
+import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
@@ -30,6 +30,11 @@ const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's voice channel in their profile modal",
+        default: true,
+    },
+    showVoiceChannelSectionHeader: {
+        type: OptionType.BOOLEAN,
+        description: "Wether to show \"IN A VOICE CHANNEL\" above the join button",
         default: true,
     }
 });
@@ -47,9 +52,10 @@ const getVoiceChannelField = (props: any) => {
     // console.log(result);
 
     return (
-        <VoiceChannelField
+        <VoiceChannelSection
             channel={channel}
             label={result}
+            showVoiceChannelSectionHeader={settings.store.showVoiceChannelSectionHeader}
         />
     );
 };
@@ -62,7 +68,11 @@ export default definePlugin({
 
     patchModal(props: any) {
         if (settings.store.showInUserProfileModal)
-            return getVoiceChannelField(props);
+            return (
+                <div style={{ margin: "0 12px" }} >
+                    {getVoiceChannelField(props)}
+                </div>
+            );
     },
 
     patchPopout(props: any) {
