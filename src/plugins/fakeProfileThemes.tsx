@@ -18,14 +18,22 @@
 
 // This plugin is a port from Alyxia's Vendetta plugin
 import { definePluginSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 import { User } from "discord-types/general";
+import virtualMerge from "virtual-merge";
 
 interface UserProfile extends User {
     themeColors?: Array<number>;
+}
+
+interface Colors {
+    primary: number;
+    accent: number;
 }
 
 function encode(primary: number, accent: number): string {
@@ -69,8 +77,8 @@ const settings = definePluginSettings({
         options: [
             { label: "Nitro", value: true, default: true },
             { label: "Fake", value: false },
-        ],
-    },
+        ]
+    }
 });
 
 export default definePlugin({
@@ -88,9 +96,9 @@ export default definePlugin({
             find: ".USER_SETTINGS_PROFILE_THEME_ACCENT",
             replacement: {
                 match: /ACCENT}\)}\)}\)(?<=(?<=},color:(\i).+)},color:(\i).+)/,
-                replace: "$&,$self.addCopy3y3Button($1,$2)"
+                replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
             }
-        },
+        }
     ],
     settings,
     colorDecodeHook(user: UserProfile) {
@@ -99,13 +107,15 @@ export default definePlugin({
             if (settings.store.nitroFirst && user.themeColors) return user;
             const colors = decode(user.bio);
             if (colors) {
-                user.premiumType = 2;
-                user.themeColors = colors;
+                return virtualMerge(user, {
+                    premiumType: 2,
+                    themeColors: colors
+                });
             }
         }
         return user;
     },
-    addCopy3y3Button(primary: number, accent: number) {
+    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
         return <Button
             onClick={() => {
                 const colorString = encode(primary, accent);
@@ -113,8 +123,8 @@ export default definePlugin({
             }}
             color={Button.Colors.PRIMARY}
             size={Button.Sizes.XLARGE}
-            style={{ marginLeft: "16px" }}
+            className={Margins.left16}
         >Copy 3y3
         </Button >;
-    },
+    }, { noop: true }),
 });

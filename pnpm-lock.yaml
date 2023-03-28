@@ -38,6 +38,7 @@ specifiers:
   tsx: ^3.12.6
   type-fest: ^3.5.3
   typescript: ^4.9.4
+  virtual-merge: ^1.0.1
 
 dependencies:
   '@vap/core': 0.0.12
@@ -71,6 +72,7 @@ devDependencies:
   tsx: 3.12.6
   type-fest: 3.5.3
   typescript: 4.9.4
+  virtual-merge: 1.0.1
 
 packages:
 
@@ -3121,6 +3123,10 @@ packages:
     dependencies:
       spdx-correct: 3.1.1
       spdx-expression-parse: 3.0.1
+    dev: true
+
+  /virtual-merge/1.0.1:
+    resolution: {integrity: sha512-h7rzV6n5fZJbDu2lP4iu+IOtsZ00uqECFUxFePK1uY0pz/S5B7FNDJpmdDVfyGL7poyJECEHfTaIpJaknNkU0Q==}
     dev: true
 
   /vscode-oniguruma/1.7.0:
