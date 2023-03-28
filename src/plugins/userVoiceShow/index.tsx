@@ -55,7 +55,7 @@ const getVoiceChannelField = (props: any) => {
         <VoiceChannelSection
             channel={channel}
             label={result}
-            showVoiceChannelSectionHeader={settings.store.showVoiceChannelSectionHeader}
+            showHeader={settings.store.showVoiceChannelSectionHeader}
         />
     );
 };
