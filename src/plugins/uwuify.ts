@@ -94,7 +94,7 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [Devs.echo],
+    authors: [Devs.echo, Devs.skyevg],
     dependencies: ["CommandsAPI"],
 
     commands: [
