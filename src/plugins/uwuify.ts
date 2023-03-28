@@ -21,87 +21,71 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 const endings = [
-    "owo", "UwU", ">w<", "^w^", "●w●", "☆w☆", "𝗨𝘄𝗨", "(ᗒᗨᗕ)", "(▰˘v˘▰)",
-    "( ´ ▽ ` ).｡ｏ♡", "*unbuttons shirt*", ">3<", ">:3", ":3", "murr~",
-    "♥(。U ω U。)", "(˘ε˘)", "*screams*", "*twerks*", "*sweats*",
+    "rawr x3",
+    "OwO",
+    "UwU",
+    "o.O",
+    "-.-",
+    ">w<",
+    "(⑅˘꒳˘)",
+    "(ꈍᴗꈍ)",
+    "(˘ω˘)",
+    "(U ᵕ U❁)",
+    "σωσ",
+    "òωó",
+    "(///ˬ///✿)",
+    "(U ﹏ U)",
+    "( ͡o ω ͡o )",
+    "ʘwʘ",
+    ":3",
+    ":3", // important enough to have twice
+    "XD",
+    "nyaa~~",
+    "mya",
+    ">_<",
+    "😳",
+    "🥺",
+    "😳😳😳",
+    "rawr",
+    "^^",
+    "^^;;",
+    "(ˆ ﻌ ˆ)♡",
+    "^•ﻌ•^",
+    "/(^•ω•^)",
+    "(✿oωo)"
 ];
 
 const replacements = [
-    ["love", "wuv"],
-    ["mr", "mistuh"],
-    ["dog", "doggo"],
-    ["cat", "kitteh"],
-    ["hello", "henwo"],
-    ["hell", "heck"],
-    ["fuck", "fwick"],
-    ["fuk", "fwick"],
-    ["shit", "shoot"],
-    ["friend", "fwend"],
-    ["stop", "stawp"],
-    ["god", "gosh"],
-    ["dick", "peepee"],
-    ["penis", "bulge"],
-    ["damn", "darn"],
+    ["small", "smol"],
+    ["cute", "kawaii~"],
+    ["fluff", "floof"],
+    ["love", "luv"],
+    ["stupid", "baka"],
+    ["what", "nani"],
+    ["meow", "nya~"],
 ];
+
+function selectRandomElement(arr) {
+    // generate a random index based on the length of the array
+    const randomIndex = Math.floor(Math.random() * arr.length);
+
+    // return the element at the randomly generated index
+    return arr[randomIndex];
+}
 
 
 function uwuify(message: string): string {
-    return message
-        .split(" ")
-        .map(w => {
-            let owofied = false;
-            const lowerCase = w.toLowerCase();
-            // return if the word is too short - uwuifying short words makes them unreadable
-            if (w.length < 4) {
-                return w;
-            }
-
-            // replacing the words based on the array on line 29
-            for (const [find, replace] of replacements) {
-                if (w.includes(find)) {
-                    w = w.replace(find, replace);
-                    owofied = true;
-                }
-            }
-            // these are the biggest word changes. if any of these are done we dont do the
-            // ones after the isowo check. to keep the words somewhat readable
-            if (lowerCase.includes("u") && !lowerCase.includes("uwu")) {
-                w = w.replace("u", "UwU");
-                owofied = true;
-            }
-            if (lowerCase.includes("o") && !lowerCase.includes("owo")) {
-                w = w.replace("o", "OwO");
-                owofied = true;
-            }
-            if (lowerCase.endsWith("y") && w.length < 7) {
-                w = w + " " + "w" + w.slice(1);
-                owofied = true;
-            }
-
-            // returning if word has been already uwuified - to prevent over-uwuifying
-            if (owofied) {
-                return w;
-            }
-
-            // more tiny changes - to keep the words that passed through the latter changes uwuified
-            if (!lowerCase.endsWith("n")) {
-                w = w.replace("n", "ny");
-            }
-            if (Math.floor(Math.random() * 2) === 1) {
-                w.replace("s", "sh");
-            }
-            if (Math.floor(Math.random() * 5) === 3 && !owofied) {
-                w = w[0] + "-" + w[0] + "-" + w;
-            }
-            if (Math.floor(Math.random() * 5) === 3) {
-                w =
-                    w +
-                    " " +
-                    endings[Math.floor(Math.random() * endings.length)];
-            }
-            w = w.replaceAll("r", "w").replaceAll("l", "w");
-            return w;
-        }).join(" ");
+    message = message.toLowerCase();
+    // words
+    for (const pair of replacements) {
+        message = message.replaceAll(pair[0], pair[1]);
+    }
+    message = message
+        .replaceAll(/([ \t\n])n/g, "$1ny") // nyaify
+        .replaceAll(/[lr]/g, "w") // [lr] > w
+        .replaceAll(/([ \t\n])([a-z])/g, (_, p1, p2) => Math.random() < .5 ? `${p1}${p2}-${p2}` : `${p1}${p2}`) // stutter
+        .replaceAll(/([^.,!][.,!])([ \t\n])/g, (_, p1, p2) => `${p1} ${selectRandomElement(endings)}${p2}`); // endings
+    return message;
 }
 
 
