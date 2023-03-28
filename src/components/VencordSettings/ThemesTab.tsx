@@ -116,13 +116,9 @@ export default ErrorBoundary.wrap(function () {
             </Card>
             <Forms.FormTitle tag="h5">Themes</Forms.FormTitle>
             <TextArea
-                style={{
-                    padding: ".5em",
-                    border: "1px solid var(--background-modifier-accent)"
-                }}
                 value={themeText}
                 onChange={e => setThemeText(e.currentTarget.value)}
-                className={TextAreaProps.textarea}
+                className={`${TextAreaProps.textarea} vc-settings-theme-links`}
                 placeholder="Theme Links"
                 spellCheck={false}
                 onBlur={onBlur}
