@@ -221,5 +221,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     TheKodeToad: {
         name: "TheKodeToad",
         id: 706152404072267788n
+    },
+    Rapougnac: {
+        name: "Rapougnac",
+        id: 253554702858452992n
     }
 });

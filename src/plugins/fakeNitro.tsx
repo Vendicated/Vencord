@@ -90,7 +90,7 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.Rapougnac],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -269,6 +269,10 @@ export default definePlugin({
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
+    get EmojiStore() {
+        return findByPropsLazy("getCustomEmojiById");
+    },
+
     handleProtoChange(proto: any, user: any) {
         if ((!proto.appearance && !AppearanceSettingsProto) || !UserSettingsProtoStore) return;
 
@@ -350,12 +354,14 @@ export default definePlugin({
                 continue;
             }
 
+            const emoji = this.EmojiStore.getCustomEmojiById(fakeNitroMatch[1]);
+
             newContent.push((
                 <this.EmojiComponent node={{
                     type: "customEmoji",
                     jumboable: content.length === 1,
                     animated: fakeNitroMatch[2] === "gif",
-                    name: ":FakeNitroEmoji:",
+                    name: emoji?.allNamesString ?? ":FakeNitroEmoji:",
                     emojiId: fakeNitroMatch[1]
                 }} />
             ));
@@ -441,8 +447,6 @@ export default definePlugin({
         if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
             return;
         }
-
-        const EmojiStore = findByPropsLazy("getCustomEmojiById");
         const StickerStore = findByPropsLazy("getAllGuildStickers") as {
             getPremiumPacks(): StickerPack[];
             getAllGuildStickers(): Map<string, Sticker[]>;
@@ -509,7 +513,7 @@ export default definePlugin({
             const { guildId } = this;
 
             for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
-                const emoji = EmojiStore.getCustomEmojiById(emojiId);
+                const emoji = this.EmojiStore.getCustomEmojiById(emojiId);
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
                 if (!emoji.require_colons) continue;
 
