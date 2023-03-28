@@ -19,7 +19,7 @@
 import "./messageLogger.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -34,7 +34,7 @@ import textStyle from "./deleteStyleText.css?managed";
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
-    if (Settings.plugins.MessageLogger.deleteStyle === "text") {
+    if (settings.store.deleteStyle === "text") {
         enableStyle(textStyle);
         disableStyle(overlayStyle);
     } else {
@@ -42,6 +42,29 @@ function addDeleteStyle() {
         enableStyle(overlayStyle);
     }
 }
+
+const settings = definePluginSettings({
+    deleteStyle: {
+        type: OptionType.SELECT,
+        description: "The style of deleted messages",
+        default: "text",
+        options: [
+            { label: "Red text", value: "text", default: true },
+            { label: "Red overlay", value: "overlay" }
+        ],
+        onChange: () => addDeleteStyle()
+    },
+    ignoreBots: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by bots",
+        default: false
+    },
+    ignoreSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by yourself",
+        default: false
+    }
+});
 
 const MENU_ITEM_ID = "message-logger-remove-history";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
@@ -78,6 +101,8 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Ven],
     dependencies: ["ContextMenuAPI", "MenuItemDeobfuscatorAPI"],
 
+    settings,
+
     start() {
         addDeleteStyle();
         addContextMenuPatch("message", patchMessageContextMenu);
@@ -111,34 +136,11 @@ export default definePlugin({
         };
     },
 
-    options: {
-        deleteStyle: {
-            type: OptionType.SELECT,
-            description: "The style of deleted messages",
-            default: "text",
-            options: [
-                { label: "Red text", value: "text", default: true },
-                { label: "Red overlay", value: "overlay" }
-            ],
-            onChange: () => addDeleteStyle()
-        },
-        ignoreBots: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by bots",
-            default: false
-        },
-        ignoreSelf: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by yourself",
-            default: false
-        }
-    },
-
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf } = Settings.plugins.MessageLogger;
+            const { ignoreBots, ignoreSelf } = settings.store;
             const myId = UserStore.getCurrentUser().id;
 
             function mutate(id: string) {
