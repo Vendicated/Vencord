@@ -25,7 +25,7 @@ import { OpenScreenshareSettingsButton } from "../components/OpenScreenshareSett
 import { getPluginSettings, pluginSettingsHelpers, usePluginSettings } from "../settings";
 
 interface ReplacedStreamSettingsProps {
-    oldStreamSettings: any;
+    children: JSX.Element;
 }
 
 const ReplacedStreamSettings = (props: ReplacedStreamSettingsProps) => {
@@ -40,7 +40,7 @@ const ReplacedStreamSettings = (props: ReplacedStreamSettingsProps) => {
         }}>
         {!getPluginSettings().hideDefaultSettings &&
             <div style={{ width: "100%" }}>
-                {props.oldStreamSettings}
+                {props.children}
             </div>
         }
         <Flex flexDirection="column" style={{ gap: 0, width: "100%" }}>
@@ -59,6 +59,8 @@ const ReplacedStreamSettings = (props: ReplacedStreamSettingsProps) => {
     </Flex>;
 };
 
+let replacedStreamSettingsComponent: JSX.Element | undefined;
+
 export class PatchedFunctions {
     public patchedLocationRender(oldRender: (...args: any[]) => any, thisContext: any, functionArguments: any) {
         const renderResult = Reflect.apply(oldRender, thisContext, functionArguments);
@@ -75,8 +77,11 @@ export class PatchedFunctions {
                     const streamSettingsModalContent =
                         oldChildrenResult.props.children;
 
+                    if (!replacedStreamSettingsComponent)
+                        replacedStreamSettingsComponent = <ReplacedStreamSettings>{{ ...streamSettingsModalContent.props.children.props.children }}</ReplacedStreamSettings>;
+
                     streamSettingsModalContent.props.title = "Stream Settings";
-                    streamSettingsModalContent.props.children.props.children = <ReplacedStreamSettings oldStreamSettings={streamSettingsModalContent.props.children.props.children} />;
+                    streamSettingsModalContent.props.children.props.children = replacedStreamSettingsComponent;
                     break;
                 default:
                     break;

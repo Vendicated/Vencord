@@ -30,17 +30,6 @@ export const AudioSourceSelect = (props?: typeof Select["defaultProps"]) => {
     const [windowPreviews, setWindowPreviews] = useState<WindowPreview[]>([]);
 
     useEffect(() => {
-        // const intervalFunction = async () => setWindowPreviews(await MediaEngineStore.getMediaEngine().getWindowPreviews(1, 1));
-        // // intervalFunction();
-
-        // const intervals: NodeJS.Timer[] = [];
-        // intervals.push(
-        //     setInterval(async () => intervalFunction, 1000),
-        //     // setInterval(async () => setWindowPreviews(await MediaEngineStore.getMediaEngine().getWindowPreviews(1, 1)), 30000)
-        // );
-
-        // return () => intervals.forEach(interval => clearInterval(interval));
-
         const intervalFn = async () => {
             const newPreviews = await MediaEngineStore.getMediaEngine().getWindowPreviews(1, 1);
             setWindowPreviews(oldPreviews => [...oldPreviews, ...newPreviews].filter((preview, index, array) => array.findIndex(t => t.id === preview.id) === index));
@@ -50,7 +39,7 @@ export const AudioSourceSelect = (props?: typeof Select["defaultProps"]) => {
         const intervals = [
             setInterval(async () => {
                 intervalFn();
-            }, 1000), setInterval(async () => {
+            }, 4000), setInterval(async () => {
                 setWindowPreviews(await MediaEngineStore.getMediaEngine().getWindowPreviews(1, 1));
             }, 30000)
         ];

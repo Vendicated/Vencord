@@ -25,4 +25,4 @@ If you don't want to do any of the above, you can just try the presets in the Pr
 
 ## Known Issues
 
-When sharing a window directly it can sometimes happen that no changes are applied, the reason for this is unknown at this time, but to avoid this you can simply share your screen and set the audio source if needed.
+When sharing a window directly it can sometimes happen that no changes are applied, the reason for this is currently unknown, but to avoid this you can simply share your whole screen and set the audio source if required.
