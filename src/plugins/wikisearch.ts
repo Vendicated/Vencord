@@ -20,7 +20,6 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 export default definePlugin({
     name: "Wikisearch",
     description: "Searches Wikipedia for your requested query. (/wikisearch)",
@@ -48,14 +47,16 @@ export default definePlugin({
                     });
                 }
 
-                const data = await fetch("https://en.wikipedia.org/w/api.php?" + new URLSearchParams({
-                	action: "query",
-                	format: "json",
-                	list: "search",
-                	formatversion: 2,
-                	origin: "*",
-                	srsearch: word
-                }).then(response => response.json())
+                const dataSearchParams = new URLSearchParams({
+                    action: "query",
+                    format: "json",
+                    list: "search",
+                    formatversion: "2",
+                    origin: "*",
+                    srsearch: word
+                } as unknown as URLSearchParams); // URLSearchParams doesn't take obj for some reason???
+
+                const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
                     .catch(err => {
                         console.log(err);
                         sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
