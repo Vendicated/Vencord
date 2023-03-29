@@ -48,7 +48,14 @@ export default definePlugin({
                     });
                 }
 
-                const data = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&origin=*&srsearch=${encodeURIComponent(word.toString())}`).then(response => response.json())
+                const data = await fetch("https://en.wikipedia.org/w/api.php?" + new URLSearchParams({
+                	action: "query",
+                	format: "json",
+                	list: "search",
+                	formatversion: 2,
+                	origin: "*",
+                	srsearch: word
+                }).then(response => response.json())
                     .catch(err => {
                         console.log(err);
                         sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
