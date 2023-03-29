@@ -35,8 +35,8 @@ export default definePlugin({
         {
             find: "window.DiscordSentry=",
             replacement: {
-                match: /window\.DiscordSentry=function.+\}\(\)/,
-                replace: "",
+                match: /^.+$/,
+                replace: "()=>{}",
             }
         },
         {
