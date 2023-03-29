@@ -113,7 +113,7 @@ export enum OptionType {
     COMPONENT,
     REGEX,
     ARRAY,
-    MAP,
+    TABLE,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -131,8 +131,8 @@ export type PluginSettingAtomDef =
     | PluginSettingRegexDef
     | PluginSettingComponentDef;
 export type PluginSettingCollectionDef =
-    | PluginSettingArrayDef<PluginSettingAtomDef>
-    | PluginSettingMapDef<PluginSettingAtomDef, PluginSettingAtomDef>;
+    | PluginSettingArrayDef
+    | PluginSettingTableDef;
 
 export type PluginSettingPureDef = PluginSettingCollectionDef | PluginSettingAtomDef;
 export type PluginSettingDef = PluginSettingPureDef & PluginSettingCommon;
@@ -161,18 +161,24 @@ interface IsValid<T, D = unknown> {
     isValid?(this: D, value: T): boolean | string;
 }
 
-export type PluginSettingArrayDef<T extends PluginSettingAtomDef> = {
+export type PluginSettingArrayDef<T extends PluginSettingAtomDef = PluginSettingAtomDef> = {
     type: OptionType.ARRAY;
     default?: PluginSettingAtomType<T>[];
     items: T;
 };
 
-export type PluginSettingMapDef<K extends PluginSettingAtomDef, V extends PluginSettingAtomDef> = {
-    type: OptionType.MAP;
-    default?: Map<PluginSettingAtomType<K>, PluginSettingAtomType<V>>;
-    keys: K;
-    values: V;
+export type PluginSettingTableColumn = PluginSettingAtomDef & {
+    columnLabel: string;
 };
+export type PluginSettingTableColumnDefs = Record<string, PluginSettingTableColumn>;
+export type PluginSettingTableDef<C extends PluginSettingTableColumnDefs = PluginSettingTableColumnDefs> = {
+    type: OptionType.TABLE;
+    default?: PluginSettingTableRows<C>;
+    columns: C;
+};
+type PluginSettingTableRows<C extends PluginSettingTableColumnDefs> = {
+    [K in keyof C]: PluginSettingAtomType<C[K]>;
+}[];
 
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
@@ -269,10 +275,10 @@ type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSett
 ) : O extends { default: infer T; } ? T : undefined;
 
 type PluginSettingCollectionType<O extends PluginSettingCollectionDef> = O extends PluginSettingArrayDef<infer V> ? PluginSettingAtomType<V>[] :
-    O extends PluginSettingMapDef<infer K, infer V> ? Map<PluginSettingAtomType<K>, PluginSettingAtomType<V>> :
+    O extends PluginSettingTableDef<infer C> ? PluginSettingTableRows<C> :
     never;
 
-type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingAtomDef ? PluginSettingAtomType<O> :
+export type PluginSettingType<O extends PluginSettingPureDef> = O extends PluginSettingAtomDef ? PluginSettingAtomType<O> :
     O extends PluginSettingCollectionDef ? PluginSettingCollectionType<O> :
     never;
 

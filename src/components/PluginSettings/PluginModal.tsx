@@ -74,7 +74,7 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.COMPONENT]: SettingCustomComponent,
     [OptionType.REGEX]: SettingRegexComponent,
     [OptionType.ARRAY]: SettingArrayComponent,
-    [OptionType.MAP]: () => null,
+    [OptionType.TUPLE]: () => null,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {

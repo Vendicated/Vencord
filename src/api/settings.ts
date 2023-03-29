@@ -19,7 +19,7 @@
 import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
-import { DefinedSettings, OptionType, PluginSettingPureDef, SettingsChecks, SettingsDefinition } from "@utils/types";
+import { DefinedSettings, OptionType, PluginSettingPureDef, PluginSettingType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -147,10 +147,15 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
 
 const IMPURE_TYPES = new Set([
     OptionType.REGEX,
-    OptionType.MAP,
+    OptionType.TABLE,
     OptionType.ARRAY,
 ] as const);
 type ImpureDef = Extract<PluginSettingPureDef, { type: typeof IMPURE_TYPES extends Set<infer T> ? T : never; }>;
+type ImpureSerialized<D extends ImpureDef> = {
+    [OptionType.REGEX]: [string, string];
+    [OptionType.ARRAY]: any[];
+    [OptionType.TABLE]: Record<string, any>[];
+}[D["type"]];
 function isImpure(def: PluginSettingPureDef): def is ImpureDef {
     return IMPURE_TYPES.has(def.type as ImpureDef["type"]);
 }
@@ -210,55 +215,70 @@ function stringifySettings(settings: Settings) {
     }, 4);
 }
 
-function deserialize(def: ImpureDef, serialized: any): any {
-    // TODO: type the params better
-    switch (def.type) {
-        case OptionType.REGEX: try {
+type Deserializer<D extends ImpureDef> = (def: D, serialized: ImpureSerialized<D>) => PluginSettingType<D>;
+const deserializers: { [D in ImpureDef as D["type"]]: Deserializer<D> } = {
+    [OptionType.REGEX]: (def, serialized) => {
+        try {
             return new RegExp(serialized[0], serialized[1]);
         } catch {
             return new RegExp("");
         }
-        case OptionType.ARRAY:
-            if (!Array.isArray(serialized)) return [];
-            const itemDef = def.items;
-            if (isImpure(itemDef)) return serialized.map(v => deserialize(itemDef, v));
-            else return serialized;
-        case OptionType.MAP:
-            const map = new Map();
-            if (!Array.isArray(serialized)) return map;
-            const keyDef = def.keys;
-            const valueDef = def.values;
-            for (const [key, value] of serialized) {
-                map.set(
-                    isImpure(keyDef) ? deserialize(keyDef, key) : key,
-                    isImpure(valueDef) ? deserialize(valueDef, value) : value,
-                );
+    },
+    [OptionType.ARRAY]: (def, serialized) => {
+        if (!Array.isArray(serialized)) return [];
+        const itemDef = def.items;
+        if (isImpure(itemDef)) return serialized.map(v => deserialize(itemDef, v));
+        else return serialized;
+    },
+    [OptionType.TABLE]: (def, serialized) => {
+        const rows: Record<string, any>[] = [];
+        if (!Array.isArray(serialized)) return rows;
+        for (const serializedRow of serialized) {
+            const row: Record<string, any> = {};
+            for (const [key, value] of Object.entries(serializedRow)) {
+                const colDef = def.columns[key];
+                if (!colDef) continue;
+                if (isImpure(colDef)) row[key] = deserialize(colDef, value);
+                else row[key] = value;
             }
-            return map;
-    }
+            rows.push(row);
+        }
+        return rows;
+    },
+};
+function deserialize<D extends ImpureDef>(def: D, serialized: ImpureSerialized<D>): PluginSettingType<D> {
+    // Typescript really hates function unions
+    return deserializers[def.type](def as any, serialized as any) as any;
 }
-function serialize(def: ImpureDef, impureVal: any): any {
-    switch (def.type) {
-        case OptionType.REGEX:
-            return [impureVal.source, impureVal.flags];
-        case OptionType.ARRAY:
-            if (!Array.isArray(impureVal)) return [];
-            const itemDef = def.items;
-            if (isImpure(itemDef)) return impureVal.map(v => serialize(itemDef, v));
-            else return impureVal;
-        case OptionType.MAP:
-            const entries: any[] = [];
-            if (!(impureVal instanceof Map)) return entries;
-            const keyDef = def.keys;
-            const valueDef = def.values;
-            for (const [key, value] of impureVal.entries()) {
-                entries.push([
-                    isImpure(keyDef) ? serialize(keyDef, key) : key,
-                    isImpure(valueDef) ? serialize(valueDef, value) : value,
-                ]);
+
+type Serializer<D extends ImpureDef> = (def: D, impureVal: PluginSettingType<D>) => ImpureSerialized<D>;
+const serializers: { [D in ImpureDef as D["type"]]: Serializer<D> } = {
+    [OptionType.REGEX]: (def, impureVal) => [impureVal.source, impureVal.flags],
+    [OptionType.ARRAY]: (def, impureVal) => {
+        if (!Array.isArray(impureVal)) return [];
+        const itemDef = def.items;
+        if (isImpure(itemDef)) return impureVal.map(v => serialize(itemDef, v));
+        else return impureVal;
+    },
+    [OptionType.TABLE]: (def, impureVal) => {
+        const rows: Record<string, any>[] = [];
+        if (!Array.isArray(impureVal)) return rows;
+        for (const impureRow of impureVal) {
+            const row: Record<string, any> = {};
+            for (const [key, value] of Object.entries(impureRow)) {
+                const colDef = def.columns[key];
+                if (!colDef) continue;
+                if (isImpure(colDef)) row[key] = serialize(colDef, value);
+                else row[key] = value;
             }
-            return entries;
-    }
+            rows.push(row);
+        }
+        return rows;
+    },
+};
+function serialize<D extends ImpureDef>(def: D, impureVal: PluginSettingType<D>): ImpureSerialized<D> {
+    // Typescript REALLY REALLY hates function unions
+    return serializers[def.type](def as any, impureVal as any) as any;
 }
 
 /**
