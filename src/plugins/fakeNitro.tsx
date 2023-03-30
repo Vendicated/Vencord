@@ -204,7 +204,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
-                    replace: (_, content) => `${content}=$self.patchFakeNitroEmojis(${content});`
+                    replace: (_, content) => `${content}=$self.patchFakeNitroEmojis(${content},arguments[2]?.formatInline);`
                 }
             ]
         },
@@ -333,7 +333,7 @@ export default definePlugin({
 
     EmojiComponent: null as any,
 
-    patchFakeNitroEmojis(content: Array<any>) {
+    patchFakeNitroEmojis(content: Array<any>, inline: boolean) {
         if (!this.EmojiComponent) return content;
 
         const newContent: Array<any> = [];
@@ -353,7 +353,7 @@ export default definePlugin({
             newContent.push((
                 <this.EmojiComponent node={{
                     type: "customEmoji",
-                    jumboable: content.length === 1,
+                    jumboable: !inline && content.length === 1,
                     animated: fakeNitroMatch[2] === "gif",
                     name: ":FakeNitroEmoji:",
                     emojiId: fakeNitroMatch[1]
