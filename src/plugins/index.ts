@@ -17,7 +17,7 @@
 */
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
-import { Settings } from "@api/settings";
+import { initializeVencordSettings, Settings } from "@api/settings";
 import Logger from "@utils/Logger";
 import { Patch, Plugin } from "@utils/types";
 
@@ -30,6 +30,8 @@ const logger = new Logger("PluginManager", "#a6d189");
 export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches = [] as Patch[];
+
+initializeVencordSettings();
 
 const settings = Settings.plugins;
 

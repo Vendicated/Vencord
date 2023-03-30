@@ -70,12 +70,24 @@ const DefaultSettings: Settings = {
     }
 };
 
-try {
-    var settings = parseSettings(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS));
-    mergeDefaults(settings, DefaultSettings);
-} catch (err) {
-    var settings = mergeDefaults({} as Settings, DefaultSettings);
-    logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
+const settings = {} as Settings;
+let settingsInitialized = false;
+
+export function initializeVencordSettings() {
+    if (settingsInitialized) throw new Error("Settings already initialized");
+    try {
+        Object.assign(settings, parseSettings(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)));
+        mergeDefaults(settings, DefaultSettings);
+    } catch (err) {
+        mergeDefaults(settings, DefaultSettings);
+        logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
+    }
+
+    settingsInitialized = true;
+    for (const [pluginName, ...oldNames] of queuedMigrations) {
+        migratePluginSettings(pluginName, ...oldNames);
+    }
+    queuedMigrations.length = 0;
 }
 
 type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
@@ -342,7 +354,13 @@ export function addSettingsListener(path: string, onUpdate: (newValue: any, path
     subscriptions.add(onUpdate);
 }
 
+const queuedMigrations: string[][] = [];
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    if (!settingsInitialized) {
+        queuedMigrations.push([name, ...oldNames]);
+        return;
+    }
+
     const { plugins } = settings;
     if (name in plugins) return;
 
