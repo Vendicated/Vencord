@@ -19,7 +19,6 @@
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { Forms } from "@webpack/common";
-import { isArray } from "lodash";
 
 import { AudioSourceSelect } from "../components/AudioSourceSelect";
 import { OpenScreenshareSettingsButton } from "../components/OpenScreenshareSettingsButton";
@@ -83,7 +82,7 @@ export class PatchedFunctions {
 
                         replacedStreamSettingsComponent =
                             <ReplacedStreamSettings>
-                                {isArray(oldStreamSettingsComponent) ? [...oldStreamSettingsComponent] : { ...oldStreamSettingsComponent }}
+                                {Array.isArray(oldStreamSettingsComponent) ? [...oldStreamSettingsComponent] : { ...oldStreamSettingsComponent }}
                             </ReplacedStreamSettings>;
                     }
 
