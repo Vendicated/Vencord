@@ -2,8 +2,41 @@
     display: none;
 }
 
-[class*="compact"] .vc-pronoundb-compact {
+[class*="compact"] .vc-pronoundb-compact,
+.vc-pronoundb-compact-hover {
     display: inline-block;
     margin-left: -2px;
     margin-right: 0.25rem;
+}
+
+.vc-pronoundb-compact-hover {
+    height: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+[class*="compact"]:hover .vc-pronoundb-compact-hover {
+    height: auto;
+    width: auto;
+    overflow: visible;
+}
+
+.vc-pronoundb-compact-hover,
+.vc-pronoundb-cozy-hover {
+    transform: scaleX(0) translateX(-42px);
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: 0.4s ease;
+    transform-origin: 0 50%;
+}
+
+[class*="compact"]:hover .vc-pronoundb-compact-hover,
+[class*="cozy"]:hover .vc-pronoundb-cozy-hover {
+    transform: scaleX(1) translateX(0);
+    opacity: 1;
+}
+
+/* fixes flickering */
+[class*="pointerCover-"] {
+    display: none;
 }

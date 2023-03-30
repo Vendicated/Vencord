@@ -57,11 +57,20 @@ export function CompactPronounsChatComponentWrapper({ message }: { message: Mess
 function PronounsChatComponent({ message }: { message: Message; }) {
     const result = awaitAndFormatPronouns(message.author.id);
     if (result != null) {
-        return (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp)}
-            >• {result}</span>
-        );
+        if (Settings.plugins.PronounDB.showOnHover){
+            return (
+                <span
+                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-cozy", "vc-pronoundb-cozy-hover")}
+                >• {result}</span>
+            );
+        }
+        else {
+            return (
+                <span
+                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-cozy")}
+                >• {result}</span>
+            );
+        }
     }
 
     return null;
@@ -70,11 +79,20 @@ function PronounsChatComponent({ message }: { message: Message; }) {
 export function CompactPronounsChatComponent({ message }: { message: Message; }) {
     const result = awaitAndFormatPronouns(message.author.id);
     if (result != null) {
-        return (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
-            >• {result}</span>
-        );
+        if (Settings.plugins.PronounDB.showOnHover){
+            return (
+                <span
+                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact", "vc-pronoundb-compact-hover")}
+                >• {result}</span>
+            );
+        }
+        else {
+            return (
+                <span
+                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
+                >• {result}</span>
+            );
+        }
     }
 
     return null;

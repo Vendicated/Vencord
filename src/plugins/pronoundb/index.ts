@@ -17,6 +17,7 @@
 */
 
 import "./styles.css";
+import { Settings } from "@api/settings";
 
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -99,6 +100,12 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Show in profile",
             default: true
+        },
+        showOnHover: {
+            type: OptionType.BOOLEAN,
+            description: "Hide the pronouns in messages unless hovered",
+            disabled: () => Settings.plugins.PronounDB.showInMessages !== true,
+            default: false
         }
     },
     settingsAboutComponent: PronounsAboutComponent,
