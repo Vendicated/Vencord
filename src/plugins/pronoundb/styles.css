@@ -26,6 +26,7 @@
     transform: scaleX(0) translateX(-42px);
     opacity: 0;
     transition: 0.4s ease;
+    transition-property: transform, opacity;
     transform-origin: 0 50%;
 }
 
