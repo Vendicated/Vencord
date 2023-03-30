@@ -47,6 +47,11 @@ export default definePlugin({
             default: false,
             onChange: v => toggleHoverControls(v)
         },
+        useSpotifyUris: {
+            type: OptionType.BOOLEAN,
+            description: "Open Spotify URIs instead of Spotify URLs. Will only work if you have Spotify installed and might not work on all platforms",
+            default: false
+        }
     },
     patches: [
         {
