@@ -73,7 +73,7 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
     if (result != null) {
         return (
             <span
-                className={classes(styles.timestampInline, styles.timestamp, cl("compact", { compacthover: () => Settings.plugins.PronounDB.showOnHover !== true }))}
+                className={classes(styles.timestampInline, styles.timestamp, cl("compact", { compacthover: Settings.plugins.PronounDB.showOnHover }))}
             >• {result}</span>
         );
     }
