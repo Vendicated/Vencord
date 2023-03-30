@@ -39,7 +39,7 @@ export default definePlugin({
                 },
             ],
             execute: async (_, ctx) => {
-                const word = findOption(_, "search");
+                const word = findOption(_, "search", "");
 
                 if (!word) {
                     return sendBotMessage(ctx.channel.id, {
@@ -54,7 +54,7 @@ export default definePlugin({
                     formatversion: "2",
                     origin: "*",
                     srsearch: word
-                } as unknown as URLSearchParams); // URLSearchParams doesn't take obj for some reason???
+                });
 
                 const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
                     .catch(err => {
