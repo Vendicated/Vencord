@@ -17,6 +17,7 @@
 */
 
 import { Settings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
@@ -25,6 +26,7 @@ import { Message } from "discord-types/general";
 import { awaitAndFormatPronouns } from "../pronoundbUtils";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
+const cl = classNameFactory("vc-pronoundb-");
 
 function shouldShow(message: Message): boolean {
     // Respect showInMessages
@@ -57,42 +59,23 @@ export function CompactPronounsChatComponentWrapper({ message }: { message: Mess
 function PronounsChatComponent({ message }: { message: Message; }) {
     const result = awaitAndFormatPronouns(message.author.id);
     if (result != null) {
-        if (Settings.plugins.PronounDB.showOnHover){
-            return (
-                <span
-                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-cozy", "vc-pronoundb-cozy-hover")}
-                >• {result}</span>
-            );
-        }
-        else {
-            return (
-                <span
-                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-cozy")}
-                >• {result}</span>
-            );
-        }
+        return (
+            <span
+                className={classes(styles.timestampInline, styles.timestamp, cl("cozy", { cozyhover: () => Settings.plugins.PronounDB.showOnHover !== true }))}
+            >• {result}</span>
+        );
     }
-
     return null;
 }
 
 export function CompactPronounsChatComponent({ message }: { message: Message; }) {
     const result = awaitAndFormatPronouns(message.author.id);
     if (result != null) {
-        if (Settings.plugins.PronounDB.showOnHover){
-            return (
-                <span
-                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact", "vc-pronoundb-compact-hover")}
-                >• {result}</span>
-            );
-        }
-        else {
-            return (
-                <span
-                    className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
-                >• {result}</span>
-            );
-        }
+        return (
+            <span
+                className={classes(styles.timestampInline, styles.timestamp, cl("compact", { compacthover: () => Settings.plugins.PronounDB.showOnHover !== true }))}
+            >• {result}</span>
+        );
     }
 
     return null;
