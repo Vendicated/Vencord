@@ -26,12 +26,8 @@ import { MediaEngineStore } from "../discordModules";
 import { CodecCapabilities } from "../discordModules/modules/types";
 import { defaultProfiles, pluginSettingsHelpers, usePluginSettings } from "../settings";
 import { Styles } from "../styles";
-import { openURL } from "../utils/utils";
-import { AuthorSummaryItem } from "./AuthorSummaryItem";
-import { CopyButton } from "./CopyProfileButton";
-import { DeleteButton } from "./DeleteProfileButton";
-import { NewProfileButton } from "./NewProfileButton";
-import { SaveProfileButton } from "./SaveProfileButton";
+import { openURL } from "../utils";
+import { AuthorSummaryItem, CopyButton, DeleteButton, NewProfileButton, SaveProfileButton } from "./";
 
 interface SettingsCardItemProps {
     title?: string;

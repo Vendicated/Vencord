@@ -20,7 +20,7 @@ import { openModalLazy } from "@utils/modal";
 import { Button } from "@webpack/common";
 import React from "react";
 
-import { ScreenshareSettingsModal } from "./ScreenshareSettingsModal";
+import { ScreenshareSettingsModal } from "./";
 
 export interface OpenScreenshareSettingsButtonProps {
     title?: string;

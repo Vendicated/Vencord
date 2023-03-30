@@ -21,8 +21,8 @@ import { User } from "discord-types/general";
 import React from "react";
 
 import { PluginInfo } from "../constants";
-import { UserSummaryItem } from "../discordModules/components/components";
-import { createDummyUser } from "../utils/utils";
+import { UserSummaryItem } from "../discordModules/components";
+import { createDummyUser } from "../utils";
 
 export const AuthorSummaryItem = (...props: any[]) => {
     const [authors, setAuthors] = useState<Partial<User>[]>([]);

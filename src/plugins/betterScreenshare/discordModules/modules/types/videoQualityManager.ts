@@ -17,7 +17,7 @@
 */
 
 import { Bitrate, Framerate, Resolution } from "../../../types";
-import { Connection } from "./connection";
+import { Connection } from "./";
 
 export type VideoQualityManager = VideoQualityManager_ & {
     connection: Connection;

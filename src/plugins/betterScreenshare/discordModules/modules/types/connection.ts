@@ -20,11 +20,8 @@
 import EventEmitter from "events";
 import TypedEventEmitter from "typed-emitter";
 
-// import { TypedEmitter } from "tiny-typed-emitter";
 import { Framerate, Resolution } from "../../../types";
-import { Conn } from "./conn";
-import { FramerateReducer } from "./framerateReducer";
-import { VideoQualityManager } from "./videoQualityManager";
+import { Conn, FramerateReducer, VideoQualityManager } from "./";
 
 export const ConnectionEvent = {
     SPEAKING: "speaking",

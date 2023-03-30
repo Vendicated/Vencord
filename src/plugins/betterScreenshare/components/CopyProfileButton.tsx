@@ -20,7 +20,7 @@ import { Button } from "@webpack/common";
 import React from "react";
 
 import { pluginSettingsHelpers, usePluginSettings } from "../settings";
-import { IconTooltipButton } from "./IconTooltipButton";
+import { IconTooltipButton } from "./";
 
 export const CopyButton = (props: typeof Button["defaultProps"]) => {
     const { setCurrentProfile } = pluginSettingsHelpers;

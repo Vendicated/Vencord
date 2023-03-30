@@ -17,7 +17,6 @@
 */
 
 import { filters, waitFor } from "@webpack";
-import { } from "webpack/common/internal";
 
 import * as types from "./types";
 

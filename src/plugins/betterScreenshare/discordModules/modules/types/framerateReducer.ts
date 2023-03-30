@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Connection } from "./connection";
-import { VideoQualityManager } from "./videoQualityManager";
+import { Connection, VideoQualityManager } from "./";
 
 export type FramerateReducer = FramerateReducer_ & {
     connection: Connection;

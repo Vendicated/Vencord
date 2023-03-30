@@ -20,7 +20,7 @@ import { Button } from "@webpack/common";
 import React from "react";
 
 import { pluginSettingsHelpers } from "../settings";
-import { IconTooltipButton } from "./IconTooltipButton";
+import { IconTooltipButton } from "./";
 
 export const NewProfileButton = (props: typeof Button["defaultProps"]) => {
     const {

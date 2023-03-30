@@ -21,7 +21,7 @@ import * as t from "@webpack/types";
 import React from "react";
 
 import { pluginSettingsHelpers, usePluginSettings } from "../settings";
-import { IconTooltipButton } from "./IconTooltipButton";
+import { IconTooltipButton } from "./";
 
 export const DeleteButton = (props: t.Button["defaultProps"]) => {
     const { deleteProfile } = pluginSettingsHelpers;

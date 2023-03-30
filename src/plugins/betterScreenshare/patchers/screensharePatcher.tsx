@@ -23,7 +23,7 @@ import { MediaEngineStore } from "../discordModules/stores/types";
 import { Emitter } from "../emitter";
 import { getPluginSettings } from "../settings";
 import { Framerate, Resolution } from "../types";
-import { Patcher } from "./patcher";
+import { Patcher } from "./";
 
 
 export class ScreensharePatcher extends Patcher {
