@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/settings";
 import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
-import { OpenScreenshareSettingsButton } from "./components/OpenScreenshareSettingsButton";
+import { OpenScreenshareSettingsButton } from "./components";
 import { PluginInfo } from "./constants";
 import { Emitter } from "./emitter";
 import { ScreensharePatcher } from "./patchers";

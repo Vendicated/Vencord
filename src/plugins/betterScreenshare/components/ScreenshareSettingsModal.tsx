@@ -29,12 +29,12 @@ import { Styles } from "../styles";
 import { openURL } from "../utils";
 import { AuthorSummaryItem, CopyButton, DeleteButton, NewProfileButton, SaveProfileButton } from "./";
 
-interface SettingsCardItemProps {
+export interface SettingsCardItemProps {
     title?: string;
     children: JSX.Element[] | JSX.Element;
 }
 
-const SettingsCardItem = (props: SettingsCardItemProps & React.PropsWithChildren<{
+export const SettingsCardItem = (props: SettingsCardItemProps & React.PropsWithChildren<{
     flexDirection?: React.CSSProperties["flexDirection"];
     style?: React.CSSProperties;
     className?: string;
@@ -45,7 +45,7 @@ const SettingsCardItem = (props: SettingsCardItemProps & React.PropsWithChildren
     </Flex>;
 };
 
-interface SettingsCardProps {
+export interface SettingsCardProps {
     title?: string;
     children?: JSX.Element[] | JSX.Element;
     switchEnabled?: boolean,
