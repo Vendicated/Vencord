@@ -91,6 +91,8 @@ export class ScreensharePatcher extends Patcher {
                     } = currentProfile;
                     const { videoQualityManager } = connection;
 
+                    videoQualityManager.qualityOverwrite = {};
+
                     Reflect.apply(oldSetDesktopSource, this, [source, {
                         ...options,
                         useVideoHook: true,
@@ -112,6 +114,7 @@ export class ScreensharePatcher extends Patcher {
                         videoQualityManager.qualityOverwrite.bitrateMin = bitrateBit;
                         videoQualityManager.qualityOverwrite.bitrateTarget = bitrateBit;
                     }
+
                     if (keyframeIntervalEnabled && keyframeInterval)
                         connection.setKeyframeInterval(keyframeInterval);
 

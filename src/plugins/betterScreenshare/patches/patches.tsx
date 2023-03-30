@@ -19,6 +19,7 @@
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { Forms } from "@webpack/common";
+import { isArray } from "lodash";
 
 import { AudioSourceSelect } from "../components/AudioSourceSelect";
 import { OpenScreenshareSettingsButton } from "../components/OpenScreenshareSettingsButton";
@@ -77,8 +78,14 @@ export class PatchedFunctions {
                     const streamSettingsModalContent =
                         oldChildrenResult.props.children;
 
-                    if (!replacedStreamSettingsComponent)
-                        replacedStreamSettingsComponent = <ReplacedStreamSettings>{{ ...streamSettingsModalContent.props.children.props.children }}</ReplacedStreamSettings>;
+                    if (!replacedStreamSettingsComponent) {
+                        const oldStreamSettingsComponent = streamSettingsModalContent.props.children.props.children;
+
+                        replacedStreamSettingsComponent =
+                            <ReplacedStreamSettings>
+                                {isArray(oldStreamSettingsComponent) ? [...oldStreamSettingsComponent] : { ...oldStreamSettingsComponent }}
+                            </ReplacedStreamSettings>;
+                    }
 
                     streamSettingsModalContent.props.title = "Stream Settings";
                     streamSettingsModalContent.props.children.props.children = replacedStreamSettingsComponent;
