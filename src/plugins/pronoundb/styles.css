@@ -25,7 +25,6 @@
 .vc-pronoundb-cozyhover {
     transform: scaleX(0) translateX(-42px);
     opacity: 0;
-    will-change: transform, opacity;
     transition: 0.4s ease;
     transform-origin: 0 50%;
 }
