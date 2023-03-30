@@ -28,6 +28,7 @@ const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     autoUpdate: boolean;
+    autoUpdateNotification: boolean,
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -52,6 +53,7 @@ export interface Settings {
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     autoUpdate: false,
+    autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
@@ -131,6 +133,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             target[p] = v;
             // Call any listeners that are listening to a setting of this path
             const setPath = `${path}${path && "."}${p}`;
+            delete proxyCache[setPath];
             for (const subscription of subscriptions) {
                 if (!subscription._path || subscription._path === setPath) {
                     subscription(v, setPath);

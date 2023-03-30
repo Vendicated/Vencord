@@ -20,9 +20,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import { find, findByPropsLazy } from "@webpack";
-import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
+
+import { VIEW_CHANNEL } from "..";
 
 
 enum SortOrderTypes {
@@ -167,7 +169,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
                 <div className="shc-lock-screen-heading-container">
-                    <Text variant="heading-xxl/bold">This is a hidden {ChannelTypesToChannelNames[type]} channel.</Text>
+                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel.</Text>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
