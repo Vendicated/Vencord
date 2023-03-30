@@ -72,7 +72,7 @@ function VencordSettings() {
                 title: "Use Windows' native title bar instead of Discord's custom one",
                 note: "Requires a full restart"
             }),
-            !IS_WEB && {
+            !IS_WEB && false /* This causes electron to freeze / white screen for some people */ && {
                 key: "transparent",
                 title: "Enable window transparency",
                 note: "Requires a full restart"

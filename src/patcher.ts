@@ -83,10 +83,12 @@ if (!process.argv.includes("--vanilla")) {
                     delete options.frame;
                 }
 
+                /* This causes electron to freeze / white screen for some people
                 if (settings.transparent) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
                 }
+                */
 
                 process.env.DISCORD_PRELOAD = original;
 
