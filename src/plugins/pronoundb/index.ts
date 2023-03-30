@@ -104,7 +104,7 @@ export default definePlugin({
         showOnHover: {
             type: OptionType.BOOLEAN,
             description: "Hide the pronouns in messages unless hovered",
-            disabled: () => Settings.plugins.PronounDB.showInMessages !== true,
+            disabled: () => !Settings.plugins.PronounDB.showInMessages,
             default: false
         }
     },
