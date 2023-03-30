@@ -93,6 +93,12 @@ export class ScreensharePatcher extends Patcher {
 
                     videoQualityManager.qualityOverwrite = {};
 
+                    if (!keyframeIntervalEnabled || !keyframeInterval)
+                        connection.setKeyframeInterval(0);
+
+                    if (!videoCodec || !videoCodecEnabled)
+                        connection.setCodecs("opus", "H264", "stream");
+
                     Reflect.apply(oldSetDesktopSource, this, [source, {
                         ...options,
                         useVideoHook: true,
