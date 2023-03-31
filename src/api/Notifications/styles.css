@@ -3,16 +3,19 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    width: 25vw;
-    min-height: 10vh;
     color: var(--text-normal);
     background-color: var(--background-secondary-alt);
-    position: absolute;
-    z-index: 2147483647;
-    right: 1rem;
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
+}
+
+.vc-notification-root:not(.vc-notification-log-entry) {
+    position: absolute;
+    z-index: 2147483647;
+    right: 1rem;
+    width: 25vw;
+    min-height: 10vh;
 }
 
 .vc-notification {
@@ -71,4 +74,17 @@
 
 .vc-notification-img {
     width: 100%;
+}
+
+.vc-notification-log-empty {
+    height: 218px;
+    background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") centerno-repeat;
+    margin-bottom: 40px;
+}
+
+.vc-notification-log-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
 }
