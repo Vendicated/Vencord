@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
-import events from "./events";
+import { forEachEvent } from "./events";
 import { removeFriend, removeGroup, removeGuild } from "./functions";
 import settings from "./settings";
 import { syncAndRunChecks } from "./utils";
@@ -30,6 +30,7 @@ export default definePlugin({
     description: "Notifies you when a friend, group chat, or server removes you.",
     authors: [Devs.nick],
     settings,
+
     patches: [
         {
             find: "removeRelationship:function(",
@@ -53,13 +54,16 @@ export default definePlugin({
             }
         }
     ],
+
     async start() {
         await syncAndRunChecks();
-        events.forEach(e => e.callbacks.forEach(c => FluxDispatcher.subscribe(e.name, c)));
+        forEachEvent((ev, cb) => FluxDispatcher.subscribe(ev, cb));
     },
+
     stop() {
-        events.forEach(e => e.callbacks.forEach(c => FluxDispatcher.unsubscribe(e.name, c)));
+        forEachEvent((ev, cb) => FluxDispatcher.unsubscribe(ev, cb));
     },
+
     removeFriend,
     removeGroup,
     removeGuild

@@ -16,36 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FluxEvents } from "@webpack/types";
+
 import { onChannelDelete, onGuildDelete, onRelationshipRemove } from "./functions";
 import { syncFriends, syncGroups, syncGuilds } from "./utils";
 
-export default [
-    {
-        name: "GUILD_CREATE",
-        callbacks: [syncGuilds]
-    },
-    {
-        name: "GUILD_DELETE",
-        callbacks: [onGuildDelete]
-    },
-    {
-        name: "CHANNEL_CREATE",
-        callbacks: [syncGroups]
-    },
-    {
-        name: "CHANNEL_DELETE",
-        callbacks: [onChannelDelete]
-    },
-    {
-        name: "RELATIONSHIP_ADD",
-        callbacks: [syncFriends]
-    },
-    {
-        name: "RELATIONSHIP_UPDATE",
-        callbacks: [syncFriends]
-    },
-    {
-        name: "RELATIONSHIP_REMOVE",
-        callbacks: [syncFriends, onRelationshipRemove]
+export const FluxHandlers: Partial<Record<FluxEvents, Array<(data: any) => void>>> = {
+    GUILD_CREATE: [syncGuilds],
+    GUILD_DELETE: [onGuildDelete],
+    CHANNEL_CREATE: [syncGroups],
+    CHANNEL_DELETE: [onChannelDelete],
+    RELATIONSHIP_ADD: [syncFriends],
+    RELATIONSHIP_UPDATE: [syncFriends],
+    RELATIONSHIP_REMOVE: [syncFriends, onRelationshipRemove]
+};
+
+export function forEachEvent(fn: (event: FluxEvents, handler: (data: any) => void) => void) {
+    for (const event in FluxHandlers) {
+        for (const cb of FluxHandlers[event]) {
+            fn(event as FluxEvents, cb);
+        }
     }
-] as const;
+}
