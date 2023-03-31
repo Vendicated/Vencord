@@ -533,7 +533,16 @@ export default definePlugin({
     },
 
     filterAttachments(attachments: Message["attachments"]) {
-        return attachments.filter(attachment => attachment.content_type !== "image/gif" || !attachment.url.match(fakeNitroGifStickerRegex));
+        return attachments.filter(attachment => {
+            if (attachment.content_type !== "image/gif") return true;
+
+            const match = attachment.url.match(fakeNitroGifStickerRegex);
+            if (match) {
+                if (StickerStore.getStickerById(match[1])) return false;
+            }
+
+            return true;
+        });
     },
 
     shouldKeepEmojiLink(link: any) {
