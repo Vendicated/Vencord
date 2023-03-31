@@ -75,8 +75,8 @@ const settings = definePluginSettings({
         description: "Default color source if both are present",
         type: OptionType.SELECT,
         options: [
-            { label: "Nitro", value: true, default: true },
-            { label: "Fake", value: false },
+            { label: "Nitro colors", value: true, default: true },
+            { label: "Fake colors", value: false },
         ]
     }
 });
@@ -89,13 +89,13 @@ export default definePlugin({
         {
             find: "getUserProfile=",
             replacement: {
-                match: /(getUserProfile=function\(\i\){return )(\i\[\i\])/,
-                replace: "$1$self.colorDecodeHook($2)"
+                match: /(?<=getUserProfile=function\(\i\){return )(\i\[\i\])/,
+                replace: "$self.colorDecodeHook($1)"
             }
         }, {
             find: ".USER_SETTINGS_PROFILE_THEME_ACCENT",
             replacement: {
-                match: /ACCENT}\)}\)}\)(?<=(?<=},color:(\i).+)},color:(\i).+)/,
+                match: /RESET_PROFILE_THEME}\)(?<=},color:(\i).+?},color:(\i).+?)/,
                 replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
             }
         }
