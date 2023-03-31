@@ -56,7 +56,9 @@ export default definePlugin({
     ],
 
     async start() {
-        await syncAndRunChecks();
+        setTimeout(() => {
+            syncAndRunChecks();
+        }, 5000);
         forEachEvent((ev, cb) => FluxDispatcher.subscribe(ev, cb));
     },
 
