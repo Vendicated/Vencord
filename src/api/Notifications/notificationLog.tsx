@@ -22,6 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import { useAwaiter } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -29,6 +30,7 @@ import type { NotificationData } from "./Notifications";
 
 interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
     timestamp: number;
+    id: string;
 }
 
 const KEY = "notification-log";
@@ -47,22 +49,27 @@ export async function persistNotification(notification: NotificationData) {
     const limit = Settings.notifications.logLimit;
     if (limit === 0) return;
 
-    const log = await getLog();
+    await DataStore.update(KEY, (old: PersistentNotificationData[] | undefined) => {
+        const log = old ?? [];
 
-    // Omit stuff we don't need jazz
-    const {
-        onClick, onClose, richBody, permanent, noPersist, dismissOnClick,
-        ...pureNotification
-    } = notification;
-    log.unshift({
-        ...pureNotification,
-        timestamp: Date.now()
+        // Omit stuff we don't need
+        const {
+            onClick, onClose, richBody, permanent, noPersist, dismissOnClick,
+            ...pureNotification
+        } = notification;
+
+        log.unshift({
+            ...pureNotification,
+            timestamp: Date.now(),
+            id: nanoid()
+        });
+
+        if (log.length > limit && limit !== 101)
+            log.length = limit;
+
+        return log;
     });
 
-    if (log.length > limit && limit !== 101)
-        log.length = limit;
-
-    await DataStore.set(KEY, log);
     signals.forEach(x => x());
 }
 
@@ -143,7 +150,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
 
     return (
         <div className={cl("container")}>
-            {log.map(n => <NotificationEntry data={n} key={n.timestamp} />)}
+            {log.map(n => <NotificationEntry data={n} key={n.id} />)}
         </div>
     );
 }
