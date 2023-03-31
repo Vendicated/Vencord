@@ -46,6 +46,19 @@ export class ScreensharePatcher extends Patcher {
             connection => {
                 if (connection.context !== "stream") return;
 
+                const oldSetCodecs = connection.setCodecs;
+                connection.setCodecs = function () {
+                    const {
+                        currentProfile,
+                    } = getPluginSettings();
+                    const { videoCodec, videoCodecEnabled } = currentProfile;
+
+                    if (videoCodecEnabled && videoCodec) {
+                        Reflect.apply(oldSetCodecs, this, ["opus", videoCodec, "stream"]);
+                    } else
+                        Reflect.apply(oldSetCodecs, this, arguments);
+                };
+
                 const oldHandleSoundshare = connection.handleSoundshare;
                 connection.handleSoundshare = function () {
                     const {
@@ -93,11 +106,11 @@ export class ScreensharePatcher extends Patcher {
 
                     videoQualityManager.qualityOverwrite = {};
 
-                    if (!keyframeIntervalEnabled || !keyframeInterval)
-                        connection.setKeyframeInterval(0);
-
-                    if (!videoCodec || !videoCodecEnabled)
+                    if (!videoCodecEnabled || !videoCodec)
                         connection.setCodecs("opus", "H264", "stream");
+
+                    if (videoCodecEnabled && videoCodec)
+                        connection.setCodecs("opus", videoCodec, "stream");
 
                     Reflect.apply(oldSetDesktopSource, this, [source, {
                         ...options,
@@ -110,9 +123,6 @@ export class ScreensharePatcher extends Patcher {
                         ...(resolutionEnabled && width && height ? { width: width, height: height } : {}),
                     } satisfies DesktopSourceOptions]);
 
-                    if (videoCodec && videoCodecEnabled)
-                        connection.setCodecs("opus", videoCodec, "stream");
-
                     if (videoBitrateEnabled && videoBitrate) {
                         const bitrateBit = videoBitrate * 1000;
                         connection.setCameraBitRate(bitrateBit, bitrateBit, bitrateBit);
@@ -123,6 +133,9 @@ export class ScreensharePatcher extends Patcher {
 
                     if (keyframeIntervalEnabled && keyframeInterval)
                         connection.setKeyframeInterval(keyframeInterval);
+
+                    if (!keyframeIntervalEnabled || !keyframeInterval)
+                        connection.setKeyframeInterval(0);
 
                     if (audioSourceEnabled && audioSource) {
                         const pid = utils.getPidFromDesktopSource(audioSource);
