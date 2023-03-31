@@ -18,14 +18,10 @@
 
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
-import { findByPropsLazy } from "@webpack";
-import { GuildStore, RelationshipStore, UserUtils } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { ChannelStore, GuildStore, RelationshipStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
-
-const DMStore = findByPropsLazy("getSortedPrivateChannels");
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
@@ -121,7 +117,7 @@ export function deleteGroup(id: string) {
 }
 
 export async function syncGroups() {
-    for (const { type, id, name, rawRecipients, icon } of DMStore.getSortedPrivateChannels() as Channel[]) {
+    for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
         if (type === ChannelType.GROUP_DM)
             groups.set(id, {
                 id,
