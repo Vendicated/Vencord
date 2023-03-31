@@ -27,7 +27,7 @@ import type { DispatchWithoutAction } from "react";
 import NotificationComponent from "./NotificationComponent";
 import type { NotificationData } from "./Notifications";
 
-interface PersistentNotificationData extends Omit<NotificationData, "onClick" | "onClose" | "richBody" | "permanent" | "noPersist"> {
+interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
     timestamp: number;
 }
 
@@ -49,8 +49,11 @@ export async function persistNotification(notification: NotificationData) {
 
     const log = await getLog();
 
-    // Omit not serializable jazz
-    const { onClick, onClose, richBody, permanent, noPersist, ...pureNotification } = notification;
+    // Omit stuff we don't need jazz
+    const {
+        onClick, onClose, richBody, permanent, noPersist, dismissOnClick,
+        ...pureNotification
+    } = notification;
     log.unshift({
         ...pureNotification,
         timestamp: Date.now()
@@ -108,13 +111,14 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
         <div className={cl("wrapper", { removing })} ref={ref}>
             <NotificationComponent
                 {...data}
+                permanent={true}
+                dismissOnClick={false}
                 onClose={() => {
                     if (removing) return;
                     setRemoving(true);
 
                     setTimeout(() => deleteNotification(data.timestamp), 200);
                 }}
-                permanent={true}
                 richBody={
                     <div className={cl("body")}>
                         {data.body}

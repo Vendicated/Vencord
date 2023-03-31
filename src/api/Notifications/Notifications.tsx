@@ -59,6 +59,8 @@ export interface NotificationData {
     permanent?: boolean;
     /** Whether this notification should not be persisted in the Notification Log */
     noPersist?: boolean;
+    /** Whether this notification should be dismissed when clicked (defaults to true) */
+    dismissOnClick?: boolean;
 }
 
 function _showNotification(notification: NotificationData, id: number) {

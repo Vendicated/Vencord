@@ -35,7 +35,8 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     onClose,
     image,
     permanent,
-    className
+    className,
+    dismissOnClick
 }: NotificationData & { className?: string; }) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
@@ -66,8 +67,9 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             className={classes("vc-notification-root", className)}
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
             onClick={() => {
-                onClose!();
                 onClick?.();
+                if (dismissOnClick !== false)
+                    onClose!();
             }}
             onContextMenu={e => {
                 e.preventDefault();
