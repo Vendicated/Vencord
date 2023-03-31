@@ -99,3 +99,8 @@
     font-size: 0.8em;
     font-weight: lighter;
 }
+
+.vc-notification-log-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}
