@@ -90,10 +90,7 @@ export function useLogs() {
 }
 
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
-    if (pending)
-        return <Forms.FormText>Loading Notification log...</Forms.FormText>;
-
-    if (!log.length)
+    if (!log.length && !pending)
         return (
             <div className={cl("container")}>
                 <div className={cl("empty")} />
