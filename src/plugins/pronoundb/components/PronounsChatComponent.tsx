@@ -61,7 +61,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
     if (result != null) {
         return (
             <span
-                className={classes(styles.timestampInline, styles.timestamp, cl("cozy", { cozyhover: Settings.plugins.PronounDB.showOnHover }))}
+                className={classes(styles.timestampInline, styles.timestamp, cl("cozy", { "cozy-hoveronly": Settings.plugins.PronounDB.showOnHover }))}
             >• {result}</span>
         );
     }
@@ -73,7 +73,7 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
     if (result != null) {
         return (
             <span
-                className={classes(styles.timestampInline, styles.timestamp, cl("compact", { compacthover: Settings.plugins.PronounDB.showOnHover }))}
+                className={classes(styles.timestampInline, styles.timestamp, cl("compact", { "compact-hoveronly": Settings.plugins.PronounDB.showOnHover }))}
             >• {result}</span>
         );
     }

@@ -1,40 +1,37 @@
+/* Handle compact mode */
 .vc-pronoundb-compact {
     display: none;
 }
 
-[class*="compact"] .vc-pronoundb-compact,
-.vc-pronoundb-compacthover {
+[class*="compact"] .vc-pronoundb-compact {
     display: inline-block;
     margin-left: -2px;
     margin-right: 0.25rem;
 }
 
-.vc-pronoundb-compacthover {
+
+/* Handles the showOnHover option */
+.vc-pronoundb-compact-hoveronly,
+.vc-pronoundb-cozy-hoveronly {
+    transform: scaleX(0) translateX(-42px);
+    opacity: 0;
     height: 0;
     width: 0;
     overflow: hidden;
+    transform-origin: 0 50%;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, height, width;
 }
 
-[class*="compact"]:hover .vc-pronoundb-compacthover {
+[class*="compact"]:hover .vc-pronoundb-compact-hoveronly,
+[class*="cozy"]:hover .vc-pronoundb-cozy-hoveronly {
+    transform: scaleX(1) translateX(0);
+    opacity: 1;
     height: auto;
     width: auto;
     overflow: visible;
 }
 
-.vc-pronoundb-compacthover,
-.vc-pronoundb-cozyhover {
-    transform: scaleX(0) translateX(-42px);
-    opacity: 0;
-    transition: 0.4s ease;
-    transition-property: transform, opacity;
-    transform-origin: 0 50%;
-}
-
-[class*="compact"]:hover .vc-pronoundb-compacthover,
-[class*="cozy"]:hover .vc-pronoundb-cozyhover {
-    transform: scaleX(1) translateX(0);
-    opacity: 1;
-}
 
 /* fixes flickering */
 [class*="pointerCover-"] {
