@@ -23,15 +23,18 @@ import { React } from "@webpack/common";
 
 import { ErrorCard } from "./ErrorCard";
 
-interface Props {
+interface Props<T = any> {
     /** Render nothing if an error occurs */
     noop?: boolean;
     /** Fallback component to render if an error occurs */
     fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; }>>;
-    /** called when an error occurs */
-    onError?(error: Error, errorInfo: React.ErrorInfo): void;
+    /** called when an error occurs. The props property is only available if using .wrap */
+    onError?(data: { error: Error, errorInfo: React.ErrorInfo, props: T; }): void;
     /** Custom error message */
     message?: string;
+
+    /** The props passed to the wrapped component. Only used by wrap */
+    wrappedProps?: T;
 }
 
 const color = "#e78284";
@@ -66,7 +69,7 @@ const ErrorBoundary = LazyComponent(() => {
         }
 
         componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-            this.props.onError?.(error, errorInfo);
+            this.props.onError?.({ error, errorInfo, props: this.props.wrappedProps });
             logger.error("A component threw an Error\n", error);
             logger.error("Component Stack", errorInfo.componentStack);
         }
@@ -102,11 +105,11 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Props): React.ComponentType<T>;
+        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): React.FunctionComponent<T>;
     };
 
 ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
-    <ErrorBoundary {...errorBoundaryProps}>
+    <ErrorBoundary {...errorBoundaryProps} wrappedProps={props}>
         <Component {...props} />
     </ErrorBoundary>
 );

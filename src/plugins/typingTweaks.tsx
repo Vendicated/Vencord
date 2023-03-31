@@ -21,10 +21,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { GuildMemberStore, React, RelationshipStore, SelectedChannelStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const Avatar = findByCodeLazy('"top",spacing:');
+const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -53,6 +54,46 @@ export function buildSeveralUsers({ a, b, c }: { a: string, b: string, c: number
     ];
 }
 
+interface Props {
+    user: User;
+    guildId: string;
+}
+
+const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
+    return (
+        <strong
+            role="button"
+            onClick={() => {
+                openProfile({
+                    userId: user.id,
+                    guildId,
+                    channelId: SelectedChannelStore.getChannelId(),
+                    analyticsLocation: {
+                        page: guildId ? "Guild Channel" : "DM Channel",
+                        section: "Profile Popout"
+                    }
+                });
+            }}
+            style={{
+                display: "grid",
+                gridAutoFlow: "column",
+                gap: "4px",
+                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                cursor: "pointer"
+            }}
+        >
+            {settings.store.showAvatars && (
+                <div style={{ marginTop: "4px" }}>
+                    <Avatar
+                        size="SIZE_16"
+                        src={user.getAvatarURL(guildId, 128)} />
+                </div>
+            )}
+            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
+        </strong>
+    );
+}, { noop: true });
+
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
@@ -70,7 +111,7 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /return \i\.Z\.getName\(.,.\.props\.channel\.id,(.)\)/,
+                match: /return \i\.\i\.getName\(.,.\.props\.channel\.id,(.)\)/,
                 replace: "return $1"
             }
         },
@@ -93,22 +134,10 @@ export default definePlugin({
 
         let element = 0;
 
-        return children.map(c => c.type === "strong" ? <this.TypingUser {...props} user={users[element++]} /> : c);
+        return children.map(c =>
+            c.type === "strong"
+                ? <TypingUser {...props} user={users[element++]} />
+                : c
+        );
     },
-
-    TypingUser: ErrorBoundary.wrap(({ user, guildId }: { user: User, guildId: string; }) => {
-        return <strong style={{
-            display: "grid",
-            gridAutoFlow: "column",
-            gap: "4px",
-            color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined
-        }}>
-            {settings.store.showAvatars && <div style={{ marginTop: "4px" }}>
-                <Avatar
-                    size={Avatar.Sizes.SIZE_16}
-                    src={user.getAvatarURL(guildId, 128)} />
-            </div>}
-            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
-        </strong>;
-    }, { noop: true })
 });

@@ -20,6 +20,7 @@ import "./settingsStyles.css";
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { handleComponentFailed } from "@components/handleComponentFailed";
 import { findByCodeLazy } from "@webpack";
 import { Forms, SettingsRouter, Text } from "@webpack/common";
 
@@ -58,11 +59,11 @@ function Settings(props: SettingsProps) {
     const CurrentTab = SettingsTabs[tab]?.component;
 
     return <Forms.FormSection>
-        <Text variant="heading-md/normal" tag="h2">Vencord Settings</Text>
+        <Text variant="heading-lg/semibold" style={{ color: "var(--header-primary)" }} tag="h2">Vencord Settings</Text>
 
         <TabBar
-            type={TabBar.Types.TOP}
-            look={TabBar.Looks.BRAND}
+            type="top"
+            look="brand"
             className={cl("tab-bar")}
             selectedItem={tab}
             onItemSelect={SettingsRouter.open}
@@ -83,7 +84,7 @@ function Settings(props: SettingsProps) {
 }
 
 export default function (props: SettingsProps) {
-    return <ErrorBoundary>
+    return <ErrorBoundary onError={handleComponentFailed}>
         <Settings tab={props.tab} />
     </ErrorBoundary>;
 }

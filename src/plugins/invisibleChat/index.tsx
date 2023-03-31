@@ -91,8 +91,8 @@ function ChatBarIcon() {
                             <svg
                                 aria-hidden
                                 role="img"
-                                width="24"
-                                height="24"
+                                width="32"
+                                height="32"
                                 viewBox={"0 0 64 64"}
                                 style={{ scale: "1.1" }}
                             >
@@ -131,8 +131,8 @@ export default definePlugin({
         {
             find: ".activeCommandOption",
             replacement: {
-                match: /.=.\.activeCommand,.=.\.activeCommandOption,.{1,133}(.)=\[\];/,
-                replace: "$&;$1.push($self.chatBarIcon());",
+                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
             }
         },
     ],

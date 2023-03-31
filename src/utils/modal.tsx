@@ -117,6 +117,7 @@ const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
     openModal: filters.byCode("onCloseRequest:null!="),
     closeModal: filters.byCode("onCloseCallback&&"),
     openModalLazy: m => m?.length === 1 && filters.byCode(".apply(this,arguments)")(m),
+    closeAllModals: filters.byCode(".value.key,")
 });
 
 /**
@@ -141,4 +142,11 @@ export function openModal(render: RenderFunction, options?: ModalOptions, contex
  */
 export function closeModal(modalKey: string, contextKey?: string): void {
     return ModalAPI.closeModal(modalKey, contextKey);
+}
+
+/**
+ * Close all open modals
+ */
+export function closeAllModals(): void {
+    return ModalAPI.closeAllModals();
 }

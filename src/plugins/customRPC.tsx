@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
@@ -56,11 +57,11 @@ interface ActivityAssets {
 }
 
 interface Activity {
-    state: string;
+    state?: string;
     details?: string;
     timestamps?: {
-        start?: Number;
-        end?: Number;
+        start?: number;
+        end?: number;
     };
     assets?: ActivityAssets;
     buttons?: Array<string>;
@@ -70,7 +71,7 @@ interface Activity {
         button_urls?: Array<string>;
     };
     type: ActivityType;
-    flags: Number;
+    flags: number;
 }
 
 enum ActivityType {
@@ -93,13 +94,13 @@ const numOpt = (description: string) => ({
     onChange: setRpc
 }) as const;
 
-const choice = (label: string, value: any, _default?: Boolean) => ({
+const choice = (label: string, value: any, _default?: boolean) => ({
     label,
     value,
     default: _default
 }) as const;
 
-const choiceOpt = (description: string, options) => ({
+const choiceOpt = <T,>(description: string, options: T) => ({
     type: OptionType.SELECT,
     description,
     onChange: setRpc,
@@ -173,13 +174,13 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.buttons = [
             buttonOneText,
             buttonTwoText
-        ].filter(Boolean);
+        ].filter(isTruthy);
 
         activity.metadata = {
             button_urls: [
                 buttonOneURL,
                 buttonTwoURL
-            ].filter(Boolean)
+            ].filter(isTruthy)
         };
     }
 
@@ -206,17 +207,16 @@ async function createActivity(): Promise<Activity | undefined> {
             delete activity[k];
     }
 
-    // WHAT DO YOU WANT FROM ME
-    // eslint-disable-next-line consistent-return
     return activity;
 }
 
-async function setRpc(disable?: Boolean) {
+async function setRpc(disable?: boolean) {
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !disable ? activity : {}
+        activity: !disable ? activity : null,
+        socketId: "CustomRPC",
     });
 }
 

@@ -19,12 +19,12 @@
 import { Command } from "@api/Commands";
 import { Promisable } from "type-fest";
 
-import type { ReplaceFn } from "./patches";
-
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
 }
+
+export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {
     match: string | RegExp;
@@ -76,9 +76,9 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
-     * Set this if your plugin only works on Browser or Desktop, not both
+     * Whether this plugin should be enabled by default, but can be disabled
      */
-    target?: "WEB" | "DESKTOP" | "BOTH";
+    enabledByDefault?: boolean;
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
@@ -229,9 +229,12 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
     never;
+type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
+    O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
+) : O extends { default: infer T; } ? T : undefined;
 
 type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingType<D[K]>;
+    [K in keyof D]: PluginSettingType<D[K]> | PluginSettingDefaultType<D[K]>;
 };
 
 /** An instance of defined plugin settings */

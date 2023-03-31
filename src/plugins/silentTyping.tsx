@@ -37,9 +37,15 @@ const settings = definePluginSettings({
     }
 });
 
-function SilentTypingToggle() {
+function SilentTypingToggle(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
     const { isEnabled } = settings.use(["isEnabled"]);
     const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
+
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
         <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"}>
@@ -82,8 +88,8 @@ export default definePlugin({
             find: ".activeCommandOption",
             predicate: () => settings.store.showIcon,
             replacement: {
-                match: /\i=\i\.activeCommand,\i=\i\.activeCommandOption,.{1,133}(.)=\[\];/,
-                replace: "$&;$1.push($self.chatBarIcon());",
+                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],

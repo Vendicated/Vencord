@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@utils/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu, protocol, session } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -79,8 +79,12 @@ if (!process.argv.includes("--vanilla")) {
                 options.webPreferences.sandbox = false;
                 if (settings.frameless) {
                     options.frame = false;
+                } else if (process.platform === "win32" && settings.winNativeTitleBar) {
+                    delete options.frame;
                 }
-                if (settings.transparent) {
+
+                // This causes electron to freeze / white screen for some people
+                if ((settings as any).transparentUNSAFE_USE_AT_OWN_RISK) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
                 }
@@ -113,10 +117,10 @@ if (!process.argv.includes("--vanilla")) {
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
-    electron.app.whenReady().then(() => {
+    app.whenReady().then(() => {
         // Source Maps! Maybe there's a better way but since the renderer is executed
         // from a string I don't think any other form of sourcemaps would work
-        electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
+        protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
             let url = unsafeUrl.slice("vencord://".length);
             if (url.endsWith("/")) url = url.slice(0, -1);
             switch (url) {
@@ -172,7 +176,7 @@ if (!process.argv.includes("--vanilla")) {
             }
         }
 
-        electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
+        session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
             if (responseHeaders) {
                 if (resourceType === "mainFrame")
                     patchCsp(responseHeaders, "content-security-policy");
@@ -184,6 +188,11 @@ if (!process.argv.includes("--vanilla")) {
             }
             cb({ cancel: false, responseHeaders });
         });
+
+        // assign a noop to onHeadersReceived to prevent other mods from adding their own incompatible ones.
+        // For instance, OpenAsar adds their own that doesn't fix content-type for stylesheets which makes it
+        // impossible to load css from github raw despite our fix above
+        session.defaultSession.webRequest.onHeadersReceived = () => { };
     });
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
