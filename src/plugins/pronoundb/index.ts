@@ -64,8 +64,8 @@ export default definePlugin({
         {
             find: ".Messages.USER_POPOUT_PRONOUNS",
             replacement: {
-                match: /\i\.\i\.useExperiment\({}\)\.showPronouns/,
-                replace: "true"
+                match: /\.showPronouns/,
+                replace: ".showPronouns||true"
             }
         }
     ],
