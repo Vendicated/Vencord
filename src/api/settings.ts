@@ -147,6 +147,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             target[p] = v;
             // Call any listeners that are listening to a setting of this path
             const setPath = `${path}${path && "."}${p}`;
+            delete proxyCache[setPath];
             for (const subscription of subscriptions) {
                 if (!subscription._path || subscription._path === setPath) {
                     subscription(v, setPath);
