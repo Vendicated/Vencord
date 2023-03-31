@@ -8,9 +8,10 @@
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
+    width: 100%;
 }
 
-.vc-notification-root:not(.vc-notification-log-entry) {
+.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
@@ -85,8 +86,23 @@
 .vc-notification-log-container {
     display: flex;
     flex-direction: column;
-    gap: 1em;
     padding: 1em;
+    overflow: hidden;
+}
+
+.vc-notification-log-wrapper {
+    transition: 200ms ease;
+    transition-property: height, opacity;
+}
+
+.vc-notification-log-wrapper:not(:last-child) {
+    margin-bottom: 1em;
+}
+
+.vc-notification-log-removing {
+    height: 0 !important;
+    opacity: 0;
+    margin-bottom: 1em;
 }
 
 .vc-notification-log-body {

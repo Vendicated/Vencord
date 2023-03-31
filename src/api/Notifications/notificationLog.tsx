@@ -21,7 +21,7 @@ import { Settings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import { useAwaiter } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Alerts, Button, Forms, moment, Text, Timestamp, useEffect, useReducer } from "@webpack/common";
+import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -89,6 +89,43 @@ export function useLogs() {
     return [log, pending] as const;
 }
 
+function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
+    const [removing, setRemoving] = useState(false);
+    const ref = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const div = ref.current!;
+
+        const setHeight = () => {
+            if (div.clientHeight === 0) return requestAnimationFrame(setHeight);
+            div.style.height = `${div.clientHeight}px`;
+        };
+
+        setHeight();
+    }, []);
+
+    return (
+        <div className={cl("wrapper", { removing })} ref={ref}>
+            <NotificationComponent
+                {...data}
+                onClose={() => {
+                    if (removing) return;
+                    setRemoving(true);
+
+                    setTimeout(() => deleteNotification(data.timestamp), 200);
+                }}
+                permanent={true}
+                richBody={
+                    <div className={cl("body")}>
+                        {data.body}
+                        <Timestamp timestamp={moment(data.timestamp)} className={cl("timestamp")} />
+                    </div>
+                }
+            />
+        </div>
+    );
+}
+
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
     if (!log.length && !pending)
         return (
@@ -102,21 +139,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
 
     return (
         <div className={cl("container")}>
-            {log.map(n => (
-                <NotificationComponent
-                    {...n}
-                    key={n.timestamp}
-                    onClose={() => deleteNotification(n.timestamp)}
-                    permanent={true}
-                    className={cl("entry")}
-                    richBody={
-                        <div className={cl("body")}>
-                            {n.body}
-                            <Timestamp timestamp={moment(n.timestamp)} className={cl("timestamp")} />
-                        </div>
-                    }
-                />
-            ))}
+            {log.map(n => <NotificationEntry data={n} key={n.timestamp} />)}
         </div>
     );
 }
