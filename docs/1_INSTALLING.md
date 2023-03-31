@@ -13,12 +13,6 @@ Welcome to Megu's Installation Guide! In this file, you will learn about how to 
   - [Installing Vencord](#installing-vencord)
   - [Updating Vencord](#updating-vencord)
   - [Uninstalling Vencord](#uninstalling-vencord)
-  - [Manually Installing Vencord](#manually-installing-vencord)
-    - [On Windows](#on-windows)
-    - [On Linux](#on-linux)
-    - [On MacOS](#on-macos)
-    - [Manual Patching](#manual-patching)
-    - [Manually Uninstalling Vencord](#manually-uninstalling-vencord)
 
 ## Dependencies
 
