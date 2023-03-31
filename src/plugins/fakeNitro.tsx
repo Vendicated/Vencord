@@ -256,7 +256,7 @@ export default definePlugin({
                 {
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
                     match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
-                    replace: (_, content) => `${content}=$self.patchFakeNitroEmojisOrRemoveStickersLinks(${content});`
+                    replace: (_, content) => `${content}=$self.patchFakeNitroEmojisOrRemoveStickersLinks(${content},arguments[2]?.formatInline);`
                 }
             ]
         },
@@ -412,7 +412,7 @@ export default definePlugin({
         });
     },
 
-    patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>) {
+    patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
         const newContent: Array<any> = [];
 
         for (const element of content) {
@@ -425,7 +425,7 @@ export default definePlugin({
                 const fakeNitroMatch = element.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
                     newContent.push(MessageElementsParser.customEmoji.react({
-                        jumboable: content.length === 1,
+                        jumboable: inline,
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: ":FakeNitroEmoji:",
