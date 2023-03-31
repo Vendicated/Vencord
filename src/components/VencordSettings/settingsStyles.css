@@ -38,7 +38,7 @@
     color: var(--info-warning-text);
     margin-top: 0;
 }
-    
+
 .vc-settings-theme-links {
     /* Needed to fix bad themes that hide certain textarea elements for whatever eldritch reason */
     display: inline-block !important;
