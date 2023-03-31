@@ -20,7 +20,7 @@ import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/settings";
 import { useAwaiter } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Forms, Text, useEffect, useReducer } from "@webpack/common";
+import { Forms, moment, Text, Timestamp, useEffect, useReducer } from "@webpack/common";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -106,6 +106,12 @@ export function NotificationLog() {
                     onClose={() => deleteNotification(n.timestamp)}
                     permanent={true}
                     className="vc-notification-log-entry"
+                    richBody={
+                        <div className="vc-notification-log-body">
+                            {n.body}
+                            <Timestamp timestamp={moment(n.timestamp)} className="vc-notification-log-timestamp" />
+                        </div>
+                    }
                 />
             ))}
         </div>

@@ -88,3 +88,14 @@
     gap: 1em;
     padding: 1em;
 }
+
+.vc-notification-log-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-notification-log-timestamp {
+    margin-left: auto;
+    font-size: 0.8em;
+    font-weight: lighter;
+}
