@@ -35,22 +35,22 @@ export default definePlugin({
         {
             find: "removeRelationship:function(",
             replacement: {
-                "match": /(removeRelationship:function\((\i),\i,\i\){)/,
-                "replace": "$1$self.removeFriend($2);"
+                match: /(removeRelationship:function\((\i),\i,\i\){)/,
+                replace: "$1$self.removeFriend($2);"
             }
         },
         {
             find: "leaveGuild:function(",
             replacement: {
-                "match": /(leaveGuild:function\((\i)\){)/,
-                "replace": "$1$self.removeGuild($2);"
+                match: /(leaveGuild:function\((\i)\){)/,
+                replace: "$1$self.removeGuild($2);"
             }
         },
         {
             find: "closePrivateChannel:function(",
             replacement: {
-                "match": /(closePrivateChannel:function\((\i)\){)/,
-                "replace": "$1$self.removeGroup($2);"
+                match: /(closePrivateChannel:function\((\i)\){)/,
+                replace: "$1$self.removeGroup($2);"
             }
         }
     ],
