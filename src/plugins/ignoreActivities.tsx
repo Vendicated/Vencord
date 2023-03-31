@@ -147,8 +147,8 @@ export default definePlugin({
         {
             find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
             replacement: {
-                match: /!(\i)\|\|(null==\i\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
-                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
+                match: /!(\i)(\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
+                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => "false"
                     + `${restWithoutPlatformCheck}`
                     + `(${platformCheck}?${children}:[])`
                     + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
