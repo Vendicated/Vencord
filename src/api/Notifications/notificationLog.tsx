@@ -64,7 +64,7 @@ export async function persistNotification(notification: NotificationData) {
             id: nanoid()
         });
 
-        if (log.length > limit && limit !== 101)
+        if (log.length > limit && limit !== 200)
             log.length = limit;
 
         return log;

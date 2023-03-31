@@ -206,14 +206,14 @@ function VencordSettings() {
                 Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
             </Forms.FormText>
             <Slider
-                markers={[0, 20, 50, 101]}
+                markers={[0, 25, 50, 75, 100, 200]}
                 minValue={0}
-                maxValue={101}
+                maxValue={200}
+                stickToMarkers={true}
                 initialValue={notifSettings.logLimit}
-                onValueChange={v => notifSettings.logLimit = Math.floor(v)}
-                onValueRender={v => v === 101 ? "∞" : Math.floor(v)}
-                onMarkerRender={v => v === 101 ? "∞" : Math.floor(v)}
-                stickToMarkers={false}
+                onValueChange={v => notifSettings.logLimit = v}
+                onValueRender={v => v === 200 ? "∞" : v}
+                onMarkerRender={v => v === 200 ? "∞" : v}
             />
 
             <Button
