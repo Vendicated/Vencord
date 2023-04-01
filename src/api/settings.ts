@@ -47,6 +47,7 @@ export interface Settings {
         timeout: number;
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
+        logLimit: number;
     };
 
     backend: {
@@ -73,7 +74,8 @@ const DefaultSettings: Settings = {
     notifications: {
         timeout: 5000,
         position: "bottom-right",
-        useNative: "not-focused"
+        useNative: "not-focused",
+        logLimit: 50
     },
 
     backend: {
