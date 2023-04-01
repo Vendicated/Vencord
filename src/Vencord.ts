@@ -54,6 +54,7 @@ async function init() {
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
+                        noPersist: true,
                         onClick() {
                             if (needsFullRestart)
                                 window.DiscordNative.app.relaunch();
@@ -69,6 +70,7 @@ async function init() {
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
+                    noPersist: true,
                     onClick() {
                         SettingsRouter.open("VencordUpdater");
                     }

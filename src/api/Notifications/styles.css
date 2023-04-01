@@ -3,16 +3,20 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    width: 25vw;
-    min-height: 10vh;
     color: var(--text-normal);
     background-color: var(--background-secondary-alt);
-    position: absolute;
-    z-index: 2147483647;
-    right: 1rem;
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
+    width: 100%;
+}
+
+.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
+    position: absolute;
+    z-index: 2147483647;
+    right: 1rem;
+    width: 25vw;
+    min-height: 10vh;
 }
 
 .vc-notification {
@@ -71,4 +75,48 @@
 
 .vc-notification-img {
     width: 100%;
+}
+
+.vc-notification-log-empty {
+    height: 218px;
+    background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
+    margin-bottom: 40px;
+}
+
+.vc-notification-log-container {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    overflow: hidden;
+}
+
+.vc-notification-log-wrapper {
+    transition: 200ms ease;
+    transition-property: height, opacity;
+}
+
+.vc-notification-log-wrapper:not(:last-child) {
+    margin-bottom: 1em;
+}
+
+.vc-notification-log-removing {
+    height: 0 !important;
+    opacity: 0;
+    margin-bottom: 1em;
+}
+
+.vc-notification-log-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-notification-log-timestamp {
+    margin-left: auto;
+    font-size: 0.8em;
+    font-weight: lighter;
+}
+
+.vc-notification-log-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
 }

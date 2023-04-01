@@ -11,6 +11,7 @@ patchedDependencies:
 specifiers:
   '@types/diff': ^5.0.2
   '@types/lodash': ^4.14.191
+  '@types/nanoid': ^3.0.0
   '@types/node': ^18.11.18
   '@types/react': ^18.0.27
   '@types/react-dom': ^18.0.10
@@ -31,6 +32,7 @@ specifiers:
   fflate: ^0.7.4
   highlight.js: 10.6.0
   moment: ^2.29.4
+  nanoid: ^4.0.2
   puppeteer-core: ^19.6.0
   standalone-electron-types: ^1.0.0
   stylelint: ^14.16.1
@@ -43,10 +45,12 @@ dependencies:
   '@vap/core': 0.0.12
   '@vap/shiki': 0.10.3
   fflate: 0.7.4
+  nanoid: 4.0.2
 
 devDependencies:
   '@types/diff': 5.0.2
   '@types/lodash': 4.14.191
+  '@types/nanoid': 3.0.0
   '@types/node': 18.11.18
   '@types/react': 18.0.27
   '@types/react-dom': 18.0.10
@@ -415,6 +419,13 @@ packages:
 
   /@types/minimist/1.2.2:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
+    dev: true
+
+  /@types/nanoid/3.0.0:
+    resolution: {integrity: sha512-UXitWSmXCwhDmAKe7D3hNQtQaHeHt5L8LO1CB8GF8jlYVzOv5cBWDNqiJ+oPEWrWei3i3dkZtHY/bUtd0R/uOQ==}
+    deprecated: This is a stub types definition. nanoid provides its own type definitions, so you do not need this installed.
+    dependencies:
+      nanoid: 4.0.2
     dev: true
 
   /@types/node/18.11.18:
@@ -2244,6 +2255,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /nanoid/4.0.2:
+    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
+    engines: {node: ^14 || ^16 || >=18}
+    hasBin: true
 
   /nanomatch/1.2.13:
     resolution: {integrity: sha512-fpoe2T0RbHwBTBUOftAfBPaDEi06ufaUai0mE6Yn1kacc3SnTErfb/h+X94VXzI64rKFHYImXSvdwGGCmwOqCA==}
