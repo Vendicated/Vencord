@@ -206,7 +206,7 @@ export const ScreenshareSettingsModal = ({ onClose, transitionState }: Screensha
                         <SettingsCard title="Video Bitrate" toggleable={true} switchEnabled={editable && !isSaving} checked={videoBitrateEnabled} onChange={status => setVideoBitrateEnabled(status)}>
                             <SettingsCardItem title="Kb/s">
                                 <div style={{ paddingTop: "0.3em", paddingRight: "0.4em", paddingLeft: "0.4em", boxSizing: "border-box" }}>
-                                    <Slider disabled={!videoBitrateEnabled || !editable || isSaving} onValueChange={value => setVideoBitrate(value)} initialValue={videoBitrate || 500} minValue={500} maxValue={50000} markers={[500, 50000]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
+                                    <Slider disabled={!videoBitrateEnabled || !editable || isSaving} onValueChange={value => setVideoBitrate(value)} initialValue={videoBitrate || 500} minValue={500} maxValue={10000} markers={[500, 10000]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
                                 </div>
                             </SettingsCardItem>
                         </SettingsCard>
