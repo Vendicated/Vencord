@@ -116,7 +116,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Error",
             body: (e as ErrorEvent).message || "No Error Message",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -128,7 +129,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Disconnected",
             body: e.reason || "No Reason provided",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
