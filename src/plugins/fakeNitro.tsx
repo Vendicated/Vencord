@@ -23,8 +23,8 @@ import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies"
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 
 const DRAFT_TYPE = 0;
@@ -32,7 +32,6 @@ const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 const PreloadedUserSettingsProtoHandler = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 const ReaderFactory = findByPropsLazy("readerFactory");
-const MessageElementsParser = proxyLazy(() => findByCode(".emojiTooltipPosition,")?.({}));
 const StickerStore = findStoreLazy("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
@@ -98,7 +97,6 @@ interface StickerPack {
 const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
-const fakeNitroNameRegex = /(?:\?|&)name=(\w+)/;
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -424,6 +422,8 @@ export default definePlugin({
 
         const newContent: Array<any> = [];
 
+        let nextIndex = content.length;
+
         for (const element of content) {
             if (element.props?.trusted == null) {
                 newContent.push(element);
@@ -433,15 +433,20 @@ export default definePlugin({
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = element.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
-                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? element.props.href.match(fakeNitroNameRegex)?.[1] ?? "FakeNitroEmoji";
+                    let url: URL | null = null;
+                    try {
+                        url = new URL(element.props.href);
+                    } catch { }
 
-                    newContent.push(MessageElementsParser.customEmoji.react({
+                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
+
+                    newContent.push(Parser.defaultRules.customEmoji.react({
                         jumboable: !inline,
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
                         fake: true
-                    }, void 0, { key: "0" }));
+                    }, void 0, { key: String(nextIndex++) }));
 
                     continue;
                 }
@@ -477,7 +482,12 @@ export default definePlugin({
         for (const item of itemsToMaybePush) {
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
-                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? item.match(fakeNitroNameRegex)?.[1] ?? "FakeNitroSticker";
+                let url: URL | null = null;
+                try {
+                    url = new URL(item);
+                } catch { }
+
+                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
