@@ -19,7 +19,7 @@
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
+import { ApngBlendOp, ApngDisposeOp, ApngFrame, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
@@ -602,8 +602,29 @@ export default definePlugin({
         const scale = resolution / Math.max(width, height);
         ctx.scale(scale, scale);
 
-        let lastImg: HTMLImageElement | null = null;
-        for (const { left, top, width, height, disposeOp, img, delay } of frames) {
+        let previousFrame: ApngFrame | null = null;
+        let previousFrameData: ImageData | null = null;
+
+        for (const frame of frames) {
+            const { left, top, width, height, img, delay, blendOp, disposeOp } = frame;
+
+            if (previousFrame?.disposeOp === ApngDisposeOp.BACKGROUND) {
+                ctx.clearRect(previousFrame.left, previousFrame.top, previousFrame.width, previousFrame.height);
+            } else if (previousFrameData && previousFrame?.disposeOp === ApngDisposeOp.PREVIOUS) {
+                ctx.putImageData(previousFrameData, previousFrame.left, previousFrame.top);
+            }
+
+            previousFrame = frame;
+            previousFrameData = null;
+
+            if (disposeOp === ApngDisposeOp.PREVIOUS) {
+                previousFrameData = ctx.getImageData(left, top, width, height);
+            }
+
+            if (blendOp === ApngBlendOp.SOURCE) {
+                ctx.clearRect(left, top, width, height);
+            }
+
             ctx.drawImage(img, left, top, width, height);
 
             const { data } = ctx.getImageData(0, 0, resolution, resolution);
@@ -614,19 +635,12 @@ export default definePlugin({
             gif.writeFrame(index, resolution, resolution, {
                 transparent: true,
                 palette,
-                delay,
+                delay
             });
-
-            if (disposeOp === ApngDisposeOp.BACKGROUND) {
-                ctx.clearRect(left, top, width, height);
-            } else if (disposeOp === ApngDisposeOp.PREVIOUS && lastImg) {
-                ctx.drawImage(lastImg, left, top, width, height);
-            }
-
-            lastImg = img;
         }
 
         gif.finish();
+
         const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
         promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
     },
