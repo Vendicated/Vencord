@@ -18,8 +18,8 @@
 
 export * from "./AudioSourceSelect";
 export * from "./AuthorSummaryItem";
-export * from "./CopyProfileButton";
-export * from "./DeleteProfileButton";
+export * from "./CopyButton";
+export * from "./DeleteButton";
 export * from "./IconTooltipButton";
 export * from "./NewButton";
 export * from "./OpenScreenshareSettingsButton";

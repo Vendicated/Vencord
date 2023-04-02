@@ -242,7 +242,7 @@ export const ScreenshareSettingsModal = ({ onClose, transitionState }: Screensha
         },
         {
             label: "High",
-            value: 1000
+            value: 10000
         }
     ] as const;
 

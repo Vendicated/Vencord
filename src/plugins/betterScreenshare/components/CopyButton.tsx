@@ -19,7 +19,7 @@
 import { Button } from "@webpack/common";
 import React from "react";
 
-import { IconTooltipButton } from "./";
+import { IconTooltipButton } from ".";
 
 export const CopyButton = (props: typeof Button["defaultProps"]) => {
     return (
