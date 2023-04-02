@@ -56,7 +56,7 @@ export async function authorizeCloud() {
     }
 
     try {
-        const oauthConfiguration = await fetch(new URL("/api/v1/oauth/settings", getCloudUrl()));
+        const oauthConfiguration = await fetch(new URL("/v1/oauth/settings", getCloudUrl()));
         var { clientId, redirectUri } = await oauthConfiguration.json();
     } catch {
         showNotification({

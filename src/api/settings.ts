@@ -78,7 +78,7 @@ const DefaultSettings: Settings = {
 
     backend: {
         enabled: false,
-        url: "https://vencord.vendicated.dev/",
+        url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
     }
