@@ -34,12 +34,12 @@
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.3",
         "fflate": "^0.7.4",
-        "nanoid": "^4.0.2"
+        "nanoid": "^4.0.2",
+        "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
         "@types/diff": "^5.0.2",
         "@types/lodash": "^4.14.191",
-        "@types/nanoid": "^3.0.0",
         "@types/node": "^18.11.18",
         "@types/react": "^18.0.27",
         "@types/react-dom": "^18.0.10",
