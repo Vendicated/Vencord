@@ -24,12 +24,7 @@ import { find, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-// PermissionStore.computePermissions is not the same function and doesn't work here
-const PermissionUtil: { computePermissions: ({ ...args }) => bigint; } = findByPropsLazy("computePermissions", "canEveryoneRole");
-const Permissions: Record<string, bigint> = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS");
-const Tags: Record<string, number> = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types);
-
-const isWebhook = (message, user) => message?.webhookId && user.isNonUserBot();
+type PermissionName = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "CREATE_GUILD_EXPRESSIONS" | "VIEW_AUDIT_LOG" | "VIEW_CHANNEL" | "VIEW_GUILD_ANALYTICS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "MODERATE_MEMBERS" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "ADD_REACTIONS" | "USE_APPLICATION_COMMANDS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "PRIORITY_SPEAKER" | "STREAM" | "USE_EMBEDDED_ACTIVITIES" | "USE_SOUNDBOARD" | "USE_EXTERNAL_SOUNDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "CREATE_EVENTS";
 
 interface Tag {
     // name used for identifying, must be alphanumeric + underscores
@@ -37,75 +32,93 @@ interface Tag {
     // name shown on the tag itself, can be anything probably; automatically uppercase'd
     displayName: string;
     description: string;
-    permissions?: string[];
-    condition?: (message: Message | null, user: User, channel: Channel) => boolean;
+    permissions?: PermissionName[];
+    condition?(message: Message | null, user: User, channel: Channel): boolean;
 }
-const tags: Tag[] = [{
-    name: "WEBHOOK",
-    displayName: "Webhook",
-    description: "Messages sent by webhooks",
-    condition: isWebhook
-}, {
-    name: "OWNER",
-    displayName: "Owner",
-    description: "Owns the server",
-    condition: (_, user, channel) => GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id
-}, {
-    name: "ADMINISTRATOR",
-    displayName: "Admin",
-    description: "Has the administrator permission",
-    permissions: ["ADMINISTRATOR"]
-}, {
-    name: "MODERATOR_STAFF",
-    displayName: "Staff",
-    description: "Can manage the server, channels or roles",
-    permissions: ["MANAGE_GUILD", "MANAGE_CHANNELS", "MANAGE_ROLES"]
-}, {
-    name: "MODERATOR",
-    displayName: "Mod",
-    description: "Can manage messages or kick/ban people",
-    permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
-}, {
-    name: "MODERATOR_VC",
-    displayName: "VC Mod",
-    description: "Can manage voice chats",
-    permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
-    // reversed so higher entries have priority over lower entries
-}].reverse();
 
-let i = 999;
+const CLYDE_ID = "1081004946872352958";
+
+// PermissionStore.computePermissions is not the same function and doesn't work here
+const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") as {
+    computePermissions({ ...args }): bigint;
+};
+
+const Permissions = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS") as Record<PermissionName, bigint>;
+const Tags = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types) as Record<string, number>;
+
+const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 // e[e.BOT=0]="BOT";
+let i = 999;
 const addTagVar = (name: string, types: string) => `${types}[${types}.${name}=${i--}]="${name}"`;
 // case r.SERVER:T=c.Z.Messages.BOT_TAG_SERVER;break;
 const addTagCase = (name: string, displayName: string, types: string, textVar: string) =>
     `case ${types}.${name}:${textVar}=${displayName};break;`;
+
+const tags: Tag[] = [
+    {
+        name: "WEBHOOK",
+        displayName: "Webhook",
+        description: "Messages sent by webhooks",
+        condition: isWebhook
+    }, {
+        name: "OWNER",
+        displayName: "Owner",
+        description: "Owns the server",
+        condition: (_, user, channel) => GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id
+    }, {
+        name: "ADMINISTRATOR",
+        displayName: "Admin",
+        description: "Has the administrator permission",
+        permissions: ["ADMINISTRATOR"]
+    }, {
+        name: "MODERATOR_STAFF",
+        displayName: "Staff",
+        description: "Can manage the server, channels or roles",
+        permissions: ["MANAGE_GUILD", "MANAGE_CHANNELS", "MANAGE_ROLES"]
+    }, {
+        name: "MODERATOR",
+        displayName: "Mod",
+        description: "Can manage messages or kick/ban people",
+        permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
+    }, {
+        name: "MODERATOR_VC",
+        displayName: "VC Mod",
+        description: "Can manage voice chats",
+        permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
+    }
+];
+// reversed so higher entries have priority over lower entries
+tags.reverse();
 
 const settings = definePluginSettings({
     dontShowBotTag: {
         description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
         type: OptionType.BOOLEAN
     },
-    ...Object.fromEntries(tags.map(t => [
-        `visibility_${t.name}`, {
-            description: `Show ${t.displayName} tags (${t.description})`,
+    ...Object.fromEntries(tags.map(({ name, displayName, description }) => [
+        `visibility_${name}`, {
+            description: `Show ${displayName} tags (${description})`,
             type: OptionType.SELECT,
-            options: [{
-                label: "Always",
-                value: "always",
-                default: true
-            }, {
-                label: "Only in chat",
-                value: "chat"
-            }, {
-                label: "Only in memeber list and profiles",
-                value: "not-chat"
-            }, {
-                label: "Never",
-                value: "never"
-            }]
+            options: [
+                {
+                    label: "Always",
+                    value: "always",
+                    default: true
+                }, {
+                    label: "Only in chat",
+                    value: "chat"
+                }, {
+                    label: "Only in memeber list and profiles",
+                    value: "not-chat"
+                }, {
+                    label: "Never",
+                    value: "never"
+                }
+            ]
         }
     ]))
 });
+
 migratePluginSettings("MoreTags", "Webhook Tags");
 export default definePlugin({
     name: "MoreTags",
@@ -185,40 +198,62 @@ return type!==null?$2.botTag,type"
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
+
         const permissions = PermissionUtil.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
-        return Object.entries(Permissions).map(([perm, permInt]) =>
-            permissions & permInt ? perm : ""
-        ).filter(Boolean);
+        return Object.entries(Permissions)
+            .map(([perm, permInt]) =>
+                permissions & permInt ? perm : ""
+            )
+            .filter(Boolean);
     },
 
     isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || tags.some(t => tag === Tags[`${t.name}_OP`]),
 
-    getTag(args: any): number | null {
-        // note: everything other than user and location can be undefined
-        const { message, user, channelId, origType, location } = args;
-        let { channel } = args;
+    getTag({
+        message, user, channelId, origType, location, channel
+    }: {
+        message: Message,
+        user: User,
+        channel?: Channel & { isForumPost(): boolean; },
+        channelId: string;
+        origType?: number;
+        location: string;
+    }): number | null {
+        if (location === "chat" && user.id === "1")
+            return Tags.OFFICIAL;
+        if (user.id === CLYDE_ID)
+            return Tags.AI;
+
         let type = typeof origType === "number" ? origType : null;
-        // "as any" cast because the Channel type doesn't have .isForumPost() yet
-        channel ??= ChannelStore.getChannel(channelId) as any;
+
+        channel ??= ChannelStore.getChannel(channelId!) as any;
+        if (!channel) return type;
 
         const settings = this.settings.store;
         const perms = this.getPermissions(user, channel);
 
-        if (location === "chat" && user.id === "1") return Tags.OFFICIAL;
-        // there's no difference between clyde and a regular webhook message from the message object
-        // exept maybe `user.avatar === "clyde"` but that's worse imo
-        if (user.id === "1081004946872352958") return Tags.AI;
-        tags.forEach(tag => {
-            if (![location, "always"].includes(settings[`visibility_${tag.name}`])) return;
-
-            if (tag.permissions?.find(perm => perms.includes(perm))
-                || (tag.condition?.(message, user, channel))
-            ) {
-                if (channel.isForumPost() && channel.ownerId === user.id) type = Tags[`${tag.name}_OP`];
-                else if (user.bot && !isWebhook(message, user) && !settings.dontShowBotTag) type = Tags[`${tag.name}_BOT`];
-                else type = Tags[tag.name];
+        for (const tag of tags) {
+            switch (settings[`visibility_${tag.name}`]) {
+                case "always":
+                case location:
+                    break;
+                default:
+                    continue;
             }
-        });
+
+            if (
+                tag.permissions?.some(perm => perms.includes(perm)) ||
+                (tag.condition?.(message, user, channel))
+            ) {
+                if (channel.isForumPost() && channel.ownerId === user.id)
+                    type = Tags[`${tag.name}_OP`];
+                else if (user.bot && !isWebhook(message, user) && !settings.dontShowBotTag)
+                    type = Tags[`${tag.name}_BOT`];
+                else
+                    type = Tags[tag.name];
+            }
+        }
+
         return type;
     }
 });
