@@ -28,7 +28,7 @@ export const NewProfileButton = (props: typeof Button["defaultProps"]) => {
     } = pluginSettingsHelpers;
 
     const onNewProfile = () => {
-        setCurrentProfile({ name: "", editable: true });
+        setCurrentProfile({ name: "" });
     };
 
     return (
