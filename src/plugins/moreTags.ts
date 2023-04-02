@@ -81,8 +81,6 @@ const tags: Tag[] = [
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     }
 ];
-// reversed so higher entries have priority over lower entries
-tags.reverse();
 
 const settings = definePluginSettings({
     dontShowBotTag: {
@@ -268,6 +266,7 @@ return type!==null?$2.botTag,type"
                     type = Tags[`${tag.name}-BOT`];
                 else
                     type = Tags[tag.name];
+                break;
             }
         }
 
