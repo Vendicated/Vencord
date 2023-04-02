@@ -22,7 +22,11 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, React, Tooltip } from "@webpack/common";
 
-function SilentMessageToggle() {
+function SilentMessageToggle(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
     const [enabled, setEnabled] = React.useState(false);
 
     React.useEffect(() => {
@@ -36,6 +40,8 @@ function SilentMessageToggle() {
         addPreSendListener(listener);
         return () => void removePreSendListener(listener);
     }, [enabled]);
+
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
         <Tooltip text="Toggle Silent Message">
@@ -77,8 +83,8 @@ export default definePlugin({
         {
             find: ".activeCommandOption",
             replacement: {
-                match: /"gift"\)\);(?<=(\i)\.push.+?)/,
-                replace: (m, array) => `${m}${array}.push($self.SilentMessageToggle());`
+                match: /"gift"\)\);(?<=(\i)\.push.+?disabled:(\i),.+?)/,
+                replace: (m, array, disabled) => `${m};try{${disabled}||${array}.push($self.SilentMessageToggle(arguments[0]));}catch{}`
             }
         }
     ],
