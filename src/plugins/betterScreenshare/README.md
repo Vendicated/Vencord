@@ -17,7 +17,9 @@
 
 ## Bitrate
 
-To find your optimal bitrate, you must first find your upload speed. You can do this by running a speed test on this [website](https://www.speedtest.net/). When you're done, you'll see a number in the upload field that represents your maximum upload speed in (`Mbps`) `Mb/s`. To use the upload you need to convert it from `Mb/s` to `Kb/s` by multiplying it by `1000`. I'd recommend going a bit lower as you probably won't always hit your max upload speed and it will affect your ping. Heres are two examples `5000kb/s` -> `4000kb/s`, `20000kb/s` -> `18000kb/s`.
+To find your optimal bitrate, you must first find your upload speed. You can do this by running a speed test on this [website](https://www.speedtest.net/). When you're done, you'll see a number in the upload field that represents your maximum upload speed in (`Mbps`) `Mb/s`. To use the upload you need to convert it from `Mb/s` to `Kb/s` by multiplying it by `1000`. I'd recommend going a bit lower as you probably won't always hit your max upload speed and it will affect your ping. Heres is a example `5000 Kb/s` -> `4000 Kb/s`.
+
+**IMPORTANT**: Discord added a cap of `10000 Kb/s`, if you went higher everyone would experience packet loss. It is not known if there is a bypass for this.
 
 ## Presets
 
