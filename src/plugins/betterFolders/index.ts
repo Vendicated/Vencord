@@ -39,7 +39,7 @@ const settings = definePluginSettings({
     },
     sidebarAnim: {
         type: OptionType.BOOLEAN,
-        description: "Folder sidebar animation",
+        description: "Animate opening the folder sidebar",
         default: true,
     },
     closeAllFolders: {
@@ -105,7 +105,7 @@ export default definePlugin({
             find: "APPLICATION_LIBRARY,render",
             predicate: () => settings.store.sidebar,
             replacement: {
-                match: /(\(0,\i\.jsx\))\(.{1,3}\..,{className:.{1,3}\(\)\.guilds,themeOverride:\i}\)/,
+                match: /(\(0,\i\.jsx\))\(\i\..,{className:\i\(\)\.guilds,themeOverride:\i}\)/,
                 replace: "$&,$1($self.FolderSideBar,{})"
             }
         },
@@ -122,44 +122,56 @@ export default definePlugin({
     settings,
 
     start() {
-        const getGuildFolder = id => GuildFolderStore.guildFolders.find(f => f.guildIds.includes(id));
+        const getGuildFolder = (id: string) => GuildFolderStore.guildFolders.find(f => f.guildIds.includes(id));
 
         FluxDispatcher.subscribe("CHANNEL_SELECT", this.onSwitch = data => {
-            if (!settings.store.closeAllFolders && !settings.store.forceOpen) return;
+            if (!settings.store.closeAllFolders && !settings.store.forceOpen)
+                return;
+
             if (this.lastGuildId !== data.guildId) {
                 this.lastGuildId = data.guildId;
+
                 const guildFolder = getGuildFolder(data.guildId);
                 if (guildFolder?.folderId) {
                     if (settings.store.forceOpen && !ExpandedFolderStore.isFolderExpanded(guildFolder.folderId))
                         FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
-                } else if (settings.store.closeAllFolders) this.closeFolders();
+                } else if (settings.store.closeAllFolders)
+                    this.closeFolders();
             }
         });
+
         FluxDispatcher.subscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder = e => {
-            if (settings.store.closeOthers && !this.dispatching) FluxDispatcher.wait(() => {
-                const expandedFolders = ExpandedFolderStore.getExpandedFolders();
-                if (expandedFolders.size > 1) {
-                    this.dispatching = true;
-                    for (const id of expandedFolders) if (id !== e.folderId) FolderUtils.toggleGuildFolderExpand(id);
-                    this.dispatching = false;
-                }
-            });
+            if (settings.store.closeOthers && !this.dispatching)
+                FluxDispatcher.wait(() => {
+                    const expandedFolders = ExpandedFolderStore.getExpandedFolders();
+                    if (expandedFolders.size > 1) {
+                        this.dispatching = true;
+
+                        for (const id of expandedFolders) if (id !== e.folderId)
+                            FolderUtils.toggleGuildFolderExpand(id);
+
+                        this.dispatching = false;
+                    }
+                });
         });
     },
+
     stop() {
-        if (this.onSwitch) FluxDispatcher.unsubscribe("CHANNEL_SELECT", this.onSwitch);
-        if (this.onToggleFolder) FluxDispatcher.unsubscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder);
+        FluxDispatcher.unsubscribe("CHANNEL_SELECT", this.onSwitch);
+        FluxDispatcher.unsubscribe("TOGGLE_GUILD_FOLDER_EXPAND", this.onToggleFolder);
     },
 
     FolderSideBar,
+
     getGuildsTree(folders, oldTree) {
-        const tree = new GuildsTree;
+        const tree = new GuildsTree();
         tree.root.children = oldTree.root.children.filter(e => folders.includes(e.id));
         tree.nodes = folders.map(id => oldTree.nodes[id]);
         return tree;
     },
+
     closeFolders() {
-        const expandedFolders = ExpandedFolderStore.getExpandedFolders();
-        for (const id of expandedFolders) FolderUtils.toggleGuildFolderExpand(id);
+        for (const id of ExpandedFolderStore.getExpandedFolders())
+            FolderUtils.toggleGuildFolderExpand(id);
     },
 });
