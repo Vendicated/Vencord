@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import { PluginAuthor } from "@utils/types";
 
 export const PluginInfo: {
@@ -29,8 +30,7 @@ export const PluginInfo: {
     DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
     AUTHORS: [
         {
-            id: 305288513941667851n,
-            name: "philhk",
+            ...Devs.philhk,
             github: "https://github.com/philhk"
         }
     ],
