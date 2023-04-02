@@ -1,9 +1,8 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.1.2",
+    "version": "1.1.4",
     "description": "The cutest Discord client mod",
-    "keywords": [ ],
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
         "url": "https://github.com/Vendicated/Vencord/issues"
@@ -34,7 +33,9 @@
     "dependencies": {
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.3",
-        "fflate": "^0.7.4"
+        "fflate": "^0.7.4",
+        "nanoid": "^4.0.2",
+        "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
         "@types/diff": "^5.0.2",

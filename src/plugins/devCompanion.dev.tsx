@@ -116,7 +116,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Error",
             body: (e as ErrorEvent).message || "No Error Message",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -128,7 +129,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Disconnected",
             body: e.reason || "No Reason provided",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -158,7 +160,8 @@ function initWs(isManual = false) {
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
-                let src = String(candidates[keys[0]]);
+                const mod = candidates[keys[0]];
+                let src = String(mod.original ?? mod);
 
                 let i = 0;
 
