@@ -29,7 +29,7 @@ import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
 
 /** List of vencord contributor IDs */
 const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
