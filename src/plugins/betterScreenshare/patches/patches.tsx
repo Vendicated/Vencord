@@ -22,41 +22,45 @@ import { Forms } from "@webpack/common";
 
 import { AudioSourceSelect } from "../components/AudioSourceSelect";
 import { OpenScreenshareSettingsButton } from "../components/OpenScreenshareSettingsButton";
-import { getPluginSettings, pluginSettingsHelpers, usePluginSettings } from "../settings";
+import { pluginSettingsHelpers, usePluginSettings } from "../settings";
 
 interface ReplacedStreamSettingsProps {
-    children: JSX.Element;
+    children: React.HTMLProps<HTMLDivElement>["children"];
 }
 
 const ReplacedStreamSettings = (props: ReplacedStreamSettingsProps) => {
-    const { audioSourceEnabled } = usePluginSettings();
+    const { audioSourceEnabled, hideDefaultSettings } = usePluginSettings();
     const { setAudioSourceEnabled } = pluginSettingsHelpers;
 
-    return <Flex
-        flexDirection="column"
-        style={{
-            justifyContent: "center", alignItems: "center", width: "100%",
-            ...(getPluginSettings().hideDefaultSettings ? { paddingTop: "8px" } : {})
-        }}>
-        {!getPluginSettings().hideDefaultSettings &&
-            <div style={{ width: "100%" }}>
-                {props.children}
-            </div>
-        }
-        <Flex flexDirection="column" style={{ gap: 0, width: "100%" }}>
-            <Forms.FormTitle tag="h5" style={{ margin: 0 }}>Audio Source</Forms.FormTitle>
-            <Flex style={{ width: "100%" }}>
-                <div style={{ width: "100%", marginTop: "auto" }}>
-                    <AudioSourceSelect isDisabled={!audioSourceEnabled} />
+    return (
+        <Flex
+            flexDirection="column"
+            style={{
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                ...(hideDefaultSettings ? { paddingTop: "8px" } : {})
+            }}>
+            {!hideDefaultSettings &&
+                <div style={{ width: "100%" }}>
+                    {props.children}
                 </div>
-                <Flex flexDirection="column" style={{ gap: 0, alignItems: "center", justifyContent: "center", paddingBottom: "0.3em" }}>
-                    <Forms.FormTitle tag="h5">Status</Forms.FormTitle>
-                    <Switch onChange={value => setAudioSourceEnabled(value)} checked={audioSourceEnabled || false} />
+            }
+            <Flex flexDirection="column" style={{ gap: 0, width: "100%" }}>
+                <Forms.FormTitle tag="h5" style={{ margin: 0 }}>Audio Source</Forms.FormTitle>
+                <Flex style={{ width: "100%" }}>
+                    <div style={{ width: "100%", marginTop: "auto" }}>
+                        <AudioSourceSelect isDisabled={!audioSourceEnabled} />
+                    </div>
+                    <Flex flexDirection="column" style={{ gap: 0, alignItems: "center", justifyContent: "center", paddingBottom: "0.3em" }}>
+                        <Forms.FormTitle tag="h5">Status</Forms.FormTitle>
+                        <Switch onChange={value => setAudioSourceEnabled(value)} checked={audioSourceEnabled || false} />
+                    </Flex>
                 </Flex>
             </Flex>
+            <OpenScreenshareSettingsButton title="Advanced Settings" />
         </Flex>
-        <OpenScreenshareSettingsButton title="Advanced Settings" />
-    </Flex>;
+    );
 };
 
 let replacedStreamSettingsComponent: JSX.Element | undefined;
