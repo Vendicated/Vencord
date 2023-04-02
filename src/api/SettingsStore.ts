@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { find, findLazy } from "@webpack";
+import { proxyLazy } from "@utils/proxyLazy";
+import { findModuleId, wreq } from "@webpack";
 
 import { Settings } from "./settings";
 
@@ -29,12 +30,24 @@ interface Setting<T> {
      * Update the setting value
      * @param value The new value
      */
-    updateSetting(value: T): Promise<void>;
+    updateSetting(value: T | ((old: T) => T)): Promise<void>;
     /**
      * React hook for automatically updating components when the setting is updated
      */
-    useSetting(): boolean;
+    useSetting(): T;
+    settingsStoreApiGroup: string;
+    settingsStoreApiName: string;
 }
+
+const SettingsStores: Array<Setting<any>> | undefined = proxyLazy(() => {
+    const modId = findModuleId('"textAndImages","renderSpoilers"');
+    if (modId == null) return;
+
+    const mod = wreq(modId);
+    if (mod == null) return;
+
+    return Object.values(mod).filter((s: any) => s?.settingsStoreApiGroup) as any;
+});
 
 /**
  * Get the store for a setting
@@ -44,14 +57,5 @@ interface Setting<T> {
 export function getSettingStore<T = any>(group: string, name: string): Setting<T> | undefined {
     if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
 
-    return find(m => m?.settingsStoreApiGroup === group && m?.settingsStoreApiName === name);
-}
-
-/**
- * getSettingStore but lazy
- */
-export function getSettingStoreLazy<T = any>(group: string, name: string): Setting<T> | undefined {
-    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
-
-    return findLazy(m => m?.settingsStoreApiGroup === group && m?.settingsStoreApiName === name);
+    return SettingsStores?.find(s => s?.settingsStoreApiGroup === group && s?.settingsStoreApiName === name);
 }
