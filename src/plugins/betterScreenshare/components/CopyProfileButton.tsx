@@ -27,7 +27,7 @@ export const CopyButton = (props: typeof Button["defaultProps"]) => {
     const { currentProfile } = usePluginSettings();
 
     const onCopy = () => {
-        setCurrentProfile({ ...currentProfile, name: "", editable: true });
+        setCurrentProfile({ ...currentProfile, name: "" });
     };
 
     return (
