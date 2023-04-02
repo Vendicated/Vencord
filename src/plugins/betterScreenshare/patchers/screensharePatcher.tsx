@@ -50,30 +50,34 @@ export class ScreensharePatcher extends Patcher {
                 connection.setCodecs = function () {
                     const {
                         currentProfile,
+                        simpleMode
                     } = getPluginSettings();
                     const { videoCodec, videoCodecEnabled } = currentProfile;
 
-                    if (videoCodecEnabled && videoCodec) {
-                        Reflect.apply(oldSetCodecs, this, ["opus", videoCodec, "stream"]);
-                    } else
-                        Reflect.apply(oldSetCodecs, this, arguments);
+                    if (!simpleMode)
+                        if (videoCodecEnabled && videoCodec) {
+                            Reflect.apply(oldSetCodecs, this, ["opus", videoCodec, "stream"]);
+                        } else
+                            Reflect.apply(oldSetCodecs, this, arguments);
                 };
 
                 const oldHandleSoundshare = connection.handleSoundshare;
                 connection.handleSoundshare = function () {
                     const {
                         currentProfile,
+                        simpleMode
                     } = getPluginSettings();
                     const { audioBitrate, audioBitrateEnabled } = currentProfile;
 
-                    if (audioBitrateEnabled && audioBitrate) {
-                        const bitrateBit = audioBitrate * 1000;
-                        this.voiceBitrate = bitrateBit;
-                        this.conn.setTransportOptions({
-                            encodingVoiceBitRate: bitrateBit
-                        });
-                    } else
-                        Reflect.apply(oldHandleSoundshare, this, arguments);
+                    if (!simpleMode)
+                        if (audioBitrateEnabled && audioBitrate) {
+                            const bitrateBit = audioBitrate * 1000;
+                            this.voiceBitrate = bitrateBit;
+                            this.conn.setTransportOptions({
+                                encodingVoiceBitRate: bitrateBit
+                            });
+                        } else
+                            Reflect.apply(oldHandleSoundshare, this, arguments);
                 };
 
 
@@ -82,13 +86,13 @@ export class ScreensharePatcher extends Patcher {
                     const {
                         currentProfile,
                         audioSource,
-                        audioSourceEnabled
+                        audioSourceEnabled,
+                        simpleMode
                     } = getPluginSettings();
                     const {
                         name,
                         audioBitrate,
                         audioBitrateEnabled,
-                        editable,
                         framerate,
                         framerateEnabled,
                         height,
@@ -109,8 +113,9 @@ export class ScreensharePatcher extends Patcher {
                     if (!videoCodecEnabled || !videoCodec)
                         connection.setCodecs("opus", "H264", "stream");
 
-                    if (videoCodecEnabled && videoCodec)
-                        connection.setCodecs("opus", videoCodec, "stream");
+                    if (!simpleMode)
+                        if (videoCodecEnabled && videoCodec)
+                            connection.setCodecs("opus", videoCodec, "stream");
 
                     Reflect.apply(oldSetDesktopSource, this, [source, {
                         ...options,
@@ -118,7 +123,7 @@ export class ScreensharePatcher extends Patcher {
                         useGraphicsCapture: true,
                         useQuartzCapturer: true,
                         allowScreenCaptureKit: true,
-                        ...(hdrEnabled ? { hdrCaptureMode: "always" } : { hdrCaptureMode: "never" }),
+                        ...(!simpleMode && hdrEnabled ? { hdrCaptureMode: "always" } : { hdrCaptureMode: "never" }),
                         ...(framerateEnabled && framerate ? { fps: framerate } : {}),
                         ...(resolutionEnabled && width && height ? { width: width, height: height } : {}),
                     } satisfies DesktopSourceOptions]);
@@ -131,8 +136,9 @@ export class ScreensharePatcher extends Patcher {
                         videoQualityManager.qualityOverwrite.bitrateTarget = bitrateBit;
                     }
 
-                    if (keyframeIntervalEnabled && keyframeInterval)
-                        connection.setKeyframeInterval(keyframeInterval);
+                    if (!simpleMode)
+                        if (keyframeIntervalEnabled && keyframeInterval)
+                            connection.setKeyframeInterval(keyframeInterval);
 
                     if (!keyframeIntervalEnabled || !keyframeInterval)
                         connection.setKeyframeInterval(0);

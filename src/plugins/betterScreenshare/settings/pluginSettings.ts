@@ -22,7 +22,6 @@ import { PluginInfo } from "../constants";
 
 export interface Profile {
     name: string,
-    editable?: boolean,
     width?: number,
     height?: number,
     framerate?: number,
@@ -46,6 +45,7 @@ export interface PluginSettings {
     hideDefaultSettings?: boolean;
     audioSource?: string;
     audioSourceEnabled?: boolean;
+    simpleMode?: boolean;
 }
 
 export interface PluginSettingsSetter {
@@ -66,11 +66,11 @@ export interface PluginSettingsSetter {
     getProfile: (profileName: string) => Profile | undefined;
     setCurrentProfile: (profile: Profile) => void;
     deleteProfile: (profileOrName: Profile | string) => void;
-    setEditable: (editable: boolean) => void;
     saveCurrentProfile: (name: string) => void;
     setHdrEnabled: (enabled?: boolean) => void;
     setAudioSource: (audioSource?: string) => void;
     setAudioSourceEnabled: (enabled?: boolean) => void;
+    setSimpleMode: (enabled?: boolean) => void;
 }
 
 export const defaultProfiles = {
@@ -126,7 +126,6 @@ export const pluginSettingsHelpers: PluginSettingsSetter = {
     setResolutionEnabled: enabled => getPluginSettings().currentProfile.resolutionEnabled = enabled,
     setKeyframeInterval: keyframeInterval => getPluginSettings().currentProfile.keyframeInterval = keyframeInterval,
     setKeyframeIntervalEnabled: enabled => getPluginSettings().currentProfile.keyframeIntervalEnabled = enabled,
-    setEditable: editable => getPluginSettings().currentProfile.editable = editable,
     setHdrEnabled: enabled => getPluginSettings().currentProfile.hdrEnabled = enabled,
     addProfile: profile => {
         const pluginSettings = getPluginSettings();
@@ -144,16 +143,17 @@ export const pluginSettingsHelpers: PluginSettingsSetter = {
     getProfile: profileName => Object.values(defaultProfiles).find(profile => profile.name === profileName) || getPluginSettings().profiles.find(profile => profile.name === profileName),
     saveCurrentProfile: profileName => void pluginSettingsHelpers.addProfile({
         ...getPluginSettings().currentProfile,
-        name: profileName,
-        editable: true
+        name: profileName
     }),
     setAudioSource: audioSource => getPluginSettings().audioSource = audioSource,
-    setAudioSourceEnabled: enabled => getPluginSettings().audioSourceEnabled = enabled
+    setAudioSourceEnabled: enabled => getPluginSettings().audioSourceEnabled = enabled,
+    setSimpleMode: enabled => getPluginSettings().simpleMode = enabled
 } as const;
 
 export const defaultPluginSettings: Omit<PluginSettings, "enabled"> = {
     profiles: [],
-    currentProfile: { name: "", editable: true }
+    currentProfile: { name: "" },
+    simpleMode: true
 };
 
 export function getPluginSettings(): PluginSettings {

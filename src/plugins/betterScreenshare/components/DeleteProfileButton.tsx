@@ -20,7 +20,7 @@ import { Button } from "@webpack/common";
 import * as t from "@webpack/types";
 import React from "react";
 
-import { pluginSettingsHelpers, usePluginSettings } from "../settings";
+import { defaultProfiles, pluginSettingsHelpers, usePluginSettings } from "../settings";
 import { IconTooltipButton } from "./";
 
 export const DeleteButton = (props: t.Button["defaultProps"]) => {
@@ -28,13 +28,13 @@ export const DeleteButton = (props: t.Button["defaultProps"]) => {
     const { currentProfile } = usePluginSettings();
 
     const onDelete = () => {
-        currentProfile.editable && deleteProfile(currentProfile);
+        deleteProfile(currentProfile);
     };
 
     return (
         <IconTooltipButton
             {...props}
-            disabled={!currentProfile.editable || !currentProfile.name || props?.disabled}
+            disabled={Object.values(defaultProfiles).some(value => value.name === currentProfile.name) || !currentProfile.name || props?.disabled}
             color={Button.Colors.RED}
             tooltipText="Delete Profile"
             onClick={onDelete}

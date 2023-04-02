@@ -20,12 +20,14 @@ import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, Card, Forms, React, Select, Slider, Text, TextInput, useEffect, useState } from "@webpack/common";
+import { SelectOption } from "@webpack/types";
 
 import { PluginInfo } from "../constants";
 import { MediaEngineStore } from "../discordModules";
 import { CodecCapabilities } from "../discordModules/modules/types";
 import { defaultProfiles, pluginSettingsHelpers, usePluginSettings } from "../settings";
 import { Styles } from "../styles";
+import { Resolution } from "../types";
 import { openURL } from "../utils";
 import { AuthorSummaryItem, CopyButton, DeleteButton, NewProfileButton, SaveProfileButton } from "./";
 
@@ -81,13 +83,13 @@ export interface ScreenshareSettingsModalProps extends ModalProps {
 export const ScreenshareSettingsModal = ({ onClose, transitionState }: ScreenshareSettingsModalProps) => {
     const {
         currentProfile,
-        profiles
+        profiles,
+        simpleMode
     } = usePluginSettings();
     const {
         name,
         audioBitrate,
         audioBitrateEnabled,
-        editable,
         framerate,
         framerateEnabled,
         height,
@@ -117,9 +119,9 @@ export const ScreenshareSettingsModal = ({ onClose, transitionState }: Screensha
         setWidth,
         setCurrentProfile,
         getProfile,
-        setEditable,
         saveCurrentProfile,
-        setHdrEnabled
+        setHdrEnabled,
+        setSimpleMode
     } = pluginSettingsHelpers;
 
     const validateNumberInput = (value: string) => parseInt(value) ? parseInt(value) : undefined;
@@ -154,131 +156,233 @@ export const ScreenshareSettingsModal = ({ onClose, transitionState }: Screensha
         })();
     }, []);
 
+    const simpleResolutions: readonly SelectOption[] = [
+        {
+            label: "480p",
+            value: {
+                height: 480,
+                width: 720
+            } satisfies Resolution
+        },
+        {
+            label: "720p",
+            value: {
+                height: 720,
+                width: 1280
+            } satisfies Resolution
+        },
+        {
+            label: "1080p",
+            value: {
+                height: 1080,
+                width: 1920
+            } satisfies Resolution
+        },
+        {
+            label: "1440p",
+            value: {
+                height: 1440,
+                width: 2560
+            } satisfies Resolution
+        },
+        {
+            label: "2160p",
+            value: {
+                height: 2160,
+                width: 3840
+            } satisfies Resolution
+        }
+    ] as const;
+
+    const simpleVideoBitrates: readonly SelectOption[] = [
+        {
+            label: "Low",
+            value: 2500
+        },
+        {
+            label: "Medium",
+            value: 5000
+        },
+        {
+            label: "Medium-High",
+            value: 7500
+        },
+        {
+            label: "High",
+            value: 1000
+        }
+    ] as const;
+
+    const settingsCardResolutionSimple =
+        <SettingsCard title="Resolution" toggleable={true} switchEnabled={!isSaving} checked={resolutionEnabled} onChange={status => setResolutionEnabled(status)}>
+            <SettingsCardItem>
+                <Select isDisabled={!resolutionEnabled || isSaving} options={simpleResolutions} select={(value: Resolution) => void setWidth(value.width) ?? setHeight(value.height)} isSelected={(value: Resolution) => width === value.width && height === value.height} serialize={() => ""} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardVideoBitrateSimple =
+        <SettingsCard title="Bitrate" toggleable={true} switchEnabled={!isSaving} checked={videoBitrateEnabled} onChange={status => setVideoBitrateEnabled(status)}>
+            <SettingsCardItem>
+                <Select isDisabled={!videoBitrateEnabled || isSaving} options={simpleVideoBitrates} select={(value: number) => void setVideoBitrate(value)} isSelected={(value: number) => videoBitrate === value} serialize={() => ""} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardResolution =
+        <SettingsCard title="Resolution" toggleable={true} switchEnabled={!isSaving} checked={resolutionEnabled} onChange={status => setResolutionEnabled(status)}>
+            <SettingsCardItem title="Width">
+                <TextInput disabled={!resolutionEnabled || isSaving} value={textinputWidth} onChange={value => validateTextInputNumber(value) && setTextinputWidth(value)} onBlur={e => {
+                    const result = validateNumberInput(e.target.value);
+                    setWidth(result);
+                    setTextinputWidth(result ? result.toString() : "");
+                }} />
+            </SettingsCardItem>
+            <SettingsCardItem title="Height">
+                <TextInput disabled={!resolutionEnabled || isSaving} value={textinputHeight} onChange={value => validateTextInputNumber(value) && setTextinputHeight(value)} onBlur={e => {
+                    const result = validateNumberInput(e.target.value);
+                    setHeight(result);
+                    setTextinputHeight(result ? result.toString() : "");
+                }} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardFramerate =
+        <SettingsCard title="Framerate" toggleable={true} switchEnabled={!isSaving} checked={framerateEnabled} onChange={status => setFramerateEnabled(status)}>
+            <SettingsCardItem>
+                <TextInput disabled={!framerateEnabled || isSaving} value={textinputFramerate} onChange={value => validateTextInputNumber(value) && setTextinputFramerate(value)} onBlur={e => {
+                    const result = validateNumberInput(e.target.value);
+                    setFramerate(result);
+                    setTextinputFramerate(result ? result.toString() : "");
+                }} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardKeyframeInterval =
+        <SettingsCard title="Keyframe Interval (ms)" toggleable={true} switchEnabled={!isSaving} checked={keyframeIntervalEnabled} onChange={status => setKeyframeIntervalEnabled(status)}>
+            <SettingsCardItem>
+                <TextInput disabled={!keyframeIntervalEnabled || isSaving} value={textinputKeyframeInterval} onChange={value => validateTextInputNumber(value) && setTextinputKeyframeInterval(value)} onBlur={e => {
+                    const result = validateNumberInput(e.target.value);
+                    setKeyframeInterval(result);
+                    setTextinputKeyframeInterval(result ? result.toString() : "");
+                }} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardVideoBitrate =
+        <SettingsCard title="Video Bitrate" toggleable={true} switchEnabled={!isSaving} checked={videoBitrateEnabled} onChange={status => setVideoBitrateEnabled(status)}>
+            <SettingsCardItem title="Kb/s">
+                <div style={{ paddingTop: "0.3em", paddingRight: "0.4em", paddingLeft: "0.4em", boxSizing: "border-box" }}>
+                    <Slider disabled={!videoBitrateEnabled || isSaving} onValueChange={value => setVideoBitrate(value)} initialValue={videoBitrate || 500} minValue={500} maxValue={10000} markers={[500, 10000]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
+                </div>
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardAudioBitrate =
+        <SettingsCard title="Audio Bitrate" toggleable={true} switchEnabled={!isSaving} checked={audioBitrateEnabled} onChange={status => setAudioBitrateEnabled(status)}>
+            <SettingsCardItem title="Kb/s">
+                <div style={{ paddingTop: "0.3em", paddingRight: "0.4em", paddingLeft: "0.4em", boxSizing: "border-box" }}>
+                    <Slider disabled={!audioBitrateEnabled || isSaving} onValueChange={value => setAudioBitrate(value)} initialValue={audioBitrate || 8} minValue={8} maxValue={320} markers={[8, 96, 320]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
+                </div>
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardVideoCodec =
+        <SettingsCard title="Video Codec" toggleable={true} switchEnabled={!isSaving} checked={videoCodecEnabled} onChange={status => setVideoCodecEnabled(status)}>
+            <SettingsCardItem>
+                <Select isDisabled={!videoCodecEnabled || isSaving} isSelected={value => value === videoCodec} options={videoCodecs.map(codecCapabilities => ({ label: codecCapabilities.codec, value: codecCapabilities.codec }))} select={value => setVideoCodec(value)} serialize={() => ""} />
+            </SettingsCardItem>
+        </SettingsCard>;
+
+    const settingsCardHdr =
+        <SettingsCard title="Hdr" toggleable={true} switchEnabled={!isSaving} checked={hdrEnabled} onChange={status => setHdrEnabled(status)} />;
+
+    const cardGuide =
+        <Card style={{ ...Styles.infoCard, flex: 0.7 }}>
+            <div>
+                <Forms.FormTitle tag="h5">How to use?</Forms.FormTitle>
+                <Forms.FormText>If you want to know more about the settings or possible issues, please read <a onClick={() => openURL(PluginInfo.README + "#better-screenshare-plugin")}>this</a>.</Forms.FormText>
+            </div>
+        </Card>;
+
+    const settingsCardProfile =
+        <SettingsCard title="Profile">
+            <SettingsCardItem>
+                <Flex style={{ alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                        {isSaving ?
+                            <TextInput
+                                style={{ width: "100%" }}
+                                placeholder="Insert name"
+                                value={profileNameInput}
+                                onChange={setProfileNameInput} /> :
+                            <Select
+                                isSelected={value => name === value}
+                                options={[...profiles, ...Object.values(defaultProfiles)].map(profile => ({
+                                    label: profile.name,
+                                    value: profile.name
+                                }))}
+                                select={value => setCurrentProfile(getProfile(value) || { name: "" })}
+                                serialize={() => ""} />}
+                    </div>
+                    <Flex style={{ gap: "0.8em" }}>
+                        <SaveProfileButton onClick={() => {
+                            if (!isSaving) {
+                                setIsSaving(true);
+                            } else {
+                                if (profileNameInput.length && !Object.values(defaultProfiles).some(value => value.name === profileNameInput)) {
+                                    saveCurrentProfile(profileNameInput);
+                                    setCurrentProfile(getProfile(profileNameInput) || { name: "" });
+                                    setIsSaving(false);
+                                }
+                            }
+                        }} />
+                        <NewProfileButton disabled={isSaving} />
+                        <CopyButton disabled={isSaving} />
+                        <DeleteButton disabled={isSaving} />
+                    </Flex>
+                </Flex>
+            </SettingsCardItem>
+        </SettingsCard>;
+
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.LARGE}>
+        <ModalRoot transitionState={transitionState} size={simpleMode ? ModalSize.SMALL : ModalSize.LARGE}>
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Screenshare Settings</Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
-                <Flex flexDirection="column" style={{ gap: "1em" }}>
-                    <Flex>
-                        <Flex style={{ flex: 1 }}>
-                            <SettingsCard title="Resolution" toggleable={true} switchEnabled={editable && !isSaving} checked={resolutionEnabled} onChange={status => setResolutionEnabled(status)}>
-                                <SettingsCardItem title="Width">
-                                    <TextInput disabled={!resolutionEnabled || !editable || isSaving} value={textinputWidth} onChange={value => validateTextInputNumber(value) && setTextinputWidth(value)} onBlur={e => {
-                                        const result = validateNumberInput(e.target.value);
-                                        setWidth(result);
-                                        setTextinputWidth(result ? result.toString() : "");
-                                    }} />
-                                </SettingsCardItem>
-                                <SettingsCardItem title="Height">
-                                    <TextInput disabled={!resolutionEnabled || !editable || isSaving} value={textinputHeight} onChange={value => validateTextInputNumber(value) && setTextinputHeight(value)} onBlur={e => {
-                                        const result = validateNumberInput(e.target.value);
-                                        setHeight(result);
-                                        setTextinputHeight(result ? result.toString() : "");
-                                    }} />
-                                </SettingsCardItem>
-                            </SettingsCard>
-                        </Flex>
-                        <Flex style={{ flex: 1 }}>
-                            <SettingsCard title="Framerate" toggleable={true} switchEnabled={editable && !isSaving} checked={framerateEnabled} onChange={status => setFramerateEnabled(status)}>
-                                <SettingsCardItem>
-                                    <TextInput disabled={!framerateEnabled || !editable || isSaving} value={textinputFramerate} onChange={value => validateTextInputNumber(value) && setTextinputFramerate(value)} onBlur={e => {
-                                        const result = validateNumberInput(e.target.value);
-                                        setFramerate(result);
-                                        setTextinputFramerate(result ? result.toString() : "");
-                                    }} />
-                                </SettingsCardItem>
-                            </SettingsCard>
-                            <SettingsCard title="Keyframe Interval (ms)" toggleable={true} switchEnabled={editable && !isSaving} checked={keyframeIntervalEnabled} onChange={status => setKeyframeIntervalEnabled(status)}>
-                                <SettingsCardItem>
-                                    <TextInput disabled={!keyframeIntervalEnabled || !editable || isSaving} value={textinputKeyframeInterval} onChange={value => validateTextInputNumber(value) && setTextinputKeyframeInterval(value)} onBlur={e => {
-                                        const result = validateNumberInput(e.target.value);
-                                        setKeyframeInterval(result);
-                                        setTextinputKeyframeInterval(result ? result.toString() : "");
-                                    }} />
-                                </SettingsCardItem>
-                            </SettingsCard>
-                        </Flex>
-                    </Flex>
-                    <Flex>
-                        <SettingsCard title="Video Bitrate" toggleable={true} switchEnabled={editable && !isSaving} checked={videoBitrateEnabled} onChange={status => setVideoBitrateEnabled(status)}>
-                            <SettingsCardItem title="Kb/s">
-                                <div style={{ paddingTop: "0.3em", paddingRight: "0.4em", paddingLeft: "0.4em", boxSizing: "border-box" }}>
-                                    <Slider disabled={!videoBitrateEnabled || !editable || isSaving} onValueChange={value => setVideoBitrate(value)} initialValue={videoBitrate || 500} minValue={500} maxValue={10000} markers={[500, 10000]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
-                                </div>
-                            </SettingsCardItem>
-                        </SettingsCard>
-                        <SettingsCard title="Audio Bitrate" toggleable={true} switchEnabled={editable && !isSaving} checked={audioBitrateEnabled} onChange={status => setAudioBitrateEnabled(status)}>
-                            <SettingsCardItem title="Kb/s">
-                                <div style={{ paddingTop: "0.3em", paddingRight: "0.4em", paddingLeft: "0.4em", boxSizing: "border-box" }}>
-                                    <Slider disabled={!audioBitrateEnabled || !editable || isSaving} onValueChange={value => setAudioBitrate(value)} initialValue={audioBitrate || 8} minValue={8} maxValue={320} markers={[8, 96, 320]} onValueRender={value => `${value.toFixed(0)}kb/s`} />
-                                </div>
-                            </SettingsCardItem>
-                        </SettingsCard>
-                        <SettingsCard title="Video Codec" toggleable={true} switchEnabled={editable && !isSaving} checked={videoCodecEnabled} onChange={status => setVideoCodecEnabled(status)}>
-                            <SettingsCardItem>
-                                <Select isDisabled={!videoCodecEnabled || !editable || isSaving} isSelected={value => value === videoCodec} options={videoCodecs.map(codecCapabilities => ({ label: codecCapabilities.codec, value: codecCapabilities.codec }))} select={value => setVideoCodec(value)} serialize={() => ""} />
-                            </SettingsCardItem>
-                        </SettingsCard>
-                    </Flex>
-                    <Flex>
-                        <Flex style={{ flex: 1 }}>
-                            <Card style={{ ...Styles.infoCard, flex: 0.7 }}>
-                                <div>
-                                    <Forms.FormTitle tag="h5">How to use?</Forms.FormTitle>
-                                    <Forms.FormText>If you want to know more about the settings or possible issues, please read <a onClick={() => openURL(PluginInfo.README + "#better-screenshare-plugin")}>this</a>.</Forms.FormText>
-                                </div>
-                            </Card>
-                            <Flex style={{ flex: 0.3 }}>
-                                <SettingsCard title="Hdr" toggleable={true} switchEnabled={editable && !isSaving} checked={hdrEnabled} onChange={status => setHdrEnabled(status)}>
-
-                                </SettingsCard>
+                {simpleMode ?
+                    <Flex flexDirection="column" style={{ gap: "1em" }}>
+                        {settingsCardResolutionSimple}
+                        {settingsCardFramerate}
+                        {settingsCardVideoBitrateSimple}
+                    </Flex> :
+                    <Flex flexDirection="column" style={{ gap: "1em" }}>
+                        <Flex>
+                            <Flex style={{ flex: 1 }}>
+                                {settingsCardResolution}
+                            </Flex>
+                            <Flex style={{ flex: 1 }}>
+                                {settingsCardFramerate}
+                                {settingsCardKeyframeInterval}
                             </Flex>
                         </Flex>
-                        <Flex style={{ flex: 1 }}>
-                            <SettingsCard title="Profile">
-                                <SettingsCardItem>
-                                    <Flex style={{ alignItems: "center" }}>
-                                        <div style={{ flex: 1 }}>
-                                            {isSaving ?
-                                                <TextInput
-                                                    style={{ width: "100%" }}
-                                                    placeholder="Insert name"
-                                                    value={profileNameInput}
-                                                    onChange={setProfileNameInput} /> :
-                                                <Select
-                                                    isSelected={value => name === value}
-                                                    options={[...profiles, ...Object.values(defaultProfiles)].map(profile => ({
-                                                        label: profile.name,
-                                                        value: profile.name
-                                                    }))}
-                                                    select={value => setCurrentProfile(getProfile(value) || { name: "" })}
-                                                    serialize={() => ""} />}
-                                        </div>
-                                        <Flex style={{ gap: "0.8em" }}>
-                                            <SaveProfileButton onClick={() => {
-                                                if (!isSaving) {
-                                                    setIsSaving(true);
-                                                } else {
-                                                    if (profileNameInput.length) {
-                                                        saveCurrentProfile(profileNameInput);
-                                                        setCurrentProfile(getProfile(profileNameInput) || { name: "", editable: true });
-                                                        setIsSaving(false);
-                                                    }
-                                                }
-                                            }} />
-                                            <NewProfileButton disabled={isSaving} />
-                                            <CopyButton disabled={isSaving} />
-                                            <DeleteButton disabled={isSaving} />
-                                        </Flex>
-                                    </Flex>
-                                </SettingsCardItem>
-                            </SettingsCard>
+                        <Flex>
+                            {settingsCardVideoBitrate}
+                            {settingsCardAudioBitrate}
+                            {settingsCardVideoCodec}
                         </Flex>
-                    </Flex>
-                </Flex>
+                        <Flex>
+                            <Flex style={{ flex: 1 }}>
+                                {cardGuide}
+                                <Flex style={{ flex: 0.3 }}>
+                                    {settingsCardHdr}
+                                </Flex>
+                            </Flex>
+                            <Flex style={{ flex: 1 }}>
+                                {settingsCardProfile}
+                            </Flex>
+                        </Flex>
+                    </Flex>}
             </ModalContent>
             <ModalFooter>
                 <Flex style={{ width: "100%", alignItems: "center", gap: "0.6em" }}>
@@ -301,13 +405,19 @@ export const ScreenshareSettingsModal = ({ onClose, transitionState }: Screensha
                     </Text>
                     <AuthorSummaryItem />
                     <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.BRAND}
-                            onClick={onClose}
-                        >
-                            Done
-                        </Button>
+                        <Flex>
+                            <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.6em" }}>
+                                <Forms.FormTitle style={{ margin: 0 }} tag="h5">Simple</Forms.FormTitle>
+                                <Switch checked={!!simpleMode} disabled={isSaving} onChange={checked => setSimpleMode(checked)} />
+                            </Flex>
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.BRAND}
+                                onClick={onClose}
+                            >
+                                Done
+                            </Button>
+                        </Flex>
                     </Flex>
                 </Flex>
             </ModalFooter>
