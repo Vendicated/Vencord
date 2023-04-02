@@ -83,6 +83,7 @@ export default definePlugin({
                     color: "#eed202",
                     title: "Discord has crashed!",
                     body: "Awn :( Discord has crashed more than five times, not attempting to recover.",
+                    noPersist: true,
                 });
             } catch { }
 
@@ -116,6 +117,7 @@ export default definePlugin({
                     color: "#eed202",
                     title: "Discord has crashed!",
                     body: "Attempting to recover...",
+                    noPersist: true,
                 });
             } catch { }
         }
