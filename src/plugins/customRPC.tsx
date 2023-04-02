@@ -215,7 +215,8 @@ async function setRpc(disable?: boolean) {
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !disable ? activity : {}
+        activity: !disable ? activity : null,
+        socketId: "CustomRPC",
     });
 }
 

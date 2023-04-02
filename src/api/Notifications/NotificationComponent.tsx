@@ -20,6 +20,7 @@ import "./styles.css";
 
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { classes } from "@utils/misc";
 import { React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
@@ -33,8 +34,10 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     onClick,
     onClose,
     image,
-    permanent
-}: NotificationData) {
+    permanent,
+    className,
+    dismissOnClick
+}: NotificationData & { className?: string; }) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
@@ -61,9 +64,13 @@ export default ErrorBoundary.wrap(function NotificationComponent({
 
     return (
         <button
-            className="vc-notification-root"
+            className={classes("vc-notification-root", className)}
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
-            onClick={onClick}
+            onClick={() => {
+                onClick?.();
+                if (dismissOnClick !== false)
+                    onClose!();
+            }}
             onContextMenu={e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -78,7 +85,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                     <div className="vc-notification-header">
                         <h2 className="vc-notification-title">{title}</h2>
                         <button
-                            style={{ all: "unset", cursor: "pointer" }}
+                            className="vc-notification-close-btn"
                             onClick={e => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -86,7 +93,6 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                             }}
                         >
                             <svg
-                                className="vc-notification-close-btn"
                                 width="24"
                                 height="24"
                                 viewBox="0 0 24 24"

@@ -42,6 +42,7 @@ const settings = definePluginSettings({
 });
 
 let crashCount: number = 0;
+let lastCrashTimestamp: number = 0;
 
 export default definePlugin({
     name: "CrashHandler",
@@ -77,9 +78,11 @@ export default definePlugin({
                     color: "#eed202",
                     title: "Discord has crashed!",
                     body: "Awn :( Discord has crashed more than five times, not attempting to recover.",
+                    noPersist: true,
                 });
             } catch { }
 
+            lastCrashTimestamp = Date.now();
             return false;
         }
 
@@ -97,17 +100,22 @@ export default definePlugin({
         } catch (err) {
             CrashHandlerLogger.error("Failed to handle crash", err);
             return false;
+        } finally {
+            lastCrashTimestamp = Date.now();
         }
     },
 
     handlePreventCrash(_this: ReactElement & { forceUpdate: () => void; }) {
-        try {
-            showNotification({
-                color: "#eed202",
-                title: "Discord has crashed!",
-                body: "Attempting to recover...",
-            });
-        } catch { }
+        if (Date.now() - lastCrashTimestamp >= 1_000) {
+            try {
+                showNotification({
+                    color: "#eed202",
+                    title: "Discord has crashed!",
+                    body: "Attempting to recover...",
+                    noPersist: true,
+                });
+            } catch { }
+        }
 
         try {
             FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });

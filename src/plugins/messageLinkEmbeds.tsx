@@ -264,7 +264,7 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
             color: "var(--background-secondary)",
             author: {
                 name: <Text variant="text-xs/medium" tag="span">
-                    <span>{isDM ? "Direct Message - " : (guild as Guild).name + " - "}</span>,
+                    <span>{isDM ? "Direct Message - " : (guild as Guild).name + " - "}</span>
                     {isDM
                         ? Parser.parse(`<@${dmReceiver.id}>`)
                         : Parser.parse(`<#${channel.id}>`)
@@ -302,7 +302,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 {isDM
                     ? parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
                     : parse(`<#${channel.id}>`)
-                },
+                }
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
