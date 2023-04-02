@@ -111,7 +111,7 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Message[] = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
+    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
     if (!isReply) { // we are editing so only include own
         const meId = UserStore.getCurrentUser().id;
         messages = messages.filter(m => m.author.id === meId);
@@ -121,11 +121,18 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         ? Math.min(messages.length - 1, i + 1)
         : Math.max(-1, i - 1);
 
+    const findNextNonDeleted = (i: number) => {
+        do {
+            i = mutate(i);
+        } while (i !== -1 && messages[messages.length - i - 1]?.deleted === true);
+        return i;
+    };
+
     let i: number;
     if (isReply)
-        replyIdx = i = mutate(replyIdx);
+        replyIdx = i = findNextNonDeleted(replyIdx);
     else
-        editIdx = i = mutate(editIdx);
+        editIdx = i = findNextNonDeleted(editIdx);
 
     return i === - 1 ? undefined : messages[messages.length - i - 1];
 }
