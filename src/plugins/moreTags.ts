@@ -47,12 +47,6 @@ const Permissions = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_
 const Tags = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types) as Record<string, number>;
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
-// e[e.BOT=0]="BOT";
-let i = 999;
-const addTagVar = (name: string, types: string) => `${types}[${types}.${name}=${i--}]="${name}"`;
-// case r.SERVER:T=c.Z.Messages.BOT_TAG_SERVER;break;
-const addTagCase = (name: string, displayName: string, types: string, textVar: string) =>
-    `case ${types}.${name}:${textVar}=${displayName};break;`;
 
 const tags: Tag[] = [
     {
@@ -81,7 +75,7 @@ const tags: Tag[] = [
         description: "Can manage messages or kick/ban people",
         permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
     }, {
-        name: "MODERATOR_VC",
+        name: "VOICE_MODERATOR",
         displayName: "VC Mod",
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
@@ -108,7 +102,7 @@ const settings = definePluginSettings({
                     label: "Only in chat",
                     value: "chat"
                 }, {
-                    label: "Only in memeber list and profiles",
+                    label: "Only in member list and profiles",
                     value: "not-chat"
                 }, {
                     label: "Never",
@@ -130,21 +124,16 @@ export default definePlugin({
         {
             find: '.BOT=0]="BOT"',
             replacement: [
+                // add tags to the exported tags list (the Tags variable here)
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
-                    replace: (orig, types) =>
-                        `${tags.map(t =>
-                            `${addTagVar(t.name, types)};${addTagVar(`${t.name}_OP`, types)};${addTagVar(`${t.name}_BOT`, types)};`
-                        ).join("")}${orig}`
+                    replace: "$&$1=$self.addTagVariants($1);"
                 },
+                // make the tag show the right text
                 {
-                    match: /case (\i)\.BOT:default:(\i)=(.{1,20})\.BOT/,
-                    replace: (orig, types, text, strings) =>
-                        `${tags.map(t =>
-                            `${addTagCase(t.name, `"${t.displayName}"`, types, text)}\
-                            ${addTagCase(`${t.name}_OP`, `${strings}.BOT_TAG_FORUM_ORIGINAL_POSTER+" • ${t.displayName}"`, types, text)}\
-                            ${addTagCase(`${t.name}_BOT`, `${strings}.BOT_TAG_BOT+" • ${t.displayName}"`, types, text)}`
-                        ).join("")}${orig}`
+                    match: /(switch\((\i)\){.+?)case (\i)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
+                    replace: (_, origSwitch, variant, tags, displayedText, strings) =>
+                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
                 },
                 // show OP tags correctly
                 {
@@ -207,15 +196,43 @@ return type!==null?$2.botTag,type"
             .filter(Boolean);
     },
 
-    isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || tags.some(t => tag === Tags[`${t.name}_OP`]),
+    addTagVariants(val: any /* i cant think of a good name */) {
+        let i = 100;
+        tags.forEach(({ name }) => {
+            val[name] = ++i;
+            val[i] = name;
+            val[`${name}-BOT`] = ++i;
+            val[i] = `${name}-BOT`;
+            val[`${name}-OP`] = ++i;
+            val[i] = `${name}-OP`;
+        });
+        return val;
+    },
+
+    isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || tags.some(t => tag === Tags[`${t.name}-OP`]),
+
+    getTagText(passedTagName: string, strings: Record<string, string>) {
+        if (!passedTagName) return "BOT";
+        const [tagName, variant] = passedTagName.split("-");
+        const tag = tags.find(({ name }) => tagName === name);
+        if (!tag) return "BOT";
+        switch (variant) {
+            case "OP":
+                return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tag.displayName}`;
+            case "BOT":
+                return `${strings.BOT_TAG_BOT} • ${tag.displayName}`;
+            default:
+                return tag.displayName;
+        }
+    },
 
     getTag({
         message, user, channelId, origType, location, channel
     }: {
-        message: Message,
+        message?: Message,
         user: User,
         channel?: Channel & { isForumPost(): boolean; },
-        channelId: string;
+        channelId?: string;
         origType?: number;
         location: string;
     }): number | null {
@@ -243,12 +260,12 @@ return type!==null?$2.botTag,type"
 
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
-                (tag.condition?.(message, user, channel))
+                (tag.condition?.(message!, user, channel))
             ) {
                 if (channel.isForumPost() && channel.ownerId === user.id)
-                    type = Tags[`${tag.name}_OP`];
-                else if (user.bot && !isWebhook(message, user) && !settings.dontShowBotTag)
-                    type = Tags[`${tag.name}_BOT`];
+                    type = Tags[`${tag.name}-OP`];
+                else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
+                    type = Tags[`${tag.name}-BOT`];
                 else
                     type = Tags[tag.name];
             }
