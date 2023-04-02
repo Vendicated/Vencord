@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "SettingsStoreAPI",
-    description: "Adds settings groups and names to the exported object to allow for Webpack searching.",
+    description: "Patches Discord's SettingsStores to expose their group and name",
     authors: [Devs.Nuckyz],
 
     patches: [
@@ -29,8 +29,8 @@ export default definePlugin({
             find: '"textAndImages","renderSpoilers"',
             replacement: [
                 {
-                    match: /INFREQUENT_USER_ACTION.+?useSetting.+?}(?<=function \i\((\i),(\i),\i,\i\).+?)/,
-                    replace: (m, group, name) => `${m},settingsStoreApiGroup:${group},settingsStoreApiName:${name}`
+                    match: /(?<=INFREQUENT_USER_ACTION.{0,20}),useSetting:function/,
+                    replace: ",settingsStoreApiGroup:arguments[0],settingsStoreApiName:arguments[1]$&"
                 }
             ]
         }
