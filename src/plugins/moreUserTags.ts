@@ -111,9 +111,9 @@ const settings = definePluginSettings({
     ]))
 });
 
-migratePluginSettings("MoreTags", "Webhook Tags");
+migratePluginSettings("MoreUserTags", "Webhook Tags");
 export default definePlugin({
-    name: "MoreTags",
+    name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
     authors: [Devs.Cyn, Devs.TheSun],
     settings,
