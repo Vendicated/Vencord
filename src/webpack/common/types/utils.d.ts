@@ -30,6 +30,7 @@ export interface FluxDispatcher {
     isDispatching(): boolean;
     subscribe(event: FluxEvents, callback: (data: any) => void): void;
     unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    wait(callback: () => void): void;
 }
 
 export type Parser = Record<
