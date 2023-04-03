@@ -83,23 +83,17 @@ export default definePlugin({
         {
             find: ".showCopiableUsername",
             replacement: {
-                // $1: argument name (currently "e")
-                // $2: the rest inbetween the argument name and my actual match
-                // $3: my actual match
-                match: /(?<=function \w+\()(\w)(.*)(\(0,\w\.jsx\))(?=(.(?!\3))+?canDM)/,
+                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
                 // paste my fancy custom button above the message field
-                replace: "$1$2$self.patchPopout($1),$3",
+                replace: "self.patchPopout(e),$&",
             }
         },
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                // $1: argument name (currently "e")
-                // $2: the rest inbetween the argument name and my actual match
-                // $3: my actual match
-                match: /(?<=function \w+\()(\w)(.*)((\(0,\w\.jsx\))(.(?!\4))+?user:\w{1,2}}\))/,
-                // paste my fancy custom button above the message field
-                replace: "$1$2$3,$self.patchModal($1)",
+                match: /,{user:\w{1,2}}\)(?!;case)/,
+                // paste my fancy custom button below the username
+                replace: "$&,$self.patchModal(e)",
             }
         }
     ],
