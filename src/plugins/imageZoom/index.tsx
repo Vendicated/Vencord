@@ -87,6 +87,7 @@ export const settings = definePluginSettings({
 const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
     if (!children.some(child => child?.props?.id === "zoom")) {
         children.push(
+            <Menu.MenuSeparator />,
             // thanks SpotifyControls
             <Menu.MenuControlItem
                 id="zoom"
