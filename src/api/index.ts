@@ -28,6 +28,7 @@ import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
+import * as $SettingsStore from "./SettingsStore";
 import * as $Styles from "./Styles";
 
 /**
@@ -85,6 +86,10 @@ export const MessageDecorations = $MessageDecorations;
  * An API allowing you to add components to member list users, in both DM's and servers
  */
 export const MemberListDecorators = $MemberListDecorators;
+/**
+ * An API allowing you to read, manipulate and automatically update components based on Discord settings
+ */
+export const SettingsStore = $SettingsStore;
 /**
  * An API allowing you to dynamically load styles
  * a
