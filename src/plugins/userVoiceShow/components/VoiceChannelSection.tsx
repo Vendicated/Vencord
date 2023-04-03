@@ -27,7 +27,7 @@ const UserPopoutSection = findByCodeLazy(".lastSection", ".children");
 
 const CONNECT = 1n << 20n;
 
-type VoiceChannelFieldProps = {
+interface VoiceChannelFieldProps {
     channel: Channel;
     label: string;
     showHeader: boolean;
