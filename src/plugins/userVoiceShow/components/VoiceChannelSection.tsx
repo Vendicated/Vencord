@@ -31,7 +31,7 @@ interface VoiceChannelFieldProps {
     channel: Channel;
     label: string;
     showHeader: boolean;
-};
+}
 
 export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannelFieldProps) => (
     <UserPopoutSection>
