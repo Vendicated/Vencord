@@ -69,7 +69,7 @@ export default definePlugin({
     patchModal(props: any) {
         if (settings.store.showInUserProfileModal)
             return (
-                <div style={{ margin: "0 12px" }} >
+                <div className="voice-channel-profile-modal-margin">
                     {VoiceChannelField(props)}
                 </div>
             );

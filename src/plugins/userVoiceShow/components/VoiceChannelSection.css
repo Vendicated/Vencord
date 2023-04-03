@@ -12,3 +12,7 @@
     color: var(--header-primary);
     margin-bottom: 6px;
 }
+
+.voice-channel-profile-modal-margin > .section-3FmfOT {
+    margin: 0 12px;
+}
