@@ -6,7 +6,7 @@ The cutest Discord client mod
 
 -   Super easy to install (Download Installer, open, click install button, done)
 -   100+ plugins built in: [See a list](https://gist.github.com/Vendicated/8696cde7b92548064a3ae92ead84d033)
-    -   Some highlights: SpotifyControls, Experiments, NoTrack, MessageLogger, QuickReply, Free Emotes/Stickers, CustomCommands, ShowHiddenChannels, PermissionsViewer, PronounDB
+    -   Some highlights: SpotifyControls, GameActivityToggle, Experiments, NoTrack, MessageLogger, QuickReply, Free Emotes/Stickers, CustomCommands, ShowHiddenChannels, PermissionsViewer, PronounDB
 -   Fairly lightweight despite the many inbuilt plugins
 -   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript
 -   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience I recommend stable!)
