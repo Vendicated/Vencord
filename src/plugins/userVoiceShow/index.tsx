@@ -62,7 +62,7 @@ const VoiceChannelField = (props: any) => {
 
 export default definePlugin({
     name: "User Voice Show",
-    description: "See the channel a user is sitting in and click join that channel",
+    description: "Shows whether a User is currently in a voice channel somewhere in their profile",
     authors: [Devs.LordElias],
     settings,
 
