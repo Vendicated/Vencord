@@ -100,6 +100,32 @@
     max-width: 70vw;
 }
 
+.shc-lock-screen-allowed-users-and-roles-container-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn {
+    all: unset;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn > svg > path {
+    fill: var(--text-normal);
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn {
+    all: unset;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn > svg > path {
+    fill: var(--text-normal);
+}
+
 .shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
     margin-left: 10px;
     flex-wrap: wrap;

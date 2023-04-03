@@ -16,15 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import { find, findByPropsLazy } from "@webpack";
-import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
-import { VIEW_CHANNEL } from "..";
+import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
+import { settings, VIEW_CHANNEL } from "..";
 
 
 enum SortOrderTypes {
@@ -125,6 +127,8 @@ const VideoQualityModesToNames = {
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
 function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
+    const [viewAllowedUsersAndRoles, setViewAllowedUsersAndRoles] = useState(settings.store.defaultAllowedUsersAndRolesDropdownState);
+
     const {
         type,
         topic,
@@ -160,6 +164,19 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
             type: "GUILD_MEMBERS_REQUEST",
             guildIds: [channel.guild_id],
             userIds: membersToFetch
+        });
+    }
+
+    const permissions: Array<RoleOrUserPermission> = [];
+
+    if (Settings.plugins.PermissionsViewer.enabled) {
+        Object.values(permissionOverwrites).forEach(overwrite => {
+            permissions.push({
+                type: overwrite.type as PermissionType,
+                id: overwrite.id,
+                overwriteAllow: overwrite.allow,
+                overwriteDeny: overwrite.deny
+            });
         });
     }
 
@@ -264,8 +281,49 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     </div>
                 }
                 <div className="shc-lock-screen-allowed-users-and-roles-container">
-                    <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                    <ChannelBeginHeader channel={channel} />
+                    <div className="shc-lock-screen-allowed-users-and-roles-container-title">
+                        {Settings.plugins.PermissionsViewer.enabled && (
+                            <Tooltip text="Permissions Details">
+                                {({ onMouseLeave, onMouseEnter }) => (
+                                    <button
+                                        onMouseLeave={onMouseLeave}
+                                        onMouseEnter={onMouseEnter}
+                                        className="shc-lock-screen-allowed-users-and-roles-container-permdetails-btn"
+                                        onClick={() => openRolesAndUsersPermissionsModal(permissions, GuildStore.getGuild(channel.guild_id), channel.name)}
+                                    >
+                                        <svg
+                                            width="24"
+                                            height="24"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </Tooltip>
+                        )}
+                        <Text variant="text-lg/bold">Allowed users and roles:</Text>
+                        <Tooltip text="Toggle This Section">
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <button
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
+                                    onClick={() => setViewAllowedUsersAndRoles(!viewAllowedUsersAndRoles)}
+                                >
+                                    <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        transform={viewAllowedUsersAndRoles ? "scale(1 -1)" : "scale(1 1)"}
+                                    >
+                                        <path d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
+                                    </svg>
+                                </button>
+                            )}
+                        </Tooltip>
+                    </div>
+                    {viewAllowedUsersAndRoles && <ChannelBeginHeader channel={channel} />}
                 </div>
             </div>
         </div>
