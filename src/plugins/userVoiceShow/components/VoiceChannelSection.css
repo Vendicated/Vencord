@@ -13,6 +13,6 @@
     margin-bottom: 6px;
 }
 
-.voice-channel-profile-modal-margin > .section-3FmfOT {
+.voice-channel-profile-modal-margin > [class^="section"] {
     margin: 0 12px;
 }
