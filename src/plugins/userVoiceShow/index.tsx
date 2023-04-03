@@ -34,7 +34,7 @@ const settings = definePluginSettings({
     },
     showVoiceChannelSectionHeader: {
         type: OptionType.BOOLEAN,
-        description: "Wether to show \"IN A VOICE CHANNEL\" above the join button",
+        description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
     }
 });
