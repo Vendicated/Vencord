@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/settings";
+import { showNotification } from "@api/Notifications";
+import { Settings, useSettings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
-import { authorizeCloud, deauthorizeCloud } from "@utils/cloud";
+import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Button, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -34,11 +35,39 @@ function validateUrl(url: string) {
     }
 }
 
+async function eraseAllData() {
+    const res = await fetch(new URL("/v1/", getCloudUrl()), {
+        method: "DELETE",
+        headers: new Headers({
+            Authorization: await getCloudAuth()
+        })
+    });
+
+    if (!res.ok) {
+        cloudLogger.error(`Failed to erase data, API returned ${res.status}`);
+        showNotification({
+            title: "Cloud Integrations",
+            body: `Could not erase all data (API returned ${res.status}), please contact support.`,
+            color: "var(--red-360)"
+        });
+        return;
+    }
+
+    Settings.cloud.authenticated = false;
+    await deauthorizeCloud();
+
+    showNotification({
+        title: "Cloud Integrations",
+        body: "Successfully erased all data.",
+        color: "var(--green-360)"
+    });
+}
+
 function SettingsSyncSection() {
-    const settings = useSettings(["backend.enabled", "backend.settingsSync"]);
+    const settings = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
     const sectionEnabled = useMemo(
-        () => settings.backend.enabled && settings.backend.settingsSync,
-        [settings.backend.enabled, settings.backend.settingsSync]
+        () => settings.cloud.authenticated && settings.cloud.settingsSync,
+        [settings.cloud.authenticated, settings.cloud.settingsSync]
     );
 
     return (
@@ -49,9 +78,9 @@ function SettingsSyncSection() {
             </Forms.FormText>
             <Switch
                 key="cloud-sync"
-                disabled={!settings.backend.enabled}
-                value={settings.backend.settingsSync}
-                onChange={v => { settings.backend.settingsSync = v; }}
+                disabled={!settings.cloud.authenticated}
+                value={settings.cloud.settingsSync}
+                onChange={v => { settings.cloud.settingsSync = v; }}
             >
                 Settings Sync
             </Switch>
@@ -85,7 +114,7 @@ function SettingsSyncSection() {
 }
 
 function CloudTab() {
-    const settings = useSettings(["backend.enabled", "backend.url"]);
+    const settings = useSettings(["cloud.authenticated", "cloud.url"]);
 
     return (
         <>
@@ -97,8 +126,8 @@ function CloudTab() {
                 </Forms.FormText>
                 <Switch
                     key="backend"
-                    value={settings.backend.enabled}
-                    onChange={v => { v && authorizeCloud(); if (!v) settings.backend.enabled = v; }}
+                    value={settings.cloud.authenticated}
+                    onChange={v => { v && authorizeCloud(); if (!v) settings.cloud.authenticated = v; }}
                     note="This will request authorization if you have not yet set up cloud integrations."
                 >
                     Enable Cloud Integrations
@@ -109,12 +138,26 @@ function CloudTab() {
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
-                    value={settings.backend.url}
-                    onChange={v => { settings.backend.url = v; settings.backend.enabled = false; deauthorizeCloud(); }}
+                    value={settings.cloud.url}
+                    onChange={v => { settings.cloud.url = v; settings.cloud.authenticated = false; deauthorizeCloud(); }}
                     validate={validateUrl}
                 />
+                <Button
+                    className={Margins.top8}
+                    size={Button.Sizes.MEDIUM}
+                    color={Button.Colors.RED}
+                    disabled={!settings.cloud.authenticated}
+                    onClick={() => Alerts.show({
+                        title: "Are you sure?",
+                        body: "Once your data is erased, we cannot recover it. There's no going back!",
+                        onConfirm: eraseAllData,
+                        confirmText: "Erase it!",
+                        confirmColor: "vc-cloud-erase-data-danger-btn",
+                        cancelText: "Nevermind"
+                    })}
+                >Erase All Data</Button>
                 <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection>
+            </Forms.FormSection >
             <SettingsSyncSection />
         </>
     );

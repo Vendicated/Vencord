@@ -50,8 +50,8 @@ export interface Settings {
         logLimit: number;
     };
 
-    backend: {
-        enabled: boolean;
+    cloud: {
+        authenticated: boolean;
         url: string;
         settingsSync: boolean;
         settingsSyncVersion: number;
@@ -78,8 +78,8 @@ const DefaultSettings: Settings = {
         logLimit: 50
     },
 
-    backend: {
-        enabled: false,
+    cloud: {
+        authenticated: false,
         url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
@@ -156,7 +156,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 }
             }
             // And don't forget to persist the settings!
-            PlainSettings.backend.settingsSyncVersion = Date.now();
+            PlainSettings.cloud.settingsSyncVersion = Date.now();
             VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }

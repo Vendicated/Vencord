@@ -154,7 +154,7 @@ export async function putCloudSettings() {
         }
 
         const { written } = await res.json();
-        PlainSettings.backend.settingsSyncVersion = written;
+        PlainSettings.cloud.settingsSyncVersion = written;
         VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
@@ -180,7 +180,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             headers: new Headers({
                 Authorization: await getCloudAuth(),
                 Accept: "application/octet-stream",
-                "if-none-match": Settings.backend.settingsSyncVersion.toString()
+                "if-none-match": Settings.cloud.settingsSyncVersion.toString()
             }),
         });
 
@@ -215,7 +215,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         }
 
         const written = parseInt(res.headers.get("etag")!);
-        const localWritten = Settings.backend.settingsSyncVersion;
+        const localWritten = Settings.cloud.settingsSyncVersion;
 
         // don't need to check for written > localWritten because the server will return 304 due to if-none-match
         if (!force && written < localWritten) {
@@ -233,7 +233,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         await importSettings(settings);
 
         // sync with server timestamp instead of local one
-        PlainSettings.backend.settingsSyncVersion = written;
+        PlainSettings.cloud.settingsSyncVersion = written;
         VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");

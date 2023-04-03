@@ -26,7 +26,7 @@ import Logger from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const getCloudUrl = () => new URL(Settings.backend.url);
+export const getCloudUrl = () => new URL(Settings.cloud.url);
 
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
@@ -51,7 +51,7 @@ export async function deauthorizeCloud() {
 
 export async function authorizeCloud() {
     if (await getAuthorization() !== undefined) {
-        Settings.backend.enabled = true;
+        Settings.cloud.authenticated = true;
         return;
     }
 
@@ -63,7 +63,7 @@ export async function authorizeCloud() {
             title: "Cloud Integration",
             body: "Setup failed (couldn't retrieve OAuth configuration)."
         });
-        Settings.backend.enabled = false;
+        Settings.cloud.authenticated = false;
         return;
     }
 
@@ -79,7 +79,7 @@ export async function authorizeCloud() {
         cancelCompletesFlow={false}
         callback={async (callbackUrl: string) => {
             if (!callbackUrl) {
-                Settings.backend.enabled = false;
+                Settings.cloud.authenticated = false;
                 return;
             }
 
@@ -95,13 +95,13 @@ export async function authorizeCloud() {
                         title: "Cloud Integration",
                         body: "Cloud integrations enabled!"
                     });
-                    Settings.backend.enabled = true;
+                    Settings.cloud.authenticated = true;
                 } else {
                     showNotification({
                         title: "Cloud Integration",
                         body: "Setup failed (no secret returned?)."
                     });
-                    Settings.backend.enabled = false;
+                    Settings.cloud.authenticated = false;
                 }
             } catch (e: any) {
                 cloudLogger.error("Failed to authorize", e);
@@ -109,7 +109,7 @@ export async function authorizeCloud() {
                     title: "Cloud Integration",
                     body: `Setup failed (${e.toString()}).`
                 });
-                Settings.backend.enabled = false;
+                Settings.cloud.authenticated = false;
             }
         }
         }

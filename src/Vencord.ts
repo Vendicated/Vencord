@@ -39,8 +39,8 @@ export let Components: any;
 
 async function syncSettings() {
     if (
-        Settings.backend.settingsSync && // if it's enabled
-        Settings.backend.enabled && // if cloud integrations are enabled
+        Settings.cloud.settingsSync && // if it's enabled
+        Settings.cloud.authenticated && // if cloud integrations are enabled
         await getCloudSettings(false) // if we synchronized something (false means no sync)
     ) {
         // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of

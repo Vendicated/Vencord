@@ -52,3 +52,8 @@
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 1em;
 }
+
+.vc-cloud-erase-data-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}
