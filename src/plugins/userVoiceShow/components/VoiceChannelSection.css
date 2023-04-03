@@ -2,6 +2,12 @@
     white-space: normal !important;
 }
 
+.voice-channel-button {
+    width: 100%;
+    margin: auto;
+    height: unset;
+}
+
 .voice-channel-section-header {
     margin-bottom: 8px;
     color: var(--header-primary);

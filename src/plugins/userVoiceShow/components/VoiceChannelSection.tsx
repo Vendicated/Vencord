@@ -39,11 +39,6 @@ export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannel
         <Button
             className="voice-channel-button"
             color={Button.Colors.TRANSPARENT}
-            style={{
-                width: "100%",
-                margin: "auto",
-                height: "unset",
-            }}
             size={Button.Sizes.SMALL}
 
             onClick={() => {
