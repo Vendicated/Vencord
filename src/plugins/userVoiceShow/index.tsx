@@ -39,14 +39,14 @@ const settings = definePluginSettings({
     }
 });
 
-const getVoiceChannelField = (props: any) => {
+const VoiceChannelField = (props: any) => {
     // console.log(e);
     const { user } = props;
     const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
-    if (!channelId) return;
+    if (!channelId) return null;
     const channel = ChannelStore.getChannel(channelId);
     const guild = GuildStore.getGuild(channel.guild_id);
-    if (!guild) return; // When in DM call
+    if (!guild) return null; // When in DM call
 
     const result = `${guild.name} | ${channel.name}`;
     // console.log(result);
@@ -70,13 +70,13 @@ export default definePlugin({
         if (settings.store.showInUserProfileModal)
             return (
                 <div style={{ margin: "0 12px" }} >
-                    {getVoiceChannelField(props)}
+                    {VoiceChannelField(props)}
                 </div>
             );
     },
 
     patchPopout(props: any) {
-        return getVoiceChannelField(props);
+        return VoiceChannelField(props);
     },
 
     patches: [
