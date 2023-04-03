@@ -133,6 +133,7 @@ function Updatable(props: CommonProps) {
                                     cancelText: "Not now!",
                                     onConfirm() {
                                         if (needFullRestart)
+                                            // FIXME: Vencord Desktop
                                             window.DiscordNative.app.relaunch();
                                         else
                                             location.reload();

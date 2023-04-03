@@ -90,6 +90,7 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate) {
                 await update();
                 const needFullRestart = await rebuild();
+                // FIXME: Vencord Desktop support
                 if (needFullRestart) DiscordNative.app.relaunch();
                 else location.reload();
             }

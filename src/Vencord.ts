@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { checkForUpdates, rebuild, update,UpdateLogger } from "./utils/updater";
+import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -57,6 +57,7 @@ async function init() {
                         noPersist: true,
                         onClick() {
                             if (needsFullRestart)
+                                // FIXME: Vencord Desktop
                                 window.DiscordNative.app.relaunch();
                             else
                                 location.reload();
