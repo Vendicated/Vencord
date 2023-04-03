@@ -18,13 +18,13 @@
 
 import "./style.css";
 
-import { getSettingStore } from "@api/SettingsStore";
+import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Tooltip } from "@webpack/common";
 
-const ShowCurrentGame = getSettingStore<boolean>("status", "showCurrentGame");
+const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame");
 
 function GameActivityToggleButton() {
     const showCurrentGame = ShowCurrentGame?.useSetting();

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import Logger from "@utils/Logger";
 import { proxyLazy } from "@utils/proxyLazy";
 import { findModuleId, wreq } from "@webpack";
 
@@ -41,7 +42,7 @@ interface Setting<T> {
 
 const SettingsStores: Array<Setting<any>> | undefined = proxyLazy(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return;
+    if (modId == null) return new Logger("SettingsStoreAPI").error("Didn't find stores module.");
 
     const mod = wreq(modId);
     if (mod == null) return;
@@ -58,4 +59,13 @@ export function getSettingStore<T = any>(group: string, name: string): Setting<T
     if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
 
     return SettingsStores?.find(s => s?.settingsStoreApiGroup === group && s?.settingsStoreApiName === name);
+}
+
+/**
+ * getSettingStore but lazy
+ */
+export function getSettingStoreLazy<T = any>(group: string, name: string) {
+    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
+
+    return proxyLazy(() => getSettingStore<T>(group, name));
 }
