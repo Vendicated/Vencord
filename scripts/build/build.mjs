@@ -48,6 +48,7 @@ const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.j
 const sourcemap = watch ? "inline" : "external";
 
 await Promise.all([
+    // common preload
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
@@ -55,12 +56,19 @@ await Promise.all([
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
     }),
+
+    // Discord Desktop main & renderer
     esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/patcher.ts"],
+        entryPoints: ["src/main/index.ts"],
         outfile: "dist/patcher.js",
         footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: true,
+            IS_VENCORD_DESKTOP: false
+        }
     }),
     esbuild.build({
         ...commonOpts,
@@ -77,7 +85,43 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_WEB: false
+            IS_WEB: false,
+            IS_DISCORD_DESKTOP: true,
+            IS_VENCORD_DESKTOP: false
+        }
+    }),
+
+    // Vencord Desktop main & renderer
+    esbuild.build({
+        ...nodeCommonOpts,
+        entryPoints: ["src/main/index.ts"],
+        outfile: "dist/vencordDesktopMain.js",
+        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
+        sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VENCORD_DESKTOP: true
+        }
+    }),
+    esbuild.build({
+        ...commonOpts,
+        entryPoints: ["src/Vencord.ts"],
+        outfile: "dist/vencordDesktopRenderer.js",
+        format: "iife",
+        target: ["esnext"],
+        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
+        globalName: "Vencord",
+        sourcemap,
+        plugins: [
+            globPlugins,
+            ...commonOpts.plugins
+        ],
+        define: {
+            ...defines,
+            IS_WEB: false,
+            IS_DISCORD_DESKTOP: false,
+            IS_VENCORD_DESKTOP: true
         }
     }),
 ]).catch(err => {

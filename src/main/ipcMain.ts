@@ -28,7 +28,7 @@ import { join } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
@@ -41,6 +41,14 @@ export function readSettings() {
         return readFileSync(SETTINGS_FILE, "utf-8");
     } catch {
         return "{}";
+    }
+}
+
+export function getSettings(): typeof import("@api/settings").Settings {
+    try {
+        return JSON.parse(readSettings());
+    } catch {
+        return {} as any;
     }
 }
 

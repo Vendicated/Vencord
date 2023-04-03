@@ -67,7 +67,7 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     instance.pop();
 }
 
-if (IS_DEV && !IS_WEB) {
+if (IS_DEV && IS_DISCORD_DESKTOP) {
     var devToolsOpen = false;
     // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
     setTimeout(() => {
