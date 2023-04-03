@@ -33,7 +33,7 @@ const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 export default definePlugin({
     name: "SupportHelper",
     required: true,
-    description: "Helps me provide support to you",
+    description: "Helps us provide support to you",
     authors: [Devs.Ven],
 
     commands: [{

@@ -209,6 +209,11 @@ export default definePlugin({
                         "       m" +
                         ")" +
                         ".update($3"
+                },
+                {
+                    // fix up key (edit last message) attempting to edit a deleted message
+                    match: /(?<=getLastEditableMessage=.{0,200}\.find\(\(function\((\i)\)\{)return/,
+                    replace: "return !$1.deleted &&"
                 }
             ]
         },
