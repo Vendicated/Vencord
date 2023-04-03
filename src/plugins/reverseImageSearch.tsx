@@ -34,15 +34,15 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { reverseImageSearchType, itemHref, itemSrc } = args[0];
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { reverseImageSearchType, itemHref, itemSrc } = props;
 
     if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
 
     const src = itemHref ?? itemSrc;
 
-    const group = findGroupChildrenByChildId("save-image", children);
+    const group = findGroupChildrenByChildId("copy-link", children);
     if (group && !group.some(child => child?.props?.id === "search-image")) {
         group.push((
             <Menu.MenuItem

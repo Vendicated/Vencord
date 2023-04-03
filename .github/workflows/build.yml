@@ -37,6 +37,9 @@ jobs:
             - name: Build
               run: pnpm build --standalone
 
+            - name: Generate plugin list
+              run: pnpm generatePluginJson dist/plugins.json
+
             - name: Clean up obsolete files
               run: |
                 rm -rf dist/extension* Vencord.user.css

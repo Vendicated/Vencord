@@ -1,3 +1,8 @@
 .messagelogger-deleted div {
     color: #f04747;
 }
+
+.messagelogger-deleted a {
+    color: #be3535;
+    text-decoration: underline;
+}
