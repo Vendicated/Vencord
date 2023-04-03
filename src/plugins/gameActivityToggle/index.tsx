@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./style.css";
-
 import { getSettingStoreLazy } from "@api/SettingsStore";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Tooltip } from "@webpack/common";
+
+import style from "./style.css?managed";
 
 const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame");
 
@@ -69,5 +70,13 @@ export default definePlugin({
         }
     ],
 
-    GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true })
+    GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
+
+    start() {
+        enableStyle(style);
+    },
+
+    stop() {
+        disableStyle(style);
+    }
 });
