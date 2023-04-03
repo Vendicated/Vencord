@@ -93,7 +93,7 @@ export default definePlugin({
             replacement: {
                 match: /,{user:\w{1,2}}\)(?!;case)/,
                 // paste my fancy custom button below the username
-                replace: "$&,$self.patchModal(e)",
+                replace: "$&,$self.patchModal(arguments[0])",
             }
         }
     ],
