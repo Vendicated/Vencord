@@ -18,15 +18,26 @@
 
 import "./styles.css";
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
+import { debounce } from "@utils/debounce";
+import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, ReactDOM } from "@webpack/common";
+import { filters, find } from "@webpack";
+import { Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
+
+// thanks SpotifyControls
+const Slider = LazyComponent(() => {
+    const filter = filters.byCode("sliderContainer");
+    return find(m => m.render && filter(m.render));
+});
+
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -51,7 +62,7 @@ export const settings = definePluginSettings({
     zoom: {
         description: "Zoom of the lens",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 10, 0.5),
+        markers: makeRange(1, 50, 4),
         default: 2,
         stickToMarkers: false,
     },
@@ -66,11 +77,65 @@ export const settings = definePluginSettings({
     zoomSpeed: {
         description: "How fast the zoom / lens size changes",
         type: OptionType.SLIDER,
-        markers: makeRange(0.1, 3, 0.1),
+        markers: makeRange(0.1, 5, 0.2),
         default: 0.5,
         stickToMarkers: false,
     },
 });
+
+
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
+    if (!children.some(child => child?.props?.id === "zoom")) {
+        children.push(
+            // thanks SpotifyControls
+            <Menu.MenuControlItem
+                id="zoom"
+                label="Zoom"
+                control={(props, ref) => (
+                    <Slider
+                        ref={ref}
+                        {...props}
+                        minValue={1}
+                        maxValue={50}
+                        value={settings.store.zoom}
+                        onChange={debounce((value: number) => settings.store.zoom = value, 100)}
+                    />
+                )}
+            >
+
+            </Menu.MenuControlItem >,
+            <Menu.MenuControlItem
+                id="size"
+                label="Lens Size"
+                control={(props, ref) => (
+                    <Slider
+                        ref={ref}
+                        {...props}
+                        minValue={50}
+                        maxValue={1000}
+                        value={settings.store.size}
+                        onChange={debounce((value: number) => settings.store.size = value, 100)}
+                    />
+                )}
+            />,
+            <Menu.MenuControlItem
+                id="zoom-speed"
+                label="Zoom Speed"
+                control={(props, ref) => (
+                    <Slider
+                        ref={ref}
+                        {...props}
+                        minValue={0.1}
+                        maxValue={5}
+                        value={settings.store.zoomSpeed}
+                        onChange={debounce((value: number) => settings.store.zoomSpeed = value, 100)}
+                        renderValue={(value: number) => `${value.toFixed(3)}x`}
+                    />
+                )}
+            />
+        );
+    }
+};
 
 export default definePlugin({
     name: "ImageZoom",
@@ -127,7 +192,7 @@ export default definePlugin({
         return {
             onMouseOver: () => this.onMouseOver(instance),
             onMouseOut: () => this.onMouseOut(instance),
-            onMouseDown: () => this.onMouseDown(instance),
+            onMouseDown: (e: React.MouseEvent) => this.onMouseDown(e, instance),
             onMouseUp: () => this.onMouseUp(instance),
             id: instance.props.id,
         };
@@ -155,14 +220,16 @@ export default definePlugin({
     onMouseOut(instance) {
         instance.setState((state: any) => ({ ...state, mouseOver: false }));
     },
-    onMouseDown(instance) {
-        instance.setState((state: any) => ({ ...state, mouseDown: true }));
+    onMouseDown(e: React.MouseEvent, instance) {
+        if (e.button === 0 /* left */)
+            instance.setState((state: any) => ({ ...state, mouseDown: true }));
     },
     onMouseUp(instance) {
         instance.setState((state: any) => ({ ...state, mouseDown: false }));
     },
 
     start() {
+        addContextMenuPatch("image-context", imageContextMenuPatch);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
@@ -172,5 +239,6 @@ export default definePlugin({
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
+        removeContextMenuPatch("image-context", imageContextMenuPatch);
     }
 });

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -75,6 +75,26 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
             } else {
                 setOpacity(0);
             }
+
+        };
+
+        const onMouseDown = (e: MouseEvent) => {
+            if (instance.state.mouseOver && e.button === 0 /* left click */) {
+                zoom.current = settings.store.zoom;
+                size.current = settings.store.size;
+
+                // close context menu if open
+                if (document.getElementById("image-context")) {
+                    FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
+                }
+
+                updateMousePosition(e);
+                setOpacity(1);
+            }
+        };
+
+        const onMouseUp = () => {
+            setOpacity(0);
         };
 
         const onWheel = async (e: WheelEvent) => {
@@ -105,15 +125,15 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("keyup", onKeyUp);
         document.addEventListener("mousemove", updateMousePosition);
-        document.addEventListener("mousedown", updateMousePosition);
-        document.addEventListener("mouseup", updateMousePosition);
+        document.addEventListener("mousedown", onMouseDown);
+        document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("wheel", onWheel);
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("keyup", onKeyUp);
             document.removeEventListener("mousemove", updateMousePosition);
-            document.removeEventListener("mousedown", updateMousePosition);
-            document.removeEventListener("mouseup", updateMousePosition);
+            document.removeEventListener("mousedown", onMouseDown);
+            document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
 
             if (settings.store.saveZoomValues) {
