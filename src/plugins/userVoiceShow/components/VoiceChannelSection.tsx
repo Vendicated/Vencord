@@ -19,7 +19,7 @@
 import "./VoiceChannelSection.css";
 
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, PermissionStore, Toasts } from "@webpack/common";
+import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
@@ -35,7 +35,7 @@ interface VoiceChannelFieldProps {
 
 export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannelFieldProps) => (
     <UserPopoutSection>
-        {showHeader ? <h3 className="voice-channel-section-header">In a voice channel</h3> : null}
+        {showHeader ? <Forms.FormTitle className="voice-channel-section-header">In a voice channel</Forms.FormTitle> : null}
         <Button
             className="voice-channel-button"
             color={Button.Colors.TRANSPARENT}

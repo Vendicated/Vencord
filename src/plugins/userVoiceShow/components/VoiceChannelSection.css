@@ -9,11 +9,6 @@
 }
 
 .voice-channel-section-header {
-    margin-bottom: 8px;
     color: var(--header-primary);
-    font-size: 12px;
-    line-height: 16px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    text-transform: uppercase;
+    margin-bottom: 6px;
 }
