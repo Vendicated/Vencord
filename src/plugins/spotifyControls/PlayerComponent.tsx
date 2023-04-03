@@ -372,10 +372,10 @@ export function Player() {
 
     return (
         <ErrorBoundary fallback={() => (
-            <>
-                <Forms.FormText>Failed to render Spotify Modal :(</Forms.FormText>
-                <Forms.FormText>Check the console for errors</Forms.FormText>
-            </>
+            <div className="vc-spotify-fallback">
+                <p>Failed to render Spotify Modal :(</p>
+                <p >Check the console for errors</p>
+            </div>
         )}>
             <div id={cl("player")}>
                 <Info track={track} />

@@ -191,3 +191,8 @@
 .vc-spotify-time-right {
     right: 0;
 }
+
+.vc-spotify-fallback {
+    padding: 0.5em;
+    color: var(--text-normal);
+}
