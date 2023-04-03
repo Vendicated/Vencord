@@ -19,7 +19,7 @@
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import { ApngBlendOp, ApngDisposeOp, ApngFrame, getGifEncoder, importApngJs } from "@utils/dependencies";
+import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
@@ -453,11 +453,11 @@ export default definePlugin({
             }
 
             if (settings.store.transformStickers) {
-                const imgMatch = element.props.href.match(fakeNitroStickerRegex);
-                if (imgMatch) continue;
+                if (fakeNitroStickerRegex.test(element.props.href)) continue;
 
                 const gifMatch = element.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
+                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
                     if (StickerStore.getStickerById(gifMatch[1])) continue;
                 }
             }
@@ -521,16 +521,15 @@ export default definePlugin({
         switch (embed.type) {
             case "image": {
                 if (settings.store.transformEmojis) {
-                    const match = embed.url!.match(fakeNitroEmojiRegex);
-                    if (match) return true;
+                    if (fakeNitroEmojiRegex.test(embed.url!)) return true;
                 }
 
                 if (settings.store.transformStickers) {
-                    const imgMatch = embed.url!.match(fakeNitroStickerRegex);
-                    if (imgMatch) return true;
+                    if (fakeNitroStickerRegex.test(embed.url!)) return true;
 
                     const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
                     if (gifMatch) {
+                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
                         if (StickerStore.getStickerById(gifMatch[1])) return true;
                     }
                 }
@@ -548,6 +547,7 @@ export default definePlugin({
 
             const match = attachment.url.match(fakeNitroGifStickerRegex);
             if (match) {
+                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
                 if (StickerStore.getStickerById(match[1])) return false;
             }
 
@@ -556,7 +556,7 @@ export default definePlugin({
     },
 
     shouldKeepEmojiLink(link: any) {
-        return link.target?.match(fakeNitroEmojiRegex);
+        return link.target && fakeNitroEmojiRegex.test(link.target);
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
@@ -602,24 +602,12 @@ export default definePlugin({
         const scale = resolution / Math.max(width, height);
         ctx.scale(scale, scale);
 
-        let previousFrame: ApngFrame | null = null;
-        let previousFrameData: ImageData | null = null;
+        let previousFrameData: ImageData;
 
         for (const frame of frames) {
             const { left, top, width, height, img, delay, blendOp, disposeOp } = frame;
 
-            if (previousFrame?.disposeOp === ApngDisposeOp.BACKGROUND) {
-                ctx.clearRect(previousFrame.left, previousFrame.top, previousFrame.width, previousFrame.height);
-            } else if (previousFrameData && previousFrame?.disposeOp === ApngDisposeOp.PREVIOUS) {
-                ctx.putImageData(previousFrameData, previousFrame.left, previousFrame.top);
-            }
-
-            previousFrame = frame;
-            previousFrameData = null;
-
-            if (disposeOp === ApngDisposeOp.PREVIOUS) {
-                previousFrameData = ctx.getImageData(left, top, width, height);
-            }
+            previousFrameData = ctx.getImageData(left, top, width, height);
 
             if (blendOp === ApngBlendOp.SOURCE) {
                 ctx.clearRect(left, top, width, height);
@@ -637,6 +625,12 @@ export default definePlugin({
                 palette,
                 delay
             });
+
+            if (disposeOp === ApngDisposeOp.BACKGROUND) {
+                ctx.clearRect(left, top, width, height);
+            } else if (disposeOp === ApngDisposeOp.PREVIOUS) {
+                ctx.putImageData(previousFrameData, left, top);
+            }
         }
 
         gif.finish();
@@ -695,8 +689,10 @@ export default definePlugin({
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                    const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`)
-                        + `&name=${emoji.name}`;
+                    const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
+                        size: Settings.plugins.FakeNitro.emojiSize,
+                        name: encodeURIComponent(emoji.name)
+                    }));
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
@@ -716,8 +712,10 @@ export default definePlugin({
                 if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
                 if (!emoji.require_colons) continue;
 
-                const url = emoji.url.replace(/\?size=\d+/, `?size=${Settings.plugins.FakeNitro.emojiSize}`)
-                    + `&name=${emoji.name}`;
+                const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
+                    size: Settings.plugins.FakeNitro.emojiSize,
+                    name: encodeURIComponent(emoji.name)
+                }));
                 messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
                     return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                 });
