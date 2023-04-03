@@ -16,10 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const waitFor = (condition: () => boolean, cb: () => void) => {
-    if (condition()) {
-        cb();
-    } else {
-        setTimeout(() => waitFor(condition, cb), 1);
-    }
-};
+export function waitFor(condition: () => boolean, cb: () => void) {
+    if (condition()) cb();
+    else requestAnimationFrame(() => waitFor(condition, cb));
+}
