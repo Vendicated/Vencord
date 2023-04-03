@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { relaunch } from "@utils/native";
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, search } from "@webpack";
@@ -77,8 +78,7 @@ export default definePlugin({
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
-            // FIXME: Vencord Desktop
-            restart: IS_WEB ? WEB_ONLY("restart") : window.DiscordNative.app.relaunch
+            restart: IS_WEB ? WEB_ONLY("restart") : relaunch
         };
     },
 

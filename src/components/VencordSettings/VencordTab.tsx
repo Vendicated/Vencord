@@ -26,6 +26,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
+import { relaunch } from "@utils/native";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
 const cl = classNameFactory("vc-settings-");
@@ -100,8 +101,7 @@ function VencordSettings() {
                     ) : (
                         <React.Fragment>
                             <Button
-                                // FIXME: Vencord Desktop support
-                                onClick={() => window.DiscordNative.app.relaunch()}
+                                onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>

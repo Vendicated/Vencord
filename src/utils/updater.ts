@@ -20,6 +20,7 @@ import gitHash from "~git-hash";
 
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
+import { relaunch } from "./native";
 import { IpcRes } from "./types";
 
 export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
@@ -90,9 +91,10 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate) {
                 await update();
                 const needFullRestart = await rebuild();
-                // FIXME: Vencord Desktop support
-                if (needFullRestart) DiscordNative.app.relaunch();
-                else location.reload();
+                if (needFullRestart)
+                    relaunch();
+                else
+                    location.reload();
             }
         }
     } catch (err) {

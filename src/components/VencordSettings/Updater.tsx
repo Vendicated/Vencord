@@ -24,6 +24,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
+import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
@@ -133,8 +134,7 @@ function Updatable(props: CommonProps) {
                                     cancelText: "Not now!",
                                     onConfirm() {
                                         if (needFullRestart)
-                                            // FIXME: Vencord Desktop
-                                            window.DiscordNative.app.relaunch();
+                                            relaunch();
                                         else
                                             location.reload();
                                         r();
