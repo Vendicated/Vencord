@@ -65,7 +65,5 @@ export function getSettingStore<T = any>(group: string, name: string): Setting<T
  * getSettingStore but lazy
  */
 export function getSettingStoreLazy<T = any>(group: string, name: string) {
-    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
-
     return proxyLazy(() => getSettingStore<T>(group, name));
 }
