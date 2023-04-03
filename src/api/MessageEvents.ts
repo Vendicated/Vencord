@@ -19,6 +19,7 @@
 import Logger from "@utils/Logger";
 import { MessageStore } from "@webpack/common";
 import type { Channel, Message } from "discord-types/general";
+import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
@@ -41,16 +42,16 @@ export interface MessageExtra {
     stickerIds?: string[];
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => void | { cancel: boolean; };
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => void;
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void>;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
     for (const listener of sendListeners) {
         try {
-            const result = listener(channelId, messageObj, extra);
+            const result = await listener(channelId, messageObj, extra);
             if (result && result.cancel === true) {
                 return true;
             }
@@ -61,10 +62,10 @@ export function _handlePreSend(channelId: string, messageObj: MessageObject, ext
     return false;
 }
 
-export function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
+export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
-            listener(channelId, messageId, messageObj);
+            await listener(channelId, messageId, messageObj);
         } catch (e) {
             MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
         }

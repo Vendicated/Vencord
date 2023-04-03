@@ -19,6 +19,7 @@
 import type { ReactNode } from "react";
 
 import type { FluxEvents } from "./fluxEvents";
+import { i18nMessages } from "./i18nMessages";
 
 export { FluxEvents };
 
@@ -29,6 +30,7 @@ export interface FluxDispatcher {
     isDispatching(): boolean;
     subscribe(event: FluxEvents, callback: (data: any) => void): void;
     unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    wait(callback: () => void): void;
 }
 
 export type Parser = Record<
@@ -82,3 +84,30 @@ export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data:
     V8APIError: Error;
     getAPIBaseURL(withVersion?: boolean): string;
 };
+
+export interface Locale {
+    name: string;
+    value: string;
+    localizedName: string;
+}
+
+export interface LocaleInfo {
+    code: string;
+    enabled: boolean;
+    name: string;
+    englishName: string;
+    postgresLang: string;
+}
+
+export interface i18n {
+    getAvailableLocales(): Locale[];
+    getLanguages(): LocaleInfo[];
+    getDefaultLocale(): string;
+    getLocale(): string;
+    getLocaleInfo(): LocaleInfo;
+    setLocale(locale: string): void;
+
+    loadPromise: Promise<void>;
+
+    Messages: Record<i18nMessages, string>;
+}
