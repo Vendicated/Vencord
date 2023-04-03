@@ -100,6 +100,7 @@ function VencordSettings() {
                     ) : (
                         <React.Fragment>
                             <Button
+                                // FIXME: Vencord Desktop support
                                 onClick={() => window.DiscordNative.app.relaunch()}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
@@ -111,6 +112,7 @@ function VencordSettings() {
                                 Open QuickCSS File
                             </Button>
                             <Button
+                                // FIXME: Vencord Desktop support
                                 onClick={() => window.DiscordNative.fileManager.showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>

@@ -77,6 +77,7 @@ export default definePlugin({
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
+            // FIXME: Vencord Desktop
             restart: IS_WEB ? WEB_ONLY("restart") : window.DiscordNative.app.relaunch
         };
     },

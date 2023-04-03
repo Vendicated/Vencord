@@ -25,7 +25,7 @@ import { join } from "path";
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
-import { get } from "../simpleGet";
+import { get } from "../utils/simpleGet";
 import { calculateHashes, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;

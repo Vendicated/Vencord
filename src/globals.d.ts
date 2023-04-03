@@ -35,6 +35,8 @@ declare global {
     export var IS_WEB: boolean;
     export var IS_DEV: boolean;
     export var IS_STANDALONE: boolean;
+    export var IS_DISCORD_DESKTOP: boolean;
+    export var IS_VENCORD_DESKTOP: boolean;
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");

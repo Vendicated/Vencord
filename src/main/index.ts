@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,107 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { onceDefined } from "@utils/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu, protocol, session } from "electron";
-import { dirname, join } from "path";
+import { app, protocol, session } from "electron";
+import { join } from "path";
 
-import { initIpc } from "./ipcMain";
-import { installExt } from "./ipcMain/extensions";
-import { readSettings } from "./ipcMain/index";
+import { getSettings } from "./ipcMain";
+import { IS_VANILLA } from "./utils/constants";
+import { installExt } from "./utils/extensions";
 
-console.log("[Vencord] Starting up...");
-
-// Our injector file at app/index.js
-const injectorPath = require.main!.filename;
-
-// special discord_arch_electron injection method
-const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
-
-// The original app.asar
-const asarPath = join(dirname(injectorPath), "..", asarName);
-
-const discordPkg = require(join(asarPath, "package.json"));
-require.main!.filename = join(asarPath, discordPkg.main);
-
-// @ts-ignore Untyped method? Dies from cringe
-app.setAppPath(asarPath);
-
-if (!process.argv.includes("--vanilla")) {
-    let settings: typeof import("@api/settings").Settings = {} as any;
-    try {
-        settings = JSON.parse(readSettings());
-    } catch { }
-
-    // Repatch after host updates on Windows
-    if (process.platform === "win32") {
-        require("./patchWin32Updater");
-
-        if (settings.winCtrlQ) {
-            const originalBuild = Menu.buildFromTemplate;
-            Menu.buildFromTemplate = function (template) {
-                if (template[0]?.label === "&File") {
-                    const { submenu } = template[0];
-                    if (Array.isArray(submenu)) {
-                        submenu.push({
-                            label: "Quit (Hidden)",
-                            visible: false,
-                            acceleratorWorksWhenHidden: true,
-                            accelerator: "Control+Q",
-                            click: () => app.quit()
-                        });
-                    }
-                }
-                return originalBuild.call(this, template);
-            };
-        }
-    }
-
-    class BrowserWindow extends electron.BrowserWindow {
-        constructor(options: BrowserWindowConstructorOptions) {
-            if (options?.webPreferences?.preload && options.title) {
-                const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, "preload.js");
-                options.webPreferences.sandbox = false;
-                if (settings.frameless) {
-                    options.frame = false;
-                } else if (process.platform === "win32" && settings.winNativeTitleBar) {
-                    delete options.frame;
-                }
-
-                // This causes electron to freeze / white screen for some people
-                if ((settings as any).transparentUNSAFE_USE_AT_OWN_RISK) {
-                    options.transparent = true;
-                    options.backgroundColor = "#00000000";
-                }
-
-                process.env.DISCORD_PRELOAD = original;
-
-                super(options);
-                initIpc(this);
-            } else super(options);
-        }
-    }
-    Object.assign(BrowserWindow, electron.BrowserWindow);
-    // esbuild may rename our BrowserWindow, which leads to it being excluded
-    // from getFocusedWindow(), so this is necessary
-    // https://github.com/discord/electron/blob/13-x-y/lib/browser/api/browser-window.ts#L60-L62
-    Object.defineProperty(BrowserWindow, "name", { value: "BrowserWindow", configurable: true });
-
-    // Replace electrons exports with our custom BrowserWindow
-    const electronPath = require.resolve("electron");
-    delete require.cache[electronPath]!.exports;
-    require.cache[electronPath]!.exports = {
-        ...electron,
-        BrowserWindow
-    };
-
-    // Patch appSettings to force enable devtools
-    onceDefined(global, "appSettings", s =>
-        s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true)
-    );
-
-    process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
-
+if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
     app.whenReady().then(() => {
         // Source Maps! Maybe there's a better way but since the renderer is executed
         // from a string I don't think any other form of sourcemaps would work
@@ -135,7 +42,7 @@ if (!process.argv.includes("--vanilla")) {
         });
 
         try {
-            if (settings?.enableReactDevtools)
+            if (getSettings().enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
@@ -194,9 +101,8 @@ if (!process.argv.includes("--vanilla")) {
         // impossible to load css from github raw despite our fix above
         session.defaultSession.webRequest.onHeadersReceived = () => { };
     });
-} else {
-    console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }
 
-console.log("[Vencord] Loading original Discord app.asar");
-require(require.main!.filename);
+if (IS_DISCORD_DESKTOP) {
+    require("./patcher");
+}
