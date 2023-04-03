@@ -47,53 +47,48 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
     const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
 
-
-    const onKeyDown = React.useCallback((e: KeyboardEvent) => {
-        if (e.key === "Shift") {
-            isShiftDown.current = true;
-        }
-    }, []);
-
-    const onKeyUp = React.useCallback((e: KeyboardEvent) => {
-        if (e.key === "Shift") {
-            isShiftDown.current = false;
-        }
-    }, []);
-
-    const syncVideos = React.useCallback(() => {
-        currentVideoElementRef.current!.currentTime = originalVideoElementRef.current!.currentTime;
-    }, [currentVideoElementRef, originalVideoElementRef]);
-
-
-    const onWheel = React.useCallback(async (e: WheelEvent) => {
-        if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
-            const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            zoom.current = val <= 1 ? 1 : val;
-            updateMousePosition(e);
-        }
-        if (instance.state.mouseOver && instance.state.mouseDown && isShiftDown.current) {
-            const val = size.current + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
-            size.current = val <= 50 ? 50 : val;
-            updateMousePosition(e);
-        }
-    }, [isShiftDown]);
-
-    const updateMousePosition = React.useCallback((e: MouseEvent) => {
-        if (instance.state.mouseOver && instance.state.mouseDown) {
-            const offset = size.current / 2;
-            const pos = { x: e.pageX, y: e.pageY };
-            const x = -((pos.x - element.current!.getBoundingClientRect().left) * zoom.current - offset);
-            const y = -((pos.y - element.current!.getBoundingClientRect().top) * zoom.current - offset);
-            setLensPosition({ x: e.x - offset, y: e.y - offset });
-            setImagePosition({ x, y });
-            setOpacity(1);
-        } else {
-            setOpacity(0);
-        }
-    }, [zoom, size]);
-
     // since we accessing document im gonna use useLayoutEffect
     React.useLayoutEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                isShiftDown.current = true;
+            }
+        };
+        const onKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                isShiftDown.current = false;
+            }
+        };
+        const syncVideos = () => {
+            currentVideoElementRef.current!.currentTime = originalVideoElementRef.current!.currentTime;
+        };
+
+        const updateMousePosition = (e: MouseEvent) => {
+            if (instance.state.mouseOver && instance.state.mouseDown) {
+                const offset = size.current / 2;
+                const pos = { x: e.pageX, y: e.pageY };
+                const x = -((pos.x - element.current!.getBoundingClientRect().left) * zoom.current - offset);
+                const y = -((pos.y - element.current!.getBoundingClientRect().top) * zoom.current - offset);
+                setLensPosition({ x: e.x - offset, y: e.y - offset });
+                setImagePosition({ x, y });
+                setOpacity(1);
+            } else {
+                setOpacity(0);
+            }
+        };
+
+        const onWheel = async (e: WheelEvent) => {
+            if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
+                const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
+                zoom.current = val <= 1 ? 1 : val;
+                updateMousePosition(e);
+            }
+            if (instance.state.mouseOver && instance.state.mouseDown && isShiftDown.current) {
+                const val = size.current + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
+                size.current = val <= 50 ? 50 : val;
+                updateMousePosition(e);
+            }
+        };
 
         waitFor(() => instance.state.readyState === "READY", () => {
             const elem = document.getElementById(ELEMENT_ID) as HTMLDivElement;
