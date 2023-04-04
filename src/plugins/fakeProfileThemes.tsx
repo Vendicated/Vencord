@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button } from "@webpack/common";
+import { Button, Forms } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
@@ -100,6 +100,21 @@ export default definePlugin({
             }
         }
     ],
+    settingsAboutComponent: () => (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
+            <Forms.FormText>
+                After enabling this plugin, you will see custom colors in the profiles of other people using compatible plugins. <br />
+                To set your own colors:
+                <ul>
+                    <li>• go to your profile settings</li>
+                    <li>• choose your own colors in the Nitro preview</li>
+                    <li>• click the "Copy 3y3" button</li>
+                    <li>• paste the invisible text anywhere in your bio</li>
+                </ul><br />
+                <b>Please note:</b> if you are using a theme which hides nitro upsells, you should disable it temporarily to set colors.
+            </Forms.FormText>
+        </Forms.FormSection>),
     settings,
     colorDecodeHook(user: UserProfile) {
         if (user) {
