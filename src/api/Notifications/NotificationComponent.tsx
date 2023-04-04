@@ -93,8 +93,8 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                             }}
                         >
                             <svg
-                                width="24"
-                                height="24"
+                                width="20"
+                                height="20"
                                 viewBox="0 0 24 24"
                                 role="img"
                                 aria-labelledby="vc-notification-dismiss-title"

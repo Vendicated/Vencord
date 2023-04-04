@@ -15,7 +15,6 @@
     display: flex;
     gap: 1em;
     align-items: center;
-    justify-content: space-between;
     flex-grow: 1;
     flex-flow: row wrap;
     margin-bottom: 1em;

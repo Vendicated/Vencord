@@ -15,8 +15,8 @@
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
-    width: 25vw;
-    min-height: 10vh;
+    width: 25rem;
+    min-height: 6rem;
 }
 
 .vc-notification {
@@ -40,7 +40,6 @@
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.25rem;
-    text-transform: uppercase;
 }
 
 .vc-notification-close-btn {
@@ -69,7 +68,7 @@
 }
 
 .vc-notification-p {
-    margin: 0.5rem 0 0;
+    margin: 4px 0 0 !important;
     line-height: 140%;
 }
 
@@ -86,7 +85,7 @@
 .vc-notification-log-container {
     display: flex;
     flex-direction: column;
-    padding: 1em;
+    padding: 1em 0;
     overflow: hidden;
 }
 
@@ -108,12 +107,14 @@
 .vc-notification-log-body {
     display: flex;
     flex-direction: column;
+    line-height: 140%;
 }
 
 .vc-notification-log-timestamp {
     margin-left: auto;
     font-size: 0.8em;
     font-weight: lighter;
+    color: var(--text-muted);
 }
 
 .vc-notification-log-danger-btn {

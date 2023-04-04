@@ -94,7 +94,6 @@ function VencordSettings() {
                     {IS_WEB ? (
                         <Button
                             onClick={() => require("../Monaco").launchMonacoEditor()}
-                            size={Button.Sizes.SMALL}
                             disabled={settingsDir === "Loading..."}>
                             Open QuickCSS File
                         </Button>
@@ -126,6 +125,12 @@ function VencordSettings() {
                             </Button>
                         </React.Fragment>
                     )}
+                    <Button
+                        onClick={openNotificationLogModal}
+                        disabled={notifSettings.logLimit === 0}
+                    >
+                        Open Notification Log
+                    </Button>
                 </Card>
             </Forms.FormSection>
 
@@ -217,13 +222,6 @@ function VencordSettings() {
                 onValueRender={v => v === 200 ? "∞" : v}
                 onMarkerRender={v => v === 200 ? "∞" : v}
             />
-
-            <Button
-                onClick={openNotificationLogModal}
-                disabled={notifSettings.logLimit === 0}
-            >
-                Open Notification Log
-            </Button>
         </React.Fragment>
     );
 }
