@@ -103,8 +103,10 @@ waitFor(["dispatch", "subscribe"], m => {
 
 
 // This is the same module but this is easier
-waitFor(filters.byCode("currentToast?"), m => Toasts.show = m);
-waitFor(filters.byCode("currentToast:null"), m => Toasts.pop = m);
+waitFor("showToast", m => {
+    Toasts.show = m.showToast;
+    Toasts.pop = m.popToast;
+});
 
 waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
