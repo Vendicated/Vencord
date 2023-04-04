@@ -51,7 +51,9 @@ export async function downloadSettingsBackup() {
     const backup = await exportSettings();
     const data = new TextEncoder().encode(backup);
 
-    if (IS_WEB) {
+    if (IS_DISCORD_DESKTOP) {
+        DiscordNative.fileManager.saveWithDialog(data, filename);
+    } else {
         const file = new File([data], filename, { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(file);
@@ -63,8 +65,6 @@ export async function downloadSettingsBackup() {
             URL.revokeObjectURL(a.href);
             document.body.removeChild(a);
         });
-    } else {
-        DiscordNative.fileManager.saveWithDialog(data, filename);
     }
 }
 
@@ -82,7 +82,24 @@ const toastFailure = (err: any) =>
     toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
 
 export async function uploadSettingsBackup(showToast = true): Promise<void> {
-    if (IS_WEB) {
+    if (IS_DISCORD_DESKTOP) {
+        const [file] = await DiscordNative.fileManager.openFiles({
+            filters: [
+                { name: "Vencord Settings Backup", extensions: ["json"] },
+                { name: "all", extensions: ["*"] }
+            ]
+        });
+
+        if (file) {
+            try {
+                await importSettings(new TextDecoder().decode(file.data));
+                if (showToast) toastSuccess();
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+                if (showToast) toastFailure(err);
+            }
+        }
+    } else {
         const input = document.createElement("input");
         input.type = "file";
         input.style.display = "none";
@@ -107,23 +124,6 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
         document.body.appendChild(input);
         input.click();
         setImmediate(() => document.body.removeChild(input));
-    } else {
-        const [file] = await DiscordNative.fileManager.openFiles({
-            filters: [
-                { name: "Vencord Settings Backup", extensions: ["json"] },
-                { name: "all", extensions: ["*"] }
-            ]
-        });
-
-        if (file) {
-            try {
-                await importSettings(new TextDecoder().decode(file.data));
-                if (showToast) toastSuccess();
-            } catch (err) {
-                new Logger("SettingsSync").error(err);
-                if (showToast) toastFailure(err);
-            }
-        }
     }
 }
 

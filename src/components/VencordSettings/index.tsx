@@ -21,8 +21,7 @@ import "./settingsStyles.css";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { findByCodeLazy } from "@webpack";
-import { Forms, SettingsRouter, Text } from "@webpack/common";
+import { Forms, SettingsRouter, TabBar, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
 import CloudTab from "./CloudTab";
@@ -32,8 +31,6 @@ import Updater from "./Updater";
 import VencordSettings from "./VencordTab";
 
 const cl = classNameFactory("vc-settings-");
-
-const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
 interface SettingsProps {
     tab: string;
