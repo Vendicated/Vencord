@@ -186,7 +186,9 @@ export type TextInput = ComponentType<PropsWithChildren<{
     Sizes: Record<"DEFAULT" | "MINI", string>;
 };
 
-export type TextArea = ComponentType<PropsWithRef<HTMLProps<HTMLTextAreaElement>>>;
+export type TextArea = ComponentType<PropsWithRef<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
+    onChange(v: string): void;
+}>>;
 
 interface SelectOption {
     disabled?: boolean;
