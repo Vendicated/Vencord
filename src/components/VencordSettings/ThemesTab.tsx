@@ -117,7 +117,7 @@ export default ErrorBoundary.wrap(function () {
             <Forms.FormTitle tag="h5">Themes</Forms.FormTitle>
             <TextArea
                 value={themeText}
-                onChange={e => setThemeText(e.currentTarget.value)}
+                onChange={setThemeText}
                 className={`${TextAreaProps.textarea} vc-settings-theme-links`}
                 placeholder="Theme Links"
                 spellCheck={false}
