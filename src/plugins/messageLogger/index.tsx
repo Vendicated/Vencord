@@ -76,7 +76,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
-    dependencies: ["ContextMenuAPI", "MenuItemDeobfuscatorAPI"],
+    dependencies: ["ContextMenuAPI"],
 
     start() {
         addDeleteStyle();

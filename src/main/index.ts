@@ -34,6 +34,7 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
                 case "renderer.js.map":
                 case "preload.js.map":
                 case "patcher.js.map": // doubt
+                case "main.js.map":
                     cb(join(__dirname, url));
                     break;
                 default:

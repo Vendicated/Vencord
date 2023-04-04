@@ -39,7 +39,6 @@ export default definePlugin({
     name: "SpotifyControls",
     description: "Spotify Controls",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
-    dependencies: ["MenuItemDeobfuscatorAPI"],
     options: {
         hoverControls: {
             description: "Show controls on hover",

@@ -109,6 +109,8 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
     if (!isWaitFor) {
         const err = new Error("Didn't find module matching this filter");
         if (IS_DEV) {
+            logger.error(err);
+            logger.error(filter);
             if (!devToolsOpen)
                 // Strict behaviour in DevBuilds to fail early and make sure the issue is found
                 throw err;

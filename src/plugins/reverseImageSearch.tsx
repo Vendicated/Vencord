@@ -76,7 +76,7 @@ export default definePlugin({
     name: "ReverseImageSearch",
     description: "Adds ImageSearch to image context menus",
     authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
+    dependencies: ["ContextMenuAPI"],
     patches: [
         {
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
