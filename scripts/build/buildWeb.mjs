@@ -45,7 +45,9 @@ const commonOptions = {
     define: {
         IS_WEB: "true",
         IS_STANDALONE: "true",
-        IS_DEV: JSON.stringify(watch)
+        IS_DEV: JSON.stringify(watch),
+        IS_DISCORD_DESKTOP: "false",
+        IS_VENCORD_DESKTOP: "false"
     }
 };
 

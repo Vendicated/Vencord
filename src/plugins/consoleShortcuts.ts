@@ -72,6 +72,7 @@ export default definePlugin({
             findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
             findAllByCode: (code: string) => findAll(filters.byCode(code)),
+            findStore: newFindWrapper(filters.byStoreName),
             PluginsApi: Vencord.Plugins,
             plugins: Vencord.Plugins.plugins,
             React,
