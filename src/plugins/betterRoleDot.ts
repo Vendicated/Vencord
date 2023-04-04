@@ -45,6 +45,13 @@ export default definePlugin({
                 replace: "true",
             },
         },
+        {
+            find: ".colorPickerFooter",
+            replacement: {
+                match: /function (\i).{0,200}\.colorPickerFooter/,
+                replace: "$self.ColorPicker=$1;$&"
+            }
+        }
     ],
 
     options: {
