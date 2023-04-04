@@ -44,13 +44,6 @@ export default definePlugin({
                 match: /"(?:username|dot)"===\i(?!\.\i)/g,
                 replace: "true",
             },
-        },
-        {
-            find: ".colorPickerFooter",
-            replacement: {
-                match: /function (\i).{0,200}\.colorPickerFooter/,
-                replace: "$self.ColorPicker=$1;$&"
-            }
         }
     ],
 
