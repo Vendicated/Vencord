@@ -1,4 +1,4 @@
-.vc-bf-folder-sidebar [class*="wrapper-"]>[class*="listItem-"]:first-of-type,
+.vc-bf-folder-sidebar [class*="wrapper-"] > [class*="listItem-"]:first-of-type,
 .vc-bf-folder-sidebar [class*="unreadMentionsIndicator"] {
     display: none;
 }
