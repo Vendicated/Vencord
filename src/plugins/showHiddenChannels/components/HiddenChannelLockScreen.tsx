@@ -84,6 +84,7 @@ export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
 }
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
+const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
@@ -159,7 +160,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     }
 
     return (
-        <div className={ChatScrollClasses.auto + " " + "shc-lock-screen-outer-container"}>
+        <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
             <div className="shc-lock-screen-container">
                 <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
