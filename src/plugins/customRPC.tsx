@@ -18,7 +18,7 @@
 
 import { definePluginSettings } from "@api/settings";
 import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
+import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -32,6 +32,7 @@ import {
     SelectedGuildStore,
     UserStore
 } from "@webpack/common";
+import gitHash from "~git-hash";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -85,13 +86,15 @@ enum ActivityType {
 const strOpt = (description: string) => ({
     type: OptionType.STRING,
     description,
-    onChange: setRpc
+    onChange: setRpc,
+    restartNeeded: true
 }) as const;
 
 const numOpt = (description: string) => ({
     type: OptionType.NUMBER,
     description,
-    onChange: setRpc
+    onChange: setRpc,
+    restartNeeded: true
 }) as const;
 
 const choice = (label: string, value: any, _default?: boolean) => ({
@@ -104,7 +107,14 @@ const choiceOpt = <T,>(description: string, options: T) => ({
     type: OptionType.SELECT,
     description,
     onChange: setRpc,
-    options
+    options,
+    restartNeeded: true
+}) as const;
+
+const boolOpt = (description: string, defaultValue: boolean = false) => ({
+    type: OptionType.BOOLEAN,
+    description,
+    default: defaultValue,
 }) as const;
 
 
@@ -128,7 +138,8 @@ const settings = definePluginSettings({
     buttonOneText: strOpt("The text for the first button"),
     buttonOneURL: strOpt("The URL for the first button"),
     buttonTwoText: strOpt("The text for the second button"),
-    buttonTwoURL: strOpt("The URL for the second button")
+    buttonTwoURL: strOpt("The URL for the second button"),
+    devMode: boolOpt("Enables developer mode for the rich presence. Probably shouldn't use this.")
 });
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -220,23 +231,70 @@ async function setRpc(disable?: boolean) {
     });
 }
 
-export default definePlugin({
+const plugin = definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
+    debug: { // for console debugging
+        createActivity,
+        setRpc,
+        getApplicationAsset
+    },
 
+    commands: [{
+        name: "customrpc-debug",
+        description: "Sends debug information to the channel (settings, output of createActivity, etc).",
+        predicate: ctx => ctx.channel.id === SUPPORT_CHANNEL_ID,
+        async execute(args, ctx) {
+            let activity: any = { ...await createActivity() };
+            if (!activity) activity = { application_id: "0" };
+            // remove the application_id, as it's not needed.
+            delete activity.application_id;
+            const minifiedActivity = JSON.stringify(activity);
+
+            // we want to censor the appID, so we don't leak it.
+            // while technically the appID is not a secret, it's still something
+            // users might want to keep private.
+            const settings = { ...plugin.settings.store };
+            // check if appId matches the id regex
+            if (settings.appID && settings.appID.match(/^[0-9]{15,20}$/)) {
+                settings.appID = "[CENSORED]";
+            } else {
+                // doesn't match the regex?
+                settings.appID += " [DOES NOT MATCH REGEX]";
+            }
+            const minifiedSettings = JSON.stringify(settings);
+
+            const output = `__**Settings**__: \`\`\`json\n${minifiedSettings}\n\`\`\`\n__**Activity**__: \`\`\`json\n${minifiedActivity}\n\`\`\`\nGit Hash: \`${gitHash}\``;
+            return {
+                content: output
+            };
+        },
+    },
+    {
+        name: "customrpc-import",
+        description: "Imports a custom RPC from a JSON string for debugging purposes.",
+        predicate: ctx => plugin.settings.store.devMode,
+        async execute(args, ctx) {
+            const json = args.join(" ");
+            const parsedSettings = JSON.parse(json);
+            // iterate over the settings and set them (except for devMode and appID)
+            for (const [k, v] of Object.entries(parsedSettings)) {
+                if (k === "devMode" || k === "appID") continue;
+                plugin.settings.store[k] = v;
+            }
+        }
+    }],
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         return (
             <>
                 <Forms.FormTitle tag="h2">NOTE:</Forms.FormTitle>
                 <Forms.FormText>
-                    You will need to <Link href="https://discord.com/developers/applications">create an
-                        application</Link> and
-                    get its ID to use this plugin.
+                    If you're unsure of how to use this plugin, or have any issues, <Link href="https://captain8771.github.io/docs/customrpc">The Docs</Link> might help you.
                 </Forms.FormText>
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
@@ -249,3 +307,5 @@ export default definePlugin({
         );
     }
 });
+
+export default plugin;
