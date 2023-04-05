@@ -164,7 +164,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     }
 
     return (
-        <div className={ChatScrollClasses.auto + " " + "shc-lock-screen-outer-container"}>
+        <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + "shc-lock-screen-outer-container"}>
             <div className="shc-lock-screen-container">
                 <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
