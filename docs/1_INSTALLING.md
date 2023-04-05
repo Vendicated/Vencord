@@ -26,7 +26,7 @@ Install `pnpm`:
 > :exclamation: This next command may need to be run as admin/root depending on your system, and you may need to close and reopen your terminal for pnpm to be in your PATH.
 
 ```shell
-npm i -g pnpm
+npm i -g pnpm@7
 ```
 
 > :exclamation: **IMPORTANT** Make sure you aren't using an admin/root terminal from here onwards. It **will** mess up your Discord/Vencord instance and you **will** most likely have to reinstall.
