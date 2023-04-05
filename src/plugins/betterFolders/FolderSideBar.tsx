@@ -49,7 +49,7 @@ export default ErrorBoundary.wrap(() => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const fullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
-    const guilds = document.querySelector(`.${classes.guilds}`);
+    const guilds = document.getElementsByClassName(classes.guilds)[0];
 
     const visible = !!expandedFolders.size;
     const className = cl("folder-sidebar", { fullscreen });

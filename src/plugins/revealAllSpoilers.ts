@@ -47,10 +47,10 @@ export default definePlugin({
         const { messagesWrapper } = MessagesClasses;
 
         const parent = shiftKey
-            ? document.querySelector(`div.${messagesWrapper}`)
+            ? document.getElementsByClassName(messagesWrapper)[0]
             : (target as HTMLSpanElement).parentElement;
 
-        for (const spoiler of parent!.querySelectorAll(`span.${spoilerText}.${hidden}`)) {
+        for (const spoiler of parent!.getElementsByClassName(`${spoilerText} ${hidden}`)) {
             (spoiler as HTMLSpanElement).click();
         }
     }
