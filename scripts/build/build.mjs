@@ -80,7 +80,7 @@ await Promise.all([
         globalName: "Vencord",
         sourcemap,
         plugins: [
-            globPlugins,
+            globPlugins("discordDesktop"),
             ...commonOpts.plugins
         ],
         define: {
@@ -114,7 +114,7 @@ await Promise.all([
         globalName: "Vencord",
         sourcemap,
         plugins: [
-            globPlugins,
+            globPlugins("vencordDesktop"),
             ...commonOpts.plugins
         ],
         define: {
