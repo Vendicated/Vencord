@@ -24,7 +24,7 @@ export async function calculateHashes() {
     const hashes = {} as Record<string, string>;
 
     await Promise.all(
-        ["patcher.js", "preload.js", "renderer.js", "renderer.css"].map(file => new Promise<void>(r => {
+        [IS_DISCORD_DESKTOP ? "patcher.js" : "main.js", "preload.js", "renderer.js", "renderer.css"].map(file => new Promise<void>(r => {
             const fis = createReadStream(join(__dirname, file));
             const hash = createHash("sha1", { encoding: "hex" });
             fis.once("end", () => {
