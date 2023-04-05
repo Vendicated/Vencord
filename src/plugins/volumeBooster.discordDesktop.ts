@@ -56,7 +56,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=updateAsync\("audioContextSettings".{0,350}return \i\.volume=)\i(?=})/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:.+?volume:)\i(?=})/,
                     replace: "$&>200?200:$&"
                 },
                 {
