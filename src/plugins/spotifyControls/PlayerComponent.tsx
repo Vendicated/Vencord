@@ -22,8 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
-import { classes, copyWithToast, LazyComponent } from "@utils/misc";
-import { filters, find } from "@webpack";
+import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SpotifyStore, Track } from "./SpotifyStore";
@@ -79,7 +78,7 @@ function CopyContextMenu({ name, path }: { name: string; path: string; }) {
     const openId = `spotify-open-${name}`;
 
     return (
-        <Menu.ContextMenu
+        <Menu.Menu
             navId={`spotify-${name}-menu`}
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label={`Spotify ${name} Menu`}
@@ -96,7 +95,7 @@ function CopyContextMenu({ name, path }: { name: string; path: string; }) {
                 label={`Open ${name} in Spotify`}
                 action={() => SpotifyStore.openExternal(path)}
             />
-        </Menu.ContextMenu>
+        </Menu.Menu>
     );
 }
 
@@ -154,11 +153,6 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-const Slider = LazyComponent(() => {
-    const filter = filters.byCode("sliderContainer");
-    return find(m => m.render && filter(m.render));
-});
-
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
@@ -190,7 +184,7 @@ function SeekBar() {
             >
                 {msToHuman(position)}
             </Forms.FormText>
-            <Slider
+            <Menu.MenuSliderControl
                 minValue={0}
                 maxValue={duration}
                 value={position}
@@ -217,7 +211,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
 
     return (
-        <Menu.ContextMenu
+        <Menu.Menu
             navId="spotify-album-menu"
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Spotify Album Menu"
@@ -240,7 +234,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 key="spotify-volume"
                 label="Volume"
                 control={(props, ref) => (
-                    <Slider
+                    <Menu.MenuSliderControl
                         {...props}
                         ref={ref}
                         value={volume}
@@ -250,7 +244,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                     />
                 )}
             />
-        </Menu.ContextMenu>
+        </Menu.Menu>
     );
 }
 
