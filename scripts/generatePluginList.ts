@@ -35,7 +35,7 @@ interface PluginData {
     hasCommands: boolean;
     required: boolean;
     enabledByDefault: boolean;
-    target: "desktop" | "web" | "dev";
+    target: "discordDesktop" | "vencordDesktop" | "web" | "dev";
 }
 
 const devs = {} as Record<string, Dev>;
@@ -150,7 +150,7 @@ async function parseFile(fileName: string) {
         const fileBits = fileName.split(".");
         if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1)!)) {
             const mod = fileBits.at(-2)!;
-            if (!["web", "desktop", "dev"].includes(mod)) throw fail(`invalid target ${fileBits.at(-2)}`);
+            if (!["web", "discordDesktop", "vencordDesktop", "dev"].includes(mod)) throw fail(`invalid target ${fileBits.at(-2)}`);
             data.target = mod as any;
         }
 
