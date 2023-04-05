@@ -32,6 +32,7 @@ import {
     SelectedGuildStore,
     UserStore
 } from "@webpack/common";
+
 import gitHash from "~git-hash";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
