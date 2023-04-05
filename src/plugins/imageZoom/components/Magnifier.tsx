@@ -22,7 +22,11 @@ import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
 import { waitFor } from "../utils/waitFor";
 
-type Vec2 = { x: number, y: number; };
+interface Vec2 {
+    x: number,
+    y: number;
+}
+
 export interface MagnifierProps {
     zoom: number;
     size: number,

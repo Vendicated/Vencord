@@ -23,21 +23,12 @@ import { definePluginSettings } from "@api/settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
-import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { filters, find } from "@webpack";
 import { Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
-
-// thanks SpotifyControls
-const Slider = LazyComponent(() => {
-    const filter = filters.byCode("sliderContainer");
-    return find(m => m.render && filter(m.render));
-});
-
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -93,7 +84,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
                     id="zoom"
                     label="Zoom"
                     control={(props, ref) => (
-                        <Slider
+                        <Menu.MenuSliderControl
                             ref={ref}
                             {...props}
                             minValue={1}
@@ -107,7 +98,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
                     id="size"
                     label="Lens Size"
                     control={(props, ref) => (
-                        <Slider
+                        <Menu.MenuSliderControl
                             ref={ref}
                             {...props}
                             minValue={50}
@@ -121,7 +112,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
                     id="zoom-speed"
                     label="Zoom Speed"
                     control={(props, ref) => (
-                        <Slider
+                        <Menu.MenuSliderControl
                             ref={ref}
                             {...props}
                             minValue={0.1}
@@ -143,7 +134,7 @@ export default definePlugin({
     authors: [Devs.Aria],
     patches: [
         {
-            find: "\"renderLinkComponent\",\"maxWidth\"",
+            find: '"renderLinkComponent","maxWidth"',
             replacement: {
                 match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
                 replace: `$1id: '${ELEMENT_ID}',$2`
@@ -154,18 +145,17 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth(.|\n){1,600})onMouseEnter:/,
-                    replace:
-                        "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
+                    replace: "$1...$self.makeProps(this),onMouseEnter:"
                 },
 
                 {
-                    match: /(componentDidMount=function\(\){)/,
+                    match: /componentDidMount=function\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
-                    match: /(componentWillUnmount=function\(\){)/,
+                    match: /componentWillUnmount=function\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
