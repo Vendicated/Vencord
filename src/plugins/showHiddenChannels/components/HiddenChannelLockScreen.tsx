@@ -77,12 +77,7 @@ enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-let EmojiComponent: ComponentType<any>;
 let ChannelBeginHeader: ComponentType<any>;
-
-export function setEmojiComponent(component: ComponentType<any>) {
-    EmojiComponent = component;
-}
 
 export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
     ChannelBeginHeader = component;
@@ -245,11 +240,10 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {defaultReactionEmoji != null &&
                     <div className="shc-lock-screen-default-emoji-container">
                         <Text variant="text-md/normal">Default reaction emoji:</Text>
-                        <EmojiComponent node={{
-                            type: defaultReactionEmoji.emojiName ? "emoji" : "customEmoji",
+                        {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
                             name: defaultReactionEmoji.emojiName ?? "",
                             emojiId: defaultReactionEmoji.emojiId
-                        }} />
+                        })}
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&

@@ -43,6 +43,7 @@ const settings = definePluginSettings({
 
 let crashCount: number = 0;
 let lastCrashTimestamp: number = 0;
+let shouldAttemptNextHandle = false;
 
 export default definePlugin({
     name: "CrashHandler",
@@ -72,6 +73,10 @@ export default definePlugin({
     ],
 
     handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
+        if (Date.now() - lastCrashTimestamp <= 1_000 && !shouldAttemptNextHandle) return true;
+
+        shouldAttemptNextHandle = false;
+
         if (++crashCount > 5) {
             try {
                 showNotification({
@@ -151,6 +156,7 @@ export default definePlugin({
         }
 
         try {
+            shouldAttemptNextHandle = true;
             _this.forceUpdate();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to update crash handler component.", err);
