@@ -38,7 +38,7 @@ const commonOptions = {
     format: "iife",
     external: ["plugins", "git-hash", "/assets/*"],
     plugins: [
-        globPlugins,
+        globPlugins("web"),
         ...commonOpts.plugins,
     ],
     target: ["esnext"],

@@ -35,7 +35,7 @@ export default definePlugin({
             find: ".Menu,{",
             all: true,
             replacement: {
-                match: /(?<=\.jsxs?\)\(\i\.Menu,)\{/,
+                match: /(?<=\.jsxs?\)\(\i\.Menu,)\{/g,
                 replace: "{contextMenuApiArguments:typeof arguments!=='undefined'?arguments:[],"
             }
         }
