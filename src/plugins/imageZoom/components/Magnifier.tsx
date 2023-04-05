@@ -99,6 +99,10 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
 
         const onMouseUp = () => {
             setOpacity(0);
+            if (settings.store.saveZoomValues) {
+                settings.store.zoom = zoom.current;
+                settings.store.size = size.current;
+            }
         };
 
         const onWheel = async (e: WheelEvent) => {
