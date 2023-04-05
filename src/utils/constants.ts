@@ -245,5 +245,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Dziurwa: {
         name: "Dziurwa",
         id: 787017887877169173n
+    },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
     }
 });
