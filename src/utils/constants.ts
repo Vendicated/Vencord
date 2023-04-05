@@ -194,6 +194,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Captain",
         id: 347366054806159360n
     },
+    nick: {
+        name: "nick",
+        id: 347884694408265729n
+    },
     whqwert: {
         name: "whqwert",
         id: 586239091520176128n
@@ -221,6 +225,18 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     TheKodeToad: {
         name: "TheKodeToad",
         id: 706152404072267788n
+    },
+    juby: {
+        name: "Juby210",
+        id: 324622488644616195n
+    },
+    Alyxia: {
+        name: "Alyxia Sother",
+        id: 952185386350829688n
+    },
+    Remty: {
+        name: "Remty",
+        id: 335055032204656642n
     },
     skyevg: {
         name: "skyevg",

@@ -5,6 +5,14 @@
     --vc-spotify-green: #1db954; /* so cusotm themes can easily change it */
 }
 
+.theme-light #vc-spotify-player {
+    background: var(--bg-overlay-3, var(--background-secondary-alt));
+}
+
+.theme-dark #vc-spotify-player {
+    background: var(--bg-overlay-1, var(--background-secondary-alt));
+}
+
 .vc-spotify-button {
     background: none;
     color: var(--interactive-normal);
@@ -182,4 +190,9 @@
 
 .vc-spotify-time-right {
     right: 0;
+}
+
+.vc-spotify-fallback {
+    padding: 0.5em;
+    color: var(--text-normal);
 }

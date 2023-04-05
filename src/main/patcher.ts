@@ -20,9 +20,8 @@ import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
-import { initIpc } from "./ipcMain";
-import { installExt } from "./ipcMain/extensions";
-import { readSettings } from "./ipcMain/index";
+import { getSettings, initIpc } from "./ipcMain";
+import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Vencord] Starting up...");
 
@@ -41,11 +40,8 @@ require.main!.filename = join(asarPath, discordPkg.main);
 // @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
-if (!process.argv.includes("--vanilla")) {
-    let settings: typeof import("@api/settings").Settings = {} as any;
-    try {
-        settings = JSON.parse(readSettings());
-    } catch { }
+if (!IS_VANILLA) {
+    const settings = getSettings();
 
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
@@ -83,7 +79,8 @@ if (!process.argv.includes("--vanilla")) {
                     delete options.frame;
                 }
 
-                if (settings.transparent) {
+                // This causes electron to freeze / white screen for some people
+                if ((settings as any).transparentUNSAFE_USE_AT_OWN_RISK) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
                 }
@@ -115,79 +112,6 @@ if (!process.argv.includes("--vanilla")) {
     );
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
-
-    electron.app.whenReady().then(() => {
-        // Source Maps! Maybe there's a better way but since the renderer is executed
-        // from a string I don't think any other form of sourcemaps would work
-        electron.protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
-            let url = unsafeUrl.slice("vencord://".length);
-            if (url.endsWith("/")) url = url.slice(0, -1);
-            switch (url) {
-                case "renderer.js.map":
-                case "preload.js.map":
-                case "patcher.js.map": // doubt
-                    cb(join(__dirname, url));
-                    break;
-                default:
-                    cb({ statusCode: 403 });
-            }
-        });
-
-        try {
-            if (settings?.enableReactDevtools)
-                installExt("fmkadmapgofadopljbjfkapdkoienihi")
-                    .then(() => console.info("[Vencord] Installed React Developer Tools"))
-                    .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
-        } catch { }
-
-
-        // Remove CSP
-        type PolicyResult = Record<string, string[]>;
-
-        const parsePolicy = (policy: string): PolicyResult => {
-            const result: PolicyResult = {};
-            policy.split(";").forEach(directive => {
-                const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/g);
-                if (directiveKey && !Object.prototype.hasOwnProperty.call(result, directiveKey)) {
-                    result[directiveKey] = directiveValue;
-                }
-            });
-            return result;
-        };
-        const stringifyPolicy = (policy: PolicyResult): string =>
-            Object.entries(policy)
-                .filter(([, values]) => values?.length)
-                .map(directive => directive.flat().join(" "))
-                .join("; ");
-
-        function patchCsp(headers: Record<string, string[]>, header: string) {
-            if (header in headers) {
-                const csp = parsePolicy(headers[header][0]);
-
-                for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                    csp[directive] = ["*", "blob:", "data:", "'unsafe-inline'"];
-                }
-                // TODO: Restrict this to only imported packages with fixed version.
-                // Perhaps auto generate with esbuild
-                csp["script-src"] ??= [];
-                csp["script-src"].push("'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com");
-                headers[header] = [stringifyPolicy(csp)];
-            }
-        }
-
-        electron.session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
-            if (responseHeaders) {
-                if (resourceType === "mainFrame")
-                    patchCsp(responseHeaders, "content-security-policy");
-
-                // Fix hosts that don't properly set the css content type, such as
-                // raw.githubusercontent.com
-                if (resourceType === "stylesheet")
-                    responseHeaders["content-type"] = ["text/css"];
-            }
-            cb({ cancel: false, responseHeaders });
-        });
-    });
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }

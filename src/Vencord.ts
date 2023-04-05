@@ -30,7 +30,7 @@ import "./webpack/patchWebpack";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
+import { checkForUpdates, rebuild, update,UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -54,9 +54,14 @@ async function init() {
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
+                        noPersist: true,
                         onClick() {
-                            if (needsFullRestart)
-                                window.DiscordNative.app.relaunch();
+                            if (needsFullRestart) {
+                                if (IS_DISCORD_DESKTOP)
+                                    window.DiscordNative.app.relaunch();
+                                else
+                                    window.VencordDesktop.app.relaunch();
+                            }
                             else
                                 location.reload();
                         }
@@ -69,6 +74,7 @@ async function init() {
                     title: "A Vencord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
+                    noPersist: true,
                     onClick() {
                         SettingsRouter.open("VencordUpdater");
                     }
@@ -94,7 +100,7 @@ async function init() {
 
 init();
 
-if (!IS_WEB && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
+if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
     document.addEventListener("DOMContentLoaded", () => {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",

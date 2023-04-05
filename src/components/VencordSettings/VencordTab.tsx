@@ -17,6 +17,7 @@
 */
 
 
+import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
@@ -25,6 +26,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
+import { relaunch, showItemInFolder } from "@utils/native";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
 const cl = classNameFactory("vc-settings-");
@@ -63,7 +65,7 @@ function VencordSettings() {
                 title: "Enable React Developer Tools",
                 note: "Requires a full restart"
             },
-            !IS_WEB && (!isWindows ? {
+            !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",
                 note: "Requires a full restart"
@@ -72,7 +74,7 @@ function VencordSettings() {
                 title: "Use Windows' native title bar instead of Discord's custom one",
                 note: "Requires a full restart"
             }),
-            !IS_WEB && {
+            !IS_WEB && false /* This causes electron to freeze / white screen for some people */ && {
                 key: "transparent",
                 title: "Enable window transparency",
                 note: "Requires a full restart"
@@ -99,7 +101,7 @@ function VencordSettings() {
                     ) : (
                         <React.Fragment>
                             <Button
-                                onClick={() => window.DiscordNative.app.relaunch()}
+                                onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
@@ -110,7 +112,7 @@ function VencordSettings() {
                                 Open QuickCSS File
                             </Button>
                             <Button
-                                onClick={() => window.DiscordNative.fileManager.showItemInFolder(settingsDir)}
+                                onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
@@ -165,7 +167,7 @@ function VencordSettings() {
                     { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
                     { label: "Always use Desktop notifications", value: "always" },
                     { label: "Always use Vencord notifications", value: "never" },
-                ]satisfies Array<{ value: typeof settings["notifications"]["useNative"]; } & Record<string, any>>}
+                ] satisfies Array<{ value: typeof settings["notifications"]["useNative"]; } & Record<string, any>>}
                 closeOnSelect={true}
                 select={v => notifSettings.useNative = v}
                 isSelected={v => v === notifSettings.useNative}
@@ -179,7 +181,7 @@ function VencordSettings() {
                 options={[
                     { label: "Bottom Right", value: "bottom-right", default: true },
                     { label: "Top Right", value: "top-right" },
-                ]satisfies Array<{ value: typeof settings["notifications"]["position"]; } & Record<string, any>>}
+                ] satisfies Array<{ value: typeof settings["notifications"]["position"]; } & Record<string, any>>}
                 select={v => notifSettings.position = v}
                 isSelected={v => v === notifSettings.position}
                 serialize={identity}
@@ -198,6 +200,29 @@ function VencordSettings() {
                 onMarkerRender={v => (v / 1000) + "s"}
                 stickToMarkers={false}
             />
+
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom16}>
+                The amount of notifications to save in the log until old ones are removed.
+                Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
+            </Forms.FormText>
+            <Slider
+                markers={[0, 25, 50, 75, 100, 200]}
+                minValue={0}
+                maxValue={200}
+                stickToMarkers={true}
+                initialValue={notifSettings.logLimit}
+                onValueChange={v => notifSettings.logLimit = v}
+                onValueRender={v => v === 200 ? "∞" : v}
+                onMarkerRender={v => v === 200 ? "∞" : v}
+            />
+
+            <Button
+                onClick={openNotificationLogModal}
+                disabled={notifSettings.logLimit === 0}
+            >
+                Open Notification Log
+            </Button>
         </React.Fragment>
     );
 }

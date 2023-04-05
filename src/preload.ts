@@ -54,7 +54,9 @@ if (location.protocol !== "data:") {
             document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
         });
     }
-    require(process.env.DISCORD_PRELOAD!);
+
+    if (process.env.DISCORD_PRELOAD)
+        require(process.env.DISCORD_PRELOAD);
 } else {
     // Monaco Popout
     contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
