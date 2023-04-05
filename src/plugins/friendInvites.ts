@@ -20,6 +20,7 @@ import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
+import { UserStore, RestAPI } from "@webpack/common";
 
 export default definePlugin({
     name: "FriendInvites",
@@ -32,11 +33,24 @@ export default definePlugin({
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                if (!findByProps("getCurrentUser").getCurrentUser().phone) return sendBotMessage(ctx.channel.id, { content: "You need to have a phone number connected to your account to create a friend invite!" });
+                if (!UserStore.getCurrentUser().phone)
+                    return sendBotMessage(ctx.channel.id, {
+                        content: "You need to have a phone number connected to your account to create a friend invite!"
+                    });
                 const random = findByProps("v4").v4();
                 const friendInvites = findByProps("createFriendInvite");
-                const createInvite = await findByProps("getAPIBaseURL").post({ url: '/friend-finder/find-friends', body: { modified_contacts: { [random]: [1, '', ''] } } }).then(x => friendInvites.createFriendInvite({ "code": x.body.invite_suggestions[0][3], "recipient_phone_number_or_email": random }));
-
+                const createInvite = await RestAPI.post({
+                    url: '/friend-finder/find-friends',
+                    body: {
+                        modified_contacts:
+                        {
+                            [random]: [1, '', '']
+                        }
+                    }
+                }).then(x => friendInvites.createFriendInvite({
+                    code: x.body.invite_suggestions[0][3],
+                    recipient_phone_number_or_email: random
+                }));
                 return void sendBotMessage(ctx.channel.id, {
                     content: `
                         discord.gg/${createInvite.code} ·
