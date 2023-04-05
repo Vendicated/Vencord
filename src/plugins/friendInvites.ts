@@ -24,7 +24,7 @@ import { findByProps } from "@webpack";
 export default definePlugin({
     name: "FriendInvites",
     description: "Create and manage friend invite links via slash commands (/create friend invite, /view friend invites, /revoke friend invites).",
-    authors: [Devs.afn],
+    authors: [Devs.afn, Devs.Dziurwa],
     dependencies: ["CommandsAPI"],
     commands: [
         {
@@ -32,8 +32,10 @@ export default definePlugin({
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
+                if (!findByProps("getCurrentUser").getCurrentUser().phone) return sendBotMessage(ctx.channel.id, { content: "You need to have a phone number connected to your account to create a friend invite!" });
+                const random = findByProps("v4").v4();
                 const friendInvites = findByProps("createFriendInvite");
-                const createInvite = await friendInvites.createFriendInvite();
+                const createInvite = await findByProps("getAPIBaseURL").post({ url: '/friend-finder/find-friends', body: { modified_contacts: { [random]: [1, '', ''] } } }).then(x => friendInvites.createFriendInvite({ "code": x.body.invite_suggestions[0][3], "recipient_phone_number_or_email": random }));
 
                 return void sendBotMessage(ctx.channel.id, {
                     content: `
