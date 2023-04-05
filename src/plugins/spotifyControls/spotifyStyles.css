@@ -140,6 +140,7 @@
 
 #vc-spotify-album-image {
     border-radius: 3px;
+    transition: filter 0.2s;
 }
 
 #vc-spotify-album-image:hover {
