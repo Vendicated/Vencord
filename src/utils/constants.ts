@@ -241,5 +241,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     skyevg: {
         name: "skyevg",
         id: 1090310844283363348n
+    },
+    RyanCaoDev: {
+        name: "Ryan Cao",
+        id: 952235800110694471n
     }
 });
