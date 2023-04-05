@@ -1,5 +1,4 @@
 .shc-lock-screen-outer-container {
-    background: var(--bg-overlay-chat, var(--background-primary));
     overflow: hidden scroll;
     flex: 1 1 auto;
     height: 100%;
