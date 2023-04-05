@@ -1,6 +1,5 @@
 .shc-lock-screen-outer-container {
     background: var(--bg-overlay-chat, var(--background-primary));
-    background-color: var(--background-primary);
     overflow: hidden scroll;
     flex: 1 1 auto;
     height: 100%;
@@ -43,7 +42,6 @@
 .shc-lock-screen-topic-container {
     color: var(--text-normal);
     background: var(--bg-overlay-3, var(--background-secondary));
-    background-color: var(--background-secondary);
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
@@ -51,7 +49,6 @@
 
 .shc-lock-screen-tags-container {
     background: var(--bg-overlay-3, var(--background-secondary));
-    background-color: var(--background-secondary);
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
@@ -88,7 +85,6 @@
 
 .shc-lock-screen-default-emoji-container > [class^="emojiContainer"] {
     background: var(--bg-overlay-3, var(--background-secondary));
-    background-color: var(--background-secondary);
     border-radius: 8px;
     padding: 3px 4px;
     margin-left: 5px;
@@ -99,7 +95,6 @@
     flex-direction: column;
     align-items: center;
     background: var(--bg-overlay-3, var(--background-secondary));
-    background-color: var(--background-secondary);
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
