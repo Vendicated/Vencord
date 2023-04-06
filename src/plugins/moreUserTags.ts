@@ -218,7 +218,7 @@ return type!==null?$2.botTag,type"
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
         if (!tag) return "BOT";
-        if (variant === "BOT" && this.settings.store.dontShowForBots) return "BOT";
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.BOT_TAG_BOT;
 
         switch (variant) {
             case "OP":
