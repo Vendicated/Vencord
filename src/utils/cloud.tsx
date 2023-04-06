@@ -120,5 +120,5 @@ export async function getCloudAuth() {
     const userId = UserStore.getCurrentUser().id;
     const secret = await getAuthorization();
 
-    return window.btoa(`${userId}:${secret}`);
+    return window.btoa(`${secret}:${userId}`);
 }
