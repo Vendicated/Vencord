@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { app } from "electron";
+import { join } from "path";
 
-// eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/menu";
+export const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
+    process.env.DISCORD_USER_DATA_DIR
+        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
+        : join(app.getPath("userData"), "..", "Vencord")
+);
+export const SETTINGS_DIR = join(DATA_DIR, "settings");
+export const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
+export const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
+export const ALLOWED_PROTOCOLS = [
+    "https:",
+    "http:",
+    "steam:",
+    "spotify:"
+];
 
-export let Menu = {} as t.Menu;
-
-waitFor("MenuItem", m => Menu = m);
-
-export const ContextMenu: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
-    open: filters.byCode("stopPropagation"),
-    openLazy: m => m.toString().length < 50,
-    close: filters.byCode("CONTEXT_MENU_CLOSE")
-});
-
+export const IS_VANILLA = /* @__PURE__ */ process.argv.includes("--vanilla");

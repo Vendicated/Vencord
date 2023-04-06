@@ -21,7 +21,7 @@ import type { ComponentType, CSSProperties, PropsWithChildren, UIEvent } from "r
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
 export interface Menu {
-    ContextMenu: RC<{
+    Menu: RC<{
         navId: string;
         onClose(): void;
         className?: string;
@@ -49,19 +49,21 @@ export interface Menu {
         id: string;
         interactive?: boolean;
     }>;
+    // TODO: Type me
+    MenuSliderControl: RC<any>;
 }
 
 export interface ContextMenuApi {
     close(): void;
     open(
         event: UIEvent,
-        render?: Menu["ContextMenu"],
+        render?: Menu["Menu"],
         options?: { enableSpellCheck?: boolean; },
-        renderLazy?: () => Promise<Menu["ContextMenu"]>
+        renderLazy?: () => Promise<Menu["Menu"]>
     ): void;
     openLazy(
         event: UIEvent,
-        renderLazy?: () => Promise<Menu["ContextMenu"]>,
+        renderLazy?: () => Promise<Menu["Menu"]>,
         options?: { enableSpellCheck?: boolean; }
     ): void;
 }

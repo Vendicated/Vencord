@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -65,7 +65,7 @@
         "type-fest": "^3.5.3",
         "typescript": "^4.9.4"
     },
-    "packageManager": "pnpm@7.13.4",
+    "packageManager": "pnpm@8.1.1",
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
@@ -92,6 +92,7 @@
         "sourceDir": "./dist/extension-v2-unpacked"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=18",
+        "pnpm": ">=8"
     }
 }

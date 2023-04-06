@@ -44,7 +44,7 @@ export default definePlugin({
                 match: /"(?:username|dot)"===\i(?!\.\i)/g,
                 replace: "true",
             },
-        },
+        }
     ],
 
     options: {
