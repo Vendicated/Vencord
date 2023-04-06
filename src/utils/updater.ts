@@ -20,6 +20,7 @@ import gitHash from "~git-hash";
 
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
+import { relaunch } from "./native";
 import { IpcRes } from "./types";
 
 export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
@@ -61,7 +62,7 @@ export function getRepo() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
 }
 
-type Hashes = Record<"patcher.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
+type Hashes = Record<"patcher.js" | "main.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
 
 /**
  * @returns true if hard restart is required
@@ -74,8 +75,11 @@ export async function rebuild() {
 
     const newHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
 
-    return oldHashes["patcher.js"] !== newHashes["patcher.js"] ||
-        oldHashes["preload.js"] !== newHashes["preload.js"];
+    if (oldHashes["preload.js"] !== newHashes["preload.js"]) return true;
+    if (IS_DISCORD_DESKTOP && oldHashes["patcher.js"] !== newHashes["patcher.js"]) return true;
+    if (IS_VENCORD_DESKTOP && oldHashes["main.js"] !== newHashes["main.js"]) return true;
+
+    return false;
 }
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
@@ -90,8 +94,10 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate) {
                 await update();
                 const needFullRestart = await rebuild();
-                if (needFullRestart) DiscordNative.app.relaunch();
-                else location.reload();
+                if (needFullRestart)
+                    relaunch();
+                else
+                    location.reload();
             }
         }
     } catch (err) {
