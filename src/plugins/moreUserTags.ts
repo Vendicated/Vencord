@@ -122,12 +122,12 @@ export default definePlugin({
         {
             find: '.BOT=0]="BOT"',
             replacement: [
-                // add tags to the exported tags list (the Tags variable here)
+                // e[e.BOT = 0] = "BOT" etc.; adds the tags there
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
                     replace: "$&$1=$self.addTagVariants($1);"
                 },
-                // make the tag show the right text
+                // display the text for the custom tags added by the plugin
                 {
                     match: /(switch\((\i)\){.+?)case (\i)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
                     replace: (_, origSwitch, variant, tags, displayedText, strings) =>
@@ -152,8 +152,8 @@ export default definePlugin({
         {
             find: ".renderBot=function(){",
             replacement: {
-                match: /this.props.user;return null!=(\i)&&.{0,10}\?(.{0,50})\.botTag/,
-                replace: "this.props.user;var type=$self.getTag({...this.props,origType:$1.bot?0:null,location:'not-chat'});\
+                match: /this.props.user;return null!=(\i)&&\i\.bot\?(.{0,30})\.botTag/,
+                replace: "this.props.user;var type = $self.getTag({ ...this.props, origType: $1.bot ? 0 : null, location: 'not-chat' });\
 return type!==null?$2.botTag,type"
             }
         },
@@ -161,23 +161,23 @@ return type!==null?$2.botTag,type"
         {
             find: ".hasAvatarForGuild(null==",
             replacement: {
-                match: /\.usernameSection,user/,
-                replace: ".usernameSection,moreTags_channelId:arguments[0].channelId,user"
+                match: /(?=usernameIcon:)/,
+                replace: "moreTags_channelId:arguments[0].channelId,"
             }
         },
         {
             find: 'copyMetaData:"User Tag"',
             replacement: {
-                match: /discriminatorClass:(.{1,100}),botClass:/,
-                replace: "discriminatorClass:$1,moreTags_channelId:arguments[0].moreTags_channelId,botClass:"
+                match: /(?=,botClass:)/,
+                replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
         // in profiles
         {
             find: ",botType:",
             replacement: {
-                match: /,botType:(\i\((\i)\)),/g,
-                replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
+                match: /,botType:(\i\((\i)\))/g,
+                replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'})"
             }
         },
     ],
@@ -194,26 +194,26 @@ return type!==null?$2.botTag,type"
             .filter(Boolean);
     },
 
-    addTagVariants(val: any /* i cant think of a good name */) {
+    addTagVariants(tagConstant) {
         let i = 100;
         tags.forEach(({ name }) => {
-            val[name] = ++i;
-            val[i] = name;
-            val[`${name}-BOT`] = ++i;
-            val[i] = `${name}-BOT`;
-            val[`${name}-OP`] = ++i;
-            val[i] = `${name}-OP`;
+            tagConstant[name] = ++i;
+            tagConstant[i] = name;
+            tagConstant[`${name}-BOT`] = ++i;
+            tagConstant[i] = `${name}-BOT`;
+            tagConstant[`${name}-OP`] = ++i;
+            tagConstant[i] = `${name}-OP`;
         });
-        return val;
+        return tagConstant;
     },
 
     isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || tags.some(t => tag === Tags[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return "BOT";
+        if (!passedTagName) return strings.BOT_TAG_BOT;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return "BOT";
+        if (!tag) return strings.BOT_TAG_BOT;
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tag.displayName}`;
