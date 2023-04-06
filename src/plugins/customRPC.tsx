@@ -198,17 +198,17 @@ async function createActivity(): Promise<Activity | undefined> {
 
     if (imageBig) {
         activity.assets = {
-            large_image: await getApplicationAsset(imageBig),
-            large_text: imageBigTooltip
+            large_image: await getApplicationAsset(imageBig)
         };
+        if (imageBigTooltip) activity.assets.large_text = imageBigTooltip;
     }
 
     if (imageSmall) {
         activity.assets = {
             ...activity.assets,
-            small_image: await getApplicationAsset(imageSmall),
-            small_text: imageSmallTooltip
+            small_image: await getApplicationAsset(imageSmall)
         };
+        if (imageSmallTooltip) activity.assets.small_text = imageSmallTooltip;
     }
 
 
