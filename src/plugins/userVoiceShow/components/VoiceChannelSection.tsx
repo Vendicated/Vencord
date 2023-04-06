@@ -35,9 +35,9 @@ interface VoiceChannelFieldProps {
 
 export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannelFieldProps) => (
     <UserPopoutSection>
-        {showHeader ? <Forms.FormTitle className="voice-channel-section-header">In a voice channel</Forms.FormTitle> : null}
+        {showHeader && <Forms.FormTitle className="vc-uvs-header">In a voice channel</Forms.FormTitle>}
         <Button
-            className="voice-channel-button"
+            className="vc-uvs-button"
             color={Button.Colors.TRANSPARENT}
             size={Button.Sizes.SMALL}
 
@@ -54,6 +54,8 @@ export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannel
                         }
                     });
             }}
-        >{label}</Button>
+        >
+            {label}
+        </Button>
     </UserPopoutSection>
 );

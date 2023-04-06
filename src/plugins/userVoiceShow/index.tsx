@@ -17,10 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
@@ -39,17 +41,20 @@ const settings = definePluginSettings({
     }
 });
 
-const VoiceChannelField = (props: any) => {
-    // console.log(e);
-    const { user } = props;
+interface UserProps {
+    user: User;
+}
+
+const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
     if (!channelId) return null;
+
     const channel = ChannelStore.getChannel(channelId);
     const guild = GuildStore.getGuild(channel.guild_id);
+
     if (!guild) return null; // When in DM call
 
     const result = `${guild.name} | ${channel.name}`;
-    // console.log(result);
 
     return (
         <VoiceChannelSection
@@ -58,7 +63,7 @@ const VoiceChannelField = (props: any) => {
             showHeader={settings.store.showVoiceChannelSectionHeader}
         />
     );
-};
+});
 
 export default definePlugin({
     name: "UserVoiceShow",
@@ -66,18 +71,18 @@ export default definePlugin({
     authors: [Devs.LordElias],
     settings,
 
-    patchModal(props: any) {
-        if (settings.store.showInUserProfileModal)
-            return (
-                <div className="voice-channel-profile-modal-margin">
-                    {VoiceChannelField(props)}
-                </div>
-            );
+    patchModal({ user }: UserProps) {
+        if (!settings.store.showInUserProfileModal)
+            return null;
+
+        return (
+            <div className="vc-uvs-modal-margin">
+                <VoiceChannelField user={user} />
+            </div>
+        );
     },
 
-    patchPopout(props: any) {
-        return VoiceChannelField(props);
-    },
+    patchPopout: ({ user }: UserProps) => <VoiceChannelField user={user} />,
 
     patches: [
         {
@@ -97,11 +102,4 @@ export default definePlugin({
             }
         }
     ],
-    // Delete these two below if you are only using code patches
-    start() {
-
-    },
-    stop() {
-
-    },
 });

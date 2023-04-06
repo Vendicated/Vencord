@@ -1,18 +1,18 @@
-.voice-channel-button > div {
+.vc-uvs-button > div {
     white-space: normal !important;
 }
 
-.voice-channel-button {
+.vc-uvs-button {
     width: 100%;
     margin: auto;
     height: unset;
 }
 
-.voice-channel-section-header {
+.vc-uvs-header {
     color: var(--header-primary);
     margin-bottom: 6px;
 }
 
-.voice-channel-profile-modal-margin > [class^="section"] {
+.vc-uvs-modal-margin > [class^="section"] {
     margin: 0 12px;
 }
