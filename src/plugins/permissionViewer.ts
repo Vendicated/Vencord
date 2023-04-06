@@ -18,6 +18,10 @@
 
 import definePlugin from "@utils/types";
 
+function createCancelAction(prepend: string, serverIdRead: string, append: string, returnValue?: string) {
+    return `${prepend} try { if (window.unownedGuilds != null && window.unownedGuilds[${serverIdRead}] == true) { return${(" " + returnValue) ?? ""}; } } catch {} ${append}`;
+}
+
 export default definePlugin({
     name: "Permission Viewer",
     description: "Enables server settings view by tricking the client into thinking you are the owner of every guild",
@@ -31,6 +35,7 @@ export default definePlugin({
             name: "vsk"
         }
     ],
+
     patches: [
         {
             find: "canAccessGuildSettings=function",
@@ -41,7 +46,7 @@ export default definePlugin({
                 },
                 {
                     match: /;([A-z])+\.can=function\((.+?),(.+?),(.+?)\)({var.+?[A-z]+?\(.+?,\1,.+?\);return .+?\(.*?\)});/g,
-                    replace: ";$1.can=function($2, $3, $4) { const hasPerm = (() => $5)(); if($2 == 0x0000000010000000) { window.unownedGuilds = window.unownedGuilds || {}; if (!hasPerm && window.unownedGuilds[$3.id] == null) { window.unownedGuilds[$3.id] = true; } else if (hasPerm) { window.unownedGuilds[$3.id] = null; } return true; } return hasPerm; };"
+                    replace: ";$1.can=function($2, $3, $4) { const hasPerm = (() => $5)(); if($2 == 0x0000000010000000 && $3 != null) { window.unownedGuilds = window.unownedGuilds || {}; if (!hasPerm && window.unownedGuilds[$3.id] == null) { window.unownedGuilds[$3.id] = true; } else if (hasPerm) { window.unownedGuilds[$3.id] = null; } return true; } return hasPerm; };"
                 }
             ]
         },
@@ -50,20 +55,42 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(function [A-z]+?\(([A-z]+?)\)\{)(.+?get.+?GUILD_INTEGRATIONS.+?\})/,
-                    replace: "$1 if (window.unownedGuilds != null && window.unownedGuilds[$2] == true) { return; } $3"
+                    replace: createCancelAction("$1", "$2", "$3")
                 },
                 {
                     match: /(\}function [A-z]+?\(([A-z]+?)\){)(.+\n?.+?GUILD_INTEGRATIONS.+?has_commands)/,
-                    replace: "$1 if (window.unownedGuilds != null && window.unownedGuilds[$2] == true) { return; } $3"
+                    replace: createCancelAction("$1", "$2", "$3")
                 }
             ]
         },
         {
-            find: "permissions.toString()",
+            find: ".permissions.toString()",
             replacement: [
                 {
-                    match: /(:([A-z]).id]\);[A-z]\.useEffect\(\(function\(\)\{)(null.+?==\2\?void 0:)/,
-                    replace: "$1 if (window.unownedGuilds != null && window.unownedGuilds[$2.id] == true) { return; } $3"
+                    match: /(\),\[\w+?,(\w+?)\.id,null==.+?:(\w+)\.id]\);\w+?\.useEffect\(\(function\(\)\{)(null.+?==\3\?void 0:)/,
+                    replace: createCancelAction("$1", "$2.id", "$4")
+                },
+                {
+                    match: /(onSave:function\(\){if\(null!=(\w+)\){)(var \w+=\2\.id)/,
+                    replace: createCancelAction("$1", "$2.id", "$3")
+                }
+            ]
+        },
+        {
+            find: "updateMemberRoles:function(",
+            replacement: [
+                {
+                    match: /(updateMemberRoles:function\((\w+),.+?\){)(return)/,
+                    replace: createCancelAction("$1", "$2", "$3")
+                }
+            ]
+        },
+        {
+            find: "updatePermissionOverwrite:function(",
+            replacement: [
+                {
+                    match: /(updatePermissionOverwrite:function\(\w+,(\w+)\){)(return)/,
+                    replace: createCancelAction("$1", "$2.id", "$3", "Promise.resolve()")
                 }
             ]
         }
