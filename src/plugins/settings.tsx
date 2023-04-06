@@ -107,17 +107,17 @@ export default definePlugin({
             });
 
         cats.push({
-            section: "VencordSettingsSync",
-            label: "Backup & Restore",
-            element: () => <SettingsComponent tab="VencordSettingsSync" />,
-            onClick: makeOnClick("VencordSettingsSync")
-        });
-
-        cats.push({
             section: "VencordCloud",
             label: "Cloud",
             element: () => <SettingsComponent tab="VencordCloud" />,
             onClick: makeOnClick("VencordCloud")
+        });
+
+        cats.push({
+            section: "VencordSettingsSync",
+            label: "Backup & Restore",
+            element: () => <SettingsComponent tab="VencordSettingsSync" />,
+            onClick: makeOnClick("VencordSettingsSync")
         });
 
         if (IS_DEV)
