@@ -19,7 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/settings";
 import { Toasts } from "@webpack/common";
-import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
+import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import IpcEvents from "./IpcEvents";
@@ -140,7 +140,7 @@ export async function putCloudSettings() {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
             }),
-            body: deflateSync(strToU8(settings))
+            body: deflateSync(new TextEncoder().encode(settings))
         });
 
         if (!res.ok) {
@@ -229,7 +229,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         const data = await res.arrayBuffer();
 
-        const settings = strFromU8(inflateSync(new Uint8Array(data)));
+        const settings = new TextDecoder().decode(inflateSync(new Uint8Array(data)));
         await importSettings(settings);
 
         // sync with server timestamp instead of local one
