@@ -91,7 +91,7 @@ export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
     authors: [Devs.TheSun],
-    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
+    dependencies: ["ContextMenuAPI"],
     patches: [
         // add the channel tab container at the top
         {
