@@ -16,16 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function relaunch() {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.app.relaunch();
-    else
-        window.VencordDesktop.app.relaunch();
-}
-
-export function showItemInFolder(path: string) {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.fileManager.showItemInFolder(path);
-    else
-        window.VencordDesktop.fileManager.showItemInFolder(path);
-}
+export const ELEMENT_ID = "magnify-modal";
