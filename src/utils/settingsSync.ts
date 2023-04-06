@@ -180,7 +180,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             headers: new Headers({
                 Authorization: await getCloudAuth(),
                 Accept: "application/octet-stream",
-                "if-none-match": Settings.cloud.settingsSyncVersion.toString()
+                "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
             }),
         });
 
@@ -214,7 +214,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             return false;
         }
 
-        const written = parseInt(res.headers.get("etag")!);
+        const written = Number(res.headers.get("etag")!);
         const localWritten = Settings.cloud.settingsSyncVersion;
 
         // don't need to check for written > localWritten because the server will return 304 due to if-none-match

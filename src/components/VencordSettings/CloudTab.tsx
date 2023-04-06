@@ -24,7 +24,7 @@ import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -64,11 +64,9 @@ async function eraseAllData() {
 }
 
 function SettingsSyncSection() {
-    const settings = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
-    const sectionEnabled = useMemo(
-        () => settings.cloud.authenticated && settings.cloud.settingsSync,
-        [settings.cloud.authenticated, settings.cloud.settingsSync]
-    );
+    // eslint-disable-next-line prefer-const
+    const { cloud } = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
+    const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
         <Forms.FormSection title="Settings Sync" className={Margins.top16}>
@@ -78,9 +76,9 @@ function SettingsSyncSection() {
             </Forms.FormText>
             <Switch
                 key="cloud-sync"
-                disabled={!settings.cloud.authenticated}
-                value={settings.cloud.settingsSync}
-                onChange={v => { settings.cloud.settingsSync = v; }}
+                disabled={!cloud.authenticated}
+                value={cloud.settingsSync}
+                onChange={v => { cloud.settingsSync = v; }}
             >
                 Settings Sync
             </Switch>
