@@ -29,8 +29,8 @@ export let useCallback: typeof React.useCallback;
 
 export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/client") = findByPropsLazy("createPortal", "render");
 
-export const useDrag/*: typeof import("react-dnd").useDrag*/ = findByCodeLazy(".disconnectDragSource(");
-export const useDrop/*: typeof import("react-dnd").useDrop*/ = findByCodeLazy(".disconnectDropTarget(");
+export const useDrag: typeof import("react-dnd").useDrag = findByCodeLazy(".disconnectDragSource(");
+export const useDrop: typeof import("react-dnd").useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 waitFor("useState", m => {
     React = m;
