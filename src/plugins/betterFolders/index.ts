@@ -67,7 +67,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
-    authors: [Devs.juby],
+    authors: [Devs.juby, Devs.AutumnVN],
     patches: [
         {
             find: '("guildsnav")',
@@ -122,7 +122,7 @@ export default definePlugin({
     settings,
 
     start() {
-        const getGuildFolder = (id: string) => GuildFolderStore.guildFolders.find(f => f.guildIds.includes(id));
+        const getGuildFolder = (id: string) => GuildFolderStore.getGuildFolders().find(f => f.guildIds.includes(id));
 
         FluxDispatcher.subscribe("CHANNEL_SELECT", this.onSwitch = data => {
             if (!settings.store.closeAllFolders && !settings.store.forceOpen)
