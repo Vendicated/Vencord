@@ -100,7 +100,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number,
     const { channelInfo, pos, update } = props;
     const channel = ChannelStore.getChannel(channelInfo.channelId);
     const { openChannels } = ChannelTabsUtils;
-    return <Menu.ContextMenu
+    return <Menu.Menu
         navId="channeltabs-channel-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="Channel Tab Context Menu"
@@ -141,7 +141,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number,
                 }}
             />
         </Menu.MenuGroup>}
-    </Menu.ContextMenu>;
+    </Menu.Menu>;
 }
 
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
