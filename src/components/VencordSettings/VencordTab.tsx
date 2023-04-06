@@ -26,6 +26,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
+import { relaunch, showItemInFolder } from "@utils/native";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
 const cl = classNameFactory("vc-settings-");
@@ -64,7 +65,7 @@ function VencordSettings() {
                 title: "Enable React Developer Tools",
                 note: "Requires a full restart"
             },
-            !IS_WEB && (!isWindows ? {
+            !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",
                 note: "Requires a full restart"
@@ -100,7 +101,7 @@ function VencordSettings() {
                     ) : (
                         <React.Fragment>
                             <Button
-                                onClick={() => window.DiscordNative.app.relaunch()}
+                                onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
@@ -111,7 +112,7 @@ function VencordSettings() {
                                 Open QuickCSS File
                             </Button>
                             <Button
-                                onClick={() => window.DiscordNative.fileManager.showItemInFolder(settingsDir)}
+                                onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
