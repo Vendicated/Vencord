@@ -93,6 +93,25 @@ const settings = definePluginSettings({
             }
         ]
     },
+    listMode: {
+        description: "Whether to use guild list as blacklist or whitelist",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Blacklist",
+                value: "blacklist",
+                default: true
+            },
+            {
+                label: "Whitelist",
+                value: "whitelist"
+            }
+        ]
+    },
+    serverList: {
+        description: "Guild IDs to embed/ignore message links in (separate with comma)",
+        type: OptionType.STRING
+    },
     clearMessageCache: {
         type: OptionType.COMPONENT,
         description: "Clear the linked message cache",
@@ -199,7 +218,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 }
 
 
-function MessageEmbedAccessory({ message }: { message: Message; }) {
+function MessageEmbedAccessory({ message, listMode, serverList }: { message: Message; listMode: string; serverList: string[]; }) {
     // @ts-ignore
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
@@ -216,6 +235,9 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
         if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
             continue;
         }
+
+        if (listMode === "blacklist" && serverList.includes(guildID)) continue;
+        if (listMode === "whitelist" && !serverList.includes(guildID)) continue;
 
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
@@ -363,7 +385,11 @@ export default definePlugin({
 
             return (
                 <ErrorBoundary>
-                    <MessageEmbedAccessory message={props.message} />
+                    <MessageEmbedAccessory
+                        message={props.message}
+                        listMode={this.settings.store.listMode}
+                        serverList={this.settings.store.serverList?.split(",") ?? []}
+                    />
                 </ErrorBoundary>
             );
         }, 4 /* just above rich embeds */);
