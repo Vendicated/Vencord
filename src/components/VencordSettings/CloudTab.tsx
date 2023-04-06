@@ -64,7 +64,6 @@ async function eraseAllData() {
 }
 
 function SettingsSyncSection() {
-    // eslint-disable-next-line prefer-const
     const { cloud } = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
