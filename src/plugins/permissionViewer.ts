@@ -24,7 +24,7 @@ function createCancelAction(prepend: string, serverIdRead: string, append: strin
 
 export default definePlugin({
     name: "Permission Viewer",
-    description: "Enables server settings view by tricking the client into thinking you are the owner of every guild",
+    description: "Enables server/channel settings view by tricking the client into thinking you have permission to",
     authors: [
         {
             id: 477974820504731648n,
