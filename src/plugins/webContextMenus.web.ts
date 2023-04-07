@@ -19,28 +19,78 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+async function fetchImage(url: string) {
+    const res = await fetch(url, {
+        mode: "cors"
+    });
+    if (res.status !== 200) return;
+
+    return res.blob();
+}
+
 export default definePlugin({
     name: "WebContextMenus",
     description: "Re-adds some of context menu items missing on the web version of Discord, namely Copy/Open Link",
     authors: [Devs.Ven],
     enabledByDefault: true,
 
-    patches: [{
-        // There is literally no reason for Discord to make this Desktop only.
-        // The only thing broken is copy, but they already have a different copy function
-        // with web support????
-        find: "open-native-link",
-        replacement: [
-            {
-                // if (isNative || null ==
-                match: /if\(!\w\..{1,3}\|\|null==/,
-                replace: "if(null=="
-            },
-            // Fix silly Discord calling the non web support copy
-            {
-                match: /\w\.default\.copy/,
-                replace: "Vencord.Webpack.Common.Clipboard.copy"
-            }
-        ]
-    }]
+    patches: [
+        // Add back Copy & Open Link
+        {
+            // There is literally no reason for Discord to make this Desktop only.
+            // The only thing broken is copy, but they already have a different copy function
+            // with web support????
+            find: "open-native-link",
+            replacement: [
+                {
+                    // if (isNative || null ==
+                    match: /if\(!\w\..{1,3}\|\|null==/,
+                    replace: "if(null=="
+                },
+                // Fix silly Discord calling the non web support copy
+                {
+                    match: /\w\.default\.copy/,
+                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                }
+            ]
+        },
+        // Add back Copy & Save Image
+        {
+            find: 'id:"copy-image"',
+            replacement: [
+                {
+                    // if (!IS_WEB || null ==
+                    match: /if\(!\i\.\i\|\|null==/,
+                    replace: "if(null=="
+                },
+                {
+                    match: /return\s*?\[\i\.default\.canCopyImage\(\)/,
+                    replace: "return [true"
+                },
+                {
+                    match: /(?<=COPY_IMAGE_MENU_ITEM,)action:/,
+                    replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
+                },
+                {
+                    match: /(?<=SAVE_IMAGE_MENU_ITEM,)action:/,
+                    replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
+                },
+            ]
+        }
+    ],
+
+    async copyImage(url: string) {
+        const data = await fetchImage(url);
+        if (!data) return;
+
+        await navigator.clipboard.write([
+            new ClipboardItem({
+                [data.type]: data
+            })
+        ]);
+    },
+
+    saveImage(url: string) {
+
+    }
 });
