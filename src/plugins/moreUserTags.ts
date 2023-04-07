@@ -83,6 +83,10 @@ const tags: Tag[] = [
 ];
 
 const settings = definePluginSettings({
+    dontShowForBots: {
+        description: "Don't show tags (not including the webhook tag) for bots",
+        type: OptionType.BOOLEAN
+    },
     dontShowBotTag: {
         description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
         type: OptionType.BOOLEAN
@@ -214,6 +218,8 @@ return type!==null?$2.botTag,type"
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
         if (!tag) return "BOT";
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.BOT_TAG_BOT;
+
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tag.displayName}`;
