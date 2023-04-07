@@ -18,6 +18,7 @@
 
 import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
+import { localStorage } from "@utils/localStorage";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
 import { putCloudSettings } from "@utils/settingsSync";
@@ -25,8 +26,6 @@ import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from 
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
-
-const { localStorage } = window;
 
 const logger = new Logger("Settings");
 export interface Settings {

@@ -30,14 +30,13 @@ import "./webpack/patchWebpack";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
+import { localStorage } from "./utils/localStorage";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, rebuild, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
 export let Components: any;
-
-const { localStorage } = window;
 
 async function syncSettings() {
     if (
