@@ -94,6 +94,15 @@ export default definePlugin({
                 match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
                 replace: "return true?"
             }
+        },
+
+        // Add back link context menu
+        {
+            find: '"interactionUsernameProfile"',
+            replacement: {
+                match: /if\("A"===\i\.tagName&&""!==\i\.textContent\)/,
+                replace: "if(false)"
+            }
         }
     ],
 
