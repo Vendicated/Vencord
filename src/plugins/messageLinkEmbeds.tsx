@@ -388,7 +388,7 @@ export default definePlugin({
                     <MessageEmbedAccessory
                         message={props.message}
                         listMode={this.settings.store.listMode}
-                        serverList={this.settings.store.serverList?.split(",") ?? []}
+                        serverList={this.settings.store.serverList?.split(",").map(s => s.trim()) ?? []}
                     />
                 </ErrorBoundary>
             );
