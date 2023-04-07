@@ -24,6 +24,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Forms, SettingsRouter, TabBar, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
+import CloudTab from "./CloudTab";
 import PluginsTab from "./PluginsTab";
 import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
@@ -45,7 +46,8 @@ const SettingsTabs: Record<string, SettingsTab> = {
     VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
     VencordThemes: { name: "Themes", component: () => <ThemesTab /> },
     VencordUpdater: { name: "Updater" }, // Only show updater if IS_WEB is false
-    VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
+    VencordCloud: { name: "Cloud", component: () => <CloudTab /> },
+    VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> }
 };
 
 if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater />;
