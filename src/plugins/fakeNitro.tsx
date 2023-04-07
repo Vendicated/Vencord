@@ -679,7 +679,7 @@ export default definePlugin({
                     }
 
                     delete extra.stickerIds;
-                    messageObj.content += " " + link + `&name=${sticker.name}`;
+                    messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
                 }
             }
 
