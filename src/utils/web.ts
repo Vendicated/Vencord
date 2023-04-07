@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function downloadFile(url: string, name: string) {
+export function saveFile(file: File) {
     const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
 
     document.body.appendChild(a);
     a.click();

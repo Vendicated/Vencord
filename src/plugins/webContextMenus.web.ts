@@ -18,14 +18,13 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { saveFile } from "@utils/web";
 
 async function fetchImage(url: string) {
-    const res = await fetch(url, {
-        mode: "cors"
-    });
+    const res = await fetch(url);
     if (res.status !== 200) return;
 
-    return res.blob();
+    return await res.blob();
 }
 
 export default definePlugin({
@@ -90,7 +89,13 @@ export default definePlugin({
         ]);
     },
 
-    saveImage(url: string) {
+    async saveImage(url: string) {
+        const data = await fetchImage(url);
+        if (!data) return;
 
+        const name = url.split("/").pop()!;
+        const file = new File([data], name, { type: data.type });
+
+        saveFile(file);
     }
 });
