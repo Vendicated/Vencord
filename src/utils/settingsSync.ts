@@ -147,7 +147,7 @@ export async function putCloudSettings() {
             cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
             showNotification({
                 title: "Cloud Settings",
-                body: `Could not synchronize settings (API returned ${res.status}).`,
+                body: `Could not synchronize settings to cloud (API returned ${res.status}).`,
                 color: "var(--red-360)"
             });
             return;
@@ -160,14 +160,14 @@ export async function putCloudSettings() {
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         showNotification({
             title: "Cloud Settings",
-            body: "Synchronized your settings!",
+            body: "Synchronized your settings to the cloud!",
             color: "var(--green-360)"
         });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
             title: "Cloud Settings",
-            body: `Could not synchronize settings (${e.toString()}).`,
+            body: `Could not synchronize settings to the cloud (${e.toString()}).`,
             color: "var(--red-360)"
         });
     }
@@ -208,7 +208,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             showNotification({
                 title: "Cloud Settings",
-                body: `Could not synchronize settings (API returned ${res.status}).`,
+                body: `Could not synchronize settings from the cloud (API returned ${res.status}).`,
                 color: "var(--red-360)"
             });
             return false;
@@ -250,7 +250,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         cloudSettingsLogger.error("Failed to sync down", e);
         showNotification({
             title: "Cloud Settings",
-            body: `Could not synchronize settings (${e.toString()}).`,
+            body: `Could not synchronize settings from the cloud (${e.toString()}).`,
             color: "var(--red-360)"
         });
 
