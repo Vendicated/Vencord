@@ -30,7 +30,7 @@ async function fetchImage(url: string) {
 
 export default definePlugin({
     name: "WebContextMenus",
-    description: "Re-adds some of context menu items missing on the web version of Discord, namely Copy/Open Link",
+    description: "Re-adds context menus missing in the web version of Discord: Images, ChatBar, 'Copy Link', 'Open Link', 'Copy Image', 'Save Image'",
     authors: [Devs.Ven],
     enabledByDefault: true,
 
@@ -50,8 +50,8 @@ export default definePlugin({
             find: "open-native-link",
             replacement: [
                 {
-                    // if (isNative || null ==
-                    match: /if\(!\w\..{1,3}\|\|null==/,
+                    // if (IS_DESKTOP || null == ...)
+                    match: /if\(!\i\.\i\|\|null==/,
                     replace: "if(null=="
                 },
                 // Fix silly Discord calling the non web support copy
@@ -116,9 +116,8 @@ export default definePlugin({
         {
             find: 'navId:"textarea-context"',
             replacement: [
-                // create desktop only spellcheck entries
                 {
-                    // desktopEntries = makeEntries(), spellcheckChildren = desktopEntries[0], languageChildren = desktopEntries[1]
+                    // desktopOnlyEntries = makeEntries(), spellcheckChildren = desktopOnlyEntries[0], languageChildren = desktopOnlyEntries[1]
                     match: /\i=.{0,30}text:\i,target:\i,onHeightUpdate:\i\}\),2\),(\i)=\i\[0\],(\i)=\i\[1\]/,
                     // set spellcheckChildren & languageChildren to empty arrays, so just in case patch 3 fails, we don't
                     // reference undefined variables
