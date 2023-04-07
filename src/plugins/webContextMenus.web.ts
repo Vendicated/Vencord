@@ -103,6 +103,38 @@ export default definePlugin({
                 match: /if\("A"===\i\.tagName&&""!==\i\.textContent\)/,
                 replace: "if(false)"
             }
+        },
+
+        // Add back slate / text input context menu
+        {
+            find: '"slate-toolbar"',
+            replacement: {
+                match: /(?<=\.handleContextMenu=.+?"bottom";)\i\.\i\?/,
+                replace: "true?"
+            }
+        },
+        {
+            find: 'navId:"textarea-context"',
+            replacement: [
+                // create desktop only spellcheck entries
+                {
+                    // desktopEntries = makeEntries(), spellcheckChildren = desktopEntries[0], languageChildren = desktopEntries[1]
+                    match: /\i=.{0,30}text:\i,target:\i,onHeightUpdate:\i\}\),2\),(\i)=\i\[0\],(\i)=\i\[1\]/,
+                    // set spellcheckChildren & languageChildren to empty arrays, so just in case patch 3 fails, we don't
+                    // reference undefined variables
+                    replace: "$1=[],$2=[]",
+                },
+                {
+                    // if (!IS_DESKTOP) return
+                    match: /(?<=showApplicationCommandSuggestions;)if\(!\i\.\i\)/,
+                    replace: "if(false)"
+                },
+                {
+                    // do not add menu items for entries removed in patch 1
+                    match: /("submit-button".+?)(\(0,\i\.jsx\)\(\i.MenuGroup,\{children:\i\}\),){2}/,
+                    replace: "$1"
+                }
+            ]
         }
     ],
 
