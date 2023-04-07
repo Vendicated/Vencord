@@ -19,7 +19,8 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByProps } from "@webpack";
+import { findByProps, findLazy } from "@webpack";
+import { Clipboard } from "@webpack/common";
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -27,6 +28,8 @@ async function fetchImage(url: string) {
 
     return await res.blob();
 }
+
+const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export default definePlugin({
     name: "WebContextMenus",
@@ -133,6 +136,11 @@ export default definePlugin({
                     // so just capture and add back
                     match: /("submit-button".+?)(\(0,\i\.jsx\)\(\i.MenuGroup,\{children:\i\}\),){2}/,
                     replace: "$1"
+                },
+                {
+                    // Change calls to DiscordNative.clipboard to us instead
+                    match: /\b\i\.default\.(copy|cut|paste)/g,
+                    replace: "$self.$1"
                 }
             ]
         }
@@ -157,5 +165,30 @@ export default definePlugin({
         const file = new File([data], name, { type: data.type });
 
         saveFile(file);
+    },
+
+    copy() {
+        const selection = document.getSelection();
+        if (!selection) return;
+
+        Clipboard.copy(selection.toString());
+    },
+
+    cut() {
+        this.copy();
+        MiniDispatcher.dispatch("INSERT_TEXT", { rawText: "" });
+    },
+
+    async paste() {
+        const text = await navigator.clipboard.readText();
+
+        const data = new DataTransfer();
+        data.setData("text/plain", text);
+
+        document.dispatchEvent(
+            new ClipboardEvent("paste", {
+                clipboardData: data
+            })
+        );
     }
 });
