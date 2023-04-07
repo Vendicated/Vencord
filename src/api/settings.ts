@@ -99,7 +99,7 @@ try {
 
 const saveSettingsOnFrequentAction = debounce(async () => {
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
-        putCloudSettings();
+        await putCloudSettings();
         delete localStorage.Vencord_settingsDirty;
     }
 }, 60_000);
