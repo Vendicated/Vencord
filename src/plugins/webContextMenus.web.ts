@@ -19,6 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { saveFile } from "@utils/web";
+import { findByProps } from "@webpack";
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -32,6 +33,13 @@ export default definePlugin({
     description: "Re-adds some of context menu items missing on the web version of Discord, namely Copy/Open Link",
     authors: [Devs.Ven],
     enabledByDefault: true,
+
+    start() {
+        const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
+        // cope
+        window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
+        window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
+    },
 
     patches: [
         // Add back Copy & Open Link
@@ -53,6 +61,7 @@ export default definePlugin({
                 }
             ]
         },
+
         // Add back Copy & Save Image
         {
             find: 'id:"copy-image"',
@@ -75,6 +84,16 @@ export default definePlugin({
                     replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
                 },
             ]
+        },
+
+        // Add back image context menu
+        {
+            find: 'navId:"image-context"',
+            replacement: {
+                // return IS_DESKTOP ? React.createElement(Menu, ...)
+                match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
+                replace: "return true?"
+            }
         }
     ],
 
