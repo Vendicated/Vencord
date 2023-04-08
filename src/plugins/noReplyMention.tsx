@@ -42,7 +42,7 @@ export default definePlugin({
         const { exemptList, inverseShiftReply } = Settings.plugins.NoReplyMention;
 
         const isExempted = exemptList.includes(message.author.id);
-        return inverseShiftReply ? holdingShift !== isExempted : isExempted;
+        return inverseShiftReply ? holdingShift !== isExempted : !holdingShift && isExempted;
     },
     patches: [
         {
