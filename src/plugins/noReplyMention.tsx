@@ -42,14 +42,24 @@ export default definePlugin({
         const { exemptList, inverseShiftReply } = Settings.plugins.NoReplyMention;
 
         const isExempted = exemptList.includes(message.author.id);
+        if (holdingShift === undefined) return isExempted;
         return inverseShiftReply ? holdingShift !== isExempted : !holdingShift && isExempted;
     },
     patches: [
         {
+            find: "CREATE_PENDING_REPLY:function",
+            predicate: () => Settings.plugins.QuickReply.enabled,
+            replacement: {
+                match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
+                replace:
+                    "CREATE_PENDING_REPLY:function($1){$1._isQuickReply&&($1.shouldMention=$self.shouldMention($1.message));",
+            },
+        },
+        {
             find: ",\"Message\")}function",
             replacement: {
                 match: /:(.{1,2}),shouldMention:!(.{1,2})\.shiftKey/,
-                replace: ":$1,shouldMention:$self.shouldMention($1, $2.shiftKey)"
+                replace: ":$1,shouldMention:$self.shouldMention($1,$2.shiftKey)"
             }
         }
     ],
