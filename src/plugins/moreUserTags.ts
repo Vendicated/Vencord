@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/proxyLazy.js";
 import definePlugin, { OptionType } from "@utils/types";
@@ -115,7 +115,6 @@ const settings = definePluginSettings({
     ]))
 });
 
-migratePluginSettings("MoreUserTags", "Webhook Tags");
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
