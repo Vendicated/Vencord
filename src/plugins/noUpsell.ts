@@ -23,8 +23,8 @@ import { findByPropsLazy } from "@webpack";
 const UserSettings = findByPropsLazy("markDirtyFromMigration");
 
 export default definePlugin({
-    name: "NoDismissibleContents",
-    description: "Dismiss all upsell popups about Discord features or Nitro ads before you ever see them",
+    name: "NoUpsell",
+    description: "Suppresses all dismissible Nitro and feature ad popups",
     authors: [Devs.dzshn],
 
     patches: [
