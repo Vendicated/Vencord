@@ -163,7 +163,7 @@ export default definePlugin({
                 {
                     // do not add menu items for entries removed in patch 1. Using a lookbehind for group 1 is slow,
                     // so just capture and add back
-                    match: /("submit-button".+?)(\(0,\i\.jsx\)\(\i.MenuGroup,\{children:\i\}\),){2}/,
+                    match: /("submit-button".+?)(\(0,\i\.jsx\)\(\i\.MenuGroup,\{children:\i\}\),){2}/,
                     replace: "$1"
                 },
                 {
