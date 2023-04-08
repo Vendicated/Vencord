@@ -19,14 +19,7 @@
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-interface Reply {
-    message: {
-        author: {
-            id: string;
-        };
-    };
-}
+import type { Message } from "discord-types/general";
 
 export default definePlugin({
     name: "NoReplyMention",
@@ -35,24 +28,29 @@ export default definePlugin({
     options: {
         exemptList: {
             description:
-                "List of users to exempt from this plugin (separated by commas)",
+                "List of users to exempt from this plugin (separated by commas or spaces)",
             type: OptionType.STRING,
             default: "1234567890123445,1234567890123445",
         },
+        inverseShiftReply: {
+            description: "Inverse shift replying behaviour",
+            type: OptionType.BOOLEAN,
+            default: false,
+        }
     },
-    shouldMention(reply: Reply) {
-        return Settings.plugins.NoReplyMention.exemptList.includes(
-            reply.message.author.id
-        );
+    shouldMention(message: Message, holdingShift: boolean) {
+        const { exemptList, inverseShiftReply } = Settings.plugins.NoReplyMention;
+
+        const isExempted = exemptList.includes(message.author.id);
+        return inverseShiftReply ? holdingShift !== isExempted : isExempted;
     },
     patches: [
         {
-            find: "CREATE_PENDING_REPLY:function",
+            find: ",\"Message\")}function",
             replacement: {
-                match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
-                replace:
-                    "CREATE_PENDING_REPLY:function($1){$1.shouldMention=$self.shouldMention($1);",
-            },
-        },
+                match: /:(.{1,2}),shouldMention:!(.{1,2})\.shiftKey/,
+                replace: ":$1,shouldMention:$self.shouldMention($1, $2.shiftKey)"
+            }
+        }
     ],
 });
