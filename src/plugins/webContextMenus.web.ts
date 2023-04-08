@@ -35,7 +35,7 @@ const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 const settings = definePluginSettings({
     addBack: {
         type: OptionType.BOOLEAN,
-        description: "Add back the context menus for images, links and the chat input bar",
+        description: "Add back the Discord context menus for images, links and the chat input bar",
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
         // so disable this by default. Vencord Desktop just doesn't, so enable by default
         default: IS_VENCORD_DESKTOP,
