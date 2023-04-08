@@ -22,14 +22,14 @@ import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
 import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
+import { findByProps, findByPropsLazy } from "@webpack";
 import { ChannelStore, Forms, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
 import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
-const Keybind = LazyComponent(() => findByCode(".keyClassName"));
+const Keybind = LazyComponent(() => findByProps("KeyCombo").KeyCombo);
 const KeybindClasses = findByPropsLazy("ddrArrows");
 
 const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
