@@ -24,7 +24,7 @@ import type { Message } from "discord-types/general";
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.axyie],
+    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix],
     options: {
         exemptList: {
             description:
