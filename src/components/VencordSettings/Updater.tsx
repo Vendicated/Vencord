@@ -229,11 +229,19 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
-                <Link href={repo}>
-                    {repo.split("/").slice(-2).join("/")}
-                </Link>
-            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
+            <Forms.FormText className="vc-text-selectable">
+                {repoPending
+                    ? repo
+                    : err
+                        ? "Failed to retrieve - check console"
+                        : (
+                            <Link href={repo}>
+                                {repo.split("/").slice(-2).join("/")}
+                            </Link>
+                        )
+                }
+                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+            </Forms.FormText>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 

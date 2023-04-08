@@ -41,6 +41,7 @@ function BackupRestoreTab() {
                 Settings Export contains:
                 <ul>
                     <li>&mdash; Custom QuickCSS</li>
+                    <li>&mdash; Theme Links</li>
                     <li>&mdash; Plugin Settings</li>
                 </ul>
             </Text>
