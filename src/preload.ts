@@ -26,9 +26,8 @@ import VencordNative from "./VencordNative";
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
+// Discord
 if (location.protocol !== "data:") {
-    // Discord
-    webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
     const rendererCss = join(__dirname, "renderer.css");
 
     function insertCss(css: string) {
@@ -55,10 +54,12 @@ if (location.protocol !== "data:") {
         });
     }
 
-    if (process.env.DISCORD_PRELOAD)
+    if (process.env.DISCORD_PRELOAD) {
+        webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
         require(process.env.DISCORD_PRELOAD);
-} else {
-    // Monaco Popout
+    }
+} // Monaco popout
+else {
     contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
     contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
     // shrug
