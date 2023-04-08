@@ -27,5 +27,5 @@
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="avatarPositionNormal"],
 [class*="PremiumWithoutBanner"]:has([class*="bannerPremium"]) [class*="avatarPositionPremiumNoBanner"] {
-    top: 75px;
+    top: 76px;
 }
