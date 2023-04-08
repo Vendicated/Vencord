@@ -25,10 +25,7 @@
     cy: 86;
 }
 
-[class*="NonPremium"]:has([class*="bannerPremium"]) [class*="avatarPositionNormal"] {
-    top: 75px;
-}
-
+[class*="NonPremium"]:has([class*="bannerPremium"]) [class*="avatarPositionNormal"],
 [class*="PremiumWithoutBanner"]:has([class*="bannerPremium"]) [class*="avatarPositionPremiumNoBanner"] {
     top: 75px;
 }
