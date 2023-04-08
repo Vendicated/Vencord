@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./index.css";
-
+import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
+
+import style from "./index.css?managed";
 
 const URL = "https://raw.githubusercontent.com/Discord-Custom-Covers/usrbg/master/dist/usrbg.json";
 
@@ -71,7 +72,7 @@ export default definePlugin({
 
     start() {
         updateBg(URL);
-
+        enableStyle(style);
     }
 });
 
