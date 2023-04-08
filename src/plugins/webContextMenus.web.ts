@@ -33,6 +33,8 @@ async function fetchImage(url: string) {
 const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 const settings = definePluginSettings({
+    // This needs to be all in one setting because to enable any of these, we need to make Discord use their desktop context
+    // menu handler instead of the web one, which breaks the other menus that aren't enabled
     addBack: {
         type: OptionType.BOOLEAN,
         description: "Add back the Discord context menus for images, links and the chat input bar",
