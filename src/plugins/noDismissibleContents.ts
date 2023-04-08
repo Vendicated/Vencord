@@ -27,7 +27,22 @@ export default definePlugin({
     description: "Dismiss all upsell popups about Discord features or Nitro ads before you ever see them",
     authors: [Devs.dzshn],
 
+    patches: [
+        {
+            find: "HUB_WAITLIST_UPSELL=0",
+            replacement: {
+                match: /(?<=(\i)={dismissedContents:)new Uint8Array\(0\)(};.+?;)/,
+                replace: "Uint8Array.from(Array(192),()=>255)$2return $1;"
+            }
+        },
+    ],
+
     start() {
-        UserSettings.getCurrentValue().userContent.dismissedContents = Uint8Array.from(Array(128), () => 255);
-    }
+        // technically, this only needs to be done once after the patch is in effect
+        // this is due to some weird schema validation and cache stuff, and I can't
+        // exactly find where the cache is, but this should suffice.
+        UserSettings.updateAsync("userContent", (v: any) => {
+            v.dismissedContents = new Uint8Array();
+        });
+    },
 });
