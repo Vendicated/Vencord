@@ -61,6 +61,14 @@ export default definePlugin({
         }
     },
 
+    stop() {
+        if (settings.store.addBack) {
+            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
+            window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
+            window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
+        }
+    },
+
     patches: [
         // Add back Copy & Open Link
         {
