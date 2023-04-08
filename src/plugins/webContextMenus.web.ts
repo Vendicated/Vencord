@@ -58,11 +58,12 @@ export default definePlugin({
             const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
+            this.changedListeners = true;
         }
     },
 
     stop() {
-        if (settings.store.addBack) {
+        if (this.changedListeners) {
             const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
