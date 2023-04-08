@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { findByProps, findLazy } from "@webpack";
 import { Clipboard } from "@webpack/common";
@@ -31,17 +32,31 @@ async function fetchImage(url: string) {
 
 const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
+const settings = definePluginSettings({
+    addBack: {
+        type: OptionType.BOOLEAN,
+        description: "Add back the context menus for images, links and the chat input bar",
+        // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
+        // so disable this by default. Vencord Desktop just doesn't, so enable by default
+        default: IS_VENCORD_DESKTOP,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "WebContextMenus",
-    description: "Re-adds context menus missing in the web version of Discord: Images, ChatBar, 'Copy Link', 'Open Link', 'Copy Image', 'Save Image'",
+    description: "Re-adds context menus missing in the web version of Discord: Images, ChatInputBar, Links, 'Copy Link', 'Open Link', 'Copy Image', 'Save Image'",
     authors: [Devs.Ven],
     enabledByDefault: true,
 
+    settings,
+
     start() {
-        const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
-        // cope
-        window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
-        window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
+        if (settings.store.addBack) {
+            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
+            window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
+            window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
+        }
     },
 
     patches: [
@@ -92,6 +107,7 @@ export default definePlugin({
         // Add back image context menu
         {
             find: 'navId:"image-context"',
+            predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
                 match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
@@ -102,6 +118,7 @@ export default definePlugin({
         // Add back link context menu
         {
             find: '"interactionUsernameProfile"',
+            predicate: () => settings.store.addBack,
             replacement: {
                 match: /if\("A"===\i\.tagName&&""!==\i\.textContent\)/,
                 replace: "if(false)"
@@ -111,6 +128,7 @@ export default definePlugin({
         // Add back slate / text input context menu
         {
             find: '"slate-toolbar"',
+            predicate: () => settings.store.addBack,
             replacement: {
                 match: /(?<=\.handleContextMenu=.+?"bottom";)\i\.\i\?/,
                 replace: "true?"
@@ -118,6 +136,7 @@ export default definePlugin({
         },
         {
             find: 'navId:"textarea-context"',
+            predicate: () => settings.store.addBack,
             replacement: [
                 {
                     // desktopOnlyEntries = makeEntries(), spellcheckChildren = desktopOnlyEntries[0], languageChildren = desktopOnlyEntries[1]
@@ -144,6 +163,8 @@ export default definePlugin({
                 }
             ]
         }
+
+        // TODO: Maybe add spellcheck for VencordDesktop
     ],
 
     async copyImage(url: string) {
