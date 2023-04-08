@@ -179,21 +179,32 @@ export default definePlugin({
     ],
 
     async copyImage(url: string) {
-        const data = await fetchImage(url);
-        if (!data) return;
+        // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
+        // via canvas first
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext("2d")!.drawImage(img, 0, 0);
 
-        await navigator.clipboard.write([
-            new ClipboardItem({
-                [data.type]: data
-            })
-        ]);
+            canvas.toBlob(data => {
+                navigator.clipboard.write([
+                    new ClipboardItem({
+                        "image/png": data!
+                    })
+                ]);
+            }, "image/png");
+        };
+        img.crossOrigin = "anonymous";
+        img.src = url;
     },
 
     async saveImage(url: string) {
         const data = await fetchImage(url);
         if (!data) return;
 
-        const name = url.split("/").pop()!;
+        const name = new URL(url).pathname.split("/").pop()!;
         const file = new File([data], name, { type: data.type });
 
         saveFile(file);
