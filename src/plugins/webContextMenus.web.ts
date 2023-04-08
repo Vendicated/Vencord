@@ -193,7 +193,7 @@ export default definePlugin({
         const data = await fetchImage(url);
         if (!data) return;
 
-        const name = url.split("/").pop()!;
+        const name = new URL(url).pathname.split("/").pop()!;
         const file = new File([data], name, { type: data.type });
 
         saveFile(file);
