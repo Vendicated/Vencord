@@ -26,6 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import type { ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -299,7 +300,7 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return) (.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}(${messages}).concat(fakeNitroNode.fake?" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}($self.patchDescription(${messages}, fakeNitroNode.fake))`
             }
         }
     ],
@@ -415,6 +416,15 @@ export default definePlugin({
                 proto
             }
         });
+    },
+
+    patchDescription(node: ReactNode, fake: boolean) {
+        if (!fake) return node;
+
+        return [
+            ...(Array.isArray(node) ? node : [node]),
+            " This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link."
+        ];
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
