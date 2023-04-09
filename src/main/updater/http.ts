@@ -26,7 +26,7 @@ import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
 import { get } from "../utils/simpleGet";
-import { calculateHashes, serializeErrors } from "./common";
+import { calculateHashes, serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
@@ -57,13 +57,6 @@ async function calculateGitChanges() {
     }));
 }
 
-const FILES_TO_DOWNLOAD = [
-    IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
-    "preload.js",
-    IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
-    "renderer.css"
-];
-
 async function fetchUpdates() {
     const release = await githubGet("/releases/latest");
 
@@ -73,7 +66,7 @@ async function fetchUpdates() {
         return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
-        if (FILES_TO_DOWNLOAD.some(s => name.startsWith(s))) {
+        if (VENCORD_FILES.some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }
     });
@@ -83,13 +76,7 @@ async function fetchUpdates() {
 async function applyUpdates() {
     await Promise.all(PendingUpdates.map(
         async ([name, data]) => writeFile(
-            join(
-                __dirname,
-                IS_VENCORD_DESKTOP
-                    // vencordDesktopRenderer.js -> renderer.js
-                    ? name.replace(/vencordDesktop(\w)/, (_, c) => c.toLowerCase())
-                    : name
-            ),
+            join(__dirname, name),
             await get(data)
         )
     ));
