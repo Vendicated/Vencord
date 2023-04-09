@@ -26,7 +26,7 @@ import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
 import { get } from "../utils/simpleGet";
-import { calculateHashes, serializeErrors, VENCORD_FILES } from "./common";
+import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
@@ -84,7 +84,6 @@ async function applyUpdates() {
     return true;
 }
 
-ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));

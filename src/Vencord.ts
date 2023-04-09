@@ -77,20 +77,14 @@ async function init() {
 
             if (Settings.autoUpdate) {
                 await update();
-                const needsFullRestart = await rebuild();
+                await rebuild();
                 if (Settings.autoUpdateNotification)
                     setTimeout(() => showNotification({
                         title: "Vencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
                         noPersist: true,
-                        onClick() {
-                            if (needsFullRestart) {
-                                relaunch();
-                            }
-                            else
-                                location.reload();
-                        }
+                        onClick: relaunch
                     }), 10_000);
                 return;
             }

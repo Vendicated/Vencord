@@ -25,7 +25,7 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
+import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
@@ -125,7 +125,6 @@ function Updatable(props: CommonProps) {
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
                             setUpdates([]);
-                            const needFullRestart = await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
                                     title: "Update Success!",
@@ -133,10 +132,7 @@ function Updatable(props: CommonProps) {
                                     confirmText: "Restart",
                                     cancelText: "Not now!",
                                     onConfirm() {
-                                        if (needFullRestart)
-                                            relaunch();
-                                        else
-                                            location.reload();
+                                        relaunch();
                                         r();
                                     },
                                     onCancel: r
