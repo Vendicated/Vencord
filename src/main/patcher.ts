@@ -85,6 +85,11 @@ if (!IS_VANILLA) {
                     options.backgroundColor = "#00000000";
                 }
 
+                if (settings.macosTranslucency && process.platform === "darwin") {
+                    options.backgroundColor = "#00000000";
+                    options.vibrancy = "sidebar";
+                }
+
                 process.env.DISCORD_PRELOAD = original;
 
                 super(options);
