@@ -73,7 +73,7 @@ export default definePlugin({
     ],
 
     getProfileTimezonesComponent: ({ user }: { user: User; }) => {
-        const { preference } = settings.use(["preference"]);
+        const { preference, showTimezonesInProfile } = settings.use(["preference", "showTimezonesInProfile"]);
 
         const [timezone, setTimezone] = React.useState<string | undefined>();
         const [isInEditMode, setIsInEditMode] = React.useState(false);
@@ -91,7 +91,7 @@ export default definePlugin({
             return () => clearInterval(interval);
         }, [preference]);
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile)
+        if (!showTimezonesInProfile)
             return null;
 
         return (

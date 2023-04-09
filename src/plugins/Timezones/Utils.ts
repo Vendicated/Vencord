@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 
 import * as DataStore from "@api/DataStore";
 import { VENCORD_USER_AGENT } from "@utils/constants";
@@ -32,6 +31,7 @@ export interface TimezoneDB {
 export const API_URL = "https://timezonedb.catvibers.me";
 const Cache: Record<string, string> = {};
 
+const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 export function getTimeString(timezone: string, timestamp = new Date()): string {
     const locale = PreloadedUserSettings.getCurrentValue().localization.locale.value;
 
