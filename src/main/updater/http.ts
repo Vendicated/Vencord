@@ -70,13 +70,10 @@ async function fetchUpdates() {
             PendingUpdates.push([name, browser_download_url]);
         }
     });
-    console.log(PendingUpdates);
-
     return true;
 }
 
 async function applyUpdates() {
-    console.log(PendingUpdates);
     await Promise.all(PendingUpdates.map(
         async ([name, data]) => writeFile(
             join(__dirname, name),
