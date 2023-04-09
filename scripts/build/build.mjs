@@ -96,7 +96,7 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/vencordDesktopMain.js",
-        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("main") },
+        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
         sourcemap,
         define: {
             ...defines,
@@ -110,7 +110,7 @@ await Promise.all([
         outfile: "dist/vencordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
