@@ -106,7 +106,7 @@ if (!IS_VANILLA) {
         BrowserWindow
     };
 
-    // Patch appSettings to force enable devtools
+    // Patch appSettings to force enable devtools and optionally disable min size
     onceDefined(global, "appSettings", s => {
         s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
         if (settings.disableMinSize) {
