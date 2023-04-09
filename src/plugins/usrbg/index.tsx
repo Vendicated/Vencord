@@ -65,7 +65,7 @@ export default definePlugin({
     },
 
     bannerHook(banner: string, user: any) {
-        if (banner) return banner;
+        if (banner || userBg[user.userId] === "undefined") return banner;
         if (userBg[user.userId]) return userBg[user.userId];
         fetch(URL + user.userId + ".txt").then(res => {
             if (res.status === 200) {
