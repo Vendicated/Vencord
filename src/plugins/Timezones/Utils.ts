@@ -92,13 +92,13 @@ export function getUserTimezone(discordID: string, strategy: CustomTimezonePrefe
     return new Promise(res => {
         const timezone = (DataStore.get(DATASTORE_KEY) as Promise<TimezoneDB | undefined>).then(tzs => tzs?.[discordID]);
         timezone.then(tz => {
-            if (strategy == CustomTimezonePreference.Always) {
+            if (strategy === CustomTimezonePreference.Always) {
                 if (tz) res(tz);
                 else res(undefined);
                 return;
             }
 
-            if (tz && strategy == CustomTimezonePreference.Secondary)
+            if (tz && strategy === CustomTimezonePreference.Secondary)
                 res(tz);
             else {
                 if (discordID in Cache) res(Cache[discordID]);
@@ -121,7 +121,7 @@ export const getAllTimezones = async (): Promise<string[]> => {
     if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
         try {
             // @ts-expect-error fuck you typescript
-            return Intl.supportedValuesOf('timeZone');
+            return Intl.supportedValuesOf("timeZone");
         } catch { }
     }
 
