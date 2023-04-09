@@ -65,8 +65,8 @@ export default definePlugin({
     },
 
     bannerHook(banner: string, user: any) {
-        const bg = userBg[user.userId];
-        if (bg) banner = bg;
+        if (banner) return banner;
+        banner = userBg[user.id] ? userBg[user.id] : undefined;
         return banner;
     },
 
