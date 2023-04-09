@@ -16,35 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Message } from "discord-types/general";
+
+const settings = definePluginSettings({
+    exemptList: {
+        description:
+            "List of users to exempt from this plugin (separated by commas or spaces)",
+        type: OptionType.STRING,
+        default: "1234567890123445,1234567890123445",
+    },
+    inverseShiftReply: {
+        description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
+});
 
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
     authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix],
-    options: {
-        exemptList: {
-            description:
-                "List of users to exempt from this plugin (separated by commas or spaces)",
-            type: OptionType.STRING,
-            default: "1234567890123445,1234567890123445",
-        },
-        inverseShiftReply: {
-            description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
-            type: OptionType.BOOLEAN,
-            default: false,
-        }
-    },
-    shouldMention(message: Message, holdingShift: boolean) {
-        const { exemptList, inverseShiftReply } = Settings.plugins.NoReplyMention;
+    settings,
 
-        const isExempt = exemptList.includes(message.author.id);
+    shouldMention(message: Message, holdingShift: boolean) {
+        const isExempt = settings.store.exemptList.includes(message.author.id);
         if (holdingShift === undefined) return isExempt;
-        return inverseShiftReply ? holdingShift !== isExempt : !holdingShift && isExempt;
+        return settings.store.inverseShiftReply ? holdingShift !== isExempt : !holdingShift && isExempt;
     },
+
     patches: [
         {
             find: "CREATE_PENDING_REPLY:function",
