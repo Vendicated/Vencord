@@ -24,6 +24,7 @@ import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
+
 import settings from "./settings";
 
 
