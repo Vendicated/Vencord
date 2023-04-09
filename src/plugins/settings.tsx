@@ -76,15 +76,6 @@ export default definePlugin({
                 section: ID.HEADER,
                 label: "Vencord"
             },
-            IS_VENCORD_DESKTOP && {
-                section: "VencordDesktop",
-                label: "Desktop Settings",
-                element: VencordDesktop.Components.Settings,
-                onClick: makeOnClick("VencordDesktop")
-            },
-            IS_VENCORD_DESKTOP && {
-                section: ID.DIVIDER
-            },
             {
                 section: "VencordSettings",
                 label: "Vencord",
@@ -127,6 +118,12 @@ export default definePlugin({
                 element: PatchHelper!,
                 onClick: makeOnClick("VencordPatchHelper")
             },
+            IS_VENCORD_DESKTOP && {
+                section: "VencordDesktop",
+                label: "Desktop Settings",
+                element: VencordDesktop.Components.Settings,
+                onClick: makeOnClick("VencordDesktop")
+            },
             {
                 section: ID.DIVIDER
             }
@@ -147,14 +144,6 @@ export default definePlugin({
             ],
             restartNeeded: true
         },
-    },
-
-    tabs: {
-        vencord: () => <SettingsComponent tab="VencordSettings" />,
-        plugins: () => <SettingsComponent tab="VencordPlugins" />,
-        themes: () => <SettingsComponent tab="VencordThemes" />,
-        updater: () => <SettingsComponent tab="VencordUpdater" />,
-        sync: () => <SettingsComponent tab="VencordSettingsSync" />
     },
 
     get electronVersion() {

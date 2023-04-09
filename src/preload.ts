@@ -28,24 +28,21 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
 // Discord
 if (location.protocol !== "data:") {
+    // #region cssInsert
     const rendererCss = join(__dirname, "renderer.css");
 
-    function insertCss(css: string) {
-        const style = document.createElement("style");
-        style.id = "vencord-css-core";
-        style.textContent = css;
+    const style = document.createElement("style");
+    style.id = "vencord-css-core";
+    style.textContent = readFileSync(rendererCss, "utf-8");
 
-        if (document.readyState === "complete") {
-            document.documentElement.appendChild(style);
-        } else {
-            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
-                once: true
-            });
-        }
+    if (document.readyState === "complete") {
+        document.documentElement.appendChild(style);
+    } else {
+        document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+            once: true
+        });
     }
 
-    const css = readFileSync(rendererCss, "utf-8");
-    insertCss(css);
     if (IS_DEV) {
         // persistent means keep process running if watcher is the only thing still running
         // which we obviously don't want
@@ -53,6 +50,7 @@ if (location.protocol !== "data:") {
             document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
         });
     }
+    // #endregion
 
     if (process.env.DISCORD_PRELOAD) {
         webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
