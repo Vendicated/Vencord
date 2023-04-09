@@ -38,6 +38,7 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
@@ -71,6 +72,7 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
 
