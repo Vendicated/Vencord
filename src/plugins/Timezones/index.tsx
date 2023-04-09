@@ -17,158 +17,41 @@
 */
 
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { Devs, VENCORD_USER_AGENT } from "@utils/constants";
-import { classes, useForceUpdater } from "@utils/misc";
-import definePlugin, { OptionType } from "@utils/types";
+import { classes, makeLazy, useForceUpdater } from "@utils/misc";
+import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
-
+import settings from "./settings";
 
 
 const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409");
 const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
 
-import { timezones } from "./all_timezones";
-import { API_URL, DATASTORE_KEY, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
+import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
 
-
+const useTimezones = makeLazy(getAllTimezones);
 
 export default definePlugin({
-    name: "Timezones",
-    description: "Shows the timezones of users",
+    settings,
+
+    name: "User Timezones",
+    description: "Allows you to see and set the timezones of other users.",
     authors: [Devs.mantikafasi, Devs.Arjix],
-    options: {
 
-        showTimezonesInChat: {
-            type: OptionType.BOOLEAN,
-            description: "Show timezones in chat",
-            default: true,
-        },
-
-        showTimezonesInProfile: {
-            type: OptionType.BOOLEAN,
-            description: "Show timezones in profile",
-            default: true,
-        },
-    },
     settingsAboutComponent: () => {
         const href = `${API_URL}?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
         return (
             <Text variant="text-md/normal">
                 A plugin that displays the local time for specific users using their timezone. <br />
-                By default the timezone will be fetched from the <a href={href} onClick={() => open(href)}>TimezoneDB</a> (if available), <br />
-                but you can override that with a custom timezone.
+                Timezones can either be set manually or fetched automatically from the <a href={href}>TimezoneDB</a>
             </Text>
         );
     },
-    commands: [
-        {
-            name: "settimezone",
-            description: "Set a users timezone",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "user",
-                    description: "User to set timezone for",
-                    type: ApplicationCommandOptionType.USER,
-                    required: true
-                },
-                {
-                    name: "timezone",
-                    description: "Timezone id to set (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: true
-                }
-
-
-            ],
-            execute(args, ctx) {
-                const user: string | undefined = findOption(args, "user");
-                const timezone = (findOption(args, "timezone") as string | undefined)?.trim() as typeof timezones[number] | undefined;
-
-                // Kinda hard to happen, but just to be safe...
-                if (!user || !timezone) return sendBotMessage(ctx.channel.id, { content: "PLease provider both a user and a timezone." });
-
-
-                if (timezone && !timezones.includes(timezone)) {
-                    sendBotMessage(ctx.channel.id, { content: "Invalid timezone.\nPlease look at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" });
-                    return;
-                }
-
-                DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
-                    oldValue = oldValue || {};
-
-                    oldValue[user] = timezone;
-                    return oldValue;
-                }).then(() => {
-                    sendBotMessage(ctx.channel.id, { content: "Timezone set!" });
-                }).catch(err => {
-                    console.error(err);
-                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
-                });
-            },
-        },
-        {
-            name: "deletetimezone",
-            description: "Delete a users timezone",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "user",
-                    description: "User to delete timezone for",
-                    type: ApplicationCommandOptionType.USER,
-                    required: true
-                },
-            ],
-            execute(args, ctx) {
-                const user: string | undefined = findOption(args, "user");
-                if (!user) return sendBotMessage(ctx.channel.id, { content: "Please provide a user." }) && undefined;
-
-                DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
-                    oldValue = oldValue || {};
-
-                    if (!Object.prototype.hasOwnProperty.call(oldValue, user))
-                        sendBotMessage(ctx.channel.id, { content: "No timezones were set for this user." });
-                    else {
-                        delete oldValue[user];
-                        sendBotMessage(ctx.channel.id, { content: "Timezone removed!." });
-                    }
-
-                    return oldValue;
-                }).catch(err => {
-                    console.error(err);
-                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
-                });
-            }
-        },
-        {
-            name: "gettimezones",
-            description: "Get all timezones",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            execute(args, ctx) {
-                DataStore.get(DATASTORE_KEY).then((timezones: TimezoneDB | undefined) => {
-                    if (!timezones || Object.keys(timezones).length === 0) {
-                        sendBotMessage(ctx.channel.id, { content: "No timezones are set." });
-                        return;
-                    }
-
-                    sendBotMessage(ctx.channel.id, {
-                        content: "Timezones for " + Object.keys(timezones).length + " users:\n" + Object.keys(timezones).map(user => {
-                            return `<@${user}> - ${timezones[user]}`;
-                        }).join("\n")
-                    });
-                }).catch(err => {
-                    console.error(err);
-                    sendBotMessage(ctx.channel.id, { content: "Something went wrong, please try again later." });
-                });
-            }
-        }
-    ],
 
     patches: [
         {
@@ -176,37 +59,39 @@ export default definePlugin({
             replacement: {
 
                 match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\[{0,1}\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\)*\]{0,1})/,
-                // DONT EVER ASK ME HOW THIS WORKS I DONT KNOW EITHER I STOLE IT FROM TYMEN
-                replace: "[$1, Vencord.Plugins.plugins.Timezones.getTimezonesComponent(e)]"
+                replace: "[$1, $self.getTimezonesComponent(e)]"
             },
         },
         {
             find: "().customStatusSection",
             replacement: {
-                // Inserts the timezone component right below the custom status.
                 match: /user:(\w),nickname:\w,.*?children.*?\(\)\.customStatusSection.*?\}\),/,
                 replace: "$&$self.getProfileTimezonesComponent({user:$1}),"
             }
         }
     ],
 
-    getProfileTimezonesComponent: (e: any) => {
-        const user = e.user as User;
+    getProfileTimezonesComponent: ({ user }: { user: User; }) => {
+        const { preference } = settings.use(["preference"]);
 
         const [timezone, setTimezone] = React.useState<string | undefined>();
         const [isInEditMode, setIsInEditMode] = React.useState(false);
+        const [timezones, setTimezones] = React.useState<string[]>([]);
+
         const forceUpdate = useForceUpdater();
 
         React.useEffect(() => {
-            getUserTimezone(user.id).then(timezone => setTimezone(timezone));
+            useTimezones().then(setTimezones);
+            getUserTimezone(user.id, preference).then(tz => setTimezone(tz));
 
-            // Rerender every second to stay in sync.
-            setInterval(forceUpdate, 1000);
-        }, [user.id]);
+            // Rerender every 10 seconds to stay in sync.
+            const interval = setInterval(forceUpdate, 10 * 1000);
 
-        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile) {
+            return () => clearInterval(interval);
+        }, [preference]);
+
+        if (!Vencord.Settings.plugins.Timezones.showTimezonesInProfile)
             return null;
-        }
 
         return (
             <Text variant="text-sm/normal" className={classNames.customStatusSection}
@@ -220,26 +105,33 @@ export default definePlugin({
                     } : {})
                 }}
             >
-                {!isInEditMode && <span style={{ fontSize: "1.2em", cursor: (timezone ? "pointer" : "") }} onClick={() => {
-                    if (timezone) {
-                        Toasts.show({
-                            type: Toasts.Type.MESSAGE,
-                            message: timezone,
-                            id: Toasts.genId()
-                        });
-                    }
-                }}>{(timezone) ? getTimeString(timezone) : "No timezone set"}</span>}
+                {!isInEditMode &&
+                    <span
+                        style={{ fontSize: "1.2em", cursor: (timezone ? "pointer" : "") }}
+                        onClick={() => {
+                            if (timezone) {
+                                Toasts.show({
+                                    type: Toasts.Type.MESSAGE,
+                                    message: timezone,
+                                    id: Toasts.genId()
+                                });
+                            }
+                        }}
+                    >
+                        {(timezone) ? getTimeString(timezone) : "No timezone set"}
+                    </span>
+                }
 
                 {isInEditMode && (
                     <span style={{ width: "90%" }}>
                         <SearchableSelect
                             placeholder="Pick a timezone"
                             options={timezones.map(tz => ({ label: tz, value: tz }))}
-                            onChange={value => setTimezone(value)}
+                            value={timezone ? { label: timezone, value: timezone } : undefined}
+                            onChange={value => { setTimezone(value); }}
                         />
                     </span>
                 )}
-
 
                 <span style={
                     isInEditMode ? {
@@ -257,38 +149,42 @@ export default definePlugin({
                     <EditIcon
                         style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
                         onClick={() => {
-                            if (isInEditMode) {
-                                if (timezone) {
-                                    DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
-                                        oldValue = oldValue || {};
-                                        oldValue[user.id] = timezone as typeof timezones[number];
-                                        return oldValue;
-                                    }).then(() => {
-                                        Toasts.show({
-                                            type: Toasts.Type.SUCCESS,
-                                            message: "Timezone set!",
-                                            id: Toasts.genId()
-                                        });
-                                        setIsInEditMode(false);
-                                    }).catch(err => {
-                                        console.error(err);
-                                        Toasts.show({
-                                            type: Toasts.Type.FAILURE,
-                                            message: "Something went wrong, please try again later.",
-                                            id: Toasts.genId()
-                                        });
-                                    });
-                                } else {
-                                    setIsInEditMode(false);
-                                }
-                            } else {
+                            if (!isInEditMode) {
                                 setIsInEditMode(true);
+                                return;
                             }
+
+                            if (!timezone) {
+                                setIsInEditMode(false);
+                                return;
+                            }
+
+                            DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
+                                oldValue = oldValue || {};
+                                oldValue[user.id] = timezone;
+                                return oldValue;
+                            }).then(() => {
+                                Toasts.show({
+                                    type: Toasts.Type.SUCCESS,
+                                    message: "Timezone set!",
+                                    id: Toasts.genId()
+                                });
+
+                                setIsInEditMode(false);
+                            }).catch(err => {
+                                console.error(err);
+                                Toasts.show({
+                                    type: Toasts.Type.FAILURE,
+                                    message: "Something went wrong, please try again later.",
+                                    id: Toasts.genId()
+                                });
+                            });
                         }}
                         color="var(--primary-330)"
                         height="16"
                         width="16"
                     />
+
                     {isInEditMode &&
                         <DeleteIcon
                             style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
@@ -304,7 +200,7 @@ export default definePlugin({
                                         id: Toasts.genId()
                                     });
                                     setIsInEditMode(false);
-                                    setTimezone(await getUserTimezone(user.id));
+                                    setTimezone(await getUserTimezone(user.id, preference));
                                 }).catch(err => {
                                     console.error(err);
                                     Toasts.show({
@@ -322,18 +218,20 @@ export default definePlugin({
                 </span>
             </Text >
         );
-    }
-    ,
+    },
 
-    getTimezonesComponent: ({ message, user }: { message: Message, user: any; }) => {
-        if (Vencord.Settings.plugins.showTimezonesInChat || user || message.author.id === UserStore.getCurrentUser().id)
-            return null;
-
+    getTimezonesComponent: ({ message }: { message: Message; }) => {
+        const { showTimezonesInChat, preference } = settings.use(["preference", "showTimezonesInChat"]);
         const [timezone, setTimezone] = React.useState<string | undefined>();
 
         React.useEffect(() => {
-            getUserTimezone(message.author.id).then(timezone => setTimezone(timezone));
-        }, [message.author.id]);
+            if (!showTimezonesInChat) return;
+
+            getUserTimezone(message.author.id, preference).then(tz => setTimezone(tz));
+        }, [showTimezonesInChat, preference]);
+
+        if (!showTimezonesInChat || message.author.id === UserStore.getCurrentUser()?.id)
+            return null;
 
         return (
             <span className={classes(styles.timestampInline, styles.timestamp)}>
