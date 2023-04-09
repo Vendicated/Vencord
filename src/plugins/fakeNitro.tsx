@@ -148,7 +148,7 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.whqwert],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -300,7 +300,7 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return) (.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}($self.patchDescription(${messages}, fakeNitroNode.fake))`
+                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}($self.patchDescription(${messages},fakeNitroNode.fake))`
             }
         }
     ],
