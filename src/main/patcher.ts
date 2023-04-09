@@ -107,9 +107,16 @@ if (!IS_VANILLA) {
     };
 
     // Patch appSettings to force enable devtools
-    onceDefined(global, "appSettings", s =>
-        s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true)
-    );
+    onceDefined(global, "appSettings", s => {
+        s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
+        if (settings.disableMinSize) {
+            s.set("MIN_WIDTH", 0);
+            s.set("MIN_HEIGHT", 0);
+        } else {
+            s.set("MIN_WIDTH", 940);
+            s.set("MIN_HEIGHT", 500);
+        }
+    });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 } else {
