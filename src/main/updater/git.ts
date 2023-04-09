@@ -22,7 +22,7 @@ import { ipcMain } from "electron";
 import { join } from "path";
 import { promisify } from "util";
 
-import { calculateHashes, serializeErrors } from "./common";
+import { serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
 
@@ -76,7 +76,6 @@ async function build() {
     return !res.stderr.includes("Build failed");
 }
 
-ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));

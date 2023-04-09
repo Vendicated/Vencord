@@ -62,24 +62,9 @@ export function getRepo() {
     return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
 }
 
-type Hashes = Record<"patcher.js" | "main.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
-
-/**
- * @returns true if hard restart is required
- */
 export async function rebuild() {
-    const oldHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
-
     if (!await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.BUILD)))
         throw new Error("The Build failed. Please try manually building the new update");
-
-    const newHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
-
-    if (oldHashes["preload.js"] !== newHashes["preload.js"]) return true;
-    if (IS_DISCORD_DESKTOP && oldHashes["patcher.js"] !== newHashes["patcher.js"]) return true;
-    if (IS_VENCORD_DESKTOP && oldHashes["main.js"] !== newHashes["main.js"]) return true;
-
-    return false;
 }
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
@@ -93,11 +78,8 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
             if (wantsUpdate) {
                 await update();
-                const needFullRestart = await rebuild();
-                if (needFullRestart)
-                    relaunch();
-                else
-                    location.reload();
+                await rebuild();
+                relaunch();
             }
         }
     } catch (err) {

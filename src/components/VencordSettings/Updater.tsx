@@ -125,7 +125,7 @@ function Updatable(props: CommonProps) {
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
                             setUpdates([]);
-                            const needFullRestart = await rebuild();
+                            await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
                                     title: "Update Success!",
@@ -133,10 +133,7 @@ function Updatable(props: CommonProps) {
                                     confirmText: "Restart",
                                     cancelText: "Not now!",
                                     onConfirm() {
-                                        if (needFullRestart)
-                                            relaunch();
-                                        else
-                                            location.reload();
+                                        relaunch();
                                         r();
                                     },
                                     onCancel: r

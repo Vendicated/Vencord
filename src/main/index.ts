@@ -32,9 +32,10 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
             if (url.endsWith("/")) url = url.slice(0, -1);
             switch (url) {
                 case "renderer.js.map":
+                case "vencordDesktopRenderer.js.map":
                 case "preload.js.map":
-                case "patcher.js.map": // doubt
-                case "main.js.map":
+                case "patcher.js.map":
+                case "vencordDesktopMain.js.map":
                     cb(join(__dirname, url));
                     break;
                 default:
