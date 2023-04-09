@@ -40,7 +40,6 @@ export default strEnum({
     OPEN_QUICKCSS: "VencordOpenQuickCss",
     GET_UPDATES: "VencordGetUpdates",
     GET_REPO: "VencordGetRepo",
-    GET_HASHES: "VencordGetHashes",
     UPDATE: "VencordUpdate",
     BUILD: "VencordBuild",
     OPEN_MONACO_EDITOR: "VencordOpenMonacoEditor",

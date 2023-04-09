@@ -56,8 +56,8 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=updateAsync\("audioContextSettings".{0,50})(?=return (\i)\.volume=(\i))/,
-                    replace: (_, volumeOptions, newVolume) => `if(${newVolume}>200)return ${volumeOptions}.volume=200;`
+                    match: /(?<=isLocalMute\(\i,\i\),volume:.+?volume:)\i(?=})/,
+                    replace: "$&>200?200:$&"
                 },
                 {
                     match: /(?<=Object\.entries\(\i\.localMutes\).+?volume:).+?(?=,)/,
@@ -74,10 +74,10 @@ export default definePlugin({
             find: '.displayName="MediaEngineStore"',
             replacement: [
                 {
-                    match: /(?<=\.settings\.audioContextSettings.+?)(\i\[\i\])=(\i\.volume)(.+?setLocalVolume\(\i,).+?\)/,
-                    replace: (_, localVolume, syncVolume, rest) => ""
+                    match: /(\.settings\.audioContextSettings.+?)(\i\[\i\])=(\i\.volume)(.+?setLocalVolume\(\i,).+?\)/,
+                    replace: (_, rest1, localVolume, syncVolume, rest2) => rest1
                         + `(${localVolume}>200?void 0:${localVolume}=${syncVolume})`
-                        + rest
+                        + rest2
                         + `${localVolume}??${syncVolume})`
                 }
             ]

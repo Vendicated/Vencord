@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BadgePosition, ProfileBadge } from "@api/Badges";
+import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -29,7 +29,7 @@ import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://media.discordapp.net/stickers/1026517526106087454.webp";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
 
 /** List of vencord contributor IDs */
 const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
@@ -53,14 +53,14 @@ const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "tooltip">
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users.",
-    authors: [Devs.Megu],
+    authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
         /* Patch the badges array */
         {
-            find: "PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP.format({date:",
+            find: "Messages.PROFILE_USER_BADGES,",
             replacement: {
-                match: /&&((\w{1,3})\.push\({tooltip:\w{1,3}\.\w{1,3}\.Messages\.PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP\.format.+?;)(?:return\s\w{1,3};?})/,
+                match: /&&((\i)\.push\({tooltip:\i\.\i\.Messages\.PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP\.format.+?;)(?:return\s\i;?})/,
                 replace: (_, m, badgeArray) => `&&${m} return Vencord.Api.Badges.inject(${badgeArray}, arguments[0]);}`,
             }
         },
@@ -69,20 +69,22 @@ export default definePlugin({
             find: "Messages.PROFILE_USER_BADGES,role:",
             replacement: [
                 {
-                    match: /src:(\w{1,3})\[(\w{1,3})\.key\],/,
+                    match: /src:(\i)\[(\i)\.key\],/g,
                     // <img src={badge.image ?? imageMap[badge.key]} {...badge.props} />
                     replace: (_, imageMap, badge) => `src: ${badge}.image ?? ${imageMap}[${badge}.key], ...${badge}.props,`
                 },
                 {
-                    match: /spacing:(\d{1,2}),children:(.{1,40}(\i)\.jsx.+?(\i)\.onClick.+?\)})},/,
-                    // if the badge provides it's own component, render that instead of an image
-                    // the badge also includes info about the user that has it (type BadgeUserArgs), which is why it's passed as props
-                    replace: (_, s, origBadgeComponent, React, badge) =>
-                        `spacing:${s},children:${badge}.component ? () => (0,${React}.jsx)(${badge}.component, { ...${badge} }) : ${origBadgeComponent}},`
+                    match: /children:function(?<=(\i)\.(?:tooltip|description),spacing:\d.+?)/g,
+                    replace: "children:$1.component ? () => $self.renderBadgeComponent($1) : function"
                 }
             ]
         }
     ],
+
+    renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
+        const Component = badge.component!;
+        return <Component {...badge} />;
+    }, { noop: true }),
 
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);

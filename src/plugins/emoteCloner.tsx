@@ -17,7 +17,6 @@
 */
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
@@ -176,74 +175,78 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
     );
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, args) => {
-    if (!args?.[0]) return;
-    const { favoriteableId, emoteClonerDataAlt, itemHref, itemSrc, favoriteableType } = args[0];
+function buildMenuItem(id: string, name: string, isAnimated: boolean) {
+    return (
+        <Menu.MenuItem
+            id="emote-cloner"
+            key="emote-cloner"
+            label="Clone Emote"
+            action={() =>
+                openModal(modalProps => (
+                    <ModalRoot {...modalProps}>
+                        <ModalHeader>
+                            <img
+                                role="presentation"
+                                aria-hidden
+                                src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${id}.${isAnimated ? "gif" : "png"}`}
+                                alt=""
+                                height={24}
+                                width={24}
+                                style={{ marginRight: "0.5em" }}
+                            />
+                            <Forms.FormText>Clone {name}</Forms.FormText>
+                        </ModalHeader>
+                        <ModalContent>
+                            <CloneModal id={id} name={name} isAnimated={isAnimated} />
+                        </ModalContent>
+                    </ModalRoot>
+                ))
+            }
+        />
+    );
+}
 
-    if (!emoteClonerDataAlt || favoriteableType !== "emoji") return;
+function isGifUrl(url: string) {
+    return new URL(url).pathname.endsWith(".gif");
+}
 
-    const name = emoteClonerDataAlt.match(/:(.*)(?:~\d+)?:/)?.[1];
-    if (!name || !favoriteableId) return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
-    const src = itemHref ?? itemSrc;
-    const isAnimated = new URL(src).pathname.endsWith(".gif");
+    if (!favoriteableId || favoriteableType !== "emoji") return;
 
-    const group = findGroupChildrenByChildId("save-image", children);
-    if (group && !group.some(child => child?.props?.id === "emote-cloner")) {
-        group.push((
-            <Menu.MenuItem
-                id="emote-cloner"
-                key="emote-cloner"
-                label="Clone"
-                action={() =>
-                    openModal(modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${favoriteableId}.${isAnimated ? "gif" : "png"}`}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                    style={{ marginRight: "0.5em" }}
-                                />
-                                <Forms.FormText>Clone {name}</Forms.FormText>
-                            </ModalHeader>
-                            <ModalContent>
-                                <CloneModal id={favoriteableId} name={name} isAnimated={isAnimated} />
-                            </ModalContent>
-                        </ModalRoot>
-                    ))
-                }
-            >
-            </Menu.MenuItem>
-        ));
-    }
+    const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
+    if (!match) return;
+    const name = match[1] ?? "FakeNitroEmoji";
+
+    const group = findGroupChildrenByChildId("copy-link", children);
+    if (group && !group.some(child => child?.props?.id === "emote-cloner"))
+        group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
 };
 
-migratePluginSettings("EmoteCloner", "EmoteYoink");
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
+    const { id, name, type } = props?.target?.dataset ?? {};
+    if (!id || !name || type !== "emoji") return;
+
+    const firstChild = props.target.firstChild as HTMLImageElement;
+
+    if (!children.some(c => c?.props?.id === "emote-cloner"))
+        children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
+};
+
 export default definePlugin({
     name: "EmoteCloner",
     description: "Adds a Clone context menu item to emotes to clone them your own server",
     authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
-
-    patches: [
-        {
-            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
-                replace: (m, target) => `${m}emoteClonerDataAlt:${target}.alt,`
-            }
-        }
-    ],
+    dependencies: ["ContextMenuAPI"],
 
     start() {
         addContextMenuPatch("message", messageContextMenuPatch);
+        addContextMenuPatch("expression-picker", expressionPickerPatch);
     },
 
     stop() {
         removeContextMenuPatch("message", messageContextMenuPatch);
+        removeContextMenuPatch("expression-picker", expressionPickerPatch);
     }
 });

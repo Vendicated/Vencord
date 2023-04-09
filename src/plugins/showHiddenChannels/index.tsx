@@ -21,16 +21,18 @@ import "./style.css";
 import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import HiddenChannelLockScreen, { setChannelBeginHeaderComponent, setEmojiComponent } from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen, { setChannelBeginHeaderComponent } from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
 
-const VIEW_CHANNEL = 1n << 10n;
+export const VIEW_CHANNEL = 1n << 10n;
+const CONNECT = 1n << 20n;
 
 enum ShowMode {
     LockIcon,
@@ -99,14 +101,14 @@ export default definePlugin({
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
-                    // Make Discord think we are connected to a voice channel so it shows us inside it
+                    // Prevent Discord from trying to connect to hidden channels
                     match: /(?=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\))/,
                     replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
-                    // Make Discord think we are connected to a voice channel so it shows us inside it
+                    // Make Discord show inside the channel if clicking on a hidden or locked channel
                     match: /(?<=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\);!__OVERLAY__&&\()/,
-                    replace: (_, channel) => `$self.isHiddenChannel(${channel})||`
+                    replace: (_, channel) => `$self.isHiddenChannel(${channel},true)||`
                 }
             ]
         },
@@ -232,26 +234,58 @@ export default definePlugin({
                 replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
         },
-        // Export the emoji component used on the lock screen
-        {
-            find: 'jumboable?"jumbo":"default"',
-            replacement: {
-                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function\(\i\){var \i=\i\.node.+?)/,
-                replace: (m, component) => `${m}shcEmojiComponentExport=($self.setEmojiComponent(${component}),void 0),`
-            }
-        },
         {
             find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
             replacement: [
                 {
-                    // Export the channel beggining header
+                    // Export the channel beginning header
                     match: /computePermissionsForRoles.+?}\)}(?<=function (\i)\(.+?)(?=var)/,
                     replace: (m, component) => `${m}$self.setChannelBeginHeaderComponent(${component});`
                 },
                 {
-                    // Patch the header to only return allowed users and roles if it's a hidden channel (Like when it's used on the HiddenChannelLockScreen)
+                    // Change the role permission check to CONNECT if the channel is locked
+                    match: /ADMINISTRATOR\)\|\|(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
+                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
+                },
+                {
+                    // Change the permissionOverwrite check to CONNECT if the channel is locked
+                    match: /permissionOverwrites\[.+?\i=(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
+                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
+                },
+                {
+                    // Patch the header to only return allowed users and roles if it's a hidden channel or locked channel (Like when it's used on the HiddenChannelLockScreen)
                     match: /MANAGE_ROLES.{0,60}?return(?=\(.+?(\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(\i)\.guild_id.+?roleColor.+?]}\)))/,
-                    replace: (m, component, channel) => `${m} $self.isHiddenChannel(${channel})?${component}:`
+                    replace: (m, component, channel) => {
+                        // Export the channel for the users allowed component patch
+                        component = component.replace(canonicalizeMatch(/(?<=users:\i)/), `,channel:${channel}`);
+
+                        return `${m} $self.isHiddenChannel(${channel},true)?${component}:`;
+                    }
+                }
+            ]
+        },
+        {
+            find: "().avatars),children",
+            replacement: [
+                {
+                    // Create a variable for the channel prop
+                    match: /=(\i)\.maxUsers,/,
+                    replace: (m, props) => `${m}channel=${props}.channel,`
+                },
+                {
+                    // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
+                    match: /\i>0(?=&&.{0,60}renderPopout)/,
+                    replace: m => `($self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)?true:${m})`
+                },
+                {
+                    // Prevent Discord from overwriting the last children with the plus button if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
+                    match: /(?<=\.value\(\),(\i)=.+?length-)1(?=\]=.{0,60}renderPopout)/,
+                    replace: (_, amount) => `($self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)&&${amount}<=0?0:1)`
+                },
+                {
+                    // Show only the plus text without overflowed children amount if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
+                    match: /(?<="\+",)(\i)\+1/,
+                    replace: (m, amount) => `$self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)&&${amount}<=0?"":${m}`
                 }
             ]
         },
@@ -261,22 +295,22 @@ export default definePlugin({
                 {
                     // Remove the divider and the open chat button for the HiddenChannelLockScreen
                     match: /"more-options-popout"\)\);if\((?<=function \i\((\i)\).+?)/,
-                    replace: (m, props) => `${m}(!$self.isHiddenChannel(${props}.channel)||${props}.inCall)&&`
+                    replace: (m, props) => `${m}!${props}.inCall&&$self.isHiddenChannel(${props}.channel,true)){}else if(`
                 },
                 {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
                     match: /this\.renderVoiceChannelEffects.+?children:(?<=renderContent=function.+?)/,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?$self.HiddenChannelLockScreen(this.props.channel):"
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?$self.HiddenChannelLockScreen(this.props.channel):"
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of voice channels
                     match: /this\.renderVoiceChannelEffects.+?disableGradients:(?<=renderContent=function.+?)/,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)||"
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)||"
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
                     match: /(?:{|,)render(?!Header|ExternalHeader).{0,30}?:(?<=renderContent=function.+?)(?!void)/g,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel)?null:"
+                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?null:"
                 }
             ]
         },
@@ -321,9 +355,7 @@ export default definePlugin({
             ],
         },
         {
-            // The module wasn't being found, so lets just escape everything
-            // eslint-disable-next-line no-useless-escape
-            find: "\^https\:\/\/\(\?\:canary\.\|ptb\.\)\?discord.com\/channels\/\(\\\\\d\+\|",
+            find: "\"^/guild-stages/(\\\\d+)(?:/)?(\\\\d+)?\"",
             replacement: {
                 // Make mentions of hidden channels work
                 match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,\i\)/,
@@ -337,19 +369,61 @@ export default definePlugin({
                 match: /(?<=getChannel\((\i)\)\)(?=.{0,100}?selectVoiceChannel))/,
                 replace: (_, channelId) => `&&!$self.isHiddenChannel({channelId:${channelId}})`
             }
+        },
+        {
+            find: '.displayName="GuildChannelStore"',
+            replacement: [
+                {
+                    // Make GuildChannelStore contain hidden channels
+                    match: /isChannelGated\(.+?\)(?=\|\|)/,
+                    replace: m => `${m}||true`
+                },
+                {
+                    // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
+                    match: /(?<=getChannels=function\(\i)\).+?(?=return (\i)})/,
+                    replace: (rest, channels) => `,shouldIncludeHidden=false${rest}${channels}=$self.resolveGuildChannels(${channels},shouldIncludeHidden);`
+                }
+            ]
+        },
+        {
+            find: ".Messages.FORM_LABEL_MUTED",
+            replacement: {
+                // Make GuildChannelStore.getChannels return hidden channels
+                match: /(?<=getChannels\(\i)(?=\))/,
+                replace: ",true"
+            }
         }
     ],
 
-    setEmojiComponent,
     setChannelBeginHeaderComponent,
 
-    isHiddenChannel(channel: Channel & { channelId?: string; }) {
+    isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
         if (!channel) return false;
 
         if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
-        return !PermissionStore.can(VIEW_CHANNEL, channel);
+        return !PermissionStore.can(VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(CONNECT, channel);
+    },
+
+    resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
+        if (shouldIncludeHidden) return channels;
+
+        const res = {};
+        for (const [key, maybeObjChannels] of Object.entries(channels)) {
+            if (!Array.isArray(maybeObjChannels)) {
+                res[key] = maybeObjChannels;
+                continue;
+            }
+
+            res[key] ??= [];
+
+            for (const objChannel of maybeObjChannels) {
+                if (objChannel.channel.id === null || !this.isHiddenChannel(objChannel.channel)) res[key].push(objChannel);
+            }
+        }
+
+        return res;
     },
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,

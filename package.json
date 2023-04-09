@@ -1,9 +1,8 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.1.0",
+    "version": "1.1.6",
     "description": "The cutest Discord client mod",
-    "keywords": [],
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
         "url": "https://github.com/Vendicated/Vencord/issues"
@@ -20,9 +19,10 @@
     "scripts": {
         "build": "node scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
+        "generatePluginJson": "tsx scripts/generatePluginList.ts",
         "inject": "node scripts/runInstaller.mjs",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "lint-styles": "stylelint \"src/**/*.css\"",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
+        "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm testTsc",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
@@ -33,7 +33,9 @@
     "dependencies": {
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.3",
-        "fflate": "^0.7.4"
+        "fflate": "^0.7.4",
+        "nanoid": "^4.0.2",
+        "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
         "@types/diff": "^5.0.2",
@@ -59,10 +61,11 @@
         "standalone-electron-types": "^1.0.0",
         "stylelint": "^14.16.1",
         "stylelint-config-standard": "^29.0.0",
+        "tsx": "^3.12.6",
         "type-fest": "^3.5.3",
         "typescript": "^4.9.4"
     },
-    "packageManager": "pnpm@7.13.4",
+    "packageManager": "pnpm@8.1.1",
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
@@ -89,6 +92,7 @@
         "sourceDir": "./dist/extension-v2-unpacked"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=18",
+        "pnpm": ">=8"
     }
 }
