@@ -45,9 +45,9 @@ export default definePlugin({
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
             const client = (() => {
-                if (IS_DISCORD_DESKTOP) return `Desktop (v${DiscordNative.app.getVersion()})`;
-                if (IS_VENCORD_DESKTOP) return `Vencord Desktop (v${VencordDesktopNative.app.getVersion()})`;
-                if ("armcord" in window) return "ArmCord";
+                if (IS_DISCORD_DESKTOP) return `Desktop v${DiscordNative.app.getVersion()}`;
+                if (IS_VENCORD_DESKTOP) return `Vencord Desktop v${VencordDesktopNative.app.getVersion()}`;
+                if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
                 return `Web (${navigator.userAgent})`;
             })();
 
