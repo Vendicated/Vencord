@@ -31,25 +31,31 @@ let editIdx = -1;
 
 migratePluginSettings("QuickReply", "InteractionKeybinds");
 
+enum MentionOptions {
+    DISABLED,
+    ENABLED,
+    NO_REPLY_MENTION_PLUGIN
+}
+
 const settings = definePluginSettings({
     shouldMention: {
         type: OptionType.SELECT,
         description: "Ping reply by default",
         options: [
             {
-                label: "If NoReplyMention plugin is enabled",
-                value: Settings.plugins.NoReplyMention.enabled,
+                label: "Follow NoReplyMention",
+                value: MentionOptions.NO_REPLY_MENTION_PLUGIN,
                 default: true
             },
-            { label: "Enabled", value: true },
-            { label: "Disabled", value: false },
+            { label: "Enabled", value: MentionOptions.ENABLED },
+            { label: "Disabled", value: MentionOptions.DISABLED },
         ]
     }
 });
 
 export default definePlugin({
     name: "QuickReply",
-    authors: [Devs.obscurity, Devs.Ven],
+    authors: [Devs.obscurity, Devs.Ven, Devs.pylix],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
     settings,
 
@@ -154,6 +160,14 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     return i === - 1 ? undefined : messages[messages.length - i - 1];
 }
 
+function shouldMention() {
+    switch (settings.store.shouldMention) {
+        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return !Settings.plugins.NoReplyMention.enabled;
+        case MentionOptions.DISABLED: return false;
+        default: return true;
+    }
+}
+
 // handle next/prev reply
 function nextReply(isUp: boolean) {
     const message = getNextMessage(isUp, true);
@@ -166,11 +180,12 @@ function nextReply(isUp: boolean) {
 
     const channel = ChannelStore.getChannel(message.channel_id);
     const meId = UserStore.getCurrentUser().id;
+
     Dispatcher.dispatch({
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
-        shouldMention: settings.store.shouldMention,
+        shouldMention: shouldMention(),
         showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });
