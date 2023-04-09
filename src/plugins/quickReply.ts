@@ -31,7 +31,7 @@ let editIdx = -1;
 
 migratePluginSettings("QuickReply", "InteractionKeybinds");
 
-enum MentionOptions {
+const enum MentionOptions {
     DISABLED,
     ENABLED,
     NO_REPLY_MENTION_PLUGIN
