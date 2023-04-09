@@ -66,7 +66,7 @@ export default definePlugin({
 
     bannerHook(banner: string, user: any) {
         if (banner) return banner;
-        banner = userBg[user.id] ? userBg[user.id] : undefined;
+        banner = userBg[user.userId] ? userBg[user.userId] : undefined;
         return banner;
     },
 
