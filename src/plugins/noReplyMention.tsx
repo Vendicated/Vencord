@@ -33,7 +33,7 @@ export default definePlugin({
             default: "1234567890123445,1234567890123445",
         },
         inverseShiftReply: {
-            description: "Inverse shift replying behaviour",
+            description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
             type: OptionType.BOOLEAN,
             default: false,
         }
@@ -41,16 +41,16 @@ export default definePlugin({
     shouldMention(message: Message, holdingShift: boolean) {
         const { exemptList, inverseShiftReply } = Settings.plugins.NoReplyMention;
 
-        const isExempted = exemptList.includes(message.author.id);
-        if (holdingShift === undefined) return isExempted;
-        return inverseShiftReply ? holdingShift !== isExempted : !holdingShift && isExempted;
+        const isExempt = exemptList.includes(message.author.id);
+        if (holdingShift === undefined) return isExempt;
+        return inverseShiftReply ? holdingShift !== isExempt : !holdingShift && isExempt;
     },
     patches: [
         {
             find: "CREATE_PENDING_REPLY:function",
             predicate: () => Settings.plugins.QuickReply.enabled,
             replacement: {
-                match: /CREATE_PENDING_REPLY:function\((.{1,2})\){/,
+                match: /CREATE_PENDING_REPLY:function\((\i)\){/,
                 replace:
                     "CREATE_PENDING_REPLY:function($1){$1._isQuickReply&&($1.shouldMention=$self.shouldMention($1.message));",
             },
@@ -58,7 +58,7 @@ export default definePlugin({
         {
             find: ",\"Message\")}function",
             replacement: {
-                match: /:(.{1,2}),shouldMention:!(.{1,2})\.shiftKey/,
+                match: /:(\i),shouldMention:!(\i)\.shiftKey/,
                 replace: ":$1,shouldMention:$self.shouldMention($1,$2.shiftKey)"
             }
         }
