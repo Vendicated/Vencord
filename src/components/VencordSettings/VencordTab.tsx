@@ -83,6 +83,11 @@ function VencordSettings() {
                 key: "winCtrlQ",
                 title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
                 note: "Requires a full restart"
+            },
+            IS_DISCORD_DESKTOP && {
+                key: "disableMinSize",
+                title: "Disable minimum window size",
+                note: "Requires a full restart"
             }
         ];
 
