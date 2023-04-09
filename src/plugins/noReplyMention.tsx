@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Message } from "discord-types/general";
@@ -50,7 +50,6 @@ export default definePlugin({
     patches: [
         {
             find: "CREATE_PENDING_REPLY:function",
-            predicate: () => Settings.plugins.QuickReply.enabled,
             replacement: {
                 match: /CREATE_PENDING_REPLY:function\((\i)\){/,
                 replace:
