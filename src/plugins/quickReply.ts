@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
+import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -31,10 +31,27 @@ let editIdx = -1;
 
 migratePluginSettings("QuickReply", "InteractionKeybinds");
 
+const settings = definePluginSettings({
+    shouldMention: {
+        type: OptionType.SELECT,
+        description: "Ping reply by default",
+        options: [
+            {
+                label: "If NoReplyMention plugin is enabled",
+                value: Settings.plugins.NoReplyMention.enabled,
+                default: true
+            },
+            { label: "Enabled", value: true },
+            { label: "Disabled", value: false },
+        ]
+    }
+});
+
 export default definePlugin({
     name: "QuickReply",
     authors: [Devs.obscurity, Devs.Ven],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
+    settings,
 
     start() {
         Dispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
@@ -153,7 +170,7 @@ function nextReply(isUp: boolean) {
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
-        shouldMention: true,
+        shouldMention: settings.store.shouldMention,
         showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });

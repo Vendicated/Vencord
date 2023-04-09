@@ -41,21 +41,12 @@ export default definePlugin({
     authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix],
     settings,
 
-    shouldMention(message: Message, isHoldingShift?: boolean) {
+    shouldMention(message: Message, isHoldingShift: boolean) {
         const isExempt = settings.store.exemptList.includes(message.author.id);
-        if (isHoldingShift === undefined) return isExempt;
         return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
     },
 
     patches: [
-        {
-            find: "CREATE_PENDING_REPLY:function",
-            replacement: {
-                match: /CREATE_PENDING_REPLY:function\((\i)\){/,
-                replace:
-                    "CREATE_PENDING_REPLY:function($1){$1._isQuickReply&&($1.shouldMention=$self.shouldMention($1.message));",
-            },
-        },
         {
             find: ",\"Message\")}function",
             replacement: {
