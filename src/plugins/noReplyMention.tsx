@@ -41,10 +41,10 @@ export default definePlugin({
     authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix],
     settings,
 
-    shouldMention(message: Message, holdingShift: boolean) {
+    shouldMention(message: Message, isHoldingShift?: boolean) {
         const isExempt = settings.store.exemptList.includes(message.author.id);
-        if (holdingShift === undefined) return isExempt;
-        return settings.store.inverseShiftReply ? holdingShift !== isExempt : !holdingShift && isExempt;
+        if (isHoldingShift === undefined) return isExempt;
+        return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
     },
 
     patches: [
