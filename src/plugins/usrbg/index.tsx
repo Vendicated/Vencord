@@ -67,9 +67,9 @@ export default definePlugin({
     bannerHook(banner: string, user: any) {
         if (banner) return banner;
         if (userBg[user.userId]) return userBg[user.userId];
-        fetch(URL + user.userId + ".txt").then((res) => {
-            if (res.status == 200) {
-                res.text().then((text) => {
+        fetch(URL + user.userId + ".txt").then(res => {
+            if (res.status === 200) {
+                res.text().then(text => {
                     userBg[user.userId] = text;
                 });
             } else {
