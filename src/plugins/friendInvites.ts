@@ -19,12 +19,16 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
+import { RestAPI, UserStore } from "@webpack/common";
+
+const FriendInvites = findByPropsLazy("createFriendInvite");
+const uuid = findByPropsLazy("v4", "v1");
 
 export default definePlugin({
     name: "FriendInvites",
-    description: "Generate and manage friend invite links.",
-    authors: [Devs.afn],
+    description: "Create and manage friend invite links via slash commands (/create friend invite, /view friend invites, /revoke friend invites).",
+    authors: [Devs.afn, Devs.Dziurwa],
     dependencies: ["CommandsAPI"],
     commands: [
         {
@@ -32,14 +36,31 @@ export default definePlugin({
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const friendInvites = findByProps("createFriendInvite");
-                const createInvite = await friendInvites.createFriendInvite();
+                if (!UserStore.getCurrentUser().phone)
+                    return sendBotMessage(ctx.channel.id, {
+                        content: "You need to have a phone number connected to your account to create a friend invite!"
+                    });
 
-                return void sendBotMessage(ctx.channel.id, {
+                const random = uuid.v4();
+                const invite = await RestAPI.post({
+                    url: "/friend-finder/find-friends",
+                    body: {
+                        modified_contacts: {
+                            [random]: [1, "", ""]
+                        }
+                    }
+                }).then(res =>
+                    FriendInvites.createFriendInvite({
+                        code: res.body.invite_suggestions[0][3],
+                        recipient_phone_number_or_email: random
+                    })
+                );
+
+                sendBotMessage(ctx.channel.id, {
                     content: `
-                        discord.gg/${createInvite.code}
-                        Expires: <t:${new Date(createInvite.expires_at).getTime() / 1000}:R>
-                        Max uses: \`${createInvite.max_uses}\`
+                        discord.gg/${invite.code} ·
+                        Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
+                        Max uses: \`${invite.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
                 });
             },
@@ -49,28 +70,29 @@ export default definePlugin({
             description: "View a list of all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const friendInvites = findByProps("createFriendInvite");
-                const invites = await friendInvites.getAllFriendInvites();
+                const invites = await FriendInvites.getAllFriendInvites();
                 const friendInviteList = invites.map(i =>
-                    `_discord.gg/${i.code}_
-                    Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R>
-                    Times used: \`${i.uses}/${i.max_uses}\``.trim().replace(/\s+/g, " ")
+                    `
+                    _discord.gg/${i.code}_ ·
+                    Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R> ·
+                    Times used: \`${i.uses}/${i.max_uses}\`
+                    `.trim().replace(/\s+/g, " ")
                 );
 
-                return void sendBotMessage(ctx.channel.id, {
-                    content: friendInviteList.join("\n\n") || "You have no active friend invites!"
+                sendBotMessage(ctx.channel.id, {
+                    content: friendInviteList.join("\n") || "You have no active friend invites!"
                 });
             },
         },
         {
             name: "revoke friend invites",
-            description: "Revokes ALL generated friend invite links.",
+            description: "Revokes all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                await findByProps("createFriendInvite").revokeFriendInvites();
+                await FriendInvites.revokeFriendInvites();
 
                 return void sendBotMessage(ctx.channel.id, {
-                    content: "All friend links have been revoked."
+                    content: "All friend invites have been revoked."
                 });
             },
         },

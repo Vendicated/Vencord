@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
+import { localStorage } from "@utils/localStorage";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
+import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
@@ -28,12 +31,15 @@ const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
     autoUpdate: boolean;
+    autoUpdateNotification: boolean,
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    macosTranslucency: boolean;
+    disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
@@ -46,25 +52,44 @@ export interface Settings {
         timeout: number;
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
+        logLimit: number;
+    };
+
+    cloud: {
+        authenticated: boolean;
+        url: string;
+        settingsSync: boolean;
+        settingsSyncVersion: number;
     };
 }
 
 const DefaultSettings: Settings = {
     notifyAboutUpdates: true,
     autoUpdate: false,
+    autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
     enableReactDevtools: false,
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    macosTranslucency: false,
+    disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
 
     notifications: {
         timeout: 5000,
         position: "bottom-right",
-        useNative: "not-focused"
+        useNative: "not-focused",
+        logLimit: 50
+    },
+
+    cloud: {
+        authenticated: false,
+        url: "https://api.vencord.dev/",
+        settingsSync: false,
+        settingsSyncVersion: 0
     }
 };
 
@@ -75,6 +100,13 @@ try {
     var settings = mergeDefaults({} as Settings, DefaultSettings);
     logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
 }
+
+const saveSettingsOnFrequentAction = debounce(async () => {
+    if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+        await putCloudSettings();
+        delete localStorage.Vencord_settingsDirty;
+    }
+}, 60_000);
 
 type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
 const subscriptions = new Set<SubscriptionCallback>();
@@ -131,12 +163,16 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             target[p] = v;
             // Call any listeners that are listening to a setting of this path
             const setPath = `${path}${path && "."}${p}`;
+            delete proxyCache[setPath];
             for (const subscription of subscriptions) {
                 if (!subscription._path || subscription._path === setPath) {
                     subscription(v, setPath);
                 }
             }
             // And don't forget to persist the settings!
+            PlainSettings.cloud.settingsSyncVersion = Date.now();
+            localStorage.Vencord_settingsDirty = true;
+            saveSettingsOnFrequentAction();
             VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }
@@ -167,11 +203,11 @@ export const Settings = makeProxy(settings);
  * @returns Settings
  */
 // TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
-export function useSettings(paths?: string[]) {
+export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
     const onUpdate: SubscriptionCallback = paths
-        ? (value, path) => paths.includes(path) && forceUpdate()
+        ? (value, path) => paths.includes(path as UseSettings<Settings>) && forceUpdate()
         : forceUpdate;
 
     React.useEffect(() => {
@@ -229,7 +265,7 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
             return Settings.plugins[definedSettings.pluginName] as any;
         },
         use: settings => useSettings(
-            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
         ).plugins[definedSettings.pluginName] as any,
         def,
         checks: checks ?? {},
@@ -237,3 +273,15 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
     };
     return definedSettings;
 }
+
+type UseSettings<T extends object> = ResolveUseSettings<T>[keyof T];
+
+type ResolveUseSettings<T extends object> = {
+    [Key in keyof T]:
+    Key extends string
+    ? T[Key] extends Record<string, unknown>
+    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
+    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
+    : Key
+    : never;
+};

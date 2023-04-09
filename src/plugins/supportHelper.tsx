@@ -33,8 +33,9 @@ const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 export default definePlugin({
     name: "SupportHelper",
     required: true,
-    description: "Helps me provide support to you",
+    description: "Helps us provide support to you",
     authors: [Devs.Ven],
+    dependencies: ["CommandsAPI"],
 
     commands: [{
         name: "vencord-debug",
@@ -43,11 +44,18 @@ export default definePlugin({
         execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
+            const client = (() => {
+                if (IS_DISCORD_DESKTOP) return `Desktop v${DiscordNative.app.getVersion()}`;
+                if (IS_VENCORD_DESKTOP) return `Vencord Desktop v${VencordDesktopNative.app.getVersion()}`;
+                if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
+                return `Web (${navigator.userAgent})`;
+            })();
+
             const debugInfo = `
 **Vencord Debug Info**
 
 > Discord Branch: ${RELEASE_CHANNEL}
-> Client: ${typeof DiscordNative === "undefined" ? window.armcord ? "Armcord" : `Web (${navigator.userAgent})` : `Desktop (Electron v${settings.electronVersion})`}
+> Client: ${client}
 > Platform: ${window.navigator.platform}
 > Vencord Version: ${gitHash}${settings.additionalInfo}
 > Outdated: ${isOutdated}

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -29,39 +30,21 @@ const Engines = {
     ImgOps: "https://imgops.com/start?url="
 };
 
-export default definePlugin({
-    name: "ReverseImageSearch",
-    description: "Adds ImageSearch to image context menus",
-    authors: [Devs.Ven],
-    dependencies: ["MenuItemDeobfuscatorAPI"],
-    patches: [{
-        find: "open-native-link",
-        replacement: {
-            match: /id:"open-native-link".{0,200}\(\{href:(.{0,3}),.{0,200}\},"open-native-link"\)/,
-            replace: (m, src) =>
-                `${m},Vencord.Plugins.plugins.ReverseImageSearch.makeMenu(${src}, arguments[2])`
-        }
-    }, {
-        // pass the target to the open link menu so we can check if it's an image
-        find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
-        replacement: [
-            {
-                match: /ariaLabel:\i\.Z\.Messages\.MESSAGE_ACTIONS_MENU_LABEL/,
-                replace: "$&,_vencordTarget:arguments[0].target"
-            },
-            {
-                // var f = props.itemHref, .... MakeNativeMenu(null != f ? f : blah)
-                match: /(\i)=\i\.itemHref,.+?\(null!=\1\?\1:.{1,10}(?=\))/,
-                replace: "$&,arguments[0]._vencordTarget"
-            }
-        ]
-    }],
+function search(src: string, engine: string) {
+    open(engine + encodeURIComponent(src), "_blank");
+}
 
-    makeMenu(src: string, target: HTMLElement) {
-        if (target && !(target instanceof HTMLImageElement) && target.attributes["data-role"]?.value !== "img")
-            return null;
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props) return;
+    const { reverseImageSearchType, itemHref, itemSrc } = props;
 
-        return (
+    if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
+
+    const src = itemHref ?? itemSrc;
+
+    const group = findGroupChildrenByChildId("copy-link", children);
+    if (group && !group.some(child => child?.props?.id === "search-image")) {
+        group.push((
             <Menu.MenuItem
                 label="Search Image"
                 key="search-image"
@@ -74,7 +57,7 @@ export default definePlugin({
                             key={key}
                             id={key}
                             label={engine}
-                            action={() => this.search(src, Engines[engine])}
+                            action={() => search(src, Engines[engine])}
                         />
                     );
                 })}
@@ -82,14 +65,33 @@ export default definePlugin({
                     key="search-image-all"
                     id="search-image-all"
                     label="All"
-                    action={() => Object.values(Engines).forEach(e => this.search(src, e))}
+                    action={() => Object.values(Engines).forEach(e => search(src, e))}
                 />
             </Menu.MenuItem>
-        );
+        ));
+    }
+};
+
+export default definePlugin({
+    name: "ReverseImageSearch",
+    description: "Adds ImageSearch to image context menus",
+    authors: [Devs.Ven, Devs.Nuckyz],
+    dependencies: ["ContextMenuAPI"],
+    patches: [
+        {
+            find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",
+            replacement: {
+                match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
+                replace: (m, target) => `${m}reverseImageSearchType:${target}.getAttribute("data-role"),`
+            }
+        }
+    ],
+
+    start() {
+        addContextMenuPatch("message", imageContextMenuPatch);
     },
 
-    // openUrl is a mangled export, so just match it in the module and pass it
-    search(src: string, engine: string) {
-        open(engine + encodeURIComponent(src), "_blank");
+    stop() {
+        removeContextMenuPatch("message", imageContextMenuPatch);
     }
 });

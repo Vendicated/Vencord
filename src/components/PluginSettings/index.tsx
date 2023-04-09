@@ -46,6 +46,7 @@ const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
+const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
 const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
@@ -93,7 +94,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings([`plugins.${plugin.name}`]).plugins[plugin.name];
+    const settings = useSettings([`plugins.${plugin.name}.enabled`]).plugins[plugin.name];
 
     const isEnabled = () => settings.enabled ?? false;
 
@@ -154,7 +155,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
                 <Text variant="text-md/bold" className={cl("name")}>
                     {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
                 </Text>
-                <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
+                <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
                     {plugin.options
                         ? <CogWheel />
                         : <InfoIcon width="24" height="24" />}

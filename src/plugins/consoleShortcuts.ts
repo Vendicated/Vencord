@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { relaunch } from "@utils/native";
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, search } from "@webpack";
@@ -32,14 +33,14 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     getShortcuts() {
-        function newFindWrapper(filterFactory: (props: any) => Webpack.FilterFn) {
-            const cache = new Map<string, any>();
+        function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
+            const cache = new Map<string, unknown>();
 
-            return function (filterProps: any) {
+            return function (...filterProps: unknown[]) {
                 const cacheKey = String(filterProps);
                 if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-                const matches = findAll(filterFactory(filterProps));
+                const matches = findAll(filterFactory(...filterProps));
 
                 const result = (() => {
                     switch (matches.length) {
@@ -71,13 +72,14 @@ export default definePlugin({
             findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
             findAllByCode: (code: string) => findAll(filters.byCode(code)),
+            findStore: newFindWrapper(filters.byStoreName),
             PluginsApi: Vencord.Plugins,
             plugins: Vencord.Plugins.plugins,
             React,
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
-            restart: IS_WEB ? WEB_ONLY("restart") : window.DiscordNative.app.relaunch
+            restart: IS_WEB ? WEB_ONLY("restart") : relaunch
         };
     },
 

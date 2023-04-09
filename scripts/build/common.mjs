@@ -33,6 +33,8 @@ export const banner = {
 `.trim()
 };
 
+const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
+
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
  * @type {import("esbuild").Plugin}
@@ -46,9 +48,9 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {import("esbuild").Plugin}
+ * @type {(kind: "web" | "discordDesktop" | "vencordDesktop") => import("esbuild").Plugin}
  */
-export const globPlugins = {
+export const globPlugins = kind => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
@@ -69,9 +71,17 @@ export const globPlugins = {
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
                     if (file.startsWith(".")) continue;
-                    if (file === "index.ts") {
-                        continue;
+                    if (file === "index.ts") continue;
+                    const fileBits = file.split(".");
+                    if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1))) {
+                        const mod = fileBits.at(-2);
+                        if (mod === "dev" && !watch) continue;
+                        if (mod === "web" && kind === "discordDesktop") continue;
+                        if (mod === "desktop" && kind === "web") continue;
+                        if (mod === "discordDesktop" && kind !== "discordDesktop") continue;
+                        if (mod === "vencordDesktop" && kind !== "vencordDesktop") continue;
                     }
+
                     const mod = `p${i}`;
                     code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
                     plugins += `[${mod}.name]:${mod},\n`;
@@ -85,7 +95,7 @@ export const globPlugins = {
             };
         });
     }
-};
+});
 
 /**
  * @type {import("esbuild").Plugin}
@@ -185,7 +195,7 @@ export const commonOpts = {
     legalComments: "linked",
     banner,
     plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote"],
+    external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",

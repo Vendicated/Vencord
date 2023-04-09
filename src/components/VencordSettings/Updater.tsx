@@ -24,6 +24,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
+import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, getRepo, isNewer, rebuild, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
@@ -124,7 +125,7 @@ function Updatable(props: CommonProps) {
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
                             setUpdates([]);
-                            const needFullRestart = await rebuild();
+                            await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
                                     title: "Update Success!",
@@ -132,10 +133,7 @@ function Updatable(props: CommonProps) {
                                     confirmText: "Restart",
                                     cancelText: "Not now!",
                                     onConfirm() {
-                                        if (needFullRestart)
-                                            window.DiscordNative.app.relaunch();
-                                        else
-                                            location.reload();
+                                        relaunch();
                                         r();
                                     },
                                     onCancel: r
@@ -185,7 +183,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["notifyAboutUpdates", "autoUpdate"]);
+    const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -205,7 +203,7 @@ function Updater() {
             <Switch
                 value={settings.notifyAboutUpdates}
                 onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                note="Shows a toast on startup"
+                note="Shows a notification on startup"
                 disabled={settings.autoUpdate}
             >
                 Get notified about new updates
@@ -217,14 +215,30 @@ function Updater() {
             >
                 Automatically update
             </Switch>
+            <Switch
+                value={settings.autoUpdateNotification}
+                onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                note="Shows a notification when Vencord automatically updates"
+                disabled={!settings.autoUpdate}
+            >
+                Get notified when an automatic update completes
+            </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
-                <Link href={repo}>
-                    {repo.split("/").slice(-2).join("/")}
-                </Link>
-            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
+            <Forms.FormText className="vc-text-selectable">
+                {repoPending
+                    ? repo
+                    : err
+                        ? "Failed to retrieve - check console"
+                        : (
+                            <Link href={repo}>
+                                {repo.split("/").slice(-2).join("/")}
+                            </Link>
+                        )
+                }
+                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+            </Forms.FormText>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 

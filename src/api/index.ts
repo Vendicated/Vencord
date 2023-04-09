@@ -18,6 +18,7 @@
 
 import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
+import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
@@ -27,6 +28,7 @@ import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
+import * as $SettingsStore from "./SettingsStore";
 import * as $Styles from "./Styles";
 
 /**
@@ -85,6 +87,10 @@ export const MessageDecorations = $MessageDecorations;
  */
 export const MemberListDecorators = $MemberListDecorators;
 /**
+ * An API allowing you to read, manipulate and automatically update components based on Discord settings
+ */
+export const SettingsStore = $SettingsStore;
+/**
  * An API allowing you to dynamically load styles
  * a
  */
@@ -93,3 +99,8 @@ export const Styles = $Styles;
  * An API allowing you to display notifications
  */
 export const Notifications = $Notifications;
+
+/**
+ * An api allowing you to patch and add/remove items to/from context menus
+ */
+export const ContextMenu = $ContextMenu;
