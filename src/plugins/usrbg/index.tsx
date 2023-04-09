@@ -24,7 +24,7 @@ import { Forms } from "@webpack/common";
 
 import style from "./index.css?managed";
 
-const URL = "https://raw.githubusercontent.com/Discord-Custom-Covers/usrbg/master/dist/usrbg.json";
+const URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
 
 const userBg: {} = {};
 
@@ -66,22 +66,21 @@ export default definePlugin({
 
     bannerHook(banner: string, user: any) {
         if (banner) return banner;
-        banner = userBg[user.userId] ? userBg[user.userId] : undefined;
+        if (userBg[user.userId]) return userBg[user.userId];
+        fetch(URL + user.userId + ".txt").then((res) => {
+            if (res.status == 200) {
+                res.text().then((text) => {
+                    userBg[user.userId] = text;
+                });
+            } else {
+                userBg[user.userId] = "undefined";
+            }
+        });
+        banner = userBg[user.userId];
         return banner;
     },
 
     start() {
-        updateBg(URL);
         enableStyle(style);
     }
 });
-
-function updateBg(URL: string) {
-    fetch(URL)
-        .then(res => res.json())
-        .then(data => {
-            for (const i of data) {
-                userBg[i.uid] = i.img;
-            }
-        });
-}
