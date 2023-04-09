@@ -57,18 +57,20 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     const result = `${guild.name} | ${channel.name}`;
 
     return (
-        <VoiceChannelSection
-            channel={channel}
-            label={result}
-            showHeader={settings.store.showVoiceChannelSectionHeader}
-        />
+        <div style={{ marginBottom: 10 }}>
+            <VoiceChannelSection
+                channel={channel}
+                label={result}
+                showHeader={settings.store.showVoiceChannelSectionHeader}
+            />
+        </div>
     );
 });
 
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows whether a User is currently in a voice channel somewhere in their profile",
-    authors: [Devs.LordElias],
+    authors: [Devs.LordElias, Devs.Luna],
     settings,
 
     patchModal({ user }: UserProps) {
