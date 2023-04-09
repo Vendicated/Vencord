@@ -290,8 +290,8 @@ export default definePlugin({
                     replace: (m, renderableSticker) => `${m}renderableSticker:${renderableSticker},`
                 },
                 {
-                    match: /emojiSection.{0,50}description:\i(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (m, props) => `${m}+(${props}.renderableSticker?.fake?" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                    match: /(?<=emojiSection.{0,50}description:)\i(?=,)(?<=(\i)\.sticker,.+?)/,
+                    replace: (description, props) => `$self.patchDescription(${description},${props}.renderableSticker?.fake)`
                 }
             ]
         },
