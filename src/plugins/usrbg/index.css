@@ -1,4 +1,4 @@
-[class*="NonPremium"] [class*="bannerPremium"] {
+[class*="bannerPremium"] {
     background: center / cover no-repeat;
     position: relative;
     z-index: -1;
