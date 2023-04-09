@@ -48,6 +48,7 @@ function VencordSettings() {
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
+    const isMac = navigator.platform.toLowerCase().startsWith("mac");
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -87,6 +88,11 @@ function VencordSettings() {
             IS_DISCORD_DESKTOP && {
                 key: "disableMinSize",
                 title: "Disable minimum window size",
+                note: "Requires a full restart"
+            },
+            IS_DISCORD_DESKTOP && isMac && {
+                key: "macosTranslucency",
+                title: "Enable translucent window",
                 note: "Requires a full restart"
             }
         ];
