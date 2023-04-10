@@ -29,3 +29,10 @@
     top: 50%;
     transform: translateY(-50%);
 }
+
+[class^="focusLock"] > [class^="carouselModal"] > [class*="modalCarouselWrapper"] > [class^="wrapper"] {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
