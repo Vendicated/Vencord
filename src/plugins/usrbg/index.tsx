@@ -19,6 +19,7 @@
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 
@@ -31,29 +32,17 @@ const userBg: {} = {};
 export default definePlugin({
     name: "USRBG",
     description: "Fake Nitro banner",
-    authors: [Devs.AutumnVN],
+    authors: [Devs.AutumnVN, Devs.pylix],
     patches: [
         {
-            find: "getBannerURL=",
-            replacement: {
-                match: /banner:(this\.banner)/,
-                replace: "banner:$self.bannerHook($1,this)"
-            }
+            find: ".bannerSrc,",
+            replacement: [
+                {
+                    match: /(\i).bannerSrc,/,
+                    replace: "$1.bannerSrc=$self.bannerHook($1.bannerSrc, $1.user.id),"
+                }
+            ]
         },
-        {
-            find: "getBannerURL=",
-            replacement: {
-                match: /userId,banner:(this\.banner)/,
-                replace: "userId,banner:$self.bannerHook($1,this)"
-            }
-        },
-        {
-            find: "concat(window.GLOBAL_ENV.API_ENDPOINT).concat(e)",
-            replacement: {
-                match: /var \i=e.id,\i=e.banner,\i=e.canAnimate/,
-                replace: "if(e.banner?.startsWith(\"https://\"))return e.banner;$&"
-            }
-        }
     ],
 
     settingsAboutComponent: () => {
@@ -64,18 +53,20 @@ export default definePlugin({
         );
     },
 
-    bannerHook(banner: string, user: any) {
-        if (banner || userBg[user.userId] === "undefined") return banner;
-        if (userBg[user.userId]) return userBg[user.userId];
-        fetch(URL + user.userId + ".txt").then(res => {
+    bannerHook(banner: string, userId: string) {
+        const update = useForceUpdater();
+
+        if (banner || userBg[userId] === null) return banner;
+        if (userBg[userId]) return userBg[userId];
+
+        fetch(URL + userId + ".txt").then(res => {
             if (res.status === 200) {
                 res.text().then(text => {
-                    userBg[user.userId] = text;
-                    return text;
+                    userBg[userId] = text;
+                    update();
                 });
             } else {
-                userBg[user.userId] = "undefined";
-                return banner;
+                userBg[userId] = null;
             }
         });
     },
