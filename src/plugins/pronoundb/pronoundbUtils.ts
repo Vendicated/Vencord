@@ -46,7 +46,7 @@ export function awaitAndFormatPronouns(id: string): string | null {
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
 
-    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
+    // If the result is present and not "unspecified", and there is a mapping for the code, then return the mappings
     if (result && result !== "unspecified" && PronounMapping[result])
         return formatPronouns(result);
 
