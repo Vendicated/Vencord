@@ -28,8 +28,8 @@ function toggleHoverControls(value: boolean) {
         const style = document.createElement("style");
         style.id = "vc-spotify-hover-controls";
         style.textContent = `
-.vc-spotify-button-row { height: 0; opacity: 0; will-change: height, opacity; transition: height .2s, opacity .05s; }
-#vc-spotify-player:hover .vc-spotify-button-row { opacity: 1; height: 32px; }
+.vc-spotify-button-row { height: 0; opacity: 0; will-change: height, opacity; transition: height .2s, opacity .05s; pointer-events: none; }
+#vc-spotify-player:hover .vc-spotify-button-row { opacity: 1; height: 32px; pointer-events: auto;}
 `;
         document.head.appendChild(style);
     }
