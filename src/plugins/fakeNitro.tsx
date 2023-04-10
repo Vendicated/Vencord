@@ -26,6 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import type { ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -289,8 +290,8 @@ export default definePlugin({
                     replace: (m, renderableSticker) => `${m}renderableSticker:${renderableSticker},`
                 },
                 {
-                    match: /emojiSection.{0,50}description:\i(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (m, props) => `${m}+(${props}.renderableSticker?.fake?" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                    match: /(emojiSection.{0,50}description:)(\i)(?<=(\i)\.sticker,.+?)(?=,)/,
+                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice("STICKER",${reactNode},!!${props}.renderableSticker?.fake)`
                 }
             ]
         },
@@ -298,8 +299,8 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return) (.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}(${messages})+(fakeNitroNode.fake?" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
+                replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
             }
         }
     ],
@@ -557,6 +558,25 @@ export default definePlugin({
 
     shouldKeepEmojiLink(link: any) {
         return link.target && fakeNitroEmojiRegex.test(link.target);
+    },
+
+    addFakeNotice(type: "STICKER" | "EMOJI", node: Array<ReactNode>, fake: boolean) {
+        if (!fake) return node;
+
+        node = Array.isArray(node) ? node : [node];
+
+        switch (type) {
+            case "STICKER": {
+                node.push(" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+
+                return node;
+            }
+            case "EMOJI": {
+                node.push(" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+
+                return node;
+            }
+        }
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
