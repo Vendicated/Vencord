@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
+import { localStorage } from "@utils/localStorage";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
+import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
@@ -35,6 +38,8 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    macosTranslucency: boolean;
+    disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
@@ -47,6 +52,14 @@ export interface Settings {
         timeout: number;
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
+        logLimit: number;
+    };
+
+    cloud: {
+        authenticated: boolean;
+        url: string;
+        settingsSync: boolean;
+        settingsSyncVersion: number;
     };
 }
 
@@ -60,13 +73,23 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    macosTranslucency: false,
+    disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
 
     notifications: {
         timeout: 5000,
         position: "bottom-right",
-        useNative: "not-focused"
+        useNative: "not-focused",
+        logLimit: 50
+    },
+
+    cloud: {
+        authenticated: false,
+        url: "https://api.vencord.dev/",
+        settingsSync: false,
+        settingsSyncVersion: 0
     }
 };
 
@@ -77,6 +100,13 @@ try {
     var settings = mergeDefaults({} as Settings, DefaultSettings);
     logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
 }
+
+const saveSettingsOnFrequentAction = debounce(async () => {
+    if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+        await putCloudSettings();
+        delete localStorage.Vencord_settingsDirty;
+    }
+}, 60_000);
 
 type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
 const subscriptions = new Set<SubscriptionCallback>();
@@ -140,6 +170,9 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 }
             }
             // And don't forget to persist the settings!
+            PlainSettings.cloud.settingsSyncVersion = Date.now();
+            localStorage.Vencord_settingsDirty = true;
+            saveSettingsOnFrequentAction();
             VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
             return true;
         }

@@ -76,7 +76,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
-    dependencies: ["ContextMenuAPI", "MenuItemDeobfuscatorAPI"],
+    dependencies: ["ContextMenuAPI"],
 
     start() {
         addDeleteStyle();
@@ -209,6 +209,11 @@ export default definePlugin({
                         "       m" +
                         ")" +
                         ".update($3"
+                },
+                {
+                    // fix up key (edit last message) attempting to edit a deleted message
+                    match: /(?<=getLastEditableMessage=.{0,200}\.find\(\(function\((\i)\)\{)return/,
+                    replace: "return !$1.deleted &&"
                 }
             ]
         },
