@@ -27,14 +27,14 @@ import {
 import { findLazy } from "@webpack";
 import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
 
-import { encrypt } from "../index";
+import { settings, encrypt } from "../index";
 
 const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");
     const [cover, setCover] = React.useState("");
-    const [password, setPassword] = React.useState("password");
+    const [password, setPassword] = React.useState(settings.store.defaultEncryptionPassword);
     const [noCover, setNoCover] = React.useState(false);
 
     const isValid = secret && (noCover || (cover && /\w \w/.test(cover)));
@@ -62,7 +62,7 @@ function EncModal(props: ModalProps) {
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
-                    defaultValue={"password"}
+                    defaultValue={settings.store.defaultEncryptionPassword}
                     onChange={(e: string) => {
                         setPassword(e);
                     }}

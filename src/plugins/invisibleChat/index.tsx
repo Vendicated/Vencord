@@ -107,11 +107,16 @@ function ChatBarIcon() {
     );
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     savedPasswords: {
         type: OptionType.STRING,
         default: "password, Password",
         description: "Saved Passwords (Seperated with a , )"
+    },
+    defaultEncryptionPassword: {
+        type: OptionType.STRING,
+        default: "password",
+        description: "Default Encryption Password"
     }
 });
 
