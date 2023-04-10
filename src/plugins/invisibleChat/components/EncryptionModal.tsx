@@ -62,7 +62,7 @@ function EncModal(props: ModalProps) {
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
-                    defaultValue={settings.store.defaultEncryptionPassword}
+                    defaultValue={password}
                     onChange={(e: string) => {
                         setPassword(e);
                     }}
