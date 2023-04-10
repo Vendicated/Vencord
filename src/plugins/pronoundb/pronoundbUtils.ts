@@ -41,19 +41,13 @@ const bulkFetch = debounce(async () => {
 });
 
 export function awaitAndFormatPronouns(id: string): string | null {
-    let result = getCachedPronouns(id);
-
-    if (!result) {
-        const [fetched, , isPending] = useAwaiter(() => fetchPronouns(id), {
-            fallbackValue: null,
-            onError: e => console.error("Fetching pronouns failed: ", e)
-        });
-        if (!isPending)
-            result = fetched;
-    }
+    const [result, , isPending] = useAwaiter(() => fetchPronouns(id), {
+        fallbackValue: getCachedPronouns(id),
+        onError: e => console.error("Fetching pronouns failed: ", e)
+    });
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
-    if (result && result !== "unspecified" && PronounMapping[result])
+    if (!isPending && result && result !== "unspecified" && PronounMapping[result])
         return formatPronouns(result);
 
     return null;
@@ -68,7 +62,7 @@ export function getCachedPronouns(id: string): PronounCode | null {
 export function fetchPronouns(id: string): Promise<PronounCode> {
     return new Promise(res => {
         // If cached, return the cached pronouns
-        if (id in cache) res(cache[id]);
+        if (id in cache) res(getCachedPronouns(id)!);
         // If there is already a request added, then just add this callback to it
         else if (id in requestQueue) requestQueue[id].push(res);
         // If not already added, then add it and call the debounced function to make sure the request gets executed
