@@ -57,11 +57,13 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     const result = `${guild.name} | ${channel.name}`;
 
     return (
-        <VoiceChannelSection
-            channel={channel}
-            label={result}
-            showHeader={settings.store.showVoiceChannelSectionHeader}
-        />
+        <div style={{ marginBottom: 14 }}>
+            <VoiceChannelSection
+                channel={channel}
+                label={result}
+                showHeader={settings.store.showVoiceChannelSectionHeader}
+            />
+        </div>
     );
 });
 
