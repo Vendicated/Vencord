@@ -71,13 +71,13 @@ export default definePlugin({
             if (res.status === 200) {
                 res.text().then(text => {
                     userBg[user.userId] = text;
+                    return text;
                 });
             } else {
                 userBg[user.userId] = "undefined";
+                return banner;
             }
         });
-        banner = userBg[user.userId];
-        return banner;
     },
 
     start() {
