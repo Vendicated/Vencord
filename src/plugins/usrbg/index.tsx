@@ -19,15 +19,13 @@
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
+import { useAwaiter } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
 
 import style from "./index.css?managed";
 
 const URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
-
-const userBg: {} = {};
 
 export default definePlugin({
     name: "USRBG",
@@ -39,7 +37,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\i).bannerSrc,/,
-                    replace: "$1.bannerSrc=$self.bannerHook($1.bannerSrc, $1.user.id),"
+                    replace: "$1.bannerSrc??$self.bannerHook($1.user.id),"
                 }
             ]
         },
@@ -53,22 +51,12 @@ export default definePlugin({
         );
     },
 
-    bannerHook(banner: string, userId: string) {
-        const update = useForceUpdater();
+    bannerHook(userId: string) {
+        const [bg] = useAwaiter(
+            () => fetch(`${URL}${userId}.txt`).then(res => res.ok ? res.text() : null)
+        );
 
-        if (banner || userBg[userId] === null) return banner;
-        if (userBg[userId]) return userBg[userId];
-
-        fetch(URL + userId + ".txt").then(res => {
-            if (res.status === 200) {
-                res.text().then(text => {
-                    userBg[userId] = text;
-                    update();
-                });
-            } else {
-                userBg[userId] = null;
-            }
-        });
+        return bg || undefined;
     },
 
     start() {
