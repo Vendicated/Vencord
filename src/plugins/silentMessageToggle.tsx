@@ -44,7 +44,7 @@ function SilentMessageToggle(chatBoxProps: {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
-        <Tooltip text="Toggle Silent Message">
+        <Tooltip text={enabled ? "Disable Silent Message" : "Enable Silent Message"}>
             {tooltipProps => (
                 <div style={{ display: "flex" }}>
                     <Button
