@@ -47,7 +47,7 @@ export function awaitAndFormatPronouns(id: string): string | null {
     });
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result])
+    if (result && result !== "unspecified" && PronounMapping[result])
         return formatPronouns(result);
 
     return null;
