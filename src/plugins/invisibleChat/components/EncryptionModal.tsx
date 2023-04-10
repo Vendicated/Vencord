@@ -24,12 +24,10 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { findLazy } from "@webpack";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { findByProps } from "@webpack";
+import { Button, Forms, React, SelectedChannelStore, Switch, TextInput } from "@webpack/common";
 
-import { settings, encrypt } from "../index";
-
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+import { encrypt, settings } from "../index";
 
 function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");
@@ -87,9 +85,7 @@ function EncModal(props: ModalProps) {
                         const toSend = noCover ? encrypted.replaceAll("d", "") : encrypted;
                         if (!toSend) return;
 
-                        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-                            rawText: `${toSend}`
-                        });
+                        findByProps("editMessage").sendMessage(SelectedChannelStore.getChannelId(), { content: toSend });
 
                         props.onClose();
                     }}
