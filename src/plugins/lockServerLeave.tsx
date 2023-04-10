@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, removeContextMenuPatch, NavContextMenuPatchCallback, addGlobalContextMenuPatch, findGroupChildrenByChildId } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId,NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
-import * as DataStore from "@api/DataStore";
 
 let locks: string[] | null;
 const DATA_KEY = "LockServerLeave_SERVERS";
@@ -34,7 +34,7 @@ function guildMenuPatch(popout: boolean): NavContextMenuPatchCallback {
         const group = findGroupChildrenByChildId(target, children);
 
         if (group && !group.some(child => child?.props?.id === "lock")) {
-            const id = props.guild.id;
+            const { id } = props.guild;
             const start = popout ? 1 : 0;
 
             if (locks.includes(id))
