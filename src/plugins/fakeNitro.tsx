@@ -290,7 +290,7 @@ export default definePlugin({
                     replace: (m, renderableSticker) => `${m}renderableSticker:${renderableSticker},`
                 },
                 {
-                    match: /(?<=emojiSection.{0,50}description:)\i(?=,)(?<=(\i)\.sticker,.+?)/,
+                    match: /(?<=emojiSection.{0,50}description:)\i(?<=(\i)\.sticker,.+?)(?=,)/,
                     replace: (description, props) => `$self.patchDescription(${description},${props}.renderableSticker?.fake)`
                 }
             ]
