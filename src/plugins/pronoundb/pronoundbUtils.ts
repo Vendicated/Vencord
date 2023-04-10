@@ -41,16 +41,27 @@ const bulkFetch = debounce(async () => {
 });
 
 export function awaitAndFormatPronouns(id: string): string | null {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(id), {
-        fallbackValue: null,
-        onError: e => console.error("Fetching pronouns failed: ", e)
-    });
+    let result = getCachedPronouns(id);
+
+    if (!result) {
+        const [fetched, , isPending] = useAwaiter(() => fetchPronouns(id), {
+            fallbackValue: null,
+            onError: e => console.error("Fetching pronouns failed: ", e)
+        });
+        if (!isPending)
+            result = fetched;
+    }
 
     // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result])
+    if (result && result !== "unspecified" && PronounMapping[result])
         return formatPronouns(result);
 
     return null;
+}
+
+// Gets the cached pronouns, if you're too impatient for a promise!
+export function getCachedPronouns(id: string): PronounCode | null {
+    return cache[id] ?? null;
 }
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
