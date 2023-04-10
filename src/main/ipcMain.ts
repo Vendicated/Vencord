@@ -93,7 +93,7 @@ export function initIpc(mainWindow: BrowserWindow) {
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     const win = new BrowserWindow({
-        title: "QuickCss Editor",
+        title: "Vencord QuickCSS Editor",
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {
