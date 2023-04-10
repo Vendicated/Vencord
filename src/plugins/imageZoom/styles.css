@@ -30,7 +30,7 @@
     transform: translateY(-50%);
 }
 
-[class^="focusLock"] > [class^="carouselModal"] > [class*="modalCarouselWrapper"] > [class^="wrapper"] {
+#magnify-modal {
     position: absolute;
     left: 50%;
     top: 50%;
