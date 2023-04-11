@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./styles.css";
-
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
@@ -29,6 +28,7 @@ import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
+import styles from "./styles.css?managed";
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -219,6 +219,7 @@ export default definePlugin({
     },
 
     start() {
+        enableStyle(styles);
         addContextMenuPatch("image-context", imageContextMenuPatch);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
@@ -226,6 +227,7 @@ export default definePlugin({
     },
 
     stop() {
+        disableStyle(styles);
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
