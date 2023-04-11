@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Menu, useState } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 interface Sticker {
