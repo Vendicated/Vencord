@@ -129,11 +129,9 @@ function GreetMenu({ stickers, channel, message }: { stickers: Sticker[], messag
                             checked={checked}
                             disabled={!checked && multiGreetChoices.length >= 3}
                             action={() => {
-                                if (checked) {
-                                    s.multiGreetChoices = multiGreetChoices.filter(s => s !== sticker.id);
-                                } else {
-                                    s.multiGreetChoices = [...multiGreetChoices, sticker.id];
-                                }
+                                s.multiGreetChoices = checked
+                                    ? multiGreetChoices.filter(s => s !== sticker.id)
+                                    : [...multiGreetChoices, sticker.id];
                             }}
                         />
                     );
