@@ -24,6 +24,7 @@ import { deflateSync, inflateSync } from "fflate";
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
+import { saveFile } from "./web";
 
 export async function importSettings(data: string) {
     try {
@@ -54,17 +55,7 @@ export async function downloadSettingsBackup() {
     if (IS_DISCORD_DESKTOP) {
         DiscordNative.fileManager.saveWithDialog(data, filename);
     } else {
-        const file = new File([data], filename, { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(file);
-        a.download = filename;
-
-        document.body.appendChild(a);
-        a.click();
-        setImmediate(() => {
-            URL.revokeObjectURL(a.href);
-            document.body.removeChild(a);
-        });
+        saveFile(new File([data], filename, { type: "application/json" }));
     }
 }
 

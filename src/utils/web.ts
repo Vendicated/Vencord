@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function relaunch() {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.app.relaunch();
-    else
-        window.VencordDesktopNative.app.relaunch();
-}
+export function saveFile(file: File) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
 
-export function showItemInFolder(path: string) {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.fileManager.showItemInFolder(path);
-    else
-        window.VencordDesktopNative.fileManager.showItemInFolder(path);
+    document.body.appendChild(a);
+    a.click();
+    setImmediate(() => {
+        URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);
+    });
 }

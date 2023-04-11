@@ -257,5 +257,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     AutumnVN: {
         name: "AutumnVN",
         id: 393694671383166998n
+    },
+    pylix: {
+        name: "pylix",
+        id: 492949202121261067n
     }
 });
