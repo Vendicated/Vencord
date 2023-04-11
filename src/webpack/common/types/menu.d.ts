@@ -30,10 +30,14 @@ export interface Menu {
         onSelect?(): void;
     }>;
     MenuSeparator: ComponentType;
-    MenuGroup: RC<any>;
+    MenuGroup: RC<{
+        label: string;
+    }>;
     MenuItem: RC<{
         id: string;
         label: string;
+        action?(): void;
+
         render?: ComponentType;
         onChildrenScroll?: Function;
         childRowHeight?: number;
@@ -41,9 +45,19 @@ export interface Menu {
     }>;
     MenuCheckboxItem: RC<{
         id: string;
+        label: string;
+        checked: boolean;
+        action(): void;
+        disabled?: boolean;
     }>;
     MenuRadioItem: RC<{
         id: string;
+        group: string;
+        label: string;
+        checked: boolean;
+        action(): void;
+
+        disabled?: boolean;
     }>;
     MenuControlItem: RC<{
         id: string;
