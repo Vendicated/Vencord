@@ -45,9 +45,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <>
-                <Forms.FormText>Join <Link href="https://discord.gg/TeRQEPb">Discord server</Link> to get your own banner</Forms.FormText>
-            </>
+            <Link href="https://github.com/Discord-Custom-Covers/usrbg#request-your-own-usrbg">Get your own banner</Link>
         );
     },
 
