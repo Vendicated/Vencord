@@ -62,13 +62,11 @@ export default definePlugin({
     },
 
     bannerHook(banner: string, userId: string) {
-        if (banner && settings.store.nitroFirst) return undefined;
+        const func = banner && settings.store.nitroFirst
+            ? () => Promise.resolve(null)
+            : () => fetch(`${USRBG}${userId}.txt`).then(res => res.ok ? res.text() : null);
 
-        const [bg] = useAwaiter(
-            () => fetch(`${USRBG}${userId}.txt`).then(res => res.ok ? res.text() : null)
-        );
-
-        return bg || undefined;
+        return useAwaiter(func)[0] || void 0;
     },
 
     start() {
