@@ -25,8 +25,8 @@ import { join } from "path";
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
-import { get } from "../simpleGet";
-import { calculateHashes, serializeErrors } from "./common";
+import { get } from "../utils/simpleGet";
+import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
@@ -66,7 +66,7 @@ async function fetchUpdates() {
         return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
-        if (["patcher.js", "preload.js", "renderer.js", "renderer.css"].some(s => name.startsWith(s))) {
+        if (VENCORD_FILES.some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }
     });
@@ -75,13 +75,15 @@ async function fetchUpdates() {
 
 async function applyUpdates() {
     await Promise.all(PendingUpdates.map(
-        async ([name, data]) => writeFile(join(__dirname, name), await get(data)))
-    );
+        async ([name, data]) => writeFile(
+            join(__dirname, name),
+            await get(data)
+        )
+    ));
     PendingUpdates = [];
     return true;
 }
 
-ipcMain.handle(IpcEvents.GET_HASHES, serializeErrors(calculateHashes));
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
