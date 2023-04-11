@@ -21,7 +21,6 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
 
 import style from "./index.css?managed";
 
