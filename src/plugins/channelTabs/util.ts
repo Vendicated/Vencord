@@ -48,16 +48,28 @@ export const channelTabsSettings = definePluginSettings({
     }
 });
 
+// TODO: this entire utils section needs a rewrite
 let openChannelIndex = 0;
+const openChannelHistory = [0];
+const maxHistoryLength = 10;
+
 const openChannels: ChannelTabsProps[] = [];
 
-const setCurrentTab = (t: ChannelTabsProps) => openChannels[openChannelIndex] = t;
-const isTabSelected = (ch: ChannelTabsProps) => openChannels.indexOf(ch) === openChannelIndex;
-const isEqualToCurrentTab = (ch: ChannelTabsProps) => openChannels[openChannelIndex].channelId === ch.channelId;
+function handleChannelSwitch(ch: ChannelTabsProps) {
+    if (openChannels[openChannelIndex].channelId !== ch.channelId) openChannels[openChannelIndex] = ch;
+}
+function isTabSelected(ch: ChannelTabsProps) {
+    return openChannels.indexOf(ch) === openChannelIndex;
+}
+function setOpenChannel(i: number) {
+    openChannelIndex = i;
+    openChannelHistory.push(i);
+    if (openChannelHistory.length > maxHistoryLength) openChannelHistory.shift();
+}
 function moveToTab(i: number) {
     if (i < 0 || i >= openChannels.length) return;
     const chnl = openChannels[i];
-    openChannelIndex = i;
+    setOpenChannel(i);
     if (chnl.channelId !== SelectedChannelStore.getChannelId())
         NavigationRouter.transitionToGuild(chnl.guildId, chnl.channelId);
 }
@@ -67,13 +79,21 @@ function moveToTabRelative(d: number) {
 }
 function createTab(t: ChannelTabsProps, jumpTo?: string | boolean) {
     openChannels.push({ ...t });
-    openChannelIndex = openChannels.length - 1;
+    setOpenChannel(openChannels.length - 1);
     if (jumpTo) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}${window._.isString(jumpTo) ? `/${jumpTo}` : ""}`);
 }
 function closeTab(i: number) {
     openChannels.splice(i, 1);
-    if (openChannelIndex === i) moveToTab(Math.max(i - 1, 0));
-    if (openChannelIndex > i) openChannelIndex--;
+    if (openChannelHistory.length >= 2) {
+        openChannelHistory.pop(); // once to remove the entry for the current channel
+        const newTab = openChannelHistory.at(-1)!;
+        openChannelHistory.pop(); // and once to remove the last item in history
+        if (openChannelIndex < newTab) moveToTab(newTab - 1);
+        else moveToTab(newTab);
+    } else {
+        if (openChannelIndex === i) moveToTab(Math.max(i - 1, 0));
+        if (openChannelIndex > i) setOpenChannel(openChannelIndex - 1);
+    }
 }
 function closeOtherTabs(i: number) {
     const { length } = openChannels;
@@ -81,14 +101,15 @@ function closeOtherTabs(i: number) {
     const lastCurrentChannel = openChannels[openChannelIndex];
     for (let n = 0; n < length; n++) openChannels.pop();
     openChannels.push(channel);
-    openChannelIndex = 0;
+    setOpenChannel(0);
+    for (let j = 0; j <= openChannelHistory.length; j++) openChannelHistory.pop();
     if (channel.channelId !== lastCurrentChannel.channelId) moveToTab(openChannelIndex);
 }
 function closeTabsToTheRight(i: number) {
     const { length } = openChannels;
     for (let n = i; n < length - 1; n++) openChannels.pop();
     if (openChannelIndex > (openChannels.length - 1)) {
-        openChannelIndex = openChannels.length - 1;
+        setOpenChannel(openChannels.length - 1);
         moveToTab(openChannelIndex);
     }
 }
@@ -101,7 +122,7 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     if (!prev || !("channelId" in prev)) return;
     openChannels[openChannelIndex + direction] = openChannels[openChannelIndex];
     openChannels[openChannelIndex] = prev;
-    openChannelIndex += direction;
+    setOpenChannel(openChannelIndex + direction);
 }
 function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
     if (openChannels.length) return;
@@ -148,6 +169,6 @@ function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
 const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", data ?? { openChannels, openChannelIndex });
 
 export const ChannelTabsUtils = {
-    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, isEqualToCurrentTab, isTabSelected,
-    moveToTab, moveToTabRelative, openChannels, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
+    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
+    moveToTab, moveToTabRelative, openChannelHistory, openChannels, saveChannels, shiftCurrentTab, openStartupTabs
 };

@@ -23,15 +23,15 @@ import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { filters, find, findByCode, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
-    useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores
+    useDrag, useDrop, useEffect, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
-    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, isEqualToCurrentTab, isTabSelected,
-    moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, setCurrentTab, openStartupTabs
+    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
+    isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, openStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -195,22 +195,14 @@ function ChannelTab(props: ChannelTabsProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
-    const ref = useRef<HTMLDivElement>(null);
-    const [, drop] = useDrop(() => ({
-        accept: "vc_ChannelTab",
-        collect: monitor => ({
-            isOver: !!monitor.isOver(),
-        }),
-    }), []);
     const [{ isDragging }, drag] = useDrag(() => ({
         type: "vc_ChannelTab",
         collect: monitor => ({
             isDragging: !!monitor.isDragging()
         }),
     }));
-    drag(drop(ref));
 
-    const tab = <div className={cl("tab-base")} ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
+    const tab = <div className={cl("tab-base")} ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
         <ChannelTabContent {...props} guild={guild} channel={channel} />
     </div>;
     return tab;
@@ -256,9 +248,19 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
         };
     }, []);
 
-    if (!isEqualToCurrentTab(props)) setCurrentTab(props);
+    const [, drop] = useDrop(() => ({
+        accept: "vc_ChannelTab",
+        collect: monitor => ({
+            isOver: !!monitor.isOver(),
+        }),
+        drop: (item, monitor) => {
+            // TODO: figure this out
+        },
+    }), []);
 
-    return <div className={cl("container")}>
+    handleChannelSwitch(props);
+
+    return <div className={cl("container")} ref={drop}>
         {openChannels.map((ch, i) => <div
             className={cl("tab")}
             style={isTabSelected(ch) ? { backgroundColor: "var(--background-modifier-selected)" } : undefined}
