@@ -164,7 +164,7 @@ export default definePlugin({
             find: "Messages.WELCOME_CTA_LABEL",
             replacement: {
                 match: /innerClassName:\i\(\).welcomeCTAButton,(?<=%\i\.length;return (\i)\[\i\].+?)/,
-                replace: "$& onContextMenu:(e)=>$self.pickSticker(e, $1, arguments[0]),"
+                replace: "$&onContextMenu:(e)=>$self.pickSticker(e,$1,arguments[0]),"
             }
         }
     ],
