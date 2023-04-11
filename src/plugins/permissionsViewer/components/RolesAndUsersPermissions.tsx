@@ -200,7 +200,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
 function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
     return (
-        <Menu.ContextMenu
+        <Menu.Menu
             navId="permviewer-role-context-menu"
             onClose={ContextMenu.close}
             aria-label="Role Options"
@@ -217,7 +217,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                     FluxDispatcher.dispatch({ type: "IMPERSONATE_UPDATE", guildId: guild.id, data: { type: "ROLES", roles: { [roleId]: guild.roles[roleId] } } });
                 }}
             />
-        </Menu.ContextMenu>
+        </Menu.Menu>
     );
 }
 

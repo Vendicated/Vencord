@@ -96,7 +96,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                             </button>
                         )}
                     </Tooltip>
-                    <Tooltip text="Toggle Permissions">
+                    <Tooltip text={viewPermissions ? "View Permissions" : "Hide Permissions"}>
                         {tooltipProps => (
                             <button className="permviewer-userperms-toggleperms-btn">
                                 <svg
