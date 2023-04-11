@@ -21,9 +21,9 @@ import { React } from "@webpack/common";
 import { Settings } from "Vencord";
 
 import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
+import Plugin from "..";
 import { AudioSourceSelect, OpenScreenshareSettingsButton } from "../components";
 import { PluginInfo } from "../constants";
-import Plugin from "..";
 import { screenshareStore } from "../stores";
 
 const ReplacedStreamSettings = () => {
