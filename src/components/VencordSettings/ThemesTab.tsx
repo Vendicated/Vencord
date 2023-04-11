@@ -90,7 +90,7 @@ export default ErrorBoundary.wrap(function () {
 
     return (
         <>
-            <Card className="vc-settings-card">
+            <Card className="vc-settings-card vc-text-selectable">
                 <Forms.FormTitle tag="h5">Paste links to .css / .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
                 <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
@@ -117,7 +117,7 @@ export default ErrorBoundary.wrap(function () {
             <Forms.FormTitle tag="h5">Themes</Forms.FormTitle>
             <TextArea
                 value={themeText}
-                onChange={e => setThemeText(e.currentTarget.value)}
+                onChange={setThemeText}
                 className={`${TextAreaProps.textarea} vc-settings-theme-links`}
                 placeholder="Theme Links"
                 spellCheck={false}

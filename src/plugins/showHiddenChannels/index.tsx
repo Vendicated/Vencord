@@ -27,7 +27,7 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import HiddenChannelLockScreen, { setChannelBeginHeaderComponent, setEmojiComponent } from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen, { setChannelBeginHeaderComponent } from "./components/HiddenChannelLockScreen";
 
 const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
 
@@ -239,14 +239,6 @@ export default definePlugin({
                 replace: ".filter(ch=>!$self.isHiddenChannel(ch))"
             }
         },
-        // Export the emoji component used on the lock screen
-        {
-            find: 'jumboable?"jumbo":"default"',
-            replacement: {
-                match: /jumboable\?"jumbo":"default",emojiId.+?}}\)},(?<=(\i)=function\(\i\){var \i=\i\.node.+?)/,
-                replace: (m, component) => `${m}shcEmojiComponentExport=($self.setEmojiComponent(${component}),void 0),`
-            }
-        },
         {
             find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
             replacement: [
@@ -408,7 +400,6 @@ export default definePlugin({
         }
     ],
 
-    setEmojiComponent,
     setChannelBeginHeaderComponent,
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {

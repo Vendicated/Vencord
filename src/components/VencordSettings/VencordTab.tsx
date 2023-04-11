@@ -26,6 +26,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
+import { relaunch, showItemInFolder } from "@utils/native";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
 const cl = classNameFactory("vc-settings-");
@@ -47,6 +48,7 @@ function VencordSettings() {
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
+    const isMac = navigator.platform.toLowerCase().startsWith("mac");
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -64,7 +66,7 @@ function VencordSettings() {
                 title: "Enable React Developer Tools",
                 note: "Requires a full restart"
             },
-            !IS_WEB && (!isWindows ? {
+            !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",
                 note: "Requires a full restart"
@@ -81,6 +83,16 @@ function VencordSettings() {
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
                 title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+                note: "Requires a full restart"
+            },
+            IS_DISCORD_DESKTOP && {
+                key: "disableMinSize",
+                title: "Disable minimum window size",
+                note: "Requires a full restart"
+            },
+            IS_DISCORD_DESKTOP && isMac && {
+                key: "macosTranslucency",
+                title: "Enable translucent window",
                 note: "Requires a full restart"
             }
         ];
@@ -100,7 +112,7 @@ function VencordSettings() {
                     ) : (
                         <React.Fragment>
                             <Button
-                                onClick={() => window.DiscordNative.app.relaunch()}
+                                onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
@@ -111,7 +123,7 @@ function VencordSettings() {
                                 Open QuickCSS File
                             </Button>
                             <Button
-                                onClick={() => window.DiscordNative.fileManager.showItemInFolder(settingsDir)}
+                                onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
