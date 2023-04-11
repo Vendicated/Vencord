@@ -38,6 +38,8 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    macosTranslucency: boolean;
+    disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
@@ -71,6 +73,8 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    macosTranslucency: false,
+    disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
 
