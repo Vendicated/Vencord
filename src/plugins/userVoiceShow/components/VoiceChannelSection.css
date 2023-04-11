@@ -16,3 +16,7 @@
 .vc-uvs-modal-margin > [class^="section"] {
     margin: 0 12px;
 }
+
+.vc-uvs-popout-margin > [class^="section"] {
+    margin-top: -12px;
+}
