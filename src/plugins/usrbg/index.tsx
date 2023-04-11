@@ -25,7 +25,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-const URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
+const USRBG = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -65,7 +65,7 @@ export default definePlugin({
         if (banner && settings.store.nitroFirst) return undefined;
 
         const [bg] = useAwaiter(
-            () => fetch(`${URL}${userId}.txt`).then(res => res.ok ? res.text() : null)
+            () => fetch(`${USRBG}${userId}.txt`).then(res => res.ok ? res.text() : null)
         );
 
         return bg || undefined;
