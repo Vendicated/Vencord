@@ -73,11 +73,12 @@ export const ButtonsSettingsPanel = () => {
         return groupedButtons;
     };
 
-    return (
-        <SettingsPanel>
+    return rawPanelButtons.length > 0
+        ? <SettingsPanel>
             {...convertRawPanelButtons(rawPanelButtons).map(value => <SettingsPanelRow children={value} />)}
         </SettingsPanel>
-    );
+        : <>
+        </>;
 };
 
 export function replacedUserPanelComponent(oldComponent: (...args: any[]) => any, thisContext: any, functionArguments: any) {
