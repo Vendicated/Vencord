@@ -112,40 +112,44 @@ function GreetMenu({ stickers, channel, message }: { stickers: Sticker[], messag
                 ))}
             </Menu.MenuGroup>
 
-            <Menu.MenuSeparator />
+            {!(settings.store as any).unholyMultiGreetEnabled ? null : (
+                <>
+                    <Menu.MenuSeparator />
 
-            <Menu.MenuItem
-                label="Unholy Multi-Greet"
-                id="unholy-multi-greet"
-            >
-                {stickers.map(sticker => {
-                    const checked = multiGreetChoices.some(s => s === sticker.id);
+                    <Menu.MenuItem
+                        label="Unholy Multi-Greet"
+                        id="unholy-multi-greet"
+                    >
+                        {stickers.map(sticker => {
+                            const checked = multiGreetChoices.some(s => s === sticker.id);
 
-                    return (
-                        <Menu.MenuCheckboxItem
-                            key={sticker.id}
-                            id={"multi-greet-" + sticker.id}
-                            label={sticker.description.split(" ")[0]}
-                            checked={checked}
-                            disabled={!checked && multiGreetChoices.length >= 3}
-                            action={() => {
-                                s.multiGreetChoices = checked
-                                    ? multiGreetChoices.filter(s => s !== sticker.id)
-                                    : [...multiGreetChoices, sticker.id];
-                            }}
+                            return (
+                                <Menu.MenuCheckboxItem
+                                    key={sticker.id}
+                                    id={"multi-greet-" + sticker.id}
+                                    label={sticker.description.split(" ")[0]}
+                                    checked={checked}
+                                    disabled={!checked && multiGreetChoices.length >= 3}
+                                    action={() => {
+                                        s.multiGreetChoices = checked
+                                            ? multiGreetChoices.filter(s => s !== sticker.id)
+                                            : [...multiGreetChoices, sticker.id];
+                                    }}
+                                />
+                            );
+                        })}
+
+                        <Menu.MenuSeparator />
+                        <Menu.MenuItem
+                            id="multi-greet-submit"
+                            label="Send Greets"
+                            action={() => greet(channel, message, multiGreetChoices!)}
+                            disabled={multiGreetChoices.length === 0}
                         />
-                    );
-                })}
 
-                <Menu.MenuSeparator />
-                <Menu.MenuItem
-                    id="multi-greet-submit"
-                    label="Send Greets"
-                    action={() => greet(channel, message, multiGreetChoices!)}
-                    disabled={multiGreetChoices.length === 0}
-                />
-
-            </Menu.MenuItem>
+                    </Menu.MenuItem>
+                </>
+            )}
         </Menu.Menu>
     );
 }
