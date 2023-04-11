@@ -17,21 +17,14 @@
 */
 
 import { Devs } from "@utils/constants";
-import { types } from "plugins/philsPluginLibrary";
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterScreenshare",
-    DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
+import * as types from "../types/constants";
+
+export const PluginInfo: types.PluginInfo = {
+    PLUGIN_NAME: "PhilsPluginLibrary",
+    DESCRIPTION: "A library for phil's plugins",
     AUTHOR: {
         ...Devs.philhk,
         github: "https://github.com/philhk"
     },
-    CONTRIBUTORS: {
-        walrus: {
-            github: "https://github.com/philhk",
-            id: 305317288775778306n,
-            name: "walrus"
-        },
-    },
-    README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
-} as const satisfies types.PluginInfo;
+} as const;

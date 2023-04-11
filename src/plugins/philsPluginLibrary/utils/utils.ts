@@ -16,22 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import { types } from "plugins/philsPluginLibrary";
+import IpcEvents from "@utils/IpcEvents";
+import { UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterScreenshare",
-    DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
-    AUTHOR: {
-        ...Devs.philhk,
-        github: "https://github.com/philhk"
-    },
-    CONTRIBUTORS: {
-        walrus: {
-            github: "https://github.com/philhk",
-            id: 305317288775778306n,
-            name: "walrus"
-        },
-    },
-    README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
-} as const satisfies types.PluginInfo;
+export const createDummyUser = (props: Partial<User>) => new (UserStore.getCurrentUser().constructor as any)(props);
+export const openURL = (url?: string) => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
+export const validateNumberInput = (value: string) => parseInt(value) ? parseInt(value) : undefined;
+export const validateTextInputNumber = (value: string) => /^[0-9\b]+$/.test(value) || value === "";
+export const replaceObjectValuesIfExist = (target: Object, replace: Object) => Object.entries(target).forEach(([key, value]) => replace[key] && (target[key] = replace[key]));

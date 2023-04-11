@@ -16,22 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import { types } from "plugins/philsPluginLibrary";
+import { React } from "@webpack/common";
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterScreenshare",
-    DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
-    AUTHOR: {
-        ...Devs.philhk,
-        github: "https://github.com/philhk"
-    },
-    CONTRIBUTORS: {
-        walrus: {
-            github: "https://github.com/philhk",
-            id: 305317288775778306n,
-            name: "walrus"
-        },
-    },
-    README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
-} as const satisfies types.PluginInfo;
+
+export interface SettingsPanelProps {
+    children: React.ComponentProps<"div">["children"];
+}
+
+export const SettingsPanel = ({ children }: SettingsPanelProps) => {
+    return (
+        <div
+            style={{
+                backgroundColor: "var(--background-secondary-alt)",
+                borderBottom: "1px solid var(--background-modifier-accent)",
+                padding: "0.5em"
+            }}
+        >
+            <div
+                style={{
+                    display: "flex",
+                    gap: "0.5em",
+                    flexDirection: "column"
+                }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+};

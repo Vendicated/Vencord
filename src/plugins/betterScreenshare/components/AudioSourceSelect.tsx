@@ -17,17 +17,18 @@
 */
 
 import { Select, useEffect, useState } from "@webpack/common";
+import { MediaEngineStore, types } from "plugins/philsPluginLibrary";
 import React from "react";
 
-import { MediaEngineStore } from "../discordModules";
-import { WindowPreview } from "../discordModules/modules/types";
-import { pluginSettingsHelpers, usePluginSettings } from "../settings";
+import { screenshareStore } from "../stores";
+
 
 export const AudioSourceSelect = (props?: typeof Select["defaultProps"]) => {
-    const { audioSource } = usePluginSettings();
-    const { setAudioSource } = pluginSettingsHelpers;
+    const { use } = screenshareStore;
 
-    const [windowPreviews, setWindowPreviews] = useState<WindowPreview[]>([]);
+    const { audioSource, setAudioSource } = use();
+
+    const [windowPreviews, setWindowPreviews] = useState<types.WindowPreview[]>([]);
 
     useEffect(() => {
         const intervalFn = async () => {

@@ -16,23 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classes } from "@utils/misc";
 import { Button } from "@webpack/common";
+import { panelClasses } from "plugins/philsPluginLibrary/discordModules";
 import React from "react";
 
-import { openScreenshareModal } from "../modals";
-
-export interface OpenScreenshareSettingsButtonProps {
-    title?: string;
+export type IconComponent = <T extends { className: string; }>(props: T) => JSX.Element;
+export interface SettingsPanelButtonProps extends Partial<React.ComponentProps<typeof Button>> {
+    icon?: IconComponent;
 }
 
-export const OpenScreenshareSettingsButton = (props: OpenScreenshareSettingsButtonProps) => {
+export const SettingsPanelButton = (props: SettingsPanelButtonProps) => {
     return (
         <Button
             size={Button.Sizes.SMALL}
-            color={Button.Colors.PRIMARY}
-            onClick={openScreenshareModal}
-        >
-            {props.title ? props.title : "Screenshare Settings"}
-        </Button>
+            className={classes(panelClasses.button, panelClasses.buttonColor)}
+            innerClassName={classes(panelClasses.buttonContents)}
+            wrapperClassName={classes(panelClasses.button)}
+            children={props.icon && <props.icon className={classes(panelClasses.buttonIcon)} />}
+            {...props} />
     );
 };

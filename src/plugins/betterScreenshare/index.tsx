@@ -19,13 +19,19 @@
 import { definePluginSettings } from "@api/settings";
 import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
+import { Emitter } from "plugins/philsPluginLibrary";
+import { ScreenshareSettingsIcon } from "plugins/philsPluginLibrary/icons";
+import { addSettingsPanelButton, removeSettingsPanelButton } from "plugins/philsPluginLibrary/patches";
 
 import { OpenScreenshareSettingsButton } from "./components";
 import { PluginInfo } from "./constants";
-import { Emitter } from "./emitter";
+import { openScreenshareModal } from "./modals";
 import { ScreensharePatcher } from "./patchers";
-import { PatchedFunctions } from "./patches";
-import { initPluginSettings } from "./settings";
+import { ScreenshareAudioPatcher } from "./patchers/screenshareAudio";
+import { replacedLocationRender } from "./patches";
+import { replacedScreenshareModalComponent } from "./patches/screenshareModal";
+import { initScreenshareStore } from "./stores";
+import { initScreenshareAudioStore } from "./stores/screenshareAudioStore";
 
 export default new class Plugin implements PluginDef {
     readonly name: string;
@@ -33,21 +39,26 @@ export default new class Plugin implements PluginDef {
     readonly authors: PluginAuthor[];
     readonly patches: Omit<Patch, "plugin">[];
     readonly settings: DefinedSettings<SettingsDefinition, {}>;
+    readonly dependencies: string[];
 
-    private readonly patchedFunctions: PatchedFunctions;
-    private screensharePatcher?: ScreensharePatcher;
+    private readonly replacedLocationRender: typeof replacedLocationRender;
+    private readonly replacedScreenshareModalComponent: typeof replacedScreenshareModalComponent;
+    public screensharePatcher?: ScreensharePatcher;
+    public screenshareAudioPatcher?: ScreenshareAudioPatcher;
 
     constructor() {
         this.name = PluginInfo.PLUGIN_NAME;
         this.description = PluginInfo.DESCRIPTION;
-        this.authors = PluginInfo.AUTHORS as PluginAuthor[];
-        this.patches = [{
-            find: ".ObjectTypes",
-            replacement: {
-                match: /render=(.+(}}\)}));/,
-                replace: "render=function(){return $self.patchedFunctions.patchedLocationRender($1, this, arguments);};"
+        this.authors = [PluginInfo.AUTHOR, ...Object.values(PluginInfo.CONTRIBUTORS)] as PluginAuthor[];
+        this.patches = [
+            {
+                find: "Messages.SCREENSHARE_RELAUNCH",
+                replacement: {
+                    match: /(function .{1,2}\(.{1,2}\){)(.{1,40}(?=selectGuild).+?(?:]}\)}\)))(})/,
+                    replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"
+                }
             }
-        }];
+        ];
         this.settings = definePluginSettings({
             openScreenshareSettings: {
                 component: () => <OpenScreenshareSettingsButton />,
@@ -57,19 +68,33 @@ export default new class Plugin implements PluginDef {
             hideDefaultSettings: {
                 type: OptionType.BOOLEAN,
                 description: "Hide Discord screen sharing settings",
-                default: true
+                default: true,
             }
         });
-        this.patchedFunctions = new PatchedFunctions();
+        this.dependencies = ["PhilsPluginLibrary"];
+        this.replacedLocationRender = replacedLocationRender;
+        this.replacedScreenshareModalComponent = replacedScreenshareModalComponent;
     }
 
     start(): void {
-        initPluginSettings();
+        initScreenshareStore();
+        initScreenshareAudioStore();
         this.screensharePatcher = new ScreensharePatcher().patch();
+        this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
+
+        addSettingsPanelButton({
+            name: PluginInfo.PLUGIN_NAME,
+            icon: ScreenshareSettingsIcon,
+            tooltipText: "Screenshare Settings",
+            onClick: openScreenshareModal
+        });
     }
 
     stop(): void {
         this.screensharePatcher?.unpatch();
-        Emitter.removeAllListeners();
+        this.screenshareAudioPatcher?.unpatch();
+        Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
+
+        removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
     }
 };

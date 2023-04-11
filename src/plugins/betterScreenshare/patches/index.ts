@@ -16,4 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./patches";
+export * from "./location";
+export * from "./screenshareModal";
+export * from "./video";

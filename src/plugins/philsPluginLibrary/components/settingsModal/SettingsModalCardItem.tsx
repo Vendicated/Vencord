@@ -16,22 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import { types } from "plugins/philsPluginLibrary";
+import { Forms } from "@webpack/common";
+import React from "react";
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterScreenshare",
-    DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
-    AUTHOR: {
-        ...Devs.philhk,
-        github: "https://github.com/philhk"
-    },
-    CONTRIBUTORS: {
-        walrus: {
-            github: "https://github.com/philhk",
-            id: 305317288775778306n,
-            name: "walrus"
-        },
-    },
-    README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
-} as const satisfies types.PluginInfo;
+export interface SettingsModalCardItemProps extends Pick<React.ComponentProps<"div">,
+    | "children"> {
+    title?: string;
+}
+
+export const SettingsModalCardItem = ({ children, title }: SettingsModalCardItemProps) => {
+    return (
+        <div style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.4em",
+            width: "100%"
+        }}>
+            {title && <Forms.FormTitle tag="h5" style={{ margin: 0 }}>{title}</Forms.FormTitle>}
+            {children}
+        </div>
+    );
+};

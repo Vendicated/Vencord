@@ -17,11 +17,5 @@
 */
 
 export * from "./AudioSourceSelect";
-export * from "./AuthorSummaryItem";
-export * from "./CopyButton";
-export * from "./DeleteButton";
-export * from "./IconTooltipButton";
-export * from "./NewButton";
 export * from "./OpenScreenshareSettingsButton";
-export * from "./SaveButton";
 export * from "./ScreenshareSettingsModal";
