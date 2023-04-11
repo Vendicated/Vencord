@@ -9,7 +9,7 @@
 }
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] {
-    height: 120px;
+    min-height: 120px !important;
 }
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] foreignObject {
