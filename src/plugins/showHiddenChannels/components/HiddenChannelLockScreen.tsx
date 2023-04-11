@@ -298,7 +298,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                             </Tooltip>
                         )}
                         <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                        <Tooltip text="Toggle This Section">
+                        <Tooltip text={viewAllowedUsersAndRoles ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <button
                                     onMouseLeave={onMouseLeave}
