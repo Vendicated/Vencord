@@ -20,14 +20,12 @@ import { definePluginSettings } from "@api/settings";
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
+import { useAwaiter } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
 const USRBG = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
-
-const userBg: { [key: string]: string | null; } = {};
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -49,8 +47,8 @@ export default definePlugin({
         {
             find: ".bannerSrc,",
             replacement: {
-                match: /(\i).bannerSrc,/,
-                replace: "$1.bannerSrc=$self.bannerHook($1.displayProfile?.banner, $1.user.id),"
+                match: /(\i)\.bannerSrc,/,
+                replace: "$self.useBannerHook($1),"
             }
         }
     ],
@@ -61,20 +59,16 @@ export default definePlugin({
         );
     },
 
-    bannerHook(banner: string, userId: string) {
-        const update = useForceUpdater();
-        if ((banner && settings.store.nitroFirst) || userBg[userId] === null) return undefined;
-        if (userBg[userId]) return userBg[userId];
-        fetch(USRBG + userId + ".txt").then(res => {
-            if (res.ok) {
-                res.text().then(text => {
-                    userBg[userId] = text;
-                    update();
-                });
-            } else {
-                userBg[userId] = null;
-            }
-        });
+    useBannerHook(props: any) {
+        const { displayProfile, user } = props;
+
+        const [bg] = useAwaiter(() => {
+            return displayProfile?.banner && settings.store.nitroFirst
+                ? Promise.resolve(null)
+                : fetch(USRBG + user.id + ".txt").then(res => res.ok ? res.text() : null);
+        }, { fallbackValue: null, deps: [displayProfile] });
+
+        return bg;
     },
 
     start() {
