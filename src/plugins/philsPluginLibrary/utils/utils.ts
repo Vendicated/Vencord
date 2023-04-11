@@ -24,4 +24,5 @@ export const createDummyUser = (props: Partial<User>) => new (UserStore.getCurre
 export const openURL = (url?: string) => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
 export const validateNumberInput = (value: string) => parseInt(value) ? parseInt(value) : undefined;
 export const validateTextInputNumber = (value: string) => /^[0-9\b]+$/.test(value) || value === "";
-export const replaceObjectValuesIfExist = (target: Object, replace: Object) => Object.entries(target).forEach(([key, value]) => replace[key] && (target[key] = replace[key]));
+export const replaceObjectValuesIfExist =
+    (target: Object, replace: Object) => Object.entries(target).forEach(([key, value]) => replace[key] && (target[key] = replace[key]));

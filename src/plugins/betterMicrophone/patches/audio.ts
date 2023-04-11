@@ -22,7 +22,9 @@ import { MicrophoneProfile, MicrophoneStore } from "../stores";
 
 export function getDefaultTransportationOptions(connection: types.Connection) {
     return {
-        ...connection.getCodecOptions("opus"),
+        audioEncoder: {
+            ...connection.getCodecOptions("opus").audioEncoder,
+        },
         encodingVoiceBitRate: 64000
     };
 }
@@ -45,9 +47,6 @@ export function getReplaceableTransportationOptions(connection: types.Connection
     return {
         ...(voiceBitrateEnabled && voiceBitrate
             ? {
-                callBitRate: voiceBitrate * 1000,
-                callMinBitRate: voiceBitrate * 1000,
-                callMaxBitRate: voiceBitrate * 1000,
                 encodingVoiceBitRate: voiceBitrate * 1000
             }
             : {}

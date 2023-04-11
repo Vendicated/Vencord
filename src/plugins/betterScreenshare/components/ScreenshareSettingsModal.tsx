@@ -36,9 +36,9 @@ import {
     validateNumberInput,
     validateTextInputNumber
 } from "../../philsPluginLibrary";
+import { Styles } from "../../philsPluginLibrary/styles";
 import { PluginInfo } from "../constants";
 import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
-import { Styles } from "../styles";
 
 const simpleResolutions: readonly (SelectOption & { value: types.Resolution; })[] = [
     {
@@ -403,12 +403,10 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                 onChange: status => setHdrEnabled(status)
             }} />;
 
-    const cardGuide =
+    const guideCard =
         <Card style={{ ...Styles.infoCard, flex: 0.4 }}>
-            <div>
-                <Forms.FormTitle tag="h5">How to use?</Forms.FormTitle>
-                <Forms.FormText>If you want to know more about the settings or possible issues, please read <a onClick={() => openURL(PluginInfo.README + "#better-screenshare-plugin")}>this</a>.</Forms.FormText>
-            </div>
+            <Forms.FormTitle tag="h5">How to use?</Forms.FormTitle>
+            <Forms.FormText>If you want to know more about the settings or possible issues, please read <a onClick={() => openURL(PluginInfo.README + "#better-screenshare-plugin")}>this</a>.</Forms.FormText>
         </Card>;
 
     const settingsCardProfiles =
@@ -458,7 +456,7 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                         {screenshareAudioStore && settingsCardAudio}
                     </SettingsModalCardRow>
                     <SettingsModalCardRow>
-                        {cardGuide}
+                        {guideCard}
                         {settingsCardHdr}
                         {settingsCardProfiles}
                     </SettingsModalCardRow>

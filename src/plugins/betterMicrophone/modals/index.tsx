@@ -35,6 +35,7 @@ export const openMicrophoneSettingsModal =
         return props =>
             <MicrophoneSettingsModal
                 onDone={onMicrophoneModalDone}
+                showInfo
                 microphoneStore={microphoneStore}
                 author={PluginInfo.AUTHOR}
                 contributors={Object.values(PluginInfo.CONTRIBUTORS)}

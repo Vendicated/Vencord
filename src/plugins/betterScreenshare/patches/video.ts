@@ -23,7 +23,9 @@ import { ScreenshareProfile, ScreenshareStore } from "../stores";
 export function getDefaultTransportationOptions(connection: types.Connection) {
     return {
         ...connection.videoQualityManager.applyQualityConstraints({}).constraints,
-        ...connection.getCodecOptions("opus", "H264", "stream"),
+        videoEncoder: {
+            ...connection.getCodecOptions("", "H264", "stream").videoEncoder
+        },
         streamParameters: connection.videoStreamParameters[0],
         keyframeInterval: 0,
     };
@@ -149,7 +151,9 @@ export function getReplaceableTransportationOptions(connection: types.Connection
             : {}
         ),
         ...(videoCodecEnabled && videoCodec
-            ? connection.getCodecOptions("opus", videoCodec, "stream")
+            ? {
+                videoEncoder: connection.getCodecOptions("", videoCodec, "stream").videoEncoder
+            }
             : {}
         ),
         ...(audioSourceEnabled && audioSource && utils.getPidFromDesktopSource(audioSource)
@@ -191,12 +195,16 @@ export function patchConnection(
         const replaceableDesktopSourceOptions = getReplaceableDesktopSourceOptions(get);
         replaceObjectValuesIfExist(options, replaceableDesktopSourceOptions);
 
+        logger.info("Overridden Desktop Source Options", options);
+
         return Reflect.apply(oldSetDesktopSourceWithOptions, this, [options]);
     };
 
     connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
         const replaceableTransportOptions = getReplaceableTransportationOptions(connection, get);
         replaceObjectValuesIfExist(options, replaceableTransportOptions);
+
+        logger.info("Overridden Transport Options", options);
 
         if (options.streamParameters)
             connection.videoStreamParameters = [options.streamParameters];
@@ -207,7 +215,7 @@ export function patchConnection(
     const forceUpdateTransportationOptions = () => {
         const transportOptions = window._.merge({ ...getDefaultTransportationOptions(connection) }, getReplaceableTransportationOptions(connection, get));
 
-        logger.info("Replaced Transport Options", transportOptions);
+        logger.info("Force Updated Transport Options", transportOptions);
 
         oldSetTransportOptions(transportOptions);
     };
@@ -215,7 +223,7 @@ export function patchConnection(
     const forceUpdateDesktopSourceOptions = () => {
         const desktopSourceOptions = window._.merge({ ...getDefaultDesktopSourceOptions(connection) }, getDefaultDesktopSourceOptions(connection));
 
-        logger.info("Replaced Desktop Source Options", desktopSourceOptions);
+        logger.info("Force Updated Desktop Source Options", desktopSourceOptions);
 
         oldSetDesktopSourceWithOptions(desktopSourceOptions);
     };

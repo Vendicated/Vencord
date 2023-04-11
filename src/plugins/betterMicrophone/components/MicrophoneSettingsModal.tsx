@@ -19,7 +19,7 @@
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { ModalSize } from "@utils/modal";
-import { Forms, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
+import { Card, Forms, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
 import {
@@ -32,6 +32,7 @@ import {
     validateNumberInput,
     validateTextInputNumber
 } from "../../philsPluginLibrary";
+import { Styles } from "../../philsPluginLibrary/styles";
 import { MicrophoneProfile, MicrophoneStore } from "../stores";
 
 const simpleVoiceBitrates: readonly SelectOption[] = [
@@ -51,10 +52,11 @@ const simpleVoiceBitrates: readonly SelectOption[] = [
 
 export interface MicrophoneSettingsModalProps extends React.ComponentProps<typeof SettingsModal> {
     microphoneStore: ProfilableStore<MicrophoneStore, MicrophoneProfile>;
+    showInfo?: boolean;
 }
 
 export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => {
-    const { microphoneStore } = props;
+    const { microphoneStore, showInfo } = props;
 
     const {
         currentProfile,
@@ -266,6 +268,14 @@ export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => 
             onSaveStateChanged={state => setIsSaving(state)}
             profileableStore={microphoneStore} />;
 
+    const infoCard =
+        <Card style={{ ...Styles.infoCard }}>
+            <Forms.FormTitle tag="h5">Important</Forms.FormTitle>
+            <Forms.FormText>
+                To take full advantage of this plugin, please disable <span style={{ fontWeight: "bold" }}>Krisp</span> and <span style={{ fontWeight: "bold" }}>Echo Cancellation</span>, otherwise features like Stereo (Channels) will not work.
+            </Forms.FormText>
+        </Card>;
+
     return (
         <SettingsModal
             size={simpleMode ? ModalSize.DYNAMIC : ModalSize.DYNAMIC}
@@ -283,13 +293,18 @@ export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => 
             }}
         >
             {simpleMode
-                ? <div style={{ width: "30em" }}>
+                ? <div style={{ width: "30em", display: "flex", flexDirection: "column", gap: "1em" }}>
                     <SettingsModalCardRow>
                         {settingsCardVoiceBitrateSimple}
                         {settingsCardChannelsSimple}
                     </SettingsModalCardRow>
+                    {showInfo &&
+                        <SettingsModalCardRow>
+                            {infoCard}
+                        </SettingsModalCardRow>
+                    }
                 </div>
-                : <div style={{ display: "flex", flexDirection: "column", width: "50em", gap: "1em", maxHeight: "20em" }}>
+                : <div style={{ display: "flex", flexDirection: "column", width: "50em", gap: "1em", maxHeight: "30em" }}>
                     <SettingsModalCardRow>
                         {settingsCardFreq}
                         {settingsCardRate}
@@ -300,6 +315,11 @@ export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => 
                         {settingsCardVoiceBitrate}
                         {settingsCardProfiles}
                     </SettingsModalCardRow>
+                    {showInfo &&
+                        <SettingsModalCardRow>
+                            {infoCard}
+                        </SettingsModalCardRow>
+                    }
                 </div>
             }
         </SettingsModal>
