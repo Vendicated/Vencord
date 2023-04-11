@@ -36,12 +36,15 @@ export function createPluginStore<Z extends PluginSettings = {}>(pluginName: str
     if (!Settings.plugins[pluginName])
         throw new Error("The specified plugin does not exist");
 
-    const get: PluginGet<Z> = () => Settings.plugins[pluginName].settings[storeName] as Z;
-    const set: PluginSet<Z> = (s: ((settings: Z) => Z | undefined) | Z) =>
-        Settings.plugins[pluginName].settings[storeName] = (typeof s === "function" ? s(get()) : s) || get();
-    const use: PluginUse<Z> = () => useSettings().plugins[pluginName].settings[storeName] as Z;
+    if (!Settings.plugins[pluginName].stores)
+        Settings.plugins[pluginName].stores = {};
 
-    set({ ...f(set, get), ...Settings.plugins[pluginName].settings[storeName] });
+    const get: PluginGet<Z> = () => Settings.plugins[pluginName].stores[storeName] as Z;
+    const set: PluginSet<Z> = (s: ((settings: Z) => Z | undefined) | Z) =>
+        Settings.plugins[pluginName].stores[storeName] = (typeof s === "function" ? s(get()) : s) || get();
+    const use: PluginUse<Z> = () => useSettings().plugins[pluginName].stores[storeName] as Z;
+
+    set({ ...f(set, get), ...Settings.plugins[pluginName].stores[storeName] });
 
     return {
         use,

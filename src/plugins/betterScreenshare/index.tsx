@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
-import { React } from "@webpack/common";
 
 import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
 import { OpenScreenshareSettingsButton } from "./components";
@@ -55,11 +54,16 @@ export default new class Plugin implements PluginDef {
             }
         ];
         this.settings = definePluginSettings({
-            openScreenshareSettings: {
-                component: () => <OpenScreenshareSettingsButton />,
-                description: "Open advanced screen sharing settings",
-                type: OptionType.COMPONENT
-            },
+            ...(Settings.plugins[PluginInfo.PLUGIN_NAME].enabled
+                ? {
+                    openScreenshareSettings: {
+                        component: () => <OpenScreenshareSettingsButton />,
+                        description: "Open advanced screen sharing settings",
+                        type: OptionType.COMPONENT
+                    }
+                }
+                : {}
+            ),
             hideDefaultSettings: {
                 type: OptionType.BOOLEAN,
                 description: "Hide Discord screen sharing settings",

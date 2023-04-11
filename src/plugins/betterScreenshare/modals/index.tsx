@@ -20,7 +20,7 @@ import { openModalLazy } from "@utils/modal";
 
 import { ScreenshareSettingsModal } from "../components";
 import { PluginInfo } from "../constants";
-import Plugin from "../index";
+import Plugin from "..";
 import { screenshareAudioStore, screenshareStore } from "../stores";
 
 const onScreenshareModalDone = () => {
