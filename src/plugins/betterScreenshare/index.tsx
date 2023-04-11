@@ -19,19 +19,14 @@
 import { definePluginSettings } from "@api/settings";
 import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
-import { Emitter } from "plugins/philsPluginLibrary";
-import { ScreenshareSettingsIcon } from "plugins/philsPluginLibrary/icons";
-import { addSettingsPanelButton, removeSettingsPanelButton } from "plugins/philsPluginLibrary/patches";
 
+import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
 import { OpenScreenshareSettingsButton } from "./components";
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
-import { ScreensharePatcher } from "./patchers";
-import { ScreenshareAudioPatcher } from "./patchers/screenshareAudio";
-import { replacedLocationRender } from "./patches";
-import { replacedScreenshareModalComponent } from "./patches/screenshareModal";
-import { initScreenshareStore } from "./stores";
-import { initScreenshareAudioStore } from "./stores/screenshareAudioStore";
+import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
+import { replacedLocationRender, replacedScreenshareModalComponent } from "./patches";
+import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
 export default new class Plugin implements PluginDef {
     readonly name: string;

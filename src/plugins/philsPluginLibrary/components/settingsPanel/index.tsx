@@ -17,3 +17,6 @@
 */
 
 export * from "./SettingsPanel";
+export * from "./SettingsPanelButton";
+export * from "./SettingsPanelRow";
+export * from "./SettingsPanelTooltipButton";

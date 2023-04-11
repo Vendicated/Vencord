@@ -17,10 +17,8 @@
 */
 
 import { PluginAuthor, PluginDef } from "@utils/types";
-import { Emitter } from "plugins/philsPluginLibrary";
-import { MicrophoneSettingsIcon } from "plugins/philsPluginLibrary/icons";
-import { addSettingsPanelButton, removeSettingsPanelButton } from "plugins/philsPluginLibrary/patches";
 
+import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
 import { PluginInfo } from "./constants";
 import { openMicrophoneSettingsModal } from "./modals";
 import { MicrophonePatcher } from "./patchers";

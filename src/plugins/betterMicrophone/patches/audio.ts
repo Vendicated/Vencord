@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { replaceObjectValuesIfExist, types } from "plugins/philsPluginLibrary";
-import { ProfilableStore } from "plugins/philsPluginLibrary/store/profileable";
-
+import { ProfilableStore, replaceObjectValuesIfExist, types } from "../../philsPluginLibrary";
 import { logger } from "../logger";
 import { MicrophoneProfile, MicrophoneStore } from "../stores";
 

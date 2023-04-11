@@ -23,7 +23,7 @@ import { IconComponent, SettingsPanelButton } from "../components/settingsPanel/
 import { SettingsPanelRow } from "../components/settingsPanel/SettingsPanelRow";
 import { SettingsPanelTooltipButton } from "../components/settingsPanel/SettingsPanelTooltipButton";
 
-export interface SettingsPanelButton {
+export interface PanelButton {
     name: string,
     tooltipText?: string,
     icon?: IconComponent;
@@ -31,7 +31,7 @@ export interface SettingsPanelButton {
 }
 
 const settingsPanelButtonsSubscriptions = new Set<React.DispatchWithoutAction>();
-export const settingsPanelButtons: SettingsPanelButton[] = new Proxy<SettingsPanelButton[]>([], {
+export const settingsPanelButtons: PanelButton[] = new Proxy<PanelButton[]>([], {
     set: (target, p, newValue) => {
         target[p] = newValue;
         settingsPanelButtonsSubscriptions.forEach(fn => fn());
@@ -53,7 +53,7 @@ export const useButtons = () => {
 export const ButtonsSettingsPanel = () => {
     const rawPanelButtons = useButtons();
 
-    const convertRawPanelButtons = (buttons: SettingsPanelButton[]) => {
+    const convertRawPanelButtons = (buttons: PanelButton[]) => {
         const settingsPanelButtonsClone = [...buttons].sort();
         const groupedButtons: JSX.Element[][] = [];
 
@@ -95,7 +95,7 @@ export function replacedUserPanelComponent(oldComponent: (...args: any[]) => any
     return componentResult;
 }
 
-export function addSettingsPanelButton(settings: SettingsPanelButton) {
+export function addSettingsPanelButton(settings: PanelButton) {
     settingsPanelButtons.push(settings);
 }
 

@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { replaceObjectValuesIfExist, types, utils } from "plugins/philsPluginLibrary";
-import { ProfilableStore } from "plugins/philsPluginLibrary/store/profileable";
-
+import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "../../philsPluginLibrary";
 import { logger } from "../logger";
 import { ScreenshareProfile, ScreenshareStore } from "../stores";
 

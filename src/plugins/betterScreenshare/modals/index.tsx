@@ -21,9 +21,7 @@ import { openModalLazy } from "@utils/modal";
 import { ScreenshareSettingsModal } from "../components";
 import { PluginInfo } from "../constants";
 import Plugin from "../index";
-import { screenshareStore } from "../stores";
-import { screenshareAudioStore } from "../stores/screenshareAudioStore";
-
+import { screenshareAudioStore, screenshareStore } from "../stores";
 
 const onScreenshareModalDone = () => {
     const { screenshareAudioPatcher, screensharePatcher } = Plugin;

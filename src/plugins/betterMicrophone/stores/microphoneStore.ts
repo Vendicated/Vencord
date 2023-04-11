@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createPluginStore } from "plugins/philsPluginLibrary";
-import { ProfilableInitializer, ProfilableStore, profileable, ProfileableProfile } from "plugins/philsPluginLibrary/store/profileable";
-
+import { createPluginStore, ProfilableInitializer, ProfilableStore, profileable, ProfileableProfile } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
 
 
@@ -50,7 +48,7 @@ export interface MicrophoneStore {
     setVoiceBitrateEnabled: (enabled?: boolean) => void;
 }
 
-export const defaultProfiles = {
+export const defaultMicrophoneProfiles = {
     normal: {
         name: "Normal",
         channels: 2,
@@ -91,6 +89,6 @@ export const initMicrophoneStore = () =>
         profileable(
             microphoneStoreDefault,
             { name: "" },
-            Object.values(defaultProfiles)
+            Object.values(defaultMicrophoneProfiles)
         )
     );

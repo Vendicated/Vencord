@@ -21,14 +21,23 @@ import { Switch } from "@components/Switch";
 import { ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
-import { MicrophoneSettingsModal } from "plugins/betterMicrophone/components";
-import { MediaEngineStore, openURL, SettingsModal, SettingsModalCard, SettingsModalCardItem, SettingsModalCardRow, types, validateNumberInput, validateTextInputNumber } from "plugins/philsPluginLibrary";
-import { SettingsModalProfilesCard } from "plugins/philsPluginLibrary/components/settingsModal/SettingsModalProfilesCard";
-import { ProfilableStore } from "plugins/philsPluginLibrary/store/profileable";
 
+import { MicrophoneSettingsModal } from "../../betterMicrophone/components";
+import {
+    MediaEngineStore,
+    openURL,
+    ProfilableStore,
+    SettingsModal,
+    SettingsModalCard,
+    SettingsModalCardItem,
+    SettingsModalCardRow,
+    SettingsModalProfilesCard,
+    types,
+    validateNumberInput,
+    validateTextInputNumber
+} from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
-import { ScreenshareProfile, ScreenshareStore } from "../stores";
-import { ScreenshareAudioProfile, ScreenshareAudioStore } from "../stores/screenshareAudioStore";
+import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
 import { Styles } from "../styles";
 
 const simpleResolutions: readonly (SelectOption & { value: types.Resolution; })[] = [

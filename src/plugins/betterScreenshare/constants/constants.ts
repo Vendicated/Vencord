@@ -17,7 +17,8 @@
 */
 
 import { Devs } from "@utils/constants";
-import { types } from "plugins/philsPluginLibrary";
+
+import { types } from "../../philsPluginLibrary";
 
 export const PluginInfo = {
     PLUGIN_NAME: "BetterScreenshare",

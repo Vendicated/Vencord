@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Emitter, MediaEngineStore, types } from "plugins/philsPluginLibrary";
-import { Patcher } from "plugins/philsPluginLibrary/patchers";
-
+import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
 import { patchConnection } from "../patches";
 import { microphoneStore } from "../stores";

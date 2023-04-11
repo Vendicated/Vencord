@@ -17,8 +17,9 @@
 */
 
 import { classes } from "@utils/misc";
-import { panelClasses } from "plugins/philsPluginLibrary/discordModules";
 import React from "react";
+
+import { panelClasses } from "../../discordModules";
 
 export interface SettingsPanelRowProps {
     children: React.ComponentProps<"div">["children"];

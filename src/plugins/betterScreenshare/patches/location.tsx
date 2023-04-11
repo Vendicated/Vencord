@@ -18,11 +18,10 @@
 
 import { Flex } from "@components/Flex";
 import { React } from "@webpack/common";
-import { SettingsModalCard, SettingsModalCardItem } from "plugins/philsPluginLibrary";
 import { Settings } from "Vencord";
 
-import { AudioSourceSelect } from "../components";
-import { OpenScreenshareSettingsButton } from "../components/OpenScreenshareSettingsButton";
+import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
+import { AudioSourceSelect, OpenScreenshareSettingsButton } from "../components";
 import { PluginInfo } from "../constants";
 import { screenshareStore } from "../stores";
 

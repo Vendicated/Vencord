@@ -18,9 +18,9 @@
 
 import { Flex } from "@components/Flex";
 import { React } from "@webpack/common";
-import { SettingsModalCard, SettingsModalCardItem } from "plugins/philsPluginLibrary";
 import { Settings } from "Vencord";
 
+import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
 import { AudioSourceSelect, OpenScreenshareSettingsButton } from "../components";
 import { PluginInfo } from "../constants";
 import Plugin from "../index";

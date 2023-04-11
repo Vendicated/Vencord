@@ -21,10 +21,17 @@ import { Switch } from "@components/Switch";
 import { ModalSize } from "@utils/modal";
 import { Forms, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
-import { SettingsModal, SettingsModalCard, SettingsModalCardItem, SettingsModalCardRow, validateNumberInput, validateTextInputNumber } from "plugins/philsPluginLibrary";
-import { SettingsModalProfilesCard } from "plugins/philsPluginLibrary/components/settingsModal/SettingsModalProfilesCard";
-import { ProfilableStore } from "plugins/philsPluginLibrary/store/profileable";
 
+import {
+    ProfilableStore,
+    SettingsModal,
+    SettingsModalCard,
+    SettingsModalCardItem,
+    SettingsModalCardRow,
+    SettingsModalProfilesCard,
+    validateNumberInput,
+    validateTextInputNumber
+} from "../../philsPluginLibrary";
 import { MicrophoneProfile, MicrophoneStore } from "../stores";
 
 const simpleVoiceBitrates: readonly SelectOption[] = [

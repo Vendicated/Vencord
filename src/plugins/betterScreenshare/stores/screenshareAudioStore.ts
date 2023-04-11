@@ -17,14 +17,12 @@
 */
 
 import {
-    defaultProfiles,
+    defaultMicrophoneProfiles as defaultScreenshareAudioProfiles,
     MicrophoneProfile as ScreenshareAudioProfile,
     MicrophoneStore as ScreenshareAudioStore,
     microphoneStoreDefault as screenshareAudioStoreDefault
-} from "plugins/betterMicrophone/stores";
-import { createPluginStore } from "plugins/philsPluginLibrary";
-import { ProfilableStore, profileable } from "plugins/philsPluginLibrary/store/profileable";
-
+} from "../../betterMicrophone/stores";
+import { createPluginStore, ProfilableStore, profileable } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
 
 export let screenshareAudioStore: ProfilableStore<ScreenshareAudioStore, ScreenshareAudioProfile>;
@@ -36,8 +34,8 @@ export const initScreenshareAudioStore = () =>
         profileable(
             screenshareAudioStoreDefault,
             { name: "" },
-            Object.values(defaultProfiles)
+            Object.values(defaultScreenshareAudioProfiles)
         )
     );
 
-export { defaultProfiles, ScreenshareAudioProfile, ScreenshareAudioStore, screenshareAudioStoreDefault };
+export { defaultScreenshareAudioProfiles, ScreenshareAudioProfile, ScreenshareAudioStore, screenshareAudioStoreDefault };

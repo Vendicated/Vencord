@@ -16,5 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export * from "./AuthorSummaryItem";
+export * from "./buttons";
+export * from "./ContributorAuthorSummary";
 export * from "./settingsModal";
 export * from "./settingsPanel";

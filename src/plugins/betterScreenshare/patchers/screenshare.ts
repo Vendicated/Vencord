@@ -17,11 +17,10 @@
 */
 
 import { UserStore } from "@webpack/common";
-import { Emitter, MediaEngineStore, types } from "plugins/philsPluginLibrary";
-import { Patcher } from "plugins/philsPluginLibrary/patchers";
 
+import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
-import { patchConnection } from "../patches/video";
+import { patchConnection } from "../patches";
 import { screenshareStore } from "../stores";
 
 export class ScreensharePatcher extends Patcher {
