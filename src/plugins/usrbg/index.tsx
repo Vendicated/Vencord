@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -23,7 +24,6 @@ import { useAwaiter } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
-import { definePluginSettings } from "@api/settings";
 
 const URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
 
