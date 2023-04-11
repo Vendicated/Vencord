@@ -20,23 +20,36 @@ import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/misc";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
+import { definePluginSettings } from "@api/settings";
 
 const URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
+
+const settings = definePluginSettings({
+    nitroFirst: {
+        description: "Default banner if both Nitro and USRBG are present",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Nitro banner", value: true, default: true },
+            { label: "USRBG banner", value: false },
+        ]
+    }
+});
 
 export default definePlugin({
     name: "USRBG",
     description: "Fake Nitro banner",
     authors: [Devs.AutumnVN, Devs.pylix],
+    settings,
     patches: [
         {
             find: ".bannerSrc,",
             replacement: [
                 {
                     match: /(\i).bannerSrc,/,
-                    replace: "$1.bannerSrc??$self.bannerHook($1.user.id),"
+                    replace: "$1.bannerSrc??$self.bannerHook($1.displayProfile?.banner, $1.user.id),"
                 }
             ]
         },
@@ -48,7 +61,9 @@ export default definePlugin({
         );
     },
 
-    bannerHook(userId: string) {
+    bannerHook(banner: string, userId: string) {
+        if (banner && settings.store.nitroFirst) return undefined;
+
         const [bg] = useAwaiter(
             () => fetch(`${URL}${userId}.txt`).then(res => res.ok ? res.text() : null)
         );
