@@ -20,12 +20,14 @@ import { definePluginSettings } from "@api/settings";
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { useAwaiter } from "@utils/misc";
+import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
 const USRBG = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
+
+const userBg: { [key: string]: string | null; } = {};
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -46,13 +48,11 @@ export default definePlugin({
     patches: [
         {
             find: ".bannerSrc,",
-            replacement: [
-                {
-                    match: /(\i).bannerSrc,/,
-                    replace: "$1.bannerSrc??$self.bannerHook($1.displayProfile?.banner, $1.user.id),"
-                }
-            ]
-        },
+            replacement: {
+                match: /(\i).bannerSrc,/,
+                replace: "$1.bannerSrc=$self.bannerHook($1.displayProfile?.banner, $1.user.id),"
+            }
+        }
     ],
 
     settingsAboutComponent: () => {
@@ -62,11 +62,19 @@ export default definePlugin({
     },
 
     bannerHook(banner: string, userId: string) {
-        const func = banner && settings.store.nitroFirst
-            ? () => Promise.resolve(null)
-            : () => fetch(`${USRBG}${userId}.txt`).then(res => res.ok ? res.text() : null);
-
-        return useAwaiter(func)[0] || void 0;
+        const update = useForceUpdater();
+        if ((banner && settings.store.nitroFirst) || userBg[userId] === null) return undefined;
+        if (userBg[userId]) return userBg[userId];
+        fetch(USRBG + userId + ".txt").then(res => {
+            if (res.ok) {
+                res.text().then(text => {
+                    userBg[userId] = text;
+                    update();
+                });
+            } else {
+                userBg[userId] = null;
+            }
+        });
     },
 
     start() {
