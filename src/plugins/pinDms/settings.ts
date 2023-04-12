@@ -19,7 +19,7 @@
 import { definePluginSettings, Settings, useSettings } from "@api/settings";
 import { OptionType } from "@utils/types";
 
-let snapshot: Set<string>;
+let snapshot: Set<string> | undefined;
 
 export const settings = definePluginSettings({
     showTwice: {
@@ -29,7 +29,12 @@ export const settings = definePluginSettings({
     }
 });
 
-const takeSnapshot = () => snapshot = new Set<string>((Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(","));
+const getArray = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(",") as string[] | undefined;
+const save = (pins: string[]) => {
+    snapshot = void 0;
+    Settings.plugins.PinDMs.pinnedDMs = pins.join(",");
+};
+const takeSnapshot = () => snapshot = new Set<string>(getArray());
 const requireSnapshot = () => snapshot ?? takeSnapshot();
 
 export function usePinnedDms() {
@@ -48,5 +53,12 @@ export function togglePin(id: string) {
         snapshot.add(id);
     }
 
-    Settings.plugins.PinDMs.pinnedDMs = [...snapshot].join(",");
+    save([...snapshot]);
+}
+
+export function movePin(element: string, target: string) {
+    const pins = getArray()!;
+    pins.splice(pins.indexOf(element), 1);
+    pins.splice(pins.indexOf(target) + 1, 0, element);
+    save(pins);
 }

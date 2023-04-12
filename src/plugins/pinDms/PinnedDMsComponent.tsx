@@ -20,17 +20,55 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { filters, find, findByCode, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, SelectedChannelStore, useEffect, useState } from "@webpack/common";
+import type { DragEvent } from "react";
 
-import { usePinnedDms } from "./settings";
+import { movePin, usePinnedDms } from "./settings";
 
 const classes = findByPropsLazy("privateChannelsHeaderContainer");
 const DMComponent = LazyComponent(() => findByCode("getRecipientId()", "isFavorite"));
 const dmGroupFilter = filters.byCode("isFavorite:", "channelName:");
 const DMGroupComponent = LazyComponent(() => find(m => dmGroupFilter(m) && !filters.byCode("getRecipientId")(m)));
 
+function cancelDefault(e: DragEvent<unknown>) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+interface PinnedDMProps {
+    id: string;
+    selectedChannelId: string;
+    beginDrag(channelId: string): void;
+    endDrag(e: DragEvent<unknown>): void;
+}
+
+function PinnedDM({ id, selectedChannelId, beginDrag, endDrag }: PinnedDMProps) {
+    const channel = ChannelStore.getChannel(id);
+    if (!channel) return null;
+
+    const Component = channel.isMultiUserDM() ? DMGroupComponent : DMComponent;
+
+    return (
+        <div
+            key={channel.id}
+            draggable={true}
+            onDragOver={cancelDefault}
+            onDragEnter={cancelDefault}
+            onDragStart={() => beginDrag(id)}
+            onDrop={endDrag}
+        >
+            <Component
+                channel={channel}
+                selected={channel.id === selectedChannelId}
+                inPins={true}
+            />
+        </div>
+    );
+}
+
 export default ErrorBoundary.wrap(function PinnedDmsComponent() {
     const pins = usePinnedDms();
     const [selectedChannelId, setSelectedChannelId] = useState(SelectedChannelStore.getChannelId());
+    const [draggedChannelId, setDraggedChannelId] = useState<string>();
 
     useEffect(() => {
         const cb = ({ channelId }) => setSelectedChannelId(channelId);
@@ -48,21 +86,20 @@ export default ErrorBoundary.wrap(function PinnedDmsComponent() {
              (and there's dozens of those, so it's impossible to find) */}
             <h2 className={`${classes.privateChannelsHeaderContainer} container-q97qHp`}>Pinned DMs</h2>
 
-            {Array.from(pins, p => {
-                const channel = ChannelStore.getChannel(p);
-                if (!channel) return null;
+            {Array.from(pins, p => (
+                <PinnedDM
+                    key={p}
+                    id={p}
+                    selectedChannelId={selectedChannelId}
+                    beginDrag={() => setDraggedChannelId(p)}
+                    endDrag={e => {
+                        cancelDefault(e);
 
-                const Component = channel.isMultiUserDM() ? DMGroupComponent : DMComponent;
-
-                return (
-                    <Component
-                        key={channel.id}
-                        channel={channel}
-                        selected={channel.id === selectedChannelId}
-                        inPins={true}
-                    />
-                );
-            })}
+                        movePin(draggedChannelId!, p);
+                        setDraggedChannelId(undefined);
+                    }}
+                />
+            ))}
         </>
     );
 });
