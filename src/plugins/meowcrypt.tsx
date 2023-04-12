@@ -23,7 +23,7 @@ import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, FluxDispatcher, React, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const regex = /^nya\.[0-9a-zA-Z+/]+={0,2}\.[0-9a-zA-Z+/]+={0,2}\.[0-9a-zA-Z+/]+={0,2}$/;
+const regex = /^nya>\.<[0-9a-zA-Z+/]+={0,2}>\.<[0-9a-zA-Z+/]+={0,2}>\.<[0-9a-zA-Z+/]+={0,2}$/;
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
