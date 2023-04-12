@@ -62,7 +62,3 @@ export function movePin(element: string, target: string) {
     pins.splice(pins.indexOf(target) + 1, 0, element);
     save(pins);
 }
-
-export function getPinCount() {
-    return requireSnapshot().size;
-}

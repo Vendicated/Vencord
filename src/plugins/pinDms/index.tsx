@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, getPinCount, isPinned, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -34,10 +34,6 @@ export default definePlugin({
     usePinCount() {
         const pinnedDms = usePinnedDms();
         return pinnedDms.size;
-    },
-
-    getPinCount() {
-        return getPinCount();
     },
 
     getChannel(channels: Record<string, Channel>, idx: number) {
@@ -53,14 +49,6 @@ export default definePlugin({
         if (!channel) return true;
         if (section === 1) return false;
         return isPinned(channel.id);
-    },
-
-    getExtraOffset(rowHeight: number, rowIdx: number, channelIds: string[]) {
-        let offset = rowHeight * getPinCount();
-        for (let i = 0; i < rowIdx; i++) {
-            if (isPinned(channelIds[i])) offset -= rowHeight;
-        }
-        return offset;
     },
 
     patches: [
@@ -97,11 +85,6 @@ export default definePlugin({
                     // section === DMS
                     match: /===\i.DMS&&0/,
                     replace: "-1$&"
-                },
-                {
-                    // offset += ROW_HEIGHT * (rowIndex + preRendererChildrenCount) + padding;
-                    match: /(\i)\+=(\i)\*\((\i)\+\i\)\+\i;/,
-                    replace: "$& $1+=$self.getExtraOffset($2,$3,this.props.privateChannelIds);"
                 }
             ]
         }
