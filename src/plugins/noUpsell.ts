@@ -32,17 +32,15 @@ export default definePlugin({
             find: "HUB_WAITLIST_UPSELL=0",
             replacement: {
                 match: /(?<=(\i)={dismissedContents:)new Uint8Array\(0\)(};.+?;)/,
-                replace: "Uint8Array.from(Array(192),()=>255)$2return $1;"
+                replace: "new Uint8Array(192).fill(0xff)$2return $1;"
             }
         },
     ],
 
     start() {
-        // technically, this only needs to be done once after the patch is in effect
-        // this is due to some weird schema validation and cache stuff, and I can't
-        // exactly find where the cache is, but this should suffice.
+        // force cache to be out of sync with the parser patch
         UserSettings.updateAsync("userContent", (v: any) => {
-            v.dismissedContents = new Uint8Array();
+            v.dismissedContents = new Uint8Array(48).fill(0xff);
         });
     },
 });
