@@ -47,12 +47,16 @@ export default definePlugin({
                     body: {
                         modified_contacts: {
                             [random]: [1, "", ""]
-                        }
+                        },
+                        phone_contact_methods_count: 1
                     }
                 }).then(res =>
                     FriendInvites.createFriendInvite({
                         code: res.body.invite_suggestions[0][3],
-                        recipient_phone_number_or_email: random
+                        recipient_phone_number_or_email: random,
+                        contact_visibility: 1,
+                        filter_visibilities: [],
+                        filtered_invite_suggestions_index: 1
                     })
                 );
 
