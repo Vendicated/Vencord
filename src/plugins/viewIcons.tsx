@@ -200,7 +200,7 @@ export default definePlugin({
             find: "().avatarWrapperNonUserBot",
             replacement: {
                 match: /(avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
-                replace: '$1style:($2)?{cursor:"pointer"}:{},onClick:$2?()=>{$self.openImage($3)}'
+                replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
             }
         }
     ]
