@@ -22,7 +22,7 @@ import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCal
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore, Menu, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, PermissionsBits, UserStore } from "@webpack/common";
 import { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
@@ -73,6 +73,13 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     type: PermissionType.Role,
                     id: role.id,
                     permissions: role.permissions
+                });
+            }
+
+            if (guild.ownerId === id!) {
+                permissions.push({
+                    type: PermissionType.Owner,
+                    permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
                 });
             }
 
@@ -152,7 +159,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     settings,
 
-    dependencies: ["MenuItemDeobfuscatorAPI", "ContextMenuAPI"],
+    dependencies: ["ContextMenuAPI"],
 
     patches: [
         {
