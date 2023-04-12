@@ -18,6 +18,8 @@
 
 import { React } from "@webpack/common";
 
+import { panelClasses } from "../../discordModules";
+
 
 export interface SettingsPanelProps {
     children: React.ComponentProps<"div">["children"];
@@ -26,12 +28,7 @@ export interface SettingsPanelProps {
 export const SettingsPanel = ({ children }: SettingsPanelProps) => {
     return (
         <div
-            style={{
-                backgroundColor: "var(--background-secondary-alt)",
-                borderBottom: "1px solid var(--background-modifier-accent)",
-                padding: "0.5em"
-            }}
-        >
+            className={panelClasses.container}>
             <div
                 style={{
                     display: "flex",
