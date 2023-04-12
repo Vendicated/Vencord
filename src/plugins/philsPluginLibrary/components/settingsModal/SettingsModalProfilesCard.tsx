@@ -101,10 +101,10 @@ export const SettingsModalProfilesCard = <T extends PluginSettings = {},>(props:
                                 serialize={() => ""} />}
                     </div>
                     <Flex style={{ gap: "0.8em" }}>
-                        <SaveButton onClick={onSaveProfile} disabled={!currentProfile.name || !currentProfile.name.length} />
+                        <SaveButton onClick={onSaveProfile} />
                         <NewButton onClick={onNewProfile} disabled={isSaving} />
                         <CopyButton onClick={onCopyProfile} disabled={isSaving} />
-                        <DeleteButton onClick={onDeleteProfile} disabled={isSaving || isCurrentProfileADefaultProfile()} />
+                        <DeleteButton onClick={onDeleteProfile} disabled={isSaving || isCurrentProfileADefaultProfile() || !currentProfile.name.length} />
                     </Flex>
                 </Flex>
             </SettingsModalCardItem>
