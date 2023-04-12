@@ -63,7 +63,7 @@ const settings = definePluginSettings({
 });
 
 function openImage(url: string) {
-    var format = settings.store.format;
+    let format = settings.store.format;
 
     if (url.startsWith("/")) {
         url = window.location.protocol + "//" + window.location.host + url;
