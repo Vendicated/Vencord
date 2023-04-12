@@ -19,6 +19,7 @@
 import { definePluginSettings, Settings, useSettings } from "@api/settings";
 import { OptionType } from "@utils/types";
 
+let snapshotArray: string[] | undefined;
 let snapshot: Set<string> | undefined;
 
 export const settings = definePluginSettings({
@@ -34,7 +35,10 @@ const save = (pins: string[]) => {
     snapshot = void 0;
     Settings.plugins.PinDMs.pinnedDMs = pins.join(",");
 };
-const takeSnapshot = () => snapshot = new Set<string>(getArray());
+const takeSnapshot = () => {
+    snapshotArray = getArray();
+    return snapshot = new Set<string>(snapshotArray);
+};
 const requireSnapshot = () => snapshot ?? takeSnapshot();
 
 export function usePinnedDms() {
@@ -54,6 +58,11 @@ export function togglePin(id: string) {
     }
 
     save([...snapshot]);
+}
+
+export function getPinAt(idx: number) {
+    requireSnapshot();
+    return snapshotArray![idx];
 }
 
 export function movePin(element: string, target: string) {

@@ -16,18 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { ChannelStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import PinnedDmsComponent from "./PinnedDMsComponent";
-import { settings, usePinnedDms } from "./settings";
-import { findInReactTree } from "./walk";
-
-const seen = new WeakSet();
+import { getPinAt, settings, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -39,16 +34,39 @@ export default definePlugin({
     start: addContextMenus,
     stop: removeContextMenus,
 
+    usePinCount() {
+        const pinnedDms = usePinnedDms();
+        return pinnedDms.size;
+    },
+
+    getChannel(idx: number) {
+        return ChannelStore.getChannel(getPinAt(idx));
+    },
+
     patches: [
         // Patch DM list
         {
             find: ".privateChannelsHeaderContainer,",
-            replacement: {
-                // children: function(i) { return React.createElement(Component, someFunc({
-                match: /(?<=FocusJumpSection,\{children:function\(\i\)\{return\s*\(0,\i\.jsxs?\)\()(.+?),(\i)\(\{/,
-                // children: function(i) { return React.createElement(OurWrapper, someFunc({ originalComponent: Component
-                replace: "$self.Wrapper,$2({originalComponent:$1,"
-            }
+            replacement: [
+                {
+                    match: /sections:\[\i,/,
+                    replace: "$&$self.usePinCount(),"
+                },
+                {
+                    match: /children:(\i\.\i\.Messages.DIRECT_MESSAGES)(?<=renderSection=function\((\i)\).+?)/,
+                    replace: "children:$2.section===1?'Pinned DMs':$1"
+                },
+                {
+                    // inside renderDM: channel=channels[channelIds[row]]
+                    match: /(?<=preRenderedChildren,\i=)(\i\[\i\[\i\]\])/,
+                    // section 1 is us, manually get our own channel
+                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$1"
+                },
+                {
+                    match: /channel:\i,selected:/,
+                    replace: "inPins:arguments[0]===1,$&"
+                }
+            ]
         },
         // Patch the DM & DMGroup components to not render pinned dms in the regular dm list
         {
@@ -68,34 +86,5 @@ export default definePlugin({
         if (!pinnedDms.has(props.channel.id)) return false;
 
         return !settings.store.showTwice;
-    },
-
-    Wrapper: ErrorBoundary.wrap((props: { originalComponent: React.ComponentType<any>; selectedChannelId: string; }) => {
-        const original = <props.originalComponent {...props} />;
-
-        const originalRender = original.type.render;
-        original.type.render = (...args: any[]) => {
-            const res = originalRender(...args);
-            try {
-                if (seen.has(res)) return res;
-                seen.add(res);
-
-                const container = findInReactTree(res, node => node?.props?.containerRef);
-                const idx = container.props.children.findIndex(n => n?.props?.className?.startsWith("privateChannelsHeaderContainer"));
-                if (idx !== -1)
-                    container.props.children.splice(
-                        idx - 1,
-                        0,
-                        <PinnedDmsComponent />
-                    );
-
-            } catch (e) {
-                new Logger("PinDMs").error("Failed to patch DM list", e);
-            }
-
-            return res;
-        };
-
-        return original;
-    })
+    }
 });
