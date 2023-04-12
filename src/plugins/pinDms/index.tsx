@@ -22,14 +22,12 @@ import { ChannelStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, settings, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list",
     authors: [Devs.Ven],
-
-    settings,
 
     start: addContextMenus,
     stop: removeContextMenus,
@@ -45,6 +43,13 @@ export default definePlugin({
 
     isPinned(channel?: Channel) {
         return channel && isPinned(channel.id);
+    },
+
+    shouldHide(section: number, channel?: Channel) {
+        if (!channel) return true;
+        if (!isPinned(channel.id)) return false;
+        if (section === 1) return false;
+        return true;
     },
 
     patches: [
@@ -74,18 +79,9 @@ export default definePlugin({
                     match: /(?<=preRenderedChildren,(\i)=)(\i\[\i\[\i\]\]);/,
                     // section 1 is us, manually get our own channel
                     // additionally, if the channel is pinned and it's not our section, don't render
-                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$2;if($self.isPinned($1)&&arguments[0]!==1)return null;"
+                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$2;if($self.shouldHide(arguments[0],$1))return null;"
                 }
             ]
         }
-    ],
-
-    shouldHide(props: { channel: Channel, inPins?: boolean; }) {
-        const pinnedDms = usePinnedDms();
-
-        if (props.inPins) return false;
-        if (!pinnedDms.has(props.channel.id)) return false;
-
-        return !settings.store.showTwice;
-    }
+    ]
 });

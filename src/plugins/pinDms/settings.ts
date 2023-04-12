@@ -16,19 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings, useSettings } from "@api/settings";
-import { OptionType } from "@utils/types";
+import { Settings, useSettings } from "@api/settings";
 
 let snapshotArray: string[] | undefined;
 let snapshot: Set<string> | undefined;
-
-export const settings = definePluginSettings({
-    showTwice: {
-        type: OptionType.BOOLEAN,
-        description: "Also show pinned DMs in the normal DM list",
-        default: false
-    }
-});
 
 const getArray = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(",") as string[] | undefined;
 const save = (pins: string[]) => {
