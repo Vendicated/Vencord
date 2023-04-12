@@ -80,8 +80,6 @@ function openImage(url: string) {
     ));
 }
 
-const seen = new WeakSet();
-
 const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 

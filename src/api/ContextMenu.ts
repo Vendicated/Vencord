@@ -127,7 +127,7 @@ export function _patchContextMenu(props: ContextMenuProps) {
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
-    props.children = Array.isArray(props.children) ? props.children : [props.children];
+    if (!Array.isArray(props.children)) props.children = [props.children];
 
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
