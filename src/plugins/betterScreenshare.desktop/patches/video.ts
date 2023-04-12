@@ -221,7 +221,7 @@ export function patchConnection(
     };
 
     const forceUpdateDesktopSourceOptions = () => {
-        const desktopSourceOptions = window._.merge({ ...getDefaultDesktopSourceOptions(connection) }, getDefaultDesktopSourceOptions(connection));
+        const desktopSourceOptions = window._.merge({ ...getDefaultDesktopSourceOptions(connection) }, getReplaceableDesktopSourceOptions(get));
 
         logger.info("Force Updated Desktop Source Options", desktopSourceOptions);
 
