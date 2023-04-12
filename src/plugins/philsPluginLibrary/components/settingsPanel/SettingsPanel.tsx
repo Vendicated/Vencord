@@ -29,15 +29,7 @@ export const SettingsPanel = ({ children }: SettingsPanelProps) => {
     return (
         <div
             className={panelClasses.container}>
-            <div
-                style={{
-                    display: "flex",
-                    gap: "0.5em",
-                    flexDirection: "column"
-                }}
-            >
-                {children}
-            </div>
+            {children}
         </div>
     );
 };
