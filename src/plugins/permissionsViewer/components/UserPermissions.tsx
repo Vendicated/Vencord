@@ -58,6 +58,19 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         });
     }
 
+    if (guild.ownerId === guildMember.userId) {
+        rolePermissions.push({
+            type: PermissionType.Owner,
+            permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
+        });
+
+        userPermissions.push({
+            permission: "Server Owner",
+            roleColor: "var(--primary-300)",
+            rolePosition: Infinity
+        });
+    }
+
     sortUserRoles(userRoles);
 
     for (const [permission, bit] of Object.entries(PermissionsBits)) {

@@ -26,12 +26,13 @@ import { getPermissionString } from "../formatting";
 
 export enum PermissionType {
     Role = 0,
-    User = 1
+    User = 1,
+    Owner = 2
 }
 
 export interface RoleOrUserPermission {
     type: PermissionType;
-    id: string;
+    id?: string;
     permissions?: bigint;
     overwriteAllow?: bigint;
     overwriteDeny?: bigint;
@@ -53,7 +54,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
     const usersToRequest = permissions.filter(permission => permission.type === PermissionType.User)
         .map(({ id }) => id)
-        .filter(id => !GuildMemberStore.isMember(guild.id, id));
+        .filter(id => !GuildMemberStore.isMember(guild.id, id!));
 
     useEffect(() => {
         FluxDispatcher.dispatch({
@@ -86,8 +87,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     <div className="permviewer-perms-container">
                         <div className="permviewer-perms-list">
                             {permissions.map((permission, index) => {
-                                const user = UserStore.getUser(permission.id);
-                                const role = guild.roles[permission.id];
+                                const user = UserStore.getUser(permission.id ?? "");
+                                const role = guild.roles[permission.id ?? ""];
 
                                 return (
                                     <button
@@ -96,7 +97,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     >
                                         <div
                                             className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
-                                            onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id} onClose={modalProps.onClose} />)}
+                                            onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id!} onClose={modalProps.onClose} />)}
                                         >
                                             {permission.type === PermissionType.Role && (
                                                 <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }} />
@@ -107,7 +108,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             <Text variant="text-md/normal">{
                                                 permission.type === PermissionType.Role
                                                     ? role?.name ?? "Unknown Role"
-                                                    : (user?.tag) ?? "Unknown User"
+                                                    : permission.type === PermissionType.User
+                                                        ? user?.tag ?? "Unknown User"
+                                                        : "@owner"
                                             }</Text>
                                         </div>
                                     </button>
