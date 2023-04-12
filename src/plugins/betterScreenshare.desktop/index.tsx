@@ -24,7 +24,7 @@ import { OpenScreenshareSettingsButton } from "./components";
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
-import { replacedLocationRender, replacedScreenshareModalComponent } from "./patches";
+import { replacedScreenshareModalComponent } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
 export default new class Plugin implements PluginDef {
@@ -35,7 +35,6 @@ export default new class Plugin implements PluginDef {
     readonly settings: DefinedSettings<SettingsDefinition, {}>;
     readonly dependencies: string[];
 
-    private readonly replacedLocationRender: typeof replacedLocationRender;
     private readonly replacedScreenshareModalComponent: typeof replacedScreenshareModalComponent;
     public screensharePatcher?: ScreensharePatcher;
     public screenshareAudioPatcher?: ScreenshareAudioPatcher;
@@ -71,7 +70,6 @@ export default new class Plugin implements PluginDef {
             }
         });
         this.dependencies = ["PhilsPluginLibrary"];
-        this.replacedLocationRender = replacedLocationRender;
         this.replacedScreenshareModalComponent = replacedScreenshareModalComponent;
     }
 
