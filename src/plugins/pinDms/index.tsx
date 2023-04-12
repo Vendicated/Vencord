@@ -22,7 +22,7 @@ import { ChannelStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, settings, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, settings, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -43,39 +43,40 @@ export default definePlugin({
         return ChannelStore.getChannel(getPinAt(idx));
     },
 
+    isPinned(channel?: Channel) {
+        return channel && isPinned(channel.id);
+    },
+
     patches: [
         // Patch DM list
         {
             find: ".privateChannelsHeaderContainer,",
             replacement: [
                 {
+                    // sections is an array of numbers, where each element is a section and
+                    // the number is the amount of rows. Add our pinCount in second place
+                    // - Section 1: buttons for pages like Friends & Library
+                    // - Section 2: our pinned dms
+                    // - Section 3: the normal dm list
                     match: /sections:\[\i,/,
                     replace: "$&$self.usePinCount(),"
                 },
                 {
+                    // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
+                    // lookbehind is used to lookup parameter name. We could use arguments[0], but
+                    // if children ever is wrapped in an iife, it will break
                     match: /children:(\i\.\i\.Messages.DIRECT_MESSAGES)(?<=renderSection=function\((\i)\).+?)/,
                     replace: "children:$2.section===1?'Pinned DMs':$1"
                 },
                 {
-                    // inside renderDM: channel=channels[channelIds[row]]
-                    match: /(?<=preRenderedChildren,\i=)(\i\[\i\[\i\]\])/,
+                    // Patch channel lookup inside renderDM
+                    // channel=channels[channelIds[row]];
+                    match: /(?<=preRenderedChildren,(\i)=)(\i\[\i\[\i\]\]);/,
                     // section 1 is us, manually get our own channel
-                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$1"
-                },
-                {
-                    match: /channel:\i,selected:/,
-                    replace: "inPins:arguments[0]===1,$&"
+                    // additionally, if the channel is pinned and it's not our section, don't render
+                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$2;if($self.isPinned($1)&&arguments[0]!==1)return null;"
                 }
             ]
-        },
-        // Patch the DM & DMGroup components to not render pinned dms in the regular dm list
-        {
-            find: ".handleLeaveGroup=",
-            replacement: {
-                // return React.createElement(Component, { channel: c, channelName: n
-                match: /return(?=\(0,\i\.jsxs?\)\(\i,\i\(\{channel:\i,channelName:\i)/g,
-                replace: "return $self.shouldHide(arguments[0])?null:"
-            }
         }
     ],
 
