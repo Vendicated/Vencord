@@ -17,8 +17,15 @@
 */
 
 import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
+import { filters, find, findByCode, findByPropsLazy } from "@webpack";
+import { ChannelStore } from "@webpack/common";
+
+const classes = findByPropsLazy("privateChannelsHeaderContainer");
+const DMComponent = LazyComponent(() => findByCode("getRecipientId()", "isFavorite"));
+const dmGroupFilter = filters.byCode("isFavorite:", "channelName:");
+const DMGroupComponent = LazyComponent(() => find(m => dmGroupFilter(m) && !filters.byCode("getRecipientId")(m)));
 
 function walkChildren(node: any, fn: (node: any) => false | void): boolean {
     if (fn(node) === false) return false;
@@ -51,7 +58,32 @@ function findInReactTree(root: any, filter: (node: any) => boolean) {
     return found;
 }
 
+const pins = ["845052403802964019", "941031948762112050"];
+
+function PinnedDmsComponent() {
+    return (
+        <>
+            {/* Have to hardcode this class because it is exported by a module that only contains container
+             (and there's dozens of those, so it's impossible to find) */}
+            <h2 className={`${classes.privateChannelsHeaderContainer} container-q97qHp`}>Pinned DMs</h2>
+            {pins.map(p => {
+                const channel = ChannelStore.getChannel(p);
+                if (!channel) return null;
+
+                const Component = channel.isMultiUserDM() ? DMGroupComponent : DMComponent;
+
+                return <Component
+                    key={channel.id}
+                    channel={channel}
+                    selected={false}
+                />;
+            })}
+        </>
+    );
+}
+
 const seen = new WeakSet();
+
 
 export default definePlugin({
     name: "PinDMs",
@@ -68,7 +100,7 @@ export default definePlugin({
         }
     ],
 
-    Wrapper(props: { originalComponent: React.ComponentType<any>; }) {
+    Wrapper(props: { originalComponent: React.ComponentType<any>; selectedChannelId: string; }) {
         const original = <props.originalComponent {...props} />;
 
         const originalRender = original.type.render;
@@ -79,7 +111,8 @@ export default definePlugin({
 
             const container = findInReactTree(res, node => node?.props?.containerRef);
             const idx = container.props.children.findIndex(n => n?.props?.className?.startsWith("privateChannelsHeaderContainer"));
-            container.props.children.splice(idx - 1, 0, <Forms.FormText>EXPLODE</Forms.FormText>);
+            if (idx !== -1)
+                container.props.children.splice(idx - 1, 0, <PinnedDmsComponent />);
 
             return res;
         };
