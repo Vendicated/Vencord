@@ -33,7 +33,7 @@ const takeSnapshot = () => {
 const requireSnapshot = () => snapshot ?? takeSnapshot();
 
 export function usePinnedDms() {
-    useSettings(["plugins.PinDMs.pinnedDMs", "plugins.PinDMs.showTwice"]);
+    useSettings(["plugins.PinDMs.pinnedDMs"]);
 
     return requireSnapshot();
 }
@@ -61,4 +61,8 @@ export function movePin(element: string, target: string) {
     pins.splice(pins.indexOf(element), 1);
     pins.splice(pins.indexOf(target) + 1, 0, element);
     save(pins);
+}
+
+export function getPinCount() {
+    return requireSnapshot().size;
 }

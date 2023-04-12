@@ -18,11 +18,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, usePinnedDms } from "./settings";
+import { getPinAt, getPinCount, isPinned, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -37,8 +36,13 @@ export default definePlugin({
         return pinnedDms.size;
     },
 
-    getChannel(idx: number) {
-        return ChannelStore.getChannel(getPinAt(idx));
+    getPinCount() {
+        return getPinCount();
+    },
+
+    getChannel(channels: Record<string, Channel>, idx: number) {
+        console.log("getChannel", channels[getPinAt(idx)]);
+        return channels[getPinAt(idx)];
     },
 
     isPinned(channel?: Channel) {
@@ -47,9 +51,16 @@ export default definePlugin({
 
     shouldHide(section: number, channel?: Channel) {
         if (!channel) return true;
-        if (!isPinned(channel.id)) return false;
         if (section === 1) return false;
-        return true;
+        return isPinned(channel.id);
+    },
+
+    getExtraOffset(rowHeight: number, rowIdx: number, channelIds: string[]) {
+        let offset = rowHeight * getPinCount();
+        for (let i = 0; i < rowIdx; i++) {
+            if (isPinned(channelIds[i])) offset -= rowHeight;
+        }
+        return offset;
     },
 
     patches: [
@@ -76,10 +87,21 @@ export default definePlugin({
                 {
                     // Patch channel lookup inside renderDM
                     // channel=channels[channelIds[row]];
-                    match: /(?<=preRenderedChildren,(\i)=)(\i\[\i\[\i\]\]);/,
+                    match: /(?<=preRenderedChildren,(\i)=)((\i)\[\i\[\i\]\]);/,
                     // section 1 is us, manually get our own channel
                     // additionally, if the channel is pinned and it's not our section, don't render
-                    replace: "arguments[0]===1?$self.getChannel(arguments[1]):$2;if($self.shouldHide(arguments[0],$1))return null;"
+                    replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;if($self.shouldHide(arguments[0],$1))return null;"
+                },
+                {
+                    // Fix getRowHeight's check for whether this is the DMs section
+                    // section === DMS
+                    match: /===\i.DMS&&0/,
+                    replace: "-1$&"
+                },
+                {
+                    // offset += ROW_HEIGHT * (rowIndex + preRendererChildrenCount) + padding;
+                    match: /(\i)\+=(\i)\*\((\i)\+\i\)\+\i;/,
+                    replace: "$& $1+=$self.getExtraOffset($2,$3,this.props.privateChannelIds);"
                 }
             ]
         }
