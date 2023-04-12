@@ -36,35 +36,6 @@ const ContextMenuLogger = new Logger("ContextMenu");
 export const navPatches = new Map<string, Set<NavContextMenuPatchCallback>>();
 export const globalPatches = new Set<GlobalContextMenuPatchCallback>();
 
-const proxySet = new WeakSet();
-function makeChildrenProxy(target: Array<ReactElement>) {
-    return new Proxy(target, {
-        get() {
-            // @ts-expect-error
-            const value = Reflect.get(...arguments);
-
-            if (value?.props?.children == null || proxySet.has(value.props.children)) return value;
-            if (Array.isArray(value.props.children)) {
-                value.props.children = makeChildrenProxy(value.props.children);
-                proxySet.add(value.props.children);
-            }
-
-            return value;
-        },
-        set(target, _, newValue) {
-            if (newValue != null) {
-                for (const child of target) {
-                    if (child == null) continue;
-                    if (child.props?.id === newValue.props?.id) return false;
-                }
-            }
-
-            // @ts-expect-error
-            return Reflect.set(...arguments);
-        }
-    });
-}
-
 /**
  * Add a context menu patch
  * @param navId The navId(s) for the context menu(s) to patch
@@ -147,11 +118,16 @@ interface ContextMenuProps {
     onClose: (callback: (...args: Array<any>) => any) => void;
 }
 
+const patchedMenus = new WeakSet();
+
 export function _patchContextMenu(props: ContextMenuProps) {
+    if (patchedMenus.has(props)) return;
+    patchedMenus.add(props);
+
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
-    props.children = makeChildrenProxy(Array.isArray(props.children) ? props.children : [props.children]);
+    props.children = Array.isArray(props.children) ? props.children : [props.children];
 
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
