@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, PropsWithChildren, UIEvent } from "react";
+import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, UIEvent } from "react";
 
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
@@ -31,12 +31,12 @@ export interface Menu {
     }>;
     MenuSeparator: ComponentType;
     MenuGroup: RC<{
-        label: string;
+        label?: string;
     }>;
     MenuItem: RC<{
         id: string;
         label: string;
-        action?(): void;
+        action?(e: MouseEvent): void;
 
         render?: ComponentType;
         onChildrenScroll?: Function;
@@ -47,7 +47,7 @@ export interface Menu {
         id: string;
         label: string;
         checked: boolean;
-        action(): void;
+        action?(e: MouseEvent): void;
         disabled?: boolean;
     }>;
     MenuRadioItem: RC<{
@@ -55,8 +55,7 @@ export interface Menu {
         group: string;
         label: string;
         checked: boolean;
-        action(): void;
-
+        action?(e: MouseEvent): void;
         disabled?: boolean;
     }>;
     MenuControlItem: RC<{
