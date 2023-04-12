@@ -187,7 +187,7 @@ export default definePlugin({
     async onMessage(e: IMessageCreate) {
         if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
         if (e.message.state === "SENDING") return;
-        if (!e.message.content.startsWith("nya.")) return;
+        if (!e.message.content.startsWith("nya>.<")) return;
         try {
             const matches = regex.exec(e.message.content);
             if (matches) {
