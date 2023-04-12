@@ -174,8 +174,12 @@ export default definePlugin({
     pickSticker(
         event: React.UIEvent,
         stickers: Sticker[],
-        props: { channel: Channel, message: Message; }
+        props: {
+            channel: Channel,
+            message: Message;
+        }
     ) {
-        ContextMenu.open(event, () => <GreetMenu stickers={stickers} {...props} />);
+        if (!(props.message as any).deleted)
+            ContextMenu.open(event, () => <GreetMenu stickers={stickers} {...props} />);
     }
 });
