@@ -152,7 +152,8 @@ export async function putCloudSettings() {
         showNotification({
             title: "Cloud Settings",
             body: "Synchronized your settings to the cloud!",
-            color: "var(--green-360)"
+            color: "var(--green-360)",
+            noPersist: true
         });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
@@ -180,7 +181,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "There are no settings in the cloud."
+                    body: "There are no settings in the cloud.",
+                    noPersist: true
                 });
             return false;
         }
@@ -190,7 +192,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "Your settings are up to date."
+                    body: "Your settings are up to date.",
+                    noPersist: true
                 });
             return false;
         }
@@ -213,7 +216,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "Your local settings are newer than the cloud ones."
+                    body: "Your local settings are newer than the cloud ones.",
+                    noPersist: true,
                 });
             return;
         }
@@ -233,7 +237,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch()
+                onClick: () => window.DiscordNative.app.relaunch(),
+                noPersist: true
             });
 
         return true;
