@@ -143,8 +143,8 @@ export default definePlugin({
                 },
                 // add HTML data attributes (for easier theming)
                 {
-                    match: /className:(\i)\(\).botText,children:(\i)\}/,
-                    replace: "className:$1().botText,'data-tag':$2.toLowerCase(),children:$2}"
+                    match: /children:\[(\i),\(0,(\i)\.jsx\)\("span",{className:(\i)\(\).botText,children:(\i)}\)\]/,
+                    replace: "'data-tag':$4.toLowerCase(),children:[$1,(0,$2.jsx)(\"span\",{className:$3().botText,children:$4})]"
                 }
             ],
         },
