@@ -25,11 +25,11 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-const USRBG = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
+const USRBG_BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
 
 const settings = definePluginSettings({
     nitroFirst: {
-        description: "Default banner if both Nitro and USRBG are present",
+        description: "Banner to use if both Nitro and USRBG banners are present",
         type: OptionType.SELECT,
         options: [
             { label: "Nitro banner", value: true, default: true },
@@ -40,7 +40,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "USRBG",
-    description: "Fake Nitro banner",
+    description: "USRBG is a community maintained database of Discord banners, allowing anyone to get a banner without requiring Nitro",
     authors: [Devs.AutumnVN, Devs.pylix],
     settings,
     patches: [
@@ -62,11 +62,15 @@ export default definePlugin({
     useBannerHook(props: any) {
         const { displayProfile, user } = props;
 
-        const [bg] = useAwaiter(() => {
-            return displayProfile?.banner && settings.store.nitroFirst
-                ? Promise.resolve(null)
-                : fetch(USRBG + user.id + ".txt").then(res => res.ok ? res.text() : null);
-        }, { fallbackValue: null, deps: [displayProfile] });
+        const [bg] = useAwaiter(
+            async () => {
+                if (displayProfile?.banner && settings.store.nitroFirst) return null;
+
+                const res = await fetch(USRBG_BASE_URL + user.id + ".txt");
+                if (!res.ok) return null;
+                return res.text();
+            },
+            { fallbackValue: null, deps: [displayProfile] });
 
         return bg;
     },
