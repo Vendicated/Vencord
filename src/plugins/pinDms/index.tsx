@@ -31,18 +31,14 @@ export default definePlugin({
     start: addContextMenus,
     stop: removeContextMenus,
 
-    usePinCount() {
+    usePinCount(channelIds: string[]) {
         const pinnedDms = usePinnedDms();
-        return pinnedDms.size;
+        // See comment on first patch for reasoning
+        return channelIds.length ? [pinnedDms.size] : [];
     },
 
     getChannel(channels: Record<string, Channel>, idx: number) {
-        console.log("getChannel", channels[getPinAt(idx)]);
         return channels[getPinAt(idx)];
-    },
-
-    isPinned(channel?: Channel) {
-        return channel && isPinned(channel.id);
     },
 
     shouldHide(section: number, channel?: Channel) {
@@ -62,8 +58,13 @@ export default definePlugin({
                     // - Section 1: buttons for pages like Friends & Library
                     // - Section 2: our pinned dms
                     // - Section 3: the normal dm list
-                    match: /sections:\[\i,/,
-                    replace: "$&$self.usePinCount(),"
+                    match: /sections:\[\i(?=,Math\.max\((\i)\.length)/,
+                    // For some reason, adding our sections when no private channels are ready yet
+                    // makes DMs infinitely load. Thus usePinCount returns either a single element
+                    // array with the count, or an empty array. Due to spreading, only in the former
+                    // case will an element be added to the outer array
+                    // Thanks for the fix, Strencher!
+                    replace: "$&,...$self.usePinCount($1)"
                 },
                 {
                     // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
@@ -78,12 +79,14 @@ export default definePlugin({
                     match: /(?<=preRenderedChildren,(\i)=)((\i)\[\i\[\i\]\]);/,
                     // section 1 is us, manually get our own channel
                     // additionally, if the channel is pinned and it's not our section, don't render
+                    // section === 1 ? getChannel(channels, row) : channels[channelIds[row]]; if (shouldHide(section, channel)) return null;
                     replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;if($self.shouldHide(arguments[0],$1))return null;"
                 },
                 {
                     // Fix getRowHeight's check for whether this is the DMs section
                     // section === DMS
                     match: /===\i.DMS&&0/,
+                    // section -1 === DMS
                     replace: "-1$&"
                 }
             ]
