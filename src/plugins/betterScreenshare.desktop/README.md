@@ -1,4 +1,4 @@
-# Better Screenshare Plugin
+# sBetter Screenshare Plugin
 
 ## How to use each Setting?
 
@@ -27,4 +27,4 @@ If you don't want to do any of the above, you can just try the presets in the Pr
 
 ## Known Issues
 
-When sharing a window directly it can sometimes happen that no changes are applied, the reason for this is currently unknown, but to avoid this you can simply share your whole screen and set the audio source if required.
+~~When sharing a window directly it can sometimes happen that no changes are applied, the reason for this is currently unknown, but to avoid this you can simply share your whole screen and set the audio source if required.~~

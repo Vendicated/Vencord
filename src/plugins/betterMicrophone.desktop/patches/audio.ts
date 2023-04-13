@@ -76,7 +76,7 @@ export function patchConnection(
     const forceUpdateTransportationOptions = () => {
         const transportOptions = window._.merge({ ...getDefaultTransportationOptions(connection) }, getReplaceableTransportationOptions(connection, get));
 
-        logger.info("Replaced Transport Options", transportOptions);
+        logger.info("Overridden Transport Options", transportOptions);
 
         oldSetTransportOptions(transportOptions);
     };
