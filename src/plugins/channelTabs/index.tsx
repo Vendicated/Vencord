@@ -107,15 +107,15 @@ export default definePlugin({
             find: ".messageContainer,onKeyDown",
             replacement: {
                 match: /onJump:function\(\i\){(return \i\((\i),(\i).id)/,
-                replace: "onJump:function($2){ if($2.ctrlKey) return $self.open($3);$1"
+                replace: "onJump:function($2){if($2.ctrlKey) return $self.open($3);$1"
             }
         },
         // ctrl click to open in new tab in search results
         {
             find: ".searchResultFocusRing",
             replacement: {
-                match: /jumpTo=function\((\i)\){.{0,100}(\i)=\i\.result.{0,50}\)\);/,
-                replace: "$&if($1.ctrlKey) return $self.open($2);"
+                match: /;(?=null!=(\i)&&\i\(\i\))/,
+                replace: ";if (arguments[0].ctrlKey) return $self.open($1);"
             }
         }
     ],
