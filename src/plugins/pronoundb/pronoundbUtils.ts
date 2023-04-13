@@ -35,7 +35,7 @@ const bulkFetch = debounce(async () => {
     const pronouns = await bulkFetchPronouns(ids);
     for (const id of ids) {
         // Call all callbacks for the id
-        requestQueue[id].forEach(c => c(pronouns[id]));
+        requestQueue[id]?.forEach(c => c(pronouns[id]));
         delete requestQueue[id];
     }
 });

@@ -118,7 +118,12 @@ interface ContextMenuProps {
     onClose: (callback: (...args: Array<any>) => any) => void;
 }
 
+const patchedMenus = new WeakSet();
+
 export function _patchContextMenu(props: ContextMenuProps) {
+    if (patchedMenus.has(props)) return;
+    patchedMenus.add(props);
+
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 

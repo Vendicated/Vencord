@@ -49,7 +49,6 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     const { deleted, editHistory, id, channel_id } = message;
 
     if (!deleted && !editHistory?.length) return;
-    if (children.some(c => c?.props?.id === MENU_ITEM_ID)) return;
 
     children.push((
         <Menu.MenuItem

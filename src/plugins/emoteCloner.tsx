@@ -220,8 +220,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const name = match[1] ?? "FakeNitroEmoji";
 
     const group = findGroupChildrenByChildId("copy-link", children);
-    if (group && !group.some(child => child?.props?.id === "emote-cloner"))
-        group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
+    if (group) group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
@@ -230,8 +229,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
     const firstChild = props.target.firstChild as HTMLImageElement;
 
-    if (!children.some(c => c?.props?.id === "emote-cloner"))
-        children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
+    children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
 };
 
 export default definePlugin({

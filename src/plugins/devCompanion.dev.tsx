@@ -238,8 +238,6 @@ function initWs(isManual = false) {
 }
 
 const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
     kids.unshift(
         <Menu.MenuItem
             id={NAV_ID}

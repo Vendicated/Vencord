@@ -136,6 +136,11 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
+    transformCompoundSentence: {
+        description: "Whether to transform fake stickers and emojis in compound sentences (sentences with more content than just the fake emoji or sticker link)",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     enableStreamQualityBypass: {
         description: "Allow streaming in nitro quality",
         type: OptionType.BOOLEAN,
@@ -305,45 +310,6 @@ export default definePlugin({
         }
     ],
 
-    options: {
-        enableEmojiBypass: {
-            description: "Allow sending fake emojis",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        emojiSize: {
-            description: "Size of the emojis when sending",
-            type: OptionType.SLIDER,
-            default: 48,
-            markers: [32, 48, 64, 128, 160, 256, 512],
-        },
-        transformEmojis: {
-            description: "Whether to transform fake emojis into real ones",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        enableStickerBypass: {
-            description: "Allow sending fake stickers",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        stickerSize: {
-            description: "Size of the stickers when sending",
-            type: OptionType.SLIDER,
-            default: 160,
-            markers: [32, 64, 128, 160, 256, 512],
-        },
-        enableStreamQualityBypass: {
-            description: "Allow streaming in nitro quality",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        }
-    },
-
     get guildId() {
         return getCurrentGuild()?.id;
     },
@@ -419,7 +385,7 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        if (content.length > 1) return content;
+        if (content.length > 1 && !settings.store.transformCompoundSentence) return content;
 
         const newContent: Array<any> = [];
 
@@ -442,7 +408,7 @@ export default definePlugin({
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
                     newContent.push(Parser.defaultRules.customEmoji.react({
-                        jumboable: !inline,
+                        jumboable: !inline && content.length === 1,
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
@@ -466,8 +432,8 @@ export default definePlugin({
             newContent.push(element);
         }
 
-        const firstTextElementIdx = newContent.findIndex(element => typeof element === "string");
-        if (firstTextElementIdx !== -1) newContent[firstTextElementIdx] = newContent[firstTextElementIdx].trimStart();
+        const firstContent = newContent[0];
+        if (typeof firstContent === "string") newContent[0] = firstContent.trimStart();
 
         return newContent;
     },
@@ -476,7 +442,8 @@ export default definePlugin({
         const itemsToMaybePush: Array<string> = [];
 
         const contentItems = message.content.split(/\s/);
-        if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]);
+        if (contentItems.length === 1 && !settings.store.transformCompoundSentence) itemsToMaybePush.push(contentItems[0]);
+        else itemsToMaybePush.push(...contentItems);
 
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
@@ -517,7 +484,7 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        if (message.content.split(/\s/).length > 1) return false;
+        if (message.content.split(/\s/).length > 1 && !settings.store.transformCompoundSentence) return false;
 
         switch (embed.type) {
             case "image": {
