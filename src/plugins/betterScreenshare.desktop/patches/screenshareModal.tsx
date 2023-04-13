@@ -72,8 +72,6 @@ export function replacedScreenshareModalSettingsContentType(oldType: (...args: a
 export function replacedScreenshareModalComponent(oldComponent: (...args: any[]) => any, thisContext: any, functionArguments: any) {
     const oldComponentResult = Reflect.apply(oldComponent, thisContext, functionArguments);
 
-    console.log(oldComponentResult, "oldComponentResult");
-
     const content = oldComponentResult.props.children.props.children[2].props.children[1].props.children[2].props.children.props.children;
     const oldContentType = content.type;
 
@@ -82,8 +80,6 @@ export function replacedScreenshareModalComponent(oldComponent: (...args: any[])
     };
 
     const [submitBtn, cancelBtn] = oldComponentResult.props.children.props.children[2].props.children[2].props.children;
-
-    console.log(submitBtn);
 
     submitBtn.props.onClick = () => {
         const { screensharePatcher, screenshareAudioPatcher } = Plugin;
