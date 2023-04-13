@@ -27,7 +27,7 @@ import { ChannelStore, Forms, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
-import { channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const Keybind = LazyComponent(() => findByProps("KeyCombo").KeyCombo);
 const KeybindClasses = findByPropsLazy("ddrArrows");
@@ -97,9 +97,9 @@ export default definePlugin({
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                // TODO: remake patch
-                match: /(===(\i)\?void 0:\i\.channelId\).{0,130})Fragment,{children:(\(0,\i\.jsxs\)\("div",{.{0,500}sidebarTheme:.{0,1000}\.CHANNEL_THREAD_VIEW\(.{0,1500}\(0,\i\.jsx\)\(.{0,100}\)]}\))/,
-                replace: "$1Fragment,{children:[$self.render($2),$3]"
+                // tried to use lookarounds /\i\.Fragment,{(?<=\?void 0:(\i)\.channelId.{0,120})/ and patch times were consistently >30ms
+                match: /(\?void 0:(\i)\.channelId.{0,120})\i\.Fragment,{/,
+                replace: "$1$self.render,{currentChannel:$2,"
             }
         },
         // ctrl click to open in new tab in inbox
@@ -134,10 +134,16 @@ export default definePlugin({
         removeContextMenuPatch("channel-context", channelContextMenuPatch);
     },
 
-    render(props) {
-        return <ErrorBoundary>
-            <ChannelsTabsContainer {...props} />
-        </ErrorBoundary>;
+    render({ currentChannel, children }: {
+        currentChannel: ChannelTabsProps,
+        children: JSX.Element; // original children passed by discord
+    }) {
+        return <>
+            <ErrorBoundary>
+                <ChannelsTabsContainer {...currentChannel} />
+            </ErrorBoundary>
+            {children}
+        </>;
     },
 
     open(message: Message) {
