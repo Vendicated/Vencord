@@ -81,12 +81,7 @@ function openImage(url: string) {
     ));
 }
 
-const seen = new WeakSet();
-
 const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
-    if (seen.has(children)) return;
-    seen.add(children);
-
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
     children.splice(1, 0, (
@@ -112,9 +107,6 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
 };
 
 const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => {
-    if (seen.has(children)) return;
-    seen.add(children);
-
     if (!banner && !icon) return;
 
     // before copy id (if it exists)
