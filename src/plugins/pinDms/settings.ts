@@ -56,9 +56,12 @@ export function getPinAt(idx: number) {
     return snapshotArray![idx];
 }
 
-export function movePin(element: string, target: string) {
+export function movePin(id: string, direction: -1 | 1) {
     const pins = getArray()!;
-    pins.splice(pins.indexOf(element), 1);
-    pins.splice(pins.indexOf(target) + 1, 0, element);
+    const a = pins.indexOf(id);
+    const b = a + direction;
+
+    [pins[a], pins[b]] = [pins[b], pins[a]];
+
     save(pins);
 }

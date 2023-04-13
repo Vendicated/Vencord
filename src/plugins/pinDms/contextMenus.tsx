@@ -19,17 +19,35 @@
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Menu } from "@webpack/common";
 
-import { isPinned, togglePin } from "./settings";
+import { isPinned, movePin, snapshotArray, togglePin } from "./settings";
 
 const seen = new WeakSet();
 
 function PinMenuItem(channelId: string) {
+    const pinned = isPinned(channelId);
+
     return (
-        <Menu.MenuItem
-            id="pin-dm"
-            label={isPinned(channelId) ? "Unpin DM" : "Pin DM"}
-            action={() => togglePin(channelId)}
-        />
+        <>
+            <Menu.MenuItem
+                id="pin-dm"
+                label={pinned ? "Unpin DM" : "Pin DM"}
+                action={() => togglePin(channelId)}
+            />
+            {pinned && snapshotArray![0] !== channelId && (
+                <Menu.MenuItem
+                    id="move-pin-up"
+                    label="Move Pin Up"
+                    action={() => movePin(channelId, -1)}
+                />
+            )}
+            {pinned && snapshotArray![snapshotArray!.length - 1] !== channelId && (
+                <Menu.MenuItem
+                    id="move-pin-down"
+                    label="Move Pin Down"
+                    action={() => movePin(channelId, +1)}
+                />
+            )}
+        </>
     );
 }
 
