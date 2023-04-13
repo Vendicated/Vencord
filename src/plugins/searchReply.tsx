@@ -51,7 +51,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
 
     // servers
     const serverGroup = findGroupChildrenByChildId("mark-unread", children);
-    if (serverGroup) {
+    if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
         return serverGroup.unshift((
             <Menu.MenuItem
                 id="reply"
