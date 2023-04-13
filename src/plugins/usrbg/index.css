@@ -16,12 +16,12 @@
     height: 360px;
 }
 
-[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] mask rect {
+[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] rect {
     height: 120px;
     y: -30;
 }
 
-[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] mask circle {
+[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] circle {
     cy: 86;
 }
 
