@@ -63,9 +63,10 @@ const settings = definePluginSettings({
 });
 
 function openImage(url: string) {
-    const u = new URL(url);
+    const format = url.startsWith("/") ? "png" : settings.store.format;
+    const u = new URL(url, window.location.href);
     u.searchParams.set("size", "512");
-    u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${settings.store.format}`);
+    u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
 
     openModal(modalProps => (
@@ -148,8 +149,8 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon
 
 export default definePlugin({
     name: "ViewIcons",
-    authors: [Devs.Ven],
-    description: "Makes Avatars/Banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
+    authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz],
+    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
 
     settings,
 
@@ -171,15 +172,21 @@ export default definePlugin({
             replacement: {
                 // global because Discord has two components that are 99% identical with one small change ._.
                 match: /\{src:(\i),avatarDecoration/g,
-                replace: (_, src) => `{src:${src},onClick:()=>$self.openImage(${src}),avatarDecoration`
+                replace: "{src:$1,onClick:()=>$self.openImage($1),avatarDecoration"
             }
         }, {
             find: ".popoutNoBannerPremium",
             replacement: {
                 match: /style:.{0,10}\{\},(\i)\)/,
-                replace: (m, style) =>
-                    `onClick:${style}.backgroundImage&&(${style}.cursor="pointer",` +
-                    `()=>$self.openImage(${style}.backgroundImage.replace("url(", ""))),${m}`
+                replace:
+                    "onClick:$1.backgroundImage&&($1.cursor=\"pointer\"," +
+                    "()=>$self.openImage($1.backgroundImage.replace(\"url(\", \"\"))),$&"
+            }
+        }, {
+            find: "().avatarWrapperNonUserBot",
+            replacement: {
+                match: /(avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
+                replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
             }
         }
     ]
