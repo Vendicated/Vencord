@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
 
 import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
-import { OpenScreenshareSettingsButton } from "./components";
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
@@ -53,16 +52,6 @@ export default new class Plugin implements PluginDef {
             }
         ];
         this.settings = definePluginSettings({
-            ...(Settings.plugins[PluginInfo.PLUGIN_NAME].enabled
-                ? {
-                    openScreenshareSettings: {
-                        component: () => <OpenScreenshareSettingsButton />,
-                        description: "Open advanced screen sharing settings",
-                        type: OptionType.COMPONENT
-                    }
-                }
-                : {}
-            ),
             hideDefaultSettings: {
                 type: OptionType.BOOLEAN,
                 description: "Hide Discord screen sharing settings",
