@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, snapshotArray, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -40,6 +40,9 @@ export default definePlugin({
     getChannel(channels: Record<string, Channel>, idx: number) {
         return channels[getPinAt(idx)];
     },
+
+    isPinned,
+    getSnapshot: () => snapshotArray,
 
     shouldHide(section: number, channel?: Channel) {
         if (!channel) return true;
@@ -90,6 +93,17 @@ export default definePlugin({
                     replace: "-1$&"
                 }
             ]
+        },
+
+        // Fix Alt Up/Down navigation
+        {
+            find: '"mod+alt+right"',
+            replacement: {
+                // channelIds = __OVERLAY__ ? stuff : toArray(getStaticPaths()).concat(toArray(channelIds))
+                match: /(?<=(\i)=__OVERLAY__\?\i:.{0,10})\.concat\((.{0,10})\)/,
+                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
+                replace: ".concat($self.getSnapshot()).concat($2.filter(c=>!$self.isPinned(c)))"
+            }
         }
     ]
 });

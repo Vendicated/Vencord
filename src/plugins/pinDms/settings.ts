@@ -18,7 +18,7 @@
 
 import { Settings, useSettings } from "@api/settings";
 
-let snapshotArray: string[] | undefined;
+export let snapshotArray: string[] | undefined;
 let snapshot: Set<string> | undefined;
 
 const getArray = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(",") as string[] | undefined;
