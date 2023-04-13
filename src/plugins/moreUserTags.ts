@@ -140,6 +140,11 @@ export default definePlugin({
                 {
                     match: /(\i)=(\i)===\i\.ORIGINAL_POSTER/,
                     replace: "$1=$self.isOPTag($2)"
+                },
+                // add HTML data attributes (for easier theming)
+                {
+                    match: /className:(\i)\(\).botText,children:(\i)\}/,
+                    replace: "className:$1().botText,'data-tag':$2.toLowerCase(),children:$2}"
                 }
             ],
         },
