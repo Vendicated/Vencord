@@ -41,7 +41,7 @@ const useTimezones = makeLazy(getAllTimezones);
 export default definePlugin({
     settings,
 
-    name: "User Timezones",
+    name: "Timezones",
     description: "Allows you to see and set the timezones of other users.",
     authors: [Devs.mantikafasi, Devs.Arjix],
 
