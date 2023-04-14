@@ -52,6 +52,54 @@ export default definePlugin({
         return isPinned(channel.id);
     },
 
+    makeScrollToChannel: (rowHeight: number) => function (this: any, channelId: string) {
+        // this is a reimplementation of Discord's function that also accounts for pinned channels
+        const {
+            _list,
+            props: { padding, privateChannelIds },
+            state: { preRenderedChildren }
+        } = this;
+
+        if (!_list) return;
+        if (!channelId) {
+            return _list.scrollTo({ to: 0 });
+        }
+
+        const snapshot = snapshotArray!;
+
+        let offset: number = rowHeight * preRenderedChildren + padding;
+
+        if (isPinned(channelId)) {
+            offset += snapshot.indexOf(channelId) * rowHeight;
+        } else {
+            // Add the height of all pins first
+            offset += rowHeight * snapshot.length;
+            let found = false;
+
+            for (let i = 0, inc = 0; i < privateChannelIds.length; i++) {
+                const c = privateChannelIds[i];
+                if (c === channelId) {
+                    found = true;
+                    offset += inc * rowHeight;
+                    break;
+                } else if (!isPinned(c)) {
+                    // only increment for non pinned, as pinned dms aren't actually rendered here
+                    inc++;
+                }
+            }
+
+            if (!found) {
+                return _list.scrollTo({ to: 0 });
+            }
+        }
+
+        // this is just verbatim copy pasted from Discord's code
+        _list.scrollIntoViewRect({
+            start: Math.max(offset - 8, 0),
+            end: offset + rowHeight + 8
+        });
+    },
+
     patches: [
         // Patch DM list
         {
@@ -93,6 +141,11 @@ export default definePlugin({
                     match: /===\i.DMS&&0/,
                     // section -1 === DMS
                     replace: "-1$&"
+                },
+                {
+                    // Override scrollToChannel to properly account for pinned channels
+                    match: /scrollToChannel=(?=function.+?end:\i\+(\i)\+8)/,
+                    replace: "scrollToChannel=$self.makeScrollToChannel($1);var yeetedScrollToChannel="
                 }
             ]
         },
