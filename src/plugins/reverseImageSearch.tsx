@@ -34,8 +34,8 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = props => {
-    return children => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    return () => {
         if (!props) return;
         const { reverseImageSearchType, itemHref, itemSrc } = props;
 

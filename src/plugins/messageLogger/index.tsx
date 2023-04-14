@@ -44,8 +44,8 @@ function addDeleteStyle() {
 }
 
 const MENU_ITEM_ID = "message-logger-remove-history";
-const patchMessageContextMenu: NavContextMenuPatchCallback = props => {
-    return children => {
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    return () => {
         const { message } = props;
         const { deleted, editHistory, id, channel_id } = message;
 

@@ -210,8 +210,8 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = props => {
-    return children => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    return () => {
         const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
         if (!favoriteableId || favoriteableType !== "emoji") return;
@@ -225,8 +225,8 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = props => {
     };
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (props: { target: HTMLElement; }) => {
-    return children => {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
+    return () => {
         const { id, name, type } = props?.target?.dataset ?? {};
         if (!id || !name || type !== "emoji") return;
 

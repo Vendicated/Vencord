@@ -238,8 +238,8 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = () => {
-    return children => {
+const contextMenuPatch: NavContextMenuPatchCallback = children => {
+    return () => {
         children.unshift(
             <Menu.MenuItem
                 id={NAV_ID}

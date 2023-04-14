@@ -81,8 +81,8 @@ function openImage(url: string) {
     ));
 }
 
-const UserContext: NavContextMenuPatchCallback = ({ user, guildId }: UserContextProps) => {
-    return children => {
+const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
+    return () => {
         const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
         children.splice(1, 0, (
@@ -108,8 +108,8 @@ const UserContext: NavContextMenuPatchCallback = ({ user, guildId }: UserContext
     };
 };
 
-const GuildContext: NavContextMenuPatchCallback = ({ guild: { id, icon, banner } }: GuildContextProps) => {
-    return children => {
+const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => {
+    return () => {
         if (!banner && !icon) return;
 
         // before copy id (if it exists)
