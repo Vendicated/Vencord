@@ -27,7 +27,7 @@ const save = (pins: string[]) => {
     Settings.plugins.PinDMs.pinnedDMs = pins.join(",");
 };
 const takeSnapshot = () => {
-    snapshotArray = getArray();
+    snapshotArray = getArray() ?? [];
     return snapshot = new Set<string>(snapshotArray);
 };
 const requireSnapshot = () => snapshot ?? takeSnapshot();
