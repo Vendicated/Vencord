@@ -46,12 +46,6 @@ export default definePlugin({
     isPinned,
     getSnapshot: () => snapshotArray,
 
-    shouldHide(section: number, channel?: Channel) {
-        if (!channel) return true;
-        if (section === 1) return false;
-        return isPinned(channel.id);
-    },
-
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))
             return (
@@ -70,7 +64,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /privateChannelIds:(\i),/,
-                    replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),"
+                    replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),pinCount:$self.usePinCount($1),"
                 },
                 {
                     // sections is an array of numbers, where each element is a section and
@@ -78,13 +72,13 @@ export default definePlugin({
                     // - Section 1: buttons for pages like Friends & Library
                     // - Section 2: our pinned dms
                     // - Section 3: the normal dm list
-                    match: /sections:\[\i(?=,Math\.max\((\i)\.length)/,
+                    match: /(?<=renderRow:(\i)\.renderRow,)sections:\[\i,/,
                     // For some reason, adding our sections when no private channels are ready yet
                     // makes DMs infinitely load. Thus usePinCount returns either a single element
                     // array with the count, or an empty array. Due to spreading, only in the former
                     // case will an element be added to the outer array
                     // Thanks for the fix, Strencher!
-                    replace: "$&,...$self.usePinCount($1)"
+                    replace: "$&...$1.props.pinCount,"
                 },
                 {
                     // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
