@@ -33,9 +33,12 @@ const Cache: Record<string, string> = {};
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
 export function getTimeString(timezone: string, timestamp = new Date()): string {
-    const locale = PreloadedUserSettings.getCurrentValue().localization.locale.value;
-
-    return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", timeZone: timezone }).format(timestamp); // we hate javascript
+    try {
+        const locale = PreloadedUserSettings.getCurrentValue().localization.locale.value;
+        return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", timeZone: timezone }).format(timestamp); // we hate javascript
+    } catch (e) {
+        return "Error"; // incase it gets invalid timezone from api, probably not gonna happen but if it does this will prevent discord from crashing
+    }
 }
 
 

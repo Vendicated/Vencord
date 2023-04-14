@@ -32,6 +32,7 @@ const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 
 const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
 
+
 import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
 
@@ -43,6 +44,16 @@ export default definePlugin({
     name: "User Timezones",
     description: "Allows you to see and set the timezones of other users.",
     authors: [Devs.mantikafasi, Devs.Arjix],
+
+    commands: [
+        {
+            name: "timezone",
+            description: "Sends link to a website that shows timezone string, useful if you want to know your friends timezone",
+            execute: () => {
+                return { content: "https://gh.lewisakura.moe/timezone/" };
+            }
+        }
+    ],
 
     settingsAboutComponent: () => {
         const href = `${API_URL}?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
