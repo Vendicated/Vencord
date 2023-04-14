@@ -71,11 +71,13 @@ interface Activity {
         button_urls?: Array<string>;
     };
     type: ActivityType;
+    url?: string;
     flags: number;
 }
 
 const enum ActivityType {
     PLAYING = 0,
+    STREAMING = 1,
     LISTENING = 2,
     WATCHING = 3,
     COMPETING = 5
@@ -115,10 +117,12 @@ const settings = definePluginSettings({
     state: strOpt("Line 2 of rich presence."),
     type: choiceOpt("Type of presence", [
         choice("Playing", ActivityType.PLAYING, true),
+        choice("Streaming", ActivityType.STREAMING),
         choice("Listening", ActivityType.LISTENING),
         choice("Watching", ActivityType.WATCHING),
         choice("Competing", ActivityType.COMPETING)
     ]),
+    twitchUsername: strOpt("The twitch username for streaming activity type."),
     startTime: numOpt("Unix Timestamp for beginning of activity."),
     endTime: numOpt("Unix Timestamp for end of activity."),
     imageBig: strOpt("Sets the big image to the specified image."),
@@ -138,6 +142,7 @@ async function createActivity(): Promise<Activity | undefined> {
         details,
         state,
         type,
+        twitchUsername,
         startTime,
         endTime,
         imageBig,
@@ -160,6 +165,10 @@ async function createActivity(): Promise<Activity | undefined> {
         type,
         flags: 1 << 0,
     };
+
+    if (type === ActivityType.STREAMING) {
+        activity.url = "https://www.twitch.tv/" + (twitchUsername ? twitchUsername : ".");
+    }
 
     if (startTime) {
         activity.timestamps = {
@@ -223,7 +232,7 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain],
+    authors: [Devs.captain, Devs.AutumnVN],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
