@@ -35,7 +35,7 @@ interface Response {
 export async function getReviews(id: string): Promise<Review[]> {
     const req = await fetch(API_URL + `/api/reviewdb/users/${id}/reviews`);
 
-    const res = (req.status == 200) ? await req.json() as Response : { success: false, message: "An Error occured while fetching reviews. Please try again later.", reviews: [], updated: false };
+    const res = (req.status === 200) ? await req.json() as Response : { success: false, message: "An Error occured while fetching reviews. Please try again later.", reviews: [], updated: false };
     if (!res.success) {
         showToast(res.message);
         return [
