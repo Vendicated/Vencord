@@ -81,12 +81,16 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                     isSelected={v => v === format}
                     select={v => setFormat(v)}
                     serialize={v => v}
-                    renderOptionLabel={o => Parser.parse(formatTimestamp(time, o.value))}
+                    renderOptionLabel={
+                        o => <div className={cl("format-label")}>{Parser.parse(formatTimestamp(time, o.value))}</div>
+                    }
                     renderOptionValue={() => rendered}
                 />
 
                 <Forms.FormTitle>Preview</Forms.FormTitle>
-                <Forms.FormText>{rendered}</Forms.FormText>
+                <Forms.FormText className={cl("preview-text")}>
+                    {rendered}
+                </Forms.FormText>
             </ModalContent>
 
             <ModalFooter>
