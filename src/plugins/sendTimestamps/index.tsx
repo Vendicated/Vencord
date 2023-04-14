@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -36,6 +39,8 @@ function parseTime(time: string) {
 const Formats = ["", "t", "T", "d", "D", "f", "F", "R"] as const;
 type Format = typeof Formats[number];
 
+const cl = classNameFactory("vc-st-");
+
 function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): void; }) {
     const [value, setValue] = useState<string>();
     const [format, setFormat] = useState<Format>("");
@@ -50,7 +55,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
 
     return (
         <ModalRoot {...rootProps}>
-            <ModalHeader>
+            <ModalHeader className={cl("modal-header")}>
                 <Forms.FormTitle>
                     Timestamp Picker
                 </Forms.FormTitle>
@@ -58,7 +63,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            <ModalContent>
+            <ModalContent className={cl("modal-content")}>
                 <input
                     type="datetime-local"
                     value={value}
@@ -90,9 +95,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                         ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: formatted });
                         close();
                     }}
-                >
-                    Done
-                </Button>
+                >Done</Button>
             </ModalFooter>
         </ModalRoot>
     );
