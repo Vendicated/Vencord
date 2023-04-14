@@ -35,8 +35,8 @@ function Icon(path: string, viewBox = "0 0 24 24") {
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height="20"
-                    width="20"
+                    height={Settings.plugins.PlatformIndicators.iconSize}
+                    width={Settings.plugins.PlatformIndicators.iconSize}
                     viewBox={viewBox}
                     fill={color}
                 >
@@ -53,6 +53,7 @@ const Icons = {
     mobile: Icon("M15.5 1h-8A2.5 2.5 0 0 0 5 3.5v17A2.5 2.5 0 0 0 7.5 23h8a2.5 2.5 0 0 0 2.5-2.5v-17A2.5 2.5 0 0 0 15.5 1zm-4 21c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5-4H7V4h9v14z"),
     console: Icon("M14.8 2.7 9 3.1V47h3.3c1.7 0 6.2.3 10 .7l6.7.6V2l-4.2.2c-2.4.1-6.9.3-10 .5zm1.8 6.4c1 1.7-1.3 3.6-2.7 2.2C12.7 10.1 13.5 8 15 8c.5 0 1.2.5 1.6 1.1zM16 33c0 6-.4 10-1 10s-1-4-1-10 .4-10 1-10 1 4 1 10zm15-8v23.3l3.8-.7c2-.3 4.7-.6 6-.6H43V3h-2.2c-1.3 0-4-.3-6-.6L31 1.7V25z", "0 0 50 50"),
 };
+
 type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
@@ -251,6 +252,20 @@ export default definePlugin({
             description: "Whether to make the mobile indicator match the color of the user status.",
             default: true,
             restartNeeded: true
+        },
+        iconSize: {
+            type: OptionType.SLIDER,
+            description: "Size of indicator icons",
+            default: 20,
+            markers: [8, 12, 16, 20, 24, 32],
+            onChange: () => {
+                const plset = Vencord.Settings.plugins.PlatformIndicators;
+                plset.iconSize = Math.round(plset.iconSize);
+            },
+            componentProps: {
+                stickToMarkers: false,
+                onValueRender: v => Math.round(v).toString()
+            }
         }
     }
 });
