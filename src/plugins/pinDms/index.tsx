@@ -52,52 +52,15 @@ export default definePlugin({
         return isPinned(channel.id);
     },
 
-    makeScrollToChannel: (rowHeight: number) => function (this: any, channelId: string) {
-        // this is a reimplementation of Discord's function that also accounts for pinned channels
-        const {
-            _list,
-            props: { padding, privateChannelIds },
-            state: { preRenderedChildren }
-        } = this;
+    getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
+        if (!isPinned(channelId))
+            return (
+                rowHeight // header
+                + rowHeight * snapshotArray!.length // pins
+                + originalOffset // original pin offset minus pins
+            );
 
-        if (!_list) return;
-        if (!channelId) {
-            return _list.scrollTo({ to: 0 });
-        }
-
-        const snapshot = snapshotArray!;
-
-        let offset: number = rowHeight * preRenderedChildren + padding;
-
-        if (isPinned(channelId)) {
-            offset += snapshot.indexOf(channelId) * rowHeight;
-        } else {
-            // Add the height of all pins first
-            offset += rowHeight * snapshot.length;
-            let found = false;
-
-            for (let i = 0, inc = 0; i < privateChannelIds.length; i++) {
-                const c = privateChannelIds[i];
-                if (c === channelId) {
-                    found = true;
-                    offset += inc * rowHeight;
-                    break;
-                } else if (!isPinned(c)) {
-                    // only increment for non pinned, as pinned dms aren't actually rendered here
-                    inc++;
-                }
-            }
-
-            if (!found) {
-                return _list.scrollTo({ to: 0 });
-            }
-        }
-
-        // this is just verbatim copy pasted from Discord's code
-        _list.scrollIntoViewRect({
-            start: Math.max(offset - 8, 0),
-            end: offset + rowHeight + 8
-        });
+        return rowHeight * (snapshotArray!.indexOf(channelId) + preRenderedChildren) + padding;
     },
 
     patches: [
@@ -105,6 +68,10 @@ export default definePlugin({
         {
             find: ".privateChannelsHeaderContainer,",
             replacement: [
+                {
+                    match: /privateChannelIds:(\i),/,
+                    replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),"
+                },
                 {
                     // sections is an array of numbers, where each element is a section and
                     // the number is the amount of rows. Add our pinCount in second place
@@ -131,9 +98,8 @@ export default definePlugin({
                     // channel=channels[channelIds[row]];
                     match: /(?<=preRenderedChildren,(\i)=)((\i)\[\i\[\i\]\]);/,
                     // section 1 is us, manually get our own channel
-                    // additionally, if the channel is pinned and it's not our section, don't render
-                    // section === 1 ? getChannel(channels, row) : channels[channelIds[row]]; if (shouldHide(section, channel)) return null;
-                    replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;if($self.shouldHide(arguments[0],$1))return null;"
+                    // section === 1 ? getChannel(channels, row) : channels[channelIds[row]];
+                    replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;"
                 },
                 {
                     // Fix getRowHeight's check for whether this is the DMs section
@@ -144,8 +110,8 @@ export default definePlugin({
                 },
                 {
                     // Override scrollToChannel to properly account for pinned channels
-                    match: /scrollToChannel=(?=function.+?end:\i\+(\i)\+8)/,
-                    replace: "scrollToChannel=$self.makeScrollToChannel($1);var yeetedScrollToChannel="
+                    match: /(?<=else\{\i\+=)(\i)\*\(.+?(?=;)/,
+                    replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
                 }
             ]
         },
