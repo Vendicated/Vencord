@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/settings";
 import PatchHelper from "@components/PatchHelper";
 import { Devs } from "@utils/constants";
@@ -33,6 +34,18 @@ export default definePlugin({
     description: "Adds Settings UI and debug info",
     authors: [Devs.Ven, Devs.Megu],
     required: true,
+
+    start() {
+        addContextMenuPatch("user-settings-cog", children => {
+            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
+            section?.forEach(c => {
+                if (c?.props?.id?.startsWith("Vencord")) {
+                    c.props.action = () => SettingsRouter.open(c.props.id);
+                }
+            });
+        });
+    },
+
     patches: [{
         find: ".versionHash",
         replacement: [
@@ -69,8 +82,6 @@ export default definePlugin({
     }],
 
     makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
-        const makeOnClick = (tab: string) => () => SettingsRouter.open(tab);
-
         return [
             {
                 section: ID.HEADER,
@@ -79,50 +90,42 @@ export default definePlugin({
             {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: () => <SettingsComponent tab="VencordSettings" />,
-                onClick: makeOnClick("VencordSettings")
+                element: () => <SettingsComponent tab="VencordSettings" />
             },
             {
                 section: "VencordPlugins",
                 label: "Plugins",
                 element: () => <SettingsComponent tab="VencordPlugins" />,
-                onClick: makeOnClick("VencordPlugins")
             },
             {
                 section: "VencordThemes",
                 label: "Themes",
                 element: () => <SettingsComponent tab="VencordThemes" />,
-                onClick: makeOnClick("VencordThemes")
             },
             !IS_WEB && {
                 section: "VencordUpdater",
                 label: "Updater",
                 element: () => <SettingsComponent tab="VencordUpdater" />,
-                onClick: makeOnClick("VencordUpdater")
             },
             {
                 section: "VencordCloud",
                 label: "Cloud",
                 element: () => <SettingsComponent tab="VencordCloud" />,
-                onClick: makeOnClick("VencordCloud")
             },
             {
                 section: "VencordSettingsSync",
                 label: "Backup & Restore",
                 element: () => <SettingsComponent tab="VencordSettingsSync" />,
-                onClick: makeOnClick("VencordSettingsSync")
             },
             IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
                 element: PatchHelper!,
-                onClick: makeOnClick("VencordPatchHelper")
             },
             IS_VENCORD_DESKTOP && {
                 section: "VencordDesktop",
                 label: "Desktop Settings",
                 element: VencordDesktop.Components.Settings,
-                onClick: makeOnClick("VencordDesktop")
             },
             {
                 section: ID.DIVIDER
