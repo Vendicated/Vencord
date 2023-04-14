@@ -58,7 +58,7 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 onConfirm: () => {
                     deleteReview(review.id).then(res => {
-                        if (res.successful) {
+                        if (res.success) {
                             refetch();
                         }
                         showToast(res.message);
