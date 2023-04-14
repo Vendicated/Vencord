@@ -35,7 +35,7 @@ export default definePlugin({
 
     usePinCount(channelIds: string[]) {
         const pinnedDms = usePinnedDms();
-        // See comment on first patch for reasoning
+        // See comment on 2nd patch for reasoning
         return channelIds.length ? [pinnedDms.size] : [];
     },
 
@@ -49,7 +49,7 @@ export default definePlugin({
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))
             return (
-                rowHeight // header
+                (rowHeight + padding) * 2 // header
                 + rowHeight * snapshotArray!.length // pins
                 + originalOffset // original pin offset minus pins
             );
@@ -63,6 +63,9 @@ export default definePlugin({
             find: ".privateChannelsHeaderContainer,",
             replacement: [
                 {
+                    // filter Discord's privateChannelIds list to remove pins, and pass
+                    // pinCount as prop. This needs to be here so that the entire DM list receives
+                    // updates on pin/unpin
                     match: /privateChannelIds:(\i),/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),pinCount:$self.usePinCount($1),"
                 },
