@@ -323,6 +323,11 @@ export default definePlugin({
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
                     match: /(?:{|,)render(?!Header|ExternalHeader).{0,30}?:(?<=renderContent=function.+?)(?!void)/g,
                     replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?null:"
+                },
+                {
+                    // Disable bad CSS class which mess up hidden voice channels styling
+                    match: /callContainer,(?<=(\i)=\i\.channel.+?\(\)\.callContainer,)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel},true)?"":`
                 }
             ]
         },
