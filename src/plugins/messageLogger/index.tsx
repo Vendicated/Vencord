@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore, ChannelStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -70,6 +70,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
         />
     ));
 };
+const EPHEMERAL = 64;
 
 export default definePlugin({
     name: "MessageLogger",
@@ -131,30 +132,58 @@ export default definePlugin({
             description: "Whether to ignore messages by yourself",
             default: false
         },
-        ignoreUsers: {
+        ignoreSnowflakes: {
             type: OptionType.STRING,
-            description: "List of users exempt from logging, separated by ;",
-            default: "123456789012345678;234567890123456789"
+            description: "List of snowflakes to exclude from logging, separated by \";\". " +
+                         "Supports user, guild, channel and message ids. " +
+                         "You can label ids with comments by adding a \",\" after id, or by wrapping in /*blockcomment*/",
+            default: "123456789012345678,foo;234567890123456789/*bar*/",
+            placeholder: "123456789012345678,foo;234567890123456789/*bar*/"
         }
+    },
+
+    checkShouldIgnore(del: any, edit: any) {
+        const { ignoreBots, ignoreSelf, ignoreSnowflakes } = Settings.plugins.MessageLogger;
+
+        function checkMsg(msg: any, otherIds: string[]) {
+            if((msg.flags & EPHEMERAL) === EPHEMERAL ||
+                ignoreBots && msg.author?.bot ||
+                ignoreSelf && msg.author?.id === UserStore.getCurrentUser().id) {
+                return true;
+            }
+
+            const ignoredIds = ignoreSnowflakes
+                .replace(/\/\*.*?\*\//g, "")
+                .split(";")
+                .map(x => x.split(",")[0].trim());
+            return ignoredIds.some(x => [
+                msg.author?.id,
+                msg.channel_id,
+                ...otherIds,
+                msg.id
+            ].includes(x));
+        }
+
+        if (del) {
+            return checkMsg(del, [ChannelStore.getChannel(del.channel_id)?.guild_id]);
+        }
+        if (edit) {
+            return checkMsg(edit.message, [edit.guildId]);
+        }
+        return false;
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf, ignoreUsers } = Settings.plugins.MessageLogger;
-            const myId = UserStore.getCurrentUser().id;
-
+            const thisScope = this;
             function mutate(id: string) {
                 const msg = cache.get(id);
                 if (!msg) return;
 
-                const EPHEMERAL = 64;
                 const shouldIgnore = data.mlDeleted ||
-                    (msg.flags & EPHEMERAL) === EPHEMERAL ||
-                    ignoreBots && msg.author?.bot ||
-                    ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.split(";").map(x => x.trim()).includes(msg.author?.id);
+                    thisScope.checkShouldIgnore(msg, null);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
@@ -208,7 +237,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id) || (Vencord.Settings.plugins.MessageLogger.ignoreUsers.split(';').map(x => x.trim()).includes($2.message.author?.id))) ? m :" +
+                        "   $self.checkShouldIgnore(null, $2) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
