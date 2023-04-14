@@ -22,10 +22,13 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, Tooltip } from "@webpack/common";
 
 const counts = {} as Record<string, [number, number]>;
 let forceUpdate: () => void;
+
+const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore");
 
 function MemberCount() {
     const guildId = getCurrentChannel().guild_id;
@@ -37,7 +40,8 @@ function MemberCount() {
 
     let total = c[0].toLocaleString();
     if (total === "0" && c[1] > 0) {
-        total = "Loading...";
+        const approx = GuildMemberCountStore.getMemberCount(guildId);
+        total = approx ? approx.toLocaleString() : "Loading...";
     }
 
     const online = c[1].toLocaleString();
