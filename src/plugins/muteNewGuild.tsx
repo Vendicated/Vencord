@@ -58,10 +58,15 @@ export default definePlugin({
             find: ",acceptInvite:function",
             replacement: {
                 match: /INVITE_ACCEPT_SUCCESS.+?;(\i)=null.+?;/,
-                replace: (m, guildId) => `${m}${guildId}!=="@me"&&${guildId}!==null&&Vencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings(${guildId},{"muted":true,"suppress_everyone":true,"suppress_roles":true});`
+                replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
             }
         }
     ],
+
+    handleMute(guildId: string | null) {
+        if (guildId === "@me" || guildId === "null" || guildId == null) return;
+        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId, { muted: true, suppress_everyone: true, suppress_roles: true });
+    },
 
     start() {
         const [isMuted, isEveryoneSupressed, isRolesSupressed] = [UserGuildSettingsStore.isMuted(null), UserGuildSettingsStore.isSuppressEveryoneEnabled(null), UserGuildSettingsStore.isSuppressRolesEnabled(null)];
