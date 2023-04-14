@@ -50,11 +50,11 @@ export default definePlugin({
         if (!isPinned(channelId))
             return (
                 (rowHeight + padding) * 2 // header
-                + rowHeight * snapshotArray!.length // pins
+                + rowHeight * snapshotArray.length // pins
                 + originalOffset // original pin offset minus pins
             );
 
-        return rowHeight * (snapshotArray!.indexOf(channelId) + preRenderedChildren) + padding;
+        return rowHeight * (snapshotArray.indexOf(channelId) + preRenderedChildren) + padding;
     },
 
     patches: [

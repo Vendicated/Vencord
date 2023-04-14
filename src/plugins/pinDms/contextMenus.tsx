@@ -33,14 +33,14 @@ function PinMenuItem(channelId: string) {
                 label={pinned ? "Unpin DM" : "Pin DM"}
                 action={() => togglePin(channelId)}
             />
-            {pinned && snapshotArray![0] !== channelId && (
+            {pinned && snapshotArray[0] !== channelId && (
                 <Menu.MenuItem
                     id="move-pin-up"
                     label="Move Pin Up"
                     action={() => movePin(channelId, -1)}
                 />
             )}
-            {pinned && snapshotArray![snapshotArray!.length - 1] !== channelId && (
+            {pinned && snapshotArray[snapshotArray.length - 1] !== channelId && (
                 <Menu.MenuItem
                     id="move-pin-down"
                     label="Move Pin Down"

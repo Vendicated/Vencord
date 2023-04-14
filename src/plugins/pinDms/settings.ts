@@ -18,7 +18,7 @@
 
 import { Settings, useSettings } from "@api/settings";
 
-export let snapshotArray: string[] | undefined;
+export let snapshotArray: string[];
 let snapshot: Set<string> | undefined;
 
 const getArray = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(",") as string[] | undefined;
@@ -53,7 +53,7 @@ export function togglePin(id: string) {
 
 export function getPinAt(idx: number) {
     requireSnapshot();
-    return snapshotArray![idx];
+    return snapshotArray[idx];
 }
 
 export function movePin(id: string, direction: -1 | 1) {
