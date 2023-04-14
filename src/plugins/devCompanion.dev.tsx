@@ -238,17 +238,19 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    kids.unshift(
-        <Menu.MenuItem
-            id={NAV_ID}
-            label="Reconnect Dev Companion"
-            action={() => {
-                socket?.close(1000, "Reconnecting");
-                initWs(true);
-            }}
-        />
-    );
+const contextMenuPatch: NavContextMenuPatchCallback = () => {
+    return children => {
+        children.unshift(
+            <Menu.MenuItem
+                id={NAV_ID}
+                label="Reconnect Dev Companion"
+                action={() => {
+                    socket?.close(1000, "Reconnecting");
+                    initWs(true);
+                }}
+            />
+        );
+    };
 };
 
 export default definePlugin({

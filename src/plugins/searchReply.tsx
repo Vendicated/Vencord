@@ -28,40 +28,41 @@ const ReplyIcon = LazyComponent(() => findByCode("M10 8.26667V4L3 11.4667L10 18.
 
 const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
-    // make sure the message is in the selected channel
-    if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = ({ message }: { message: Message; }) => {
+    return children => {
+        // make sure the message is in the selected channel
+        if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
 
-    const channel = ChannelStore.getChannel(message?.channel_id);
-    if (!channel) return;
+        const channel = ChannelStore.getChannel(message?.channel_id);
+        if (!channel) return;
 
-    // dms and group chats
-    const dmGroup = findGroupChildrenByChildId("pin", children);
-    if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
-        const pinIndex = dmGroup.findIndex(c => c.props.id === "pin");
-        return dmGroup.splice(pinIndex + 1, 0, (
-            <Menu.MenuItem
-                id="reply"
-                label={i18n.Messages.MESSAGE_ACTION_REPLY}
-                icon={ReplyIcon}
-                action={(e: React.MouseEvent) => replyFn(channel, message, e)}
-            />
-        ));
-    }
+        // dms and group chats
+        const dmGroup = findGroupChildrenByChildId("pin", children);
+        if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
+            const pinIndex = dmGroup.findIndex(c => c.props.id === "pin");
+            return dmGroup.splice(pinIndex + 1, 0, (
+                <Menu.MenuItem
+                    id="reply"
+                    label={i18n.Messages.MESSAGE_ACTION_REPLY}
+                    icon={ReplyIcon}
+                    action={(e: React.MouseEvent) => replyFn(channel, message, e)}
+                />
+            ));
+        }
 
-    // servers
-    const serverGroup = findGroupChildrenByChildId("mark-unread", children);
-    if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
-        return serverGroup.unshift((
-            <Menu.MenuItem
-                id="reply"
-                label={i18n.Messages.MESSAGE_ACTION_REPLY}
-                icon={ReplyIcon}
-                action={(e: React.MouseEvent) => replyFn(channel, message, e)}
-            />
-        ));
-    }
-
+        // servers
+        const serverGroup = findGroupChildrenByChildId("mark-unread", children);
+        if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
+            return serverGroup.unshift((
+                <Menu.MenuItem
+                    id="reply"
+                    label={i18n.Messages.MESSAGE_ACTION_REPLY}
+                    icon={ReplyIcon}
+                    action={(e: React.MouseEvent) => replyFn(channel, message, e)}
+                />
+            ));
+        }
+    };
 };
 
 
