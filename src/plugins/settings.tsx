@@ -36,6 +36,11 @@ export default definePlugin({
     required: true,
 
     start() {
+        // The settings shortcuts in the user settings cog context menu
+        // read the elements from a hardcoded map which for obvious reason
+        // doesn't contain our sections. This patches the actions of our
+        // sections to manually use SettingsRouter (which only works on desktop
+        // but the context menu is usually not available on mobile anyway)
         addContextMenuPatch("user-settings-cog", children => {
             const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
             section?.forEach(c => {
