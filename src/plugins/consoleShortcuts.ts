@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
+import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, search } from "@webpack";
@@ -79,7 +80,10 @@ export default definePlugin({
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
-            restart: IS_WEB ? WEB_ONLY("restart") : relaunch
+            restart: IS_WEB ? WEB_ONLY("restart") : relaunch,
+            canonicalizeMatch,
+            canonicalizeReplace,
+            canonicalizeReplacement
         };
     },
 
