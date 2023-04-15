@@ -75,7 +75,7 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
     children.push(
         <Menu.MenuGroup id="image-zoom">
             {/* thanks SpotifyControls */}
