@@ -109,6 +109,8 @@
     all: unset;
     margin-left: 5px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 .shc-lock-screen-allowed-users-and-roles-container-toggle-btn > svg > path {
@@ -119,6 +121,8 @@
     all: unset;
     margin-right: 5px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 .shc-lock-screen-allowed-users-and-roles-container-permdetails-btn > svg > path {
