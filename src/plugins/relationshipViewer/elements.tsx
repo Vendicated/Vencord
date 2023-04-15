@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { LazyComponent } from "@utils/misc";
 import { findByCode } from "@webpack";
-import { Button, Card, Text } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Text } from "@webpack/common";
 import { User } from "discord-types/general";
 
 // omg spotifyControls my beloved
@@ -43,7 +43,6 @@ const Svg = (path: string, label: string) => {
 };
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-
 const Expand = Svg("M15.88 9.29L12 13.17 8.12 9.29c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.59 4.59c.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41-.39-.38-1.03-.39-1.42 0z", "Expand");
 
 const collapsedElements = {};
@@ -78,23 +77,40 @@ export const createFormItem = (title: string, text?: string, element?: React.Rea
     );
 };
 
+const openProfileModal = (user: User, guildId?: string) => {
+    FluxDispatcher.dispatch({
+        type: "USER_PROFILE_MODAL_OPEN",
+        userId: user.id,
+        guildId: guildId
+    });
+};
+
 export const createFormMember = (user: User | string, guildId?: string, isMember?: boolean) => {
-    const loadedUser = user instanceof User;
+    const loadedUser = typeof user === "object";
     const name = loadedUser ? user.tag : user;
     return (
-        <Flex className={`${isMember && Margins.bottom8} ${isMember && Margins.left8} ${isMember && Margins.top8} ${isMember && Margins.right8} relation-nogap`}>
-            {loadedUser &&
-                <UserSummaryItem className="relation-avatar"
+        <Flex style={{ flexDirection: "row" }} className={`${isMember && Margins.bottom8} ${isMember && Margins.left8} ${isMember && Margins.top8} ${isMember && Margins.right8} relation-nogap`}>
+            <Flex className="relation-nogap">
+                {loadedUser && (<UserSummaryItem
                     users={[user]}
+                    count={1}
                     guildId={guildId}
                     renderIcon={false}
+                    max={2}
                     showDefaultAvatarsForNullUsers
                     showUserPopout
-                />
-            }
+                />)}
 
-            <Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>{name}</Text>
-        </Flex>
+                {loadedUser &&
+                    (
+                        <Button className="relation-form-container" onClick={() => openProfileModal(user)} style={{ all: "unset", cursor: "pointer" }}>
+                            <Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>
+                                {name}
+                            </Text>
+                        </Button>
+                    ) || (<Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>Loading user...</Text>)}
+            </Flex>
+        </Flex >
     );
 };
 

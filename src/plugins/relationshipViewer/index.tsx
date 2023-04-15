@@ -16,105 +16,173 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./relationsStyles.css";
-
-import { Flex } from "@components/Flex";
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/settings";
 import { Margins } from "@utils/margins";
-import { LazyComponent } from "@utils/misc";
-import { findByCode } from "@webpack";
-import { Button, Card, Text } from "@webpack/common";
-import { User } from "discord-types/general";
+import { ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import definePlugin, { OptionType } from "@utils/types";
+import { Card, FluxDispatcher, GuildMemberStore, Menu, React, RelationshipStore, Text, UserStore } from "@webpack/common";
+import { Guild, User } from "discord-types/general";
 
-// omg spotifyControls my beloved
-const Svg = (path: string, label: string) => {
-    return () => (
-        <svg
-            className="relation-avatar"
-            height="24"
-            width="24"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-label={label}
-            focusable={false}
-        >
-            <path d={path} />
-        </svg>
-    );
-};
+import { createCollapsableForm, createFormItem, createFormMember } from "./elements";
 
-const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+interface GuildContextProps {
+    guild: Guild;
+}
 
-const Expand = Svg("M15.88 9.29L12 13.17 8.12 9.29c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.59 4.59c.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41-.39-.38-1.03-.39-1.42 0z", "Expand");
+const settings = definePluginSettings({
+    "Show Friends": {
+        type: OptionType.BOOLEAN,
+        description: "Show friends in the list",
+        default: true
+    },
 
-const collapsedElements = {};
+    "Show Blocked": {
+        type: OptionType.BOOLEAN,
+        description: "Show blocked users in the list",
+        default: true
+    }
+});
 
-const handleContainerButton = (title: string) => {
-    const container = document.getElementById(`collapsechildren-${title}`);
-    const expansionButton = document.getElementById(`expansionbtn-${title}`);
-    if (!(container && expansionButton)) return;
-
-    if (!collapsedElements[title]) {
-        collapsedElements[title] = true;
-
-        container.classList.replace("relation-opened", "relation-closed");
-        expansionButton.classList.replace("relation-expand-opened", "relation-expand-closed");
+const updateColorsBasedOnTheme = () => {
+    const currentTheme = document.querySelector(".theme-dark") ? "dark" : "light";
+    if (currentTheme === "dark") {
+        document.documentElement.style.setProperty("--expandable", "#ffffff79");
+        document.documentElement.style.setProperty("--scrollbar-track", "#ebebeb4b");
+        document.documentElement.style.setProperty("--scrollbar-thumb", "#ffffff79");
     } else {
-        collapsedElements[title] = false;
-
-        container.classList.replace("relation-closed", "relation-opened");
-        expansionButton.classList.replace("relation-expand-closed", "relation-expand-opened");
+        document.documentElement.style.setProperty("--expandable", "#6d6d6d");
+        document.documentElement.style.setProperty("--scrollbar-track", "#ebebeb");
+        document.documentElement.style.setProperty("--scrollbar-thumb", "#6d6d6d");
     }
 };
 
-export const createFormItem = (title: string, text?: string, element?: React.ReactElement) => {
+const getUnloadedIds = (ids: Array<string>, guildId: string) => {
+    const unloadedIds: Array<string> = [];
+    for (const id of ids) {
+        if (!GuildMemberStore.getMember(guildId, id)) unloadedIds.push(id);
+    }
+
+    return unloadedIds;
+};
+
+const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildId: string, ownerId: string, guildName: string, modalProps: ModalProps; }) => {
+    const ownerUser = UserStore.getUser(ownerId);
+
+    const relationships = RelationshipStore.getRelationships();
+
+    const friendIds = RelationshipStore.getFriendIDs();
+    const blockedIds: Array<string> = [];
+
+    const friendsInServer = friendIds
+        .map(id => GuildMemberStore.getMember(guildId, id) && UserStore.getUser(id));
+
+    const blockedInServer: Array<User> = [];
+    for (const id in relationships) {
+        const rel = relationships[id];
+        if (rel !== 2) continue;
+
+        blockedIds.push(id);
+
+        const user = GuildMemberStore.getMember(guildId, id) && UserStore.getUser(id);
+        if (!user) continue;
+
+        blockedInServer.push(user);
+    }
+
+    const friendsElementArray: Array<React.ReactElement> = [];
+    const blockedElementArray: Array<React.ReactElement> = [];
+
+    for (const user of friendsInServer) {
+        if (!user) {
+            continue;
+        }
+
+        friendsElementArray.push(createFormMember(user, guildId, true));
+    }
+
+    for (const user of blockedInServer) {
+        blockedElementArray.push(createFormMember(user, guildId, true));
+    }
+
+    const friendsCount = friendsElementArray.length;
+    const blockedCount = blockedElementArray.length;
+
+    React.useEffect(() => {
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [guildId],
+            userIds: [!ownerUser && ownerId, ...getUnloadedIds(friendIds, guildId), ...getUnloadedIds(blockedIds, guildId)]
+        });
+    });
+
+    updateColorsBasedOnTheme();
+
     return (
-        <Flex className={`${Margins.left8} ${Margins.top8} ${Margins.right8}`}>
-            <Text variant="heading-sm/semibold">{title}</Text>
-            {element}
-            {text &&
-                <Text variant="text-sm/normal">{text}</Text>
-            }
-        </Flex>
+        <ModalRoot
+            {...modalProps}
+            size={ModalSize.MEDIUM}
+        >
+            <ModalHeader>
+                <Text className={Margins.top8} variant="heading-lg/medium">Server Relations</Text>
+            </ModalHeader>
+
+            <Card id="scrollstyleowo" className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`} style={{ overflowY: "auto" }}>
+                {createCollapsableForm("Guild Information", [
+                    createFormItem("Owner", undefined, createFormMember(ownerUser || "Could not fetch.", guildId)),
+                    createFormItem("Name", guildName),
+                    createFormItem("ID", guildId),
+                ])}
+
+                {settings.store["Show Friends"] && createCollapsableForm("Friends", friendsCount > 0 ? friendsElementArray : [createFormItem("No friends in this server.")], friendsCount)}
+                {settings.store["Show Blocked"] && blockedCount > 0 && createCollapsableForm("Blocked", blockedElementArray, blockedCount)}
+            </Card>
+        </ModalRoot>
     );
 };
 
-export const createFormMember = (user: User | string, guildId?: string, isMember?: boolean) => {
-    const loadedUser = user instanceof User;
-    const name = loadedUser ? user.tag : user;
-    return (
-        <Flex className={`${isMember && Margins.bottom8} ${isMember && Margins.left8} ${isMember && Margins.top8} ${isMember && Margins.right8} relation-nogap`}>
-            {loadedUser &&
-                <UserSummaryItem className="relation-avatar"
-                    users={[user]}
-                    guildId={guildId}
-                    renderIcon={false}
-                    showDefaultAvatarsForNullUsers
-                    showUserPopout
-                />
-            }
+const createGuildUI = (children, { id, ownerId, name }: Guild) => {
+    return () => {
+        // what the fuck what the fuck what the fuck
+        const privacyElements = children.find(
+            c => c?.props?.children?.[c.props.children.length - 1]?.props?.id === "change-nickname"
+        );
 
-            <Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>{name}</Text>
-        </Flex>
-    );
+        if (!privacyElements) return;
+
+        const idx = privacyElements.props.children.length - 2;
+
+        privacyElements.props.children.splice(idx, 0, (
+            <Menu.MenuItem
+                id="view-relationships"
+                label="View Relationships"
+                action={() => openModal(modalProps => <OpenRelationships guildId={id} ownerId={ownerId} guildName={name} modalProps={modalProps} />)}
+            />
+        ));
+    };
 };
 
-export const createCollapsableForm = (title: string, children: Array<React.ReactElement>, count?: number) => {
-    return (
-        <Card className={`${Margins.top8} ${Margins.bottom16} ${Margins.left16} ${Margins.right16}`}>
-            <div className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`}>
-                <Flex style={{ justifyContent: "space-between" }}>
-                    <Text variant="heading-sm/semibold">{title} {count && `(${count})`}</Text>
-                    <Button className="relation-avatar" onClick={() => handleContainerButton(title)}>
-                        <div id={`expansionbtn-${title}`} className="relation-expand-opened">
-                            <Expand />
-                        </div>
-                    </Button>
-                </Flex>
-
-                <Flex id={`collapsechildren-${title}`} className="relation-form-container relation-opened">
-                    {children}
-                </Flex>
-            </div>
-        </Card>
-    );
+const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => {
+    return createGuildUI(children, guild);
 };
+
+export default definePlugin({
+    name: "RelationshipViewer",
+    description: "Allows you to view your relationship circle within the server.",
+    authors: [
+        {
+            id: 734367577563987969n,
+            name: "Magik Manz",
+        },
+    ],
+
+    settings,
+
+    start() {
+        addContextMenuPatch("guild-context", GuildContext);
+    },
+
+    stop() {
+        removeContextMenuPatch("guild-context", GuildContext);
+    }
+});
