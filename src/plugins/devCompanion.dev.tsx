@@ -102,7 +102,8 @@ function initWs(isManual = false) {
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
-            body: "Connected to WebSocket"
+            body: "Connected to WebSocket",
+            noPersist: true
         });
     });
 

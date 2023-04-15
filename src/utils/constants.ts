@@ -261,5 +261,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RyanCaoDev: {
         name: "RyanCaoDev",
         id: 952235800110694471n,
-    }
+    },
+    Strencher: {
+        name: "Strencher",
+        id: 415849376598982656n
+    },
 });
