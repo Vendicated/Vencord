@@ -19,10 +19,7 @@
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findLazy } from "@webpack";
-import { ChannelStore } from "@webpack/common";
-
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+import { ChannelStore, ComponentDispatch } from "@webpack/common";
 
 export default definePlugin({
     name: "QuickMention",

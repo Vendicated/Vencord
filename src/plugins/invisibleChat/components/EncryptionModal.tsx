@@ -24,12 +24,9 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { findLazy } from "@webpack";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { Button, ComponentDispatch, Forms, React, Switch, TextInput } from "@webpack/common";
 
 import { encrypt } from "../index";
-
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");

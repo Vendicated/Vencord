@@ -18,12 +18,12 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findLazy, mapMangledModuleLazy } from "@webpack";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { ComponentDispatch } from "@webpack/common";
 
 const ExpressionPickerState = mapMangledModuleLazy('name:"expression-picker-last-active-view"', {
     close: filters.byCode("activeView:null", "setState")
 });
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export default definePlugin({
     name: "GifPaste",
