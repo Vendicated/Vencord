@@ -29,7 +29,7 @@ export default definePlugin({
             find: ".canAnimate",
             all: true,
             replacement: {
-                match: /\.canAnimate/g,
+                match: /\.canAnimate\b/g,
                 replace: ".canAnimate || true"
             }
         }
