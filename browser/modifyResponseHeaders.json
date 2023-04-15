@@ -15,7 +15,7 @@
             ]
         },
         "condition": {
-            "resourceTypes": ["stylesheet", "main_frame", "sub_frame"]
+            "resourceTypes": ["main_frame", "sub_frame"]
         }
     },
     {
@@ -31,7 +31,7 @@
             ]
         },
         "condition": {
-            "resourceTypes": ["stylesheet", "main_frame", "sub_frame"],
+            "resourceTypes": ["stylesheet"],
             "urlFilter": "https://raw.githubusercontent.com/*"
         }
     }
