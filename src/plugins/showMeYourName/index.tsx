@@ -21,12 +21,13 @@ import "./styles.css";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "discord-types/general";
 
 interface UsernameProps {
-    username: string;
-    nickname: string;
-    prefix: string; // aka the `@` mention prefix in replies
-    isReply: boolean;
+    author: { nick: string };
+    message: Message;
+    withMentionPrefix?: boolean;
+    isRepliedMessage: boolean;
 }
 
 const settings = definePluginSettings({
@@ -54,20 +55,23 @@ export default definePlugin({
         {
             find: ".withMentionPrefix",
             replacement: {
-                match: /(?<=(\i)=(\i).message,.{32,512},\i={className.{16,128},children:)(\i)\+(\i)/,
-                replace: "$self.renderUsername({username:$1.author.username,nickname:$4,prefix:$3,isReply:$2.isRepliedMessage})"
+                match: /(?<=children:)\i\+\i/,
+                replace: "$self.renderUsername(arguments[0])"
             }
         },
     ],
     settings,
 
-    renderUsername: ({ prefix, username, nickname, isReply: isReply }: UsernameProps) => {
-        if (username === nickname || isReply && !settings.store.inReplies)
-            return prefix + nickname;
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
+        const { username } = message.author;
+        const { nick } = author;
+        const prefix = withMentionPrefix ? "@" : "";
+        if (username === nick || isRepliedMessage && !settings.store.inReplies)
+            return prefix + nick;
         if (settings.store.mode === "user-nick")
-            return <>{prefix}{nickname} <span className="vc-smyn-suffix">{username}</span></>;
+            return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
         if (settings.store.mode === "nick-user")
-            return <>{prefix}{username} <span className="vc-smyn-suffix">{nickname}</span></>;
+            return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
         return prefix + username;
     },
 });
