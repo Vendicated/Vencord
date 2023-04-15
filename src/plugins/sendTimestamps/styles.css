@@ -1,8 +1,7 @@
 .vc-st-modal-content input {
     background-color: var(--input-background);
     color: var(--text-normal);
-    color-scheme: dark; /* change this depending on theme */
-    width: 95%; /* might need to change */
+    width: 95%;
     padding: 8px 8px 8px 12px;
     margin: 1em 0;
     outline: none;
@@ -41,4 +40,9 @@
 
 .vc-st-preview-text {
     margin-bottom: 1em;
+}
+
+.vc-st-button {
+    margin-right: 4px;
+    transform: scale(1.1);
 }

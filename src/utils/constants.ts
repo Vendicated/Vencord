@@ -257,5 +257,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     pylix: {
         name: "pylix",
         id: 492949202121261067n
+    },
+    Tyler: {
+        name: "\\\\GGTyler\\\\",
+        id: 143117463788191746n
     }
 });

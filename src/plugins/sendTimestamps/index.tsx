@@ -21,6 +21,7 @@ import "./styles.css";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { getTheme, Theme } from "@utils/discord";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ComponentDispatch, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
@@ -68,6 +69,9 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                     type="datetime-local"
                     value={value}
                     onChange={e => setValue(e.currentTarget.value)}
+                    style={{
+                        colorScheme: getTheme() === Theme.Light ? "light" : "dark",
+                    }}
                 />
 
                 <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
@@ -107,8 +111,8 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
 
 export default definePlugin({
     name: "SendTimestamps",
-    description: "Send timestamps easily. Read the extended description!",
-    authors: [Devs.Ven],
+    description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
+    authors: [Devs.Ven, Devs.Tyler],
     dependencies: ["MessageEventsAPI"],
 
     patches: [
@@ -152,11 +156,10 @@ export default definePlugin({
                                     />
                                 ));
                             }}
-                            style={{ marginRight: "2px" }}
+                            className={cl("button")}
                         >
                             <div className={ButtonWrapperClasses.buttonWrapper}>
                                 <svg
-                                    className="aicon-2Ljeb8"
                                     aria-hidden="true"
                                     role="img"
                                     width="24"
