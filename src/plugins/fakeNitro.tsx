@@ -402,13 +402,12 @@ export default definePlugin({
     },
 
     makeChildrenArray(child: ReactElement) {
-        if (!Array.isArray(child.props?.children)) child.props.children = [child.props.children];
+        if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
         if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
-        const newContent: Array<any> = [];
         let nextIndex = content.length;
 
         const transformContentElement = (element: ReactElement) => {
@@ -445,36 +444,54 @@ export default definePlugin({
             return element;
         };
 
+        const transformChild = (child: ReactElement) => {
+            if (child?.props?.trusted != null) return transformContentElement(child);
+            if (child?.props?.children != null) {
+                if (!Array.isArray(child.props.children)) {
+                    child.props.children = modifyChild(child.props.children);
+                    return child;
+                }
+
+                child.props.children = modifyChildren(child.props.children);
+                if (child.props.children.length === 0) return null;
+                return child;
+            }
+
+            return child;
+        };
+
+        const modifyChild = (child: ReactElement) => {
+            const newChild = transformChild(child);
+
+            if (newChild != null) {
+                if (newChild.type === "ul") {
+                    this.makeChildrenArray(newChild);
+                    if (newChild.props.children.length === 0) return null;
+
+                    let listHasAnItem = false;
+                    for (const [index, child] of newChild.props.children.entries()) {
+                        if (child == null) {
+                            delete newChild.props.children[index];
+                            continue;
+                        }
+
+                        this.makeChildrenArray(child);
+                        if (child.props.children.length > 0) listHasAnItem = true;
+                        else delete newChild.props.children[index];
+                    }
+
+                    if (!listHasAnItem) return null;
+
+                    newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
+                }
+            }
+
+            return newChild;
+        };
+
         const modifyChildren = (children: Array<ReactElement>) => {
             for (const [index, child] of children.entries()) {
-                const newChild = transformChild(child);
-
-                if (newChild != null) {
-                    if (newChild.type === "ul") {
-                        this.makeChildrenArray(newChild);
-
-                        if (newChild.props.children.length === 0) {
-                            delete children[index];
-                            continue;
-                        }
-
-                        let listHasAnItem = false;
-                        for (const [index, child] of newChild.props.children.entries()) {
-                            this.makeChildrenArray(child);
-
-                            if (child.props.children.length > 0) listHasAnItem = true;
-                            else delete newChild.props.children[index];
-                        }
-
-                        newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
-
-                        if (!listHasAnItem) {
-                            delete children[index];
-                            continue;
-                        }
-                    }
-                }
-                else delete children[index];
+                children[index] = modifyChild(child);
             }
 
             children = this.clearEmptyArrayItems(children);
@@ -483,22 +500,7 @@ export default definePlugin({
             return children;
         };
 
-        const transformChild = (child: ReactElement) => {
-            if (child.props?.trusted != null) return transformContentElement(child);
-            if (child.props?.children != null) {
-                this.makeChildrenArray(child);
-                child.props.children = modifyChildren(child.props.children);
-
-                if (child.props.children.length === 0) return null;
-                return child;
-            }
-
-            return child;
-        };
-
-        newContent.push(...modifyChildren(content).filter(Boolean));
-
-        return newContent;
+        return modifyChildren(content);
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
