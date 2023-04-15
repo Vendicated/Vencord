@@ -20,16 +20,16 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch],
+    name: "DisableDMCallIdle",
+    description: "Disables automatically getting kicked from a DM voice call after 5 minutes.",
+    authors: [Devs.Nuckyz],
     patches: [
         {
-            find: ",acceptInvite:function",
+            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
             replacement: {
-                match: /(\w=null!==[^;]+)/,
-                replace: "$1;Vencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings($1,{'muted':true,'suppress_everyone':true,'suppress_roles':true})"
+                match: /(?<=function \i\(\){)(?=.{1,100}\.Messages\.BOT_CALL_IDLE_DISCONNECT)/,
+                replace: "return;"
             }
         }
-    ],
+    ]
 });
