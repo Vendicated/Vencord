@@ -49,13 +49,13 @@ function PinMenuItem(channelId: string) {
     );
 }
 
-const GroupDMContext: NavContextMenuPatchCallback = (children, props) => {
+const GroupDMContext: NavContextMenuPatchCallback = (children, props) => () => {
     const container = findGroupChildrenByChildId("leave-channel", children);
     if (container)
         container.unshift(PinMenuItem(props.channel.id));
 };
 
-const UserContext: NavContextMenuPatchCallback = (children, props) => {
+const UserContext: NavContextMenuPatchCallback = (children, props) => () => {
     const container = findGroupChildrenByChildId("close-dm", children);
     if (container) {
         const idx = container.findIndex(c => c?.props?.id === "close-dm");

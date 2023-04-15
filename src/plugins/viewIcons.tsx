@@ -81,74 +81,70 @@ function openImage(url: string) {
     ));
 }
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
-    return () => {
-        const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
+const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
+    const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
-        children.splice(1, 0, (
-            <Menu.MenuGroup>
+    children.splice(1, 0, (
+        <Menu.MenuGroup>
+            <Menu.MenuItem
+                id="view-avatar"
+                label="View Avatar"
+                action={() => openImage(BannerStore.getUserAvatarURL(user, true, 512))}
+            />
+            {memberAvatar && (
                 <Menu.MenuItem
-                    id="view-avatar"
-                    label="View Avatar"
-                    action={() => openImage(BannerStore.getUserAvatarURL(user, true, 512))}
+                    id="view-server-avatar"
+                    label="View Server Avatar"
+                    action={() => openImage(BannerStore.getGuildMemberAvatarURLSimple({
+                        userId: user.id,
+                        avatar: memberAvatar,
+                        guildId
+                    }, true))}
                 />
-                {memberAvatar && (
-                    <Menu.MenuItem
-                        id="view-server-avatar"
-                        label="View Server Avatar"
-                        action={() => openImage(BannerStore.getGuildMemberAvatarURLSimple({
-                            userId: user.id,
-                            avatar: memberAvatar,
-                            guildId
-                        }, true))}
-                    />
-                )}
-            </Menu.MenuGroup>
-        ));
-    };
+            )}
+        </Menu.MenuGroup>
+    ));
 };
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => {
-    return () => {
-        if (!banner && !icon) return;
+const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => () => {
+    if (!banner && !icon) return;
 
-        // before copy id (if it exists)
-        const idx = children.length +
-            children[children.length - 1]?.props?.children?.props?.id === "devmode-copy-id"
-            ? -2
-            : -1;
+    // before copy id (if it exists)
+    const idx = children.length +
+        children[children.length - 1]?.props?.children?.props?.id === "devmode-copy-id"
+        ? -2
+        : -1;
 
-        children.splice(idx, 0, (
-            <Menu.MenuGroup>
-                {icon ? (
-                    <Menu.MenuItem
-                        id="view-icon"
-                        label="View Icon"
-                        action={() =>
-                            openImage(BannerStore.getGuildIconURL({
-                                id,
-                                icon,
-                                size: 512,
-                                canAnimate: true
-                            }))
-                        }
-                    />
-                ) : null}
-                {banner ? (
-                    <Menu.MenuItem
-                        id="view-banner"
-                        label="View Banner"
-                        action={() =>
-                            openImage(BannerStore.getGuildBannerURL({
-                                id,
-                                banner,
-                            }, true))
-                        }
-                    />
-                ) : null}
-            </Menu.MenuGroup>
-        ));
-    };
+    children.splice(idx, 0, (
+        <Menu.MenuGroup>
+            {icon ? (
+                <Menu.MenuItem
+                    id="view-icon"
+                    label="View Icon"
+                    action={() =>
+                        openImage(BannerStore.getGuildIconURL({
+                            id,
+                            icon,
+                            size: 512,
+                            canAnimate: true
+                        }))
+                    }
+                />
+            ) : null}
+            {banner ? (
+                <Menu.MenuItem
+                    id="view-banner"
+                    label="View Banner"
+                    action={() =>
+                        openImage(BannerStore.getGuildBannerURL({
+                            id,
+                            banner,
+                        }, true))
+                    }
+                />
+            ) : null}
+        </Menu.MenuGroup>
+    ));
 };
 
 export default definePlugin({

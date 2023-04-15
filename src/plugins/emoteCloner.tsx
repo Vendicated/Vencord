@@ -210,30 +210,26 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
-        const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
-        if (!favoriteableId || favoriteableType !== "emoji") return;
+    if (!favoriteableId || favoriteableType !== "emoji") return;
 
-        const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-        if (!match) return;
-        const name = match[1] ?? "FakeNitroEmoji";
+    const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
+    if (!match) return;
+    const name = match[1] ?? "FakeNitroEmoji";
 
-        const group = findGroupChildrenByChildId("copy-link", children);
-        if (group) group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
-    };
+    const group = findGroupChildrenByChildId("copy-link", children);
+    if (group) group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    return () => {
-        const { id, name, type } = props?.target?.dataset ?? {};
-        if (!id || !name || type !== "emoji") return;
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
+    const { id, name, type } = props?.target?.dataset ?? {};
+    if (!id || !name || type !== "emoji") return;
 
-        const firstChild = props.target.firstChild as HTMLImageElement;
+    const firstChild = props.target.firstChild as HTMLImageElement;
 
-        children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
-    };
+    children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
 };
 
 export default definePlugin({

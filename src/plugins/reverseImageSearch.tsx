@@ -34,44 +34,42 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
-        if (!props) return;
-        const { reverseImageSearchType, itemHref, itemSrc } = props;
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (!props) return;
+    const { reverseImageSearchType, itemHref, itemSrc } = props;
 
-        if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
+    if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
 
-        const src = itemHref ?? itemSrc;
+    const src = itemHref ?? itemSrc;
 
-        const group = findGroupChildrenByChildId("copy-link", children);
-        if (group) {
-            group.push((
+    const group = findGroupChildrenByChildId("copy-link", children);
+    if (group) {
+        group.push((
+            <Menu.MenuItem
+                label="Search Image"
+                key="search-image"
+                id="search-image"
+            >
+                {Object.keys(Engines).map(engine => {
+                    const key = "search-image-" + engine;
+                    return (
+                        <Menu.MenuItem
+                            key={key}
+                            id={key}
+                            label={engine}
+                            action={() => search(src, Engines[engine])}
+                        />
+                    );
+                })}
                 <Menu.MenuItem
-                    label="Search Image"
-                    key="search-image"
-                    id="search-image"
-                >
-                    {Object.keys(Engines).map(engine => {
-                        const key = "search-image-" + engine;
-                        return (
-                            <Menu.MenuItem
-                                key={key}
-                                id={key}
-                                label={engine}
-                                action={() => search(src, Engines[engine])}
-                            />
-                        );
-                    })}
-                    <Menu.MenuItem
-                        key="search-image-all"
-                        id="search-image-all"
-                        label="All"
-                        action={() => Object.values(Engines).forEach(e => search(src, e))}
-                    />
-                </Menu.MenuItem>
-            ));
-        }
-    };
+                    key="search-image-all"
+                    id="search-image-all"
+                    label="All"
+                    action={() => Object.values(Engines).forEach(e => search(src, e))}
+                />
+            </Menu.MenuItem>
+        ));
+    }
 };
 
 export default definePlugin({

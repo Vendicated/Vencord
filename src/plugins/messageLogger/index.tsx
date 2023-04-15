@@ -44,33 +44,31 @@ function addDeleteStyle() {
 }
 
 const MENU_ITEM_ID = "message-logger-remove-history";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
-        const { message } = props;
-        const { deleted, editHistory, id, channel_id } = message;
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+    const { message } = props;
+    const { deleted, editHistory, id, channel_id } = message;
 
-        if (!deleted && !editHistory?.length) return;
+    if (!deleted && !editHistory?.length) return;
 
-        children.push((
-            <Menu.MenuItem
-                id={MENU_ITEM_ID}
-                key={MENU_ITEM_ID}
-                label="Remove Message History"
-                action={() => {
-                    if (message.deleted) {
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_DELETE",
-                            channelId: channel_id,
-                            id,
-                            mlDeleted: true
-                        });
-                    } else {
-                        message.editHistory = [];
-                    }
-                }}
-            />
-        ));
-    };
+    children.push((
+        <Menu.MenuItem
+            id={MENU_ITEM_ID}
+            key={MENU_ITEM_ID}
+            label="Remove Message History"
+            action={() => {
+                if (message.deleted) {
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_DELETE",
+                        channelId: channel_id,
+                        id,
+                        mlDeleted: true
+                    });
+                } else {
+                    message.editHistory = [];
+                }
+            }}
+        />
+    ));
 };
 
 export default definePlugin({

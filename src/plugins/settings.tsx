@@ -41,7 +41,7 @@ export default definePlugin({
         // doesn't contain our sections. This patches the actions of our
         // sections to manually use SettingsRouter (which only works on desktop
         // but the context menu is usually not available on mobile anyway)
-        addContextMenuPatch("user-settings-cog", children => {
+        addContextMenuPatch("user-settings-cog", children => () => {
             const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
             section?.forEach(c => {
                 if (c?.props?.id?.startsWith("Vencord")) {
