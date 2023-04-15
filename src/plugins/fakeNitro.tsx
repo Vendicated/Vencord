@@ -390,7 +390,7 @@ export default definePlugin({
         if (content[0] === "") content.splice(0, 1);
 
         const lastContent = content[content.length - 1];
-        if (typeof lastContent === "string" && lastContent === " ") lastContent.trimEnd();
+        if (typeof lastContent === "string") content[content.length - 1] = lastContent.trimEnd();
         if (content[content.length - 1] === "") content.length -= 1;
     },
 
