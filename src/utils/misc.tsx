@@ -204,3 +204,7 @@ export const checkIntersecting = (el: Element) => {
 export function identity<T>(value: T): T {
     return value;
 }
+
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
+// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
+export const isMobile = navigator.userAgent.includes("Mobi");
