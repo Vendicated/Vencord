@@ -1,0 +1,11 @@
+.vc-smyn-suffix {
+    color: var(--text-muted);
+}
+
+.vc-smyn-suffix::before {
+    content: "(";
+}
+
+.vc-smyn-suffix::after {
+    content: ")";
+}
