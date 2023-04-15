@@ -55,7 +55,7 @@ export default definePlugin({
         {
             find: ".withMentionPrefix",
             replacement: {
-                match: /(?<=children:)\i\+\i/,
+                match: /(?<=onContextMenu:\i,children:)\i\+\i/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
@@ -63,15 +63,19 @@ export default definePlugin({
     settings,
 
     renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
-        const { username } = message.author;
-        const { nick } = author;
-        const prefix = withMentionPrefix ? "@" : "";
-        if (username === nick || isRepliedMessage && !settings.store.inReplies)
-            return prefix + nick;
-        if (settings.store.mode === "user-nick")
-            return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-        if (settings.store.mode === "nick-user")
-            return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
-        return prefix + username;
+        try {
+            const { username } = message.author;
+            const { nick } = author;
+            const prefix = withMentionPrefix ? "@" : "";
+            if (username === nick || isRepliedMessage && !settings.store.inReplies)
+                return prefix + nick;
+            if (settings.store.mode === "user-nick")
+                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+            if (settings.store.mode === "nick-user")
+                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+            return prefix + username;
+        } catch {
+            return author?.nick;
+        }
     },
 });
