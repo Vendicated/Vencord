@@ -117,7 +117,7 @@ export const createFormMember = (user: User | string, guildId?: string, isMember
 export const createCollapsableForm = (title: string, children: Array<React.ReactElement>, count?: number) => {
     return (
         <Card className={`${Margins.top8} ${Margins.bottom16} ${Margins.left16} ${Margins.right16}`}>
-            <div className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`}>
+            <div id="scrollstylerelatiowon" style={{ overflowY: "auto" }} className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`}>
                 <Flex style={{ justifyContent: "space-between" }}>
                     <Text variant="heading-sm/semibold">{title} {count && `(${count})`}</Text>
                     <Button className="relation-avatar" onClick={() => handleContainerButton(title)}>

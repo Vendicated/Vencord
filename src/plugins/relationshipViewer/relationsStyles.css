@@ -35,7 +35,6 @@
 }
 
 .relation-opened {
-    overflow-y: auto;
     transition: 0.5s;
     max-height: 330px;
 }
@@ -60,20 +59,20 @@
     gap: 0.6em !important;
 }
 
-::-webkit-scrollbar {
+#scrollstylerelatiowon::-webkit-scrollbar {
     margin: 16px !important;
     position: top !important;
     width: 3px;
 }
 
-::-webkit-scrollbar-track {
+#scrollstylerelatiowon::-webkit-scrollbar-track {
     margin: 16px !important;
     position: top !important;
     background-color: var(--scrollbar-track);
     border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb {
+#scrollstylerelatiowon::-webkit-scrollbar-thumb {
     margin: 16px !important;
     position: top !important;
     border-radius: 10px;

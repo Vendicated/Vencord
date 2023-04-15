@@ -127,7 +127,7 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
                 <Text className={Margins.top8} variant="heading-lg/medium">Server Relations</Text>
             </ModalHeader>
 
-            <Card id="scrollstyleowo" className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`} style={{ overflowY: "auto" }}>
+            <Card id="scrollstylerelatiowon" className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`} style={{ overflowY: "auto" }}>
                 {createCollapsableForm("Guild Information", [
                     createFormItem("Owner", undefined, createFormMember(ownerUser || "Could not fetch.", guildId)),
                     createFormItem("Name", guildName),
