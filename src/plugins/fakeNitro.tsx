@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -384,19 +384,34 @@ export default definePlugin({
         });
     },
 
+    trimContent(content: Array<any>) {
+        const firstContent = content[0];
+        if (typeof firstContent === "string") content[0] = firstContent.trimStart();
+        if (content[0] === "") content.splice(0, 1);
+
+        const lastContent = content[content.length - 1];
+        if (typeof lastContent === "string" && lastContent === " ") lastContent.trimEnd();
+        if (content[content.length - 1] === "") content.length -= 1;
+    },
+
+    clearEmptyArrayItems(array: Array<any>) {
+        const newArray: Array<any> = [];
+        for (const item of array) if (item !== void 0) newArray.push(item);
+
+        return newArray;
+    },
+
+    makeChildrenArray(child: ReactElement) {
+        if (!Array.isArray(child.props?.children)) child.props.children = [child.props.children];
+    },
+
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        if (content.length > 1 && !settings.store.transformCompoundSentence) return content;
+        if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
         const newContent: Array<any> = [];
-
         let nextIndex = content.length;
 
-        for (const element of content) {
-            if (element.props?.trusted == null) {
-                newContent.push(element);
-                continue;
-            }
-
+        const transformContentElement = (element: ReactElement) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = element.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -407,33 +422,81 @@ export default definePlugin({
 
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
-                    newContent.push(Parser.defaultRules.customEmoji.react({
+                    return Parser.defaultRules.customEmoji.react({
                         jumboable: !inline && content.length === 1,
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
                         fake: true
-                    }, void 0, { key: String(nextIndex++) }));
-
-                    continue;
+                    }, void 0, { key: String(nextIndex++) });
                 }
             }
 
             if (settings.store.transformStickers) {
-                if (fakeNitroStickerRegex.test(element.props.href)) continue;
+                if (fakeNitroStickerRegex.test(element.props.href)) return null;
 
                 const gifMatch = element.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
                     // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                    if (StickerStore.getStickerById(gifMatch[1])) continue;
+                    if (StickerStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
-            newContent.push(element);
-        }
+            return element;
+        };
 
-        const firstContent = newContent[0];
-        if (typeof firstContent === "string") newContent[0] = firstContent.trimStart();
+        const modifyChildren = (children: Array<ReactElement>) => {
+            for (const [index, child] of children.entries()) {
+                const newChild = transformChild(child);
+
+                if (newChild != null) {
+                    if (newChild.type === "ul") {
+                        this.makeChildrenArray(newChild);
+
+                        if (newChild.props.children.length === 0) {
+                            delete children[index];
+                            continue;
+                        }
+
+                        let listHasAnItem = false;
+                        for (const [index, child] of newChild.props.children.entries()) {
+                            this.makeChildrenArray(child);
+
+                            if (child.props.children.length > 0) listHasAnItem = true;
+                            else delete newChild.props.children[index];
+                        }
+
+                        newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
+
+                        if (!listHasAnItem) {
+                            delete children[index];
+                            continue;
+                        }
+                    }
+                }
+                else delete children[index];
+            }
+
+            children = this.clearEmptyArrayItems(children);
+            this.trimContent(children);
+
+            return children;
+        };
+
+        const transformChild = (child: ReactElement) => {
+            if (child.props?.trusted != null) return transformContentElement(child);
+            if (child.props?.children != null) {
+                this.makeChildrenArray(child);
+                child.props.children = modifyChildren(child.props.children);
+
+                if (child.props.children.length === 0) return null;
+                return child;
+            }
+
+            return child;
+        };
+
+        newContent.push(...modifyChildren(content).filter(Boolean));
 
         return newContent;
     },
@@ -442,8 +505,8 @@ export default definePlugin({
         const itemsToMaybePush: Array<string> = [];
 
         const contentItems = message.content.split(/\s/);
-        if (contentItems.length === 1 && !settings.store.transformCompoundSentence) itemsToMaybePush.push(contentItems[0]);
-        else itemsToMaybePush.push(...contentItems);
+        if (settings.store.transformCompoundSentence) itemsToMaybePush.push(...contentItems);
+        else if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]);
 
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
