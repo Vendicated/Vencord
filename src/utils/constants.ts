@@ -257,5 +257,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     pylix: {
         name: "pylix",
         id: 492949202121261067n
+    },
+    Strencher: {
+        name: "Strencher",
+        id: 415849376598982656n
     }
 });
