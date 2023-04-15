@@ -28,7 +28,7 @@ const ReplyIcon = LazyComponent(() => findByCode("M10 8.26667V4L3 11.4667L10 18.
 
 const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => () => {
     // make sure the message is in the selected channel
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
 
@@ -61,7 +61,6 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
             />
         ));
     }
-
 };
 
 

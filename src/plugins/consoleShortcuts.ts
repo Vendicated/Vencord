@@ -22,7 +22,8 @@ import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from 
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, search } from "@webpack";
-import { React } from "@webpack/common";
+import { React, ReactDOM } from "@webpack/common";
+import type { ComponentType } from "react";
 
 const WEB_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
@@ -60,6 +61,7 @@ export default definePlugin({
             };
         }
 
+        let fakeRenderWin: WeakRef<Window> | undefined;
         return {
             wp: Vencord.Webpack,
             wpc: Webpack.wreq.c,
@@ -83,7 +85,15 @@ export default definePlugin({
             restart: IS_WEB ? WEB_ONLY("restart") : relaunch,
             canonicalizeMatch,
             canonicalizeReplace,
-            canonicalizeReplacement
+            canonicalizeReplacement,
+            fakeRender: (component: ComponentType, props: any) => {
+                const prevWin = fakeRenderWin?.deref();
+                const win = prevWin?.closed === false ? prevWin : window.open("about:blank", "Fake Render", "popup,width=500,height=500")!;
+                fakeRenderWin = new WeakRef(win);
+                win.focus();
+
+                ReactDOM.render(React.createElement(component, props), win.document.body);
+            }
         };
     },
 
