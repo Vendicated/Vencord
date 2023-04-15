@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
+import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, search } from "@webpack";
@@ -82,6 +83,9 @@ export default definePlugin({
             Api: Vencord.Api,
             reload: () => location.reload(),
             restart: IS_WEB ? WEB_ONLY("restart") : relaunch,
+            canonicalizeMatch,
+            canonicalizeReplace,
+            canonicalizeReplacement,
             fakeRender: (component: ComponentType, props: any) => {
                 const prevWin = fakeRenderWin?.deref();
                 const win = prevWin?.closed === false ? prevWin : window.open("about:blank", "Fake Render", "popup,width=500,height=500")!;
