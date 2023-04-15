@@ -21,9 +21,11 @@ import "./settingsStyles.css";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { isMobile } from "@utils/misc";
 import { Forms, SettingsRouter, TabBar, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
+import CloudTab from "./CloudTab";
 import PluginsTab from "./PluginsTab";
 import ThemesTab from "./ThemesTab";
 import Updater from "./Updater";
@@ -45,7 +47,8 @@ const SettingsTabs: Record<string, SettingsTab> = {
     VencordPlugins: { name: "Plugins", component: () => <PluginsTab /> },
     VencordThemes: { name: "Themes", component: () => <ThemesTab /> },
     VencordUpdater: { name: "Updater" }, // Only show updater if IS_WEB is false
-    VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> },
+    VencordCloud: { name: "Cloud", component: () => <CloudTab /> },
+    VencordSettingsSync: { name: "Backup & Restore", component: () => <BackupRestoreTab /> }
 };
 
 if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater />;
@@ -53,7 +56,10 @@ if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater /
 function Settings(props: SettingsProps) {
     const { tab = "VencordSettings" } = props;
 
-    const CurrentTab = SettingsTabs[tab]?.component;
+    const CurrentTab = SettingsTabs[tab]?.component ?? null;
+    if (isMobile) {
+        return CurrentTab && <CurrentTab />;
+    }
 
     return <Forms.FormSection>
         <Text variant="heading-lg/semibold" style={{ color: "var(--header-primary)" }} tag="h2">Vencord Settings</Text>

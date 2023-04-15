@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/proxyLazy.js";
 import definePlugin, { OptionType } from "@utils/types";
@@ -83,6 +83,10 @@ const tags: Tag[] = [
 ];
 
 const settings = definePluginSettings({
+    dontShowForBots: {
+        description: "Don't show tags (not including the webhook tag) for bots",
+        type: OptionType.BOOLEAN
+    },
     dontShowBotTag: {
         description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
         type: OptionType.BOOLEAN
@@ -111,11 +115,10 @@ const settings = definePluginSettings({
     ]))
 });
 
-migratePluginSettings("MoreUserTags", "Webhook Tags");
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev],
     settings,
     patches: [
         // add tags to the tag list
@@ -137,6 +140,11 @@ export default definePlugin({
                 {
                     match: /(\i)=(\i)===\i\.ORIGINAL_POSTER/,
                     replace: "$1=$self.isOPTag($2)"
+                },
+                // add HTML data attributes (for easier theming)
+                {
+                    match: /children:\[(?=\i,\(0,\i\.jsx\)\("span",{className:\i\(\)\.botText,children:(\i)}\)\])/,
+                    replace: "'data-tag':$1.toLowerCase(),children:["
                 }
             ],
         },
@@ -214,6 +222,7 @@ return type!==null?$2.botTag,type"
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
         if (!tag) return strings.BOT_TAG_BOT;
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.BOT_TAG_BOT;
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tag.displayName}`;

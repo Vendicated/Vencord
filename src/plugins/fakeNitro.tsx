@@ -26,6 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import type { ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -135,6 +136,11 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
+    transformCompoundSentence: {
+        description: "Whether to transform fake stickers and emojis in compound sentences (sentences with more content than just the fake emoji or sticker link)",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     enableStreamQualityBypass: {
         description: "Allow streaming in nitro quality",
         type: OptionType.BOOLEAN,
@@ -147,7 +153,7 @@ migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -289,8 +295,8 @@ export default definePlugin({
                     replace: (m, renderableSticker) => `${m}renderableSticker:${renderableSticker},`
                 },
                 {
-                    match: /emojiSection.{0,50}description:\i(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (m, props) => `${m}+(${props}.renderableSticker?.fake?" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                    match: /(emojiSection.{0,50}description:)(\i)(?<=(\i)\.sticker,.+?)(?=,)/,
+                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice("STICKER",${reactNode},!!${props}.renderableSticker?.fake)`
                 }
             ]
         },
@@ -298,50 +304,11 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return) (.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, messages) => `${rest1},fakeNitroNode=${node}${rest2}(${messages})+(fakeNitroNode.fake?" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.":"")`
+                match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
+                replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
             }
         }
     ],
-
-    options: {
-        enableEmojiBypass: {
-            description: "Allow sending fake emojis",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        emojiSize: {
-            description: "Size of the emojis when sending",
-            type: OptionType.SLIDER,
-            default: 48,
-            markers: [32, 48, 64, 128, 160, 256, 512],
-        },
-        transformEmojis: {
-            description: "Whether to transform fake emojis into real ones",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        enableStickerBypass: {
-            description: "Allow sending fake stickers",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        },
-        stickerSize: {
-            description: "Size of the stickers when sending",
-            type: OptionType.SLIDER,
-            default: 160,
-            markers: [32, 64, 128, 160, 256, 512],
-        },
-        enableStreamQualityBypass: {
-            description: "Allow streaming in nitro quality",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: true,
-        }
-    },
 
     get guildId() {
         return getCurrentGuild()?.id;
@@ -418,7 +385,7 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        if (content.length > 1) return content;
+        if (content.length > 1 && !settings.store.transformCompoundSentence) return content;
 
         const newContent: Array<any> = [];
 
@@ -441,7 +408,7 @@ export default definePlugin({
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
                     newContent.push(Parser.defaultRules.customEmoji.react({
-                        jumboable: !inline,
+                        jumboable: !inline && content.length === 1,
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
@@ -465,8 +432,8 @@ export default definePlugin({
             newContent.push(element);
         }
 
-        const firstTextElementIdx = newContent.findIndex(element => typeof element === "string");
-        if (firstTextElementIdx !== -1) newContent[firstTextElementIdx] = newContent[firstTextElementIdx].trimStart();
+        const firstContent = newContent[0];
+        if (typeof firstContent === "string") newContent[0] = firstContent.trimStart();
 
         return newContent;
     },
@@ -475,7 +442,8 @@ export default definePlugin({
         const itemsToMaybePush: Array<string> = [];
 
         const contentItems = message.content.split(/\s/);
-        if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]);
+        if (contentItems.length === 1 && !settings.store.transformCompoundSentence) itemsToMaybePush.push(contentItems[0]);
+        else itemsToMaybePush.push(...contentItems);
 
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
@@ -516,7 +484,7 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        if (message.content.split(/\s/).length > 1) return false;
+        if (message.content.split(/\s/).length > 1 && !settings.store.transformCompoundSentence) return false;
 
         switch (embed.type) {
             case "image": {
@@ -557,6 +525,25 @@ export default definePlugin({
 
     shouldKeepEmojiLink(link: any) {
         return link.target && fakeNitroEmojiRegex.test(link.target);
+    },
+
+    addFakeNotice(type: "STICKER" | "EMOJI", node: Array<ReactNode>, fake: boolean) {
+        if (!fake) return node;
+
+        node = Array.isArray(node) ? node : [node];
+
+        switch (type) {
+            case "STICKER": {
+                node.push(" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+
+                return node;
+            }
+            case "EMOJI": {
+                node.push(" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+
+                return node;
+            }
+        }
     },
 
     hasPermissionToUseExternalEmojis(channelId: string) {
@@ -679,7 +666,7 @@ export default definePlugin({
                     }
 
                     delete extra.stickerIds;
-                    messageObj.content += " " + link + `&name=${sticker.name}`;
+                    messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
                 }
             }
 
