@@ -35,6 +35,7 @@ export async function importSettings(data: string) {
     }
 
     if ("settings" in parsed && "quickCss" in parsed) {
+        Object.assign(PlainSettings, parsed.settings);
         await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(parsed.settings, null, 4));
         await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, parsed.quickCss);
     } else
@@ -225,18 +226,11 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         const data = await res.arrayBuffer();
 
         const settings = new TextDecoder().decode(inflateSync(new Uint8Array(data)));
-
-        // we relatively trust this data so we can parse it out here and modify, then pass to importSettings. if this
-        // causes a parsing failure, then we just reject the settings here
-        try {
-            var parsedSettings: { settings: Settings; } = JSON.parse(settings);
-        } catch {
-            throw new Error("Settings appear to be corrupt. Try reuploading.");
-        }
+        await importSettings(settings);
 
         // sync with server timestamp instead of local one
-        parsedSettings.settings.cloud.settingsSyncVersion = written;
-        await importSettings(JSON.stringify(parsedSettings));
+        PlainSettings.cloud.settingsSyncVersion = written;
+        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
