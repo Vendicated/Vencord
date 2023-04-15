@@ -21,8 +21,6 @@ import { Menu } from "@webpack/common";
 
 import { isPinned, movePin, snapshotArray, togglePin } from "./settings";
 
-const seen = new WeakSet();
-
 function PinMenuItem(channelId: string) {
     const pinned = isPinned(channelId);
 
@@ -52,18 +50,12 @@ function PinMenuItem(channelId: string) {
 }
 
 const GroupDMContext: NavContextMenuPatchCallback = (children, props) => {
-    if (seen.has(children)) return;
-    seen.add(children);
-
     const container = findGroupChildrenByChildId("leave-channel", children);
     if (container)
         container.unshift(PinMenuItem(props.channel.id));
 };
 
 const UserContext: NavContextMenuPatchCallback = (children, props) => {
-    if (seen.has(children)) return;
-    seen.add(children);
-
     const container = findGroupChildrenByChildId("close-dm", children);
     if (container) {
         const idx = container.findIndex(c => c?.props?.id === "close-dm");
