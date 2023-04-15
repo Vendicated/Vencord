@@ -22,6 +22,7 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
+import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ComponentDispatch, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
@@ -32,6 +33,7 @@ function parseTime(time: string) {
     let ms = new Date(`${new Date().toDateString()} ${cleanTime}`).getTime() / 1000;
     if (isNaN(ms)) return time;
 
+    // add 24h if time is in the past
     if (Date.now() / 1000 > ms) ms += 86400;
 
     return `<t:${Math.round(ms)}:t>`;
@@ -57,7 +59,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle>
+                <Forms.FormTitle tag="h2">
                     Timestamp Picker
                 </Forms.FormTitle>
 
@@ -85,15 +87,17 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                     isSelected={v => v === format}
                     select={v => setFormat(v)}
                     serialize={v => v}
-                    renderOptionLabel={
-                        o => <div className={cl("format-label")}>{Parser.parse(formatTimestamp(time, o.value))}</div>
-                    }
+                    renderOptionLabel={o => (
+                        <div className={cl("format-label")}>
+                            {Parser.parse(formatTimestamp(time, o.value))}
+                        </div>
+                    )}
                     renderOptionValue={() => rendered}
                 />
 
-                <Forms.FormTitle>Preview</Forms.FormTitle>
+                <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
                 <Forms.FormText className={cl("preview-text")}>
-                    {rendered}
+                    {rendered} ({formatted})
                 </Forms.FormText>
             </ModalContent>
 
@@ -103,7 +107,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                         ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: formatted });
                         close();
                     }}
-                >Done</Button>
+                >Insert</Button>
             </ModalFooter>
         </ModalRoot>
     );
