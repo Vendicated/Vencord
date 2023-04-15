@@ -75,57 +75,55 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, _) => {
-    if (!children.some(child => child?.props?.id === "image-zoom")) {
-        children.push(
-            <Menu.MenuGroup id="image-zoom">
-                {/* thanks SpotifyControls */}
-                <Menu.MenuControlItem
-                    id="zoom"
-                    label="Zoom"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={1}
-                            maxValue={50}
-                            value={settings.store.zoom}
-                            onChange={debounce((value: number) => settings.store.zoom = value, 100)}
-                        />
-                    )}
-                />
-                <Menu.MenuControlItem
-                    id="size"
-                    label="Lens Size"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={50}
-                            maxValue={1000}
-                            value={settings.store.size}
-                            onChange={debounce((value: number) => settings.store.size = value, 100)}
-                        />
-                    )}
-                />
-                <Menu.MenuControlItem
-                    id="zoom-speed"
-                    label="Zoom Speed"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={0.1}
-                            maxValue={5}
-                            value={settings.store.zoomSpeed}
-                            onChange={debounce((value: number) => settings.store.zoomSpeed = value, 100)}
-                            renderValue={(value: number) => `${value.toFixed(3)}x`}
-                        />
-                    )}
-                />
-            </Menu.MenuGroup>
-        );
-    }
+const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
+    children.push(
+        <Menu.MenuGroup id="image-zoom">
+            {/* thanks SpotifyControls */}
+            <Menu.MenuControlItem
+                id="zoom"
+                label="Zoom"
+                control={(props, ref) => (
+                    <Menu.MenuSliderControl
+                        ref={ref}
+                        {...props}
+                        minValue={1}
+                        maxValue={50}
+                        value={settings.store.zoom}
+                        onChange={debounce((value: number) => settings.store.zoom = value, 100)}
+                    />
+                )}
+            />
+            <Menu.MenuControlItem
+                id="size"
+                label="Lens Size"
+                control={(props, ref) => (
+                    <Menu.MenuSliderControl
+                        ref={ref}
+                        {...props}
+                        minValue={50}
+                        maxValue={1000}
+                        value={settings.store.size}
+                        onChange={debounce((value: number) => settings.store.size = value, 100)}
+                    />
+                )}
+            />
+            <Menu.MenuControlItem
+                id="zoom-speed"
+                label="Zoom Speed"
+                control={(props, ref) => (
+                    <Menu.MenuSliderControl
+                        ref={ref}
+                        {...props}
+                        minValue={0.1}
+                        maxValue={5}
+                        value={settings.store.zoomSpeed}
+                        onChange={debounce((value: number) => settings.store.zoomSpeed = value, 100)}
+                        renderValue={(value: number) => `${value.toFixed(3)}x`}
+                    />
+                )}
+            />
+        </Menu.MenuGroup>
+    );
 };
 
 export default definePlugin({

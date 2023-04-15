@@ -102,7 +102,8 @@ function initWs(isManual = false) {
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
-            body: "Connected to WebSocket"
+            body: "Connected to WebSocket",
+            noPersist: true
         });
     });
 
@@ -237,10 +238,8 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
-    kids.unshift(
+const contextMenuPatch: NavContextMenuPatchCallback = children => () => {
+    children.unshift(
         <Menu.MenuItem
             id={NAV_ID}
             label="Reconnect Dev Companion"
