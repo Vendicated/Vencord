@@ -16,20 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { Badge } from "./Badge";
 
-export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch],
-    patches: [
-        {
-            find: ",acceptInvite:function",
-            replacement: {
-                match: /(\w=null!==[^;]+)/,
-                replace: "$1;Vencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings($1,{'muted':true,'suppress_everyone':true,'suppress_roles':true})"
-            }
-        }
-    ],
-});
+export interface Sender {
+    id : number,
+    discordID: string,
+    username: string,
+    profilePhoto: string,
+    badges: Badge[]
+}
+
+export interface Review {
+    comment: string,
+    id: number,
+    star: number,
+    sender: Sender,
+}

@@ -129,12 +129,12 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 }
 
 function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
-    return (children, props) => {
+    return (children, props) => () => {
         if (!props) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
-        if (group && !group.some(child => child?.props?.id === "perm-viewer-permissions")) {
+        if (group) {
             switch (type) {
                 case MenuItemParentType.User: {
                     group.push(MenuItem(props.guildId, props.user.id, type));

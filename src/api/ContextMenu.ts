@@ -19,17 +19,20 @@
 import Logger from "@utils/Logger";
 import type { ReactElement } from "react";
 
+type ContextMenuPatchCallbackReturn = (() => void) | void;
 /**
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
+ * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
-export type NavContextMenuPatchCallback = (children: Array<React.ReactElement>, ...args: Array<any>) => void;
+export type NavContextMenuPatchCallback = (children: Array<React.ReactElement>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
 /**
- * @param The navId of the context menu being patched
+ * @param navId The navId of the context menu being patched
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
+ * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
-export type GlobalContextMenuPatchCallback = (navId: string, children: Array<React.ReactElement>, ...args: Array<any>) => void;
+export type GlobalContextMenuPatchCallback = (navId: string, children: Array<React.ReactElement>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
 
 const ContextMenuLogger = new Logger("ContextMenu");
 
@@ -78,6 +81,7 @@ export function removeContextMenuPatch<T extends string | Array<string>>(navId: 
 
 /**
  * Remove a global context menu patch
+ * @param patch The patch to be removed
  * @returns Wheter the patch was sucessfully removed
  */
 export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback): boolean {
@@ -87,12 +91,13 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
 /**
  * A helper function for finding the children array of a group nested inside a context menu based on the id of one of its childs
  * @param id The id of the child
+ * @param children The context menu children
  */
-export function findGroupChildrenByChildId(id: string, children: Array<React.ReactElement>, itemsArray?: Array<React.ReactElement>): Array<React.ReactElement> | null {
+export function findGroupChildrenByChildId(id: string, children: Array<React.ReactElement>, _itemsArray?: Array<React.ReactElement>): Array<React.ReactElement> | null {
     for (const child of children) {
         if (child == null) continue;
 
-        if (child.props?.id === id) return itemsArray ?? null;
+        if (child.props?.id === id) return _itemsArray ?? null;
 
         let nextChildren = child.props?.children;
         if (nextChildren) {
@@ -118,6 +123,8 @@ interface ContextMenuProps {
     onClose: (callback: (...args: Array<any>) => any) => void;
 }
 
+const patchedMenus = new WeakSet();
+
 export function _patchContextMenu(props: ContextMenuProps) {
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
@@ -127,7 +134,8 @@ export function _patchContextMenu(props: ContextMenuProps) {
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
             try {
-                patch(props.children, ...props.contextMenuApiArguments);
+                const callback = patch(props.children, ...props.contextMenuApiArguments);
+                if (!patchedMenus.has(props)) callback?.();
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
             }
@@ -136,9 +144,12 @@ export function _patchContextMenu(props: ContextMenuProps) {
 
     for (const patch of globalPatches) {
         try {
-            patch(props.navId, props.children, ...props.contextMenuApiArguments);
+            const callback = patch(props.navId, props.children, ...props.contextMenuApiArguments);
+            if (!patchedMenus.has(props)) callback?.();
         } catch (err) {
             ContextMenuLogger.error("Global patch errored,", err);
         }
     }
+
+    patchedMenus.add(props);
 }

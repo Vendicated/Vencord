@@ -20,14 +20,13 @@ import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy } from "@webpack";
+import { find, findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
 import { settings, VIEW_CHANNEL } from "..";
-
 
 enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -94,6 +93,10 @@ const TagComponent = LazyComponent(() => find(m => {
     // Get the component which doesn't include increasedActivity logic
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
+
+const EmojiStore = findStoreLazy("EmojiStore");
+const EmojiParser = findByPropsLazy("convertSurrogateToName");
+const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -259,9 +262,15 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     <div className="shc-lock-screen-default-emoji-container">
                         <Text variant="text-md/normal">Default reaction emoji:</Text>
                         {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
-                            name: defaultReactionEmoji.emojiName ?? "",
-                            emojiId: defaultReactionEmoji.emojiId
-                        })}
+                            name: defaultReactionEmoji.emojiName
+                                ? EmojiParser.convertSurrogateToName(defaultReactionEmoji.emojiName)
+                                : EmojiStore.getCustomEmojiById(defaultReactionEmoji.emojiId)?.name ?? "",
+                            emojiId: defaultReactionEmoji.emojiId ?? void 0,
+                            surrogate: defaultReactionEmoji.emojiName ?? void 0,
+                            src: defaultReactionEmoji.emojiName
+                                ? EmojiUtils.getURL(defaultReactionEmoji.emojiName)
+                                : void 0
+                        }, void 0, { key: "0" })}
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
