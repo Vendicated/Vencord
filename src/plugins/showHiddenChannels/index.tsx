@@ -310,6 +310,11 @@ export default definePlugin({
                     replace: (m, props) => `${m}!${props}.inCall&&$self.isHiddenChannel(${props}.channel,true)){}else if(`
                 },
                 {
+                    // Remove invite users button for the HiddenChannelLockScreen
+                    match: /"popup".{0,100}?if\((?<=(\i)\.channel.+?)/,
+                    replace: (m, props) => `${m}(${props}.inCall||!$self.isHiddenChannel(${props}.channel,true))&&`
+                },
+                {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
                     match: /this\.renderVoiceChannelEffects.+?children:(?<=renderContent=function.+?)/,
                     replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?$self.HiddenChannelLockScreen(this.props.channel):"
@@ -326,8 +331,8 @@ export default definePlugin({
                 },
                 {
                     // Disable bad CSS class which mess up hidden voice channels styling
-                    match: /callContainer,(?<=(\i)=\i\.channel.+?\(\)\.callContainer,)/,
-                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel},true)?"":`
+                    match: /callContainer,(?<=\(\)\.callContainer,)/,
+                    replace: '$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?"":'
                 }
             ]
         },
