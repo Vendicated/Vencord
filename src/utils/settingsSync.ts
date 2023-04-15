@@ -225,11 +225,18 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         const data = await res.arrayBuffer();
 
         const settings = new TextDecoder().decode(inflateSync(new Uint8Array(data)));
-        await importSettings(settings);
+
+        // we relatively trust this data so we can parse it out here and modify, then pass to importSettings. if this
+        // causes a parsing failure, then we just reject the settings here
+        try {
+            var parsedSettings: { settings: Settings; } = JSON.parse(settings);
+        } catch {
+            throw new Error("Settings appear to be corrupt. Try reuploading.");
+        }
 
         // sync with server timestamp instead of local one
-        PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
+        parsedSettings.settings.cloud.settingsSyncVersion = written;
+        await importSettings(JSON.stringify(parsedSettings));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
