@@ -196,7 +196,13 @@ export default definePlugin({
 
         return (
             <>
-                <Forms.FormText>To send timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message</Forms.FormText>
+                <Forms.FormText>
+                    To quickly send send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                </Forms.FormText>
+                <Forms.FormText>
+                    See below for examples.
+                    If you need anything more specific, use the Date button in the chat bar!
+                </Forms.FormText>
                 <Forms.FormText>
                     Examples:
                     <ul>
