@@ -1,0 +1,81 @@
+:root {
+    --scrollbar-track: #ebebeb;
+    --scrollbar-thumb: #6d6d6d;
+    --expandable: #6d6d6d;
+}
+
+.relation-avatar { /* Thanks spotifyStyles.css */
+    padding: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 1px !important;
+    min-height: 1px !important;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent !important;
+}
+
+.relation-avatar:hover {
+    background-color: var(--background-modifier-selected) !important;
+}
+
+.relation-form-container {
+    display: contents;
+    flex-direction: column;
+    gap: 0 !important;
+}
+
+.relation-closed {
+    overflow-y: hidden;
+    overflow: hidden;
+    transition: 0.5s cubic-bezier(0, 1, 0, 1);
+    max-height: 0;
+}
+
+.relation-opened {
+    overflow-y: auto;
+    transition: 0.5s;
+    max-height: 330px;
+}
+
+.relation-expand-opened {
+    transform: rotate(180deg);
+    transition: 0.25s;
+}
+
+.relation-expand-closed {
+    transform: rotate(0deg);
+    transition: 0.25s;
+}
+
+.relation-avatar svg {
+    height: 20px;
+    width: 20px;
+    color: var(--expandable);
+}
+
+.relation-nogap {
+    gap: 0.6em !important;
+}
+
+::-webkit-scrollbar {
+    margin: 16px !important;
+    position: top !important;
+    width: 3px;
+}
+
+::-webkit-scrollbar-track {
+    margin: 16px !important;
+    position: top !important;
+    background-color: var(--scrollbar-track);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    margin: 16px !important;
+    position: top !important;
+    border-radius: 10px;
+    background: var(--scrollbar-thumb);
+}
