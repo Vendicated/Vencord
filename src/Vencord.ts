@@ -56,7 +56,7 @@ async function syncSettings() {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => relaunch()
+                onClick: relaunch
             });
         }
     }
