@@ -534,12 +534,12 @@ export default definePlugin({
 
         switch (type) {
             case "STICKER": {
-                node.push(" Fake Nitro sticker renders like a real sticker only for you, appears as a link to non-plugin users.");
+                node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
             case "EMOJI": {
-                node.push(" Fake Nitro emoji renders like a real emoji only for you, appears as a link to non-plugin users.");
+                node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
