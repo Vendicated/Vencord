@@ -1,0 +1,10 @@
+.vc-user-connection {
+	margin-top: 4px;
+	margin-right: 4px;
+	width: 24px;
+	height: 24px;
+	background-size: cover;
+	background-position: center;
+	display: inline-block;
+	cursor: pointer;
+}
