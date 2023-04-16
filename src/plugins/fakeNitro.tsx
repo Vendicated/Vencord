@@ -464,7 +464,7 @@ export default definePlugin({
         const modifyChild = (child: ReactElement) => {
             const newChild = transformChild(child);
 
-            if (newChild != null && newChild.type === "ul" || newChild.type === "ol") {
+            if (newChild != null && (newChild.type === "ul" || newChild.type === "ol")) {
                 this.makeChildrenArray(newChild);
                 if (newChild.props.children.length === 0) return null;
 
