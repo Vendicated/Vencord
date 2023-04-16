@@ -18,14 +18,14 @@
 
 import "./styles.css";
 
+import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Tooltip } from "webpack/common/components";
 
 let Section: React.ComponentType<any>;
-let Text: React.ComponentType<any>;
 const UserProfileStore = findStoreLazy("UserProfileStore");
 const styles: Record<string, string> = findByPropsLazy("title");
 let platforms: { get(type: string): ConnectionPlatform; };
@@ -45,6 +45,7 @@ interface ConnectionPlatform {
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(connection.type);
     const url = platform.getPlatformUserUrl && platform.getPlatformUserUrl(connection);
+    const settings = Settings.plugins.QuickConnections;
 
     return (
         <Tooltip text={connection.name + (!connection.verified ? " (unverified)" : "") + (!url ? " (copy)" : "")} key={connection.id}>
@@ -52,7 +53,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                 <a
                     href={url ?? "javascript:void(0)"}
                     target="_blank"
-                    style={{ backgroundImage: "url(" + (theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG) + ")" }}
+                    style={{
+                        backgroundImage: "url(" + (theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG) + ")",
+                        marginTop: settings.iconSpacing,
+                        marginRight: settings.iconSpacing,
+                        width: settings.iconSize,
+                        height: settings.iconSize
+                    }}
                     className="vc-user-connection"
                     onClick={() => !url && navigator.clipboard.writeText(connection.name)}
                     onMouseLeave={onMouseLeave}
@@ -73,7 +80,6 @@ function component(id: string, theme: string) {
         <ErrorBoundary>
             {connections && connections.length !== 0 &&
                 <Section>
-                    <Text variant="eyebrow" className={styles.title}>Connected Accounts</Text>
                     {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
                 </Section>
             }
@@ -89,7 +95,7 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /channelId:\i,onClose:\i}\)(?<=(\i)=\i\.user,.+?)(?<=(\i)=\(0,\i\.\i\)\(\i,\i\)\.profileTheme.+?)/,
+                match: /,hideNote:\i\|\|\i}\)(?<=(\i)=\i\.user,.+?)(?<=(\i)=\(0,\i\.\i\)\(\i,\i\)\.profileTheme.+?)/,
                 replace: "$&,$self.component($1.id,$2)"
             }
         },
@@ -101,13 +107,6 @@ export default definePlugin({
             }
         },
         {
-            find: ",[\"variant\",\"className\"])",
-            replacement: {
-                match: /var (\i)=function/,
-                replace: "var $1=$self.Text=function"
-            }
-        },
-        {
             find: "name:\"Twitch\"",
             replacement: {
                 match: /const (\i)={get:/,
@@ -115,14 +114,23 @@ export default definePlugin({
             }
         }
     ],
+    options: {
+        iconSize: {
+            type: OptionType.NUMBER,
+            description: "Icon size",
+            default: 32
+        },
+        iconSpacing: {
+            type: OptionType.NUMBER,
+            description: "Icon spacing",
+            default: 6
+        }
+    },
     component,
 
     // capture objects
     set Section(value: any) {
         Section = value;
-    },
-    set Text(value: any) {
-        Text = value;
     },
     set platforms(value: any) {
         platforms = value;
