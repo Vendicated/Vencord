@@ -389,9 +389,10 @@ export default definePlugin({
         if (typeof firstContent === "string") content[0] = firstContent.trimStart();
         if (content[0] === "") content.splice(0, 1);
 
-        const lastContent = content[content.length - 1];
-        if (typeof lastContent === "string") content[content.length - 1] = lastContent.trimEnd();
-        if (content[content.length - 1] === "") content.length -= 1;
+        const lastIndex = content.length - 1;
+        const lastContent = content[lastIndex];
+        if (typeof lastContent === "string") content[lastIndex] = lastContent.trimEnd();
+        if (content[lastIndex] === "") content.length -= 1;
     },
 
     clearEmptyArrayItems(array: Array<any>) {
@@ -463,27 +464,25 @@ export default definePlugin({
         const modifyChild = (child: ReactElement) => {
             const newChild = transformChild(child);
 
-            if (newChild != null) {
-                if (newChild.type === "ul" || newChild.type === "ol") {
-                    this.makeChildrenArray(newChild);
-                    if (newChild.props.children.length === 0) return null;
+            if (newChild != null && newChild.type === "ul" || newChild.type === "ol") {
+                this.makeChildrenArray(newChild);
+                if (newChild.props.children.length === 0) return null;
 
-                    let listHasAnItem = false;
-                    for (const [index, child] of newChild.props.children.entries()) {
-                        if (child == null) {
-                            delete newChild.props.children[index];
-                            continue;
-                        }
-
-                        this.makeChildrenArray(child);
-                        if (child.props.children.length > 0) listHasAnItem = true;
-                        else delete newChild.props.children[index];
+                let listHasAnItem = false;
+                for (const [index, child] of newChild.props.children.entries()) {
+                    if (child == null) {
+                        delete newChild.props.children[index];
+                        continue;
                     }
 
-                    if (!listHasAnItem) return null;
-
-                    newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
+                    this.makeChildrenArray(child);
+                    if (child.props.children.length > 0) listHasAnItem = true;
+                    else delete newChild.props.children[index];
                 }
+
+                if (!listHasAnItem) return null;
+
+                newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
             }
 
             return newChild;
