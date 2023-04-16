@@ -396,7 +396,7 @@ export default definePlugin({
 
     clearEmptyArrayItems(array: Array<any>) {
         const newArray: Array<any> = [];
-        for (const item of array) if (item !== void 0) newArray.push(item);
+        for (const item of array) if (item != null) newArray.push(item);
 
         return newArray;
     },
@@ -464,7 +464,7 @@ export default definePlugin({
             const newChild = transformChild(child);
 
             if (newChild != null) {
-                if (newChild.type === "ul") {
+                if (newChild.type === "ul" || newChild.type === "ol") {
                     this.makeChildrenArray(newChild);
                     if (newChild.props.children.length === 0) return null;
 
@@ -500,7 +500,9 @@ export default definePlugin({
             return children;
         };
 
-        return modifyChildren(content);
+        const a = modifyChildren(content);
+        console.log(a);
+        return a;
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
