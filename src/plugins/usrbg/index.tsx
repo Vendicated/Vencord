@@ -20,14 +20,13 @@ import { definePluginSettings } from "@api/settings";
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-const USRBG_BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/dist/";
+const USRBG_BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
 
-const USRBG_CACHE: { [key: string]: string | null; } = {};
+let USRBG_CACHE: { [key: string]: string; } = {};
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -64,21 +63,18 @@ export default definePlugin({
     useBannerHook(props: any) {
         const { displayProfile, user } = props;
 
-        if ((displayProfile?.banner && settings.store.nitroFirst) || USRBG_CACHE[user.id] === null) return undefined;
+        if ((displayProfile?.banner && settings.store.nitroFirst)) return undefined;
         if (USRBG_CACHE[user.id]) return USRBG_CACHE[user.id];
-        fetch(USRBG_BASE_URL + user.id + ".txt").then(res => {
-            if (!res.ok) return USRBG_CACHE[user.id] = null;
-            res.text().then(text => {
-                fetch(text).then(res => {
-                    if (!res.ok) return USRBG_CACHE[user.id] = null;
-                    USRBG_CACHE[user.id] = text;
-                    useForceUpdater();
-                });
-            });
-        });
+        return undefined;
     },
 
     start() {
         enableStyle(style);
+        fetch(USRBG_BASE_URL).then(res => {
+            if (!res.ok) return;
+            res.json().then(json => {
+                USRBG_CACHE = json;
+            });
+        });
     }
 });
