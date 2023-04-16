@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +20,17 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "ContextMenuAPI",
-    description: "API for adding/removing items to/from context menus.",
-    authors: [Devs.Nuckyz, Devs.Ven],
-    required: true,
+    name: "AlwaysAnimate",
+    description: "Animates anything that can be animated, besides status emojis.",
+    authors: [Devs.FieryFlames],
 
     patches: [
         {
-            find: "♫ (つ｡◕‿‿◕｡)つ ♪",
-            replacement: {
-                match: /(?<=function \i\((\i)\){)(?=var \i,\i=\i\.navId)/,
-                replace: (_, props) => `Vencord.Api.ContextMenu._patchContextMenu(${props});`
-            }
-        },
-        {
-            find: ".Menu,{",
+            find: ".canAnimate",
             all: true,
             replacement: {
-                match: /Menu,{(?<=\.jsxs?\)\(\i\.Menu,{)/g,
-                replace: "$&contextMenuApiArguments:typeof arguments!=='undefined'?arguments:[],"
+                match: /\.canAnimate\b/g,
+                replace: ".canAnimate || true"
             }
         }
     ]
