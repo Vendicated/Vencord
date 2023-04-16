@@ -83,7 +83,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "FakeProfileThemes",
-    description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding.",
+    description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding",
     authors: [Devs.Alyxia, Devs.Remty],
     patches: [
         {
@@ -112,7 +112,7 @@ export default definePlugin({
                     <li>• click the "Copy 3y3" button</li>
                     <li>• paste the invisible text anywhere in your bio</li>
                 </ul><br />
-                <b>Please note:</b> if you are using a theme which hides nitro upsells, you should disable it temporarily to set colors.
+                <b>Please note:</b> if you are using a theme which hides nitro ads, you should disable it temporarily to set colors.
             </Forms.FormText>
         </Forms.FormSection>),
     settings,
