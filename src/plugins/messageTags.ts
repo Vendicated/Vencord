@@ -234,12 +234,15 @@ export default definePlugin({
                         });
                         break; // end 'preview'
                     }
-                }
 
-                return sendBotMessage(ctx.channel.id, {
-                    author,
-                    content: "Invalid sub-command"
-                });
+                    default: {
+                        sendBotMessage(ctx.channel.id, {
+                            author,
+                            content: "Invalid sub-command"
+                        });
+                        break;
+                    }
+                }
             }
         }
     ]
