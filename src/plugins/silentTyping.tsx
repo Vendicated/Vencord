@@ -48,7 +48,7 @@ function SilentTypingToggle(chatBoxProps: {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
-        <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"}>
+        <Tooltip text={isEnabled ? "Disable Silent Typing" : "Enable Silent Typing"}>
             {(tooltipProps: any) => (
                 <div style={{ display: "flex" }}>
                     <Button
