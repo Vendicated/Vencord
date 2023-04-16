@@ -499,9 +499,7 @@ export default definePlugin({
             return children;
         };
 
-        const a = modifyChildren(content);
-        console.log(a);
-        return a;
+        return modifyChildren(content);
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
