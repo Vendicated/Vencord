@@ -2,15 +2,15 @@
     display: none;
 }
 
-.messagelogger-deleted :is(video),
-.messagelogger-deleted-attachment,
+.messagelogger-deleted :is(video, .emoji, [data-type="sticker"]),
+.messagelogger-deleted .messagelogger-deleted-attachment,
 .messagelogger-deleted div iframe {
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
 }
 
-.messagelogger-deleted:hover :is(video),
-.messagelogger-deleted-attachment:hover,
+.messagelogger-deleted:hover :is(video, .emoji, [data-type="sticker"]),
+.messagelogger-deleted .messagelogger-deleted-attachment:hover,
 .messagelogger-deleted iframe:hover {
     filter: grayscale(0) !important;
 }
