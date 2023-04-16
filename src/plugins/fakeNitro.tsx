@@ -410,19 +410,19 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformContentElement = (element: ReactElement) => {
+        const transformLinkChild = (child: ReactElement) => {
             if (settings.store.transformEmojis) {
-                const fakeNitroMatch = element.props.href.match(fakeNitroEmojiRegex);
+                const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
                     let url: URL | null = null;
                     try {
-                        url = new URL(element.props.href);
+                        url = new URL(child.props.href);
                     } catch { }
 
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
                     return Parser.defaultRules.customEmoji.react({
-                        jumboable: !inline && content.length === 1,
+                        jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
@@ -432,20 +432,20 @@ export default definePlugin({
             }
 
             if (settings.store.transformStickers) {
-                if (fakeNitroStickerRegex.test(element.props.href)) return null;
+                if (fakeNitroStickerRegex.test(child.props.href)) return null;
 
-                const gifMatch = element.props.href.match(fakeNitroGifStickerRegex);
+                const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
                     // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
                     if (StickerStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
-            return element;
+            return child;
         };
 
         const transformChild = (child: ReactElement) => {
-            if (child?.props?.trusted != null) return transformContentElement(child);
+            if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
                     child.props.children = modifyChild(child.props.children);
