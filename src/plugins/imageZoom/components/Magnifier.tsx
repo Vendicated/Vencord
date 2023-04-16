@@ -36,7 +36,6 @@ export interface MagnifierProps {
 export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
     const [ready, setReady] = useState(false);
 
-
     const [lensPosition, setLensPosition] = useState<Vec2>({ x: 0, y: 0 });
     const [imagePosition, setImagePosition] = useState<Vec2>({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
@@ -157,7 +156,7 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
 
     return (
         <div
-            className="lens"
+            className="vc-imgzoom-lens"
             style={{
                 opacity,
                 width: size.current + "px",
@@ -190,7 +189,8 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
                         }}
                         width={`${box.width * zoom.current}px`}
                         height={`${box.height * zoom.current}px`}
-                        src={instance.props.src} alt=""
+                        src={instance.props.src}
+                        alt=""
                     />
                 )}
         </div>

@@ -34,7 +34,7 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     if (!props) return;
     const { reverseImageSearchType, itemHref, itemSrc } = props;
 
@@ -43,7 +43,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
     const src = itemHref ?? itemSrc;
 
     const group = findGroupChildrenByChildId("copy-link", children);
-    if (group && !group.some(child => child?.props?.id === "search-image")) {
+    if (group) {
         group.push((
             <Menu.MenuItem
                 label="Search Image"

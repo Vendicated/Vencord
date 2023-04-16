@@ -23,6 +23,8 @@ export default definePlugin({
     name: "ContextMenuAPI",
     description: "API for adding/removing items to/from context menus.",
     authors: [Devs.Nuckyz, Devs.Ven],
+    required: true,
+
     patches: [
         {
             find: "♫ (つ｡◕‿‿◕｡)つ ♪",

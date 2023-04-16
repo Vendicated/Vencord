@@ -16,8 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findLazy } from "@webpack";
 import { ChannelStore, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
 import { Guild } from "discord-types/general";
+
+const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
@@ -29,4 +32,13 @@ export function getCurrentGuild(): Guild | undefined {
 
 export function openPrivateChannel(userId: string) {
     PrivateChannelsStore.openPrivateChannel(userId);
+}
+
+export const enum Theme {
+    Dark = 1,
+    Light = 2
+}
+
+export function getTheme(): Theme {
+    return PreloadedUserSettings.getCurrentValue()?.appearance?.theme;
 }
