@@ -16,7 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings, useSettings } from "@api/settings";
+import { definePluginSettings, Settings, useSettings } from "@api/settings";
+import { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
+
+export const enum PinOrder {
+    LastMessage,
+    Custom
+}
+
+export const settings = definePluginSettings({
+    pinOrder: {
+        type: OptionType.SELECT,
+        description: "Which order should pinned DMs be displayed in?",
+        options: [
+            { label: "Most recent message", value: PinOrder.LastMessage, default: true },
+            { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
+        ]
+    }
+});
+
+const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore");
 
 export let snapshotArray: string[];
 let snapshot: Set<string> | undefined;
@@ -51,9 +71,16 @@ export function togglePin(id: string) {
     save([...snapshot]);
 }
 
-export function getPinAt(idx: number) {
+function sortedSnapshot() {
     requireSnapshot();
-    return snapshotArray[idx];
+    if (settings.store.pinOrder === PinOrder.LastMessage)
+        return PrivateChannelSortStore.getPrivateChannelIds().filter(isPinned);
+
+    return snapshotArray;
+}
+
+export function getPinAt(idx: number) {
+    return sortedSnapshot()[idx];
 }
 
 export function movePin(id: string, direction: -1 | 1) {
