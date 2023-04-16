@@ -18,7 +18,7 @@
 
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -43,7 +43,6 @@ function VencordSettings() {
         fallbackValue: "Loading..."
     });
     const settings = useSettings();
-    const notifSettings = settings.notifications;
 
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
@@ -158,8 +157,16 @@ function VencordSettings() {
             </Forms.FormSection>
 
 
+            {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
+        </React.Fragment>
+    );
+}
+
+function NotificationSection({ settings }: { settings: typeof Settings["notifications"]; }) {
+    return (
+        <>
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
-            {notifSettings.useNative !== "never" && Notification.permission === "denied" && (
+            {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
                     <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
                     <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
@@ -178,35 +185,35 @@ function VencordSettings() {
                     { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
                     { label: "Always use Desktop notifications", value: "always" },
                     { label: "Always use Vencord notifications", value: "never" },
-                ] satisfies Array<{ value: typeof settings["notifications"]["useNative"]; } & Record<string, any>>}
+                ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
                 closeOnSelect={true}
-                select={v => notifSettings.useNative = v}
-                isSelected={v => v === notifSettings.useNative}
+                select={v => settings.useNative = v}
+                isSelected={v => v === settings.useNative}
                 serialize={identity}
             />
 
             <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
             <Select
-                isDisabled={notifSettings.useNative === "always"}
+                isDisabled={settings.useNative === "always"}
                 placeholder="Notification Position"
                 options={[
                     { label: "Bottom Right", value: "bottom-right", default: true },
                     { label: "Top Right", value: "top-right" },
-                ] satisfies Array<{ value: typeof settings["notifications"]["position"]; } & Record<string, any>>}
-                select={v => notifSettings.position = v}
-                isSelected={v => v === notifSettings.position}
+                ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
+                select={v => settings.position = v}
+                isSelected={v => v === settings.position}
                 serialize={identity}
             />
 
             <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
             <Slider
-                disabled={notifSettings.useNative === "always"}
+                disabled={settings.useNative === "always"}
                 markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
                 minValue={0}
                 maxValue={20_000}
-                initialValue={notifSettings.timeout}
-                onValueChange={v => notifSettings.timeout = v}
+                initialValue={settings.timeout}
+                onValueChange={v => settings.timeout = v}
                 onValueRender={v => (v / 1000).toFixed(2) + "s"}
                 onMarkerRender={v => (v / 1000) + "s"}
                 stickToMarkers={false}
@@ -222,22 +229,21 @@ function VencordSettings() {
                 minValue={0}
                 maxValue={200}
                 stickToMarkers={true}
-                initialValue={notifSettings.logLimit}
-                onValueChange={v => notifSettings.logLimit = v}
+                initialValue={settings.logLimit}
+                onValueChange={v => settings.logLimit = v}
                 onValueRender={v => v === 200 ? "∞" : v}
                 onMarkerRender={v => v === 200 ? "∞" : v}
             />
 
             <Button
                 onClick={openNotificationLogModal}
-                disabled={notifSettings.logLimit === 0}
+                disabled={settings.logLimit === 0}
             >
                 Open Notification Log
             </Button>
-        </React.Fragment>
+        </>
     );
 }
-
 
 interface DonateCardProps {
     image: string;

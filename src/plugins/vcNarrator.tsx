@@ -192,10 +192,13 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     start() {
-        if (speechSynthesis.getVoices().length === 0) {
-            new Logger("VcNarrator").warn("No Narrator voices found. Thus, this plugin will not work. Check my Settings for more info");
+        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
+            new Logger("VcNarrator").warn(
+                "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
+            );
             return;
         }
+
         FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceStates);
         FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", handleToggleSelfMute);
         FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", handleToggleSelfDeafen);
@@ -214,11 +217,11 @@ export default definePlugin({
             voice: {
                 type: OptionType.SELECT,
                 description: "Narrator Voice",
-                options: speechSynthesis.getVoices().map(v => ({
+                options: speechSynthesis?.getVoices().map(v => ({
                     label: v.name,
                     value: v.voiceURI,
                     default: v.default
-                }))
+                })) ?? []
             },
             volume: {
                 type: OptionType.SLIDER,
