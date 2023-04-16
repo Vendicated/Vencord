@@ -217,7 +217,7 @@ export default definePlugin({
             voice: {
                 type: OptionType.SELECT,
                 description: "Narrator Voice",
-                options: speechSynthesis?.getVoices().map(v => ({
+                options: window.speechSynthesis?.getVoices().map(v => ({
                     label: v.name,
                     value: v.voiceURI,
                     default: v.default
