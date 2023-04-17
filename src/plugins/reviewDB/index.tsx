@@ -17,6 +17,7 @@
 */
 
 import { Settings } from "@api/settings";
+import { enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -24,6 +25,7 @@ import { Button, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
+import style from "./style.css?managed";
 import { getLastReviewID } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";
 
@@ -38,13 +40,6 @@ export default definePlugin({
             replacement: {
                 match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
-            }
-        },
-        {
-            find: ".guildMember;return",
-            replacement: {
-                match: /\i=\i.guildMember;return.{0,15}{/,
-                replace: "$&lastSection:!0,"
             }
         }
     ],
@@ -67,6 +62,8 @@ export default definePlugin({
     },
 
     async start() {
+        enableStyle(style);
+
         const settings = Settings.plugins.ReviewDB;
         if (!settings.lastReviewId || !settings.notifyReviews) return;
 

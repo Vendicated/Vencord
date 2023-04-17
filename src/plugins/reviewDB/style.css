@@ -1,0 +1,4 @@
+/* stylelint-disable-next-line selector-class-pattern */
+[class|="section"]:not([class|="lastSection"]) + .ReviewDB {
+    margin-top: 12px;
+}
