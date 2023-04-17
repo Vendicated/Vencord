@@ -24,9 +24,9 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-const USRBG_BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
+const BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
 
-let USRBG_CACHE: { [key: string]: string; } = {};
+let data = {} as Record<string, string>;
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -60,21 +60,16 @@ export default definePlugin({
         );
     },
 
-    useBannerHook(props: any) {
-        const { displayProfile, user } = props;
-
-        if ((displayProfile?.banner && settings.store.nitroFirst)) return undefined;
-        if (USRBG_CACHE[user.id]) return USRBG_CACHE[user.id];
-        return undefined;
+    useBannerHook({ displayProfile, user }: any) {
+        if (displayProfile?.banner && settings.store.nitroFirst) return;
+        if (data[user.id]) return data[user.id];
     },
 
-    start() {
+    async start() {
         enableStyle(style);
-        fetch(USRBG_BASE_URL).then(res => {
-            if (!res.ok) return;
-            res.json().then(json => {
-                USRBG_CACHE = json;
-            });
-        });
+
+        const res = await fetch(BASE_URL);
+        if (res.ok)
+            data = await res.json();
     }
 });
