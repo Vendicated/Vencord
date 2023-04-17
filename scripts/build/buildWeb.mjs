@@ -143,5 +143,6 @@ await Promise.all([
     appendCssRuntime,
     buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], true),
     buildPluginZip("extension-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], false),
+    buildPluginZip("extension-firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"], false),
 ]);
 
