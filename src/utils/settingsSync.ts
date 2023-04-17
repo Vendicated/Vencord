@@ -35,6 +35,7 @@ export async function importSettings(data: string) {
     }
 
     if ("settings" in parsed && "quickCss" in parsed) {
+        Object.assign(PlainSettings, parsed.settings);
         await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(parsed.settings, null, 4));
         await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, parsed.quickCss);
     } else
