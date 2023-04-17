@@ -21,6 +21,7 @@ import { definePluginSettings, migratePluginSettings, Settings } from "@api/sett
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
+import Logger from "@utils/Logger";
 import { proxyLazy } from "@utils/proxyLazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
@@ -464,7 +465,7 @@ export default definePlugin({
         const modifyChild = (child: ReactElement) => {
             const newChild = transformChild(child);
 
-            if (newChild != null && (newChild.type === "ul" || newChild.type === "ol")) {
+            if (newChild?.type === "ul" || newChild?.type === "ol") {
                 this.makeChildrenArray(newChild);
                 if (newChild.props.children.length === 0) return null;
 
@@ -489,9 +490,7 @@ export default definePlugin({
         };
 
         const modifyChildren = (children: Array<ReactElement>) => {
-            for (const [index, child] of children.entries()) {
-                children[index] = modifyChild(child);
-            }
+            for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
             this.trimContent(children);
@@ -499,7 +498,12 @@ export default definePlugin({
             return children;
         };
 
-        return modifyChildren(content);
+        try {
+            return modifyChildren(window._.cloneDeep(content));
+        } catch (err) {
+            new Logger("FakeNitro").error(err);
+            return content;
+        }
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
