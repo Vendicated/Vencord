@@ -210,7 +210,7 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
     if (!favoriteableId || favoriteableType !== "emoji") return;
@@ -223,7 +223,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     if (group) group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
     const { id, name, type } = props?.target?.dataset ?? {};
     if (!id || !name || type !== "emoji") return;
 
@@ -236,7 +236,6 @@ export default definePlugin({
     name: "EmoteCloner",
     description: "Adds a Clone context menu item to emotes to clone them your own server",
     authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["ContextMenuAPI"],
 
     start() {
         addContextMenuPatch("message", messageContextMenuPatch);

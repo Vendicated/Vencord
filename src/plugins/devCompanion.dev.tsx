@@ -238,8 +238,8 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    kids.unshift(
+const contextMenuPatch: NavContextMenuPatchCallback = children => () => {
+    children.unshift(
         <Menu.MenuItem
             id={NAV_ID}
             label="Reconnect Dev Companion"
@@ -255,7 +255,6 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
-    dependencies: ["ContextMenuAPI"],
     settings,
 
     start() {
