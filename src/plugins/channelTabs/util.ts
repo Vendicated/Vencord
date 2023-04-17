@@ -23,7 +23,13 @@ import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common"
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
-export interface ChannelTabsProps { guildId: string, channelId: string; }
+export type ChannelProps = {
+    guildId: string;
+    channelId: string;
+};
+export interface ChannelTabsProps extends ChannelProps {
+    id: number;
+}
 
 export const channelTabsSettings = definePluginSettings({
     onStartup: {
@@ -48,17 +54,24 @@ export const channelTabsSettings = definePluginSettings({
     }
 });
 
+function without<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
+    const obj2 = { ...obj };
+    keys.forEach(k => { delete obj2[k]; });
+    return obj2;
+}
+
+
 // TODO: this entire utils section needs a rewrite
 let openChannelIndex = 0;
 const openChannelHistory = [0];
 const maxHistoryLength = 10;
 
-const openChannels: ChannelTabsProps[] = [];
+const openChannels: ChannelProps[] = [];
 
-function handleChannelSwitch(ch: ChannelTabsProps) {
+function handleChannelSwitch(ch: ChannelProps) {
     if (openChannels[openChannelIndex].channelId !== ch.channelId) openChannels[openChannelIndex] = ch;
 }
-function isTabSelected(ch: ChannelTabsProps) {
+function isTabSelected(ch: ChannelProps) {
     return openChannels.indexOf(ch) === openChannelIndex;
 }
 function setOpenChannel(i: number) {
@@ -77,7 +90,7 @@ function moveToTabRelative(d: number) {
     const i = d + openChannelIndex;
     moveToTab(i);
 }
-function createTab(t: ChannelTabsProps, jumpTo?: string | boolean) {
+function createTab(t: ChannelProps, jumpTo?: string | boolean) {
     openChannels.push({ ...t });
     setOpenChannel(openChannels.length - 1);
     if (jumpTo) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}${window._.isString(jumpTo) ? `/${jumpTo}` : ""}`);
@@ -124,11 +137,10 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     openChannels[openChannelIndex] = prev;
     setOpenChannel(openChannelIndex + direction);
 }
-function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
+function openStartupTabs(props: ChannelProps & { userId: string; }, update: () => void) {
     if (openChannels.length) return;
-    let tabsToOpen: { openChannels: ChannelTabsProps[], openChannelIndex: number; } = { openChannels: [firstTab], openChannelIndex: 0 };
-    if (["remember", "preset"].includes(channelTabsSettings.store.onStartup)) {
-        if (Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) Toasts.show({
+    if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
+        return Toasts.show({
             id: Toasts.genId(),
             message: "ChannelTabs - Not restoring tabs as KeepCurrentChannel is enabled",
             type: Toasts.Type.FAILURE,
@@ -137,36 +149,42 @@ function openStartupTabs(firstTab: ChannelTabsProps, update: () => void) {
                 position: Toasts.Position.BOTTOM
             }
         });
-        else {
-            if (channelTabsSettings.store.onStartup === "remember") {
-                DataStore.get("ChannelTabs_openChannels").then((t: typeof tabsToOpen) => {
-                    if (openChannels.length !== 1) return Toasts.show({
-                        id: Toasts.genId(),
-                        message: "ChannelTabs - Failed to restore tabs",
-                        type: Toasts.Type.FAILURE,
-                        options: {
-                            duration: 3000,
-                            position: Toasts.Position.BOTTOM
-                        }
-                    });
-                    openChannels.pop();
-                    ({ openChannelIndex } = t);
-                    console.log(openChannels, openChannelIndex, t.openChannels[t.openChannelIndex]);
-                    NavigationRouter.transitionToGuild(t.openChannels[t.openChannelIndex].guildId, t.openChannels[t.openChannelIndex].channelId);
-                });
-            } else {
-                tabsToOpen = { openChannels: channelTabsSettings.store.tabSet, openChannelIndex: 0 };
-            }
+    }
+    switch (channelTabsSettings.store.onStartup) {
+        case "remember": {
+            DataStore.get("ChannelTabs_openChannels").then(t => {
+                openChannels.pop();
+                openChannels.push(...t[props.userId].openChannels);
+                ({ openChannelIndex } = t[props.userId]);
+                if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
+                    NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
+                update();
+            });
+            break;
+        }
+        case "preset": {
+            const tabs = channelTabsSettings.store.tabSet[props.userId];
+            if (tabs) openChannels.push(...channelTabsSettings.store.tabSet[props.userId]);
+            else openChannels.push(without(props, "userId"));
+            break;
+        }
+        default: {
+            openChannels.push(without(props, "userId"));
         }
     }
-    ({ openChannelIndex } = tabsToOpen);
-    tabsToOpen.openChannels.forEach(t => openChannels.push(t));
+    if (!openChannels.length) openChannels.push(without(props, "userId"));
     if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
         NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
     update();
+
 }
-// data argument is only for testing purposes
-const saveChannels = (data?: any) => DataStore.set("ChannelTabs_openChannels", data ?? { openChannels, openChannelIndex });
+const saveChannels = async (userId: string) => {
+    if (!userId) return;
+    DataStore.set("ChannelTabs_openChannels", {
+        ...(await DataStore.get("ChannelTabs_openChannels") ?? {}),
+        [userId]: { openChannels, openChannelIndex }
+    });
+};
 
 export const ChannelTabsUtils = {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,

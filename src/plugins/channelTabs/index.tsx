@@ -23,11 +23,11 @@ import { Devs } from "@utils/constants.js";
 import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
-import { ChannelStore, Forms, Menu } from "@webpack/common";
+import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
-import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const Keybind = LazyComponent(() => findByProps("KeyCombo").KeyCombo);
 
@@ -137,12 +137,14 @@ export default definePlugin({
     },
 
     render({ currentChannel, children }: {
-        currentChannel: ChannelTabsProps,
+        currentChannel: ChannelProps,
         children: JSX.Element; // original children passed by discord
     }) {
+        const id = UserStore.getCurrentUser()?.id;
+        if (!id) return <>{children}</>;
         return <>
             <ErrorBoundary>
-                <ChannelsTabsContainer {...currentChannel} />
+                <ChannelsTabsContainer {...currentChannel} userId={id} />
             </ErrorBoundary>
             {children}
         </>;

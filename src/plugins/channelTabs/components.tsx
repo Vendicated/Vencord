@@ -27,7 +27,7 @@ import {
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
@@ -96,7 +96,7 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
         {twoChars(mentionCount || unreadCount)}
     </div> : null;
 };
-function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number, update: () => void; }) {
+function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, update: () => void; }) {
     const { channelInfo, pos, update } = props;
     const channel = ChannelStore.getChannel(channelInfo.channelId);
     const { openChannels } = ChannelTabsUtils;
@@ -144,7 +144,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelTabsProps, pos: number,
     </Menu.Menu>;
 }
 
-function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
+function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Channel; }) {
     const { guild, channel } = props;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount] = useStateFromStores(
@@ -191,7 +191,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         <Text variant="text-md/semibold" className={cl("channel-name-text")}>Unknown</Text>
     </>;
 }
-function ChannelTab(props: ChannelTabsProps) {
+function ChannelTab(props: ChannelProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
@@ -208,14 +208,14 @@ function ChannelTab(props: ChannelTabsProps) {
     return tab;
 }
 
-export function ChannelsTabsContainer(props: ChannelTabsProps) {
+export function ChannelsTabsContainer(props: ChannelProps & { userId: string; }) {
     const _update = useForceUpdater();
     function update() {
         _update();
-        saveChannels();
+        saveChannels(props.userId);
     }
-    openStartupTabs(props, update);
     const { openChannels } = ChannelTabsUtils;
+    if (!openChannels.length) openStartupTabs(props, update);
     function handleKeybinds(e: KeyboardEvent) {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
             const direction = e.key === "ArrowLeft" ? -1 : 1;
@@ -290,57 +290,59 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
         }} className={cl("button")}><PlusIcon /></button>
     </div >;
 }
-
+const PreviewTab = ({ channelId, guildId }: ChannelProps) => {
+    const cl = (n: string) => `vc-channeltabs-preview-${n}`;
+    if (guildId === "@me") return <div className={cl("tab")}>
+        <FriendsIcon height={24} width={24} />
+        <Text variant="text-sm/semibold" className={cl("text")}>Friends</Text>
+    </div>;
+    const channel = ChannelStore.getChannel(channelId);
+    const guild = GuildStore.getGuild(guildId);
+    const recipients = channel?.recipients;
+    if (channel && guild) return <div className={cl("tab")}>
+        <GuildIcon guild={guild} />
+        <Text variant="text-sm/semibold" className={cl("text")}>#{channel.name}</Text>
+    </div>;
+    else if (recipients?.length) {
+        if (recipients.length === 1) {
+            const user = UserStore.getUser(recipients[0]);
+            return <div className={cl("tab")}>
+                <UserAvatar user={user} />
+                <Text variant="text-sm/semibold" className={cl("text")}>@{user?.username}</Text>
+            </div>;
+        } else {
+            return <div className={cl("tab")}>
+                <ChannelIcon channel={channel} />
+                <Text variant="text-sm/semibold" className={cl("text")}>{channel?.name || "Group DM"}</Text>
+            </div>;
+        }
+    }
+    return <div className={cl("tab")}>
+        <QuestionIcon height={24} width={24} />;
+        <Text variant="text-sm/semibold" className={cl("text")}>{guildId}/{channelId}</Text>
+    </div>;
+};
 export function ChannelTabsPreivew(p) {
-    const { setValue }: { setValue: (v: ChannelTabsProps[]) => void; } = p;
-    const { tabSet }: { tabSet: ChannelTabsProps[], onStartup: string; } = channelTabsSettings.use();
+    const id = UserStore.getCurrentUser()?.id;
+    if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
+
+    const { setValue }: { setValue: (v: { [userId: string]: ChannelProps[]; }) => void; } = p;
+    const { tabSet }: { tabSet: { [userId: string]: ChannelProps[]; }; } = channelTabsSettings.use();
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
 
-    const [currentTabs, setCurrentTabs] = useState(tabSet ?? placeholder);
-    const cl = (n: string) => `vc-channeltabs-preview-${n}`;
-    const Tab = ({ channelId, guildId }: ChannelTabsProps) => {
-        if (guildId === "@me") return <div className={cl("tab")}>
-            <FriendsIcon height={24} width={24} />
-            <Text variant="text-sm/semibold" className={cl("text")}>Friends</Text>
-        </div>;
-        const channel = ChannelStore.getChannel(channelId);
-        const guild = GuildStore.getGuild(guildId);
-        const recipients = channel?.recipients;
-        if (channel && guild) return <div className={cl("tab")}>
-            <GuildIcon guild={guild} />
-            <Text variant="text-sm/semibold" className={cl("text")}>#{channel.name}</Text>
-        </div>;
-        else if (recipients?.length) {
-            if (recipients.length === 1) {
-                const user = UserStore.getUser(recipients[0]);
-                return <div className={cl("tab")}>
-                    <UserAvatar user={user} />
-                    <Text variant="text-sm/semibold" className={cl("text")}>@{user?.username}</Text>
-                </div>;
-            } else {
-                return <div className={cl("tab")}>
-                    <ChannelIcon channel={channel} />
-                    <Text variant="text-sm/semibold" className={cl("text")}>{channel?.name || "Group DM"}</Text>
-                </div>;
-            }
-        }
-        return <div className={cl("tab")}>
-            <QuestionIcon height={24} width={24} />;
-            <Text variant="text-sm/semibold" className={cl("text")}>Unknown {guildId}/{channelId}</Text>
-        </div>;
-    };
+    const [currentTabs, setCurrentTabs] = useState(tabSet[id] ?? placeholder);
     return <>
         <Forms.FormTitle>Startup tabs</Forms.FormTitle>
         <Flex flexDirection="row" style={{ gap: "2px" }}>
             {currentTabs.map(t => <>
-                <Tab channelId={t.channelId} guildId={t.guildId} />
+                <PreviewTab channelId={t.channelId} guildId={t.guildId} />
             </>)}
         </Flex>
         <Flex flexDirection="row-reverse">
             <Button
                 onClick={() => {
                     setCurrentTabs([...ChannelTabsUtils.openChannels]);
-                    setValue([...ChannelTabsUtils.openChannels]);
+                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openChannels] });
                 }}
             >Set to currently open tabs</Button>
         </Flex>
