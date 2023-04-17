@@ -125,7 +125,7 @@ function Updatable(props: CommonProps) {
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
                             setUpdates([]);
-                            const needFullRestart = await rebuild();
+                            await rebuild();
                             await new Promise<void>(r => {
                                 Alerts.show({
                                     title: "Update Success!",
@@ -133,10 +133,7 @@ function Updatable(props: CommonProps) {
                                     confirmText: "Restart",
                                     cancelText: "Not now!",
                                     onConfirm() {
-                                        if (needFullRestart)
-                                            relaunch();
-                                        else
-                                            location.reload();
+                                        relaunch();
                                         r();
                                     },
                                     onCancel: r
@@ -229,11 +226,19 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText>{repoPending ? repo : err ? "Failed to retrieve - check console" : (
-                <Link href={repo}>
-                    {repo.split("/").slice(-2).join("/")}
-                </Link>
-            )} (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)</Forms.FormText>
+            <Forms.FormText className="vc-text-selectable">
+                {repoPending
+                    ? repo
+                    : err
+                        ? "Failed to retrieve - check console"
+                        : (
+                            <Link href={repo}>
+                                {repo.split("/").slice(-2).join("/")}
+                            </Link>
+                        )
+                }
+                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+            </Forms.FormText>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 

@@ -44,7 +44,7 @@ function SilentMessageToggle(chatBoxProps: {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
-        <Tooltip text="Toggle Silent Message">
+        <Tooltip text={enabled ? "Disable Silent Message" : "Enable Silent Message"}>
             {tooltipProps => (
                 <div style={{ display: "flex" }}>
                     <Button
@@ -53,7 +53,7 @@ function SilentMessageToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ margin: "0px 8px" }}
+                        style={{ padding: "0 8px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
