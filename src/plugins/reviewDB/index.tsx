@@ -38,7 +38,14 @@ export default definePlugin({
             replacement: {
                 match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
-            },
+            }
+        },
+        {
+            find: ".guildMember;return",
+            replacement: {
+                match: /\i=\i.guildMember;return.{0,15}{/,
+                replace: "$&lastSection:!0,"
+            }
         }
     ],
 
