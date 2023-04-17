@@ -17,8 +17,11 @@
 */
 
 import { findOption, RequiredMessageOption } from "@api/Commands";
+import { addPreSendListener, MessageObject, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+import settings from "./settings";
 
 const endings = [
     "rawr x3",
@@ -74,18 +77,25 @@ function selectRandomElement(arr) {
 }
 
 
-function uwuify(message: string): string {
-    message = message.toLowerCase();
-    // words
-    for (const pair of replacements) {
-        message = message.replaceAll(pair[0], pair[1]);
+function uwuify(inputString: string): string {
+    const words = inputString.split(" ");
+    let outputString = "";
+
+    for (let i = 0; i < words.length; i++) { // for loop to check for links, and possibly more in the future
+        const word = words[i];
+        if (word.startsWith("http://") || word.startsWith("https://")) {
+            outputString += word + " ";
+            continue;
+        }
+        const transformedWord = word // skye's regex replacement, tho a bit tweaked
+            .replaceAll(/([ \t\n])n/g, "$1ny")
+            .replaceAll(/[lr]/g, "w")
+            .replaceAll(/(^|\s)(\S)/g, (_, p1, p2) => `${p1}${Math.random() < .5 ? `${p2}-${p2}` : p2}`)
+            .replaceAll(/([^.,!][.,!])(\s|$)/g, (_, p1, p2) => `${p1} ${selectRandomElement(endings)}${p2}`);
+        outputString += transformedWord + " ";
     }
-    message = message
-        .replaceAll(/([ \t\n])n/g, "$1ny") // nyaify
-        .replaceAll(/[lr]/g, "w") // [lr] > w
-        .replaceAll(/([ \t\n])([a-z])/g, (_, p1, p2) => Math.random() < .5 ? `${p1}${p2}-${p2}` : `${p1}${p2}`) // stutter
-        .replaceAll(/([^.,!][.,!])([ \t\n])/g, (_, p1, p2) => `${p1} ${selectRandomElement(endings)}${p2}`); // endings
-    return message;
+
+    return outputString.trim();
 }
 
 
@@ -93,10 +103,33 @@ function uwuify(message: string): string {
 // actual command declaration
 export default definePlugin({
     name: "UwUifier",
-    description: "Simply uwuify commands",
+    description: "spice up your messages with a little bit of uwu",
     authors: [Devs.echo, Devs.skyevg],
-    dependencies: ["CommandsAPI"],
+    dependencies: ["CommandsAPI", "MessageEventsAPI"],
+    options: {
+        shouldAutoUwuify: {
+            description: "automatically uwuifies your messages without using the command",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
+    },
 
+    addPrefix(_, msg: MessageObject) {
+        msg.content = uwuify(msg.content);
+    },
+
+    start() {
+        if (settings.shouldAutoUwuify) {
+            this.preSend = addPreSendListener(this.addPrefix);
+        }
+    },
+
+    stop() {
+        if (settings.shouldAutoUwuify) {
+            removePreSendListener(this.preSend);
+        }
+    },
     commands: [
         {
             name: "uwuify",
