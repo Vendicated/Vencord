@@ -43,7 +43,7 @@ jobs:
                 pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish || EXIT_CODE=$?
 
                 # Firefox
-                cd ../chromium-unpacked
+                cd ../firefox-unpacked
                 npm i -g web-ext@7.4.0 web-ext-submit@7.4.0
                 web-ext-submit || EXIT_CODE=$?
 
