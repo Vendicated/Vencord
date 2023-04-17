@@ -273,5 +273,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     FieryFlames: {
         name: "Fiery",
         id: 890228870559698955n
+    },
+    Mufaro: {
+        name: "Mufaro",
+        id: 769702535124090904n
     }
 });
