@@ -516,6 +516,8 @@ export default definePlugin({
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
+            if (!settings.store.transformCompoundSentence && !item.startsWith("https")) continue;
+
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
                 let url: URL | null = null;
@@ -552,10 +554,13 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        if (message.content.split(/\s/).length > 1 && !settings.store.transformCompoundSentence) return false;
+        const contentItems = message.content.split(/\s/);
+        if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
         switch (embed.type) {
             case "image": {
+                if (!settings.store.transformCompoundSentence && !contentItems.includes(embed.url!) && !contentItems.includes(embed.image!.proxyURL)) return false;
+
                 if (settings.store.transformEmojis) {
                     if (fakeNitroEmojiRegex.test(embed.url!)) return true;
                 }
