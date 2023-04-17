@@ -598,12 +598,12 @@ export default definePlugin({
 
         switch (type) {
             case "STICKER": {
-                node.push(" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+                node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
             case "EMOJI": {
-                node.push(" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+                node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
