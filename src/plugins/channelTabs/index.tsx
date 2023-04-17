@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
 import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
-import { findByProps, findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ChannelStore, Forms, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
@@ -30,61 +30,63 @@ import { ChannelsTabsContainer } from "./components";
 import { ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const Keybind = LazyComponent(() => findByProps("KeyCombo").KeyCombo);
-const KeybindClasses = findByPropsLazy("ddrArrows");
 
 const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
 const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (!props) return;
-    const { itemHref }: { itemHref?: string; } = props;
-    if (!itemHref) return;
-    const [_, guildId, channelId, messageId] = itemHref.match(messageLinkRegex) ?? [];
-    if (!channelId) return;
-    const group = findGroupChildrenByChildId("copy-native-link", children);
-    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
-        group.push(<Menu.MenuItem
-            label="Open In New Tab"
-            id="open-link-in-tab"
-            key="open-link-in-tab"
-            action={() => ChannelTabsUtils.createTab({
-                guildId,
-                channelId
-            }, messageId ?? true)}
-        />);
-    }
+    return () => {
+        if (!props) return;
+        const { itemHref }: { itemHref?: string; } = props;
+        if (!itemHref) return;
+        const [_, guildId, channelId, messageId] = itemHref.match(messageLinkRegex) ?? [];
+        if (!channelId) return;
+        const group = findGroupChildrenByChildId("copy-native-link", children);
+        if (group)
+            group.push(<Menu.MenuItem
+                label="Open In New Tab"
+                id="open-link-in-tab"
+                key="open-link-in-tab"
+                action={() => ChannelTabsUtils.createTab({
+                    guildId,
+                    channelId
+                }, messageId ?? true)}
+            />);
+    };
 };
 
 const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (!props) return;
-    const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
-    const group = findGroupChildrenByChildId("channel-copy-link", children);
-    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
-        group.push(<Menu.MenuItem
-            label="Open In New Tab"
-            id="open-link-in-tab"
-            key="open-link-in-tab"
-            action={() => ChannelTabsUtils.createTab({
-                guildId: channel.guild_id,
-                channelId: channel.id
-            }, messageId ?? true)}
-        />);
-    }
+    return () => {
+        if (!props) return;
+        const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
+        const group = findGroupChildrenByChildId("channel-copy-link", children);
+        if (group)
+            group.push(<Menu.MenuItem
+                label="Open In New Tab"
+                id="open-link-in-tab"
+                key="open-link-in-tab"
+                action={() => ChannelTabsUtils.createTab({
+                    guildId: channel.guild_id,
+                    channelId: channel.id
+                }, messageId ?? true)}
+            />);
+    };
 };
 
 const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (!props) return;
-    const { channel }: { channel: Channel; } = props;
-    const group = findGroupChildrenByChildId("channel-copy-link", children);
-    if (group && !group.some(child => child?.props?.id === "open-link-in-tab")) {
-        group.push(<Menu.MenuItem
-            label="Open In New Tab"
-            id="open-link-in-tab"
-            key="open-link-in-tab"
-            action={() => ChannelTabsUtils.createTab({
-                guildId: channel.guild_id,
-                channelId: channel.id
-            }, true)}
-        />);
-    }
+    return () => {
+        if (!props) return;
+        const { channel }: { channel: Channel; } = props;
+        const group = findGroupChildrenByChildId("channel-copy-link", children);
+        if (group)
+            group.push(<Menu.MenuItem
+                label="Open In New Tab"
+                id="open-link-in-tab"
+                key="open-link-in-tab"
+                action={() => ChannelTabsUtils.createTab({
+                    guildId: channel.guild_id,
+                    channelId: channel.id
+                }, true)}
+            />);
+    };
 };
 
 export default definePlugin({
@@ -158,22 +160,24 @@ export default definePlugin({
         <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
         <Flex flexDirection="row">
             <Forms.FormSection>
-                <Forms.FormText className={KeybindClasses.keybindDescription}>Switch between tabs</Forms.FormText>
-                <Keybind shortcut="mod+left" className={KeybindClasses.keybindKey} />
-                <Keybind shortcut="mod+right" className={KeybindClasses.keybindKey} />
+                <Forms.FormTitle>Switch between tabs</Forms.FormTitle>
+                <Keybind shortcut="mod+left" />
+                <Keybind shortcut="mod+right" />
             </Forms.FormSection>
             <Forms.FormSection>
-                <Forms.FormText className={KeybindClasses.keybindDescription}>Move tabs</Forms.FormText>
-                <Keybind shortcut="shift+left" className={KeybindClasses.keybindKey} />
-                <Keybind shortcut="shfit+right" className={KeybindClasses.keybindKey} />
+                <Forms.FormTitle>Switch between tabs with unreads</Forms.FormTitle>
+                <Keybind shortcut="ctrl+shift+left" />
+                <Keybind shortcut="ctrl+shfit+right" />
             </Forms.FormSection>
             <Forms.FormSection>
-                <Forms.FormText className={KeybindClasses.keybindDescription}>Open new tab</Forms.FormText>
-                <Keybind shortcut="mod+n" className={KeybindClasses.keybindKey} />
+                <Forms.FormTitle>Move tabs around</Forms.FormTitle>
+                <Keybind shortcut="shift+left" />
+                <Keybind shortcut="shfit+right" />
             </Forms.FormSection>
             <Forms.FormSection>
-                <Forms.FormText className={KeybindClasses.keybindDescription}>Close tab</Forms.FormText>
-                <Keybind shortcut="mod+w" className={KeybindClasses.keybindKey} />
+                <Forms.FormTitle>Open and close tabs</Forms.FormTitle>
+                <Keybind shortcut="mod+n" />
+                <Keybind shortcut="mod+w" />
             </Forms.FormSection>
         </Flex>
         <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>

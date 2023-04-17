@@ -219,7 +219,10 @@ export function ChannelsTabsContainer(props: ChannelTabsProps) {
     function handleKeybinds(e: KeyboardEvent) {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
             const direction = e.key === "ArrowLeft" ? -1 : 1;
-            if (e.ctrlKey) {
+            if (e.ctrlKey && e.shiftKey) {
+                // TODO: implement
+            }
+            else if (e.ctrlKey) {
                 moveToTabRelative(direction);
                 update();
             }
