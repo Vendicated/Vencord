@@ -26,6 +26,10 @@
         }
     ],
 
+    "background": {
+        "scripts": ["background.js"]
+    },
+
     "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
 
     "browser_specific_settings": {
