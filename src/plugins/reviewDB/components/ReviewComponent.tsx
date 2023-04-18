@@ -36,14 +36,14 @@ export default LazyComponent(() => {
         { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
         { contents },
         buttonClasses,
-        { defaultColor },
+        { defaultColor }
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("contents"),
         p("button", "wrapper", "selected"),
-        p("defaultColor"),
+        p("defaultColor")
     );
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
