@@ -57,15 +57,15 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-function profilePopoutComponent(e: any) {
-    return <QuickConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />;
-}
+const profilePopoutComponent = ErrorBoundary.wrap(e =>
+    <QuickConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />
+);
 
-function profilePanelComponent(e: any) {
-    return <QuickConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />;
-}
+const profilePanelComponent = ErrorBoundary.wrap(e =>
+    <QuickConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />
+);
 
-const QuickConnectionsComponent = ErrorBoundary.wrap(function ({ id, theme }: { id: string, theme: string; }) {
+function QuickConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -80,7 +80,7 @@ const QuickConnectionsComponent = ErrorBoundary.wrap(function ({ id, theme }: { 
     }
 
     return null;
-});
+}
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(connection.type);
