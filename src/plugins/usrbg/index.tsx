@@ -56,7 +56,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <Link href="https://github.com/Discord-Custom-Covers/usrbg#request-your-own-usrbg">Get your own banner</Link>
+            <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
     },
 
