@@ -18,8 +18,9 @@
 
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ChannelStore, ComponentDispatch } from "@webpack/common";
+import { ChannelStore } from "@webpack/common";
 
 export default definePlugin({
     name: "QuickMention",
@@ -34,7 +35,7 @@ export default definePlugin({
                 icon: this.Icon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: `<@${msg.author.id}> ` })
+                onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         });
     },
