@@ -32,7 +32,7 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /toString\(\)\}\);case (\w+)\.(\w+)\.BLOCKED/,
+                match: /toString\(\)\}\);case ([^;]+)\.([^;]+)\.BLOCKED/,
                 replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+t.toString();case $1.$2.BLOCKED"
             }
         },
@@ -40,7 +40,7 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /case (\w+)\.(\w+)\.ONLINE:return (\w+)\.SECTION_ONLINE/,
+                match: /case ([^;]+)\.([^;]+)\.ONLINE:return ([^;]+)\.SECTION_ONLINE/,
                 replace: "case $1.$2.ONLINE:case $1.$2.IMPLICIT:return $3.SECTION_ONLINE"
             },
         },
@@ -48,7 +48,7 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /\(0,(\w+)\.jsx\)\((\w+)\.TabBar\.Item,\{id:(\w+)\.(\w+)\.BLOCKED,([^\s]+)children:(\w+)\.(\w+)\.Messages\.BLOCKED\}\)/,
+                match: /\(0,([^;]+)\.jsx\)\(([^;]+)\.TabBar\.Item,\{id:([^;]+)\.([^;]+)\.BLOCKED,([^\s]+)children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
                 replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,$5children:\"Implicit\"}),$&"
             },
         },
@@ -57,7 +57,7 @@ export default definePlugin({
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
                 // case x.pJs.BLOCKED:return t.type === x.OGo.BLOCKED;
-                match: /case (\w+)\.(\w+)\.BLOCKED:return (\w+)\.type===(\w+)\.(\w+)\.BLOCKED/,
+                match: /case ([^;]+)\.([^;]+)\.BLOCKED:return ([^;]+)\.type===([^;]+)\.([^;]+)\.BLOCKED/,
                 replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
             },
         },
@@ -65,7 +65,7 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /(\w+)\.(\w+)\.fetchRelationships\(\)/,
+                match: /([^;]+)\.([^;]+)\.fetchRelationships\(\)/,
                 // This relationship fetch is actually completely useless, but whatevs
                 replace: "$1.$2.fetchRelationships(), Vencord.Plugins.plugins.ImplicitRelationships.fetchImplicitRelationships()"
             },
