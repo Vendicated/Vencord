@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { classes, LazyComponent } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
-import { Alerts, UserStore } from "@webpack/common";
+import { Alerts, moment, Tooltip, UserStore } from "@webpack/common";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -32,17 +33,17 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
         { contents },
         buttonClasses,
-        { defaultColor }
+        { defaultColor },
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("contents"),
         p("button", "wrapper", "selected"),
-        p("defaultColor")
+        p("defaultColor"),
     );
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
@@ -102,6 +103,25 @@ export default LazyComponent(() => {
                         {review.sender.username}
                     </span>
                     {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+
+                    {
+                        !Settings.plugins.ReviewDB.hideTimestamps && (
+
+                            <Tooltip
+                                text={new Date(review.timestamp * 1000).toLocaleString()}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+
+                                    <span className={classes(timestampInline, timestamp)}
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave} >
+                                        {moment(review.timestamp * 1000).format("HH:MM")}
+                                    </span>
+                                )}
+                            </Tooltip>
+
+                        )
+                    }
+
                     <p
                         className={classes(messageContent, defaultColor)}
                         style={{ fontSize: 15, marginTop: 4 }}

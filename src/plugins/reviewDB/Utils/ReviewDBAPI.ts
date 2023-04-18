@@ -32,8 +32,12 @@ interface Response {
     updated: boolean;
 }
 
+const WarningFlag = 0b00000010;
+
 export async function getReviews(id: string): Promise<Review[]> {
-    const req = await fetch(API_URL + `/api/reviewdb/users/${id}/reviews`);
+    var flags = 0;
+    if (!Settings.plugins.ReviewDB.showWarning) flags |= WarningFlag;
+    const req = await fetch(API_URL + `/api/reviewdb/users/${id}/reviews?flags=${flags}`);
 
     const res = (req.status === 200) ? await req.json() as Response : { success: false, message: "An Error occured while fetching reviews. Please try again later.", reviews: [], updated: false };
     if (!res.success) {
@@ -43,6 +47,7 @@ export async function getReviews(id: string): Promise<Review[]> {
                 id: 0,
                 comment: "An Error occured while fetching reviews. Please try again later.",
                 star: 0,
+                timestamp: 0,
                 sender: {
                     id: 0,
                     username: "Error",

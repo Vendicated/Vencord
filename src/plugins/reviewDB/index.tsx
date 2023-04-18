@@ -58,6 +58,16 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Notify about new reviews on startup",
             default: true,
+        },
+        showWarning: {
+            type: OptionType.BOOLEAN,
+            description: "Shows warning on reviews",
+            default: true,
+        },
+        hideTimestamps: {
+            type: OptionType.BOOLEAN,
+            description: "Hides timestamps on reviews",
+            default: false,
         }
     },
 
