@@ -1,0 +1,133 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { FluxDispatcher, ChannelStore, GuildStore, RelationshipStore, UserStore } from "@webpack/common";
+import { findStoreLazy, findByProps } from "@webpack";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+
+export default definePlugin({
+    name: "ImplicitRelationships",
+    description: "Shows your implicit relationships in the Friends tab.",
+    authors: [Devs.Dolfies],
+    patches: [
+        // Counts header
+        {
+            find: "FriendsEmptyState: Invalid empty state",
+            replacement: {
+                match: /toString\(\)\}\);case (\w+)\.(\w+)\.BLOCKED/,
+                replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+t.toString();case $1.$2.BLOCKED"
+            }
+        },
+        // No friends page
+        {
+            find: "FriendsEmptyState: Invalid empty state",
+            replacement: {
+                match: /case (\w+)\.(\w+)\.ONLINE:return (\w+)\.SECTION_ONLINE/,
+                replace: "case $1.$2.ONLINE:case $1.$2.IMPLICIT:return $3.SECTION_ONLINE"
+            },
+        },
+        // Sections header
+        {
+            find: "FriendsEmptyState: Invalid empty state",
+            replacement: {
+                match: /\(0,(\w+)\.jsx\)\((\w+)\.TabBar\.Item,\{id:(\w+)\.(\w+)\.BLOCKED,([^\s]+)children:(\w+)\.(\w+)\.Messages\.BLOCKED\}\)/,
+                replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,$5children:\"Implicit\"}),$&"
+            },
+        },
+        // Sections content
+        {
+            find: "FriendsEmptyState: Invalid empty state",
+            replacement: {
+                // case x.pJs.BLOCKED:return t.type === x.OGo.BLOCKED;
+                match: /case (\w+)\.(\w+)\.BLOCKED:return (\w+)\.type===(\w+)\.(\w+)\.BLOCKED/,
+                replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
+            },
+        },
+        // Piggyback relationship fetch
+        {
+            find: "FriendsEmptyState: Invalid empty state",
+            replacement: {
+                match: /(\w+)\.(\w+)\.fetchRelationships\(\)/,
+                // This relationship fetch is actually completely useless, but whatevs
+                replace: "$1.$2.fetchRelationships(), Vencord.Plugins.plugins.ImplicitRelationships.fetchImplicitRelationships()"
+            },
+        },
+    ],
+
+    hasDM(userId: string): boolean {
+        const privateChannels = ChannelStore.getSortedPrivateChannels();
+        return privateChannels.some((channel) => channel.recipients.includes(userId));
+    },
+
+    async fetchImplicitRelationships() {
+        // Implicit relationships are defined as users that you:
+        // 1. Have an affinity for
+        // 2. Do not have a relationship with // TODO: Check how this works with pending/blocked relationships
+        // 3. Have a mutual guild with
+        const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
+        const nonFriendAffinities = Array.from(userAffinities).filter(
+            (id) => !RelationshipStore.getRelationshipType(id)
+        );
+
+        // I would love to just check user cache here (falling back to the gateway of course)
+        // However, users in user cache may just be there because they share a DM or group DM with you
+        // So there's no guarantee that a user being in user cache means they have a mutual with you
+        // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
+        const toRequest = nonFriendAffinities.filter((id) => !UserStore.getUser(id) || this.hasDM(id));
+        const allGuildIds = Object.keys(GuildStore.getGuilds());
+        let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
+
+        // OP 8 Request Guild Members allows 100 user IDs at a time
+        // Subscribe to GUILD_MEMBERS_CHUNK and unsubscribe when we've received all the chunks
+        // and hope to god the client doesn't send any other OP 8s during this time
+        // as they haven't implemented the nonce parameter :grrrr:
+        const ignore = new Set(toRequest);
+        const callback = ({ members }) => {
+            members.forEach((member) => {
+                ignore.delete(member.user.id);
+            });
+            if (--count === 0) {
+                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK", callback);
+            }
+        };
+        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", callback);
+
+        for (let i = 0; i < toRequest.length; i += 100) {
+            FluxDispatcher.dispatch({
+                type: "GUILD_MEMBERS_REQUEST",
+                guildIds: allGuildIds,
+                userIds: toRequest.slice(i, i + 100),
+            });
+        }
+        for (let i = 0; i < 50 && count > 0; i++) {
+            await new Promise((r) => setTimeout(r, 100));
+        }
+
+        const implicitRelationships = nonFriendAffinities.map((id) => UserStore.getUser(id)).filter((user) => user && !ignore.has(user.id));
+        const relationships = RelationshipStore.__getLocalVars().relationships;
+        implicitRelationships.forEach((user) => relationships[user.id] = 5);
+    },
+
+    start() {
+        const FriendsSections = findByProps("ONLINE", "ALL", "PENDING", "BLOCKED");
+        FriendsSections.IMPLICIT = "IMPLICIT";
+    }
+});
