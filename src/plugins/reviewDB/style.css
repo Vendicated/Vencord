@@ -1,4 +1,3 @@
-/* stylelint-disable-next-line selector-class-pattern */
-[class|="section"]:not([class|="lastSection"]) + .ReviewDB {
+[class|="section"]:not([class|="lastSection"]) + .vc-reviewdb-view {
     margin-top: 12px;
 }
