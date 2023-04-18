@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -38,7 +40,7 @@ export default definePlugin({
             replacement: {
                 match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
-            },
+            }
         }
     ],
 
