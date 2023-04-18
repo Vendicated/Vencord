@@ -19,7 +19,7 @@
 import { FluxEvents } from "@webpack/types";
 
 import { onChannelDelete, onGuildDelete, onRelationshipRemove } from "./functions";
-import { syncFriends, syncGroups, syncGuilds } from "./utils";
+import { syncAndRunChecks, syncFriends, syncGroups, syncGuilds } from "./utils";
 
 export const FluxHandlers: Partial<Record<FluxEvents, Array<(data: any) => void>>> = {
     GUILD_CREATE: [syncGuilds],
@@ -28,7 +28,8 @@ export const FluxHandlers: Partial<Record<FluxEvents, Array<(data: any) => void>
     CHANNEL_DELETE: [onChannelDelete],
     RELATIONSHIP_ADD: [syncFriends],
     RELATIONSHIP_UPDATE: [syncFriends],
-    RELATIONSHIP_REMOVE: [syncFriends, onRelationshipRemove]
+    RELATIONSHIP_REMOVE: [syncFriends, onRelationshipRemove],
+    CONNECTION_OPEN: [syncAndRunChecks]
 };
 
 export function forEachEvent(fn: (event: FluxEvents, handler: (data: any) => void) => void) {

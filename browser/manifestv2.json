@@ -1,5 +1,5 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "minimum_chrome_version": "91",
 
     "name": "Vencord Web",
@@ -10,12 +10,12 @@
         "128": "icon.png"
     },
 
-    "host_permissions": [
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
         "*://*.discord.com/*",
         "https://raw.githubusercontent.com/*"
     ],
-
-    "permissions": ["declarativeNetRequest"],
 
     "content_scripts": [
         {
@@ -26,27 +26,16 @@
         }
     ],
 
-    "web_accessible_resources": [
-        {
-            "resources": ["dist/Vencord.js", "dist/Vencord.css"],
-            "matches": ["*://*.discord.com/*"]
-        }
-    ],
-
-    "declarative_net_request": {
-        "rule_resources": [
-            {
-                "id": "modifyResponseHeaders",
-                "enabled": true,
-                "path": "modifyResponseHeaders.json"
-            }
-        ]
+    "background": {
+        "scripts": ["background.js"]
     },
+
+    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
 
     "browser_specific_settings": {
         "gecko": {
             "id": "vencord-firefox@vendicated.dev",
-            "strict_min_version": "109.0"
+            "strict_min_version": "91.0"
         }
     }
 }
