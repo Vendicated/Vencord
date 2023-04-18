@@ -57,7 +57,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     }
 
     return (
-        <div className="ReviewDB">
+        <div className="vc-reviewdb-view">
             <Text
                 tag="h2"
                 variant="eyebrow"

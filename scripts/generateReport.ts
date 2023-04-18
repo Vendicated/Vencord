@@ -186,7 +186,16 @@ page.on("console", async e => {
     } else if (isDebug) {
         console.error(e.text());
     } else if (level === "error") {
-        const text = e.text();
+        const text = await Promise.all(
+            e.args().map(async a => {
+                try {
+                    return await maybeGetError(a) || await a.jsonValue();
+                } catch (e) {
+                    return a.toString();
+                }
+            })
+        ).then(a => a.join(" "));
+
         if (!text.startsWith("Failed to load resource: the server responded with a status of")) {
             console.error("Got unexpected error", text);
             report.otherErrors.push(text);
@@ -258,7 +267,7 @@ function runTime(token: string) {
                 if (!isWasm)
                     await wreq.e(id as any);
 
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 500));
             }
             console.error("[PUP_DEBUG]", "Finished loading chunks!");
 
