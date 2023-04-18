@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ChoicesOption, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { SelectedChannelStore } from "@webpack/common";
 
 const EMOTE = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";
@@ -34,10 +36,12 @@ interface Tag {
     name: string;
     message: string;
     enabled: boolean;
+    hotkey: string | null;
 }
 
 const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>(t => t ?? []);
 const getTag = (name: string) => DataStore.get(DATA_KEY).then<Tag | null>((t: Tag[]) => (t ?? []).find((tt: Tag) => tt.name === name) ?? null);
+const getTagByHotkey = (hotkey: string) => DataStore.get(DATA_KEY).then<Tag | null>((t: Tag[]) => (t ?? []).find((tt: Tag) => tt.hotkey === hotkey) ?? null);
 const addTag = async (tag: Tag) => {
     const tags = await getTags();
     tags.push(tag);
@@ -50,6 +54,11 @@ const removeTag = async (name: string) => {
     DataStore.set(DATA_KEY, tags);
     return tags;
 };
+
+
+const MessageActions = findByPropsLazy("sendGreetMessage");
+
+const bindableHotkeys: ChoicesOption[] = [];
 
 function createTagCommand(tag: Tag) {
     registerCommand({
@@ -75,11 +84,10 @@ function createTagCommand(tag: Tag) {
     }, "CustomTags");
 }
 
-
 export default definePlugin({
-    name: "MessageTags",
-    description: "Allows you to save messages and to use them with a simple command.",
-    authors: [Devs.Luna],
+    name: "MessageTags_TEMP",
+    description: "Allows you to save messages and to use them with a simple command or by a hotkey.",
+    authors: [Devs.Luna, Devs.Mufaro],
     options: {
         clyde: {
             name: "Clyde message on send",
@@ -87,11 +95,6 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             default: true
         }
-    },
-    dependencies: ["CommandsAPI"],
-
-    async start() {
-        for (const tag of await getTags()) createTagCommand(tag);
     },
 
     commands: [
@@ -116,7 +119,14 @@ export default definePlugin({
                             description: "The message that you will send when using this tag",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
-                        }
+                        },
+                        {
+                            name: "key",
+                            description: "The key that will trigger this tag",
+                            type: ApplicationCommandOptionType.STRING,
+                            required: false,
+                            choices: bindableHotkeys
+                        },
                     ]
                 },
                 {
@@ -150,6 +160,12 @@ export default definePlugin({
                             required: true
                         }
                     ]
+                },
+                {
+                    name: "purge",
+                    description: "Remove all tags from yourself",
+                    type: ApplicationCommandOptionType.SUB_COMMAND,
+                    options: []
                 }
             ],
 
@@ -159,17 +175,24 @@ export default definePlugin({
                     case "create": {
                         const name: string = findOption(args[0].options, "tag-name", "");
                         const message: string = findOption(args[0].options, "message", "");
+                        const key: string = findOption(args[0].options, "key", "");
 
                         if (await getTag(name))
                             return sendBotMessage(ctx.channel.id, {
                                 author,
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
+                        else if (key && await getTagByHotkey(key))
+                            return sendBotMessage(ctx.channel.id, {
+                                author,
+                                content: `${EMOTE} A Tag with the key **${key}** already exists!`
+                            });
 
                         const tag = {
                             name: name,
                             enabled: true,
-                            message: message
+                            message: message,
+                            hotkey: key || null
                         };
 
                         createTagCommand(tag);
@@ -177,10 +200,17 @@ export default definePlugin({
 
                         sendBotMessage(ctx.channel.id, {
                             author,
-                            content: `${EMOTE} Successfully created the tag **${name}**!`
+                            embeds: [{
+                                // @ts-ignore
+                                description: `${EMOTE} Successfully created the tag **${name}**!\n\n ${key && `**Key:** ${key}\n`}**Message:**\n\`\`\`${message}\`\`\``,
+                                color: "0xd77f7f",
+                                type: "rich"
+                            }]
                         });
+
                         break; // end 'create'
                     }
+
                     case "delete": {
                         const name: string = findOption(args[0].options, "tag-name", "");
 
@@ -197,6 +227,7 @@ export default definePlugin({
                             author,
                             content: `${EMOTE} Successfully deleted the tag **${name}**!`
                         });
+
                         break; // end 'delete'
                     }
                     case "list": {
@@ -208,14 +239,14 @@ export default definePlugin({
                                     title: "All Tags:",
                                     // @ts-ignore
                                     description: (await getTags())
-                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
+                                        .map(tag => `${tag.hotkey && `**[${tag.hotkey}]**`} \`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-ignore
-                                    color: 0xd77f7f,
+                                    color: "0xd77f7f",
                                     type: "rich",
                                 }
                             ]
                         });
+
                         break; // end 'list'
                     }
                     case "preview": {
@@ -232,18 +263,121 @@ export default definePlugin({
                             author,
                             content: tag.message.replaceAll("\\n", "\n")
                         });
+
                         break; // end 'preview'
                     }
+
+                    case "purge": {
+                        const tags = await getTags();
+                        for (const tag of tags) unregisterCommand(tag.name);
+                        DataStore.set(DATA_KEY, []);
+                        sendBotMessage(ctx.channel.id, {
+                            author,
+                            content: `${EMOTE} Successfully purged all tags!`
+                        });
+
+                        break; // end 'purge'
+                    }
+
 
                     default: {
                         sendBotMessage(ctx.channel.id, {
                             author,
                             content: "Invalid sub-command"
                         });
+
                         break;
                     }
                 }
             }
         }
-    ]
+    ],
+
+    async start() {
+        createKeys();
+        document.addEventListener("keydown", this.onKeyDown);
+        for (const tag of await getTags()) createTagCommand(tag);
+    },
+
+    async stop() {
+        document.removeEventListener("keydown", this.onKeyDown);
+        for (const tag of await getTags()) unregisterCommand(tag.name);
+    },
+
+    async onKeyDown(e: KeyboardEvent) {
+        if (e.repeat) return;
+        const tag = await getTagByHotkey(e.code);
+        if (!tag?.hotkey) return;
+        const message = {
+            content: tag.message,
+            validNonShortcutEmojis: []
+        };
+        const channelId = SelectedChannelStore.getChannelId();
+        if (Settings.plugins.MessageTags.clyde) sendBotMessage(channelId, {
+            author,
+            content: `${EMOTE} The tag **${tag.name}** has been sent!`
+        });
+        MessageActions.sendMessage(channelId, message, void 0);
+    },
+
+
 });
+
+
+const bindableKeys = [
+    "Backspace",
+    "Tab",
+    "ShiftRight",
+    "ControlRight",
+    "AltRight",
+    "CapsLock",
+    "Escape",
+    "End",
+    "Home",
+    "ArrowLeft",
+    "ArrowUp",
+    "ArrowRight",
+    "ArrowDown",
+    "Insert",
+    "Delete",
+    "ScrollLock",
+    "NumLock",
+    "Pause",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8",
+    "F9",
+    "F10",
+    "F11",
+    "F12",
+    "Numpad0",
+    "Numpad1",
+    "Numpad2",
+    "Numpad3",
+    "Numpad4",
+    "Numpad5",
+    "Numpad6",
+    "Numpad7",
+    "Numpad8",
+    "Numpad9",
+    "NumpadAdd",
+    "NumpadSubtract",
+    "NumpadMultiply",
+    "NumpadDivide",
+    "NumpadDecimal",
+];
+
+function createKeys() {
+    for (let i = 0; i < bindableKeys.length; i++) {
+        const key = bindableKeys[i];
+        bindableHotkeys.push({
+            name: key,
+            value: key,
+            label: key
+        });
+    }
+}
