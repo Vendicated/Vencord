@@ -18,17 +18,29 @@
 
 import "./styles.css";
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Tooltip } from "webpack/common/components";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { Tooltip } from "webpack/common";
 
-let Section: React.ComponentType<any>;
+const Section: React.ComponentType<any> = findByCodeLazy("().lastSection");
 const UserProfileStore = findStoreLazy("UserProfileStore");
-const styles: Record<string, string> = findByPropsLazy("title");
-let platforms: { get(type: string): ConnectionPlatform; };
+const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
+
+const settings = definePluginSettings({
+    iconSize: {
+        type: OptionType.NUMBER,
+        description: "Icon size",
+        default: 32
+    },
+    iconSpacing: {
+        type: OptionType.NUMBER,
+        description: "Icon spacing",
+        default: 6
+    }
+});
 
 interface Connection {
     type: string;
@@ -44,8 +56,7 @@ interface ConnectionPlatform {
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(connection.type);
-    const url = platform.getPlatformUserUrl && platform.getPlatformUserUrl(connection);
-    const settings = Settings.plugins.QuickConnections;
+    const url = platform.getPlatformUserUrl?.(connection);
 
     return (
         <Tooltip text={connection.name + (!connection.verified ? " (unverified)" : "") + (!url ? " (copy)" : "")} key={connection.id}>
@@ -55,10 +66,10 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                     target="_blank"
                     style={{
                         backgroundImage: "url(" + (theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG) + ")",
-                        marginTop: settings.iconSpacing,
-                        marginRight: settings.iconSpacing,
-                        width: settings.iconSize,
-                        height: settings.iconSize
+                        marginTop: settings.store.iconSpacing,
+                        marginRight: settings.store.iconSpacing,
+                        width: settings.store.iconSize,
+                        height: settings.store.iconSize
                     }}
                     className="vc-user-connection"
                     onClick={() => !url && navigator.clipboard.writeText(connection.name)}
@@ -100,39 +111,13 @@ export default definePlugin({
             }
         },
         {
-            find: "\"lastSection\",",
+            find: "\"Profile Panel: user cannot be undefined\"",
             replacement: {
-                match: /function (\i)\(e\)/,
-                replace: "$self.Section=$1;$&"
-            }
-        },
-        {
-            find: "name:\"Twitch\"",
-            replacement: {
-                match: /const (\i)={get:/,
-                replace: "const $1=$self.platforms={get:"
+                match: /hideNote:!1}\)(?<=(\i)=\i\.recipients\[0\].+?)(?<=(\i)=\(0,\i\.\i\)\(\).+?)/,
+                replace: "$&,$self.component($1,$2)"
             }
         }
     ],
-    options: {
-        iconSize: {
-            type: OptionType.NUMBER,
-            description: "Icon size",
-            default: 32
-        },
-        iconSpacing: {
-            type: OptionType.NUMBER,
-            description: "Icon spacing",
-            default: 6
-        }
-    },
-    component,
-
-    // capture objects
-    set Section(value: any) {
-        Section = value;
-    },
-    set platforms(value: any) {
-        platforms = value;
-    }
+    settings,
+    component
 });
