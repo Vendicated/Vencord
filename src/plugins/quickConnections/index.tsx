@@ -23,11 +23,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { User } from "discord-types/general";
 import { Tooltip } from "webpack/common";
 
 const Section: React.ComponentType<any> = findByCodeLazy("().lastSection");
 const UserProfileStore = findStoreLazy("UserProfileStore");
+const ThemeStore = findStoreLazy("ThemeStore");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
+const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(",\"--profile-gradient-primary-color\"");
 
 const settings = definePluginSettings({
     iconSize: {
@@ -52,6 +55,32 @@ interface Connection {
 interface ConnectionPlatform {
     getPlatformUserUrl(connection: Connection): string;
     icon: { lightSVG: string, darkSVG: string; };
+}
+
+function profilePopoutComponent(e: any) {
+    return component(e.user.id, getTheme(e.user, e.displayProfile).profileTheme);
+}
+
+function profilePanelComponent(e: any) {
+    return component(e.channel.recipients[0], ThemeStore.theme);
+}
+
+function component(userId: string, theme: string) {
+    const profile = UserProfileStore.getUserProfile(userId);
+    if (!profile)
+        return null;
+
+    const connections: Connection[] = profile.connectedAccounts;
+
+    return (
+        <ErrorBoundary>
+            {connections && connections.length !== 0 &&
+                <Section>
+                    {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+                </Section>
+            }
+        </ErrorBoundary>
+    );
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
@@ -80,24 +109,6 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
     );
 }
 
-function component(id: string, theme: string) {
-    const profile = UserProfileStore.getUserProfile(id);
-    if (!profile)
-        return null;
-
-    const connections: Connection[] = profile.connectedAccounts;
-
-    return (
-        <ErrorBoundary>
-            {connections && connections.length !== 0 &&
-                <Section>
-                    {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-                </Section>
-            }
-        </ErrorBoundary>
-    );
-}
-
 export default definePlugin({
     name: "QuickConnections",
     description: "Show connected accounts in user popouts",
@@ -106,18 +117,19 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /,hideNote:\i\|\|\i}\)(?<=(\i)=\i\.user,.+?)(?<=(\i)=\(0,\i\.\i\)\(\i,\i\)\.profileTheme.+?)/,
-                replace: "$&,$self.component($1.id,$2)"
+                match: /,hideNote:\i\|\|\i}\)/,
+                replace: "$&,$self.profilePopoutComponent(arguments[0])"
             }
         },
         {
             find: "\"Profile Panel: user cannot be undefined\"",
             replacement: {
-                match: /hideNote:!1}\)(?<=(\i)=\i\.recipients\[0\].+?)(?<=(\i)=\(0,\i\.\i\)\(\).+?)/,
-                replace: "$&,$self.component($1,$2)"
+                match: /hideNote:!1}\)/,
+                replace: "$&,$self.profilePanelComponent(arguments[0])"
             }
         }
     ],
     settings,
-    component
+    profilePopoutComponent,
+    profilePanelComponent
 });
