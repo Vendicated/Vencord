@@ -56,21 +56,17 @@ export default definePlugin({
     authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
-        /* Patch the badges array */
-        {
-            find: "Messages.ACTIVE_DEVELOPER_BADGE_TOOLTIP",
-            replacement: {
-                match: /(?<=void 0:)\i.getBadges\(\)/,
-                replace: "Vencord.Api.Badges._getBadges(arguments[0]).concat($&??[])",
-            }
-        },
         /* Patch the badge list component on user profiles */
         {
             find: "Messages.PROFILE_USER_BADGES,role:",
             replacement: [
                 {
+                    match: /(?<=void 0:)\i.getBadges\(\)/,
+                    replace: "Vencord.Api.Badges._getBadges(arguments[0]).concat($&??[])",
+                },
+                {
                     // alt: "", aria-hidden: false, src: originalSrc
-                    match: /alt:" ","aria-hidden":!0,src:(?=.{0,10}\b(\i)\.(?:icon|key))/g,
+                    match: /alt:" ","aria-hidden":!0,src:(?=(\i)\.src)/g,
                     // ...badge.props, ..., src: badge.image ?? ...
                     replace: "...$1.props,$& $1.image??"
                 },
