@@ -56,7 +56,6 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                // case x.pJs.BLOCKED:return t.type === x.OGo.BLOCKED;
                 match: /case ([^;]+)\.([^;]+)\.BLOCKED:return ([^;]+)\.type===([^;]+)\.([^;]+)\.BLOCKED/,
                 replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
             },
