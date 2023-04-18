@@ -85,7 +85,7 @@ function createTagCommand(tag: Tag) {
 }
 
 export default definePlugin({
-    name: "MessageTags_TEMP",
+    name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command or by a hotkey.",
     authors: [Devs.Luna, Devs.Mufaro],
     options: {
