@@ -58,30 +58,29 @@ interface ConnectionPlatform {
 }
 
 function profilePopoutComponent(e: any) {
-    return component(e.user.id, getTheme(e.user, e.displayProfile).profileTheme);
+    return <QuickConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />;
 }
 
 function profilePanelComponent(e: any) {
-    return component(e.channel.recipients[0], ThemeStore.theme);
+    return <QuickConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />;
 }
 
-function component(userId: string, theme: string) {
-    const profile = UserProfileStore.getUserProfile(userId);
+const QuickConnectionsComponent = ErrorBoundary.wrap(function ({ id, theme }: { id: string, theme: string; }) {
+    const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
 
     const connections: Connection[] = profile.connectedAccounts;
+    if (connections && connections.length !== 0) {
+        return (
+            <Section>
+                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            </Section>
+        );
+    }
 
-    return (
-        <ErrorBoundary>
-            {connections && connections.length !== 0 &&
-                <Section>
-                    {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-                </Section>
-            }
-        </ErrorBoundary>
-    );
-}
+    return null;
+});
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(connection.type);
