@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { Settings } from "@api/settings";
-import { enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -25,7 +26,6 @@ import { Button, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
-import style from "./style.css?managed";
 import { getLastReviewID } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";
 
@@ -62,8 +62,6 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const settings = Settings.plugins.ReviewDB;
         if (!settings.lastReviewId || !settings.notifyReviews) return;
 
