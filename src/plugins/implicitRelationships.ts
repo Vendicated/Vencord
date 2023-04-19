@@ -55,7 +55,7 @@ export default definePlugin({
                 {
                     match: /([^;]+)\.([^;]+)\.fetchRelationships\(\)/,
                     // This relationship fetch is actually completely useless, but whatevs
-                    replace: "$1.$2.fetchRelationships(),Vencord.Plugins.plugins.ImplicitRelationships.fetchImplicitRelationships()"
+                    replace: "$1.$2.fetchRelationships(),$self.fetchImplicitRelationships()"
                 },
             ],
         },
