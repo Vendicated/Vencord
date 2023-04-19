@@ -110,3 +110,4 @@ export const ContextMenu = $ContextMenu;
  * Settings lol
  */
 export const Settings = $Settings;
+export const settings = $Settings;
