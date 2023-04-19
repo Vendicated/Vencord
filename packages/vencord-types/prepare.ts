@@ -16,16 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cpSync, rmSync } from "fs";
+import { cpSync, readdirSync, rmSync } from "fs";
 import { join } from "path";
 
+const SRC = join(__dirname, "..", "..", "src");
+
 for (const file of ["preload.d.ts", "userplugins", "main", "debug"]) {
-    rmSync(join(__dirname, "dist", file), { recursive: true, force: true });
+    rmSync(join(__dirname, file), { recursive: true, force: true });
 }
 
-for (const file of ["globals.d.ts", "modules.d.ts"]) {
-    cpSync(
-        join(__dirname, "..", "..", "src", file),
-        join(__dirname, "dist", file)
-    );
+function copyDtsFiles(from: string, to: string) {
+    for (const file of readdirSync(from, { withFileTypes: true })) {
+        const fullFrom = join(from, file.name);
+        const fullTo = join(to, file.name);
+
+        if (file.isDirectory()) {
+            copyDtsFiles(fullFrom, fullTo);
+        } else if (file.name.endsWith(".d.ts")) {
+            cpSync(fullFrom, fullTo);
+        }
+    }
 }
+
+copyDtsFiles(SRC, __dirname);
