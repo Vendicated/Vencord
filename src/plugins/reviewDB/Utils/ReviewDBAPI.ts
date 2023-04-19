@@ -19,6 +19,7 @@
 import { Settings } from "@api/settings";
 
 import { Review } from "../entities/Review";
+import { ReviewDBUser } from "../entities/User";
 import { authorize, showToast } from "./Utils";
 
 const API_URL = "https://manti.vendicated.dev";
@@ -113,8 +114,10 @@ export async function reportReview(id: number) {
     showToast(await res.message);
 }
 
-export function getLastReviewID(id: string): Promise<number> {
-    return fetch(API_URL + "/getLastReviewID?discordid=" + id)
-        .then(r => r.text())
-        .then(Number);
+export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
+    return fetch(API_URL + "/api/reviewdb/users", {
+        body: JSON.stringify({ token }),
+        method: "POST",
+    })
+        .then(r => r.json());
 }
