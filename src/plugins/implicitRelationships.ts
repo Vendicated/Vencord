@@ -28,46 +28,36 @@ export default definePlugin({
     description: "Shows your implicit relationships in the Friends tab.",
     authors: [Devs.Dolfies],
     patches: [
-        // Counts header
         {
             find: "FriendsEmptyState: Invalid empty state",
-            replacement: {
-                match: /toString\(\)\}\);case ([^;]+)\.([^;]+)\.BLOCKED/,
-                replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+t.toString();case $1.$2.BLOCKED"
-            }
-        },
-        // No friends page
-        {
-            find: "FriendsEmptyState: Invalid empty state",
-            replacement: {
-                match: /case ([^;]+)\.([^;]+)\.ONLINE:return ([^;]+)\.SECTION_ONLINE/,
-                replace: "case $1.$2.ONLINE:case $1.$2.IMPLICIT:return $3.SECTION_ONLINE"
-            },
-        },
-        // Sections header
-        {
-            find: "FriendsEmptyState: Invalid empty state",
-            replacement: {
-                match: /\(0,([^;]+)\.jsx\)\(([^;]+)\.TabBar\.Item,\{id:([^;]+)\.([^;]+)\.BLOCKED,([^\s]+)children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
-                replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,$5children:\"Implicit\"}),$&"
-            },
-        },
-        // Sections content
-        {
-            find: "FriendsEmptyState: Invalid empty state",
-            replacement: {
-                match: /case ([^;]+)\.([^;]+)\.BLOCKED:return ([^;]+)\.type===([^;]+)\.([^;]+)\.BLOCKED/,
-                replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
-            },
-        },
-        // Piggyback relationship fetch
-        {
-            find: "FriendsEmptyState: Invalid empty state",
-            replacement: {
-                match: /([^;]+)\.([^;]+)\.fetchRelationships\(\)/,
-                // This relationship fetch is actually completely useless, but whatevs
-                replace: "$1.$2.fetchRelationships(),Vencord.Plugins.plugins.ImplicitRelationships.fetchImplicitRelationships()"
-            },
+            replacement: [
+                // Counts header
+                {
+                    match: /toString\(\)\}\);case ([^;]+)\.([^;]+)\.BLOCKED/,
+                    replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+t.toString();case $1.$2.BLOCKED"
+                },
+                // No friends page
+                {
+                    match: /case ([^;]+)\.([^;]+)\.ONLINE:return ([^;]+)\.SECTION_ONLINE/,
+                    replace: "case $1.$2.ONLINE:case $1.$2.IMPLICIT:return $3.SECTION_ONLINE"
+                },
+                // Sections header
+                {
+                    match: /\(0,([^;]+)\.jsx\)\(([^;]+)\.TabBar\.Item,\{id:([^;]+)\.([^;]+)\.BLOCKED,([^\s]+)children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
+                    replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,$5children:\"Implicit\"}),$&"
+                },
+                // Sections content
+                {
+                    match: /case ([^;]+)\.([^;]+)\.BLOCKED:return ([^;]+)\.type===([^;]+)\.([^;]+)\.BLOCKED/,
+                    replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
+                },
+                // Piggyback relationship fetch
+                {
+                    match: /([^;]+)\.([^;]+)\.fetchRelationships\(\)/,
+                    // This relationship fetch is actually completely useless, but whatevs
+                    replace: "$1.$2.fetchRelationships(),Vencord.Plugins.plugins.ImplicitRelationships.fetchImplicitRelationships()"
+                },
+            ],
         },
     ],
 
