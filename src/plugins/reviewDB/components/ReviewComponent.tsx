@@ -114,7 +114,7 @@ export default LazyComponent(() => {
                                     <span className={classes(timestampInline, timestamp)}
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave} >
-                                        {moment(review.timestamp * 1000).format("HH:MM")}
+                                        {moment(review.timestamp * 1000).format("HH:mm")}
                                     </span>
                                 )}
                             </Tooltip>
