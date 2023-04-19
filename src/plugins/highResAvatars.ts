@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="standalone-electron-types"/>
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
-declare module "~plugins" {
-    const plugins: Record<string, import("./utils/types").Plugin>;
-    export default plugins;
-}
+export default definePlugin({
+    name: "HighResImages",
+    description: "Makes Discord use higher resolution versions of images (pfps, emotes, etc)",
+    authors: [Devs.Ven],
 
-declare module "~git-hash" {
-    const hash: string;
-    export default hash;
-}
-declare module "~git-remote" {
-    const remote: string;
-    export default remote;
-}
-
-declare module "~fileContent/*" {
-    const content: string;
-    export default content;
-}
-
-declare module "*.css";
-
-declare module "*.css?managed" {
-    const name: string;
-    export default name;
-}
+    patches: [
+        {
+            find: 'command:"tenor"',
+            replacement: {
+                // resolution list. Simply removes everything smaller than 512
+                match: /=\[16,20,22.+?,(512,.+?3072,4096)\]/,
+                replace: "=[$1]"
+            }
+        }
+    ]
+});

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="standalone-electron-types"/>
+import { cpSync, rmSync } from "fs";
+import { join } from "path";
 
-declare module "~plugins" {
-    const plugins: Record<string, import("./utils/types").Plugin>;
-    export default plugins;
+for (const file of ["preload.d.ts", "userplugins", "main", "debug"]) {
+    rmSync(join(__dirname, "dist", file), { recursive: true, force: true });
 }
 
-declare module "~git-hash" {
-    const hash: string;
-    export default hash;
-}
-declare module "~git-remote" {
-    const remote: string;
-    export default remote;
-}
-
-declare module "~fileContent/*" {
-    const content: string;
-    export default content;
-}
-
-declare module "*.css";
-
-declare module "*.css?managed" {
-    const name: string;
-    export default name;
+for (const file of ["globals.d.ts", "modules.d.ts"]) {
+    cpSync(
+        join(__dirname, "..", "..", "src", file),
+        join(__dirname, "dist", file)
+    );
 }
