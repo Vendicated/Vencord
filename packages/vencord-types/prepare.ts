@@ -27,6 +27,9 @@ for (const file of ["preload.d.ts", "userplugins", "main", "debug"]) {
 
 function copyDtsFiles(from: string, to: string) {
     for (const file of readdirSync(from, { withFileTypes: true })) {
+        // bad
+        if (from === SRC && file.name === "globals.d.ts") continue;
+
         const fullFrom = join(from, file.name);
         const fullTo = join(to, file.name);
 
