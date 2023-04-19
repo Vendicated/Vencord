@@ -1,5 +1,5 @@
 /* eslint-disable */
 
-/// <reference path="dist/Vencord.d.ts" />
-/// <reference path="dist/globals.d.ts" />
-/// <reference path="dist/modules.d.ts" />
+/// <reference path="Vencord.d.ts" />
+/// <reference path="globals.d.ts" />
+/// <reference path="modules.d.ts" />

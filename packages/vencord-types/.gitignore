@@ -1,2 +1,6 @@
-dist
-node_modules
+*
+!.*ignore
+!package.json
+!README.md
+!prepare.ts
+!index.d.ts
