@@ -28,6 +28,7 @@ import * as $MessagePopover from "./MessagePopover";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
+import * as $Settings from "./settings";
 import * as $SettingsStore from "./SettingsStore";
 import * as $Styles from "./Styles";
 
@@ -104,3 +105,8 @@ export const Notifications = $Notifications;
  * An api allowing you to patch and add/remove items to/from context menus
  */
 export const ContextMenu = $ContextMenu;
+
+/**
+ * Settings lol
+ */
+export const Settings = $Settings;
