@@ -43,4 +43,5 @@ export default strEnum({
     UPDATE: "VencordUpdate",
     BUILD: "VencordBuild",
     OPEN_MONACO_EDITOR: "VencordOpenMonacoEditor",
+    GET_PLUGINS: "VencordGetPlugins",
 } as const);
