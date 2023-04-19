@@ -29,11 +29,11 @@ import "./webpack/patchWebpack";
 
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/settings";
-import { PMLogger, patches, startAllPlugins } from "./plugins";
+import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
-import { UpdateLogger, checkForUpdates, rebuild, update } from "./utils/updater";
+import { checkForUpdates, rebuild, update,UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
