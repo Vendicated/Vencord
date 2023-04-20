@@ -1,0 +1,78 @@
+.vc-bd-themes-store-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.vc-bd-themes-store-thumbnail-preview img {
+    aspect-ratio: 16 / 9;
+    height: 170px;
+    border-radius: 5px;
+}
+
+.vc-bd-themes-store-reached-end {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vc-bd-themes-store-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.vc-bd-themes-store-header {
+    margin-bottom: 5%;
+}
+
+.vc-bd-themes-store-card {
+    background-color: var(--background-secondary-alt);
+    color: var(--interactive-active);
+    border-radius: 8px;
+    display: block;
+    height: 100%;
+    padding: 12px;
+    width: 100%;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
+}
+
+.vc-bd-themes-store-card:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+}
+
+.vc-bd-themes-store-card-header {
+    margin-top: auto;
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    height: 1.5rem;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-bd-themes-store-name {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-grow: 1;
+    gap: 8px;
+    cursor: "default";
+}
+
+.vc-bd-themes-store-note {
+    height: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    /* stylelint-disable-next-line property-no-unknown */
+    box-orient: vertical;
+}
