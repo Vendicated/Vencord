@@ -19,21 +19,29 @@
 
 
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
-import { getThemes } from "./API";
+import { CorsProxy, host, themesEndpoint } from "./API";
 import { Store } from "./components/Store";
+import { Theme } from "./types";
 
 const themeStoreLogger = new Logger("ThemeStore");
+const dataStoreKey = "themeStore-bd-themes-json";
+
+function setIntervalImmediately(func, interval) {
+    func();
+    return setInterval(func, interval);
+}
+
 
 export default definePlugin({
     name: "Theme Store",
     authors: [Devs.Arjix],
     description: "",
-    getThemes,
 
     patches: [
         {
@@ -63,9 +71,26 @@ export default definePlugin({
         });
     },
     start() {
+        const THEME_STORE_UPDATE_INTERVAL = 1000 * 60 * 60 * 2; // Every 2 hours
+
+        this.interval = setIntervalImmediately(async () => {
+            const bdThemes = await DataStore.get<{ themes: Theme[], timestamp: number; }>(dataStoreKey);
+            if (!bdThemes || (bdThemes.timestamp + THEME_STORE_UPDATE_INTERVAL < Date.now())) {
+                const data = await fetch(CorsProxy + encodeURIComponent(themesEndpoint)).then(r => r.json()) as Theme[];
+                for (const theme of data) {
+                    theme.thumbnail_url = `https://${host}${theme.thumbnail_url || "/resources/ui/content_thumbnail.svg"}`;
+                }
+                await DataStore.set(dataStoreKey, { themes: data, timestamp: Date.now() });
+
+                themeStoreLogger.info("Updated the BD theme index");
+            }
+
+        }, THEME_STORE_UPDATE_INTERVAL / 2); // every hour
+
         addContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
     },
     stop() {
+        clearInterval(this.interval);
         removeContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
     },
 });
