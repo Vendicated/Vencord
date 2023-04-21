@@ -16,7 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export enum UserType {
+    Banned = -1,
+    Normal = 0,
+    Admin = 1
+}
+
 export interface ReviewDBUser {
     lastReviewID: number,
-    type : number // -1 banned, 0 normal, 1 admin
+    type: UserType;
 }

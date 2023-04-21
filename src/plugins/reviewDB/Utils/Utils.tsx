@@ -23,6 +23,7 @@ import { findByProps } from "@webpack";
 import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
 
 import { Review } from "../entities/Review";
+import { UserType } from "../entities/User";
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -85,5 +86,5 @@ export function showToast(text: string) {
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.usertype === 1) return true;
+    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.userType === UserType.Admin) return true;
 }
