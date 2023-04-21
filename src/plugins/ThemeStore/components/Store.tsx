@@ -1,15 +1,33 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import "./style.css";
+
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Flex, Forms, Text } from "@webpack/common";
-import { React } from "@webpack/common";
-import { ThemeSearchResult, getThemes } from "../API";
-import { LazyComponent, makeLazy } from "@utils/misc";
-
-import "./style.css";
-import { findByProps } from "@webpack";
-import { useIntersection } from "@utils/react";
 import { Logger } from "@utils/index";
+import { LazyComponent } from "@utils/misc";
+import { useIntersection } from "@utils/react";
+import { findByProps } from "@webpack";
+import { Flex, Forms, React, Text } from "@webpack/common";
+
+import { getThemes, ThemeSearchResult } from "../API";
 
 
 const cl = classNameFactory("vc-themes-store-");
@@ -46,7 +64,7 @@ export const Store = () => {
     const [loadedFirstPage, setLoadedFirstPage] = React.useState(false);
 
     React.useEffect(() => {
-        getThemes({ page }).then((data) => {
+        getThemes({ page }).then(data => {
             setThemes({ [page]: data });
             setLoadedFirstPage(true);
         });
@@ -56,8 +74,8 @@ export const Store = () => {
         if (!loadedFirstPage) return;
 
         if (isIntersecting && !reachedEnd) {
-            setPage((oldPage) => {
-                getThemes({ page: oldPage + 1 }).then((data) => {
+            setPage(oldPage => {
+                getThemes({ page: oldPage + 1 }).then(data => {
                     if (!data.length) setReachedEnd(true);
                     setThemes({ ...themes, [oldPage + 1]: data });
                 });
@@ -85,7 +103,7 @@ export const Store = () => {
                         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
                         .map(([, themes]) => themes)
                         .flat()
-                        .map((theme) => {
+                        .map(theme => {
                             return <ThemeCard theme={theme} />;
                         })}
                 </div>

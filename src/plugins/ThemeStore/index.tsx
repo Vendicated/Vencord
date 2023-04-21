@@ -14,16 +14,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
-import definePlugin from "@utils/types";
+
+
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
-
-import { Store } from "./components/Store";
-import { getThemes } from "./API";
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import definePlugin from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
+
+import { getThemes } from "./API";
+import { Store } from "./components/Store";
 
 const themeStoreLogger = new Logger("ThemeStore");
 
