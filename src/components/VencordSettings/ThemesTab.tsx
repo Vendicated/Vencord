@@ -252,7 +252,7 @@ export default ErrorBoundary.wrap(function () {
                     </div>
 
                     <div className={cl("grid")}>
-                        {userThemes !== null && userThemes.map(theme => (
+                        {userThemes?.map(theme => (
                             <ThemeCard
                                 key={theme.fileName}
                                 enabled={settings.enabledThemes.includes(theme.fileName)}
