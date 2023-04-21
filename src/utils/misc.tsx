@@ -208,3 +208,7 @@ export function identity<T>(value: T): T {
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
+
+export function intersperse<T, S>(array: T[], separator: S): (T | S)[] {
+    return array.flatMap((a, i) => i > 0 ? [separator, a] : [a]);
+}

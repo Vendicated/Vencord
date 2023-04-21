@@ -26,7 +26,7 @@ import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
-import { useAwaiter } from "@utils/misc";
+import { intersperse, useAwaiter } from "@utils/misc";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
@@ -116,12 +116,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
         }
 
         // Add commas between links
-        return links
-            .reduce((prev: React.ReactNode[], curr) => [
-                prev,
-                prev?.length ? <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span> : null,
-                curr
-            ], []);
+        return intersperse(links, <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span>);
     }
 
 
