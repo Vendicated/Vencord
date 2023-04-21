@@ -317,7 +317,7 @@ export default ErrorBoundary.wrap(function () {
                             border: "1px solid var(--background-modifier-accent)"
                         }}
                         value={themeText}
-                        onChange={e => setThemeText(e.currentTarget.value)}
+                        onChange={setThemeText}
                         className={TextAreaProps.textarea}
                         placeholder="Theme Links"
                         spellCheck={false}
