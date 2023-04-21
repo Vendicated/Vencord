@@ -85,7 +85,7 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
                 const csp = parsePolicy(headers[header][0]);
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                    csp[directive] = ["*", "blob:", "data:", "'unsafe-inline'"];
+                    csp[directive] = ["*", "blob:", "data:", "vencord:", "'unsafe-inline'"];
                 }
                 // TODO: Restrict this to only imported packages with fixed version.
                 // Perhaps auto generate with esbuild
