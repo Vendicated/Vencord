@@ -236,7 +236,6 @@ export default definePlugin({
     name: "EmoteCloner",
     description: "Adds a Clone context menu item to emotes to clone them your own server",
     authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["ContextMenuAPI"],
 
     start() {
         addContextMenuPatch("message", messageContextMenuPatch);

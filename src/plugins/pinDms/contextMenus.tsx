@@ -19,10 +19,11 @@
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Menu } from "@webpack/common";
 
-import { isPinned, movePin, snapshotArray, togglePin } from "./settings";
+import { isPinned, movePin, PinOrder, settings, snapshotArray, togglePin } from "./settings";
 
 function PinMenuItem(channelId: string) {
     const pinned = isPinned(channelId);
+    const canMove = pinned && settings.store.pinOrder === PinOrder.Custom;
 
     return (
         <>
@@ -31,14 +32,14 @@ function PinMenuItem(channelId: string) {
                 label={pinned ? "Unpin DM" : "Pin DM"}
                 action={() => togglePin(channelId)}
             />
-            {pinned && snapshotArray[0] !== channelId && (
+            {canMove && snapshotArray[0] !== channelId && (
                 <Menu.MenuItem
                     id="move-pin-up"
                     label="Move Pin Up"
                     action={() => movePin(channelId, -1)}
                 />
             )}
-            {pinned && snapshotArray[snapshotArray.length - 1] !== channelId && (
+            {canMove && snapshotArray[snapshotArray.length - 1] !== channelId && (
                 <Menu.MenuItem
                     id="move-pin-down"
                     label="Move Pin Down"
