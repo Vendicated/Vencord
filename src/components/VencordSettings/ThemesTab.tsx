@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import { useSettings } from "@api/settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
@@ -27,7 +28,7 @@ import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/misc";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, Text, TextArea } from "@webpack/common";
+import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
 
 type FileInput = React.ComponentType<{
@@ -40,9 +41,8 @@ type FileInput = React.ComponentType<{
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
-const TabBar = findByCodeLazy('[role="tab"][aria-disabled="false"]');
 
-const cl = (className: string) => `vc-settings-theme-${className}`;
+const cl = classNameFactory("vc-settings-theme-");
 
 function Validator({ link }: { link: string; }) {
     const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
