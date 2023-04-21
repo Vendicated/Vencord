@@ -12,7 +12,7 @@ import { useIntersection } from "@utils/react";
 import { Logger } from "@utils/index";
 
 
-const cl = classNameFactory("vc-bd-themes-store-");
+const cl = classNameFactory("vc-themes-store-");
 const LoadingPopout = LazyComponent(
     () => findByProps("LoadingPopout").LoadingPopout
 );

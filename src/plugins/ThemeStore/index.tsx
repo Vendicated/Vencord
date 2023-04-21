@@ -28,7 +28,7 @@ import { SettingsRouter } from "@webpack/common";
 const themeStoreLogger = new Logger("ThemeStore");
 
 export default definePlugin({
-    name: "BD Theme Store",
+    name: "Theme Store",
     authors: [Devs.Arjix],
     description: "",
     getThemes,
