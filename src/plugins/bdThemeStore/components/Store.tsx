@@ -22,17 +22,17 @@ const logger = new Logger("ThemeStore");
 const ThemeCard = ({ theme }: { theme: ThemeSearchResult; }) => {
     return (
         <Flex className={cl("card")} flexDirection="column">
-            <div className={cl("card-header")}>
-                <Text variant="text-md/bold" className={cl("name")}>
-                    {theme.meta.name}
-                </Text>
-            </div>
             <div className={cl("thumbnail-preview")}>
                 <img src={theme.preview} alt={`${theme.meta.name} - Preview`} />
             </div>
-            <Text className={cl("note")} variant="text-sm/normal">
-                {theme.meta.description}
-            </Text>
+            <div className={cl("card-body")}>
+                <Text variant="text-md/bold" className={cl("name")}>
+                    {theme.meta.name}
+                </Text>
+                <Text className={cl("note")} variant="text-sm/normal">
+                    {theme.meta.description}
+                </Text>
+            </div>
         </Flex>
     );
 };

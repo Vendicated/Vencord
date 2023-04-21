@@ -7,8 +7,8 @@
 
 .vc-bd-themes-store-thumbnail-preview img {
     aspect-ratio: 16 / 9;
-    height: 170px;
     border-radius: 5px;
+    width: 100%;
 }
 
 .vc-bd-themes-store-reached-end {
@@ -34,10 +34,13 @@
     border-radius: 8px;
     display: block;
     height: 100%;
-    padding: 12px;
     width: 100%;
     transition: 0.1s ease-out;
     transition-property: box-shadow, transform, background, opacity;
+}
+
+.vc-bd-themes-store-card-body {
+    padding: 12px;
 }
 
 .vc-bd-themes-store-card:hover {
