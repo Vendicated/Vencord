@@ -30,6 +30,7 @@ export interface FluxDispatcher {
     isDispatching(): boolean;
     subscribe(event: FluxEvents, callback: (data: any) => void): void;
     unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    wait(callback: () => void): void;
 }
 
 export type Parser = Record<
@@ -67,7 +68,7 @@ export interface SnowflakeUtils {
     extractTimestamp(snowflake: string): number;
     age(snowflake: string): number;
     atPreviousMillisecond(snowflake: string): string;
-    compare(snowflake1: string, snowflake2: string): number;
+    compare(snowflake1?: string, snowflake2?: string): number;
 }
 
 interface RestRequestData {

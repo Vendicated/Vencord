@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import {
     ModalContent,
     ModalFooter,
@@ -24,12 +25,9 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { findLazy } from "@webpack";
 import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
 
 import { encrypt } from "../index";
-
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");
@@ -87,9 +85,7 @@ function EncModal(props: ModalProps) {
                         const toSend = noCover ? encrypted.replaceAll("d", "") : encrypted;
                         if (!toSend) return;
 
-                        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-                            rawText: `${toSend}`
-                        });
+                        insertTextIntoChatInputBox(toSend);
 
                         props.onClose();
                     }}

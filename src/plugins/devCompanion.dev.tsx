@@ -102,7 +102,8 @@ function initWs(isManual = false) {
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
-            body: "Connected to WebSocket"
+            body: "Connected to WebSocket",
+            noPersist: true
         });
     });
 
@@ -116,7 +117,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Error",
             body: (e as ErrorEvent).message || "No Error Message",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -128,7 +130,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Disconnected",
             body: e.reason || "No Reason provided",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -158,7 +161,12 @@ function initWs(isManual = false) {
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
-                let src = String(candidates[keys[0]]);
+                const mod = candidates[keys[0]];
+                let src = String(mod.original ?? mod).replaceAll("\n", "");
+
+                if (src.startsWith("function(")) {
+                    src = "0," + src;
+                }
 
                 let i = 0;
 
@@ -230,10 +238,8 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
-    kids.unshift(
+const contextMenuPatch: NavContextMenuPatchCallback = children => () => {
+    children.unshift(
         <Menu.MenuItem
             id={NAV_ID}
             label="Reconnect Dev Companion"
@@ -249,7 +255,6 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
-    dependencies: ["ContextMenuAPI"],
     settings,
 
     start() {

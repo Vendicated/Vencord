@@ -23,6 +23,7 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapM
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
+export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
@@ -103,8 +104,10 @@ waitFor(["dispatch", "subscribe"], m => {
 
 
 // This is the same module but this is easier
-waitFor(filters.byCode("currentToast?"), m => Toasts.show = m);
-waitFor(filters.byCode("currentToast:null"), m => Toasts.pop = m);
+waitFor("showToast", m => {
+    Toasts.show = m.showToast;
+    Toasts.pop = m.popToast;
+});
 
 waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);

@@ -19,13 +19,12 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/misc";
 import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy } from "@webpack";
+import { find, findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
 import { VIEW_CHANNEL } from "..";
-
 
 enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -77,18 +76,14 @@ enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-let EmojiComponent: ComponentType<any>;
 let ChannelBeginHeader: ComponentType<any>;
-
-export function setEmojiComponent(component: ComponentType<any>) {
-    EmojiComponent = component;
-}
 
 export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
     ChannelBeginHeader = component;
 }
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
+const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
@@ -96,6 +91,10 @@ const TagComponent = LazyComponent(() => find(m => {
     // Get the component which doesn't include increasedActivity logic
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
+
+const EmojiStore = findStoreLazy("EmojiStore");
+const EmojiParser = findByPropsLazy("convertSurrogateToName");
+const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -164,7 +163,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     }
 
     return (
-        <div className={ChatScrollClasses.auto + " " + "shc-lock-screen-outer-container"}>
+        <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
             <div className="shc-lock-screen-container">
                 <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
@@ -245,11 +244,16 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {defaultReactionEmoji != null &&
                     <div className="shc-lock-screen-default-emoji-container">
                         <Text variant="text-md/normal">Default reaction emoji:</Text>
-                        <EmojiComponent node={{
-                            type: defaultReactionEmoji.emojiName ? "emoji" : "customEmoji",
-                            name: defaultReactionEmoji.emojiName ?? "",
-                            emojiId: defaultReactionEmoji.emojiId
-                        }} />
+                        {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
+                            name: defaultReactionEmoji.emojiName
+                                ? EmojiParser.convertSurrogateToName(defaultReactionEmoji.emojiName)
+                                : EmojiStore.getCustomEmojiById(defaultReactionEmoji.emojiId)?.name ?? "",
+                            emojiId: defaultReactionEmoji.emojiId ?? void 0,
+                            surrogate: defaultReactionEmoji.emojiName ?? void 0,
+                            src: defaultReactionEmoji.emojiName
+                                ? EmojiUtils.getURL(defaultReactionEmoji.emojiName)
+                                : void 0
+                        }, void 0, { key: "0" })}
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&

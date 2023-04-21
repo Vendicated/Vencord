@@ -186,9 +186,10 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 error={error ?? replacementError}
             />
             {!isFunc && (
-                <>
+                <div className="vc-text-selectable">
                     <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
+                        "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
                         "$$": "Insert a $",
                         "$&": "Insert the entire match",
                         "$`\u200b": "Insert the substring before the match",
@@ -200,7 +201,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                             {Parser.parse("`" + placeholder + "`")}: {desc}
                         </Forms.FormText>
                     ))}
-                </>
+                </div>
             )}
 
             <Switch

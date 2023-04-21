@@ -292,8 +292,8 @@ export default ErrorBoundary.wrap(function () {
     function renderOnlineThemes() {
         return (
             <>
-                <Card className="vc-settings-card">
-                    <Forms.FormTitle tag="h5">Paste links to .css / .theme.css files here</Forms.FormTitle>
+                <Card className="vc-settings-card vc-text-selectable">
+                    <Forms.FormTitle tag="h5">Paste links to .theme.css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
                     <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
                     <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
@@ -305,7 +305,7 @@ export default ErrorBoundary.wrap(function () {
                         <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                     </div>
                     <Forms.FormText>If using the BD site, click on "Source" somewhere below the Download button</Forms.FormText>
-                    <Forms.FormText>In the GitHub repository of your theme, find X.theme.css / X.css, click on it, then click the "Raw" button</Forms.FormText>
+                    <Forms.FormText>In the GitHub repository of your theme, find X.theme.css, click on it, then click the "Raw" button</Forms.FormText>
                     <Forms.FormText>
                         If the theme has configuration that requires you to edit the file:
                         <ul>
@@ -337,7 +337,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <>
+        <>;
             <TabBar
                 type="top"
                 look="brand"
@@ -357,7 +357,7 @@ export default ErrorBoundary.wrap(function () {
                 >
                     Online Themes
                 </TabBar.Item>
-            </TabBar>
+            </TabBar>;
 
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
