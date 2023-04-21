@@ -101,7 +101,7 @@ interface ThemeCardProps {
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
     function renderLinks() {
-        const links: (JSX.Element | string)[] = [];
+        const links: React.ReactNode[] = [];
 
         if (theme.website) {
             links.push(<Link href={theme.website}>Website</Link>);
@@ -115,13 +115,11 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
             links.push(<Link href={invite}>Discord Server</Link>);
         }
 
+        // Add commas between links
         return links
-            .map<React.ReactNode>(t => t) // make TS happy
-            .reduce((prev, curr) => [
+            .reduce((prev: React.ReactNode[], curr) => [
                 prev,
-                // Ugly but blame stable for being electron 13.
-                // TODO: When stable is on newer electron, remove this stupid ternary and remove the default value ([]) of the reducer.
-                (prev as React.ReactNode[]).length ? <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span> : null,
+                prev?.length ? <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span> : null,
                 curr
             ], []);
     }
