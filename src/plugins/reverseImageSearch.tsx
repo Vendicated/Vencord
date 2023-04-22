@@ -34,7 +34,7 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     if (!props) return;
     const { reverseImageSearchType, itemHref, itemSrc } = props;
 
@@ -76,7 +76,6 @@ export default definePlugin({
     name: "ReverseImageSearch",
     description: "Adds ImageSearch to image context menus",
     authors: [Devs.Ven, Devs.Nuckyz],
-    dependencies: ["ContextMenuAPI"],
     patches: [
         {
             find: ".Messages.MESSAGE_ACTIONS_MENU_LABEL",

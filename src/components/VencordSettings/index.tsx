@@ -21,6 +21,7 @@ import "./settingsStyles.css";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { isMobile } from "@utils/misc";
 import { Forms, SettingsRouter, TabBar, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
@@ -55,7 +56,10 @@ if (!IS_WEB) SettingsTabs.VencordUpdater.component = () => Updater && <Updater /
 function Settings(props: SettingsProps) {
     const { tab = "VencordSettings" } = props;
 
-    const CurrentTab = SettingsTabs[tab]?.component;
+    const CurrentTab = SettingsTabs[tab]?.component ?? null;
+    if (isMobile) {
+        return CurrentTab && <CurrentTab />;
+    }
 
     return <Forms.FormSection>
         <Text variant="heading-lg/semibold" style={{ color: "var(--header-primary)" }} tag="h2">Vencord Settings</Text>
