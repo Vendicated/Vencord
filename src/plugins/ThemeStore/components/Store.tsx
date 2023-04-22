@@ -45,6 +45,11 @@ const ThemeCard = ({ theme }: { theme: Theme; }) => {
                     {theme.description}
                 </Text>
             </div>
+            <div className={cl("card-footer")}>
+                {theme.tags.map(t => (<span>
+                    <Text tag="span" className={cl("theme-tag")}>{t}</Text>
+                </span>))}
+            </div>
         </Flex>
     );
 };

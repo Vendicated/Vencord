@@ -32,6 +32,22 @@
     transition-property: box-shadow, transform, background, opacity;
 }
 
+.vc-themes-store-theme-tag {
+    background-color: #1f1f5a;
+    border-radius: 99999px;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.vc-themes-store-card-footer {
+    display: flex;
+    gap: 5px;
+    justify-items: center;
+    align-items: center;
+    padding: 5px;
+    margin-bottom: 2%;
+}
+
 .vc-themes-store-card-body {
     padding: 12px;
 }
