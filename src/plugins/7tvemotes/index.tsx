@@ -113,7 +113,7 @@ let savedvalue = "";
 function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; }) {
     const [value, setValue] = useState<string>();
 
-    if ((value === undefined || value === "") && (savedvalue !== "undefined" && savedvalue !== ""))
+    if ((value === undefined) && (savedvalue !== "undefined" && savedvalue !== ""))
         setValue(savedvalue);
     savedvalue = value + "";
 
