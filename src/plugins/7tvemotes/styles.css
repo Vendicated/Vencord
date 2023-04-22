@@ -1,0 +1,28 @@
+.seventv-emotes {
+    width: 100%;
+    text-align: center;
+}
+
+.seventv-emotebutton {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    margin: 5px;
+}
+
+.seventv-navigation {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+}
+
+.seventv-searchinput {
+    display: inline-block;
+    width: 90%;
+}
+
+.seventv-searchbutton {
+    display: inline-block;
+    width: 10%;
+}
