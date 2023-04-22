@@ -71,7 +71,7 @@ export function togglePin(id: string) {
     save([...snapshot]);
 }
 
-function sortedSnapshot() {
+export function sortedSnapshot() {
     requireSnapshot();
     if (settings.store.pinOrder === PinOrder.LastMessage)
         return PrivateChannelSortStore.getPrivateChannelIds().filter(isPinned);
