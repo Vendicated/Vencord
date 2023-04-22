@@ -240,7 +240,12 @@ export type Select = ComponentType<PropsWithChildren<{
 export type SearchableSelect = ComponentType<PropsWithChildren<{
     placeholder?: string;
     options: ReadonlyArray<SelectOption>; // TODO
-    value?: SelectOption;
+
+    /**
+     * - When multi is true, this is an array of strings.
+     * - When multi is false, this is a single value.
+    */
+    value?: SelectOption | string[];
 
     /**
      * - 0 ~ Filled

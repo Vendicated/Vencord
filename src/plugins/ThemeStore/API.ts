@@ -24,15 +24,10 @@ interface CachedResult {
 }
 
 export interface ThemeSearchOptions {
-    query?: string;
-    tags?: string[];
-
-    page?: number;
+    query: string;
+    tags: string[];
 }
 
-const getCacheKey = (ops: ThemeSearchOptions) => {
-    return `${ops.page}||${ops.query}`;
-};
 
 const cache = new Map<string, CachedResult>();
 const CACHE_TIME = 1000 * 60 * 5; // 5 minutes
@@ -42,19 +37,6 @@ setInterval(() => {
         if (value.time + CACHE_TIME < Date.now()) cache.delete(key);
     });
 }, 10000);
-
-const CacheProxy = {
-    get: (ops: ThemeSearchOptions): unknown => {
-        const key = getCacheKey(ops);
-        const result = cache.get(key);
-        if (!result) return null;
-        return result.data;
-    },
-    set: (ops: ThemeSearchOptions, data: unknown) => {
-        const key = getCacheKey(ops);
-        cache.set(key, { time: Date.now(), data });
-    }
-};
 
 export const CorsProxy = "https://corsproxy.io/?";
 export const host = "betterdiscord.app";

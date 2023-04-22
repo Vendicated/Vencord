@@ -17,13 +17,6 @@
     align-items: center;
 }
 
-.vc-themes-store-loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-}
-
 .vc-themes-store-header {
     margin-bottom: 5%;
 }
@@ -78,4 +71,18 @@
     -webkit-box-orient: vertical;
     /* stylelint-disable-next-line property-no-unknown */
     box-orient: vertical;
+}
+
+.vc-themes-store-filters {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.vc-themes-store-filters > .theme-store-multi-select {
+    width: 30%;
+}
+
+.vc-themes-store-filters > .query {
+    width: 50%;
 }

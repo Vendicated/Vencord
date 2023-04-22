@@ -22,8 +22,7 @@ import { DataStore } from "@api/index";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Logger } from "@utils/index";
-import { Flex, Forms, React, Text } from "@webpack/common";
+import { Flex, Forms, React, SearchableSelect, Text, TextInput } from "@webpack/common";
 
 import { ThemeSearchOptions } from "../API";
 import { Theme } from "../types";
@@ -31,7 +30,6 @@ import { Theme } from "../types";
 const dataStoreKey = "themeStore-bd-themes-json";
 const cl = classNameFactory("vc-themes-store-");
 
-const logger = new Logger("ThemeStore");
 
 const ThemeCard = ({ theme }: { theme: Theme; }) => {
     return (
@@ -51,12 +49,20 @@ const ThemeCard = ({ theme }: { theme: Theme; }) => {
     );
 };
 
+const tags = [
+    "flat", "transparent", "layout",
+    "customizable", "fiction", "nature",
+    "space", "dark", "light", "game",
+    "anime", "red", "orange", "green",
+    "purple", "black", "other", "high-contrast",
+    "white", "aqua", "animated", "yellow",
+    "blue", "abstract"
+];
 
 export const Store = () => {
     const [themes, setThemes] = React.useState<Theme[]>([]);
-    const [reachedEnd, setReachedEnd] = React.useState(false);
 
-    const [filters, setFilters] = React.useState<ThemeSearchOptions>({ tags: [] });
+    const [filters, setFilters] = React.useState<ThemeSearchOptions>({ tags: [], query: "" });
 
     React.useEffect(() => {
         const fetchThemes = async () => {
@@ -83,22 +89,46 @@ export const Store = () => {
                     Theme Store
                 </Text>
 
+                <div className={cl("filters")}>
+                    <SearchableSelect
+                        multi={true}
+                        closeOnSelect={false}
+                        options={tags.map(t => ({ label: t, value: t }))}
+                        value={filters.tags}
+                        onChange={(value: string[]) => {
+                            setFilters({ ...filters, tags: value });
+                        }}
+                        className={"theme-store-multi-select"}
+                        placeholder="Select Tags"
+                    />
+
+                    <TextInput
+                        className={"query"}
+                        placeholder="Search themes..."
+                    />
+                </div>
+
                 <div className={cl("grid")}>
-                    {Object.entries(themes)
-                        .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                        .map(([, themes]) => themes)
-                        .flat()
+                    {themes
+                        .filter(theme => {
+                            let matches = true;
+                            for (const tag of filters.tags) {
+                                if (!theme.tags.includes(tag)) {
+                                    matches = false;
+                                    break;
+                                }
+                            }
+                            return matches;
+                        })
                         .map(theme => {
                             return <ThemeCard theme={theme} />;
                         })}
                 </div>
 
                 <div className={cl("reached-end")}>
-                    {reachedEnd && (
-                        <Text variant="heading-sm/medium">
-                            You've reached the end of the theme store!
-                        </Text>
-                    )}
+                    <Text variant="heading-sm/medium">
+                        You've reached the end of the theme store!
+                    </Text>
                 </div>
             </Forms.FormSection>
         </ErrorBoundary>
