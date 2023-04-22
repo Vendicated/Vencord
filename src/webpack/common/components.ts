@@ -51,3 +51,10 @@ waitFor("FormItem", m => {
     ({ Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar } = m);
     Forms = m;
 });
+
+
+export let Spring: typeof import("@react-spring/web");
+
+waitFor(["SpringContext", "useSpring", "animated"], m => {
+    Spring = m;
+});

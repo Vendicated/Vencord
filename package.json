@@ -38,6 +38,7 @@
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
+        "@react-spring/web": "^9.7.2",
         "@types/diff": "^5.0.2",
         "@types/lodash": "^4.14.191",
         "@types/node": "^18.11.18",
