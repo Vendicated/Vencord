@@ -22,3 +22,5 @@ src/userplugins
 
 ExtensionCache/
 settings/
+
+src/plugins/betterCamera.desktop

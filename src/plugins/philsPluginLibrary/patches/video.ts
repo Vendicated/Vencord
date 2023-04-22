@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "../../philsPluginLibrary";
-import { logger } from "../logger";
-import { ScreenshareProfile, ScreenshareStore } from "../stores";
+import Logger from "@utils/Logger";
 
-export function getDefaultTransportationOptions(connection: types.Connection) {
+import { ScreenshareProfile, ScreenshareStore } from "../../betterScreenshare.desktop/stores";
+import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "../../philsPluginLibrary";
+
+
+export function getDefaultVideoTransportationOptions(connection: types.Connection) {
     return {
         ...connection.videoQualityManager.applyQualityConstraints({}).constraints,
         videoEncoder: {
@@ -31,7 +33,7 @@ export function getDefaultTransportationOptions(connection: types.Connection) {
     };
 }
 
-export function getDefaultDesktopSourceOptions(connection: types.Connection) {
+export function getDefaultVideoDesktopSourceOptions(connection: types.Connection) {
     const [type, sourceId] = connection.desktopSourceId?.split(":") ?? ["screen", 0];
 
     return {
@@ -75,7 +77,8 @@ export function getStreamParameters(connection: types.Connection, get: Profilabl
                     height: height,
                     width: width,
                     type: "fixed"
-                }
+                },
+                maxPixelCount: width * height
             }
             : {
                 maxResolution: !capture.height || !capture.width ? {
@@ -97,11 +100,11 @@ export function getStreamParameters(connection: types.Connection, get: Profilabl
                 maxFrameRate: capture.framerate
             }
         ),
-        active: true
+        active: true,
     };
 }
 
-export function getReplaceableTransportationOptions(connection: types.Connection, get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"]) {
+export function getReplaceableVideoTransportationOptions(connection: types.Connection, get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"]) {
     const { currentProfile, audioSource, audioSourceEnabled } = get();
     const {
         framerate,
@@ -168,7 +171,7 @@ export function getReplaceableTransportationOptions(connection: types.Connection
     };
 }
 
-export function getReplaceableDesktopSourceOptions(get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"]) {
+export function getReplaceableVideoDesktopSourceOptions(get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"]) {
     const { currentProfile } = get();
     const {
         hdrEnabled,
@@ -184,54 +187,72 @@ export function getReplaceableDesktopSourceOptions(get: ProfilableStore<Screensh
     };
 }
 
-export function patchConnection(
+export function patchConnectionVideoSetDesktopSourceWithOptions(
     connection: types.Connection,
-    get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"]
+    get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"],
+    logger?: Logger
 ) {
-    const oldSetTransportOptions = connection.conn.setTransportOptions;
     const oldSetDesktopSourceWithOptions = connection.conn.setDesktopSourceWithOptions;
 
     connection.conn.setDesktopSourceWithOptions = function (this: any, options: Record<string, any>) {
-        const replaceableDesktopSourceOptions = getReplaceableDesktopSourceOptions(get);
+        const replaceableDesktopSourceOptions = getReplaceableVideoDesktopSourceOptions(get);
         replaceObjectValuesIfExist(options, replaceableDesktopSourceOptions);
 
-        logger.info("Overridden Desktop Source Options", options);
+        logger?.info("Overridden Desktop Source Options", options);
 
         return Reflect.apply(oldSetDesktopSourceWithOptions, this, [options]);
     };
 
-    connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
-        const replaceableTransportOptions = getReplaceableTransportationOptions(connection, get);
-        replaceObjectValuesIfExist(options, replaceableTransportOptions);
-
-        logger.info("Overridden Transport Options", options);
-
-        if (options.streamParameters)
-            connection.videoStreamParameters = [options.streamParameters];
-
-        return Reflect.apply(oldSetTransportOptions, this, [options]);
-    };
-
-    const forceUpdateTransportationOptions = () => {
-        const transportOptions = window._.merge({ ...getDefaultTransportationOptions(connection) }, getReplaceableTransportationOptions(connection, get));
-
-        logger.info("Force Updated Transport Options", transportOptions);
-
-        oldSetTransportOptions(transportOptions);
-    };
-
     const forceUpdateDesktopSourceOptions = () => {
-        const desktopSourceOptions = window._.merge({ ...getDefaultDesktopSourceOptions(connection) }, getReplaceableDesktopSourceOptions(get));
+        const desktopSourceOptions = window._.merge({ ...getDefaultVideoDesktopSourceOptions(connection) }, getReplaceableVideoDesktopSourceOptions(get));
 
-        logger.info("Force Updated Desktop Source Options", desktopSourceOptions);
+        logger?.info("Force Updated Desktop Source Options", desktopSourceOptions);
 
         oldSetDesktopSourceWithOptions(desktopSourceOptions);
     };
 
     return {
-        oldSetTransportOptions,
         oldSetDesktopSourceWithOptions,
-        forceUpdateTransportationOptions,
         forceUpdateDesktopSourceOptions
+    };
+}
+
+export function patchConnectionVideoTransportOptions(
+    connection: types.Connection,
+    get: ProfilableStore<ScreenshareStore, ScreenshareProfile>["get"],
+    logger?: Logger
+) {
+    const oldSetTransportOptions = connection.conn.setTransportOptions;
+
+    console.log("patchConnectionVideoTransportOptions", connection);
+
+    connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
+        const replaceableTransportOptions = getReplaceableVideoTransportationOptions(connection, get);
+
+        if (options.streamParameters)
+            connection.videoStreamParameters = Array.isArray(options.streamParameters) ? options.streamParameters : [options.streamParameters];
+
+        replaceObjectValuesIfExist(options, replaceableTransportOptions);
+
+        logger?.info("Overridden Transport Options", options);
+        console.log(this);
+        console.trace();
+
+        return Reflect.apply(oldSetTransportOptions, this, [options]);
+    };
+
+    const forceUpdateTransportationOptions = () => {
+        const transportOptions = window._.merge({ ...getDefaultVideoTransportationOptions(connection) }, getReplaceableVideoTransportationOptions(connection, get));
+
+        logger?.info("Force Updated Transport Options", transportOptions);
+
+        console.trace();
+
+        oldSetTransportOptions(transportOptions);
+    };
+
+    return {
+        oldSetTransportOptions,
+        forceUpdateTransportationOptions,
     };
 }

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ProfilableStore, replaceObjectValuesIfExist, types } from "../../philsPluginLibrary";
-import { logger } from "../logger";
-import { MicrophoneProfile, MicrophoneStore } from "../stores";
+import Logger from "@utils/Logger";
 
-export function getDefaultTransportationOptions(connection: types.Connection) {
+import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone.desktop/stores";
+import { ProfilableStore, replaceObjectValuesIfExist, types } from "../../philsPluginLibrary";
+
+export function getDefaultAudioTransportationOptions(connection: types.Connection) {
     return {
         audioEncoder: {
             ...connection.getCodecOptions("opus").audioEncoder,
@@ -29,7 +30,7 @@ export function getDefaultTransportationOptions(connection: types.Connection) {
     };
 }
 
-export function getReplaceableTransportationOptions(connection: types.Connection, get: ProfilableStore<MicrophoneStore, MicrophoneProfile>["get"]) {
+export function getReplaceableAudioTransportationOptions(connection: types.Connection, get: ProfilableStore<MicrophoneStore, MicrophoneProfile>["get"]) {
     const { currentProfile } = get();
     const {
         channels,
@@ -61,22 +62,23 @@ export function getReplaceableTransportationOptions(connection: types.Connection
     };
 }
 
-export function patchConnection(
+export function patchConnectionAudioTransportOptions(
     connection: types.Connection,
-    get: ProfilableStore<MicrophoneStore, MicrophoneProfile>["get"]
+    get: ProfilableStore<MicrophoneStore, MicrophoneProfile>["get"],
+    logger?: Logger
 ) {
     const oldSetTransportOptions = connection.conn.setTransportOptions;
 
     connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
-        replaceObjectValuesIfExist(options, getReplaceableTransportationOptions(connection, get));
+        replaceObjectValuesIfExist(options, getReplaceableAudioTransportationOptions(connection, get));
 
         return Reflect.apply(oldSetTransportOptions, this, [options]);
     };
 
     const forceUpdateTransportationOptions = () => {
-        const transportOptions = window._.merge({ ...getDefaultTransportationOptions(connection) }, getReplaceableTransportationOptions(connection, get));
+        const transportOptions = window._.merge({ ...getDefaultAudioTransportationOptions(connection) }, getReplaceableAudioTransportationOptions(connection, get));
 
-        logger.info("Overridden Transport Options", transportOptions);
+        logger?.info("Overridden Transport Options", transportOptions);
 
         oldSetTransportOptions(transportOptions);
     };

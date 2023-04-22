@@ -17,8 +17,9 @@
 */
 
 import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
+import { patchConnectionAudioTransportOptions } from "../../philsPluginLibrary/patches/audio";
 import { PluginInfo } from "../constants";
-import { patchConnection } from "../patches";
+import { logger } from "../logger";
 import { microphoneStore } from "../stores";
 
 export class MicrophonePatcher extends Patcher {
@@ -47,7 +48,7 @@ export class MicrophonePatcher extends Patcher {
 
                 this.connection = connection;
 
-                const { oldSetTransportOptions, forceUpdateTransportationOptions } = patchConnection(connection, get);
+                const { oldSetTransportOptions, forceUpdateTransportationOptions } = patchConnectionAudioTransportOptions(connection, get, logger);
 
                 this.oldSetTransportOptions = oldSetTransportOptions;
                 this.forceUpdateTransportationOptions = forceUpdateTransportationOptions;

@@ -18,9 +18,9 @@
 
 import { UserStore } from "@webpack/common";
 
-import { patchConnection } from "../../betterMicrophone.desktop/patches";
-import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
+import { Emitter, MediaEngineStore, patchConnectionAudioTransportOptions, Patcher, types } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
+import { logger } from "../logger";
 import { screenshareAudioStore } from "../stores/screenshareAudioStore";
 
 export class ScreenshareAudioPatcher extends Patcher {
@@ -54,7 +54,7 @@ export class ScreenshareAudioPatcher extends Patcher {
                 const {
                     forceUpdateTransportationOptions: forceUpdateTransportationOptionsAudio,
                     oldSetTransportOptions: oldSetTransportOptionsAudio
-                } = patchConnection(connection, get);
+                } = patchConnectionAudioTransportOptions(connection, get, logger);
 
                 this.forceUpdateTransportationOptions = forceUpdateTransportationOptionsAudio;
                 this.oldSetTransportOptions = oldSetTransportOptionsAudio;
