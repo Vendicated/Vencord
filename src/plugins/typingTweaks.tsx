@@ -24,7 +24,7 @@ import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React, RelationshipStore, SelectedChannelStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const Avatar = findByCodeLazy('"top",spacing:');
+const Avatar = findByCodeLazy(".typingIndicatorRef", "svg");
 const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
 
 const settings = definePluginSettings({
