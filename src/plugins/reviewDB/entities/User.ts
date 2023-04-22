@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export enum UserType {
+export const enum UserType {
     Banned = -1,
     Normal = 0,
     Admin = 1

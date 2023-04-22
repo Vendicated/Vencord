@@ -86,7 +86,9 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             <textarea
                 className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder={token ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id) ? `Update review for @${username}` : `Review @${username}`) : "You need to authorize to review users!"}
+                placeholder={token ?
+                    (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id) ? `Update review for @${username}` : `Review @${username}`)
+                    : "You need to authorize to review users!"}
                 onKeyDown={onKeyPress}
                 onClick={() => {
                     if (!token) {

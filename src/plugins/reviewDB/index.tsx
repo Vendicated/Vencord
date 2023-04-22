@@ -61,12 +61,12 @@ export default definePlugin({
         },
         showWarning: {
             type: OptionType.BOOLEAN,
-            description: "Shows warning on reviews",
+            description: "Display reminder to be respectful at the top of the reviews list",
             default: true,
         },
         hideTimestamps: {
             type: OptionType.BOOLEAN,
-            description: "Hides timestamps on reviews",
+            description: "Hide timestamps on reviews",
             default: false,
         }
     },
