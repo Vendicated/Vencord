@@ -42,6 +42,7 @@ interface SevenTVFile {
 
 let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
+let page: number = 1;
 
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
@@ -67,10 +68,12 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
         }
       }`;
 
+    if (page < 1) page = 1;
+
     const variables = {
         "query": value,
         "limit": 6,
-        "page": 1,
+        "page": page,
         "sort": {
             "value": "popularity",
             "order": "DESCENDING"
@@ -85,7 +88,8 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
             "aspect_ratio": ""
         }
     };
-
+    console.log("[7TVEmotes] Page: " + page);
+    console.log("[7TVEmotes] " + variables);
     fetch("https://7tv.io/v3/gql", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -93,7 +97,6 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
     }).then(response => response.json())
         .then(data => {
             emotes = data.data.emotes.items;
-            console.log("[7TV EMOTES] " + data.data.emotes.items[0].name);
             searching = false;
 
             openModal(props => (
@@ -103,14 +106,16 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
                 />
             ));
         })
-        .catch(error => { console.log("[7TV EMOTES | ERROR] " + error); searching = false; });
+        .catch(error => { console.error("[7TVEmotes] " + error); searching = false; });
 }
 
+let savedvalue = "";
 function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; }) {
     const [value, setValue] = useState<string>();
-    console.log("[7TV EMOTES] " + value);
 
-    console.log("[7TV EMOTES] emotes count: " + emotes.length);
+    if ((value === undefined || value === "") && (savedvalue !== "undefined" && savedvalue !== ""))
+        setValue(savedvalue);
+    savedvalue = value + "";
 
     return (
         <ModalRoot {...rootProps}>
@@ -137,6 +142,7 @@ function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; 
                     <Button className="seventv-searchbutton"
                         onClick={() => {
                             if (searching === false) {
+                                page = 1;
                                 FetchEmotes(value, { rootProps, close });
                             }
                         }}
@@ -147,19 +153,46 @@ function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; 
 
                 <div className="seventv-emotes">
                     {emotes.map(emote => (
-                        <Tooltip text={emote.name}>{({ onMouseEnter, onMouseLeave }) => (
-                            <Button className="seventv-emotebutton"
-                                onClick={() => {
-                                    insertTextIntoChatInputBox(GetEmoteURL(emote));
-                                    closeAllModals();
-                                }}
-                            ><img src={GetEmoteURL(emote)} height="24"></img></Button>
-                        )}</Tooltip>
+                        <Tooltip text={emote.name}>
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <Button className="seventv-emotebutton"
+                                    aria-haspopup="dialog"
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    onClick={() => {
+                                        insertTextIntoChatInputBox(GetEmoteURL(emote));
+                                        closeAllModals();
+                                    }}
+                                ><img src={GetEmoteURL(emote)} height="24"></img></Button>
+                            )}
+                        </Tooltip>
                     ))}
+                </div>
+
+                <Forms.FormDivider></Forms.FormDivider>
+
+                <div className="seventv-navigation">
+                    <Button className="seventv-pagebutton"
+                        onClick={() => {
+                            if (searching === false) {
+                                page--;
+                                FetchEmotes(value, { rootProps, close });
+                            }
+                        }}
+                    >{"<"}</Button>
+                    <Button className="seventv-pagebutton"
+                        onClick={() => {
+                            if (searching === false) {
+                                page++;
+                                FetchEmotes(value, { rootProps, close });
+                            }
+                        }}
+                    >{">"}</Button>
                 </div>
             </ModalContent>
 
             <ModalFooter>
+                <Forms.FormText className="seventv-pagetext">Page {page}</Forms.FormText>
             </ModalFooter>
         </ModalRoot>
     );
