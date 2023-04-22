@@ -74,15 +74,7 @@
 }
 
 .vc-themes-store-filters {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-}
-
-.vc-themes-store-filters > .theme-store-multi-select {
-    width: 30%;
-}
-
-.vc-themes-store-filters > .query {
-    width: 50%;
+    display: grid;
+    grid-gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
