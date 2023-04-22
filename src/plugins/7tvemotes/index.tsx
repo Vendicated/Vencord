@@ -45,7 +45,8 @@ let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
 let page: number = 1;
 let lastApiCall = 0;
-const minimumApiDelay = 500;
+const MINIMUM_API_DELAY = 500;
+const API_URL = "https://7tv.io/v3/gql";
 
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
@@ -57,7 +58,7 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
 
     const currentTime = Date.now();
     const timeSinceLastCall = currentTime - lastApiCall;
-    if (timeSinceLastCall < minimumApiDelay)
+    if (timeSinceLastCall < MINIMUM_API_DELAY)
         return;
 
     lastApiCall = currentTime;
@@ -99,7 +100,7 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
             "aspect_ratio": ""
         }
     };
-    fetch("https://7tv.io/v3/gql", {
+    fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ query, variables })
@@ -134,16 +135,16 @@ function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; 
                     7TV Emotes
                 </Forms.FormTitle>
 
-                <ModalCloseButton onClick={closeAllModals} />
+                <ModalCloseButton onClick={close} />
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
-                <Forms.FormTitle>Search for 7TV Emotes</Forms.FormTitle>
                 <div className="seventv-navigation">
                     <input className="seventv-searchinput"
                         type="string"
                         value={value}
                         onChange={e => setValue(e.currentTarget.value)}
+                        placeholder="Emote name..."
                         style={{
                             colorScheme: getTheme() === Theme.Light ? "light" : "dark",
                         }}
