@@ -88,8 +88,6 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
             "aspect_ratio": ""
         }
     };
-    console.log("[7TVEmotes] Page: " + page);
-    console.log("[7TVEmotes] " + variables);
     fetch("https://7tv.io/v3/gql", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
