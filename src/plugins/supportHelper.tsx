@@ -21,7 +21,7 @@ import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { makeCodeblock } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { isOutdated } from "@utils/updater";
-import { Alerts, FluxDispatcher, Forms, UserStore } from "@webpack/common";
+import { Alerts, Forms, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins from "~plugins";
@@ -69,18 +69,16 @@ ${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).joi
         }
     }],
 
-    rememberDismiss() {
-        DataStore.set(REMEMBER_DISMISS_KEY, gitHash);
-    },
-
-    start() {
-        FluxDispatcher.subscribe("CHANNEL_SELECT", async ({ channelId }) => {
+    flux: {
+        async CHANNEL_SELECT({ channelId }) {
             if (channelId !== SUPPORT_CHANNEL_ID) return;
 
             const myId = BigInt(UserStore.getCurrentUser().id);
             if (Object.values(Devs).some(d => d.id === myId)) return;
 
             if (isOutdated && gitHash !== await DataStore.get(REMEMBER_DISMISS_KEY)) {
+                const rememberDismiss = () => DataStore.set(REMEMBER_DISMISS_KEY, gitHash);
+
                 Alerts.show({
                     title: "Hold on!",
                     body: <div>
@@ -90,10 +88,10 @@ ${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).joi
                             to do so, in case you can't access the Updater page.
                         </Forms.FormText>
                     </div>,
-                    onCancel: this.rememberDismiss,
-                    onConfirm: this.rememberDismiss
+                    onCancel: rememberDismiss,
+                    onConfirm: rememberDismiss
                 });
             }
-        });
+        }
     }
 });

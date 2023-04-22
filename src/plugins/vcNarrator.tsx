@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Forms, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
 
 interface VoiceState {
     userId: string;
@@ -137,49 +137,6 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 }
 */
 
-function handleVoiceStates({ voiceStates }: { voiceStates: VoiceState[]; }) {
-    const myChanId = SelectedChannelStore.getVoiceChannelId();
-    const myId = UserStore.getCurrentUser().id;
-
-    for (const state of voiceStates) {
-        const { userId, channelId, oldChannelId } = state;
-        const isMe = userId === myId;
-        if (!isMe) {
-            if (!myChanId) continue;
-            if (channelId !== myChanId && oldChannelId !== myChanId) continue;
-        }
-
-        const [type, id] = getTypeAndChannelId(state, isMe);
-        if (!type) continue;
-
-        const template = Settings.plugins.VcNarrator[type + "Message"];
-        const user = isMe ? "" : UserStore.getUser(userId).username;
-        const channel = ChannelStore.getChannel(id).name;
-
-        speak(formatText(template, user, channel));
-
-        // updateStatuses(type, state, isMe);
-    }
-}
-
-function handleToggleSelfMute() {
-    const chanId = SelectedChannelStore.getVoiceChannelId()!;
-    const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
-    if (!s) return;
-
-    const event = s.mute || s.selfMute ? "unmute" : "mute";
-    speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
-}
-
-function handleToggleSelfDeafen() {
-    const chanId = SelectedChannelStore.getVoiceChannelId()!;
-    const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
-    if (!s) return;
-
-    const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-    speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
-}
-
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
 
@@ -191,6 +148,51 @@ export default definePlugin({
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
 
+    flux: {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+            const myChanId = SelectedChannelStore.getVoiceChannelId();
+            const myId = UserStore.getCurrentUser().id;
+
+            for (const state of voiceStates) {
+                const { userId, channelId, oldChannelId } = state;
+                const isMe = userId === myId;
+                if (!isMe) {
+                    if (!myChanId) continue;
+                    if (channelId !== myChanId && oldChannelId !== myChanId) continue;
+                }
+
+                const [type, id] = getTypeAndChannelId(state, isMe);
+                if (!type) continue;
+
+                const template = Settings.plugins.VcNarrator[type + "Message"];
+                const user = isMe ? "" : UserStore.getUser(userId).username;
+                const channel = ChannelStore.getChannel(id).name;
+
+                speak(formatText(template, user, channel));
+
+                // updateStatuses(type, state, isMe);
+            }
+        },
+
+        AUDIO_TOGGLE_SELF_MUTE() {
+            const chanId = SelectedChannelStore.getVoiceChannelId()!;
+            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+            if (!s) return;
+
+            const event = s.mute || s.selfMute ? "unmute" : "mute";
+            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
+        },
+
+        AUDIO_TOGGLE_SELF_DEAF() {
+            const chanId = SelectedChannelStore.getVoiceChannelId()!;
+            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+            if (!s) return;
+
+            const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
+            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
+        }
+    },
+
     start() {
         if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
             new Logger("VcNarrator").warn(
@@ -199,15 +201,6 @@ export default definePlugin({
             return;
         }
 
-        FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceStates);
-        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", handleToggleSelfMute);
-        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", handleToggleSelfDeafen);
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("VOICE_STATE_UPDATES", handleVoiceStates);
-        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", handleToggleSelfMute);
-        FluxDispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", handleToggleSelfDeafen);
     },
 
     optionsCache: null as Record<string, PluginOptionsItem> | null,

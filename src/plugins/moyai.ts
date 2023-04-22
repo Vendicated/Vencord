@@ -21,7 +21,7 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, SelectedChannelStore, UserStore } from "@webpack/common";
+import { SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, ReactionEmoji } from "discord-types/general";
 
 interface IMessageCreate {
@@ -80,50 +80,40 @@ export default definePlugin({
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
     settings,
 
-    async onMessage(e: IMessageCreate) {
-        if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
-        if (e.message.state === "SENDING") return;
-        if (settings.store.ignoreBots && e.message.author?.bot) return;
-        if (!e.message.content) return;
-        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
+    flux: {
+        async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
+            if (optimistic || type !== "MESSAGE_CREATE") return;
+            if (message.state === "SENDING") return;
+            if (settings.store.ignoreBots && message.author?.bot) return;
+            if (!message.content) return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
 
-        const moyaiCount = getMoyaiCount(e.message.content);
+            const moyaiCount = getMoyaiCount(message.content);
 
-        for (let i = 0; i < moyaiCount; i++) {
+            for (let i = 0; i < moyaiCount; i++) {
+                boom();
+                await sleep(300);
+            }
+        },
+
+        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, emoji }: IReactionAdd) {
+            if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
+            if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
+
+            const name = emoji.name.toLowerCase();
+            if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
             boom();
-            await sleep(300);
+        },
+
+        VOICE_CHANNEL_EFFECT_SEND({ emoji }: IVoiceChannelEffectSendEvent) {
+            if (!emoji?.name) return;
+            const name = emoji.name.toLowerCase();
+            if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
+            boom();
         }
-    },
-
-    onReaction(e: IReactionAdd) {
-        if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
-        if (settings.store.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
-        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
-
-        const name = e.emoji.name.toLowerCase();
-        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
-
-        boom();
-    },
-
-    onVoiceChannelEffect(e: IVoiceChannelEffectSendEvent) {
-        if (!e.emoji?.name) return;
-        const name = e.emoji.name.toLowerCase();
-        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
-
-        boom();
-    },
-
-    start() {
-        FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
-        FluxDispatcher.subscribe("MESSAGE_REACTION_ADD", this.onReaction);
-        FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
-        FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
-        FluxDispatcher.unsubscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
     }
 });
 
