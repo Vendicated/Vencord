@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, GuildStore,PresenceStore, RelationshipStore } from "@webpack/common";
+import { GuildStore, PresenceStore, RelationshipStore } from "@webpack/common";
 
 enum IndicatorType {
     SERVER = 1 << 0,
@@ -71,6 +71,24 @@ function ServersIndicator() {
     );
 }
 
+function handlePresenceUpdate() {
+    onlineFriends = 0;
+    const relations = RelationshipStore.getRelationships();
+    for (const id of Object.keys(relations)) {
+        const type = relations[id];
+        // FRIEND relationship type
+        if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
+            onlineFriends += 1;
+        }
+    }
+    forceUpdateFriendCount?.();
+}
+
+function handleGuildUpdate() {
+    guildCount = GuildStore.getGuildCount();
+    forceUpdateGuildCount?.();
+}
+
 export default definePlugin({
     name: "ServerListIndicators",
     description: "Add online friend count or server count in the server list",
@@ -99,37 +117,21 @@ export default definePlugin({
         </ErrorBoundary>;
     },
 
-    handlePresenceUpdate() {
-        onlineFriends = 0;
-        const relations = RelationshipStore.getRelationships();
-        for (const id of Object.keys(relations)) {
-            const type = relations[id];
-            // FRIEND relationship type
-            if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
-                onlineFriends += 1;
-            }
-        }
-        forceUpdateFriendCount?.();
+    flux: {
+        PRESENCE_UPDATES: handlePresenceUpdate,
+        GUILD_CREATE: handleGuildUpdate,
+        GUILD_DELETE: handleGuildUpdate,
     },
 
-    handleGuildUpdate() {
-        guildCount = GuildStore.getGuildCount();
-        forceUpdateGuildCount?.();
-    },
 
     start() {
-        this.handlePresenceUpdate();
-        this.handleGuildUpdate();
         addServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
-        FluxDispatcher.subscribe("PRESENCE_UPDATES", this.handlePresenceUpdate);
-        FluxDispatcher.subscribe("GUILD_CREATE", this.handleGuildUpdate);
-        FluxDispatcher.subscribe("GUILD_DELETE", this.handleGuildUpdate);
+
+        handlePresenceUpdate();
+        handleGuildUpdate();
     },
 
     stop() {
         removeServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
-        FluxDispatcher.unsubscribe("PRESENCE_UPDATES", this.handlePresenceUpdate);
-        FluxDispatcher.unsubscribe("GUILD_CREATE", this.handleGuildUpdate);
-        FluxDispatcher.unsubscribe("GUILD_DELETE", this.handleGuildUpdate);
     }
 });
