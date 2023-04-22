@@ -40,9 +40,12 @@ interface SevenTVFile {
     name: string;
 }
 
+let modalKey;
 let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
 let page: number = 1;
+let lastApiCall = 0;
+const minimumApiDelay = 500;
 
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
@@ -51,6 +54,14 @@ function GetEmoteURL(emote: SevenTVEmote) {
 }
 
 async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps, close(): void; }) {
+
+    const currentTime = Date.now();
+    const timeSinceLastCall = currentTime - lastApiCall;
+    if (timeSinceLastCall < minimumApiDelay)
+        return;
+
+    lastApiCall = currentTime;
+
     searching = true;
     const query = `query SearchEmotes($query: String!, $page: Int, $sort: Sort, $limit: Int, $filter: EmoteSearchFilter) {
         emotes(query: $query, page: $page, sort: $sort, limit: $limit, filter: $filter) {
@@ -97,10 +108,11 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
             emotes = data.data.emotes.items;
             searching = false;
 
-            openModal(props => (
+            closeModal(modalKey);
+            modalKey = openModal(props => (
                 <STVModal
                     rootProps={props}
-                    close={close}
+                    close={() => closeModal(modalKey)}
                 />
             ));
         })
@@ -233,10 +245,10 @@ export default definePlugin({
                             onMouseLeave={onMouseLeave}
                             innerClassName={ButtonWrapperClasses.button}
                             onClick={() => {
-                                const key = openModal(props => (
+                                modalKey = openModal(props => (
                                     <STVModal
                                         rootProps={props}
-                                        close={() => closeModal(key)}
+                                        close={() => closeModal(modalKey)}
                                     />
                                 ));
                             }}
