@@ -17,9 +17,9 @@
 */
 
 import { Devs } from "@utils/constants";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { ComponentDispatch } from "@webpack/common";
 
 const ExpressionPickerState = mapMangledModuleLazy('name:"expression-picker-last-active-view"', {
     close: filters.byCode("activeView:null", "setState")
@@ -40,7 +40,7 @@ export default definePlugin({
 
     handleSelect(gif?: { url: string; }) {
         if (gif) {
-            ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: gif.url + " " });
+            insertTextIntoChatInputBox(gif.url + " ");
             ExpressionPickerState.close();
         }
     }
