@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, settings, snapshotArray, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, settings, snapshotArray, sortedSnapshot, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
@@ -44,7 +44,7 @@ export default definePlugin({
     },
 
     isPinned,
-    getSnapshot: () => snapshotArray,
+    getSnapshot: sortedSnapshot,
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))
