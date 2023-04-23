@@ -18,59 +18,61 @@
 
 
 
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
 
 import { CorsProxy, host, themesEndpoint } from "./API";
-import { Store } from "./components/Store";
 import { Theme } from "./types";
 
 const themeStoreLogger = new Logger("ThemeStore");
 const dataStoreKey = "themeStore-bd-themes-json";
 
-function setIntervalImmediately(func, interval) {
+
+function setIntervalImmediately(func: () => void, interval: number) {
     func();
     return setInterval(func, interval);
 }
 
+export { ThemeRepo } from "./components/Repo";
 
 export default definePlugin({
-    name: "Theme Store",
+    name: "ThemeRepo",
     authors: [Devs.Arjix],
     description: "",
+    initialized: false,
 
-    patches: [
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                // Below the "Appearance" section
-                match: /\{section:.{1,2}\.ID\.HEADER,\s*label:.{1,2}\..{1,2}\.Messages\.APP_SETTINGS\},\{.*?\}/,
-                replace: "$&,$self.addSection()"
-            }
-        }
-    ],
+    // patches: [
+    //     {
+    //         find: "Messages.ACTIVITY_SETTINGS",
+    //         replacement: {
+    //             // Below the "Appearance" section
+    //             match: /\{section:.{1,2}\.ID\.HEADER,\s*label:.{1,2}\..{1,2}\.Messages\.APP_SETTINGS\},\{.*?\}/,
+    //             replace: "$&,$self.addSection()"
+    //         }
+    //     }
+    // ],
 
-    addSection() {
-        return {
-            section: "ThemeStoreSettings",
-            label: "Theme Store",
-            element: () => <Store />
-        };
-    },
+    // addSection() {
+    //     return {
+    //         section: "ThemeStoreSettings",
+    //         label: "Theme Store",
+    //         element: () => <Store />
+    //     };
+    // },
 
-    ctxMenuPatch(children) {
-        const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "ThemeStoreSettings")) as any;
-        section?.forEach(c => {
-            if (c?.props?.id?.startsWith("ThemeStore")) {
-                c.props.action = () => SettingsRouter.open(c.props.id);
-            }
-        });
-    },
+    // ctxMenuPatch(children) {
+    //     const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "ThemeStoreSettings")) as any;
+    //     section?.forEach(c => {
+    //         if (c?.props?.id?.startsWith("ThemeStore")) {
+    //             c.props.action = () => SettingsRouter.open(c.props.id);
+    //         }
+    //     });
+    // },
     start() {
+        this.initialized = true;
+
         const THEME_STORE_UPDATE_INTERVAL = 1000 * 60 * 60 * 2; // Every 2 hours
 
         this.interval = setIntervalImmediately(async () => {
@@ -87,10 +89,12 @@ export default definePlugin({
 
         }, THEME_STORE_UPDATE_INTERVAL / 2); // every hour
 
-        addContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
+        // addContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
     },
     stop() {
+        this.initialized = false;
+
         clearInterval(this.interval);
-        removeContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
+        // removeContextMenuPatch("user-settings-cog", this.ctxMenuPatch);
     },
 });

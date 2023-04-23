@@ -64,7 +64,7 @@ const tags = [
     "blue", "abstract"
 ];
 
-export const Store = () => {
+export const ThemeRepo = () => {
     const [themes, setThemes] = React.useState<Theme[]>([]);
 
     const [filters, setFilters] = React.useState<ThemeSearchOptions>({ tags: [], query: "" });
@@ -85,16 +85,12 @@ export const Store = () => {
     return (
         <ErrorBoundary onError={handleComponentFailed}>
             <Forms.FormSection>
-                <Text
-                    tag="h2"
-                    className={cl("header")}
-                    variant="heading-lg/semibold"
-                    style={{ color: "var(--header-primary)" }}
-                >
-                    Theme Store
-                </Text>
-
                 <div className={cl("filters")}>
+                    <TextInput
+                        className={"query"}
+                        placeholder="Search themes..."
+                    />
+
                     <SearchableSelect
                         multi={true}
                         closeOnSelect={false}
@@ -105,11 +101,6 @@ export const Store = () => {
                         }}
                         className={"theme-store-multi-select"}
                         placeholder="Select Tags"
-                    />
-
-                    <TextInput
-                        className={"query"}
-                        placeholder="Search themes..."
                     />
                 </div>
 

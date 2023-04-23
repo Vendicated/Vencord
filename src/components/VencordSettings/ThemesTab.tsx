@@ -30,6 +30,7 @@ import { intersperse, useAwaiter } from "@utils/misc";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
+import { ThemeRepo } from "plugins/ThemeRepo";
 
 type FileInput = React.ComponentType<{
     ref: React.Ref<HTMLInputElement>;
@@ -148,7 +149,8 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
 
 enum ThemeTab {
     LOCAL,
-    ONLINE
+    ONLINE,
+    REPO
 }
 
 export default ErrorBoundary.wrap(function () {
@@ -330,7 +332,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <>;
+        <>
             <TabBar
                 type="top"
                 look="brand"
@@ -350,10 +352,24 @@ export default ErrorBoundary.wrap(function () {
                 >
                     Online Themes
                 </TabBar.Item>
-            </TabBar>;
+
+                {
+                    (
+                        // @ts-expect-error ligma
+                        Vencord.Plugins.plugins.ThemeRepo.initialized
+                    ) &&
+                    <TabBar.Item
+                        className="vc-settings-tab-bar-item"
+                        id={ThemeTab.REPO}
+                    >
+                        Theme Repo
+                    </TabBar.Item>
+                }
+            </TabBar>
 
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
+            {currentTab === ThemeTab.REPO && <ThemeRepo />}
         </>
     );
 });
