@@ -52,8 +52,6 @@ export class ScreensharePatcher extends Patcher {
             (connection: types.Connection) => {
                 if (!(connection.context === "stream" && connection.streamUserId === UserStore.getCurrentUser().id)) return;
 
-                console.log("streancibbectuin", connection);
-
                 this.connection = connection;
 
                 const {
@@ -72,13 +70,11 @@ export class ScreensharePatcher extends Patcher {
                 this.forceUpdateTransportationOptions = forceUpdateTransportationOptions;
 
                 Emitter.addListener(connection.emitter, "on", "connected", () => {
-                    console.log("connectedsss", connection);
                     this.forceUpdateTransportationOptions();
                     this.forceUpdateDesktopSourceOptions();
                 });
 
                 Emitter.addListener(connection.emitter, "on", "destroy", () => {
-                    console.warn("destroyerd");
                     this.forceUpdateTransportationOptions = () => void 0;
                     this.forceUpdateDesktopSourceOptions = () => void 0;
                     this.oldSetTransportOptions = () => void 0;

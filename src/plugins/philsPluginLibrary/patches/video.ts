@@ -224,8 +224,6 @@ export function patchConnectionVideoTransportOptions(
 ) {
     const oldSetTransportOptions = connection.conn.setTransportOptions;
 
-    console.log("patchConnectionVideoTransportOptions", connection);
-
     connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
         const replaceableTransportOptions = getReplaceableVideoTransportationOptions(connection, get);
 
@@ -235,8 +233,6 @@ export function patchConnectionVideoTransportOptions(
         replaceObjectValuesIfExist(options, replaceableTransportOptions);
 
         logger?.info("Overridden Transport Options", options);
-        console.log(this);
-        console.trace();
 
         return Reflect.apply(oldSetTransportOptions, this, [options]);
     };
@@ -245,8 +241,6 @@ export function patchConnectionVideoTransportOptions(
         const transportOptions = window._.merge({ ...getDefaultVideoTransportationOptions(connection) }, getReplaceableVideoTransportationOptions(connection, get));
 
         logger?.info("Force Updated Transport Options", transportOptions);
-
-        console.trace();
 
         oldSetTransportOptions(transportOptions);
     };
