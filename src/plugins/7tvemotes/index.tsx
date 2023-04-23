@@ -35,10 +35,6 @@ interface SevenTVEmote {
 }
 interface SevenTVHost {
     url: string;
-    files: SevenTVFile[];
-}
-interface SevenTVFile {
-    name: string;
 }
 
 let modalKey;
@@ -73,9 +69,6 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
             animated
             host {
               url
-              files {
-                name
-              }
             }
           }
         }
