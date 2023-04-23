@@ -48,7 +48,7 @@ const API_URL = "https://7tv.io/v3/gql";
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
 
-    return "https:" + emote.host.url + "/1x." + extension;
+    return "https:" + emote.host.url + "/" + settings.store.imagesize + "." + extension;
 }
 
 async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps, close(): void; }) {
@@ -257,6 +257,16 @@ const settings = definePluginSettings({
         options: [
             { label: "Descending", value: "DESCENDING", default: true },
             { label: "Ascending", value: "ASCENDING" }
+        ],
+    },
+    imagesize: {
+        type: OptionType.SELECT,
+        description: "Default image size:",
+        options: [
+            { label: "1x", value: "1x", default: true },
+            { label: "2x", value: "2x" },
+            { label: "3x", value: "3x" },
+            { label: "4x", value: "4x" }
         ],
     }
 });
