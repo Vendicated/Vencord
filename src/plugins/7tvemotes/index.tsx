@@ -247,7 +247,7 @@ const settings = definePluginSettings({
         description: "In which category to search for emotes?",
         options: [
             { label: "TOP", value: "TOP", default: true },
-            { label: "TRENDING", value: "TRENDING" }
+            { label: "TRENDING", value: "TRENDING_DAY" }
         ],
     },
     sort_value: {
