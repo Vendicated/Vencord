@@ -53,7 +53,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,300}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1.id,{channelId:$2?.id})"
+                    replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -99,10 +99,12 @@ export default definePlugin({
         if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
         return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
     },
+
     getUserColor(userId: string, ids: { channelId?: string; guildId?: string; }) {
         const colorString = this.getColor(userId, ids);
         return colorString && parseInt(colorString.slice(1), 16);
     },
+
     roleGroupColor({ id, count, title, guildId }: { id: string; count: number; title: string; guildId: string; }) {
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id];
@@ -113,6 +115,7 @@ export default definePlugin({
             letterSpacing: ".05em"
         }}>{title} &mdash; {count}</span>;
     },
+
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {
             style: {
