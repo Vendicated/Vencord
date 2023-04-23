@@ -18,11 +18,12 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { closeAllModals, closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Tooltip, useState } from "@webpack/common";
 
 const cl = classNameFactory("vc-st-");
@@ -84,19 +85,19 @@ async function FetchEmotes(value, { rootProps, close }: { rootProps: ModalProps,
 
     const variables = {
         "query": value,
-        "limit": 6,
+        "limit": settings.store.limit,
         "page": page,
         "sort": {
-            "value": "popularity",
-            "order": "DESCENDING"
+            "value": settings.store.sort_value,
+            "order": settings.store.sort_order
         },
         "filter": {
-            "category": "TOP",
-            "exact_match": true,
-            "case_sensitive": false,
-            "ignore_tags": false,
-            "zero_width": false,
-            "animated": false,
+            "category": settings.store.category,
+            "exact_match": settings.store.exact_match,
+            "case_sensitive": settings.store.case_sensitive,
+            "ignore_tags": settings.store.ignore_tags,
+            "zero_width": settings.store.zero_width,
+            "animated": settings.store.animated,
             "aspect_ratio": ""
         }
     };
@@ -210,6 +211,63 @@ function STVModal({ rootProps, close }: { rootProps: ModalProps, close(): void; 
 }
 
 
+const settings = definePluginSettings({
+    exact_match: {
+        type: OptionType.BOOLEAN,
+        description: "Search only for emotes that have EXACTLY the same name as provided",
+        default: true,
+    },
+    case_sensitive: {
+        type: OptionType.BOOLEAN,
+        description: "Search only for emotes that have the same casing as provided",
+        default: false,
+    },
+    ignore_tags: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore emote tags",
+        default: false,
+    },
+    zero_width: {
+        type: OptionType.BOOLEAN,
+        description: "Search for zero-width emotes (You can't overlap emotes on Discord)",
+        default: false,
+    },
+    animated: {
+        type: OptionType.BOOLEAN,
+        description: "Search ONLY for animated emotes",
+        default: false,
+    },
+    limit: {
+        type: OptionType.NUMBER,
+        description: "How many emotes per page?",
+        default: 6,
+    },
+    category: {
+        type: OptionType.SELECT,
+        description: "In which category to search for emotes?",
+        options: [
+            { label: "TOP", value: "TOP", default: true },
+            { label: "TRENDING", value: "TRENDING" }
+        ],
+    },
+    sort_value: {
+        type: OptionType.SELECT,
+        description: "Sort by:",
+        options: [
+            { label: "Popularity", value: "popularity", default: true },
+            { label: "Date Created", value: "date_created" }
+        ],
+    },
+    sort_order: {
+        type: OptionType.SELECT,
+        description: "",
+        options: [
+            { label: "Descending", value: "DESCENDING", default: true },
+            { label: "Ascending", value: "ASCENDING" }
+        ],
+    }
+});
+
 export default definePlugin({
     name: "7TV Emotes",
     description: "Search for 7TV Emotes in your Discord Client!",
@@ -225,6 +283,8 @@ export default definePlugin({
             }
         },
     ],
+
+    settings,
 
     start() {
     },
