@@ -43,21 +43,21 @@ function addDeleteStyle() {
     }
 }
 
-const MENU_ITEM_ID = "message-logger-remove-history";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
+const REMOVE_HISTORY_ID = "ml-remove-history";
+const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
 
     if (!deleted && !editHistory?.length) return;
-    if (children.some(c => c?.props?.id === MENU_ITEM_ID)) return;
 
     children.push((
         <Menu.MenuItem
-            id={MENU_ITEM_ID}
-            key={MENU_ITEM_ID}
+            id={REMOVE_HISTORY_ID}
+            key={REMOVE_HISTORY_ID}
             label="Remove Message History"
             action={() => {
-                if (message.deleted) {
+                if (deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
                         channelId: channel_id,
@@ -70,13 +70,26 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             }}
         />
     ));
+
+    if (!deleted) return;
+
+    const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
+    if (!domElement) return;
+
+    children.push((
+        <Menu.MenuItem
+            id={TOGGLE_DELETE_STYLE_ID}
+            key={TOGGLE_DELETE_STYLE_ID}
+            label="Toggle Deleted Highlight"
+            action={() => domElement.classList.toggle("messagelogger-deleted")}
+        />
+    ));
 };
 
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
-    dependencies: ["ContextMenuAPI"],
 
     start() {
         addDeleteStyle();

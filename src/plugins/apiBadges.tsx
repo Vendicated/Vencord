@@ -35,7 +35,7 @@ const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/10336802034336
 const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
 
 const ContributorBadge: ProfileBadge = {
-    tooltip: "Vencord Contributor",
+    description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     props: {
@@ -45,10 +45,10 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => contributorIds.includes(user.id),
-    onClick: () => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/Vendicated/Vencord")
+    link: "https://github.com/Vendicated/Vencord"
 };
 
-const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "tooltip">>;
+const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">>;
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -56,26 +56,27 @@ export default definePlugin({
     authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
-        /* Patch the badges array */
-        {
-            find: "Messages.PROFILE_USER_BADGES,",
-            replacement: {
-                match: /&&((\i)\.push\({tooltip:\i\.\i\.Messages\.PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP\.format.+?;)(?:return\s\i;?})/,
-                replace: (_, m, badgeArray) => `&&${m} return Vencord.Api.Badges.inject(${badgeArray}, arguments[0]);}`,
-            }
-        },
         /* Patch the badge list component on user profiles */
         {
             find: "Messages.PROFILE_USER_BADGES,role:",
             replacement: [
                 {
-                    match: /src:(\i)\[(\i)\.key\],/g,
-                    // <img src={badge.image ?? imageMap[badge.key]} {...badge.props} />
-                    replace: (_, imageMap, badge) => `src: ${badge}.image ?? ${imageMap}[${badge}.key], ...${badge}.props,`
+                    match: /null==\i\?void 0:(\i)\.getBadges\(\)/,
+                    replace: (_, badgesMod) => `Vencord.Api.Badges._getBadges(arguments[0]).concat(${badgesMod}?.getBadges()??[])`,
+                },
+                {
+                    // alt: "", aria-hidden: false, src: originalSrc
+                    match: /alt:" ","aria-hidden":!0,src:(?=(\i)\.src)/g,
+                    // ...badge.props, ..., src: badge.image ?? ...
+                    replace: "...$1.props,$& $1.image??"
                 },
                 {
                     match: /children:function(?<=(\i)\.(?:tooltip|description),spacing:\d.+?)/g,
                     replace: "children:$1.component ? () => $self.renderBadgeComponent($1) : function"
+                },
+                {
+                    match: /onClick:function(?=.{0,200}href:(\i)\.link)/,
+                    replace: "onClick:$1.onClick??function"
                 }
             ]
         }
@@ -95,15 +96,15 @@ export default definePlugin({
             return;
         }
         for (const line of lines) {
-            const [id, tooltip, image] = line.split(",");
-            DonorBadges[id] = { image, tooltip };
+            const [id, description, image] = line.split(",");
+            DonorBadges[id] = { image, description };
         }
     },
 
-    addDonorBadge(badges: ProfileBadge[], userId: string) {
+    getDonorBadge(userId: string) {
         const badge = DonorBadges[userId];
         if (badge) {
-            badges.unshift({
+            return {
                 ...badge,
                 position: BadgePosition.START,
                 props: {
@@ -167,7 +168,7 @@ export default definePlugin({
                         </ErrorBoundary>
                     ));
                 },
-            });
+            };
         }
     }
 });
