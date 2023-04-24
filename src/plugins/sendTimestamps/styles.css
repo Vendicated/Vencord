@@ -43,6 +43,9 @@
 }
 
 .vc-st-button {
-    margin-right: 4px;
-    transform: scale(1.1);
+    padding: 0 8px;
+}
+
+.vc-st-button svg {
+    transform: scale(1.1) translateY(1px);
 }

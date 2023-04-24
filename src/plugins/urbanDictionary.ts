@@ -23,7 +23,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "UrbanDictionary",
-    description: "Searches for a word on Urban Dictionary",
+    description: "Search for a word on Urban Dictionary via /urban slash command",
     authors: [Devs.jewdev],
     dependencies: ["CommandsAPI"],
     commands: [

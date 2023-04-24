@@ -77,6 +77,8 @@ function _showNotification(notification: NotificationData, id: number) {
 }
 
 function shouldBeNative() {
+    if (typeof Notification === "undefined") return false;
+
     const { useNative } = Settings.notifications;
     if (useNative === "always") return true;
     if (useNative === "not-focused") return !document.hasFocus();
