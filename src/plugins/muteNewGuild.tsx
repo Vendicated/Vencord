@@ -71,7 +71,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MuteNewGuild",
     description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
     patches: [
         {
             find: ",acceptInvite:function",
