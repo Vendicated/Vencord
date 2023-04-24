@@ -28,11 +28,9 @@ function isPluginEnabled(p: Plugin) {
     ) ?? false;
 }
 
-let _pluginsWithKeybinds: Plugin[] = [];
+let _pluginsWithKeybinds: Plugin[] | undefined = undefined;
 const getPluginsWithKeybinds = () => {
-    if (_pluginsWithKeybinds.length) return _pluginsWithKeybinds;
-
-    return (_pluginsWithKeybinds = Object.values(Vencord.Plugins.plugins).filter(v => v.keybinds && isPluginEnabled(v)));
+    return _pluginsWithKeybinds ??= Object.values(Vencord.Plugins.plugins).filter(v => v.keybinds && isPluginEnabled(v));
 };
 
 export default definePlugin({
@@ -113,8 +111,8 @@ export default definePlugin({
         for (const plugin of getPluginsWithKeybinds()) {
             for (const keybind of plugin.keybinds!.items) {
                 actionTypes.push({
-                    label: `${keybind.name} (Vencord)`,
-                    value: `Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${keybind.name}`
+                    label: `${keybind.bindName} (Vencord)`,
+                    value: `Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${keybind.bindName}`
                 });
             }
         }
@@ -135,7 +133,7 @@ export default definePlugin({
     addKeybinds(_: any) {
         for (const plugin of getPluginsWithKeybinds()) {
             for (const keybind of plugin.keybinds!.items) {
-                _[`Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${keybind.name}`] = {
+                _[`Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${keybind.bindName}`] = {
                     binds: keybind!.binds,
                     comboKeysBindGlobal: keybind!.global,
                     action: keybind!.action
@@ -156,7 +154,7 @@ export default definePlugin({
     }) {
         for (const plugin of getPluginsWithKeybinds()) {
             for (const kb of plugin.keybinds!.items) {
-                keyEvents[`Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${kb.name}`] = {
+                keyEvents[`Vencord.${plugin.name}.${plugin.keybinds!.groupName}.${kb.bindName}`] = {
                     keyEvents: {
                         blurred: kb?.keyEvents?.blurred ?? true,
                         focused: kb?.keyEvents?.focused ?? true,
