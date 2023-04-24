@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants.js";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { FluxDispatcher, Forms, Toasts, UserStore } from "@webpack/common";
+import { Forms, Toasts, UserStore } from "@webpack/common";
 
 // the plugin uses -1 as a fallback for no client theme. discord doesn't
 interface PreferredTheme {
@@ -38,18 +38,28 @@ const getBasicTheme = () =>
     PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
 const getClientThemeId = () =>
     PreloadedUserSettings.getCurrentValue().appearance.clientThemeSettings?.backgroundGradientPresetId?.value as number ?? -1;
+
 const canUseClientThemes = () =>
     Vencord.Plugins.isPluginEnabled("FakeNitro") || (UserStore.getCurrentUser().premiumType ?? 0) === 2;
+const canActuallyUseClientThemes = () =>
+    (UserStore.getCurrentUser().premiumType ?? 0) === 2;
+
 function updateThemeIfNecessary(theme: string) {
     const currentTheme = getBasicTheme();
     const themeId = settings.store.preferredTheme[theme];
     if (
         (theme === "light" && currentTheme === "dark")
         || (theme === "dark" && currentTheme === "light")
-    ) updateTheme({
-        theme,
-        backgroundGradientPresetId: canUseClientThemes() ? themeId === -1 ? undefined : themeId : undefined
-    });
+    ) {
+        const canUseThemes = canUseClientThemes();
+        updateTheme({
+            theme,
+            backgroundGradientPresetId: canUseThemes && themeId !== -1 ? themeId : undefined
+        });
+        // if you update a fake client theme, settings aren't synced at all
+        // so while you update to a light theme, discord still thinks you are using a dark one.
+        if (themeId && canUseThemes && !canActuallyUseClientThemes()) updateTheme({ theme });
+    }
 }
 // hh:mm to unix timestamp
 function toAdjustedTimestamp(t: string): number {
@@ -69,6 +79,17 @@ function showError() {
 }
 const snakeToTitleCase = (text: string) =>
     text.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+
+function updatePreferredThemes(e) {
+    const newTheme = e?.changes?.appearance?.settings as {
+        theme?: "light" | "dark", // undefined means system theme
+        clientThemeSettings: {
+            backgroundGradientPresetId?: number;
+        };
+    };
+    if (!newTheme?.theme) return;
+    settings.store.preferredTheme[newTheme.theme] = newTheme.clientThemeSettings.backgroundGradientPresetId ?? -1;
+}
 
 function DisplayThemeComponent() {
     const { light, dark }: PreferredTheme = settings.store.preferredTheme;
@@ -151,24 +172,15 @@ export default definePlugin({
         }
     },
 
-    updatePreferredThemes(e) {
-        const newTheme = e?.changes?.appearance?.settings as {
-            theme?: "light" | "dark", // undefined means system theme
-            clientThemeSettings: {
-                backgroundGradientPresetId?: number;
-            };
-        };
-        if (!newTheme?.theme) return;
-        settings.store.preferredTheme[newTheme.theme] = newTheme.clientThemeSettings.backgroundGradientPresetId ?? -1;
+    flux: {
+        SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE: updatePreferredThemes
     },
 
     start() {
-        FluxDispatcher.subscribe("SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE", this.updatePreferredThemes);
         this.checkForUpdate();
     },
 
     stop() {
-        FluxDispatcher.unsubscribe("SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE", this.updatePreferredThemes);
         clearTimeout(nextChange);
     },
 });
