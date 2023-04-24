@@ -1,0 +1,31 @@
+.vc-imgzoom-lens {
+    position: absolute;
+    inset: 0;
+    z-index: 9999;
+    border: 2px solid grey;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: none;
+    box-shadow: inset 0 0 10px 2px grey;
+    filter: drop-shadow(0 0 2px grey);
+    pointer-events: none;
+}
+
+/* make the carousel take up less space so we can click the backdrop and exit out of it */
+[class|="carouselModal"] {
+    height: fit-content;
+    box-shadow: none;
+}
+
+[class*="modalCarouselWrapper"] {
+    height: fit-content;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+[class|="wrapper"]:has(> #vc-imgzoom-magnify-modal) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}

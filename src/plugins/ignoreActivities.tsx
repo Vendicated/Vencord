@@ -88,7 +88,7 @@ function ToggleIconOn({ forceWhite }: { forceWhite?: boolean; }) {
     );
 }
 
-function ToggleActivityComponent({ activity, forceWhite }: { activity: IgnoredActivity; forceWhite?: boolean; }) {
+function ToggleActivityComponent({ activity, forceWhite, forceLeftMargin }: { activity: IgnoredActivity; forceWhite?: boolean; forceLeftMargin?: boolean; }) {
     const forceUpdate = useForceUpdater();
 
     return (
@@ -101,6 +101,7 @@ function ToggleActivityComponent({ activity, forceWhite }: { activity: IgnoredAc
                     role="button"
                     aria-label="Toggle activity"
                     tabIndex={0}
+                    style={forceLeftMargin ? { marginLeft: "2px" } : undefined}
                     onClick={e => handleActivityToggle(e, activity, forceUpdate)}
                 >
                     {
@@ -147,8 +148,8 @@ export default definePlugin({
         {
             find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
             replacement: {
-                match: /!(\i)\|\|(null==\i\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
-                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => ""
+                match: /!(\i)(\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
+                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => "false"
                     + `${restWithoutPlatformCheck}`
                     + `(${platformCheck}?${children}:[])`
                     + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
@@ -200,7 +201,7 @@ export default definePlugin({
     renderToggleGameActivityButton(props: { id?: string; exePath: string; }) {
         return (
             <ErrorBoundary noop>
-                <ToggleActivityComponent activity={{ id: props.id ?? props.exePath, type: ActivitiesTypes.Game }} />
+                <ToggleActivityComponent activity={{ id: props.id ?? props.exePath, type: ActivitiesTypes.Game }} forceLeftMargin={true} />
             </ErrorBoundary>
         );
     },

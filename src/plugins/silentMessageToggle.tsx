@@ -17,18 +17,41 @@
 */
 
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, React, Tooltip } from "@webpack/common";
 
-function SilentMessageToggle() {
-    const [enabled, setEnabled] = React.useState(false);
+let lastState = false;
+
+const settings = definePluginSettings({
+    persistState: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to persist the state of the silent message toggle when changing channels",
+        default: false,
+        onChange(newValue: boolean) {
+            if (newValue === false) lastState = false;
+        }
+    }
+});
+
+function SilentMessageToggle(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
+    const [enabled, setEnabled] = React.useState(lastState);
+
+    function setEnabledValue(value: boolean) {
+        if (settings.store.persistState) lastState = value;
+        setEnabled(value);
+    }
 
     React.useEffect(() => {
         const listener: SendListener = (_, message) => {
             if (enabled) {
-                setEnabled(false);
+                setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
@@ -37,17 +60,19 @@ function SilentMessageToggle() {
         return () => void removePreSendListener(listener);
     }, [enabled]);
 
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
+
     return (
-        <Tooltip text="Toggle Silent Message">
+        <Tooltip text={enabled ? "Disable Silent Message" : "Enable Silent Message"}>
             {tooltipProps => (
                 <div style={{ display: "flex" }}>
                     <Button
                         {...tooltipProps}
-                        onClick={() => setEnabled(prev => !prev)}
+                        onClick={() => setEnabledValue(!enabled)}
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ margin: "0px 8px" }}
+                        style={{ padding: "0 8px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -73,12 +98,13 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
+    settings,
     patches: [
         {
             find: ".activeCommandOption",
             replacement: {
                 match: /"gift"\)\);(?<=(\i)\.push.+?disabled:(\i),.+?)/,
-                replace: (m, array, disabled) => `${m}${disabled}||${array}.push($self.SilentMessageToggle());`
+                replace: (m, array, disabled) => `${m};try{${disabled}||${array}.push($self.SilentMessageToggle(arguments[0]));}catch{}`
             }
         }
     ],

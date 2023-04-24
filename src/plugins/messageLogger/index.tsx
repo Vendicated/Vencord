@@ -18,19 +18,19 @@
 
 import "./messageLogger.css";
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 
-const i18n = findLazy(m => m.Messages?.["en-US"]);
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
@@ -43,6 +43,49 @@ function addDeleteStyle() {
     }
 }
 
+const REMOVE_HISTORY_ID = "ml-remove-history";
+const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+    const { message } = props;
+    const { deleted, editHistory, id, channel_id } = message;
+
+    if (!deleted && !editHistory?.length) return;
+
+    children.push((
+        <Menu.MenuItem
+            id={REMOVE_HISTORY_ID}
+            key={REMOVE_HISTORY_ID}
+            label="Remove Message History"
+            action={() => {
+                if (deleted) {
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_DELETE",
+                        channelId: channel_id,
+                        id,
+                        mlDeleted: true
+                    });
+                } else {
+                    message.editHistory = [];
+                }
+            }}
+        />
+    ));
+
+    if (!deleted) return;
+
+    const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
+    if (!domElement) return;
+
+    children.push((
+        <Menu.MenuItem
+            id={TOGGLE_DELETE_STYLE_ID}
+            key={TOGGLE_DELETE_STYLE_ID}
+            label="Toggle Deleted Highlight"
+            action={() => domElement.classList.toggle("messagelogger-deleted")}
+        />
+    ));
+};
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
@@ -50,13 +93,11 @@ export default definePlugin({
 
     start() {
         addDeleteStyle();
+        addContextMenuPatch("message", patchMessageContextMenu);
     },
 
     stop() {
-        document.querySelectorAll(".messagelogger-deleted").forEach(e => e.remove());
-        document.querySelectorAll(".messagelogger-edited").forEach(e => e.remove());
-        document.body.classList.remove("messagelogger-red-overlay");
-        document.body.classList.remove("messagelogger-red-text");
+        removeContextMenuPatch("message", patchMessageContextMenu);
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
@@ -106,7 +147,7 @@ export default definePlugin({
         }
     },
 
-    handleDelete(cache: any, data: { ids: string[], id: string; }, isBulk: boolean) {
+    handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
@@ -118,7 +159,8 @@ export default definePlugin({
                 if (!msg) return;
 
                 const EPHEMERAL = 64;
-                const shouldIgnore = (msg.flags & EPHEMERAL) === EPHEMERAL ||
+                const shouldIgnore = data.mlDeleted ||
+                    (msg.flags & EPHEMERAL) === EPHEMERAL ||
                     ignoreBots && msg.author?.bot ||
                     ignoreSelf && msg.author?.id === myId;
 
@@ -180,6 +222,11 @@ export default definePlugin({
                         "       m" +
                         ")" +
                         ".update($3"
+                },
+                {
+                    // fix up key (edit last message) attempting to edit a deleted message
+                    match: /(?<=getLastEditableMessage=.{0,200}\.find\(\(function\((\i)\)\{)return/,
+                    replace: "return !$1.deleted &&"
                 }
             ]
         },
@@ -272,14 +319,9 @@ export default definePlugin({
             find: "Message must not be a thread starter message",
             replacement: [
                 {
-                    // Write message.deleted to deleted var
-                    match: /var (\w)=(\w).id,(?=\w=\w.message)/,
-                    replace: "var $1=$2.id,deleted=$2.message.deleted,"
-                },
-                {
                     // Append messagelogger-deleted to classNames if deleted
                     match: /\)\("li",\{(.+?),className:/,
-                    replace: ")(\"li\",{$1,className:(deleted ? \"messagelogger-deleted \" : \"\")+"
+                    replace: ")(\"li\",{$1,className:(arguments[0].message.deleted ? \"messagelogger-deleted \" : \"\")+"
                 }
             ]
         },

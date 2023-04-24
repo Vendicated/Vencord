@@ -20,6 +20,8 @@ import { registerCommand, unregisterCommand } from "@api/Commands";
 import { initializeVencordSettings, Settings } from "@api/settings";
 import Logger from "@utils/Logger";
 import { Patch, Plugin } from "@utils/types";
+import { FluxDispatcher } from "@webpack/common";
+import { FluxEvents } from "@webpack/types";
 
 import Plugins from "~plugins";
 
@@ -45,8 +47,11 @@ export function isPluginEnabled(p: string) {
 
 const pluginsValues = Object.values(Plugins);
 
-// First roundtrip to mark and force enable dependencies
-for (const p of pluginsValues) {
+// First roundtrip to mark and force enable dependencies (only for enabled plugins)
+//
+// FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
+// goes for the top level and their children, but for now this works okay with the current API plugins
+for (const p of pluginsValues) if (settings[p.name]?.enabled) {
     p.dependencies?.forEach(d => {
         const dep = Plugins[d];
         if (dep) {
@@ -110,62 +115,76 @@ export function startDependenciesRecursive(p: Plugin) {
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
+    const { name, commands, flux } = p;
+
     if (p.start) {
-        logger.info("Starting plugin", p.name);
+        logger.info("Starting plugin", name);
         if (p.started) {
-            logger.warn(`${p.name} already started`);
+            logger.warn(`${name} already started`);
             return false;
         }
         try {
             p.start();
             p.started = true;
         } catch (e) {
-            logger.error(`Failed to start ${p.name}\n`, e);
+            logger.error(`Failed to start ${name}\n`, e);
             return false;
         }
     }
 
-    if (p.commands?.length) {
-        logger.info("Registering commands of plugin", p.name);
-        for (const cmd of p.commands) {
+    if (commands?.length) {
+        logger.info("Registering commands of plugin", name);
+        for (const cmd of commands) {
             try {
-                registerCommand(cmd, p.name);
+                registerCommand(cmd, name);
             } catch (e) {
                 logger.error(`Failed to register command ${cmd.name}\n`, e);
                 return false;
             }
         }
+    }
 
+    if (flux) {
+        for (const event in flux) {
+            FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
+        }
     }
 
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
+    const { name, commands, flux } = p;
     if (p.stop) {
-        logger.info("Stopping plugin", p.name);
+        logger.info("Stopping plugin", name);
         if (!p.started) {
-            logger.warn(`${p.name} already stopped`);
+            logger.warn(`${name} already stopped`);
             return false;
         }
         try {
             p.stop();
             p.started = false;
         } catch (e) {
-            logger.error(`Failed to stop ${p.name}\n`, e);
+            logger.error(`Failed to stop ${name}\n`, e);
             return false;
         }
     }
 
-    if (p.commands?.length) {
-        logger.info("Unregistering commands of plugin", p.name);
-        for (const cmd of p.commands) {
+    if (commands?.length) {
+        logger.info("Unregistering commands of plugin", name);
+        for (const cmd of commands) {
             try {
                 unregisterCommand(cmd.name);
             } catch (e) {
                 logger.error(`Failed to unregister command ${cmd.name}\n`, e);
                 return false;
             }
+        }
+    }
+
+    if (flux) {
+        for (const event in flux) {
+            FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
         }
     }
 

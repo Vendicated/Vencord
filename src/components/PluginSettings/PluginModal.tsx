@@ -20,7 +20,8 @@ import { generateId } from "@api/Commands";
 import { useSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { LazyComponent } from "@utils/misc";
+import { Margins } from "@utils/margins";
+import { classes, LazyComponent } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { proxyLazy } from "@utils/proxyLazy";
 import { OptionType, Plugin } from "@utils/types";
@@ -179,7 +180,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
+        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
@@ -203,7 +204,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 </Forms.FormSection>
                 {!!plugin.settingsAboutComponent && (
-                    <div style={{ marginBottom: 8 }}>
+                    <div className={classes(Margins.bottom8, "vc-text-selectable")}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
                                 <plugin.settingsAboutComponent tempSettings={tempSettings} />

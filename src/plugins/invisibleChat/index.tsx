@@ -85,7 +85,7 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ marginRight: "2px" }}
+                        style={{ padding: "0 4px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -119,6 +119,7 @@ export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way! This plugin makes requests to >>https://embed.sammcheese.net<< to provide embeds to decrypted links!",
     authors: [Devs.SammCheese],
+    dependencies: ["MessagePopoverAPI"],
     patches: [
         {
             // Indicator
