@@ -102,6 +102,7 @@ export function startDependenciesRecursive(p: Plugin) {
     if (p.keybinds && !p.dependencies?.includes("KeybindsAPI")) {
         p.dependencies ??= [];
         p.dependencies.push("KeybindsAPI");
+        restartNeeded = true;
     }
 
     p.dependencies?.forEach(dep => {
