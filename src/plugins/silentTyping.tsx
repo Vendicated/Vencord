@@ -48,7 +48,7 @@ function SilentTypingToggle(chatBoxProps: {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     return (
-        <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"}>
+        <Tooltip text={isEnabled ? "Disable Silent Typing" : "Enable Silent Typing"}>
             {(tooltipProps: any) => (
                 <div style={{ display: "flex" }}>
                     <Button
@@ -57,7 +57,7 @@ function SilentTypingToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ margin: "0 8px 0" }}
+                        style={{ padding: "0 8px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
