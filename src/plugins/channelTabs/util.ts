@@ -127,6 +127,7 @@ function closeTabsToTheRight(i: number) {
     }
 }
 function closeCurrentTab() {
+    if (openChannels.length === 1) return;
     openChannels.splice(openChannelIndex, 1);
     moveToTab(Math.max(openChannelIndex - 1, 0));
 }
@@ -138,7 +139,6 @@ function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
     setOpenChannel(openChannelIndex + direction);
 }
 function openStartupTabs(props: ChannelProps & { userId: string; }, update: () => void) {
-    if (openChannels.length) return;
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({
             id: Toasts.genId(),
@@ -176,7 +176,6 @@ function openStartupTabs(props: ChannelProps & { userId: string; }, update: () =
     if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
         NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
     update();
-
 }
 const saveChannels = async (userId: string) => {
     if (!userId) return;

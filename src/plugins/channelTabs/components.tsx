@@ -237,10 +237,9 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
             update();
         }
         else if (["W", "w"].includes(e.key) && e.ctrlKey) {
-            if (openChannels.length > 1) closeCurrentTab();
+            closeCurrentTab();
             update();
         }
-
     }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);

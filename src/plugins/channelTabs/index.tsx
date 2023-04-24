@@ -141,6 +141,8 @@ export default definePlugin({
         children: JSX.Element; // original children passed by discord
     }) {
         const id = UserStore.getCurrentUser()?.id;
+        // TODO: renders way too early, before UserStore and/or ChannelStore are ready
+        // find a way to render later or force an update when ready?
         if (!id) return <>{children}</>;
         return <>
             <ErrorBoundary>
