@@ -48,6 +48,11 @@ const pluginsValues = Object.values(Plugins);
 // FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
 // goes for the top level and their children, but for now this works okay with the current API plugins
 for (const p of pluginsValues) if (settings[p.name]?.enabled) {
+    if (p.keybinds && !p.dependencies?.includes("KeybindsAPI")) {
+        p.dependencies ??= [];
+        p.dependencies.push("KeybindsAPI");
+    }
+
     p.dependencies?.forEach(d => {
         const dep = Plugins[d];
         if (dep) {
@@ -93,11 +98,17 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
 export function startDependenciesRecursive(p: Plugin) {
     let restartNeeded = false;
     const failures: string[] = [];
+
+    if (p.keybinds && !p.dependencies?.includes("KeybindsAPI")) {
+        p.dependencies ??= [];
+        p.dependencies.push("KeybindsAPI");
+    }
+
     p.dependencies?.forEach(dep => {
         if (!Settings.plugins[dep].enabled) {
             startDependenciesRecursive(Plugins[dep]);
             // If the plugin has patches, don't start the plugin, just enable it.
-            if (Plugins[dep].patches) {
+            if (Plugins[dep].patches || Plugins[dep].keybinds) {
                 logger.warn(`Enabling dependency ${dep} requires restart.`);
                 Settings.plugins[dep].enabled = true;
                 restartNeeded = true;
@@ -136,7 +147,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
                 return false;
             }
         }
-
     }
 
     return true;

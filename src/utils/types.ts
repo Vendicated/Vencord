@@ -54,6 +54,22 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+
+export interface KeybindItem {
+    name: string;
+    bindName: string;
+    description: string;
+    binds: string[];
+    keyEvents?: {
+        blurred: boolean;
+        focused: boolean;
+        keydown: boolean;
+        keyup: boolean;
+    };
+    global: boolean;
+    action(): void;
+}
+
 export interface PluginDef {
     name: string;
     description: string;
@@ -61,6 +77,17 @@ export interface PluginDef {
     start?(): void;
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
+
+    /**
+     * A group of keybinds. If you specify these, you must add KeybindsAPI to dependencies.
+     * One plugin can only have one keybind group.
+     * A keybind group can have as many keybinds as it needs.
+     */
+    keybinds?: {
+        groupName: string;
+        groupDescription: string;
+        items: KeybindItem[];
+    };
     /**
      * List of commands. If you specify these, you must add CommandsAPI to dependencies
      */
