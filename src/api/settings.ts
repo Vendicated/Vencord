@@ -22,7 +22,7 @@ import { localStorage } from "@utils/localStorage";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
 import { putCloudSettings } from "@utils/settingsSync";
-import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
+import { DefinedSettings, OptionType, PluginSettingPureDef, PluginSettingType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -93,12 +93,24 @@ const DefaultSettings: Settings = {
     }
 };
 
-try {
-    var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
-    mergeDefaults(settings, DefaultSettings);
-} catch (err) {
-    var settings = mergeDefaults({} as Settings, DefaultSettings);
-    logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
+const settings = {} as Settings;
+let settingsInitialized = false;
+
+export function initializeVencordSettings() {
+    if (settingsInitialized) throw new Error("Settings already initialized");
+    try {
+        Object.assign(settings, parseSettings(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)));
+        mergeDefaults(settings, DefaultSettings);
+    } catch (err) {
+        mergeDefaults(settings, DefaultSettings);
+        logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
+    }
+
+    settingsInitialized = true;
+    for (const [pluginName, ...oldNames] of queuedMigrations) {
+        migratePluginSettings(pluginName, ...oldNames);
+    }
+    queuedMigrations.length = 0;
 }
 
 const saveSettingsOnFrequentAction = debounce(async () => {
@@ -170,13 +182,150 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 }
             }
             // And don't forget to persist the settings!
+
             PlainSettings.cloud.settingsSyncVersion = Date.now();
             localStorage.Vencord_settingsDirty = true;
             saveSettingsOnFrequentAction();
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, stringifySettings(root));
             return true;
         }
     });
+}
+
+const IMPURE_TYPES = new Set([
+    OptionType.REGEX,
+    OptionType.TABLE,
+    OptionType.ARRAY,
+] as const);
+type ImpureDef = Extract<PluginSettingPureDef, { type: typeof IMPURE_TYPES extends Set<infer T> ? T : never; }>;
+type ImpureSerialized<D extends ImpureDef> = {
+    [OptionType.REGEX]: [string, string];
+    [OptionType.ARRAY]: any[];
+    [OptionType.TABLE]: Record<string, any>[];
+}[D["type"]];
+function isImpure(def: PluginSettingPureDef): def is ImpureDef {
+    return IMPURE_TYPES.has(def.type as ImpureDef["type"]);
+}
+
+/**
+ * Iterates over every plugin setting with an impure type with some context.
+ * Impure settings are settings that are not plainly JSON-serializable.
+ */
+function forEachImpure(settings: Settings, cb: (ctx: {
+    pluginName: string;
+    settingName: string;
+    def: ImpureDef;
+    value: any; // TODO: type this better
+}) => void) {
+    for (const [pluginName, pluginSettings] of Object.entries(settings.plugins)) {
+        const plugin = plugins[pluginName];
+        if (!plugin) continue;
+
+        const settingDefs = plugin.settings;
+        if (!settingDefs) continue;
+
+        for (const [settingName, value] of Object.entries(pluginSettings)) {
+            const settingDef = settingDefs.def[settingName];
+            if (!settingDef || !isImpure(settingDef)) continue;
+
+            cb({ pluginName, settingName, def: settingDef, value });
+        }
+    }
+}
+
+function parseSettings(json: string) {
+    const settings = JSON.parse(json) as Settings;
+    forEachImpure(settings, ({
+        pluginName,
+        settingName,
+        def,
+        value,
+    }) => {
+        settings.plugins[pluginName][settingName] = deserialize(def, value);
+    });
+    return settings;
+}
+function stringifySettings(settings: Settings) {
+    const marked = new Map();
+
+    forEachImpure(settings, ({
+        def,
+        value,
+    }) => {
+        if (!marked.has(value))
+            marked.set(value, serialize(def, value));
+    });
+
+    return JSON.stringify(settings, (key, value) => {
+        if (marked.has(value)) return marked.get(value)!;
+        return value;
+    }, 4);
+}
+
+type Deserializer<D extends ImpureDef> = (def: D, serialized: ImpureSerialized<D>) => PluginSettingType<D>;
+const deserializers: { [D in ImpureDef as D["type"]]: Deserializer<D> } = {
+    [OptionType.REGEX]: (def, serialized) => {
+        try {
+            return new RegExp(serialized[0], serialized[1]);
+        } catch {
+            return new RegExp("");
+        }
+    },
+    [OptionType.ARRAY]: (def, serialized) => {
+        if (!Array.isArray(serialized)) return [];
+        const itemDef = def.items;
+        if (isImpure(itemDef)) return serialized.map(v => deserialize(itemDef, v));
+        else return serialized;
+    },
+    [OptionType.TABLE]: (def, serialized) => {
+        const rows: Record<string, any>[] = [];
+        if (!Array.isArray(serialized)) return rows;
+        for (const serializedRow of serialized) {
+            const row: Record<string, any> = {};
+            for (const [key, value] of Object.entries(serializedRow)) {
+                const colDef = def.columns[key];
+                if (!colDef) continue;
+                if (isImpure(colDef)) row[key] = deserialize(colDef, value);
+                else row[key] = value;
+            }
+            rows.push(row);
+        }
+        return rows;
+    },
+};
+function deserialize<D extends ImpureDef>(def: D, serialized: ImpureSerialized<D>): PluginSettingType<D> {
+    // Typescript really hates function unions
+    return deserializers[def.type](def as any, serialized as any) as any;
+}
+
+type Serializer<D extends ImpureDef> = (def: D, impureVal: PluginSettingType<D>) => ImpureSerialized<D>;
+const serializers: { [D in ImpureDef as D["type"]]: Serializer<D> } = {
+    [OptionType.REGEX]: (def, impureVal) => [impureVal.source, impureVal.flags],
+    [OptionType.ARRAY]: (def, impureVal) => {
+        if (!Array.isArray(impureVal)) return [];
+        const itemDef = def.items;
+        if (isImpure(itemDef)) return impureVal.map(v => serialize(itemDef, v));
+        else return impureVal;
+    },
+    [OptionType.TABLE]: (def, impureVal) => {
+        const rows: Record<string, any>[] = [];
+        if (!Array.isArray(impureVal)) return rows;
+        for (const impureRow of impureVal) {
+            const row: Record<string, any> = {};
+            for (const [key, value] of Object.entries(impureRow)) {
+                const colDef = def.columns[key];
+                if (!colDef) continue;
+                if (isImpure(colDef)) row[key] = serialize(colDef, value);
+                else row[key] = value;
+            }
+            rows.push(row);
+        }
+        return rows;
+    },
+};
+function serialize<D extends ImpureDef>(def: D, impureVal: PluginSettingType<D>): ImpureSerialized<D> {
+    // Typescript REALLY REALLY hates function unions
+    return serializers[def.type](def as any, impureVal as any) as any;
 }
 
 /**
@@ -240,7 +389,13 @@ export function addSettingsListener(path: string, onUpdate: (newValue: any, path
     subscriptions.add(onUpdate);
 }
 
+const queuedMigrations: string[][] = [];
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    if (!settingsInitialized) {
+        queuedMigrations.push([name, ...oldNames]);
+        return;
+    }
+
     const { plugins } = settings;
     if (name in plugins) return;
 
