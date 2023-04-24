@@ -330,7 +330,7 @@ export function ChannelTabsPreivew(p) {
     const { tabSet }: { tabSet: { [userId: string]: ChannelProps[]; }; } = channelTabsSettings.use();
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
 
-    const [currentTabs, setCurrentTabs] = useState(tabSet[id] ?? placeholder);
+    const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
     return <>
         <Forms.FormTitle>Startup tabs</Forms.FormTitle>
         <Flex flexDirection="row" style={{ gap: "2px" }}>
