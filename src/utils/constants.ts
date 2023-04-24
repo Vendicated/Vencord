@@ -277,5 +277,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Xslash: {
         name: "Xslash",
         id: 323903843903733782n
+    },
+    KannaDev: {
+        name: "Kanna",
+        id: 317728561106518019n
     }
 });
