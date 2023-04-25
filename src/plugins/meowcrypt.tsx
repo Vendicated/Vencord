@@ -34,11 +34,11 @@ interface IMessageCreate {
 }
 
 function base64UrlEncode(str: Uint8Array): string {
-    return btoa(String.fromCharCode(...str));
+    return window.btoa(String.fromCharCode(...str));
 }
 
 function base64UrlDecode(str: string): Uint8Array {
-    return new Uint8Array(atob(str).split("").map(c => { return c.charCodeAt(0); }));
+    return new Uint8Array(window.atob(str).split("").map(c => { return c.charCodeAt(0); }));
 }
 
 async function encrypt(text: string): Promise<string> {
