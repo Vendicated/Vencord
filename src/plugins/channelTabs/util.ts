@@ -51,6 +51,7 @@ export const channelTabsSettings = definePluginSettings({
         component: ChannelTabsPreivew,
         description: "Select which tabs to open at startup",
         type: OptionType.COMPONENT,
+        default: {}
     },
     channelNameEmojis: {
         type: OptionType.BOOLEAN,

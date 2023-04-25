@@ -20,7 +20,7 @@ import "./style.css";
 
 import { Flex } from "@components/Flex.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
-import { filters, find, findByCode, findByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
     useDrag, useDrop, useEffect, UserStore, useState, useStateFromStores
@@ -48,10 +48,12 @@ const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 
-const twoChars = (n: number) => n > 99 ? "9+" : `${n}`;
 const cl = (name: string) => `vc-channeltabs-${name}`;
-const PlusIcon = () => <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path /* fill="var(--background-primary)"*/ d="M32 16a16 16 0 0 1-16 16A16 16 0 0 1 0 16a16 16 0 0 1 32 0z" /><path d="M16 6.667v18.667m-9.333-9.333h18.667" stroke="var(--text-normal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>;
-const XIcon = () => <svg height="16" width="16" viewBox="-28.797 -28.797 172.787 172.787"><path fill="transparent" d="M57.596-28.797a86.394 86.394 0 0 1 86.394 86.393 86.394 86.394 0 0 1-86.394 86.394 86.394 86.394 0 0 1-86.393-86.394 86.394 86.394 0 0 1 86.393-86.393z" /><path fill="var(--text-normal)" d="m71.27 57.599 42.785-42.781a3.885 3.885 0 0 0 0-5.497l-8.177-8.18a3.889 3.889 0 0 0-5.496 0L57.597 43.926 14.813 1.141a3.889 3.889 0 0 0-5.496 0l-8.178 8.18a3.885 3.885 0 0 0 0 5.497L43.924 57.6l-42.78 42.776a3.887 3.887 0 0 0 0 5.497l8.177 8.18a3.889 3.889 0 0 0 5.496 0l42.779-42.78 42.779 42.78a3.889 3.889 0 0 0 5.496 0l8.177-8.18a3.887 3.887 0 0 0 0-5.497L71.27 57.599z" /></svg>;
+
+const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
+const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
+const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
+const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
 const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     ? <img
         src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
@@ -87,12 +89,19 @@ function TypingIndicator(props: { channelId: string, isTyping: boolean; }) {
             ? <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div>
             : null;
 }
+const getDotWidth = findByCodeLazy("<10?16:");
+const styles = findByPropsLazy("numberBadge");
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
-    let classes = cl("notification-dot");
-    if (mentionCount) classes += ` ${cl("has-mention")}`;
-    return unreadCount > 0 ? <div className={classes}>
-        {twoChars(mentionCount || unreadCount)}
-    </div> : null;
+    return unreadCount > 0 ?
+        <div
+            className={classes(styles.numberBadge, styles.baseShapeRound)}
+            style={{
+                backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
+                width: getDotWidth(mentionCount || unreadCount)
+            }}
+        >
+            {mentionCount || unreadCount}
+        </div> : null;
 };
 function ChannelEmoji({ emoji }: { emoji: string | undefined; }) {
     if (!emoji || !channelTabsSettings.store.channelNameEmojis) return null;
@@ -150,7 +159,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
 }
 
 function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Channel; }) {
-    const { guild, channel } = props;
+    const { guild, guildId, channel, channelId } = props;
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
@@ -168,45 +177,70 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
         // is this necessary?
         (o, n) => o[0] === n[0] && o[1] === n[1] && o[2] === n[2] && o[3] === n[3]
     );
-    if (props.guildId === "@me") return <>
-        <FriendsIcon height={24} width={24} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>Friends</Text>
-    </>;
-    if (props.guildId === "@favorites") return <>
-        <GuildIcon guild={GuildStore.getGuild(channel!.guild_id)} />
-        <ChannelEmoji emoji={channelEmoji} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel?.name}</Text>
-        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-        <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
-    </>;
-    if (guild && channel) return <>
-        <GuildIcon guild={guild} />
-        <ChannelEmoji emoji={channelEmoji} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>#{channel?.name}</Text>
-        <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-        <TypingIndicator channelId={channel?.id} isTyping={isTyping} />
-    </>;
+    if (guildId === "@favorites")
+        return <>
+            <GuildIcon guild={GuildStore.getGuild(channel!.guild_id)} />
+            <ChannelEmoji emoji={channelEmoji} />
+            <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
+            <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
+            <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
+        </>;
+    if (guild) {
+        if (channel)
+            return <>
+                <GuildIcon guild={guild} />
+                <ChannelEmoji emoji={channelEmoji} />
+                <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
+                <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
+                <TypingIndicator channelId={channel?.id} isTyping={isTyping} />
+            </>;
+        else {
+            let name = "Unknown (" + channelId + ")";
+            switch (channelId) {
+                case "customize-community":
+                    name = "Channels & Roles";
+                    break;
+                case "channel-browser":
+                    name = "Browse Channels";
+                    break;
+                case "@home":
+                    name = "Server Guide";
+                    break;
+            }
+            return <>
+                <GuildIcon guild={guild} />
+                <Text className={cl("channel-name-text")}>{name}</Text>
+            </>;
+        }
+    }
     if (channel && recipients?.length) {
         if (channel.type === ChannelTypes.DM) {
             const user = UserStore.getUser(recipients[0]);
             return <>
                 <UserAvatar user={user} />
-                <Text variant="text-md/semibold" className={cl("channel-name-text")}>@{user?.username}</Text>
+                <Text className={cl("channel-name-text")}>@{user?.username}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
             </>;
         } else { // Group DM
             return <>
                 <ChannelIcon channel={channel} />
-                <Text variant="text-md/semibold" className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
+                <Text className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
             </>;
         }
     }
-    else return <>
+
+    if (guildId === "@me" || guildId === undefined)
+        return <>
+            <FriendsIcon height={24} width={24} />
+            <Text className={cl("channel-name-text")}>Friends</Text>
+        </>;
+
+    return <>
         <QuestionIcon height={24} width={24} />
-        <Text variant="text-md/semibold" className={cl("channel-name-text")}>Unknown</Text>
+        <Text className={cl("channel-name-text")}>Unknown</Text>
     </>;
 }
 function ChannelTab(props: ChannelProps) {
@@ -235,19 +269,10 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
     const { openChannels } = ChannelTabsUtils;
     if (!openChannels.length) openStartupTabs(props, update);
     function handleKeybinds(e: KeyboardEvent) {
-        if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
-            const direction = e.key === "ArrowLeft" ? -1 : 1;
-            if (e.ctrlKey && e.shiftKey) {
-                // TODO: implement
-            }
-            else if (e.ctrlKey) {
-                moveToTabRelative(direction);
-                update();
-            }
-            else if (e.shiftKey) {
-                shiftCurrentTab(direction);
-                update();
-            }
+        if (e.key === "Tab" && e.ctrlKey) {
+            const direction = e.shiftKey ? -1 : 1;
+            moveToTabRelative(direction);
+            update();
         }
         // Ctrl+T is taken by discord
         else if (["N", "n"].includes(e.key) && e.ctrlKey) {
@@ -282,61 +307,39 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
 
     return <div className={cl("container")} ref={drop}>
         {openChannels.map((ch, i) => <div
-            className={cl("tab")}
-            style={isTabSelected(ch) ? { backgroundColor: "var(--background-modifier-selected)" } : undefined}
+            className={classes(cl("tab"), isTabSelected(ch) ? cl("tab-selected") : null)}
             key={i}
             onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu channelInfo={ch} pos={i} update={update} />)}
         >
-            <button className={`${cl("button")} ${cl("channel-info")}`} onClick={() => {
+            <button className={classes(cl("button"), cl("channel-info"))} onMouseDown={event => {
+                if (event.button !== 0)
+                    return;
+
                 moveToTab(i);
                 update();
             }}>
                 <ChannelTab {...ch} />
             </button>
-            {openChannels.length > 1 && <button className={`${cl("button")} ${cl("close-button")}`} onClick={() => {
+            {openChannels.length > 1 && <button className={classes(cl("button"), cl("close-button"))} onClick={() => {
                 closeTab(i);
                 update();
             }}>
-                <XIcon />
+                <XIcon width={16} height={16} />
             </button>}
         </div>)
         }
         <button onClick={() => {
             createTab(props);
             update();
-        }} className={cl("button")}><PlusIcon /></button>
+        }} className={classes(cl("button"), cl("new-button"))}><PlusIcon /></button>
     </div >;
 }
-const PreviewTab = ({ channelId, guildId }: ChannelProps) => {
-    const cl = (n: string) => `vc-channeltabs-preview-${n}`;
-    if (guildId === "@me") return <div className={cl("tab")}>
-        <FriendsIcon height={24} width={24} />
-        <Text variant="text-sm/semibold" className={cl("text")}>Friends</Text>
-    </div>;
-    const channel = ChannelStore.getChannel(channelId);
-    const guild = GuildStore.getGuild(guildId);
-    const recipients = channel?.recipients;
-    if (channel && guild) return <div className={cl("tab")}>
-        <GuildIcon guild={guild} />
-        <Text variant="text-sm/semibold" className={cl("text")}>#{channel.name}</Text>
-    </div>;
-    else if (recipients?.length) {
-        if (recipients.length === 1) {
-            const user = UserStore.getUser(recipients[0]);
-            return <div className={cl("tab")}>
-                <UserAvatar user={user} />
-                <Text variant="text-sm/semibold" className={cl("text")}>@{user?.username}</Text>
-            </div>;
-        } else {
-            return <div className={cl("tab")}>
-                <ChannelIcon channel={channel} />
-                <Text variant="text-sm/semibold" className={cl("text")}>{channel?.name || "Group DM"}</Text>
-            </div>;
-        }
-    }
-    return <div className={cl("tab")}>
-        <QuestionIcon height={24} width={24} />;
-        <Text variant="text-sm/semibold" className={cl("text")}>{guildId}/{channelId}</Text>
+const PreviewTab = (props: ChannelProps) => {
+    const guild = GuildStore.getGuild(props.guildId);
+    const channel = ChannelStore.getChannel(props.channelId);
+
+    return <div className={cl("preview-tab")}>
+        <ChannelTabContent {...props} guild={guild} channel={channel} />
     </div>;
 };
 export function ChannelTabsPreivew(p) {

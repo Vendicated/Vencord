@@ -15,9 +15,10 @@
 
 .vc-channeltabs-notification-dot {
     height: 16px;
-    width: 16px;
-    min-width: 16px;
-    border-radius: 50%;
+    padding-left: 4px;
+    padding-right: 4px;
+    min-width: 8px;
+    border-radius: 16px;
     text-align: center;
     background-color: var(--brand-experiment);
 }
@@ -34,8 +35,7 @@
 
 .vc-channeltabs-tab-base {
     border-radius: 8px;
-    padding: 2px;
-    padding-left: 6px;
+    padding: 4px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -43,8 +43,7 @@
 }
 
 .vc-channeltabs-container {
-    padding: 2px;
-    padding-bottom: 0;
+    padding: 6px;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -60,18 +59,35 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 8px 8px 0 0;
-    width: 18rem;
+    border-radius: 4px;
+    width: 12rem;
     min-width: 0;
+    margin-right: 4px;
+}
+
+.vc-channeltabs-tab-selected {
+    background-color: var(--background-modifier-selected);
+}
+
+.vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
+    background-color: var(--background-modifier-hover);
 }
 
 .vc-channeltabs-button {
     background-color: transparent;
+    color: var(--text-normal);
+}
+
+.vc-channeltabs-new-button {
+    height: 18px;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .vc-channeltabs-close-button {
+    height: 16px;
     padding: 0;
-    padding-right: 2px;
+    margin-right: 8px;
 }
 
 .vc-channeltabs-emoji-container {
