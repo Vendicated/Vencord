@@ -80,14 +80,11 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
         }
         className={cl("icon")}
     />;
-function TypingIndicator(props: { channelId: string, isTyping: boolean; }) {
-    const { channelId, isTyping } = props;
-    if (Vencord.Plugins.isPluginEnabled("TypingIndicator"))
-        return (Vencord.Plugins.plugins.TypingIndicator as any).TypingIndicator(channelId);
-    else
-        return isTyping
-            ? <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div>
-            : null;
+function TypingIndicator(props: { isTyping: boolean; }) {
+    const { isTyping } = props;
+    return isTyping
+        ? <div style={{ marginLeft: 2 }}><ThreeDots dotRadius={3} themed={true} /></div>
+        : null;
 }
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     return unreadCount > 0 ?
@@ -181,7 +178,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
             <ChannelEmoji emoji={channelEmoji} />
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-            <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
+            <TypingIndicator isTyping={isTyping} />
         </>;
     if (guild) {
         if (channel)
@@ -190,7 +187,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
                 <ChannelEmoji emoji={channelEmoji} />
                 <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-                <TypingIndicator channelId={channel?.id} isTyping={isTyping} />
+                <TypingIndicator isTyping={isTyping} />
             </>;
         else {
             let name = "Unknown (" + channelId + ")";
@@ -218,14 +215,14 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
                 <UserAvatar user={user} />
                 <Text className={cl("channel-name-text")}>@{user?.username}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-                <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
+                <TypingIndicator isTyping={isTyping} />
             </>;
         } else { // Group DM
             return <>
                 <ChannelIcon channel={channel} />
                 <Text className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-                <TypingIndicator channelId={props.channelId} isTyping={isTyping} />
+                <TypingIndicator isTyping={isTyping} />
             </>;
         }
     }
