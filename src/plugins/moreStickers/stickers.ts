@@ -1,4 +1,4 @@
-type LineSticker = {
+interface LineSticker {
     animationUrl: string,
     fallbackStaticUrl?: string,
     id: string;
@@ -8,7 +8,7 @@ type LineSticker = {
     type: string;
 };
 
-type LineStickerPack = {
+interface LineStickerPack {
     title: string;
     author: {
         name: string;
@@ -46,7 +46,7 @@ async function getLineStickers(id: string) {
         id,
         mainImage,
         stickers
-    };
+    } as LineStickerPack;
 
     return stickerPack;
 }
