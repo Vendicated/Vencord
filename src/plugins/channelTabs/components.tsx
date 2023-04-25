@@ -19,7 +19,7 @@
 import "./style.css";
 
 import { Flex } from "@components/Flex.jsx";
-import { LazyComponent, useForceUpdater } from "@utils/misc.jsx";
+import { classes, LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
@@ -41,19 +41,21 @@ enum ChannelTypes {
 const ChannelNameEmojisStore = findStoreLazy("ChannelNameEmojisStore");
 // also takes a channel param, but isn't used anywhere within the function
 const useChannelEmojiBgColor: (emoji: string) => any = findByCodeLazy('="#607D8B";');
+const getDotWidth = findByCodeLazy("<10?16:");
+const styles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
-const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
-const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
-const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
-
-const cl = (name: string) => `vc-channeltabs-${name}`;
 
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
 const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
+const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
+const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
+
+const cl = (name: string) => `vc-channeltabs-${name}`;
+
 const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     ? <img
         src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
@@ -78,8 +80,6 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
         }
         className={cl("icon")}
     />;
-
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 function TypingIndicator(props: { channelId: string, isTyping: boolean; }) {
     const { channelId, isTyping } = props;
     if (Vencord.Plugins.isPluginEnabled("TypingIndicator"))
@@ -89,8 +89,6 @@ function TypingIndicator(props: { channelId: string, isTyping: boolean; }) {
             ? <div style={{ marginLeft: 6 }}><ThreeDots dotRadius={3} themed={true} /></div>
             : null;
 }
-const getDotWidth = findByCodeLazy("<10?16:");
-const styles = findByPropsLazy("numberBadge");
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     return unreadCount > 0 ?
         <div
