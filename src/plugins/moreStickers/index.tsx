@@ -28,56 +28,58 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".consolidateGifsStickersEmojis",
-            replacement: {
+            find: "().stickerIcon,",
+            replacement: [{
+                match: /(children:\(0,\w\.jsx\)\()(\w{2})(,{innerClassName.{20,30}\.stickerButton)/,
+                replace: (_, head, button, tail) => {
+                    const isMoreStickers = "arguments[0]?.type === \"more-stickers\"";
+                    return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
+                }
+            }, {
                 match: /null==\(null===\(\w=\w\.stickers\)\|\|void 0.*?\.consolidateGifsStickersEmojis.*?(\w)\.push\((\(0,\w\.jsx\))\((\w+),.*?"sticker"\)\)/,
                 replace: (m, _, jsx, compo) => {
                     const c = "arguments[0].type";
-                    return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:"morestickers"},"more-stickers"))`;
+                    return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:"more-stickers"},"more-stickers"))`;
                 }
-            }
+            }, {
+                match: /(var \w,\w=\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\()(.*?\.STICKER)(,.*?;)/,
+                replace: (_, head, section, tail) => {
+                    const isMoreStickers = "arguments[0]?.type === \"more-stickers\"";
+                    return `${head}${isMoreStickers}?"more-stickers":${section}${tail}`;
+                }
+            }]
         },
         {
             find: ".Messages.EXPRESSION_PICKER_GIF",
             replacement: {
-                match: /role:"tablist",.{10,20}\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\])/,
+                match: /role:"tablist",.{10,20}\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/,
                 replace: m => {
                     const stickerTabRegex = /(\w)\?(\(.+?\))\((\w{1,2}),.*?isActive:(\w)==.*?:null/;
-
-                    return m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab) => {
+                    const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab) => {
+                        const isActive = `${currentTab}==="more-stickers"`;
                         return (
                             `${_m},${canUseStickers}?` +
-                            `${jsx}(${tabHeaderComp},{id:"morestickers-picker-tab","aria-controls":"morestickers-picker-tab-panel","aria-selected":${currentTab}==="morestickers",isActive:${currentTab}==="morestickers",autoFocus:false,viewType:"sticker",children:${jsx}("div",{children:"More Stickers"})})` +
+                            `${jsx}(${tabHeaderComp},{id:"more-stickers-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:false,viewType:"more-stickers",children:${jsx}("div",{children:"More Stickers"})})` +
                             ":null"
                         );
+                    });
+
+                    return res.replace(/:null,((\w)===.*?\.STICKER&&\w\?(\(.*?\)).*?(\{.*?,onSelectSticker:.*?\})\):null)/, (_, _m, currentTab, jsx, props) => {
+                        return `:null,${currentTab}==="more-stickers"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
                     });
                 }
             }
         },
-        {
-            find: "().stickerIcon,",
-            replacement: {
-                match: /(children:\(0,\w\.jsx\)\()(\w{2})(,{innerClassName.{20,30}\.stickerButton)/,
-                replace: (_, head, button, tail) => {
-                    const isMoreStickers = "(arguments || [])[0]?.type === \"morestickers\"";
-                    return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
-                }
-            }
-        }
     ],
     stickerButton({
         innerClassName,
         isActive,
         onClick
     }) {
-        console.log("ayo??", onClick);
         return (
             <button
                 className={innerClassName}
-                onClick={() => {
-                    console.log("ayo?");
-                    onClick();
-                }}
+                onClick={onClick}
                 style={{ backgroundColor: "transparent" }}
             >
                 {/*
@@ -96,5 +98,8 @@ export default definePlugin({
                 </svg>
             </button>
         );
+    },
+    moreStickersComponent() {
+        return <>Hello</>;
     }
 });
