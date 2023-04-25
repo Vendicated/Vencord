@@ -34,11 +34,11 @@ interface IMessageCreate {
 }
 
 function base64UrlEncode(str: Uint8Array): string {
-    return btoa(new TextDecoder().decode(str));
+    return btoa(String.fromCharCode(...str));
 }
 
 function base64UrlDecode(str: string): Uint8Array {
-    return new TextEncoder().encode(atob(str));
+    return new Uint8Array(atob(str).split("").map(c => { return c.charCodeAt(0); }));
 }
 
 async function encrypt(text: string): Promise<string> {
@@ -184,7 +184,7 @@ export default definePlugin({
     ],
 
     flux: {
-        MESSAGE_CREATE(e: IMessageCreate) {
+        async MESSAGE_CREATE(e: IMessageCreate) {
             if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
             if (e.message.state === "SENDING") return;
             if (!e.message.content.startsWith("nya>.<")) return;
