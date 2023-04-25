@@ -74,6 +74,18 @@
     padding-right: 2px;
 }
 
+.vc-channeltabs-emoji-container {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+}
+
+.vc-channeltabs-emoji {
+    height: 16px;
+    width: 16px;
+    padding-top: 4px;
+}
+
 .vc-channeltabs-preview-tab {
     display: flex;
     flex-direction: row;
