@@ -33,13 +33,12 @@ interface IMessageCreate {
     message: Message;
 }
 
-function base64urlencode(str: Uint8Array): string {
-    const b64 = btoa(String.fromCharCode.apply(null, str));
-    return b64;
+function base64UrlEncode(str: Uint8Array): string {
+    return btoa(new TextDecoder().decode(str));
 }
 
-function base64urldecode(str: string): Uint8Array {
-    return new Uint8Array(atob(str).split("").map(c => { return c.charCodeAt(0); }));
+function base64UrlDecode(str: string): Uint8Array {
+    return new TextEncoder().encode(atob(str));
 }
 
 async function encrypt(text: string): Promise<string> {
@@ -80,17 +79,17 @@ async function encrypt(text: string): Promise<string> {
 
     return [
         "nya",
-        base64urlencode(salt),
-        base64urlencode(block),
-        base64urlencode(cipherArr)
+        base64UrlEncode(salt),
+        base64UrlEncode(block),
+        base64UrlEncode(cipherArr)
     ].join(">.<");
 }
 
 async function decrypt(text: string): Promise<string> {
     const spl = text.split(">.<");
-    const one = base64urldecode(spl[1]);
-    const two = base64urldecode(spl[2]);
-    const three = base64urldecode(spl[3]);
+    const one = base64UrlDecode(spl[1]);
+    const two = base64UrlDecode(spl[2]);
+    const three = base64UrlDecode(spl[3]);
     const pass = new TextEncoder().encode("8f5SCpAbDyCdtPTNBwQpYPJVussZFXVaVWP587ZNgZr3uxKGzRLf4naudDBxmdw5");
 
     const key = await crypto.subtle.importKey("raw", pass, "PBKDF2", false, ["deriveKey"]);
@@ -184,29 +183,27 @@ export default definePlugin({
         }
     ],
 
-    async onMessage(e: IMessageCreate) {
-        if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
-        if (e.message.state === "SENDING") return;
-        if (!e.message.content.startsWith("nya>.<")) return;
-        try {
-            const matches = regex.exec(e.message.content);
-            if (matches) {
-                await decrypt(matches[0]).then((text: string) => {
-                    e.message.content = text;
-                    const { message } = e;
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message
+    flux: {
+        MESSAGE_CREATE(e: IMessageCreate) {
+            if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
+            if (e.message.state === "SENDING") return;
+            if (!e.message.content.startsWith("nya>.<")) return;
+            try {
+                const matches = regex.exec(e.message.content);
+                if (matches) {
+                    await decrypt(matches[0]).then((text: string) => {
+                        e.message.content = text;
+                        const { message } = e;
+                        FluxDispatcher.dispatch({
+                            type: "MESSAGE_UPDATE",
+                            message
+                        });
                     });
-                });
+                }
+            } catch (err) {
+                console.log(err);
             }
-        } catch (err) {
-            console.log(err);
         }
-    },
-
-    start() {
-        FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
     },
 
     MeowcryptSend: ErrorBoundary.wrap(MeowcryptSend, { noop: true }),
