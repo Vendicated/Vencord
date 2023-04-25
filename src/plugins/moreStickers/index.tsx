@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MoreStickers",
     description: "Adds sticker packs from apps like LINE",
-    authors: [Devs.Arjix],
+    authors: [Devs.Arjix, Devs.Leko],
 
     patches: [{
         find: ".consolidateGifsStickersEmojis",
