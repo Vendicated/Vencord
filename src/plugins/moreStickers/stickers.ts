@@ -1,52 +1,62 @@
-interface LineSticker {
-    animationUrl: string,
-    fallbackStaticUrl?: string,
-    id: string;
-    popupUrl: string;
-    soundUrl: string;
-    staticUrl: string;
-    type: string;
-};
+import { Sticker, StickerPack, StickerPackMeta } from "./types";
+import { Mutex } from "./mutex";
 
-interface LineStickerPack {
-    title: string;
-    author: {
-        name: string;
-        url: string;
-    },
-    id: string;
-    mainImage: LineSticker;
-    stickers: LineSticker[];
-};
+import * as DataStore from "@api/DataStore";
+const mutex = new Mutex();
+
+const PACKS_KEY = "Vencord-MoreStickers-Packs";
 
 /**
-  * Get stickers from LINE
+  * Convert StickerPack to StickerPackMeta
   *
-  * @param {string} id The id of the sticker pack.
-  * @return {LineStickerPack} The sticker pack.
+  * @param {StickerPack} sp The StickerPack to convert.
+  * @return {StickerPackMeta} The sticker pack metadata.
   */
-async function getLineStickers(id: string) {
-    const res = await fetch(`https://store.line.me/stickershop/product/${id}/en`);
-    const html = await res.text();
+function stickerPackToMeta(sp: StickerPack): StickerPackMeta {
+    return {
+        id: sp.id,
+        title: sp.title,
+        author: sp.author,
+        logo: sp.logo
+    };
+}
 
-    const doc = new DOMParser().parseFromString(html, "text/html");
+/**
+  * Save a sticker pack
+  *
+  * @param {StickerPack} sp The StickerPack to save.
+  * @return {Promise<void>}
+  */
+export async function saveStickerPack(sp: StickerPack) {
+    const meta = stickerPackToMeta(sp);
 
-    const stickers =
-        [...doc.querySelectorAll(".FnStickerPreviewItem")]
-            .map(x => JSON.parse((x as HTMLElement).dataset.preview ?? "null"))
-            .filter(x => x !== null) as LineSticker[];
+    await Promise.all([
+        DataStore.set(`${sp.id}`, sp),
+        (async () => {
+            const unlock = await mutex.lock();
+            const packs = await DataStore.get(PACKS_KEY) as (StickerPackMeta[] | undefined);
+            await DataStore.set(PACKS_KEY, packs === undefined ? [meta] : [...packs, meta]);
+            unlock();
+        })()
+    ]);
+}
 
-    const mainImage = JSON.parse((doc.querySelector("[ref=mainImage]") as HTMLElement)?.dataset?.preview ?? "null") as LineSticker;
-    const stickerPack = {
-        title: doc.querySelector("[data-test=sticker-name-title]")?.textContent ?? "null",
-        author: {
-            name: doc.querySelector("[data-test=sticker-author]")?.textContent ?? "null",
-            url: "https://store.line.me/" + (doc.querySelector("[data-test=sticker-author]")?.getAttribute("href") ?? "null")
-        },
-        id,
-        mainImage,
-        stickers
-    } as LineStickerPack;
+/**
+  * Get sticker packs' metadata
+  *
+  * @return {Promise<StickerPackMeta[]>}
+  */
+export async function getStickerPacks(): Promise<StickerPackMeta[]> {
+    const packs = await DataStore.get(PACKS_KEY) as (StickerPackMeta[] | undefined);
+    return packs ?? [];
+}
 
-    return stickerPack;
+/**
+ * Get a sticker pack
+ * 
+ * @param {string} id The id of the sticker pack.
+ * @return {Promise<StickerPack | undefined>}
+ * */
+export async function getStickerPack(id: string): Promise<StickerPack | undefined> {
+    return await DataStore.get(id) as StickerPack | undefined;
 }
