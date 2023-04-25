@@ -99,7 +99,11 @@ export default definePlugin({
             </button>
         );
     },
-    moreStickersComponent() {
+    moreStickersComponent({
+        isLoading: boolean,
+        channel: Channel,
+        closePopout: Function
+    }) {
         return <>Hello</>;
     }
 });
