@@ -1,4 +1,4 @@
-import { Sticker, StickerPack, StickerPackMeta } from "./types";
+import { StickerPack, StickerPackMeta } from "./types";
 import { Mutex } from "./mutex";
 
 import * as DataStore from "@api/DataStore";
@@ -22,27 +22,31 @@ function stickerPackToMeta(sp: StickerPack): StickerPackMeta {
 }
 
 /**
-  * Save a sticker pack
+  * Save a sticker pack to the DataStore
   *
   * @param {StickerPack} sp The StickerPack to save.
   * @return {Promise<void>}
   */
-export async function saveStickerPack(sp: StickerPack) {
+export async function saveStickerPack(sp: StickerPack): Promise<void> {
     const meta = stickerPackToMeta(sp);
 
     await Promise.all([
         DataStore.set(`${sp.id}`, sp),
         (async () => {
             const unlock = await mutex.lock();
-            const packs = await DataStore.get(PACKS_KEY) as (StickerPackMeta[] | undefined);
-            await DataStore.set(PACKS_KEY, packs === undefined ? [meta] : [...packs, meta]);
-            unlock();
+
+            try {
+                const packs = await DataStore.get(PACKS_KEY) as (StickerPackMeta[] | undefined);
+                await DataStore.set(PACKS_KEY, packs === undefined ? [meta] : [...packs, meta]);
+            } finally {
+                unlock();
+            }
         })()
     ]);
 }
 
 /**
-  * Get sticker packs' metadata
+  * Get sticker packs' metadata from the DataStore
   *
   * @return {Promise<StickerPackMeta[]>}
   */
@@ -52,7 +56,7 @@ export async function getStickerPacks(): Promise<StickerPackMeta[]> {
 }
 
 /**
- * Get a sticker pack
+ * Get a sticker pack from the DataStore
  * 
  * @param {string} id The id of the sticker pack.
  * @return {Promise<StickerPack | undefined>}
