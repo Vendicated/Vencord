@@ -20,6 +20,8 @@ import "./style.css";
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Text } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
 export default definePlugin({
     name: "MoreStickers",
@@ -100,10 +102,14 @@ export default definePlugin({
         );
     },
     moreStickersComponent({
+        isLoading,
+        channel,
+        closePopout
+    }: {
         isLoading: boolean,
         channel: Channel,
-        closePopout: Function
+        closePopout: Function;
     }) {
-        return <>Hello</>;
+        return <Text>Is in DM? {channel.isDM() ? "Yes" : "No"}</Text>;
     }
 });
