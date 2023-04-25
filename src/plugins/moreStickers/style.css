@@ -1,0 +1,10 @@
+.more-stickers-icon {
+    fill: #b9bbbe;
+    margin-top: 20%;
+}
+
+.more-stickers-icon:hover,
+.more-stickers-icon:focus-visible,
+.more-stickers-icon-active {
+    fill: #fff;
+}
