@@ -255,24 +255,22 @@ function ProfilesMenu() {
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Meowcrypt Profiles"
         >
-            <Menu.MenuGroup label="Profiles">
-                {profiles.map(profile => (
-                    <Menu.MenuRadioItem
-                        key={profile.name}
-                        group="meowcrypt-profile"
-                        id={"meowcrypt-profile-" + profile.name}
-                        label={profile.name}
-                        checked={profile.name === currentProfile}
-                        action={async () => await setCurrentProfile(profile.name).then(refetchProfile)}
-                    />
-                ))}
-            </Menu.MenuGroup>
-
-            <Menu.MenuSeparator />
-
             <Menu.MenuGroup
-                label="Options"
+                label="Meowcrypt"
             >
+                <Menu.MenuItem id="profiles" label="Profiles">
+                    {profiles.map(profile => (
+                        <Menu.MenuRadioItem
+                            key={profile.name}
+                            group="meowcrypt-profile"
+                            id={"meowcrypt-profile-" + profile.name}
+                            label={profile.name}
+                            checked={profile.name === currentProfile}
+                            action={async () => await setCurrentProfile(profile.name).then(refetchProfile)}
+                        />
+                    ))}
+                </Menu.MenuItem>
+
                 <Menu.MenuItem
                     key="add-profile"
                     id="meowcrypt-add-profile"
