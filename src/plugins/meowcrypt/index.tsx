@@ -73,11 +73,7 @@ export const addProfile = async (profile: Profile) => {
 };
 const removeProfile = async (name: string) => {
     await DataStore.update(DATA_KEY, (old: Profile[] | undefined) => {
-        var array = old ?? [];
-
-        array.filter((p: Profile) => p.name !== name);
-
-        return array;
+        return old?.filter((p: Profile) => p.name !== name) ?? [];
     });
 };
 
