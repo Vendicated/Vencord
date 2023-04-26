@@ -24,9 +24,9 @@ import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import { PickerBody } from "./components/PickerBody";
-import { PickerHeader } from "./components/PickerHeader";
-import { Wrapper } from "./components/Wrapper";
+import { PickerBody } from "./components/pickerBody";
+import { PickerHeader } from "./components/pickerHeader";
+import { Wrapper } from "./components/wrapper";
 
 
 const cl = classNameFactory("vc-more-stickers-");

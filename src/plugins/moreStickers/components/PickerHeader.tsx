@@ -21,7 +21,7 @@ import { TextInput } from "@webpack/common";
 
 import { Header } from "./header";
 import { IconContainer } from "./iconContainer";
-import { SearchIcon } from "./SearchIcon";
+import { SearchIcon } from "./searchIcon";
 
 const cl = classNameFactory("vc-more-stickers-");
 export const PickerHeader = () => {

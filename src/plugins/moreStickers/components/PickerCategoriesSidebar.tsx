@@ -21,8 +21,8 @@ import { React } from "@webpack/common";
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
 import { CategoryWrapper } from "./categoryWrapper";
-import { RecentlyUsedIcon } from "./RecentlyUsedIcon";
-import { StickerCategory } from "./StickerCategory";
+import { RecentlyUsedIcon } from "./recentlyUsedIcon";
+import { StickerCategory } from "./stickerCategory";
 
 export interface StickerCategory {
     id: string;
