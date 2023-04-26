@@ -17,7 +17,7 @@
 */
 
 
-import { PickerSidebar } from "./pickerCategoriesSidebar";
+import { PickerSidebar } from "./PickerCategoriesSidebar";
 
 
 export const PickerBody = () => {
