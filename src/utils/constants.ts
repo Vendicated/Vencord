@@ -277,5 +277,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     KannaDev: {
         name: "Kanna",
         id: 317728561106518019n
+    },
+    Jup: {
+        name: "Jup",
+        id: 1088725200000000000n
     }
 });
