@@ -52,7 +52,7 @@ export function AddProfileModal(props: any) {
                     onChange={setKey}
                 />
 
-                <Forms.FormTitle tag="h5">Color</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">Color (in hex, eg. #6969ff)</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     onChange={setColor}
