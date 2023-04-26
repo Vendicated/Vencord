@@ -24,8 +24,8 @@ import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import { PickerBody } from "./components/pickerBody";
-import { PickerHeader } from "./components/pickerHeader";
+import { PickerBody } from "./components/PickerBody";
+import { PickerHeader } from "./components/PickerHeader";
 import { Wrapper } from "./components/wrapper";
 
 
@@ -91,9 +91,7 @@ export default definePlugin({
                 onClick={onClick}
                 style={{ backgroundColor: "transparent" }}
             >
-                {/*
-                    Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29
-                */}
+                {/* Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29 */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -112,7 +110,6 @@ export default definePlugin({
         channel,
         closePopout
     }: {
-        isLoading: boolean,
         channel: Channel,
         closePopout: Function;
     }) {
