@@ -1,0 +1,3 @@
+foreignObject:hover {
+    mask: url(#svg-mask-squircle) !important;
+}
