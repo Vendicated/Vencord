@@ -47,6 +47,11 @@ const settings = definePluginSettings({
         description: "Close all folders when selecting a server not in a folder",
         default: false,
     },
+    alwaysClose: {
+        type: OptionType.BOOLEAN,
+        description: "Close all folders when selecting any server in any folder",
+        default: false,
+    },
     closeAllHomeButton: {
         type: OptionType.BOOLEAN,
         description: "Close all folders when clicking on the home button",
@@ -111,11 +116,17 @@ export default definePlugin({
         },
         {
             find: '("guildsnav")',
-            predicate: () => settings.store.closeAllHomeButton,
-            replacement: {
-                match: ",onClick:function(){if(!__OVERLAY__){",
-                replace: "$&$self.closeFolders();"
-            }
+            replacement : [
+                {
+                    predicate: () => settings.store.closeAllHomeButton,
+                    match: ",onClick:function(){if(!__OVERLAY__){",
+                    replace: "$&$self.closeFolders();"
+                },
+                {
+                    predicate: () => settings.store.alwaysClose,
+                    match: /(GUILD_TOOLTIP_A11Y_LABEL(?!.{5,50}FAVORITES).{40,70},onClick:)(\i)/,
+                    replace: "$1function(){$self.closeFolders();$2(...arguments)}"
+                }]
         }
     ],
 
