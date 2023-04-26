@@ -135,3 +135,12 @@
 .vc-more-stickers-sticker-category-active {
     background-color: var(--background-modifier-hover);
 }
+
+.vc-more-stickers-clear-icon {
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.vc-more-stickers-clear-icon:hover {
+    color: var(--interactive-hover);
+}

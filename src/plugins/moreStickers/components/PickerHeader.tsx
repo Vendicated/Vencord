@@ -22,7 +22,7 @@ import { React, TextInput } from "@webpack/common";
 
 import { Header } from "./header";
 import { IconContainer } from "./iconContainer";
-import { SearchIcon } from "./searchIcon";
+import { CancelIcon, SearchIcon } from "./icons";
 
 const cl = classNameFactory("vc-more-stickers-");
 
@@ -34,6 +34,12 @@ const debounceQueryChange = debounce((cb, value) => cb(value), 150);
 
 export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
     const [query, setQuery] = React.useState<string | undefined>();
+
+    const update = (value: string, now = false) => {
+        setQuery(value);
+        if (now) onQueryChange(value);
+        else debounceQueryChange(onQueryChange, value);
+    };
 
     return (
         <Header>
@@ -47,15 +53,16 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
                             autoFocus={true}
                             value={query}
 
-                            onChange={(value: string) => {
-                                setQuery(value);
-                                debounceQueryChange(onQueryChange, value);
-                            }}
+                            onChange={(value: string) => update(value)}
                         />
                     </div>
                     <div className={cl("picker-search-icon")}>
                         <IconContainer>
-                            <SearchIcon />
+                            {
+                                (query && query.length > 0) ?
+                                    <CancelIcon className="vc-more-stickers-clear-icon" width={20} height={20} onClick={() => update("", true)} /> :
+                                    <SearchIcon width={20} height={20} color="var(--text-muted)" />
+                            }
                         </IconContainer>
                     </div>
                 </div>
