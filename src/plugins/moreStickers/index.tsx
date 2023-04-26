@@ -33,6 +33,8 @@ import { RecentlyUsedIcon } from "./components/recentlyUsedIcon";
 import { SearchIcon } from "./components/searchIcon";
 import { StickerCategory } from "./components/stickerCategory";
 import { Wrapper } from "./components/wrapper";
+
+
 const cl = classNameFactory("vc-more-stickers-");
 export default definePlugin({
     name: "MoreStickers",
