@@ -16,43 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 
-import { CategoryImage } from "./categoryImage";
-import { CategoryScroller } from "./categoryScroller";
-import { CategoryWrapper } from "./categoryWrapper";
-import { RecentlyUsedIcon } from "./RecentlyUsedIcon";
-import { StickerCategory } from "./StickerCategory";
+import { PickerSidebar } from "./PickerCategoriesSidebar";
 
-
-const cl = classNameFactory("vc-more-stickers-");
 
 export const PickerBody = () => {
     return (
-        <CategoryWrapper>
-            <CategoryScroller>
-                <StickerCategory style={{
-                    padding: "4px",
-                    boxSizing: "border-box"
-                }}>
-                    <RecentlyUsedIcon />
-                </StickerCategory>
-                <StickerCategory>
-                    <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
-                </StickerCategory>
-                <StickerCategory>
-                    <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
-                </StickerCategory>
-                <StickerCategory>
-                    <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
-                </StickerCategory>
-                <StickerCategory>
-                    <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
-                </StickerCategory>
-                <StickerCategory>
-                    <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
-                </StickerCategory>
-            </CategoryScroller>
-        </CategoryWrapper>
+        <div>
+            <PickerSidebar
+                categories={new Array(10).fill({
+                    packName: "Vencord",
+                    packIcon: "https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40"
+                }).map((cat, idx) => ({ id: (idx + 1).toString(), ...cat }))}
+                onCategorySelect={category => {
+                    console.log("Selected category: ", category);
+                }}
+            />
+        </div>
     );
 };

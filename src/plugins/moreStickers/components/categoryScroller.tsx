@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function CategoryScroller(props: { children: JSX.Element | JSX.Element[]; }) {
+export function CategoryScroller(props: { children: React.ReactNode; }) {
     const children = Array.isArray(props.children) ? props.children : [props.children];
+
     return (
         <div className="vc-more-stickers-category-scroller">
             <div>{
                 children.map(child => (
-                    <div role="listitem" aria-setsize={children.length} aria-posinset={0}>
+                    <div role="listitem">
                         {child}
                     </div>
                 ))

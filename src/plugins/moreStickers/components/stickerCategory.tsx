@@ -16,22 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function StickerCategory(props: {
-    children: JSX.Element | JSX.Element[],
+export interface StickerCategoryProps {
+    children: React.ReactNode;
+    onClick?: () => void;
+    isActive: boolean;
     style?: React.CSSProperties;
-}) {
+}
+
+export function StickerCategory(props: StickerCategoryProps) {
     return (
-        <div style={{
-            ...props.style,
-            borderRadius: "4px",
-            color: "var(--interactive-normal)",
-            cursor: "pointer",
-            height: "32px",
-            marginBottom: "8px",
-            width: "32px"
-        }}
-        role="button"
-        tabIndex={0}
+        <div
+            style={props.style}
+            className={
+                "vc-more-stickers-sticker-category" +
+                (props.isActive ? " vc-more-stickers-sticker-category-active" : "")
+            }
+            tabIndex={0}
+            role="button"
+            onClick={props.onClick}
         >
             {props.children}
         </div>

@@ -44,9 +44,29 @@
     margin-right: 8px;
 }
 
+.vc-more-stickers-foreign-object > img {
+    text-indent: -9999px;
+    align-items: center;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
 .vc-more-stickers-foreign-object:hover {
     /* stylelint-disable-next-line function-url-quotes */
     mask: url(#svg-mask-squircle) !important;
+}
+
+.vc-more-stickers-category-wrapper {
+    background-color: var(--background-tertiary);
+    position: absolute;
+    overflow: hidden;
+    width: 48px;
+    top: 50px;
+    left: 0;
 }
 
 .vc-more-stickers-category-scroller {
@@ -78,16 +98,6 @@
     display: none;
 }
 
-.vc-more-stickers-category-wrapper {
-    top: 50px;
-    background-color: var(--background-tertiary);
-    position: absolute;
-    right: 0;
-    left: 0;
-    overflow: hidden;
-    width: 48px;
-}
-
 .vc-more-stickers-header {
     box-shadow: var(--elevation-low);
     grid-column: 1/3;
@@ -97,4 +107,17 @@
     padding: 0 16px 16px;
     display: flex;
     align-items: center;
+}
+
+.vc-more-stickers-sticker-category {
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+.vc-more-stickers-sticker-category:hover,
+.vc-more-stickers-sticker-category-active {
+    background-color: var(--background-modifier-hover);
 }

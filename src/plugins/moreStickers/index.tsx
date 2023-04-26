@@ -109,7 +109,6 @@ export default definePlugin({
         );
     },
     moreStickersComponent({
-        isLoading,
         channel,
         closePopout
     }: {
