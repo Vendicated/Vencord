@@ -16,27 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Text } from "@webpack/common";
 
-import { PickerSidebar } from "./PickerCategoriesSidebar";
-import { PickerContent } from "./PickerContent";
-
-export interface PickerBodyProps {
-    searchQuery?: string;
+export interface PickerContent {
+    query?: string;
 }
 
-export const PickerBody = ({ searchQuery }: PickerBodyProps) => {
+export const PickerContent = ({ query }: PickerContent) => {
     return (
-        <div>
-            <PickerSidebar
-                categories={new Array(10).fill({
-                    packName: "Vencord",
-                    packIcon: "https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40"
-                }).map((cat, idx) => ({ id: (idx + 1).toString(), ...cat }))}
-                onCategorySelect={category => {
-                    console.log("Selected category: ", category);
-                }}
-            />
-            <PickerContent query={searchQuery} />
+        <div className="vc-more-stickers-picker-content">
+            <Text className={"temporary-text-will-be-removed"}>Search query (debounced): "{query}"</Text>
         </div>
     );
 };

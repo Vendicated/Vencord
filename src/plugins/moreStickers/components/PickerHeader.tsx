@@ -17,24 +17,40 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import { TextInput } from "@webpack/common";
+import { debounce } from "@utils/debounce";
+import { React, TextInput } from "@webpack/common";
 
 import { Header } from "./header";
 import { IconContainer } from "./iconContainer";
 import { SearchIcon } from "./searchIcon";
 
 const cl = classNameFactory("vc-more-stickers-");
-export const PickerHeader = () => {
+
+export interface PickerHeaderProps {
+    onQueryChange: (query: string) => void;
+}
+
+const debounceQueryChange = debounce((cb, value) => cb(value), 150);
+
+export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
+    const [query, setQuery] = React.useState<string | undefined>();
+
     return (
         <Header>
             <div className={cl("picker-container")}>
                 <div>
                     <div className={cl("picker-search-box")}>
                         <TextInput
-                            placeholder="Search stickers"
-                            onChange={(v, n) => console.log(v, n)}
                             style={{ height: "30px" }}
+
+                            placeholder="Search stickers"
                             autoFocus={true}
+                            value={query}
+
+                            onChange={(value: string) => {
+                                setQuery(value);
+                                debounceQueryChange(onQueryChange, value);
+                            }}
                         />
                     </div>
                     <div className={cl("picker-search-icon")}>

@@ -113,10 +113,12 @@ export default definePlugin({
         channel: Channel,
         closePopout: Function;
     }) {
+        const [query, setQuery] = React.useState<string | undefined>();
+
         return (
             <Wrapper>
-                <PickerHeader />
-                <PickerBody />
+                <PickerHeader onQueryChange={setQuery} />
+                <PickerBody searchQuery={query} />
             </Wrapper>
         );
     }
