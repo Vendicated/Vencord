@@ -58,23 +58,27 @@ interface IMessageCreate {
 const getProfiles = () => DataStore.get(DATA_KEY).then<Profile[]>(p => p ?? []);
 const getProfile = (name: string) => DataStore.get(DATA_KEY).then<Profile | null>((p: Profile[]) => (p ?? []).find((p2: Profile) => p2.name === name) ?? null);
 export const addProfile = async (profile: Profile) => {
-    var profiles = await getProfiles();
-    let matchedNew = false;
-    profiles.forEach(p => {
-        if (p.name === profile.name) matchedNew = true;
+    await DataStore.update(DATA_KEY, (old: Profile[] | undefined) => {
+        var array = old ?? [];
+
+        const matchedNew = array.some(p => p.name === profile.name);
+        if (matchedNew) {
+            return array;
+        }
+
+        array.push(profile);
+        return array;
     });
-    if (matchedNew) {
-        await removeProfile(profile.name);
-    }
-    profiles.push(profile);
-    DataStore.set(DATA_KEY, profiles);
-    return profiles;
+    return await getProfiles();
 };
 const removeProfile = async (name: string) => {
-    let profiles = await getProfiles();
-    profiles = await profiles.filter((p: Profile) => p.name !== name);
-    DataStore.set(DATA_KEY, profiles);
-    return profiles;
+    await DataStore.update(DATA_KEY, (old: Profile[] | undefined) => {
+        var array = old ?? [];
+
+        array.filter((p: Profile) => p.name !== name);
+
+        return array;
+    });
 };
 
 const getCurrentProfile = () => DataStore.get(CURRENT_KEY).then<string>(c => c ?? "Public");
@@ -238,13 +242,9 @@ function ProfilesMenu() {
 
     const [profiles] = useAwaiter(async () => {
         const p = await getProfiles();
-        let matchedPublic = false;
-        p.forEach(async profile => {
-            if (profile.name === "Public") matchedPublic = true;
-        });
-        if (!matchedPublic) {
-            const p2 = await addProfile(publicProfile);
-            return p2;
+        const hasPublic = p.some(p => p.name === "Public");
+        if (!hasPublic) {
+            return addProfile(publicProfile);
         }
         return p;
     }, { fallbackValue: [publicProfile] });
@@ -266,7 +266,7 @@ function ProfilesMenu() {
                             id={"meowcrypt-profile-" + profile.name}
                             label={profile.name}
                             checked={profile.name === currentProfile}
-                            action={async () => await setCurrentProfile(profile.name).then(refetchProfile)}
+                            action={() => setCurrentProfile(profile.name).then(refetchProfile)}
                         />
                     ))}
                 </Menu.MenuItem>
@@ -282,7 +282,7 @@ function ProfilesMenu() {
                     key="delete-profile"
                     id="meowcrypt-delete-profile"
                     label="Delete Current Profile"
-                    action={async () => await removeProfile(currentProfile).then(async () => await setCurrentProfile("Public").then(refetchProfile))}
+                    action={() => removeProfile(currentProfile).then(() => setCurrentProfile("Public")).then(refetchProfile)}
                 />
             </Menu.MenuGroup>
         </Menu.Menu>
