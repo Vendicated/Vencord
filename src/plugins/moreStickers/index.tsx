@@ -32,7 +32,7 @@ import { Wrapper } from "./components/wrapper";
 const cl = classNameFactory("vc-more-stickers-");
 export default definePlugin({
     name: "MoreStickers",
-    description: "Adds sticker packs from apps like LINE",
+    description: "Adds sticker packs from other social media platforms. (e.g. LINE)",
     authors: [Devs.Arjix, Devs.Leko],
 
     patches: [
