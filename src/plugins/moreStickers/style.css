@@ -43,3 +43,58 @@
     box-sizing: border-box;
     margin-right: 8px;
 }
+
+.vc-more-stickers-foreign-object:hover {
+    /* stylelint-disable-next-line function-url-quotes */
+    mask: url(#svg-mask-squircle) !important;
+}
+
+.vc-more-stickers-category-scroller {
+    overflow: hidden scroll;
+    padding-right: 0;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.vc-more-stickers-category-scroller > :first-child {
+    inset: 8px;
+    contain: layout;
+    position: absolute;
+}
+
+.vc-more-stickers-category-scroller > :last-child {
+    position: "absolute";
+    pointer-events: none;
+    min-height: 0;
+    min-width: 1px;
+    flex: 0 0 auto;
+    height: 0;
+}
+
+.vc-more-stickers-category-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.vc-more-stickers-category-wrapper {
+    top: 50px;
+    background-color: var(--background-tertiary);
+    position: absolute;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    width: 48px;
+}
+
+.vc-more-stickers-header {
+    box-shadow: var(--elevation-low);
+    grid-column: 1/3;
+    grid-row: 1/2;
+    min-height: 1px;
+    z-index: 1;
+    padding: 0 16px 16px;
+    display: flex;
+    align-items: center;
+}
