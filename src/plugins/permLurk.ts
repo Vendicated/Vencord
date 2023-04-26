@@ -33,7 +33,6 @@ export default definePlugin({
                 findByProps("getGuildCount").getGuild(guildId).joinedAt = new Date;
                 findByProps("lurkingGuildIds").lurkingGuildIds().pop();
                 findByProps("joinGuild").transitionToGuildSync(guildId);
-                console.log("lol");
             }, 600);
 
         }
