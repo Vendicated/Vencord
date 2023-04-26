@@ -1,10 +1,45 @@
-.more-stickers-icon {
+.vc-more-stickers-icon {
     fill: #b9bbbe;
     margin-top: 20%;
 }
 
-.more-stickers-icon:hover,
-.more-stickers-icon:focus-visible,
-.more-stickers-icon-active {
+.vc-more-stickers-icon:hover,
+.vc-more-stickers-icon:focus-visible,
+.vc-more-stickers-icon-active {
     fill: #fff;
+}
+
+.vc-more-stickers-picker-container {
+    background-color: var(--background-tertiary);
+    overflow: hidden;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.vc-more-stickers-picker-container > div:first-child {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: wrap;
+    padding: 1px 0 1px 1px;
+    overflow: hidden;
+}
+
+.vc-more-stickers-picker-search-box {
+    height: 30px;
+    line-height: 32px;
+    font-size: 16px;
+    flex: 1;
+    min-width: 48px;
+    margin: 1px;
+}
+
+.vc-more-stickers-picker-search-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: text;
+    box-sizing: border-box;
+    margin-right: 8px;
 }

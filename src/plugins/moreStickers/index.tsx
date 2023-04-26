@@ -18,9 +18,10 @@
 
 import "./style.css";
 
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { TextInput } from "@webpack/common";
+import { React, TextInput } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { Header } from "./components/header";
@@ -28,7 +29,7 @@ import { IconContainer } from "./components/iconContainer";
 import { SearchIcon } from "./components/searchIcon";
 import { Wrapper } from "./components/wrapper";
 
-
+const cl = classNameFactory("vc-more-stickers-");
 export default definePlugin({
     name: "MoreStickers",
     description: "Adds sticker packs from apps like LINE",
@@ -67,7 +68,7 @@ export default definePlugin({
                         const isActive = `${currentTab}==="more-stickers"`;
                         return (
                             `${_m},${canUseStickers}?` +
-                            `${jsx}(${tabHeaderComp},{id:"more-stickers-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:false,viewType:"more-stickers",children:${jsx}("div",{children:"More Stickers"})})` +
+                            `${jsx}(${tabHeaderComp},{id:"more-stickers-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"more-stickers",children:${jsx}("div",{children:"More Stickers"})})` +
                             ":null"
                         );
                     });
@@ -99,7 +100,7 @@ export default definePlugin({
                     height="24"
                     preserveAspectRatio="xMidYMid meet"
                     viewBox="0 0 24 24"
-                    className={`more-stickers-icon ${isActive ? "more-stickers-icon-active" : ""}`}
+                    className={cl("icon", { "icon-active": isActive })}
                 >
                     <path d="M18.5 11c-4.136 0-7.5 3.364-7.5 7.5c0 .871.157 1.704.432 2.482l9.551-9.551A7.462 7.462 0 0 0 18.5 11z" />
                     <path d="M12 2C6.486 2 2 6.486 2 12c0 4.583 3.158 8.585 7.563 9.69A9.431 9.431 0 0 1 9 18.5C9 13.262 13.262 9 18.5 9c1.12 0 2.191.205 3.19.563C20.585 5.158 16.583 2 12 2z" />
@@ -116,57 +117,21 @@ export default definePlugin({
         channel: Channel,
         closePopout: Function;
     }) {
-        // return <Text>Is in DM? {channel.isDM() ? "Yes" : "No"}</Text>;
-
         return (
             <Wrapper>
                 <Header>
-                    <div style={{
-                        backgroundColor: "var(--background-tertiary)",
-                        overflow: "hidden",
-                        borderRadius: "4px",
-                        width: "100%"
-                    }}>
-                        <div style={{
-                            display: "flex",
-                            flex: "1 1 auto",
-                            flexDirection: "row",
-                            flexWrap: "wrap",
-                            padding: "1px 0px 1px 1px",
-                            overflow: "hidden"
-                        }}>
-                            <div
-                                style={{
-                                    height: "30px",
-                                    lineHeight: "32px",
-                                    fontSize: "16px",
-
-                                    flex: "1",
-                                    minWidth: "48px",
-                                    margin: "1px"
-                                }}
-                            >
+                    <div className={cl("picker-container")}>
+                        <div>
+                            <div className={cl("picker-search-box")}>
                                 <TextInput
                                     placeholder="Search stickers"
                                     onChange={(v, n) => console.log(v, n)}
-                                    style={{
-                                        height: "30px"
-                                    }}
+                                    style={{ height: "30px" }}
+                                    autoFocus={true}
                                 />
                             </div>
-                            <div style={{
-                                width: "32px",
-                                height: "32px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                cursor: "text",
-                                boxSizing: "border-box",
-                                marginRight: "8px",
-                            }}>
-                                <IconContainer>
-                                    <SearchIcon />
-                                </IconContainer>
+                            <div className={cl("picker-search-icon")}>
+                                <IconContainer><SearchIcon /></IconContainer>
                             </div>
                         </div>
                     </div>
