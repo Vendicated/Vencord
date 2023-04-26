@@ -20,12 +20,12 @@ import "./style.css";
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Text, TextInput } from "@webpack/common";
+import { TextInput } from "@webpack/common";
 import { Channel } from "discord-types/general";
-import { findByCodeLazy } from "@webpack";
+
+import { Header } from "./components/header";
 import { IconContainer } from "./components/iconContainer";
 import { SearchIcon } from "./components/searchIcon";
-import { Header } from "./components/header";
 import { Wrapper } from "./components/wrapper";
 
 
@@ -122,18 +122,18 @@ export default definePlugin({
             <Wrapper>
                 <Header>
                     <div style={{
-                        backgroundColor: 'var(--background-tertiary)',
-                        overflow: 'hidden',
-                        borderRadius: '4px',
-                        width: '100%'
+                        backgroundColor: "var(--background-tertiary)",
+                        overflow: "hidden",
+                        borderRadius: "4px",
+                        width: "100%"
                     }}>
                         <div style={{
                             display: "flex",
-                            flex: '1 1 auto',
-                            flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            padding: '1px 0px 1px 1px',
-                            overflow: 'hidden'
+                            flex: "1 1 auto",
+                            flexDirection: "row",
+                            flexWrap: "wrap",
+                            padding: "1px 0px 1px 1px",
+                            overflow: "hidden"
                         }}>
                             <div
                                 style={{
