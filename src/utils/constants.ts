@@ -277,5 +277,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Leko: {
         name: "Leko",
         id: 108153734541942784n
+    },
+    KannaDev: {
+        name: "Kanna",
+        id: 317728561106518019n
     }
 });
