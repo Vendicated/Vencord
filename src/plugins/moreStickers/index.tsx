@@ -27,7 +27,11 @@ import { Header } from "./components/header";
 import { IconContainer } from "./components/iconContainer";
 import { SearchIcon } from "./components/searchIcon";
 import { Wrapper } from "./components/wrapper";
-
+import { CategoryWrapper } from "./components/categoryWrapper";
+import { CategoryScroller } from "./components/categoryScroller";
+import { StickerCategory } from "./components/stickerCategory";
+import { RecentlyUsedIcon } from "./components/recentlyUsedIcon";
+import { CategoryImage } from "./components/categoryImage";
 
 export default definePlugin({
     name: "MoreStickers",
@@ -120,6 +124,8 @@ export default definePlugin({
 
         return (
             <Wrapper>
+                {/* <mask id="svg-mask-avatar-default" maskContentUnits="objectBoundingBox" viewBox="0 0 1 1"><circle fill="white" cx="0.5" cy="0.5" r="0.5"></circle></mask>
+                <mask id="svg-mask-squircle" maskContentUnits="objectBoundingBox" viewBox="0 0 1 1"><path fill="white" d="M0 0.464C0 0.301585 0 0.220377 0.0316081 0.158343C0.0594114 0.103776 0.103776 0.0594114 0.158343 0.0316081C0.220377 0 0.301585 0 0.464 0H0.536C0.698415 0 0.779623 0 0.841657 0.0316081C0.896224 0.0594114 0.940589 0.103776 0.968392 0.158343C1 0.220377 1 0.301585 1 0.464V0.536C1 0.698415 1 0.779623 0.968392 0.841657C0.940589 0.896224 0.896224 0.940589 0.841657 0.968392C0.779623 1 0.698415 1 0.536 1H0.464C0.301585 1 0.220377 1 0.158343 0.968392C0.103776 0.940589 0.0594114 0.896224 0.0316081 0.841657C0 0.779623 0 0.698415 0 0.536V0.464Z"></path></mask> */}
                 <Header>
                     <div style={{
                         backgroundColor: "var(--background-tertiary)",
@@ -171,6 +177,31 @@ export default definePlugin({
                         </div>
                     </div>
                 </Header>
+                <CategoryWrapper>
+                    <CategoryScroller>
+                        <StickerCategory style={{
+                            padding: '4px',
+                            boxSizing: 'border-box'
+                        }}>
+                            <RecentlyUsedIcon />
+                        </StickerCategory>
+                        <StickerCategory>
+                            <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
+                        </StickerCategory>
+                        <StickerCategory>
+                            <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
+                        </StickerCategory>
+                        <StickerCategory>
+                            <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
+                        </StickerCategory>
+                        <StickerCategory>
+                            <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
+                        </StickerCategory>
+                        <StickerCategory>
+                            <CategoryImage src="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" />
+                        </StickerCategory>
+                    </CategoryScroller>
+                </CategoryWrapper>
             </Wrapper>
         );
     }
