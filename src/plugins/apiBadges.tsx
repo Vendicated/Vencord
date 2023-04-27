@@ -48,7 +48,7 @@ const ContributorBadge: ProfileBadge = {
     link: "https://github.com/Vendicated/Vencord"
 };
 
-const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">>;
+let DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">>;
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -89,12 +89,24 @@ export default definePlugin({
 
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);
-        const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv").then(r => r.text());
+        await this.loadBadges();
+    },
+
+    async loadBadges(noCache = false) {
+        const init = {} as RequestInit;
+        if (noCache)
+            init.cache = "no-cache";
+
+        const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv", init)
+            .then(r => r.text());
+
         const lines = badges.trim().split("\n");
         if (lines.shift() !== "id,tooltip,image") {
             new Logger("BadgeAPI").error("Invalid badges.csv file!");
             return;
         }
+
+        DonorBadges = {};
         for (const line of lines) {
             const [id, description, image] = line.split(",");
             DonorBadges[id] = { image, description };
