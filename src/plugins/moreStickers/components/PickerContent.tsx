@@ -58,7 +58,6 @@ function PickerContentRowGrid({
             aria-colindex={colIndex}
             id={`vc-more-stickers-PickerContentRowGrid-${rowIndex}-${colIndex}`}
             onMouseEnter={() => onHover(sticker)}
-            onMouseLeave={() => onHover(null)}
         >
             <div
                 className="vc-more-stickers-PickerContentRowGrid-sticker"
