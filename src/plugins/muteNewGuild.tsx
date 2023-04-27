@@ -52,7 +52,7 @@ function NoDMNotificationsModal({ modalProps }: { modalProps: ModalProps; }) {
 
 const settings = definePluginSettings({
     guild: {
-        description: "Suppress Guild",
+        description: "Mute Guild",
         type: OptionType.BOOLEAN,
         default: true
     },
