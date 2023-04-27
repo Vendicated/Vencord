@@ -19,6 +19,7 @@
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import IpcEvents from "@utils/IpcEvents";
 import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
@@ -37,6 +38,15 @@ function VencordPopout(onClose: () => void) {
                 id="vc-menu-notifications"
                 label="Open Notification Log"
                 action={openNotificationLogModal}
+            />
+            <Menu.MenuItem
+                id="vc-menu-quickcss"
+                label="Open QuickCSS"
+                action={() =>
+                    IS_WEB
+                        ? require("@components/Monaco").launchMonacoEditor()
+                        : VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)
+                }
             />
             <Menu.MenuItem
                 id="vc-refetch-badges"
