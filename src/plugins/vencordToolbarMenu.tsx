@@ -23,12 +23,38 @@ import IpcEvents from "@utils/IpcEvents";
 import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
-import { Menu, Popout, Toasts, useState } from "@webpack/common";
+import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
 const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
 
 function VencordPopout(onClose: () => void) {
+    const pluginEntries = [] as ReactNode[];
+
+    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
+        if (plugin.toolbarActions) {
+            pluginEntries.push(
+                <Menu.MenuGroup
+                    label={plugin.name}
+                    key={`vc-menu-${plugin.name}`}
+                >
+                    {Object.entries(plugin.toolbarActions).map(([text, action]) => {
+                        const key = `vc-menu-${plugin.name}-${text}`;
+
+                        return (
+                            <Menu.MenuItem
+                                id={key}
+                                key={key}
+                                label={text}
+                                action={action}
+                            />
+                        );
+                    })}
+                </Menu.MenuGroup>
+            );
+        }
+    }
+
     return (
         <Menu.Menu
             navId="vencord-menu"
@@ -48,18 +74,7 @@ function VencordPopout(onClose: () => void) {
                         : VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)
                 }
             />
-            <Menu.MenuItem
-                id="vc-refetch-badges"
-                label="Refetch Badges"
-                action={async () => {
-                    await (Vencord.Plugins.plugins.BadgeAPI as any).loadBadges(true);
-                    Toasts.show({
-                        id: Toasts.genId(),
-                        message: "Successfully refetched badges!",
-                        type: Toasts.Type.SUCCESS
-                    });
-                }}
-            />
+            {...pluginEntries}
         </Menu.Menu>
     );
 }
@@ -106,9 +121,10 @@ function ToolbarFragmentWrapper({ children }: { children: ReactNode[]; }) {
 }
 
 export default definePlugin({
-    name: "VencordToolbarAPI",
-    description: "description",
+    name: "VencordToolbarMenu",
+    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
     authors: [Devs.Ven],
+    enabledByDefault: true,
 
     patches: [
         {

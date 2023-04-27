@@ -27,7 +27,7 @@ import Logger from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
+import { Forms, Toasts } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
 
@@ -110,6 +110,17 @@ export default definePlugin({
         for (const line of lines) {
             const [id, description, image] = line.split(",");
             DonorBadges[id] = { image, description };
+        }
+    },
+
+    toolbarActions: {
+        async "Refetch Badges"() {
+            await (Vencord.Plugins.plugins.BadgeAPI as any).loadBadges(true);
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "Successfully refetched badges!",
+                type: Toasts.Type.SUCCESS
+            });
         }
     },
 
