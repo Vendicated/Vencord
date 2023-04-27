@@ -68,7 +68,7 @@ export async function saveStickerPack(sp: StickerPack): Promise<void> {
   *
   * @return {Promise<StickerPackMeta[]>}
   */
-export async function getStickerPacks(): Promise<StickerPackMeta[]> {
+export async function getStickerPackMetas(): Promise<StickerPackMeta[]> {
     const packs = (await DataStore.get(PACKS_KEY)) ?? null as (StickerPackMeta[] | null);
     return packs ?? [];
 }
@@ -92,4 +92,27 @@ export async function getStickerPack(id: string): Promise<StickerPack | null> {
 export async function getStickerPackMeta(id: string): Promise<StickerPackMeta | null> {
     const sp = await getStickerPack(id);
     return sp ? stickerPackToMeta(sp) : null;
+}
+
+/**
+ * Delete a sticker pack from the DataStore
+ * 
+ * @param {string} id The id of the sticker pack.
+ * @return {Promise<void>}
+ * */
+export async function deleteStickerPack(id: string): Promise<void> {
+    await Promise.all([
+        DataStore.del(id),
+        (async () => {
+            const unlock = await mutex.lock();
+
+            try {
+                const packs = (await DataStore.get(PACKS_KEY) ?? null) as (StickerPackMeta[] | null);
+                if (packs === null) return;
+                await DataStore.set(PACKS_KEY, packs.filter(p => p.id !== id));
+            } finally {
+                unlock();
+            }
+        })()
+    ]);
 }

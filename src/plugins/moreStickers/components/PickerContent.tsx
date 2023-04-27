@@ -18,16 +18,17 @@
 
 import { React } from "@webpack/common";
 
-import { getStickerPackMeta } from "../stickers";
-import { Sticker, StickerPackMeta } from "../types";
+import { getStickerPack } from "../stickers";
+import { Sticker, StickerPackMeta, StickerPack } from "../types";
 
 export interface PickerContent {
-    query?: string;
+    stickerPacks: StickerPack[];
 }
 
 export interface PickerContentHeader {
     image: string;
     title: string;
+    children?: React.ReactNode;
 }
 
 export interface PickerContentRow {
@@ -114,90 +115,125 @@ function HeaderCollapseIcon({ isExpanded }: { isExpanded: boolean; }) {
     );
 }
 
-export function PickerContentHeader({ image, title }: PickerContentHeader) {
-    const [isExpanded, setIsExpanded] = React.useState(true);
+export function PickerContentHeader({
+    image,
+    title,
+    children
+}: PickerContentHeader) {
+    const [isExpand, setIsExpand] = React.useState(true);
     return (
-        <div className="vc-more-stickers-PickerContentHeader-wrapper">
-            <div className="vc-more-stickers-PickerContentHeader-header"
-                aria-expanded={isExpanded}
-                aria-label={`Category, ${title}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <div className="vc-more-stickers-PickerContentHeader-headerIcon">
-                    <div>
-                        <svg
-                            className="vc-more-stickers-PickerContentHeader-svg"
-                            width={16} height={16} viewBox="0 0 16 16"
-                        >
-                            <foreignObject
-                                x={0} y={0} width={16} height={16}
-                                overflow="visible" mask="url(#svg-mask-squircle)"
-                            >
-                                <img
-                                    alt={title}
-                                    src={image}
-                                    className="vc-more-stickers-PickerContentHeader-guildIcon"
-                                ></img>
-                            </foreignObject>
-                        </svg>
-                    </div>
-                </div>
-                <span
-                    className="vc-more-stickers-PickerContentHeader-headerLabel"
+        <span>
+            <div className="vc-more-stickers-PickerContentHeader-wrapper">
+                <div className="vc-more-stickers-PickerContentHeader-header"
+                    aria-expanded={isExpand}
+                    aria-label={`Category, ${title}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                        setIsExpand(!isExpand);
+                    }}
                 >
-                    {title}
-                </span>
-                <HeaderCollapseIcon isExpanded={isExpanded} />
+                    <div className="vc-more-stickers-PickerContentHeader-headerIcon">
+                        <div>
+                            <svg
+                                className="vc-more-stickers-PickerContentHeader-svg"
+                                width={16} height={16} viewBox="0 0 16 16"
+                            >
+                                <foreignObject
+                                    x={0} y={0} width={16} height={16}
+                                    overflow="visible" mask="url(#svg-mask-squircle)"
+                                >
+                                    <img
+                                        alt={title}
+                                        src={image}
+                                        className="vc-more-stickers-PickerContentHeader-guildIcon"
+                                    ></img>
+                                </foreignObject>
+                            </svg>
+                        </div>
+                    </div>
+                    <span
+                        className="vc-more-stickers-PickerContentHeader-headerLabel"
+                    >
+                        {title}
+                    </span>
+                    <HeaderCollapseIcon isExpanded={isExpand} />
+                </div>
             </div>
-        </div>
+            {isExpand ? children : null}
+        </span>
     );
 }
-
-export function PickerContent({ query }: PickerContent) {
+export function PickerContent({ stickerPacks }: PickerContent) {
     const [currentSticker, setCurrentSticker] = React.useState<Sticker | null>(null);
-    const [stickerPackMeta, setStickerPackMeta] = React.useState<StickerPackMeta | null>(null);
+    const [currentStickerPack, setCurrentStickerPack] = React.useState<StickerPack | null>(null);
+    const elemRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (!currentSticker?.stickerPackId) {
-            setStickerPackMeta(null);
+            setCurrentStickerPack(null);
             return;
         }
-        if (stickerPackMeta?.id !== currentSticker.stickerPackId) {
-            getStickerPackMeta(currentSticker.stickerPackId).then(setStickerPackMeta);
+        if (currentStickerPack?.id !== currentSticker.stickerPackId) {
+            setCurrentStickerPack(stickerPacks.find(p => p.id === currentSticker.stickerPackId) ?? null);
         }
     }, [currentSticker]);
-
-    function getSampleGrid(rowIndex: number, colIndex: number, onHover: PickerContentRowGrid["onHover"]): PickerContentRowGrid {
-        return {
-            rowIndex,
-            colIndex,
-            sticker: {
-                id: `test-sticker-${rowIndex}-${colIndex}`,
-                url: "https://media.discordapp.net/stickers/1005775259796000809.webp?size=96",
-                title: `Test Sticker ${rowIndex}-${colIndex}`,
-                stickerPackId: "test-sticker-pack"
-            },
-            onHover
-        };
-    }
 
     return (
         <div className="vc-more-stickers-PickerContent-listWrapper">
             <div className="vc-more-stickers-PickerContent-wrapper">
                 <div className="vc-more-stickers-PickerContent-scroller">
                     <div className="vc-more-stickers-PickerContent-listItems" role="none presentation">
-                        <div>
-                            <PickerContentHeader image="https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40" title="Vencord" />
-                            <PickerContentRow
-                                rowIndex={1}
-                                grid1={getSampleGrid(1, 1, setCurrentSticker)}
-                                grid2={getSampleGrid(1, 2, setCurrentSticker)}
-                                grid3={getSampleGrid(1, 3, setCurrentSticker)}
-                            ></PickerContentRow>
+                        <div ref={elemRef}>
+                            {
+                                stickerPacks.map(sp => {
+                                    const stickerArrays: Sticker[][] = [];
+                                    for (let i = 0; i < sp.stickers.length; i += 3) {
+                                        stickerArrays.push(sp.stickers.slice(i, i + 3));
+                                    }
+
+                                    const rows = stickerArrays.map((stickers, i) => (
+                                        <PickerContentRow
+                                            rowIndex={i}
+                                            grid1={{
+                                                rowIndex: i,
+                                                colIndex: 1,
+                                                sticker: stickers[0],
+                                                onHover: setCurrentSticker
+                                            }}
+                                            grid2={
+                                                stickers.length > 1 ? {
+                                                    rowIndex: i,
+                                                    colIndex: 2,
+                                                    sticker: stickers[1],
+                                                    onHover: setCurrentSticker
+                                                } : undefined
+                                            }
+                                            grid3={
+                                                stickers.length > 2 ? {
+                                                    rowIndex: i,
+                                                    colIndex: 3,
+                                                    sticker: stickers[2],
+                                                    onHover: setCurrentSticker
+                                                } : undefined
+                                            }
+                                        />
+                                    ));
+                                    return (
+                                        <PickerContentHeader
+                                            image={sp.logo.url}
+                                            title={sp.title}
+                                        >
+                                            {...rows}
+                                        </PickerContentHeader>
+                                    );
+                                })
+                            }
                         </div>
                     </div>
+                    <div style={{
+                        height: `${elemRef.current?.clientHeight ?? 0}px`
+                    }}></div>
                 </div>
                 <div className="vc-more-stickers-PickerContent-inspector">
                     <div className="vc-more-stickers-PickerContent-inspector-graphicPrimary" aria-hidden="true">
@@ -218,10 +254,10 @@ export function PickerContent({ query }: PickerContent) {
                         </div>
                     </div>
                     <div className="vc-more-stickers-PickerContent-inspector-textWrapper">
-                        <div className="vc-more-stickers-PickerContent-inspector-titlePrimary" data-text-variant="text-md/semibold">{currentSticker?.title ?? "貼圖包寶寶"}</div>
+                        <div className="vc-more-stickers-PickerContent-inspector-titlePrimary" data-text-variant="text-md/semibold">{currentSticker?.title ?? ""}</div>
                         <div className="vc-more-stickers-PickerContent-inspector-titleSecondary" data-text-variant="text-md/semibold">
-                            {stickerPackMeta?.title ? "from " : ""}
-                            <strong>{stickerPackMeta?.title ?? ""}</strong>
+                            {currentStickerPack?.title ? "from " : ""}
+                            <strong>{currentStickerPack?.title ?? ""}</strong>
                         </div>
                     </div>
                     <div className="vc-more-stickers-PickerContent-inspector-graphicSecondary" aria-hidden="true">
@@ -229,8 +265,8 @@ export function PickerContent({ query }: PickerContent) {
                             <svg width={32} height={32} viewBox="0 0 32 32">
                                 <foreignObject x={0} y={0} width={32} height={32} overflow="visible" mask="url(#svg-mask-squircle)">
                                     <img
-                                        alt={stickerPackMeta?.title ?? ""}
-                                        src={stickerPackMeta?.logo?.url}
+                                        alt={currentStickerPack?.title ?? ""}
+                                        src={currentStickerPack?.logo?.url}
                                     ></img>
                                 </foreignObject>
                             </svg>

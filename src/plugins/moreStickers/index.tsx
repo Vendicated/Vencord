@@ -29,12 +29,25 @@ import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
 import { Wrapper } from "./components/wrapper";
 
+import { initTest, clearTest } from "./testdata";
+
+import { StickerPackMeta, StickerPack } from "./types";
+import { getStickerPackMetas, getStickerPack } from "./stickers";
 
 const cl = classNameFactory("vc-more-stickers-");
+
 export default definePlugin({
     name: "MoreStickers",
     description: "Adds sticker packs from other social media platforms. (e.g. LINE)",
     authors: [Devs.Arjix, Devs.Leko],
+
+    start() {
+        initTest();
+    },
+
+    stop() {
+        clearTest();
+    },
 
     patches: [
         {
@@ -115,6 +128,24 @@ export default definePlugin({
         closePopout: Function;
     }) {
         const [query, setQuery] = React.useState<string | undefined>();
+        const [stickerPackMetas, setStickerPackMetas] = React.useState<StickerPackMeta[]>([]);
+        const [stickerPacks, setStickerPacks] = React.useState<StickerPack[]>([]);
+        const [counter, setCounter] = React.useState(0);
+
+        React.useEffect(() => {
+            (async () => {
+                console.log("Updating sticker packs...", counter);
+                setCounter(counter + 1);
+
+                const sps = (await Promise.all(
+                    stickerPackMetas.map(meta => getStickerPack(meta.id))
+                ))
+                    .filter((x): x is Exclude<typeof x, null> => x !== null);
+                setStickerPacks(sps);
+            })();
+        }, [stickerPackMetas.map(x => x.id).sort().join(",")]);
+
+        getStickerPackMetas().then(setStickerPackMetas);
 
         return (
             <Wrapper>
@@ -123,12 +154,15 @@ export default definePlugin({
                 </svg>
 
                 <PickerHeader onQueryChange={setQuery} />
-                <PickerContent query={query} />
+                <PickerContent stickerPacks={stickerPacks} />
                 <PickerSidebar
-                    categories={new Array(10).fill({
-                        packName: "Vencord",
-                        packIcon: "https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40"
-                    }).map((cat, idx) => ({ id: (idx + 1).toString(), ...cat }))}
+                    categories={
+                        stickerPackMetas.map(meta => ({
+                            id: meta.id,
+                            name: meta.title,
+                            iconUrl: meta.logo.url
+                        }))
+                    }
                     onCategorySelect={category => {
                         console.log("Selected category: ", category);
                     }}

@@ -26,8 +26,8 @@ import { StickerCategory } from "./stickerCategory";
 
 export interface StickerCategory {
     id: string;
-    packName: string;
-    packIcon?: string;
+    name: string;
+    iconUrl?: string;
 }
 
 export interface SidebarProps {
@@ -37,7 +37,7 @@ export interface SidebarProps {
 
 export const RecentPack = {
     id: "recent",
-    packName: "Recently Used",
+    name: "Recently Used",
 } as StickerCategory;
 
 export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) => {
@@ -71,7 +71,7 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                                 }}
                                 isActive={activeCategory === category}
                             >
-                                <CategoryImage src={category.packIcon!} alt={category.packName} isActive={activeCategory === category} />
+                                <CategoryImage src={category.iconUrl!} alt={category.name} isActive={activeCategory === category} />
                             </StickerCategory>
                         );
                     })

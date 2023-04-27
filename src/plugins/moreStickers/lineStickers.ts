@@ -17,6 +17,7 @@
 */
 
 import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
+import { corsFetch } from "./utils";
 
 /**
  * Convert LineStickerPack id to StickerPack id
@@ -32,7 +33,7 @@ function toStickerPackId(id: string): string {
 /**
   * Convert LineSticker to Sticker
   *
-  * @param {LineSticker} sp The LineSticker to convert.
+  * @param {LineSticker} s The LineSticker to convert.
   * @return {Sticker} The sticker.
   */
 export function convertSticker(s: LineSticker): Sticker {
@@ -66,8 +67,8 @@ export function convert(sp: LineStickerPack): StickerPack {
   * @param {string} id The id of the sticker pack.
   * @return {Promise<LineStickerPack>} The sticker pack.
   */
-export async function getStickers(id: string): Promise<LineStickerPack> {
-    const res = await fetch(`https://store.line.me/stickershop/product/${id}/en`);
+export async function getStickerPack(id: string): Promise<LineStickerPack> {
+    const res = await corsFetch(`https://store.line.me/stickershop/product/${id}/en`);
     const html = await res.text();
 
     const doc = new DOMParser().parseFromString(html, "text/html");
