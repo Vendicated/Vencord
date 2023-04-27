@@ -23,7 +23,6 @@ import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
 import IpcEvents from "@utils/IpcEvents";
-import Logger from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -49,6 +48,26 @@ const ContributorBadge: ProfileBadge = {
 };
 
 let DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">>;
+
+async function loadBadges(noCache = false) {
+    const init = {} as RequestInit;
+    if (noCache)
+        init.cache = "no-cache";
+
+    const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv", init)
+        .then(r => r.text());
+
+    const lines = badges.trim().split("\n");
+    if (lines.shift() !== "id,tooltip,image") {
+        throw new Error("Invalid badges.csv file:\n" + badges);
+    }
+
+    DonorBadges = {};
+    for (const line of lines) {
+        const [id, description, image] = line.split(",");
+        DonorBadges[id] = { image, description };
+    }
+}
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -89,33 +108,12 @@ export default definePlugin({
 
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);
-        await this.loadBadges();
-    },
-
-    async loadBadges(noCache = false) {
-        const init = {} as RequestInit;
-        if (noCache)
-            init.cache = "no-cache";
-
-        const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv", init)
-            .then(r => r.text());
-
-        const lines = badges.trim().split("\n");
-        if (lines.shift() !== "id,tooltip,image") {
-            new Logger("BadgeAPI").error("Invalid badges.csv file!");
-            return;
-        }
-
-        DonorBadges = {};
-        for (const line of lines) {
-            const [id, description, image] = line.split(",");
-            DonorBadges[id] = { image, description };
-        }
+        await loadBadges();
     },
 
     toolbarActions: {
         async "Refetch Badges"() {
-            await (Vencord.Plugins.plugins.BadgeAPI as any).loadBadges(true);
+            await loadBadges(true);
             Toasts.show({
                 id: Toasts.genId(),
                 message: "Successfully refetched badges!",
