@@ -20,7 +20,7 @@ import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
 
 /**
  * Convert LineStickerPack id to StickerPack id
- * 
+ *
  * @param id The id to convert.
  * @returns {string} The converted id.
  */

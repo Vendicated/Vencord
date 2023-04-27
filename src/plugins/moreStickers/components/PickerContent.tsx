@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { React, Text } from "@webpack/common";
-import { Sticker, StickerPackMeta } from "../types";
+
+import { React } from "@webpack/common";
+
 import { getStickerPackMeta } from "../stickers";
+import { Sticker, StickerPackMeta } from "../types";
 
 export interface PickerContent {
     query?: string;
@@ -66,8 +68,8 @@ function PickerContentRowGrid({
                     <div className="vc-more-stickers-PickerContentRowGrid-inspectedIndicator"></div>
                     <div className="vc-more-stickers-PickerContentRowGrid-stickerNode">
                         <div className="vc-more-stickers-PickerContentRowGrid-assetWrapper" style={{
-                            height: '96px',
-                            width: '96px'
+                            height: "96px",
+                            width: "96px"
                         }}>
                             <img
                                 alt={sticker.title}
@@ -159,16 +161,13 @@ export function PickerContent({ query }: PickerContent) {
     const [stickerPackMeta, setStickerPackMeta] = React.useState<StickerPackMeta | null>(null);
 
     React.useEffect(() => {
-        (async () => {
-            if (currentSticker?.stickerPackId) {
-                if (stickerPackMeta?.id !== currentSticker.stickerPackId) {
-                    const meta = await getStickerPackMeta(currentSticker.stickerPackId);
-                    setStickerPackMeta(meta);
-                }
-            } else {
-                setStickerPackMeta(null);
-            }
-        })();
+        if (!currentSticker?.stickerPackId) {
+            setStickerPackMeta(null);
+            return;
+        }
+        if (stickerPackMeta?.id !== currentSticker.stickerPackId) {
+            getStickerPackMeta(currentSticker.stickerPackId).then(setStickerPackMeta);
+        }
     }, [currentSticker]);
 
     function getSampleGrid(rowIndex: number, colIndex: number, onHover: PickerContentRowGrid["onHover"]): PickerContentRowGrid {
@@ -205,8 +204,8 @@ export function PickerContent({ query }: PickerContent) {
                     <div className="vc-more-stickers-PickerContent-inspector-graphicPrimary" aria-hidden="true">
                         <div>
                             <div className="vc-more-stickers-PickerContentRowGrid-assetWrapper" style={{
-                                height: '28px',
-                                width: '28px'
+                                height: "28px",
+                                width: "28px"
                             }}>
                                 <img
                                     alt={currentSticker?.title ?? ""}
@@ -242,4 +241,4 @@ export function PickerContent({ query }: PickerContent) {
             </div>
         </div>
     );
-};
+}

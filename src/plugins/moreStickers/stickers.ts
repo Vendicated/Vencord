@@ -85,7 +85,7 @@ export async function getStickerPack(id: string): Promise<StickerPack | null> {
 
 /**
  * Get a sticker pack meta from the DataStore
- * 
+ *
  * @param {string} id The id of the sticker pack.
  * @return {Promise<StickerPackMeta | null>}
  * */

@@ -24,9 +24,9 @@ import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
+import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
-import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { Wrapper } from "./components/wrapper";
 
 
