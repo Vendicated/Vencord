@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function CategoryScroller(props: { children: React.ReactNode; }) {
+export function CategoryScroller(props: { children: React.ReactNode, categoryLength: number; }) {
     const children = Array.isArray(props.children) ? props.children : [props.children];
 
     return (
@@ -28,7 +28,7 @@ export function CategoryScroller(props: { children: React.ReactNode; }) {
                     </div>
                 ))
             }</div>
-            <div style={{ height: "1753px" }}></div>
+            <div style={{ height: `${Math.round(41.75 * (props.categoryLength + 1))}px` }}></div>
             <div aria-hidden="true"></div>
         </div>
     );

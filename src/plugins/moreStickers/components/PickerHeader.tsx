@@ -30,14 +30,14 @@ export interface PickerHeaderProps {
     onQueryChange: (query: string) => void;
 }
 
-const debounceQueryChange = debounce((cb, value) => cb(value), 150);
+const debounceQueryChange = debounce((cb: Function, ...args: any) => cb(...args), 150);
 
 export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
     const [query, setQuery] = React.useState<string | undefined>();
 
-    const update = (value: string, now = false) => {
+    const setQueryDebounced = (value: string, immediate = false) => {
         setQuery(value);
-        if (now) onQueryChange(value);
+        if (immediate) onQueryChange(value);
         else debounceQueryChange(onQueryChange, value);
     };
 
@@ -53,14 +53,14 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
                             autoFocus={true}
                             value={query}
 
-                            onChange={(value: string) => update(value)}
+                            onChange={(value: string) => setQueryDebounced(value)}
                         />
                     </div>
                     <div className={cl("picker-search-icon")}>
                         <IconContainer>
                             {
                                 (query && query.length > 0) ?
-                                    <CancelIcon className="vc-more-stickers-clear-icon" width={20} height={20} onClick={() => update("", true)} /> :
+                                    <CancelIcon className="vc-more-stickers-clear-icon" width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
                                     <SearchIcon width={20} height={20} color="var(--text-muted)" />
                             }
                         </IconContainer>

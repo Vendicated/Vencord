@@ -18,7 +18,17 @@
 
 import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
 
-const PREFIX = "Vencord-MoreStickers-Line-";
+/**
+ * Convert LineStickerPack id to StickerPack id
+ * 
+ * @param id The id to convert.
+ * @returns {string} The converted id.
+ */
+
+function toStickerPackId(id: string): string {
+    return "Vencord-MoreStickers-Line-" + id;
+}
+
 /**
   * Convert LineSticker to Sticker
   *
@@ -28,7 +38,9 @@ const PREFIX = "Vencord-MoreStickers-Line-";
 export function convertSticker(s: LineSticker): Sticker {
     return {
         id: s.id,
-        url: s.staticUrl
+        url: s.staticUrl,
+        title: s.id,
+        stickerPackId: toStickerPackId(s.stickerPackId)
     };
 }
 
@@ -40,7 +52,7 @@ export function convertSticker(s: LineSticker): Sticker {
   */
 export function convert(sp: LineStickerPack): StickerPack {
     return {
-        id: PREFIX + sp.id,
+        id: toStickerPackId(sp.id),
         title: sp.title,
         author: sp.author,
         logo: convertSticker(sp.mainImage),
@@ -63,7 +75,8 @@ export async function getStickers(id: string): Promise<LineStickerPack> {
     const stickers =
         [...doc.querySelectorAll(".FnStickerPreviewItem")]
             .map(x => JSON.parse((x as HTMLElement).dataset.preview ?? "null"))
-            .filter(x => x !== null) as LineSticker[];
+            .filter(x => x !== null)
+            .map(x => ({ ...x, stickerPackId: id })) as LineSticker[];
 
     const mainImage = JSON.parse((doc.querySelector("[ref=mainImage]") as HTMLElement)?.dataset?.preview ?? "null") as LineSticker;
     const stickerPack = {

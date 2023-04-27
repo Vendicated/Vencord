@@ -45,7 +45,7 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
 
     return (
         <CategoryWrapper>
-            <CategoryScroller>
+            <CategoryScroller categoryLength={categories.length}>
                 <StickerCategory
                     style={{ padding: "4px", boxSizing: "border-box" }}
                     isActive={activeCategory === RecentPack}

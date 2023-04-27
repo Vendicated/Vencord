@@ -24,6 +24,7 @@ export interface LineSticker {
     soundUrl: string;
     staticUrl: string;
     type: string;
+    stickerPackId: LineStickerPack["id"];
 }
 
 export interface LineStickerPack {
@@ -40,6 +41,8 @@ export interface LineStickerPack {
 export interface Sticker {
     id: string;
     url: string;
+    title: string;
+    stickerPackId: StickerPackMeta["id"];
 }
 
 export interface StickerPackMeta {

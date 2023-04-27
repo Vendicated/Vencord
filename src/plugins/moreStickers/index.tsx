@@ -24,8 +24,9 @@ import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import { PickerBody } from "./components/PickerBody";
+import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
+import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { Wrapper } from "./components/wrapper";
 
 
@@ -117,8 +118,21 @@ export default definePlugin({
 
         return (
             <Wrapper>
+                <svg width="1" height="1" viewBox="0 0 1 1" fill="none" xmlns="http://www.w3.org/2000/svg" id="vc-more-stickers-inspectedIndicatorMask">
+                    <path d="M0 0.26087C0 0.137894 0 0.0764069 0.0382035 0.0382035C0.0764069 0 0.137894 0 0.26087 0H0.73913C0.862106 0 0.923593 0 0.961797 0.0382035C1 0.0764069 1 0.137894 1 0.26087V0.73913C1 0.862106 1 0.923593 0.961797 0.961797C0.923593 1 0.862106 1 0.73913 1H0.26087C0.137894 1 0.0764069 1 0.0382035 0.961797C0 0.923593 0 0.862106 0 0.73913V0.26087Z" fill="white" />
+                </svg>
+
                 <PickerHeader onQueryChange={setQuery} />
-                <PickerBody searchQuery={query} />
+                <PickerContent query={query} />
+                <PickerSidebar
+                    categories={new Array(10).fill({
+                        packName: "Vencord",
+                        packIcon: "https://cdn.discordapp.com/icons/1015060230222131221/d3f7c37d974d6f4f179324d63b86bb1c.webp?size=40"
+                    }).map((cat, idx) => ({ id: (idx + 1).toString(), ...cat }))}
+                    onCategorySelect={category => {
+                        console.log("Selected category: ", category);
+                    }}
+                ></PickerSidebar>
             </Wrapper>
         );
     }
