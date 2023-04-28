@@ -121,7 +121,7 @@ export default definePlugin({
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
+                match: /return \i\.\i\?/,
                 replace: "return true?"
             }
         },
@@ -146,7 +146,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'navId:"textarea-context"',
+            find: ':"command-suggestions"',
             predicate: () => settings.store.addBack,
             replacement: [
                 {
