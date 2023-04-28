@@ -28,9 +28,9 @@ import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
 import { Wrapper } from "./components/wrapper";
-import { getStickerPack,getStickerPackMetas } from "./stickers";
-import { clearTest,initTest } from "./testdata";
-import { StickerPack,StickerPackMeta } from "./types";
+import { getStickerPack, getStickerPackMetas } from "./stickers";
+import { clearTest, initTest } from "./testdata";
+import { StickerPack, StickerPackMeta } from "./types";
 
 const cl = classNameFactory("vc-more-stickers-");
 
@@ -131,7 +131,7 @@ export default definePlugin({
         const [counter, setCounter] = React.useState(0);
         const [selectedStickerPackId, setSelectedStickerPackId] = React.useState<string | null>(null);
 
-        const getMetasSignature = (m: StickerPackMeta[]) => [m.map(x => x.id).sort().join(",")];
+        const getMetasSignature = (m: StickerPackMeta[]) => m.map(x => x.id).sort().join(",");
 
         React.useEffect(() => {
             (async () => {
