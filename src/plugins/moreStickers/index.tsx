@@ -131,6 +131,7 @@ export default definePlugin({
         const [stickerPackMetas, setStickerPackMetas] = React.useState<StickerPackMeta[]>([]);
         const [stickerPacks, setStickerPacks] = React.useState<StickerPack[]>([]);
         const [counter, setCounter] = React.useState(0);
+        const [selectedStickerPackId, setSelectedStickerPackId] = React.useState<string | null>(null);
 
         React.useEffect(() => {
             (async () => {
@@ -154,7 +155,12 @@ export default definePlugin({
                 </svg>
 
                 <PickerHeader onQueryChange={setQuery} />
-                <PickerContent stickerPacks={stickerPacks} />
+                <PickerContent
+                    stickerPacks={stickerPacks}
+                    selectedStickerPackId={selectedStickerPackId}
+                    setSelectedStickerPackId={setSelectedStickerPackId}
+                    channelId={channel.id}
+                />
                 <PickerSidebar
                     categories={
                         stickerPackMetas.map(meta => ({
@@ -164,7 +170,7 @@ export default definePlugin({
                         }))
                     }
                     onCategorySelect={category => {
-                        console.log("Selected category: ", category);
+                        setSelectedStickerPackId(category.id);
                     }}
                 ></PickerSidebar>
             </Wrapper>

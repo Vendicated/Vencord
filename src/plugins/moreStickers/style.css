@@ -331,6 +331,10 @@
     z-index: -1;
 }
 
+.vc-more-stickers-PickerContentRowGrid-inspectedIndicator.inspected {
+    background-color: var(--background-accent);
+}
+
 .vc-more-stickers-PickerContentRowGrid-stickerNode {
     -webkit-transition: opacity .25s;
     transition: opacity .25s;
