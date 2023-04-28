@@ -267,7 +267,7 @@ function runTime(token: string) {
                 if (!isWasm)
                     await wreq.e(id as any);
 
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 150));
             }
             console.error("[PUP_DEBUG]", "Finished loading chunks!");
 
