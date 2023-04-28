@@ -220,10 +220,6 @@ export default definePlugin({
 
     settings,
 
-    escapeRegex(str: string) {
-        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    },
-
     stringToRegex(str: string) {
         const m = str.match(/^([/~@;%#'])(.*?)\1([gimsuy]*)$/);
         return m ? new RegExp(m[2], m[3]) : new RegExp(str);
@@ -257,7 +253,7 @@ export default definePlugin({
             for (const rule of rulesString) {
                 if (!rule.find || !rule.replace) continue;
                 if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-                msg.content = msg.content.replace(new RegExp(this.escapeRegex(rule.find), "g"), rule.replace);
+                msg.content = msg.content.replaceAll(rule.find, rule.replace);
             }
             for (const rule of rulesRegex) {
                 if (!rule.find || !rule.replace) continue;
