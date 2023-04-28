@@ -407,3 +407,37 @@
     display: block;
     contain: paint;
 }
+
+.vc-more-stickers-picker-settings-cog-container {
+    position: fixed;
+    transform: translateY(-100%);
+    background-color: var(--background-secondary-alt);
+    padding: 8px;
+    padding-top: 0;
+    border-bottom-left-radius: 5px;
+}
+
+.vc-more-stickers-picker-settings-cog {
+    border-radius: 999850px;
+    background-color: var(--green-400);
+    padding: 8px;
+}
+
+/* prettier-ignore */
+.vc-more-stickers-picker-settings-cog:hover:has(svg:hover),
+.vc-more-stickers-picker-settings-cog:focus-visible:has(svg:focus-visible) {
+    cursor: pointer;
+    background-color: var(--green-300);
+}
+
+.vc-more-stickers-picker-settings-cog > svg {
+    color: var(--interactive-normal) !important;
+    width: 100%;
+    height: 100%;
+}
+
+/* prettier-ignore */
+.vc-more-stickers-picker-settings-cog > svg:hover,
+.vc-more-stickers-picker-settings-cog > svg:focus-visible {
+    color: var(--interactive-active) !important;
+}

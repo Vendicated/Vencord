@@ -21,10 +21,9 @@ import { React } from "@webpack/common";
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
 import { CategoryWrapper } from "./categoryWrapper";
-import { RecentlyUsedIcon } from "./icons";
+import { CogIcon, RecentlyUsedIcon } from "./icons";
 import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
 import { StickerCategory } from "./stickerCategory";
-
 export interface StickerCategory {
     id: string;
     name: string;
@@ -80,6 +79,11 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                     })
                 }
             </CategoryScroller>
+            <div className="vc-more-stickers-picker-settings-cog-container">
+                <button className="vc-more-stickers-picker-settings-cog" onClick={() => alert("TODO: Settings popup.")}>
+                    <CogIcon width={20} height={20} />
+                </button>
+            </div>
         </CategoryWrapper>
     );
 };
