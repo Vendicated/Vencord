@@ -23,13 +23,19 @@ The cutest Discord client mod
 
 Click the below button to install Vencord to the Discord Desktop app
 
-[![Download and run the Installer](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#usage)
+[![Download and run the Installer](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#vencord-installer)
 
 ## Installing on Browser
 
 [![Get it on the Firefox Webstore](https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Get it on the Chrome Webstore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
 
 Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that the CSS Editor, Themes loaded from remote sources and co. will not work in the UserScript. Use the extension if you need any of those
+
+## Installing our Desktop App
+
+As an alternative to the Discord Desktop app, Vencord also has its own standalone Desktop app that is snappier and lighter than Discord's official Desktop app. It is currently in beta and we have yet to implement some features like screensharing, but you can try the beta nonetheless
+
+[![Download Vencord Desktop](https://img.shields.io/github/v/release/Vencord/Desktop?label=Download%20Vencord%20Desktop&style=for-the-badge)](https://github.com/Vencord/Desktop#vencord-desktop)
 
 ## Join our Support/Community Server
 
