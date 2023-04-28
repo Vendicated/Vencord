@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { setRecentStickers } from "./components/recent";
 import {
     convert,
     getStickerPack
@@ -26,7 +27,6 @@ import {
     saveStickerPack
 } from "./stickers";
 import { StickerPack } from "./types";
-import { setRecentStickers } from "./components/recent";
 
 export async function initTest() {
     console.log("initTest.");
