@@ -133,6 +133,8 @@ export default definePlugin({
         const [counter, setCounter] = React.useState(0);
         const [selectedStickerPackId, setSelectedStickerPackId] = React.useState<string | null>(null);
 
+        const getMetasSignature = (m: StickerPackMeta[]) => [m.map(x => x.id).sort().join(",")];
+
         React.useEffect(() => {
             (async () => {
                 console.log("Updating sticker packs...", counter);
@@ -144,9 +146,16 @@ export default definePlugin({
                     .filter((x): x is Exclude<typeof x, null> => x !== null);
                 setStickerPacks(sps);
             })();
-        }, [stickerPackMetas.map(x => x.id).sort().join(",")]);
+        }, stickerPackMetas);
 
-        getStickerPackMetas().then(setStickerPackMetas);
+        React.useEffect(() => {
+            (async () => {
+                const metas = await getStickerPackMetas();
+                if (getMetasSignature(metas) !== getMetasSignature(stickerPackMetas)) {
+                    setStickerPackMetas(metas);
+                }
+            })();
+        }, []);
 
         return (
             <Wrapper>
