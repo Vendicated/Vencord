@@ -75,12 +75,12 @@ export default definePlugin({
             replacement: {
                 match: /role:"tablist",.{10,20}\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/,
                 replace: m => {
-                    const stickerTabRegex = /(\w)\?(\(.+?\))\((\w{1,2}),.*?isActive:(\w)==.*?:null/;
-                    const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab) => {
+                    const stickerTabRegex = /(\w)\?(\(.+?\))\((\w{1,2}),.*?isActive:(\w)==.*?children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/;
+                    const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
                         const isActive = `${currentTab}==="stickers+"`;
                         return (
                             `${_m},${canUseStickers}?` +
-                            `${jsx}(${tabHeaderComp},{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"stickers+",children:${jsx}("div",{children:"Stickers+"})})` +
+                            `${jsx}(${tabHeaderComp},{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"stickers+",children:${jsx}("div",{children:${stickerText}+"+"})})` +
                             ":null"
                         );
                     });
