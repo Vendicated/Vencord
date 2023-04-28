@@ -257,6 +257,7 @@ export default definePlugin({
             await DataStore.set("TextReplace_rulesRegex", rulesRegex);
         }
         this.preSend = addPreSendListener((_, msg) => {
+            msg.content = " " + msg.content + " ";
             for (const rule of rulesString) {
                 if (!rule.find || !rule.replace) continue;
                 if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
