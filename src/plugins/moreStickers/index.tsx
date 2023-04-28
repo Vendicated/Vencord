@@ -53,20 +53,20 @@ export default definePlugin({
             replacement: [{
                 match: /(children:\(0,\w\.jsx\)\()(\w{2})(,{innerClassName.{20,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
-                    const isMoreStickers = "arguments[0]?.type === \"more-stickers\"";
+                    const isMoreStickers = "arguments[0]?.stickersType";
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /null==\(null===\(\w=\w\.stickers\)\|\|void 0.*?\.consolidateGifsStickersEmojis.*?(\w)\.push\((\(0,\w\.jsx\))\((\w+),.*?"sticker"\)\)/,
-                replace: (m, _, jsx, compo) => {
+                match: /null==\(null===\(\w=\w\.stickers\)\|\|void 0.*?\.consolidateGifsStickersEmojis.*?(\w)\.push\((\(0,\w\.jsx\))\((\w+),{disabled:\w,type:(\w)},"sticker"\)\)/,
+                replace: (m, _, jsx, compo, type) => {
                     const c = "arguments[0].type";
-                    return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:"more-stickers"},"more-stickers"))`;
+                    return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
                 }
             }, {
-                match: /(var \w,\w=\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\()(.*?\.STICKER)(,.*?;)/,
-                replace: (_, head, section, tail) => {
-                    const isMoreStickers = "arguments[0]?.type === \"more-stickers\"";
-                    return `${head}${isMoreStickers}?"more-stickers":${section}${tail}`;
+                match: /(var \w,\w=)(\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\(.*?\.STICKER,.*?);/,
+                replace: (_, decl, cb) => {
+                    const newCb = cb.replace(/(?<=function\(\)\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
+                    return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
                 }
             }]
         },
@@ -77,16 +77,16 @@ export default definePlugin({
                 replace: m => {
                     const stickerTabRegex = /(\w)\?(\(.+?\))\((\w{1,2}),.*?isActive:(\w)==.*?:null/;
                     const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab) => {
-                        const isActive = `${currentTab}==="more-stickers"`;
+                        const isActive = `${currentTab}==="stickers+"`;
                         return (
                             `${_m},${canUseStickers}?` +
-                            `${jsx}(${tabHeaderComp},{id:"more-stickers-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"more-stickers",children:${jsx}("div",{children:"More Stickers"})})` +
+                            `${jsx}(${tabHeaderComp},{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"stickers+",children:${jsx}("div",{children:"Stickers+"})})` +
                             ":null"
                         );
                     });
 
                     return res.replace(/:null,((\w)===.*?\.STICKER&&\w\?(\(.*?\)).*?(\{.*?,onSelectSticker:.*?\})\):null)/, (_, _m, currentTab, jsx, props) => {
-                        return `:null,${currentTab}==="more-stickers"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
+                        return `:null,${currentTab}==="stickers+"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
                     });
                 }
             }
