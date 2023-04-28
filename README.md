@@ -3,7 +3,8 @@
 The cutest Discord client mod
 
 
-![A screenshot of Vencord featuring the ClearVision-v6 theme](https://user-images.githubusercontent.com/45497981/235015332-0453d3eb-1da6-4601-963e-ef5e454123a1.png)
+![](https://user-images.githubusercontent.com/45497981/235015332-0453d3eb-1da6-4601-963e-ef5e454123a1.png)
+*A screenshot of Vencord featuring the [ClearVision-v6 theme](https://github.com/ClearVision/ClearVision-v6) (Vencord does not come with it pre-installed, it is only an example)*
 
 ## Features
 
@@ -23,13 +24,19 @@ The cutest Discord client mod
 
 Click the below button to install Vencord to the Discord Desktop app
 
-[![Download and run the Installer](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#usage)
+[![Download and run the Installer](https://img.shields.io/github/v/release/Vencord/Installer?label=Download%20Vencord%20Installer&style=for-the-badge)](https://github.com/Vencord/Installer#vencord-installer)
 
 ## Installing on Browser
 
 [![Get it on the Firefox Webstore](https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png)](https://addons.mozilla.org/en-GB/firefox/addon/vencord-web/) [![Get it on the Chrome Webstore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chrome.google.com/webstore/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb)
 
 Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that the CSS Editor, Themes loaded from remote sources and co. will not work in the UserScript. Use the extension if you need any of those
+
+## Installing our Desktop App
+
+As an alternative to the Discord Desktop app, Vencord also has its own standalone Desktop app that is snappier and lighter than Discord's official Desktop app. It is currently in beta and we have yet to implement some features like screensharing, but you can try the beta nonetheless
+
+[![Download Vencord Desktop](https://img.shields.io/github/v/release/Vencord/Desktop?label=Download%20Vencord%20Desktop&style=for-the-badge)](https://github.com/Vencord/Desktop#vencord-desktop)
 
 ## Join our Support/Community Server
 
@@ -41,7 +48,7 @@ Discord is trademark of Discord Inc. and solely mentioned for the sake of descri
 Mention of it does not imply any affiliation with or endorsement by Discord Inc.
 
 <details>
-<summary>Vencord violates Discord's terms of service</summary> 
+<summary>Using Vencord violates Discord's terms of service</summary> 
 
 Client modifications are against Discord’s Terms of Service.
 
