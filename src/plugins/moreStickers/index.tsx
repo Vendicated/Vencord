@@ -68,6 +68,12 @@ export default definePlugin({
                     const newCb = cb.replace(/(?<=function\(\)\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
                 }
+            }, {
+                match: /(\w)=((\w)===\w+\.\w+\.STICKER)/,
+                replace: (_, isActive, isStickerTab, currentTab) => {
+                    const c = "arguments[0].stickersType";
+                    return `${isActive}=${c}?(${currentTab}===${c}):(${isStickerTab})`;
+                }
             }]
         },
         {
