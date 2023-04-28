@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
 import { Button, Text } from "@webpack/common";
-import { definePluginSettings } from "@api/settings";
 
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
