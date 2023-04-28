@@ -57,7 +57,7 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                         setActiveCategory(RecentPack);
                     }}
                 >
-                    <RecentlyUsedIcon width={20} height={20} color={
+                    <RecentlyUsedIcon width={24} height={24} color={
                         activeCategory === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
                     } />
                 </StickerCategory>
