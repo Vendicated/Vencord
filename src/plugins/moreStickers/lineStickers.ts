@@ -27,7 +27,19 @@ import { corsFetch } from "./utils";
  */
 
 function toStickerPackId(id: string): string {
-    return "Vencord-MoreStickers-Line-" + id;
+    return "Vencord-MoreStickers-Line-Pack-" + id;
+}
+
+/**
+ * Convert LineSticker id to Sticker id
+ *
+ * @param stickerId The id to convert.
+ * @param lineStickerPackId The id of the LineStickerPack.
+ * @returns {string} The converted id.
+ */
+
+function toStickerId(stickerId: string, lineStickerPackId: string): string {
+    return "Vencord-MoreStickers-Line-Sticker" + lineStickerPackId + "-" + stickerId;
 }
 
 /**
@@ -38,8 +50,8 @@ function toStickerPackId(id: string): string {
   */
 export function convertSticker(s: LineSticker): Sticker {
     return {
-        id: s.id,
-        url: s.staticUrl,
+        id: toStickerId(s.id, s.stickerPackId),
+        image: s.staticUrl,
         title: s.id,
         stickerPackId: toStickerPackId(s.stickerPackId)
     };

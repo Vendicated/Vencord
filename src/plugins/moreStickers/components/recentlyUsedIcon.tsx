@@ -20,13 +20,13 @@ import { findByCodeLazy } from "@webpack";
 
 const RecentlyUsedIconOrg = findByCodeLazy("M12 2C6.4764 2 2 6.4764 2 12C2 17.5236 6.4764 22 12 22C17.5236");
 
-export function RecentlyUsedIcon() {
+export function RecentlyUsedIcon({ size, color }: { size: number, color: string; }) {
     return (
         <RecentlyUsedIconOrg
             style={{
-                color: "var(--interactive-active)",
-                width: "24px",
-                height: "24px",
+                color,
+                width: `${size}px`,
+                height: `${size}px`,
                 overflow: "hidden",
                 overflowClipMargin: "content-box",
             }}
