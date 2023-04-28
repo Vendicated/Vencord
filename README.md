@@ -47,7 +47,7 @@ Discord is trademark of Discord Inc. and solely mentioned for the sake of descri
 Mention of it does not imply any affiliation with or endorsement by Discord Inc.
 
 <details>
-<summary>Vencord violates Discord's terms of service</summary> 
+<summary>Using Vencord violates Discord's terms of service</summary> 
 
 Client modifications are against Discord’s Terms of Service.
 
