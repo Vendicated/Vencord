@@ -35,7 +35,8 @@ let rulesString = [
 let rulesRegex = [
     {
         find: "",
-        replace: ""
+        replace: "",
+        onlyIfIncludes: ""
     }
 ] as any;
 
@@ -68,6 +69,11 @@ const TextReplaceString = () => {
                 replace: "",
                 onlyIfIncludes: ""
             });
+        } else if (key === "find" && e === "") {
+            rulesString.splice(index, 1);
+            await DataStore.set("TextReplace_rulesString", rulesString);
+            update();
+            return;
         }
         rulesString[index][key] = e;
         await DataStore.set("TextReplace_rulesString", rulesString);
@@ -115,8 +121,9 @@ const TextReplaceString = () => {
                                     bottom: "-7px"
                                 }}
                             >
-                                <svg fill="#f04747" width="26px" height="26px" viewBox="2.7 3.2 26.5 27" xmlns="http://www.w3.org/2000/svg" transform="rotate(45)">
-                                    <path d="M15.5 29.5c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.938 15.938c0-0.552-0.448-1-1-1h-4v-4c0-0.552-0.447-1-1-1h-1c-0.553 0-1 0.448-1 1v4h-4c-0.553 0-1 0.448-1 1v1c0 0.553 0.447 1 1 1h4v4c0 0.553 0.447 1 1 1h1c0.553 0 1-0.447 1-1v-4h4c0.552 0 1-0.447 1-1v-1z" />
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+                                    <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
                                 </svg>
                             </Button>
                         </tr>
@@ -141,8 +148,14 @@ const TextReplaceRegex = () => {
         if (index === rulesRegex.length - 1) {
             rulesRegex.push({
                 find: "",
-                replace: ""
+                replace: "",
+                onlyIfIncludes: ""
             });
+        } else if (key === "find" && e === "") {
+            rulesRegex.splice(index, 1);
+            await DataStore.set("TextReplace_rulesRegex", rulesRegex);
+            update();
+            return;
         }
         rulesRegex[index][key] = e;
         await DataStore.set("TextReplace_rulesRegex", rulesRegex);
@@ -174,6 +187,14 @@ const TextReplaceRegex = () => {
                                     spellCheck={false}
                                 />
                             </td>
+                            <td>
+                                <TextInput
+                                    placeholder="Only if includes"
+                                    value={rule.onlyIfIncludes}
+                                    onChange={e => onChangeRegex(e, index, "onlyIfIncludes")}
+                                    spellCheck={false}
+                                />
+                            </td>
                             <Button
                                 size={Button.Sizes.MIN}
                                 onClick={() => onClickRemoveRegex(index)}
@@ -182,8 +203,9 @@ const TextReplaceRegex = () => {
                                     bottom: "-7px"
                                 }}
                             >
-                                <svg fill="#f04747" width="26px" height="26px" viewBox="2.7 3.2 26.5 27" xmlns="http://www.w3.org/2000/svg" transform="rotate(45)">
-                                    <path d="M15.5 29.5c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.938 15.938c0-0.552-0.448-1-1-1h-4v-4c0-0.552-0.447-1-1-1h-1c-0.553 0-1 0.448-1 1v4h-4c-0.553 0-1 0.448-1 1v1c0 0.553 0.447 1 1 1h4v4c0 0.553 0.447 1 1 1h1c0.553 0 1-0.447 1-1v-4h4c0.552 0 1-0.447 1-1v-1z" />
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+                                    <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
                                 </svg>
                             </Button>
                         </tr>
@@ -228,7 +250,8 @@ export default definePlugin({
             rulesRegex = [
                 {
                     find: "",
-                    replace: ""
+                    replace: "",
+                    onlyIfIncludes: ""
                 }
             ];
             await DataStore.set("TextReplace_rulesRegex", rulesRegex);
@@ -241,6 +264,7 @@ export default definePlugin({
             }
             for (const rule of rulesRegex) {
                 if (!rule.find || !rule.replace) continue;
+                if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
                 try {
                     const regex = this.stringToRegex(rule.find);
                     msg.content = msg.content.replace(regex, rule.replace);
