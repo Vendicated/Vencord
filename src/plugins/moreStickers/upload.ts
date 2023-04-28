@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy,findLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 
 import { Sticker } from "./types";
 
@@ -41,9 +41,9 @@ export async function sendSticker(channelId: string, sticker: Sticker, sendAsLin
     }
 
     if (!sendAsLink) {
-        const response = await fetch(sticker.url, { cache: "force-cache" });
+        const response = await fetch(sticker.image, { cache: "force-cache" });
         const blob = await response.blob();
-        const filename = (new URL(sticker.url)).pathname.split("/").pop();
+        const filename = (new URL(sticker.image)).pathname.split("/").pop();
         const ext = filename?.split(".").pop() ?? "png";
         const file = new File([blob], filename ?? "sticker.png", { type: `image/${ext}` });
 
@@ -64,7 +64,7 @@ export async function sendSticker(channelId: string, sticker: Sticker, sendAsLin
         });
     } else {
         MessageUtils._sendMessage(channelId, {
-            content: `${messageContent} ${sticker.url}`.trim()
+            content: `${messageContent} ${sticker.image}`.trim()
         }, messageOptions || {});
     }
 }

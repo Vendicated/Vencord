@@ -18,16 +18,21 @@
 
 import {
     convert,
-    getStickerPack } from "./lineStickers";
+    getStickerPack
+} from "./lineStickers";
 import {
     deleteStickerPack,
     getStickerPackMetas,
     saveStickerPack
 } from "./stickers";
 import { StickerPack } from "./types";
+import { setRecentStickers } from "./components/recent";
 
 export async function initTest() {
     console.log("initTest.");
+
+    console.log("Clearing recent stickers.");
+    setRecentStickers([]);
 
     // Clear all sticker packs
     console.log("Clearing all sticker packs.");
@@ -71,6 +76,9 @@ export async function initTest() {
 
 export async function clearTest() {
     console.log("clearTest.");
+
+    console.log("Clearing recent stickers.");
+    setRecentStickers([]);
 
     // Clear all sticker packs
     console.log("Clearing all sticker packs.");
