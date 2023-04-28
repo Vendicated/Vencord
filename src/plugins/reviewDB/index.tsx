@@ -79,7 +79,8 @@ export default definePlugin({
             const user = await getCurrentUserInfo(settings.token);
             if (settings.lastReviewId < user.lastReviewID) {
                 settings.lastReviewId = user.lastReviewID;
-                user.lastReviewID !== 0 && showToast("You have new reviews on your profile!");
+                if (user.lastReviewID !== 0)
+                    showToast("You have new reviews on your profile!");
             }
             settings.userType = user.type;
         }, 4000);
