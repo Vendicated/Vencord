@@ -88,6 +88,7 @@ function TypingIndicator(props: { isTyping: boolean; }) {
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     return unreadCount > 0 ?
         <div
+            data-has-mention={!!mentionCount}
             className={classes(styles.numberBadge, styles.baseShapeRound)}
             style={{
                 backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
@@ -153,7 +154,8 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
 }
 
 function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Channel; }) {
-    const { guild, guildId, channel, channelId } = props;
+    const { guildId, channel, channelId } = props;
+    const guild = props.guild ?? GuildStore.getGuild(channel!.guild_id);
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
@@ -173,7 +175,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
     );
     if (guildId === "@favorites")
         return <>
-            <GuildIcon guild={GuildStore.getGuild(channel!.guild_id)} />
+            <GuildIcon guild={guild} />
             <ChannelEmoji emoji={channelEmoji} channel={channel!} />
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
