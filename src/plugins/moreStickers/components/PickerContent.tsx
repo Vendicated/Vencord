@@ -79,7 +79,7 @@ function PickerContentRowGrid({
                 <div aria-hidden="true">
                     <div className={
                         [
-                            `vc-more-stickers-PickerContentRowGrid-inspectedIndicator`,
+                            "vc-more-stickers-PickerContentRowGrid-inspectedIndicator",
                             `${isHovered ? "inspected" : ""}`
                         ].join(" ")
                     }></div>

@@ -18,8 +18,8 @@
 
 import * as DataStore from "@api/DataStore";
 
-import { Mutex } from "./utils";
 import { StickerPack, StickerPackMeta } from "./types";
+import { Mutex } from "./utils";
 const mutex = new Mutex();
 
 const PACKS_KEY = "Vencord-MoreStickers-Packs";
@@ -96,7 +96,7 @@ export async function getStickerPackMeta(id: string): Promise<StickerPackMeta | 
 
 /**
  * Delete a sticker pack from the DataStore
- * 
+ *
  * @param {string} id The id of the sticker pack.
  * @return {Promise<void>}
  * */

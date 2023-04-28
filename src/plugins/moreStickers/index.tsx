@@ -28,11 +28,9 @@ import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
 import { Wrapper } from "./components/wrapper";
-
-import { initTest, clearTest } from "./testdata";
-
-import { StickerPackMeta, StickerPack } from "./types";
-import { getStickerPackMetas, getStickerPack } from "./stickers";
+import { getStickerPack,getStickerPackMetas } from "./stickers";
+import { clearTest,initTest } from "./testdata";
+import { StickerPack,StickerPackMeta } from "./types";
 
 const cl = classNameFactory("vc-more-stickers-");
 
