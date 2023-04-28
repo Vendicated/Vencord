@@ -161,17 +161,17 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
         [ReadStateStore, TypingStore, ChannelNameEmojisStore],
         () => [
-            ReadStateStore.getUnreadCount(props.channelId) as number,
-            ReadStateStore.getMentionCount(props.channelId) as number,
+            ReadStateStore.getUnreadCount(channelId) as number,
+            ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            (props.channel
-                ? ChannelNameEmojisStore.getGuildChannelEmojis(props.guildId)?.[props.channel.name?.toLowerCase()]
+            (channel
+                ? ChannelNameEmojisStore.getGuildChannelEmojis(props.guildId)?.[channel.name?.toLowerCase()]
                 : undefined
             ) as string | undefined
         ],
         null,
         // is this necessary?
-        (o, n) => o[0] === n[0] && o[1] === n[1] && o[2] === n[2] && o[3] === n[3]
+        (o, n) => o.every((v, i) => v === n[i])
     );
     if (guildId === "@favorites")
         return <>

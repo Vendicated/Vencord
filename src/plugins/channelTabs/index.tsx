@@ -166,7 +166,7 @@ export default definePlugin({
             <Forms.FormSection>
                 <Forms.FormTitle>Switch between tabs</Forms.FormTitle>
                 <Keybind shortcut="mod+tab" />
-                <Keybind shortcut="mod+tab" />
+                <Keybind shortcut="mod+shift+tab" />
             </Forms.FormSection>
             <Forms.FormSection>
                 <Forms.FormTitle>Switch between tabs with unreads</Forms.FormTitle>
