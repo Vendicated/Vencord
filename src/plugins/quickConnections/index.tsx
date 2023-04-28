@@ -22,26 +22,39 @@ import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { User } from "discord-types/general";
-import { Tooltip } from "webpack/common";
+import { Clipboard, Tooltip } from "@webpack/common";
+import { LazyComponent } from "@utils/misc";
 
-const Section: React.ComponentType<any> = findByCodeLazy("().lastSection");
+const Section = LazyComponent(() => findByCode("().lastSection"));
 const UserProfileStore = findStoreLazy("UserProfileStore");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(",\"--profile-gradient-primary-color\"");
 
+enum Spacing {
+    COMPACT,
+    COZY,
+    ROOMY
+}
+const getSpacingPx = (spacing: Spacing | undefined) => (spacing ?? Spacing.COMPACT) * 2 + 4;
+
 const settings = definePluginSettings({
     iconSize: {
         type: OptionType.NUMBER,
-        description: "Icon size",
+        description: "Icon size (px)",
         default: 32
     },
     iconSpacing: {
-        type: OptionType.NUMBER,
-        description: "Icon spacing",
-        default: 6
+        type: OptionType.SELECT,
+        description: "Icon margin",
+        default: Spacing.COZY,
+        options: [
+            { label: "Compact", value: Spacing.COMPACT },
+            { label: "Cozy", value: Spacing.COZY }, // US Spelling :/
+            { label: "Roomy", value: Spacing.ROOMY }
+        ]
     }
 });
 
@@ -71,15 +84,14 @@ function QuickConnectionsComponent({ id, theme }: { id: string, theme: string; }
         return null;
 
     const connections: Connection[] = profile.connectedAccounts;
-    if (connections && connections.length !== 0) {
-        return (
-            <Section>
-                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-            </Section>
-        );
-    }
+    if (!connections?.length)
+        return null;
 
-    return null;
+    return (
+        <Section>
+            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+        </Section>
+    );
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
@@ -94,13 +106,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                     target="_blank"
                     style={{
                         backgroundImage: "url(" + (theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG) + ")",
-                        marginTop: settings.store.iconSpacing,
-                        marginRight: settings.store.iconSpacing,
+                        marginTop: getSpacingPx(settings.store.iconSpacing),
+                        marginRight: getSpacingPx(settings.store.iconSpacing),
                         width: settings.store.iconSize,
                         height: settings.store.iconSize
                     }}
                     className="vc-user-connection"
-                    onClick={() => !url && navigator.clipboard.writeText(connection.name)}
+                    onClick={() => !url && Clipboard.copy(connection.name)}
                     onMouseLeave={onMouseLeave}
                     onMouseEnter={onMouseEnter} />
             }
