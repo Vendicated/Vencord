@@ -21,6 +21,7 @@ import { React } from "@webpack/common";
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
 import { CategoryWrapper } from "./categoryWrapper";
+import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
 import { RecentlyUsedIcon } from "./recentlyUsedIcon";
 import { StickerCategory } from "./stickerCategory";
 
@@ -36,8 +37,8 @@ export interface SidebarProps {
 }
 
 export const RecentPack = {
-    id: "recent",
-    name: "Recently Used",
+    id: RECENT_STICKERS_ID,
+    name: RECENT_STICKERS_TITLE,
 } as StickerCategory;
 
 export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) => {
@@ -47,7 +48,7 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
         <CategoryWrapper>
             <CategoryScroller categoryLength={categories.length}>
                 <StickerCategory
-                    style={{ padding: "4px", boxSizing: "border-box" }}
+                    style={{ padding: "4px", boxSizing: "border-box", width: "32px" }}
                     isActive={activeCategory === RecentPack}
                     onClick={() => {
                         if (activeCategory === RecentPack) return;
@@ -56,7 +57,9 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                         setActiveCategory(RecentPack);
                     }}
                 >
-                    <RecentlyUsedIcon />
+                    <RecentlyUsedIcon size={24} color={
+                        activeCategory === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
+                    } />
                 </StickerCategory>
                 {
                     ...categories.map(category => {

@@ -144,7 +144,7 @@ export default definePlugin({
                     .filter((x): x is Exclude<typeof x, null> => x !== null);
                 setStickerPacks(sps);
             })();
-        }, stickerPackMetas);
+        }, [stickerPackMetas]);
 
         React.useEffect(() => {
             (async () => {
@@ -173,7 +173,7 @@ export default definePlugin({
                         stickerPackMetas.map(meta => ({
                             id: meta.id,
                             name: meta.title,
-                            iconUrl: meta.logo.url
+                            iconUrl: meta.logo.image
                         }))
                     }
                     onCategorySelect={category => {

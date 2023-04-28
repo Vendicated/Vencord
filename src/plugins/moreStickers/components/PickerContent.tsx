@@ -20,6 +20,8 @@ import { React } from "@webpack/common";
 
 import { Sticker, StickerPack } from "../types";
 import { sendSticker } from "../upload";
+import { addRecentSticker, getRecentStickers, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
+import { RecentlyUsedIcon } from "./recentlyUsedIcon";
 
 export interface PickerContent {
     stickerPacks: StickerPack[];
@@ -29,7 +31,7 @@ export interface PickerContent {
 }
 
 export interface PickerContentHeader {
-    image: string;
+    image: string | React.ReactNode;
     title: string;
     children?: React.ReactNode;
     isSelected?: boolean;
@@ -52,6 +54,7 @@ export interface PickerContentRowGrid {
     onHover: (sticker: Sticker | null) => void;
     isHovered?: boolean;
     channelId?: string;
+    onSend?: (sticker: Sticker) => void;
 }
 
 function PickerContentRowGrid({
@@ -60,6 +63,7 @@ function PickerContentRowGrid({
     sticker,
     onHover,
     channelId,
+    onSend = () => { },
     isHovered = false
 }: PickerContentRowGrid) {
 
@@ -70,7 +74,12 @@ function PickerContentRowGrid({
             aria-colindex={colIndex}
             id={`vc-more-stickers-PickerContentRowGrid-${rowIndex}-${colIndex}`}
             onMouseEnter={() => onHover(sticker)}
-            onClick={() => { if (channelId) sendSticker(channelId, sticker); }}
+            onClick={() => {
+                if (!channelId) return;
+                sendSticker(channelId, sticker);
+                addRecentSticker(sticker);
+                onSend(sticker);
+            }}
         >
             <div
                 className="vc-more-stickers-PickerContentRowGrid-sticker"
@@ -90,7 +99,7 @@ function PickerContentRowGrid({
                         }}>
                             <img
                                 alt={sticker.title}
-                                src={sticker.url}
+                                src={sticker.image}
                                 draggable="false"
                                 datatype="sticker"
                                 data-id={sticker.id}
@@ -168,7 +177,7 @@ export function PickerContentHeader({
                 >
                     <div className="vc-more-stickers-PickerContentHeader-headerIcon">
                         <div>
-                            <svg
+                            {typeof image === "string" ? <svg
                                 className="vc-more-stickers-PickerContentHeader-svg"
                                 width={16} height={16} viewBox="0 0 16 16"
                             >
@@ -184,6 +193,7 @@ export function PickerContentHeader({
                                     ></img>
                                 </foreignObject>
                             </svg>
+                                : image}
                         </div>
                     </div>
                     <span
@@ -198,11 +208,23 @@ export function PickerContentHeader({
         </span>
     );
 }
+
 export function PickerContent({ stickerPacks, selectedStickerPackId, setSelectedStickerPackId, channelId }: PickerContent) {
     const [currentSticker, setCurrentSticker] = React.useState<Sticker | null>((stickerPacks.length && stickerPacks[0].stickers.length) ? stickerPacks[0].stickers[0] : null);
     const [currentStickerPack, setCurrentStickerPack] = React.useState<StickerPack | null>(stickerPacks.length ? stickerPacks[0] : null);
+    const [recentStickers, setRecentStickers] = React.useState<Sticker[]>([]);
+
     const stickerPacksElemRef = React.useRef<HTMLDivElement>(null);
     const scrollerRef = React.useRef<HTMLDivElement>(null);
+
+    async function fetchRecentStickers() {
+        const recentStickers = await getRecentStickers();
+        setRecentStickers(recentStickers);
+    }
+
+    React.useEffect(() => {
+        fetchRecentStickers();
+    }, []);
 
     React.useEffect(() => {
         if (currentStickerPack?.id !== currentSticker?.stickerPackId) {
@@ -210,52 +232,78 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
         }
     }, [currentSticker]);
 
+    const stickersToRows = (stickers: Sticker[]): JSX.Element[] => stickers
+        .reduce((acc, sticker, i) => {
+            if (i % 3 === 0) {
+                acc.push([]);
+            }
+            acc[acc.length - 1].push(sticker);
+            return acc;
+        }, [] as Sticker[][])
+        .map((stickers, i) => (
+            <PickerContentRow
+                rowIndex={i}
+                channelId={channelId}
+                grid1={{
+                    rowIndex: i,
+                    colIndex: 1,
+                    sticker: stickers[0],
+                    onHover: setCurrentSticker,
+                    onSend: fetchRecentStickers,
+                    isHovered: currentSticker?.id === stickers[0].id
+                }}
+                grid2={
+                    stickers.length > 1 ? {
+                        rowIndex: i,
+                        colIndex: 2,
+                        sticker: stickers[1],
+                        onHover: setCurrentSticker,
+                        onSend: fetchRecentStickers,
+                        isHovered: currentSticker?.id === stickers[1].id
+                    } : undefined
+                }
+                grid3={
+                    stickers.length > 2 ? {
+                        rowIndex: i,
+                        colIndex: 3,
+                        sticker: stickers[2],
+                        onHover: setCurrentSticker,
+                        onSend: fetchRecentStickers,
+                        isHovered: currentSticker?.id === stickers[2].id
+                    } : undefined
+                }
+            />
+        ));
+
     return (
         <div className="vc-more-stickers-PickerContent-listWrapper">
             <div className="vc-more-stickers-PickerContent-wrapper">
                 <div className="vc-more-stickers-PickerContent-scroller" ref={scrollerRef}>
                     <div className="vc-more-stickers-PickerContent-listItems" role="none presentation">
                         <div ref={stickerPacksElemRef}>
+                            <PickerContentHeader
+                                image={
+                                    <RecentlyUsedIcon size={16} color="currentColor" />
+                                }
+                                title={RECENT_STICKERS_TITLE}
+                                isSelected={RECENT_STICKERS_ID === selectedStickerPackId}
+                                beforeScroll={() => {
+                                    scrollerRef.current?.scrollTo({
+                                        top: 0,
+                                    });
+                                }}
+                                afterScroll={() => { setSelectedStickerPackId(null); }}
+                            >
+                                {
+                                    ...stickersToRows(recentStickers)
+                                }
+                            </PickerContentHeader>
                             {
                                 stickerPacks.map(sp => {
-                                    const stickerArrays: Sticker[][] = [];
-                                    for (let i = 0; i < sp.stickers.length; i += 3) {
-                                        stickerArrays.push(sp.stickers.slice(i, i + 3));
-                                    }
-                                    const rows = stickerArrays.map((stickers, i) => (
-                                        <PickerContentRow
-                                            rowIndex={i}
-                                            channelId={channelId}
-                                            grid1={{
-                                                rowIndex: i,
-                                                colIndex: 1,
-                                                sticker: stickers[0],
-                                                onHover: setCurrentSticker,
-                                                isHovered: currentSticker?.id === stickers[0].id
-                                            }}
-                                            grid2={
-                                                stickers.length > 1 ? {
-                                                    rowIndex: i,
-                                                    colIndex: 2,
-                                                    sticker: stickers[1],
-                                                    onHover: setCurrentSticker,
-                                                    isHovered: currentSticker?.id === stickers[1].id
-                                                } : undefined
-                                            }
-                                            grid3={
-                                                stickers.length > 2 ? {
-                                                    rowIndex: i,
-                                                    colIndex: 3,
-                                                    sticker: stickers[2],
-                                                    onHover: setCurrentSticker,
-                                                    isHovered: currentSticker?.id === stickers[2].id
-                                                } : undefined
-                                            }
-                                        />
-                                    ));
+                                    const rows = stickersToRows(sp.stickers);
                                     return (
                                         <PickerContentHeader
-                                            image={sp.logo.url}
+                                            image={sp.logo.image}
                                             title={sp.title}
                                             isSelected={sp.id === selectedStickerPackId}
                                             beforeScroll={() => {
@@ -285,7 +333,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                             }}>
                                 <img
                                     alt={currentSticker?.title ?? ""}
-                                    src={currentSticker?.url}
+                                    src={currentSticker?.image}
                                     draggable="false"
                                     datatype="sticker"
                                     data-id={currentSticker?.id ?? ""}
@@ -307,7 +355,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                                 <foreignObject x={0} y={0} width={32} height={32} overflow="visible" mask="url(#svg-mask-squircle)">
                                     <img
                                         alt={currentStickerPack?.title ?? ""}
-                                        src={currentStickerPack?.logo?.url}
+                                        src={currentStickerPack?.logo?.image}
                                     ></img>
                                 </foreignObject>
                             </svg>

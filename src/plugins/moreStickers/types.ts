@@ -40,7 +40,7 @@ export interface LineStickerPack {
 
 export interface Sticker {
     id: string;
-    url: string;
+    image: string;
     title: string;
     stickerPackId: StickerPackMeta["id"];
 }
