@@ -19,7 +19,7 @@
 import { Settings } from "@api/settings";
 import { classes, LazyComponent } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Tooltip, UserStore } from "@webpack/common";
+import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -106,19 +106,10 @@ export default LazyComponent(() => {
 
                     {
                         !Settings.plugins.ReviewDB.hideTimestamps && (
-
-                            <Tooltip
-                                text={new Date(review.timestamp * 1000).toLocaleString()}>
-                                {({ onMouseEnter, onMouseLeave }) => (
-
-                                    <span className={classes(timestampInline, timestamp)}
-                                        onMouseEnter={onMouseEnter}
-                                        onMouseLeave={onMouseLeave} >
-                                        {moment(review.timestamp * 1000).format("HH:mm")}
-                                    </span>
-                                )}
-                            </Tooltip>
-
+                            <Timestamp
+                                timestamp={moment(review.timestamp * 1000)}
+                                compact={true}
+                            />
                         )
                     }
 

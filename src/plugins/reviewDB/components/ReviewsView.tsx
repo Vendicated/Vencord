@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { classes, useAwaiter } from "@utils/misc";
 import { findLazy } from "@webpack";
 import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
-import { Settings } from "Vencord";
 
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
@@ -30,7 +30,6 @@ const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const { token } = Settings.plugins.ReviewDB;
-
     const [refetchCount, setRefetchCount] = React.useState(0);
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
         fallbackValue: [],
