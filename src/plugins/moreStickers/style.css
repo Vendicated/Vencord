@@ -16,7 +16,7 @@
     width: 100%;
 }
 
-.vc-more-stickers-picker-container>div:first-child {
+.vc-more-stickers-picker-container > div:first-child {
     display: flex;
     flex: 1 1 auto;
     flex-flow: wrap;
@@ -44,7 +44,7 @@
     margin-right: 8px;
 }
 
-.vc-more-stickers-foreign-object>img {
+.vc-more-stickers-foreign-object > img {
     text-indent: -9999px;
     align-items: center;
     background-color: var(--background-primary);
@@ -94,13 +94,13 @@
     flex: 1 1 auto;
 }
 
-.vc-more-stickers-category-scroller> :first-child {
+.vc-more-stickers-category-scroller > :first-child {
     inset: 8px;
     contain: layout;
     position: absolute;
 }
 
-.vc-more-stickers-category-scroller> :last-child {
+.vc-more-stickers-category-scroller > :last-child {
     position: "absolute";
     pointer-events: none;
     min-height: 0;
@@ -110,24 +110,24 @@
 }
 
 .vc-more-stickers-category-scroller,
-.vc-more-stickers-PickerContent-scroller {
+.vc-more-stickers-picker-content-scroller {
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thin-thumb) var(--scrollbar-thin-track);
 }
 
 .vc-more-stickers-category-scroller::-webkit-scrollbar,
-.vc-more-stickers-PickerContent-scroller::-webkit-scrollbar {
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 .vc-more-stickers-category-scroller::-webkit-scrollbar-corner,
-.vc-more-stickers-PickerContent-scroller::-webkit-scrollbar-corner {
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
 .vc-more-stickers-category-scroller::-webkit-scrollbar-thumb,
-.vc-more-stickers-PickerContent-scroller::-webkit-scrollbar-thumb {
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-thumb {
     background-clip: padding-box;
     border: 2px solid transparent;
     border-radius: 4px;
@@ -136,12 +136,11 @@
 }
 
 .vc-more-stickers-category-scroller::-webkit-scrollbar-track,
-.vc-more-stickers-PickerContent-scroller::-webkit-scrollbar-track {
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-track {
     border-color: var(--scrollbar-thin-track);
     background-color: var(--scrollbar-thin-track);
     border: 2px solid var(--scrollbar-thin-track);
 }
-
 
 .vc-more-stickers-header {
     box-shadow: var(--elevation-low);
@@ -176,14 +175,14 @@
     color: var(--interactive-hover);
 }
 
-.vc-more-stickers-PickerContent-listWrapper {
+.vc-more-stickers-picker-content-list-wrapper {
     grid-row: 2/2;
     grid-column: 2/2;
     overflow: hidden;
     position: relative;
 }
 
-.vc-more-stickers-PickerContent-wrapper {
+.vc-more-stickers-picker-content-wrapper {
     display: grid;
     grid-template-rows: 1fr auto;
     height: 100%;
@@ -194,9 +193,9 @@
     left: 0;
 }
 
-.vc-more-stickers-PickerContent-scroller {
+.vc-more-stickers-picker-content-scroller {
     overflow: hidden scroll;
-    padding-right: 0px;
+    padding-right: 0;
     height: 100%;
     position: relative;
     box-sizing: border-box;
@@ -205,33 +204,28 @@
     flex: 1 1 auto;
 }
 
-.vc-more-stickers-PickerContent-listItems {
+.vc-more-stickers-picker-content-list-items {
     contain: layout;
     position: absolute;
-    inset: 0px 0px 0px 8px;
+    inset: 0 0 0 8px;
 }
 
-.vc-more-stickers-PickerContentHeader-wrapper {
+.vc-more-stickers-picker-content-header-wrapper {
     position: sticky;
     top: 0;
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
     background-color: var(--background-secondary);
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     height: 32px;
     padding: 0 4px;
     z-index: 1;
 }
 
-.vc-more-stickers-PickerContentHeader-header {
+.vc-more-stickers-picker-content-header-header {
     color: var(--header-secondary);
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     -webkit-box-align: center;
     -ms-flex-align: center;
@@ -241,31 +235,28 @@
     justify-content: flex-start;
     font-size: 12px;
     font-weight: 600;
-    -webkit-transition: color .125s;
-    transition: color .125s;
+    transition: color 0.125s;
 }
 
-.vc-more-stickers-PickerContentHeader-headerIcon {
+.vc-more-stickers-picker-content-header-header-icon {
     display: contents;
     height: 100%;
     margin-right: 8px;
 }
 
-.vc-more-stickers-PickerContentHeader-svg {
+.vc-more-stickers-picker-content-header-svg {
     display: block;
     contain: paint;
 }
 
-.vc-more-stickers-PickerContentHeader-guildIcon,
-.vc-more-stickers-PickerContent-inspector-graphicSecondary img {
+.vc-more-stickers-picker-content-header-guild-icon,
+.vc-more-stickers-picker-content-inspector-graphic-secondary img {
     text-indent: -9999px;
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
     background-color: var(--background-primary);
     color: var(--text-normal);
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     height: 100%;
     -webkit-box-pack: center;
@@ -274,7 +265,7 @@
     width: 100%;
 }
 
-.vc-more-stickers-PickerContentHeader-headerLabel {
+.vc-more-stickers-picker-content-header-header-label {
     margin-left: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -283,12 +274,12 @@
     margin-right: 8px;
 }
 
-.vc-more-stickers-PickerContentHeader-header:hover {
+.vc-more-stickers-picker-content-header-header:hover {
     color: var(--interactive-active);
     cursor: pointer;
 }
 
-.vc-more-stickers-PickerContentRow {
+.vc-more-stickers-picker-content-row {
     column-gap: 67px;
     grid-template-columns: repeat(auto-fill, 100px);
     height: 100px;
@@ -298,7 +289,7 @@
     overflow: hidden;
 }
 
-.vc-more-stickers-PickerContentRowGrid-sticker {
+.vc-more-stickers-picker-content-row-grid-sticker {
     width: 96px;
     height: 96px;
     padding: 2px;
@@ -307,9 +298,8 @@
     position: relative;
 }
 
-.vc-more-stickers-PickerContentRowGrid-hiddenVisually {
+.vc-more-stickers-picker-content-row-grid-hidden-visually {
     clip: rect(0 0 0 0);
-    -webkit-clip-path: inset(50%);
     clip-path: inset(50%);
     height: 1px;
     overflow: hidden;
@@ -318,43 +308,41 @@
     width: 1px;
 }
 
-.vc-more-stickers-PickerContentRowGrid-inspectedIndicator {
+.vc-more-stickers-picker-content-row-grid-inspected-indicator {
     height: 100%;
-    left: 0;
-    -webkit-mask: url(https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg) 0 0/100% 100%;
-    mask: url(https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg) 0 0/100% 100%;
-    position: absolute;
-    top: 0;
-    -webkit-transition: background-color .08s ease-out, color .08s ease-out;
-    transition: background-color .08s ease-out, color .08s ease-out;
     width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    /* prettier-ignore */
+    mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
+    transition: background-color 0.08s ease-out, color 0.08s ease-out;
     z-index: -1;
 }
 
-.vc-more-stickers-PickerContentRowGrid-inspectedIndicator.inspected {
+.vc-more-stickers-picker-content-row-grid-inspected-indicator.inspected {
     background-color: var(--background-accent);
 }
 
-.vc-more-stickers-PickerContentRowGrid-stickerNode {
-    -webkit-transition: opacity .25s;
-    transition: opacity .25s;
+.vc-more-stickers-picker-content-row-grid-sticker-node {
+    transition: opacity 0.25s;
 }
 
-.vc-more-stickers-PickerContentRowGrid-assetWrapper {
+.vc-more-stickers-picker-content-row-grid-asset-wrapper {
     position: relative;
     user-select: none;
 }
 
-.vc-more-stickers-PickerContentRowGrid-assetWrapper:hover {
-    -webkit-mask: url(https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg) 0 0/100% 100%;
-    mask: url(https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg) 0 0/100% 100%;
+.vc-more-stickers-picker-content-row-grid-asset-wrapper:hover {
+    /* prettier-ignore */
+    mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
 }
 
-.vc-more-stickers-PickerContentRowGrid-img,
-.vc-more-stickers-PickerContent-inspector-img {
+.vc-more-stickers-picker-content-row-grid-img,
+.vc-more-stickers-picker-content-inspector-img {
     text-indent: -9999px;
     display: block;
-    -o-object-fit: contain;
     object-fit: contain;
     height: 100%;
     left: 0;
@@ -363,43 +351,31 @@
     width: 100%;
 }
 
-.vc-more-stickers-PickerContent-inspector {
-    -webkit-box-sizing: border-box;
+.vc-more-stickers-picker-content-inspector {
     box-sizing: border-box;
     height: 48px;
     width: 100%;
     padding: 0 16px;
     background-color: var(--background-secondary-alt);
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
     flex: 0 0 auto;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: row;
     flex-direction: row;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
     overflow: hidden;
 }
 
-.vc-more-stickers-PickerContent-inspector-graphicPrimary {
+.vc-more-stickers-picker-content-inspector-graphic-primary {
     height: 28px;
     width: 28px;
 }
 
-.vc-more-stickers-PickerContent-inspector-textWrapper {
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
+.vc-more-stickers-picker-content-inspector-text-wrapper {
     flex: 1;
     margin-left: 8px;
     overflow: hidden;
 }
 
-.vc-more-stickers-PickerContent-inspector-titlePrimary {
+.vc-more-stickers-picker-content-inspector-title-primary {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -410,7 +386,7 @@
     color: var(--text-normal);
 }
 
-.vc-more-stickers-PickerContent-inspector-titleSecondary {
+.vc-more-stickers-picker-content-inspector-title-secondary {
     color: var(--interactive-normal);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -421,13 +397,13 @@
     font-weight: 400;
 }
 
-.vc-more-stickers-PickerContent-inspector-graphicSecondary {
+.vc-more-stickers-picker-content-inspector-graphic-secondary {
     height: 32px;
     margin-left: 8px;
     width: 32px;
 }
 
-.vc-more-stickers-PickerContent-inspector-graphicSecondary svg {
+.vc-more-stickers-picker-content-inspector-graphic-secondary svg {
     display: block;
     contain: paint;
 }

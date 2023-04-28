@@ -60,7 +60,7 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
                         <IconContainer>
                             {
                                 (query && query.length > 0) ?
-                                    <CancelIcon className="vc-more-stickers-clear-icon" width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
+                                    <CancelIcon className={cl("clear-icon")} width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
                                     <SearchIcon width={20} height={20} color="var(--text-muted)" />
                             }
                         </IconContainer>

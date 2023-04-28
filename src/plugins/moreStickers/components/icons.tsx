@@ -21,3 +21,4 @@ import { findByCode } from "@webpack";
 
 export const SearchIcon = LazyComponent(() => findByCode("M21.707 20.293L16.314 14.9C17.403"));
 export const CancelIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4"));
+export const RecentlyUsedIcon = LazyComponent(() => findByCode("M12 2C6.4764 2 2 6.4764 2 12C2 17.5236 6.4764 22 12 22C17.5236"));

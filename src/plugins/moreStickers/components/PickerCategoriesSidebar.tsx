@@ -21,8 +21,8 @@ import { React } from "@webpack/common";
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
 import { CategoryWrapper } from "./categoryWrapper";
+import { RecentlyUsedIcon } from "./icons";
 import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
-import { RecentlyUsedIcon } from "./recentlyUsedIcon";
 import { StickerCategory } from "./stickerCategory";
 
 export interface StickerCategory {
@@ -57,7 +57,7 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                         setActiveCategory(RecentPack);
                     }}
                 >
-                    <RecentlyUsedIcon size={24} color={
+                    <RecentlyUsedIcon width={20} height={20} color={
                         activeCategory === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
                     } />
                 </StickerCategory>
