@@ -18,8 +18,12 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 
+const getGuildsTree = findByPropsLazy("getGuildsTree");
+const getGuildCount = findByPropsLazy("getGuildCount");
+const lurkingGuildIds = findByPropsLazy("lurkingGuildIds");
+const joinGuild = findByPropsLazy("joinGuild");
 
 export default definePlugin({
     name: "PermLurk",
@@ -29,10 +33,10 @@ export default definePlugin({
     flux: {
         GUILD_JOIN({ guildId }) {
             setTimeout(() => {
-                findByProps("getGuildsTree").getGuildsTree().root.children.unshift({ type: "guild", guildId, unavailable: false, children: [] });
-                findByProps("getGuildCount").getGuild(guildId).joinedAt = new Date;
-                findByProps("lurkingGuildIds").lurkingGuildIds().pop();
-                findByProps("joinGuild").transitionToGuildSync(guildId);
+                getGuildsTree.getGuildsTree().root.children.unshift({ type: "guild", guildId, unavailable: false, children: [] });
+                getGuildCount.getGuild(guildId).joinedAt = new Date;
+                lurkingGuildIds.lurkingGuildIds().pop();
+                joinGuild.transitionToGuildSync(guildId);
             }, 600);
 
         }
