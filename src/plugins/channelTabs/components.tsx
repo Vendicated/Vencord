@@ -39,8 +39,7 @@ enum ChannelTypes {
     GROUP_DM = 3
 }
 const ChannelNameEmojisStore = findStoreLazy("ChannelNameEmojisStore");
-// also takes a channel param, but isn't used anywhere within the function
-const useChannelEmojiBgColor: (emoji: string) => any = findByCodeLazy('="#607D8B";');
+const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
 const getDotWidth = findByCodeLazy("<10?16:");
 const styles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
@@ -98,9 +97,9 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
             {mentionCount || unreadCount}
         </div> : null;
 };
-function ChannelEmoji({ emoji }: { emoji: string | undefined; }) {
+function ChannelEmoji({ channel, emoji }: { channel: Channel, emoji: string | undefined; }) {
     if (!emoji || !channelTabsSettings.store.channelNameEmojis) return null;
-    const backgroundColor = useChannelEmojiBgColor(emoji);
+    const backgroundColor = useChannelEmojiBgColor(emoji, channel);
     return <div className={cl("emoji-container")} style={{ backgroundColor }}>
         <Emoji emojiName={emoji} className={cl("emoji")} />
     </div>;
@@ -175,7 +174,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
     if (guildId === "@favorites")
         return <>
             <GuildIcon guild={GuildStore.getGuild(channel!.guild_id)} />
-            <ChannelEmoji emoji={channelEmoji} />
+            <ChannelEmoji emoji={channelEmoji} channel={channel!} />
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
@@ -184,7 +183,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
-                <ChannelEmoji emoji={channelEmoji} />
+                <ChannelEmoji emoji={channelEmoji} channel={channel!} />
                 <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
