@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { ChannelStore } from "@webpack/common";
 
 import { Sticker } from "./types";
 
@@ -25,8 +26,14 @@ const UploadObject = findLazy(m => m.prototype && m.prototype.upload && m.protot
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
+const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 
-export async function sendSticker(channelId: string, sticker: Sticker, sendAsLink: boolean = false) {
+export async function sendSticker({
+    channelId,
+    sticker,
+    sendAsLink,
+    dontSend
+}: { channelId: string, sticker: Sticker, sendAsLink?: boolean, dontSend?: boolean; }) {
     let messageContent = "";
     if (DraftStore) {
         messageContent = DraftStore.getDraft(channelId, 0);
@@ -40,12 +47,18 @@ export async function sendSticker(channelId: string, sticker: Sticker, sendAsLin
         }
     }
 
-    if (!sendAsLink) {
+    if (dontSend || !sendAsLink) {
         const response = await fetch(sticker.image, { cache: "force-cache" });
         const blob = await response.blob();
         const filename = (new URL(sticker.image)).pathname.split("/").pop();
         const ext = filename?.split(".").pop() ?? "png";
-        const file = new File([blob], filename ?? "sticker.png", { type: `image/${ext}` });
+
+        const file = new File([blob], filename!, { type: `image/${ext}` });
+
+        if (dontSend) {
+            promptToUpload([file], ChannelStore.getChannel(channelId), 0);
+            return;
+        }
 
         MessageUpload.uploadFiles({
             channelId,

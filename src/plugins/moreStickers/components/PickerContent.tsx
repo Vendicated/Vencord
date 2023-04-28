@@ -29,6 +29,7 @@ export interface PickerContent {
     selectedStickerPackId?: string | null;
     setSelectedStickerPackId: React.Dispatch<React.SetStateAction<string | null>>;
     channelId: string;
+    closePopout: () => void;
 }
 
 export interface PickerContentHeader {
@@ -55,7 +56,7 @@ export interface PickerContentRowGrid {
     onHover: (sticker: Sticker | null) => void;
     isHovered?: boolean;
     channelId?: string;
-    onSend?: (sticker: Sticker) => void;
+    onSend?: (sticker?: Sticker) => void;
 }
 
 const cl = classNameFactory("vc-more-stickers-picker-");
@@ -69,6 +70,14 @@ function PickerContentRowGrid({
     onSend = () => { },
     isHovered = false
 }: PickerContentRowGrid) {
+    const [isCtrlDown, setIsCtrlDown] = React.useState(false);
+
+    React.useEffect(() => {
+        const cb = (e: KeyboardEvent) => setIsCtrlDown(e.ctrlKey);
+        window.addEventListener("keydown", cb);
+
+        return () => window.removeEventListener("keydown", cb);
+    }, []);
 
     return (
         <div
@@ -79,7 +88,8 @@ function PickerContentRowGrid({
             onMouseEnter={() => onHover(sticker)}
             onClick={() => {
                 if (!channelId) return;
-                sendSticker(channelId, sticker);
+
+                sendSticker({ channelId, sticker, dontSend: isCtrlDown });
                 addRecentSticker(sticker);
                 onSend(sticker);
             }}
@@ -215,7 +225,7 @@ export function PickerContentHeader({
     );
 }
 
-export function PickerContent({ stickerPacks, selectedStickerPackId, setSelectedStickerPackId, channelId }: PickerContent) {
+export function PickerContent({ stickerPacks, selectedStickerPackId, setSelectedStickerPackId, channelId, closePopout }: PickerContent) {
     const [currentSticker, setCurrentSticker] = (
         React.useState<Sticker | null>((
             stickerPacks.length && stickerPacks[0].stickers.length) ?
@@ -262,7 +272,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                     colIndex: 1,
                     sticker: stickers[0],
                     onHover: setCurrentSticker,
-                    onSend: fetchRecentStickers,
+                    onSend: closePopout,
                     isHovered: currentSticker?.id === stickers[0].id
                 }}
                 grid2={
@@ -271,7 +281,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                         colIndex: 2,
                         sticker: stickers[1],
                         onHover: setCurrentSticker,
-                        onSend: fetchRecentStickers,
+                        onSend: closePopout,
                         isHovered: currentSticker?.id === stickers[1].id
                     } : undefined
                 }
@@ -281,7 +291,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                         colIndex: 3,
                         sticker: stickers[2],
                         onHover: setCurrentSticker,
-                        onSend: fetchRecentStickers,
+                        onSend: closePopout,
                         isHovered: currentSticker?.id === stickers[2].id
                     } : undefined
                 }

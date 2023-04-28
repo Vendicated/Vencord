@@ -129,7 +129,7 @@ export default definePlugin({
         closePopout
     }: {
         channel: Channel,
-        closePopout: Function;
+        closePopout: () => void;
     }) {
         const [query, setQuery] = React.useState<string | undefined>();
         const [stickerPackMetas, setStickerPackMetas] = React.useState<StickerPackMeta[]>([]);
@@ -173,6 +173,7 @@ export default definePlugin({
                     selectedStickerPackId={selectedStickerPackId}
                     setSelectedStickerPackId={setSelectedStickerPackId}
                     channelId={channel.id}
+                    closePopout={closePopout}
                 />
                 <PickerSidebar
                     categories={
