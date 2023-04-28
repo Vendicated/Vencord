@@ -17,6 +17,7 @@
 */
 
 import { Command } from "@api/Commands";
+import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -101,6 +102,12 @@ export interface PluginDef {
     settingsAboutComponent?: React.ComponentType<{
         tempSettings?: Record<string, any>;
     }>;
+    /**
+     * Allows you to subscribe to Flux events
+     */
+    flux?: {
+        [E in FluxEvents]?: (event: any) => void;
+    };
 }
 
 export enum OptionType {
@@ -126,6 +133,7 @@ export type PluginSettingDef = (
     | PluginSettingSelectDef
     | PluginSettingSliderDef
     | PluginSettingComponentDef
+    | PluginSettingBigIntDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {

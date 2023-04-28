@@ -24,6 +24,7 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
+
 import { findByProps } from "@webpack";
 import { Button, Forms, React, SelectedChannelStore, Switch, TextInput } from "@webpack/common";
 
