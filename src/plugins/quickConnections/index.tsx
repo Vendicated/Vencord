@@ -21,11 +21,11 @@ import "./styles.css";
 import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { User } from "discord-types/general";
 import { Clipboard, Tooltip } from "@webpack/common";
-import { LazyComponent } from "@utils/misc";
+import { User } from "discord-types/general";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
 const UserProfileStore = findStoreLazy("UserProfileStore");
