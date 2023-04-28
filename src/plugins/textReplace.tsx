@@ -69,13 +69,11 @@ const TextReplaceString = () => {
                 replace: "",
                 onlyIfIncludes: ""
             });
-        } else if (key === "find" && e === "") {
-            rulesString.splice(index, 1);
-            await DataStore.set("TextReplace_rulesString", rulesString);
-            update();
-            return;
         }
         rulesString[index][key] = e;
+        if (rulesString[index].find === "" && rulesString[index].replace === "" && rulesString[index].onlyIfIncludes === "" && index !== rulesString.length - 1) {
+            rulesString.splice(index, 1);
+        }
         await DataStore.set("TextReplace_rulesString", rulesString);
         update();
     }
@@ -151,13 +149,11 @@ const TextReplaceRegex = () => {
                 replace: "",
                 onlyIfIncludes: ""
             });
-        } else if (key === "find" && e === "") {
-            rulesRegex.splice(index, 1);
-            await DataStore.set("TextReplace_rulesRegex", rulesRegex);
-            update();
-            return;
         }
         rulesRegex[index][key] = e;
+        if (rulesRegex[index].find === "" && rulesRegex[index].replace === "" && rulesRegex[index].onlyIfIncludes === "" && index !== rulesRegex.length - 1) {
+            rulesRegex.splice(index, 1);
+        }
         await DataStore.set("TextReplace_rulesRegex", rulesRegex);
         update();
     }
