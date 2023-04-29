@@ -24,13 +24,15 @@ import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, TextInput } from "@webpack/common";
 
+type Rules = Record<"find" | "replace" | "onlyIfIncludes", string>[] | undefined;
+
 let rulesString = [
     {
         find: "",
         replace: "",
         onlyIfIncludes: ""
     }
-] as any;
+] as Rules;
 
 let rulesRegex = [
     {
@@ -38,7 +40,7 @@ let rulesRegex = [
         replace: "",
         onlyIfIncludes: ""
     }
-] as any;
+] as Rules;
 
 const settings = definePluginSettings({
     replace: {
@@ -56,12 +58,14 @@ const TextReplaceString = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveString(index: number) {
+        if (!rulesString) return;
         rulesString.splice(index, 1);
         await DataStore.set("TextReplace_rulesString", rulesString);
         update();
     }
 
     async function onChangeString(e: string, index: number, key: string) {
+        if (!rulesString) return;
         if (index === rulesString.length - 1) {
             rulesString.push({
                 find: "",
@@ -111,7 +115,7 @@ const TextReplaceString = () => {
                                 />
                             </td>
                             {
-                                index !== rulesString.length - 1 &&
+                                rulesString && index !== rulesString.length - 1 &&
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemoveString(index)}
@@ -138,12 +142,14 @@ const TextReplaceRegex = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveRegex(index: number) {
+        if (!rulesRegex) return;
         rulesRegex.splice(index, 1);
         await DataStore.set("TextReplace_rulesRegex", rulesRegex);
         update();
     }
 
     async function onChangeRegex(e: string, index: number, key: string) {
+        if (!rulesRegex) return;
         if (index === rulesRegex.length - 1) {
             rulesRegex.push({
                 find: "",
@@ -193,7 +199,7 @@ const TextReplaceRegex = () => {
                                 />
                             </td>
                             {
-                                index !== rulesRegex.length - 1 &&
+                                rulesRegex && index !== rulesRegex.length - 1 &&
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemoveRegex(index)}
@@ -254,19 +260,23 @@ export default definePlugin({
         }
         this.preSend = addPreSendListener((_, msg) => {
             msg.content = " " + msg.content + " ";
-            for (const rule of rulesString) {
-                if (!rule.find || !rule.replace) continue;
-                if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-                msg.content = msg.content.replaceAll(rule.find, rule.replace);
+            if (rulesString) {
+                for (const rule of rulesString) {
+                    if (!rule.find || !rule.replace) continue;
+                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
+                    msg.content = msg.content.replaceAll(rule.find, rule.replace);
+                }
             }
-            for (const rule of rulesRegex) {
-                if (!rule.find || !rule.replace) continue;
-                if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-                try {
-                    const regex = this.stringToRegex(rule.find);
-                    msg.content = msg.content.replace(regex, rule.replace);
-                } catch (e) {
-                    console.error(e);
+            if (rulesRegex) {
+                for (const rule of rulesRegex) {
+                    if (!rule.find || !rule.replace) continue;
+                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
+                    try {
+                        const regex = this.stringToRegex(rule.find);
+                        msg.content = msg.content.replace(regex, rule.replace);
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
             }
         });
