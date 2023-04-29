@@ -65,6 +65,13 @@ const settings = definePluginSettings({
                 />
             </>
     },
+    allowJavascriptReplacements: {
+        type: OptionType.BOOLEAN,
+        description:
+            "Allow replacements to run javascript by starting with 'javascript:'. Makes this plugin way more powerful. "
+            + "If you enable this, be very careful and only add rules you trust.",
+        default: false
+    },
 });
 
 function stringToRegex(str: string) {
@@ -94,10 +101,16 @@ function renderFindError(find: string) {
     }
 }
 
-function interpretReplace(replace: string) {
-    return replace.startsWith("javascript:")
-        ? (0, eval)(replace.slice(11))
-        : replace;
+function makeReplace(replace: string) {
+    if (!replace.startsWith("javascript:")) return replace;
+
+    return (...args: any[]) => {
+        if (!settings.store.allowJavascriptReplacements)
+            throw new Error("Javascript replacements are disabled. Not running replacement " + replace);
+
+        const res = (0, eval)(replace.slice(11));
+        return typeof res === "function" ? res(...args) : res;
+    };
 }
 
 function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
@@ -199,27 +212,27 @@ export default definePlugin({
             // pad so that rules can use " word " to only match whole "word"
             msg.content = " " + msg.content + " ";
 
-            if (stringRules) {
-                for (const rule of stringRules) {
-                    if (!rule.find || !rule.replace) continue;
-                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
+            try {
+                if (stringRules) {
+                    for (const rule of stringRules) {
+                        if (!rule.find || !rule.replace) continue;
+                        if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
 
-                    msg.content = msg.content.replaceAll(rule.find, interpretReplace(rule.replace));
-                }
-            }
-
-            if (regexRules) {
-                for (const rule of regexRules) {
-                    if (!rule.find || !rule.replace) continue;
-                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-
-                    try {
-                        const regex = stringToRegex(rule.find);
-                        msg.content = msg.content.replace(regex, interpretReplace(rule.replace));
-                    } catch (e) {
-                        new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
+                        msg.content = msg.content.replaceAll(rule.find, makeReplace(rule.replace) as string);
                     }
                 }
+
+                if (regexRules) {
+                    for (const rule of regexRules) {
+                        if (!rule.find || !rule.replace) continue;
+                        if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
+
+                        const regex = stringToRegex(rule.find);
+                        msg.content = msg.content.replace(regex, makeReplace(rule.replace) as string);
+                    }
+                }
+            } catch (e) {
+                new Logger("TextReplace").error(e);
             }
 
             msg.content = msg.content.trim();
