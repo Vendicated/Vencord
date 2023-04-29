@@ -17,7 +17,7 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
@@ -148,8 +148,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-
-migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",

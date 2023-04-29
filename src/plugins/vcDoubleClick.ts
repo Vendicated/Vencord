@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, SelectedChannelStore } from "@webpack/common";
@@ -26,7 +25,6 @@ const timers = {} as Record<string, {
     i: number;
 }>;
 
-migratePluginSettings("VoiceChatDoubleClick", "vcDoubleClick");
 export default definePlugin({
     name: "VoiceChatDoubleClick",
     description: "Join voice chats via double click instead of single click",
