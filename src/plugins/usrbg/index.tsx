@@ -55,8 +55,8 @@ export default definePlugin({
         {
             find: ".displayProfile,",
             replacement: {
-                match: /(\i)(\.premiumType)/,
-                replace: "$self.premiumHook($1) || $1$2"
+                match: /(\i)\.premiumType/,
+                replace: "$self.premiumHook($1)||$&"
             }
         }
     ],
