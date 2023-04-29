@@ -16,18 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/settings";
 import { classes, useAwaiter } from "@utils/misc";
 import { findLazy } from "@webpack";
 import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
-import { showToast } from "../Utils/Utils";
+import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
+    const { token } = Settings.plugins.ReviewDB;
     const [refetchCount, setRefetchCount] = React.useState(0);
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
         fallbackValue: [],
@@ -83,8 +85,21 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             <textarea
                 className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder={reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id) ? `Update review for @${username}` : `Review @${username}`}
+                placeholder={
+                    token
+                        ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
+                            ? `Update review for @${username}`
+                            : `Review @${username}`)
+                        : "You need to authorize to review users!"
+                }
                 onKeyDown={onKeyPress}
+                onClick={() => {
+                    if (!token) {
+                        showToast("Opening authorization window...");
+                        authorize();
+                    }
+                }}
+
                 style={{
                     marginTop: "6px",
                     resize: "none",

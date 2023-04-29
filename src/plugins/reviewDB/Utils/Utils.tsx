@@ -17,13 +17,13 @@
 */
 
 import { Settings } from "@api/settings";
-import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
 
 import { Review } from "../entities/Review";
+import { UserType } from "../entities/User";
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -86,10 +86,5 @@ export function showToast(text: string) {
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId) return true;
-
-    const myId = BigInt(userId);
-    return myId === Devs.mantikafasi.id ||
-        myId === Devs.Ven.id ||
-        myId === Devs.rushii.id;
+    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.userType === UserType.Admin) return true;
 }
