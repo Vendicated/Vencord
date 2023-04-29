@@ -76,6 +76,7 @@ function stringToRegex(str: string) {
                 ?.split("") // Remove duplicate flags
                 .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
                 .join("")
+            ?? "g"
         )
         : new RegExp(str); // Not a regex, return string
 }
@@ -214,6 +215,8 @@ export default definePlugin({
                     }
                 }
             }
+
+            msg.content = msg.content.trim();
         });
     },
 
