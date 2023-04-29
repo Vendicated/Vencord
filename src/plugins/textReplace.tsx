@@ -224,9 +224,16 @@ export default definePlugin({
 
     settings,
 
-    stringToRegex(str: string) {
-        const m = str.match(/^([/~@;%#'])(.*?)\1([gimsuy]*)$/);
-        return m ? new RegExp(m[2], m[3]) : new RegExp(str);
+    stringToRegex(str: string) { // Convert string to regex
+        const match = str.match(/^([/~@;%#'])(.*?)\1([gimsuy]*)$/); // Regex to match regex
+        return match ?
+            new RegExp(
+                match[2], // Pattern
+                match[3]  // Flags
+                    .split('') // Remove duplicate flags
+                    .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
+                    .join('')) :
+            new RegExp(str); // Not a regex, return string
     },
 
     async start() {
