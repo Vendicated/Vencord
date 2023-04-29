@@ -56,7 +56,6 @@ const TextReplaceString = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveString(index: number) {
-        if (index === rulesString.length - 1) return;
         rulesString.splice(index, 1);
         await DataStore.set("TextReplace_rulesString", rulesString);
         update();
@@ -111,19 +110,22 @@ const TextReplaceString = () => {
                                     spellCheck={false}
                                 />
                             </td>
-                            <Button
-                                size={Button.Sizes.MIN}
-                                onClick={() => onClickRemoveString(index)}
-                                style={{
-                                    background: "none",
-                                    bottom: "-7px"
-                                }}
-                            >
-                                <svg width="24" height="24" viewBox="0 0 24 24">
-                                    <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-                                    <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
-                                </svg>
-                            </Button>
+                            {
+                                index !== rulesString.length - 1 &&
+                                <Button
+                                    size={Button.Sizes.MIN}
+                                    onClick={() => onClickRemoveString(index)}
+                                    style={{
+                                        background: "none",
+                                        bottom: "-7px"
+                                    }}
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24">
+                                        <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+                                        <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
+                                    </svg>
+                                </Button>
+                            }
                         </tr>
                     )
                 }
@@ -136,7 +138,6 @@ const TextReplaceRegex = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveRegex(index: number) {
-        if (index === rulesRegex.length - 1) return;
         rulesRegex.splice(index, 1);
         await DataStore.set("TextReplace_rulesRegex", rulesRegex);
         update();
@@ -191,19 +192,22 @@ const TextReplaceRegex = () => {
                                     spellCheck={false}
                                 />
                             </td>
-                            <Button
-                                size={Button.Sizes.MIN}
-                                onClick={() => onClickRemoveRegex(index)}
-                                style={{
-                                    background: "none",
-                                    bottom: "-7px"
-                                }}
-                            >
-                                <svg width="24" height="24" viewBox="0 0 24 24">
-                                    <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-                                    <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
-                                </svg>
-                            </Button>
+                            {
+                                index !== rulesRegex.length - 1 &&
+                                <Button
+                                    size={Button.Sizes.MIN}
+                                    onClick={() => onClickRemoveRegex(index)}
+                                    style={{
+                                        background: "none",
+                                        bottom: "-7px"
+                                    }}
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24">
+                                        <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+                                        <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
+                                    </svg>
+                                </Button>
+                            }
                         </tr>
                     )
                 }
