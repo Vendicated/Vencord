@@ -24,6 +24,9 @@ import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput } from "@webpack/common";
 
+const STRING_RULES_KEY = "TextReplace_rulesString";
+const REGEX_RULES_KEY = "TextReplace_rulesRegex";
+
 type Rules = Record<"find" | "replace" | "onlyIfIncludes", string>[];
 
 let rulesString = [
@@ -59,7 +62,7 @@ const TextReplaceString = () => {
 
     async function onClickRemoveString(index: number) {
         rulesString.splice(index, 1);
-        await DataStore.set("TextReplace_rulesString", rulesString);
+        await DataStore.set(STRING_RULES_KEY, rulesString);
         update();
     }
 
@@ -75,7 +78,7 @@ const TextReplaceString = () => {
         if (rulesString[index].find === "" && rulesString[index].replace === "" && rulesString[index].onlyIfIncludes === "" && index !== rulesString.length - 1) {
             rulesString.splice(index, 1);
         }
-        await DataStore.set("TextReplace_rulesString", rulesString);
+        await DataStore.set(STRING_RULES_KEY, rulesString);
         update();
     }
 
@@ -140,7 +143,7 @@ const TextReplaceRegex = () => {
 
     async function onClickRemoveRegex(index: number) {
         rulesRegex.splice(index, 1);
-        await DataStore.set("TextReplace_rulesRegex", rulesRegex);
+        await DataStore.set(REGEX_RULES_KEY, rulesRegex);
         update();
     }
 
@@ -156,7 +159,7 @@ const TextReplaceRegex = () => {
         if (rulesRegex[index].find === "" && rulesRegex[index].replace === "" && rulesRegex[index].onlyIfIncludes === "" && index !== rulesRegex.length - 1) {
             rulesRegex.splice(index, 1);
         }
-        await DataStore.set("TextReplace_rulesRegex", rulesRegex);
+        await DataStore.set(REGEX_RULES_KEY, rulesRegex);
         update();
     }
 
@@ -237,14 +240,14 @@ export default definePlugin({
     },
 
     async start() {
-        rulesString = await DataStore.get("TextReplace_rulesString") ?? [
+        rulesString = await DataStore.get(STRING_RULES_KEY) ?? [
             {
                 find: "",
                 replace: "",
                 onlyIfIncludes: ""
             }
         ];
-        rulesRegex = await DataStore.get("TextReplace_rulesRegex") ?? [
+        rulesRegex = await DataStore.get(REGEX_RULES_KEY) ?? [
             {
                 find: "",
                 replace: "",
