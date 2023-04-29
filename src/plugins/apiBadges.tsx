@@ -48,7 +48,7 @@ const ContributorBadge: ProfileBadge = {
     link: "https://github.com/Vendicated/Vencord"
 };
 
-const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">>;
+const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -97,78 +97,75 @@ export default definePlugin({
         }
         for (const line of lines) {
             const [id, description, image] = line.split(",");
-            DonorBadges[id] = { image, description };
+            (DonorBadges[id] ??= []).push({ image, description });
         }
     },
 
-    getDonorBadge(userId: string) {
-        const badge = DonorBadges[userId];
-        if (badge) {
-            return {
-                ...badge,
-                position: BadgePosition.START,
-                props: {
-                    style: {
-                        borderRadius: "50%",
-                        transform: "scale(0.9)" // The image is a bit too big compared to default badges
-                    }
-                },
-                onClick() {
-                    const modalKey = openModal(props => (
-                        <ErrorBoundary noop onError={() => {
-                            closeModal(modalKey);
-                            VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated");
-                        }}>
-                            <Modals.ModalRoot {...props}>
-                                <Modals.ModalHeader>
-                                    <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                        <Forms.FormTitle
-                                            tag="h2"
-                                            style={{
-                                                width: "100%",
-                                                textAlign: "center",
-                                                margin: 0
-                                            }}
-                                        >
-                                            <Heart />
-                                            Vencord Donor
-                                        </Forms.FormTitle>
-                                    </Flex>
-                                </Modals.ModalHeader>
-                                <Modals.ModalContent>
-                                    <Flex>
-                                        <img
-                                            role="presentation"
-                                            src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
-                                            alt=""
-                                            style={{ margin: "auto" }}
-                                        />
-                                        <img
-                                            role="presentation"
-                                            src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
-                                            alt=""
-                                            style={{ margin: "auto" }}
-                                        />
-                                    </Flex>
-                                    <div style={{ padding: "1em" }}>
-                                        <Forms.FormText>
-                                            This Badge is a special perk for Vencord Donors
-                                        </Forms.FormText>
-                                        <Forms.FormText className={Margins.top20}>
-                                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                        </Forms.FormText>
-                                    </div>
-                                </Modals.ModalContent>
-                                <Modals.ModalFooter>
-                                    <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                        <DonateButton />
-                                    </Flex>
-                                </Modals.ModalFooter>
-                            </Modals.ModalRoot>
-                        </ErrorBoundary>
-                    ));
-                },
-            };
-        }
+    getDonorBadges(userId: string) {
+        return DonorBadges[userId]?.map(badge => ({
+            ...badge,
+            position: BadgePosition.START,
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                }
+            },
+            onClick() {
+                const modalKey = openModal(props => (
+                    <ErrorBoundary noop onError={() => {
+                        closeModal(modalKey);
+                        VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated");
+                    }}>
+                        <Modals.ModalRoot {...props}>
+                            <Modals.ModalHeader>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <Forms.FormTitle
+                                        tag="h2"
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center",
+                                            margin: 0
+                                        }}
+                                    >
+                                        <Heart />
+                                        Vencord Donor
+                                    </Forms.FormTitle>
+                                </Flex>
+                            </Modals.ModalHeader>
+                            <Modals.ModalContent>
+                                <Flex>
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                </Flex>
+                                <div style={{ padding: "1em" }}>
+                                    <Forms.FormText>
+                                        This Badge is a special perk for Vencord Donors
+                                    </Forms.FormText>
+                                    <Forms.FormText className={Margins.top20}>
+                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                    </Forms.FormText>
+                                </div>
+                            </Modals.ModalContent>
+                            <Modals.ModalFooter>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <DonateButton />
+                                </Flex>
+                            </Modals.ModalFooter>
+                        </Modals.ModalRoot>
+                    </ErrorBoundary>
+                ));
+            },
+        }));
     }
 });
