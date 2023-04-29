@@ -167,26 +167,30 @@ export default definePlugin({
     },
 
     patches: [
+        // Make pfps clickable
         {
             find: "onAddFriend:",
             replacement: {
-                // global because Discord has two components that are 99% identical with one small change ._.
-                match: /\{src:(\i),avatarDecoration/g,
-                replace: "{src:$1,onClick:()=>$self.openImage($1),avatarDecoration"
+                match: /\{src:(\i)(?=,avatarDecoration)/,
+                replace: "{src:$1,onClick:()=>$self.openImage($1)"
             }
-        }, {
-            find: ".popoutNoBannerPremium",
+        },
+        // Make banners clickable
+        {
+            find: ".NITRO_BANNER,",
             replacement: {
-                match: /style:.{0,10}\{\},(\i)\)/,
+                // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
+                match: /style:\{(?=backgroundImage:(\i&&\i)\?"url\("\.concat\((\i),)/,
                 replace:
-                    "onClick:$1.backgroundImage&&($1.cursor=\"pointer\"," +
-                    "()=>$self.openImage($1.backgroundImage.replace(\"url(\", \"\"))),$&"
+                    // onClick: () => shouldShowBanner && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
+                    'onClick:()=>$1&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
-        }, {
+        },
+        {
             find: "().avatarWrapperNonUserBot",
             replacement: {
-                match: /(avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
-                replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
+                match: /(?<=avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
+                replace: "style:($1)?{cursor:\"pointer\"}:{},onClick:$1?()=>{$self.openImage($2)}"
             }
         }
     ]
