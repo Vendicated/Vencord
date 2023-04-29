@@ -155,7 +155,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
 
 function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Channel; }) {
     const { guildId, channel, channelId } = props;
-    const guild = props.guild ?? GuildStore.getGuild(channel!.guild_id);
+    const guild = props.guild ?? GuildStore.getGuild(channel?.guild_id!);
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
