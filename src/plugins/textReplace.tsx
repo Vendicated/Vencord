@@ -81,7 +81,7 @@ const TextReplaceString = () => {
 
     return (
         <>
-            <Forms.FormTitle tag="h2">Using String</Forms.FormTitle>
+            <Forms.FormTitle tag="h4">Using String</Forms.FormTitle>
             <table>
                 {
                     rulesString.map((rule: any, index: number) =>
@@ -162,7 +162,7 @@ const TextReplaceRegex = () => {
 
     return (
         <>
-            <Forms.FormTitle tag="h2">Using Regex</Forms.FormTitle>
+            <Forms.FormTitle tag="h4">Using Regex</Forms.FormTitle>
             <table>
                 {
                     rulesRegex.map((rule: any, index: number) =>
