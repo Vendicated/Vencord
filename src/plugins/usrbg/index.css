@@ -5,7 +5,7 @@
 }
 
 [class*="userPopout"] [class*="NonPremium"] [class*="bannerPremium"] {
-    top: -30px;
+    top: 0px;
 }
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] {
@@ -18,11 +18,11 @@
 
 [class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] rect {
     height: 120px;
-    y: -30;
+    y: 0;
 }
 
 [class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] circle {
-    cy: 86;
+    cy: 116;
 }
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="avatarPositionNormal"],
