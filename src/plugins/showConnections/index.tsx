@@ -71,14 +71,14 @@ interface ConnectionPlatform {
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(e =>
-    <QuickConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />
+    <ConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />
 );
 
 const profilePanelComponent = ErrorBoundary.wrap(e =>
-    <QuickConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />
+    <ConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />
 );
 
-function QuickConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
+function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -147,7 +147,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 }
 
 export default definePlugin({
-    name: "QuickConnections",
+    name: "ShowConnections",
     description: "Show connected accounts in user popouts",
     authors: [Devs.TheKodeToad],
     patches: [
