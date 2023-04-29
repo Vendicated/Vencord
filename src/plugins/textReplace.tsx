@@ -29,6 +29,93 @@ const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 
 type Rules = Record<"find" | "replace" | "onlyIfIncludes", string>[];
 
+interface TextReplaceProps {
+    title: string;
+    rulesArray: Rules;
+    rulesKey: string;
+}
+
+function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
+    const update = useForceUpdater();
+
+    async function onClickRemove(index: number) {
+        rulesArray.splice(index, 1);
+        await DataStore.set(rulesKey, rulesArray);
+        update();
+    }
+
+    async function onChange(e: string, index: number, key: string) {
+        if (index === rulesArray.length - 1) {
+            rulesArray.push({
+                find: "",
+                replace: "",
+                onlyIfIncludes: ""
+            });
+        }
+        rulesArray[index][key] = e;
+        if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1) {
+            rulesArray.splice(index, 1);
+        }
+        await DataStore.set(rulesKey, rulesArray);
+        update();
+    }
+
+    return (
+        <>
+            <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
+            <table>
+                {
+                    rulesArray.map((rule: any, index: number) =>
+                        <tr>
+                            <td>
+                                <TextInput
+                                    placeholder="Find"
+                                    value={rule.find}
+                                    onChange={e => onChange(e, index, "find")}
+                                    spellCheck={false}
+                                />
+                            </td>
+                            <td>
+                                <TextInput
+                                    placeholder="Replace"
+                                    value={rule.replace}
+                                    onChange={e => onChange(e, index, "replace")}
+                                    spellCheck={false}
+                                />
+                            </td>
+                            <td>
+                                <TextInput
+                                    placeholder="Only if includes"
+                                    value={rule.onlyIfIncludes}
+                                    onChange={e => onChange(e, index, "onlyIfIncludes")}
+                                    spellCheck={false}
+                                />
+                            </td>
+                            {
+                                index !== rulesArray.length - 1 &&
+                                <Button
+                                    size={Button.Sizes.MIN}
+                                    onClick={() => onClickRemove(index)}
+                                    style={{
+                                        background: "none",
+                                        bottom: "-7px"
+                                    }}
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24">
+                                        <title>Delete Rule</title>
+                                        <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+                                        <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
+                                    </svg>
+                                </Button>
+                            }
+                        </tr>
+                    )
+                }
+            </table>
+        </>
+    );
+}
+
 let rulesString = [
     {
         find: "",
@@ -51,173 +138,11 @@ const settings = definePluginSettings({
         description: "",
         component: () =>
             <>
-                <TextReplaceString />
-                <TextReplaceRegex />
+                <TextReplace title="Using String" rulesArray={rulesString} rulesKey={STRING_RULES_KEY} />
+                <TextReplace title="Using Regex" rulesArray={rulesRegex} rulesKey={REGEX_RULES_KEY} />
             </>
     },
 });
-
-const TextReplaceString = () => {
-    const update = useForceUpdater();
-
-    async function onClickRemoveString(index: number) {
-        rulesString.splice(index, 1);
-        await DataStore.set(STRING_RULES_KEY, rulesString);
-        update();
-    }
-
-    async function onChangeString(e: string, index: number, key: string) {
-        if (index === rulesString.length - 1) {
-            rulesString.push({
-                find: "",
-                replace: "",
-                onlyIfIncludes: ""
-            });
-        }
-        rulesString[index][key] = e;
-        if (rulesString[index].find === "" && rulesString[index].replace === "" && rulesString[index].onlyIfIncludes === "" && index !== rulesString.length - 1) {
-            rulesString.splice(index, 1);
-        }
-        await DataStore.set(STRING_RULES_KEY, rulesString);
-        update();
-    }
-
-    return (
-        <>
-            <Forms.FormTitle tag="h4">Using String</Forms.FormTitle>
-            <table>
-                {
-                    rulesString.map((rule: any, index: number) =>
-                        <tr>
-                            <td>
-                                <TextInput
-                                    placeholder="Find"
-                                    value={rule.find}
-                                    onChange={e => onChangeString(e, index, "find")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            <td>
-                                <TextInput
-                                    placeholder="Replace"
-                                    value={rule.replace}
-                                    onChange={e => onChangeString(e, index, "replace")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            <td>
-                                <TextInput
-                                    placeholder="Only if includes"
-                                    value={rule.onlyIfIncludes}
-                                    onChange={e => onChangeString(e, index, "onlyIfIncludes")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            {
-                                index !== rulesString.length - 1 &&
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => onClickRemoveString(index)}
-                                    style={{
-                                        background: "none",
-                                        bottom: "-7px"
-                                    }}
-                                >
-                                    <svg width="24" height="24" viewBox="0 0 24 24">
-                                        <title>Delete Rule</title>
-                                        <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-                                        <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
-                                    </svg>
-                                </Button>
-                            }
-                        </tr>
-                    )
-                }
-            </table>
-        </>
-    );
-};
-
-const TextReplaceRegex = () => {
-    const update = useForceUpdater();
-
-    async function onClickRemoveRegex(index: number) {
-        rulesRegex.splice(index, 1);
-        await DataStore.set(REGEX_RULES_KEY, rulesRegex);
-        update();
-    }
-
-    async function onChangeRegex(e: string, index: number, key: string) {
-        if (index === rulesRegex.length - 1) {
-            rulesRegex.push({
-                find: "",
-                replace: "",
-                onlyIfIncludes: ""
-            });
-        }
-        rulesRegex[index][key] = e;
-        if (rulesRegex[index].find === "" && rulesRegex[index].replace === "" && rulesRegex[index].onlyIfIncludes === "" && index !== rulesRegex.length - 1) {
-            rulesRegex.splice(index, 1);
-        }
-        await DataStore.set(REGEX_RULES_KEY, rulesRegex);
-        update();
-    }
-
-    return (
-        <>
-            <Forms.FormTitle tag="h4">Using Regex</Forms.FormTitle>
-            <table>
-                {
-                    rulesRegex.map((rule: any, index: number) =>
-                        <tr>
-                            <td>
-                                <TextInput
-                                    placeholder="Find"
-                                    value={rule.find}
-                                    onChange={e => onChangeRegex(e, index, "find")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            <td>
-                                <TextInput
-                                    placeholder="Replace"
-                                    value={rule.replace}
-                                    onChange={e => onChangeRegex(e, index, "replace")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            <td>
-                                <TextInput
-                                    placeholder="Only if includes"
-                                    value={rule.onlyIfIncludes}
-                                    onChange={e => onChangeRegex(e, index, "onlyIfIncludes")}
-                                    spellCheck={false}
-                                />
-                            </td>
-                            {
-                                index !== rulesRegex.length - 1 &&
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => onClickRemoveRegex(index)}
-                                    style={{
-                                        background: "none",
-                                        bottom: "-7px"
-                                    }}
-                                >
-                                    <svg width="24" height="24" viewBox="0 0 24 24">
-                                        <title>Delete Rule</title>
-                                        <path fill="#f04747" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-                                        <path fill="#f04747" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
-                                    </svg>
-                                </Button>
-                            }
-                        </tr>
-                    )
-                }
-            </table>
-        </>
-    );
-};
 
 export default definePlugin({
     name: "TextReplace",
