@@ -51,7 +51,7 @@ const SearchResultClasses = findByPropsLazy("message", "searchResult");
 let AutoModEmbed: React.ComponentType<any> = () => null;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
-const tenorRegex = /https:\/\/(?:www.)?tenor\.com/;
+const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
 interface Attachment {
     height: number;

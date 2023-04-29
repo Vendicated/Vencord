@@ -108,6 +108,8 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
+
+    tags?: string[];
 }
 
 export enum OptionType {
