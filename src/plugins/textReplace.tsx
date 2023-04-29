@@ -68,14 +68,19 @@ const settings = definePluginSettings({
 });
 
 function stringToRegex(str: string) {
-    const match = str.match(/^(\/)(.*?)\1([gimsuy]*)$/); // Regex to match regex
+    const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
     return match
         ? new RegExp(
             match[2], // Pattern
-            match[3] // Flags
-                .split("") // Remove duplicate flags
-                .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                .join(""))
+            (
+                match[3] // Flags possibly undefined
+                    ? match[3]
+                        .split("") // Remove duplicate flags
+                        .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
+                        .join("")
+                    : "" // No flags
+            )
+        )
         : new RegExp(str); // Not a regex, return string
 }
 
