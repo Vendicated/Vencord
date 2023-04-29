@@ -46,18 +46,17 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".bannerSrc,",
-            replacement: {
-                match: /(\i)\.bannerSrc,/,
-                replace: "$self.useBannerHook($1),"
-            }
-        },
-        {
-            find: ".displayProfile,",
-            replacement: {
-                match: /(\i)\.premiumType/,
-                replace: "$self.premiumHook($1)||$&"
-            }
+            find: ".NITRO_BANNER,",
+            replacement: [
+                {
+                    match: /(\i)\.premiumType/,
+                    replace: "$self.premiumHook($1)||$&"
+                },
+                {
+                    match: /(\i)\.bannerSrc,/,
+                    replace: "$self.useBannerHook($1),"
+                }
+            ]
         }
     ],
 
