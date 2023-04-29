@@ -112,7 +112,7 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
                 gap: "4px",
                 display: inline ? "inline-flex" : "flex",
                 alignItems: "center",
-                transform: inline ? "translateY(4px)" : undefined
+                translate: inline ? "0 3px 0" : undefined
             }}
         >
             {icons}
