@@ -135,15 +135,16 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /,theme:\i\}\)(?=,.{0,100}setNote)/,
+                match: /,theme:\i\}\)(?=,.{0,100}setNote:)/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
             }
         },
         {
             find: "\"Profile Panel: user cannot be undefined\"",
             replacement: {
-                match: /hideNote:!1}\)/,
-                replace: "$&,$self.profilePanelComponent(arguments[0])"
+                // createElement(Divider, {}), createElement(NoteComponent)
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:/,
+                replace: "$self.profilePanelComponent(arguments[0]),$&"
             }
         }
     ],
