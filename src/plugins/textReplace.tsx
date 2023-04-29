@@ -145,30 +145,26 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
                                         spellCheck={false}
                                     />
                                 </Flex>
-
-                                {
-                                    <Button
-                                        size={Button.Sizes.MIN}
-                                        onClick={() => onClickRemove(index)}
-                                        style={{
-                                            background: "none",
-                                            ...(index === rulesArray.length - 1
-                                                ? {
-                                                    visibility: "hidden",
-                                                    pointerEvents: "none"
-                                                }
-                                                : {}
-                                            )
-                                        }}
-                                    >
-                                        <svg width="24" height="24" viewBox="0 0 24 24">
-                                            <title>Delete Rule</title>
-                                            <path fill="var(--status-danger)" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" />
-                                            <path fill="var(--status-danger)" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
-                                        </svg>
-                                    </Button>
-
-                                }
+                                <Button
+                                    size={Button.Sizes.MIN}
+                                    onClick={() => onClickRemove(index)}
+                                    style={{
+                                        background: "none",
+                                        ...(index === rulesArray.length - 1
+                                            ? {
+                                                visibility: "hidden",
+                                                pointerEvents: "none"
+                                            }
+                                            : {}
+                                        )
+                                    }}
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24">
+                                        <title>Delete Rule</title>
+                                        <path fill="var(--status-danger)" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" />
+                                        <path fill="var(--status-danger)" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
+                                    </svg>
+                                </Button>
                             </Flex>
                             {isRegexRules && renderFindError(rule.find)}
                         </>
