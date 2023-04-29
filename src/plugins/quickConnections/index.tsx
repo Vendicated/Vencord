@@ -21,10 +21,10 @@ import "./styles.css";
 import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { copyWithToast, LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Clipboard, Text, Tooltip } from "@webpack/common";
+import { Text, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
@@ -105,23 +105,39 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
     const platform = platforms.get(connection.type);
     const url = platform.getPlatformUserUrl?.(connection);
 
+    const img = (
+        <img
+            aria-label={connection.name}
+            src={theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG}
+            style={{
+                marginTop: getSpacingPx(settings.store.iconSpacing),
+                marginRight: getSpacingPx(settings.store.iconSpacing),
+                width: settings.store.iconSize,
+                height: settings.store.iconSize
+            }}
+        />
+    );
+
     return (
-        <Tooltip text={connection.name + (!connection.verified ? " (unverified)" : "") + (!url ? " (copy)" : "")} key={connection.id}>
-            {({ onMouseLeave, onMouseEnter }) =>
-                <a
-                    href={url ?? "javascript:void(0)"}
-                    target="_blank"
-                    style={{
-                        backgroundImage: "url(" + (theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG) + ")",
-                        marginTop: getSpacingPx(settings.store.iconSpacing),
-                        marginRight: getSpacingPx(settings.store.iconSpacing),
-                        width: settings.store.iconSize,
-                        height: settings.store.iconSize
-                    }}
-                    className="vc-user-connection"
-                    onClick={() => !url && Clipboard.copy(connection.name)}
-                    onMouseLeave={onMouseLeave}
-                    onMouseEnter={onMouseEnter} />
+        <Tooltip text={connection.name + (!connection.verified ? " (unverified)" : "") + (!url ? " (click to copy)" : "")} key={connection.id}>
+            {tooltipProps =>
+                url
+                    ? <a
+                        {...tooltipProps}
+                        className="vc-user-connection"
+                        href={url}
+                        target="_blank"
+                    >
+                        {img}
+                    </a>
+                    : <button
+                        {...tooltipProps}
+                        className="vc-user-connection"
+                        onClick={() => copyWithToast(connection.name)}
+                    >
+                        {img}
+                    </button>
+
             }
         </Tooltip>
     );

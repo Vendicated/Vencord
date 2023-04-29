@@ -1,5 +1,5 @@
 .vc-user-connection {
-    background-size: cover;
+    all: unset;
     display: inline-block;
     cursor: pointer;
 }
