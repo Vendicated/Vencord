@@ -16,7 +16,7 @@ chrome.webRequest.onHeadersReceived.addListener(
             // In main frame requests, the CSP needs to be removed to enable fetching of custom css
             // as desired by the user
             removeFirst(responseHeaders, h => h.name.toLowerCase() === "content-security-policy");
-        } else if (type === "stylesheet" && url.startsWith("https://raw.githubusercontent.com")) {
+        } else if (type === "stylesheet" && url.startsWith("https://raw.githubusercontent.com/")) {
             // Most users will load css from GitHub, but GitHub doesn't set the correct content type,
             // so we fix it here
             removeFirst(responseHeaders, h => h.name.toLowerCase() === "content-type");
