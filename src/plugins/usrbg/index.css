@@ -4,10 +4,6 @@
     z-index: -1;
 }
 
-[class*="userPopout"] [class*="NonPremium"] [class*="bannerPremium"] {
-    top: 0px;
-}
-
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] {
     min-height: 120px !important;
 }

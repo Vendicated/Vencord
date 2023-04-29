@@ -53,7 +53,7 @@ export default definePlugin({
             }
         },
         {
-            find: "=R.ZP.isPremiumAtLeast",
+            find: "R.ZP.isPremiumAtLeast",
             replacement: {
                 match: /(\i)(\.premiumType)/,
                 replace: "$self.premiumHook($1) || $1$2"
