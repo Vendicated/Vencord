@@ -22,12 +22,15 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const SessionsStore = findStoreLazy("SessionsStore");
+const RoleIconClasses = findLazy(m => m.roleIcon && m.clickable && !m.alt);
+const RoleIconClasses2 = findByPropsLazy("roleIcon", "alt");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -39,6 +42,7 @@ function Icon(path: string, viewBox = "0 0 24 24") {
                     width="20"
                     viewBox={viewBox}
                     fill={color}
+                    className={classes(RoleIconClasses.roleIcon, RoleIconClasses.clickable, RoleIconClasses2.roleIcon)}
                 >
                     <path d={path} />
                 </svg>
@@ -105,18 +109,15 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
     if (!icons.length) return null;
 
     return (
-        <div
+        <span
             className="vc-platform-indicator"
             style={{
                 marginLeft,
-                gap: "4px",
-                display: inline ? "inline-flex" : "flex",
-                alignItems: "center",
-                translate: inline ? "0 3px 0" : undefined
+                gap: "4px"
             }}
         >
             {icons}
-        </div>
+        </span>
     );
 };
 
