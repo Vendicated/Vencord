@@ -22,9 +22,9 @@ import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput } from "@webpack/common";
 
-type Rules = Record<"find" | "replace" | "onlyIfIncludes", string>[] | undefined;
+type Rules = Record<"find" | "replace" | "onlyIfIncludes", string>[];
 
 let rulesString = [
     {
@@ -58,14 +58,12 @@ const TextReplaceString = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveString(index: number) {
-        if (!rulesString) return;
         rulesString.splice(index, 1);
         await DataStore.set("TextReplace_rulesString", rulesString);
         update();
     }
 
     async function onChangeString(e: string, index: number, key: string) {
-        if (!rulesString) return;
         if (index === rulesString.length - 1) {
             rulesString.push({
                 find: "",
@@ -83,12 +81,10 @@ const TextReplaceString = () => {
 
     return (
         <>
-            <h2 style={{
-                color: "#fff"
-            }}>Using string</h2>
+            <Forms.FormTitle tag="h2">Using String</Forms.FormTitle>
             <table>
                 {
-                    rulesString?.map((rule: any, index: number) =>
+                    rulesString.map((rule: any, index: number) =>
                         <tr>
                             <td>
                                 <TextInput
@@ -115,7 +111,7 @@ const TextReplaceString = () => {
                                 />
                             </td>
                             {
-                                rulesString && index !== rulesString.length - 1 &&
+                                index !== rulesString.length - 1 &&
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemoveString(index)}
@@ -142,14 +138,12 @@ const TextReplaceRegex = () => {
     const update = useForceUpdater();
 
     async function onClickRemoveRegex(index: number) {
-        if (!rulesRegex) return;
         rulesRegex.splice(index, 1);
         await DataStore.set("TextReplace_rulesRegex", rulesRegex);
         update();
     }
 
     async function onChangeRegex(e: string, index: number, key: string) {
-        if (!rulesRegex) return;
         if (index === rulesRegex.length - 1) {
             rulesRegex.push({
                 find: "",
@@ -167,12 +161,10 @@ const TextReplaceRegex = () => {
 
     return (
         <>
-            <h2 style={{
-                color: "#fff"
-            }}>Using regex</h2>
+            <Forms.FormTitle tag="h2">Using Regex</Forms.FormTitle>
             <table>
                 {
-                    rulesRegex?.map((rule: any, index: number) =>
+                    rulesRegex.map((rule: any, index: number) =>
                         <tr>
                             <td>
                                 <TextInput
@@ -199,7 +191,7 @@ const TextReplaceRegex = () => {
                                 />
                             </td>
                             {
-                                rulesRegex && index !== rulesRegex.length - 1 &&
+                                index !== rulesRegex.length - 1 &&
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemoveRegex(index)}
@@ -236,28 +228,20 @@ export default definePlugin({
     },
 
     async start() {
-        rulesString = await DataStore.get("TextReplace_rulesString");
-        if (!rulesString) {
-            rulesString = [
-                {
-                    find: "",
-                    replace: "",
-                    onlyIfIncludes: ""
-                }
-            ];
-            await DataStore.set("TextReplace_rulesString", rulesString);
-        }
-        rulesRegex = await DataStore.get("TextReplace_rulesRegex");
-        if (!rulesRegex) {
-            rulesRegex = [
-                {
-                    find: "",
-                    replace: "",
-                    onlyIfIncludes: ""
-                }
-            ];
-            await DataStore.set("TextReplace_rulesRegex", rulesRegex);
-        }
+        rulesString = await DataStore.get("TextReplace_rulesString") ?? [
+            {
+                find: "",
+                replace: "",
+                onlyIfIncludes: ""
+            }
+        ];
+        rulesRegex = await DataStore.get("TextReplace_rulesRegex") ?? [
+            {
+                find: "",
+                replace: "",
+                onlyIfIncludes: ""
+            }
+        ];
         this.preSend = addPreSendListener((_, msg) => {
             msg.content = " " + msg.content + " ";
             if (rulesString) {
