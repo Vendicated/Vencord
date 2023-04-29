@@ -24,16 +24,16 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Clipboard, Tooltip } from "@webpack/common";
+import { Clipboard, Text, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
 const UserProfileStore = findStoreLazy("UserProfileStore");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
-const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(",\"--profile-gradient-primary-color\"");
+const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
 
-enum Spacing {
+const enum Spacing {
     COMPACT,
     COZY,
     ROOMY
@@ -89,6 +89,13 @@ function QuickConnectionsComponent({ id, theme }: { id: string, theme: string; }
 
     return (
         <Section>
+            <Text
+                tag="h2"
+                variant="eyebrow"
+                style={{ color: "var(--header-primary)" }}
+            >
+                Connections
+            </Text>
             {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
         </Section>
     );
@@ -128,7 +135,7 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /,hideNote:\i\|\|\i}\)/,
+                match: /,theme:\i\}\)(?=,.{0,100}setNote)/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
             }
         },
