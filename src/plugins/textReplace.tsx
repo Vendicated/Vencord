@@ -72,14 +72,10 @@ function stringToRegex(str: string) {
     return match
         ? new RegExp(
             match[2], // Pattern
-            (
-                match[3] // Flags possibly undefined
-                    ? match[3]
-                        .split("") // Remove duplicate flags
-                        .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                        .join("")
-                    : "" // No flags
-            )
+            match[3]
+                ?.split("") // Remove duplicate flags
+                .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
+                .join("")
         )
         : new RegExp(str); // Not a regex, return string
 }
