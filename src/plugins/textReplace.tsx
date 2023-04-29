@@ -229,10 +229,10 @@ export default definePlugin({
         return match ?
             new RegExp(
                 match[2], // Pattern
-                match[3]  // Flags
-                    .split('') // Remove duplicate flags
+                match[3] // Flags
+                    .split("") // Remove duplicate flags
                     .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                    .join('')) :
+                    .join("")) :
             new RegExp(str); // Not a regex, return string
     },
 
