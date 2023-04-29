@@ -46,11 +46,17 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".bannerSrc,",
-            replacement: {
-                match: /(\i)\.bannerSrc,/,
-                replace: "$self.useBannerHook($1),"
-            }
+            find: ".NITRO_BANNER,",
+            replacement: [
+                {
+                    match: /(\i)\.premiumType/,
+                    replace: "$self.premiumHook($1)||$&"
+                },
+                {
+                    match: /(\i)\.bannerSrc,/,
+                    replace: "$self.useBannerHook($1),"
+                }
+            ]
         }
     ],
 
@@ -63,6 +69,10 @@ export default definePlugin({
     useBannerHook({ displayProfile, user }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
         if (data[user.id]) return data[user.id];
+    },
+
+    premiumHook({ userId }: any) {
+        if (data[userId]) return 2;
     },
 
     async start() {
