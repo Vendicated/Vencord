@@ -350,9 +350,8 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                 <div
                     className="vc-more-stickers-picker-content-inspector"
                     style={{
-                        transition: "height 200ms ease-in-out",
-                        visibility: currentSticker ? "visible" : "hidden",
-                        ...(currentSticker ? {
+                        visibility: !currentSticker ? "hidden" : "visible",
+                        ...(!currentSticker ? {
                             height: "0"
                         } : {})
                     }}
