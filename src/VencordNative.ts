@@ -16,30 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { default as IPC_EVENTS, default as IpcEvents } from "@utils/IpcEvents";
+import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
 
-function invoke<T = any>(event: IPC_EVENTS, ...args: any[]) {
+function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
 }
 
-export function sendSync<T = any>(event: IPC_EVENTS, ...args: any[]) {
+export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
 }
 
 export default {
     updater: {
-        getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IPC_EVENTS.GET_UPDATES),
-        update: () => invoke<IpcRes<boolean>>(IPC_EVENTS.UPDATE),
-        rebuild: () => invoke<IpcRes<void>>(IPC_EVENTS.BUILD),
-        getRepo: () => invoke<IpcRes<string>>(IPC_EVENTS.GET_REPO),
+        getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
+        update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
+        rebuild: () => invoke<IpcRes<void>>(IpcEvents.BUILD),
+        getRepo: () => invoke<IpcRes<string>>(IpcEvents.GET_REPO),
     },
 
     settings: {
         get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
         set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
-        getSettingsDir: () => invoke<string>(IPC_EVENTS.GET_SETTINGS_DIR),
+        getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
     },
 
     quickCss: {

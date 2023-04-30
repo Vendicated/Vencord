@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const enum IpcEvents {
+export const enum IpcEvents {
     QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
@@ -31,5 +31,3 @@ const enum IpcEvents {
     BUILD = "VencordBuild",
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
 }
-
-export default IpcEvents;
