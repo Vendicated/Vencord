@@ -43,7 +43,7 @@ function Icon(path: string, viewBox = "0 0 24 24") {
                         marginLeft: wantMargin ? 4 : 0,
                         verticalAlign: "top",
                         position: "relative",
-                        top: 1,
+                        top: wantMargin ? 1 : 0,
                     }}
                 >
                     <path d={path} />
