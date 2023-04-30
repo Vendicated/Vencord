@@ -94,12 +94,6 @@ function renderFindError(find: string) {
     }
 }
 
-function interpretReplace(replace: string) {
-    return replace.startsWith("javascript:")
-        ? (0, eval)(replace.slice(11))
-        : replace;
-}
-
 function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
     const isRegexRules = title === "Using Regex";
 
@@ -204,7 +198,7 @@ export default definePlugin({
                     if (!rule.find || !rule.replace) continue;
                     if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
 
-                    msg.content = msg.content.replaceAll(rule.find, interpretReplace(rule.replace));
+                    msg.content = msg.content.replaceAll(rule.find, rule.replace);
                 }
             }
 
@@ -215,7 +209,7 @@ export default definePlugin({
 
                     try {
                         const regex = stringToRegex(rule.find);
-                        msg.content = msg.content.replace(regex, interpretReplace(rule.replace));
+                        msg.content = msg.content.replace(regex, rule.replace);
                     } catch (e) {
                         new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
                     }
