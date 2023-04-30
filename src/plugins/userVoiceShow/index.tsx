@@ -104,9 +104,9 @@ export default definePlugin({
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                match: /,{user:\w{1,2}}\)(?!;case)/,
+                match: /\(\)\.body.+?displayProfile:\i}\),/,
                 // paste my fancy custom button below the username
-                replace: "$&,$self.patchModal(arguments[0])",
+                replace: "$&$self.patchModal(arguments[0]),",
             }
         }
     ],
