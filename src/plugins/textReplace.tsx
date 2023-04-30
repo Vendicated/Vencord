@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput, useState } from "@webpack/common";
+import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -142,7 +142,7 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     rulesArray.map((rule, index) =>
-                        <>
+                        <React.Fragment key={`${rule.find}-${index}`}>
                             <Flex flexDirection="row" style={{ gap: 0 }}>
                                 <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
                                     <Input
@@ -183,7 +183,7 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
                                 </Button>
                             </Flex>
                             {isRegexRules && renderFindError(rule.find)}
-                        </>
+                        </React.Fragment>
                     )
                 }
             </Flex>
