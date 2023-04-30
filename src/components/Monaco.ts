@@ -17,7 +17,6 @@
 */
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { find } from "@webpack";
 
@@ -25,7 +24,7 @@ import monacoHtml from "~fileContent/monacoWin.html";
 
 const queue = new Queue();
 const setCss = debounce((css: string) => {
-    queue.push(() => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, css));
+    queue.push(() => VencordNative.quickCss.set(css));
 });
 
 export async function launchMonacoEditor() {
@@ -37,7 +36,7 @@ export async function launchMonacoEditor() {
     }
 
     win.setCss = setCss;
-    win.getCurrentCss = () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+    win.getCurrentCss = () => VencordNative.quickCss.get();
     win.getTheme = () =>
         find(m =>
             m.ProtoClass?.typeName.endsWith("PreloadedUserSettings")

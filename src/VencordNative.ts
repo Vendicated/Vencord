@@ -16,34 +16,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IPC_EVENTS from "@utils/IpcEvents";
-import { IpcRenderer, ipcRenderer } from "electron";
+import { default as IPC_EVENTS, default as IpcEvents } from "@utils/IpcEvents";
+import { IpcRes } from "@utils/types";
+import { ipcRenderer } from "electron";
 
-function assertEventAllowed(event: string) {
-    if (!(event in IPC_EVENTS)) throw new Error(`Event ${event} not allowed.`);
+function invoke<T = any>(event: IPC_EVENTS, ...args: any[]) {
+    return ipcRenderer.invoke(event, ...args) as Promise<T>;
 }
+
+export function sendSync<T = any>(event: IPC_EVENTS, ...args: any[]) {
+    return ipcRenderer.sendSync(event, ...args) as T;
+}
+
 export default {
-    getVersions: () => process.versions,
-    ipc: {
-        send(event: string, ...args: any[]) {
-            assertEventAllowed(event);
-            ipcRenderer.send(event, ...args);
-        },
-        sendSync<T = any>(event: string, ...args: any[]): T {
-            assertEventAllowed(event);
-            return ipcRenderer.sendSync(event, ...args);
-        },
-        on(event: string, listener: Parameters<IpcRenderer["on"]>[1]) {
-            assertEventAllowed(event);
-            ipcRenderer.on(event, listener);
-        },
-        off(event: string, listener: Parameters<IpcRenderer["off"]>[1]) {
-            assertEventAllowed(event);
-            ipcRenderer.off(event, listener);
-        },
-        invoke<T = any>(event: string, ...args: any[]): Promise<T> {
-            assertEventAllowed(event);
-            return ipcRenderer.invoke(event, ...args);
-        }
-    }
+    updater: {
+        getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IPC_EVENTS.GET_UPDATES),
+        update: () => invoke<IpcRes<boolean>>(IPC_EVENTS.UPDATE),
+        rebuild: () => invoke<IpcRes<void>>(IPC_EVENTS.BUILD),
+        getRepo: () => invoke<IpcRes<string>>(IPC_EVENTS.GET_REPO),
+    },
+
+    settings: {
+        get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
+        set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
+        getSettingsDir: () => invoke<string>(IPC_EVENTS.GET_SETTINGS_DIR),
+    },
+
+    quickCss: {
+        get: () => invoke<string>(IpcEvents.GET_QUICK_CSS),
+        set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
+        onChange: (cb: (newCss: string) => void) => void ipcRenderer.on(IpcEvents.OPEN_QUICKCSS, (_, css) => cb(css)),
+
+        openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
+        openEditor: () => invoke<void>(IpcEvents.OPEN_MONACO_EDITOR),
+    },
+
+    native: {
+        getVersions: () => process.versions,
+        openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    },
 };

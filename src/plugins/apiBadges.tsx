@@ -22,7 +22,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
-import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
@@ -115,7 +114,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
