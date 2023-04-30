@@ -99,9 +99,9 @@ export function startDependenciesRecursive(p: Plugin) {
         if (!Settings.plugins[dep].enabled) {
             startDependenciesRecursive(Plugins[dep]);
             // If the plugin has patches, don't start the plugin, just enable it.
+            Settings.plugins[dep].enabled = true;
             if (Plugins[dep].patches) {
                 logger.warn(`Enabling dependency ${dep} requires restart.`);
-                Settings.plugins[dep].enabled = true;
                 restartNeeded = true;
                 return;
             }
