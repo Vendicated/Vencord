@@ -411,33 +411,33 @@
 .vc-more-stickers-picker-settings-cog-container {
     position: fixed;
     transform: translateY(-100%);
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-tertiary);
     padding: 8px;
-    padding-top: 0;
+    padding-right: 4px;
     border-bottom-left-radius: 5px;
 }
 
 .vc-more-stickers-picker-settings-cog {
-    border-radius: 999850px;
-    background-color: var(--green-400);
+    cursor: pointer;
+    border-radius: 2em;
+    background-color: var(--background-primary);
     padding: 8px;
+    transform: translate(-5%, 10%);
+    transition: all 0.15s ease-out;
 }
 
-/* prettier-ignore */
-.vc-more-stickers-picker-settings-cog:hover:has(svg:hover),
-.vc-more-stickers-picker-settings-cog:focus-visible:has(svg:focus-visible) {
-    cursor: pointer;
+.vc-more-stickers-picker-settings-cog-active {
+    border-radius: 1em;
     background-color: var(--green-300);
 }
 
 .vc-more-stickers-picker-settings-cog > svg {
-    color: var(--interactive-normal) !important;
+    color: var(--green-360) !important;
     width: 100%;
     height: 100%;
 }
 
 /* prettier-ignore */
-.vc-more-stickers-picker-settings-cog > svg:hover,
-.vc-more-stickers-picker-settings-cog > svg:focus-visible {
-    color: var(--interactive-active) !important;
+.vc-more-stickers-picker-settings-cog-active > svg {
+    color: var(--white-360) !important;
 }

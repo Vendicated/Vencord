@@ -347,7 +347,16 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                         height: `${stickerPacksElemRef.current?.clientHeight ?? 0}px`
                     }}></div>
                 </div>
-                <div className="vc-more-stickers-picker-content-inspector">
+                <div
+                    className="vc-more-stickers-picker-content-inspector"
+                    style={{
+                        transition: "height 200ms ease-in-out",
+                        visibility: currentSticker ? "visible" : "hidden",
+                        ...(currentSticker ? {
+                            height: "0"
+                        } : {})
+                    }}
+                >
                     <div className="vc-more-stickers-picker-content-inspector-graphic-primary" aria-hidden="true">
                         <div>
                             <div className="vc-more-stickers-picker-content-row-grid-asset-wrapper" style={{

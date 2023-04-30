@@ -16,13 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Forms, React } from "@webpack/common";
 
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
 import { CategoryWrapper } from "./categoryWrapper";
 import { CogIcon, RecentlyUsedIcon } from "./icons";
 import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
+import { Settings } from "./settings";
 import { StickerCategory } from "./stickerCategory";
 export interface StickerCategory {
     id: string;
@@ -42,6 +44,7 @@ export const RecentPack = {
 
 export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) => {
     const [activeCategory, setActiveCategory] = React.useState<StickerCategory>(RecentPack);
+    const [hovering, setHovering] = React.useState(false);
 
     return (
         <CategoryWrapper>
@@ -80,7 +83,27 @@ export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) =>
                 }
             </CategoryScroller>
             <div className="vc-more-stickers-picker-settings-cog-container">
-                <button className="vc-more-stickers-picker-settings-cog" onClick={() => alert("TODO: Settings popup.")}>
+                <button
+                    className={"vc-more-stickers-picker-settings-cog" + (
+                        hovering ? " vc-more-stickers-picker-settings-cog-active" : ""
+                    )}
+                    onClick={() => {
+                        openModal(modalProps => {
+                            return (
+                                <ModalRoot size={ModalSize.LARGE} {...modalProps}>
+                                    <ModalHeader>
+                                        <Forms.FormTitle>Sticker+</Forms.FormTitle>
+                                    </ModalHeader>
+                                    <ModalContent>
+                                        <Settings />
+                                    </ModalContent>
+                                </ModalRoot>
+                            );
+                        });
+                    }}
+                    onMouseEnter={() => setHovering(true)}
+                    onMouseLeave={() => setHovering(false)}
+                >
                     <CogIcon width={20} height={20} />
                 </button>
             </div>
