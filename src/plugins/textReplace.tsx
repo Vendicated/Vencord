@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import Logger from "@utils/Logger";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -94,6 +94,23 @@ function renderFindError(find: string) {
     }
 }
 
+function Input({ initialValue, onChange, placeholder }: {
+    placeholder: string;
+    initialValue: string;
+    onChange(value: string): void;
+}) {
+    const [value, setValue] = useState(initialValue);
+    return (
+        <TextInput
+            placeholder={placeholder}
+            value={value}
+            onChange={setValue}
+            spellCheck={false}
+            onBlur={() => value !== initialValue && onChange(value)}
+        />
+    );
+}
+
 function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
     const isRegexRules = title === "Using Regex";
 
@@ -128,23 +145,20 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
                         <>
                             <Flex flexDirection="row" style={{ gap: 0 }}>
                                 <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <TextInput
+                                    <Input
                                         placeholder="Find"
-                                        value={rule.find}
+                                        initialValue={rule.find}
                                         onChange={e => onChange(e, index, "find")}
-                                        spellCheck={false}
                                     />
-                                    <TextInput
+                                    <Input
                                         placeholder="Replace"
-                                        value={rule.replace}
+                                        initialValue={rule.replace}
                                         onChange={e => onChange(e, index, "replace")}
-                                        spellCheck={false}
                                     />
-                                    <TextInput
+                                    <Input
                                         placeholder="Only if includes"
-                                        value={rule.onlyIfIncludes}
+                                        initialValue={rule.onlyIfIncludes}
                                         onChange={e => onChange(e, index, "onlyIfIncludes")}
-                                        spellCheck={false}
                                     />
                                 </Flex>
                                 <Button
