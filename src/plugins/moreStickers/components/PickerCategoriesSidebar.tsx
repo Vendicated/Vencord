@@ -26,6 +26,7 @@ import { CogIcon, RecentlyUsedIcon } from "./icons";
 import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
 import { Settings } from "./settings";
 import { StickerCategory } from "./stickerCategory";
+
 export interface StickerCategory {
     id: string;
     name: string;
@@ -33,8 +34,8 @@ export interface StickerCategory {
 }
 
 export interface SidebarProps {
-    categories: StickerCategory[];
-    onCategorySelect: (category: StickerCategory) => void;
+    packMetas: StickerCategory[];
+    onPackSelect: (category: StickerCategory) => void;
 }
 
 export const RecentPack = {
@@ -42,41 +43,41 @@ export const RecentPack = {
     name: RECENT_STICKERS_TITLE,
 } as StickerCategory;
 
-export const PickerSidebar = ({ categories, onCategorySelect }: SidebarProps) => {
-    const [activeCategory, setActiveCategory] = React.useState<StickerCategory>(RecentPack);
+export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
+    const [activePack, setActivePack] = React.useState<StickerCategory>(RecentPack);
     const [hovering, setHovering] = React.useState(false);
 
     return (
         <CategoryWrapper>
-            <CategoryScroller categoryLength={categories.length}>
+            <CategoryScroller categoryLength={packMetas.length}>
                 <StickerCategory
                     style={{ padding: "4px", boxSizing: "border-box", width: "32px" }}
-                    isActive={activeCategory === RecentPack}
+                    isActive={activePack === RecentPack}
                     onClick={() => {
-                        if (activeCategory === RecentPack) return;
+                        if (activePack === RecentPack) return;
 
-                        onCategorySelect(RecentPack);
-                        setActiveCategory(RecentPack);
+                        onPackSelect(RecentPack);
+                        setActivePack(RecentPack);
                     }}
                 >
                     <RecentlyUsedIcon width={24} height={24} color={
-                        activeCategory === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
+                        activePack === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
                     } />
                 </StickerCategory>
                 {
-                    ...categories.map(category => {
+                    ...packMetas.map(pack => {
                         return (
                             <StickerCategory
-                                key={category.id}
+                                key={pack.id}
                                 onClick={() => {
-                                    if (activeCategory === category) return;
+                                    if (activePack?.id === pack.id) return;
 
-                                    onCategorySelect(category);
-                                    setActiveCategory(category);
+                                    onPackSelect(pack);
+                                    setActivePack(pack);
                                 }}
-                                isActive={activeCategory === category}
+                                isActive={activePack?.id === pack.id}
                             >
-                                <CategoryImage src={category.iconUrl!} alt={category.name} isActive={activeCategory === category} />
+                                <CategoryImage src={pack.iconUrl!} alt={pack.name} isActive={activePack === pack} />
                             </StickerCategory>
                         );
                     })

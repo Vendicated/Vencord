@@ -173,15 +173,15 @@ export default definePlugin({
                     closePopout={closePopout}
                 />
                 <PickerSidebar
-                    categories={
+                    packMetas={
                         stickerPackMetas.map(meta => ({
                             id: meta.id,
                             name: meta.title,
                             iconUrl: meta.logo.image
                         }))
                     }
-                    onCategorySelect={category => {
-                        setSelectedStickerPackId(category.id);
+                    onPackSelect={pack => {
+                        setSelectedStickerPackId(pack.id);
                     }}
                 ></PickerSidebar>
             </Wrapper>
