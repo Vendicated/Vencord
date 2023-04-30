@@ -31,4 +31,5 @@ export interface Review {
     id: number,
     star: number,
     sender: Sender,
+    timestamp: number
 }

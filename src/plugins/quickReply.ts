@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -29,7 +29,6 @@ const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
 let editIdx = -1;
 
-migratePluginSettings("QuickReply", "InteractionKeybinds");
 
 const enum MentionOptions {
     DISABLED,

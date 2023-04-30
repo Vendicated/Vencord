@@ -59,7 +59,7 @@
 }
 
 .vc-text-selectable,
-.vc-text-selectable :not(a, button) {
+.vc-text-selectable :not(a, button, a *, button *) {
     /* make text selectable, silly discord makes the entirety of settings not selectable */
     user-select: text;
 
