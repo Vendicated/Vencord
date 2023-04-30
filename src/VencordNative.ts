@@ -55,7 +55,7 @@ export default {
     },
 
     native: {
-        getVersions: () => process.versions,
+        getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
 };
