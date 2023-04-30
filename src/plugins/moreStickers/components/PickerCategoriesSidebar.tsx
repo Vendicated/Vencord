@@ -17,7 +17,7 @@
 */
 
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Forms, React } from "@webpack/common";
+import { React, Text } from "@webpack/common";
 
 import { CategoryImage } from "./categoryImage";
 import { CategoryScroller } from "./categoryScroller";
@@ -93,7 +93,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                             return (
                                 <ModalRoot size={ModalSize.LARGE} {...modalProps}>
                                     <ModalHeader>
-                                        <Forms.FormTitle>Sticker+</Forms.FormTitle>
+                                        <Text tag="h2">Stickers+</Text>
                                     </ModalHeader>
                                     <ModalContent>
                                         <Settings />

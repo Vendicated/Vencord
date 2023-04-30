@@ -19,6 +19,27 @@
 import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
 import { corsFetch } from "./utils";
 
+
+export interface StickerCategory {
+    title: string;
+    id: number;
+    packs: {
+        title: string;
+        id: string;
+        img: string;
+    }[];
+}
+
+
+const stickerPacksResource = "https://arjix.is-a.dev/line-stickers/";
+export const GetStickerPacksForLINE = async () => {
+    return {
+        official: await fetch(stickerPacksResource + "data/official_sticker_packs.json").then(x => x.json()) as StickerCategory[],
+        creator: await fetch(stickerPacksResource + "data/creator_sticker_packs.json").then(x => x.json()) as StickerCategory[],
+    };
+};
+
+
 /**
  * Convert LineStickerPack id to StickerPack id
  *
@@ -86,7 +107,7 @@ export async function getStickerPack(id: string): Promise<LineStickerPack> {
     const doc = new DOMParser().parseFromString(html, "text/html");
 
     const stickers =
-        [...doc.querySelectorAll(".FnStickerPreviewItem")]
+        [...doc.querySelectorAll('[class$="StickerPreviewItem"]')]
             .map(x => JSON.parse((x as HTMLElement).dataset.preview ?? "null"))
             .filter(x => x !== null)
             .map(x => ({ ...x, stickerPackId: id })) as LineSticker[];

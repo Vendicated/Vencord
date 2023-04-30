@@ -20,7 +20,7 @@ import { Text } from "@webpack/common";
 
 export const Settings = () => {
     return (
-        <div>
+        <div className="vc-more-stickers-settings">
             <Text>hello</Text>
         </div>
     );
