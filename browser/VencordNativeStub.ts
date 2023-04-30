@@ -16,7 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/// <reference path="../src/modules.d.ts" />
+/// <reference path="../src/globals.d.ts" />
+
+import monacoHtml from "~fileContent/../src/components/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
+import { debounce } from "../src/utils";
+import { getTheme, Theme } from "../src/utils/discord";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -26,8 +32,10 @@ const cssListeners = new Set<(css: string) => void>();
 const NOOP = () => { };
 const NOOP_ASYNC = async () => { };
 
+const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
+
 // probably should make this less cursed at some point
-(window as typeof window & { VencordNative: typeof import("../src/VencordNative").default; }).VencordNative = {
+window.VencordNative = {
     native: {
         getVersions: () => ({}),
         openExternal: async (url) => void open(url, "_blank")
@@ -49,8 +57,24 @@ const NOOP_ASYNC = async () => { };
         addChangeListener(cb) {
             cssListeners.add(cb);
         },
-        openEditor: NOOP_ASYNC,
-        openFile: NOOP_ASYNC
+        openFile: NOOP_ASYNC,
+        async openEditor() {
+            const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
+            const win = open("about:blank", "VencordQuickCss", features);
+            if (!win) {
+                alert("Failed to open QuickCSS popup. Make sure to allow popups!");
+                return;
+            }
+
+            win.setCss = setCssDebounced;
+            win.getCurrentCss = () => VencordNative.quickCss.get();
+            win.getTheme = () =>
+                getTheme() === Theme.Light
+                    ? "vs-light"
+                    : "vs-dark";
+
+            win.document.write(monacoHtml);
+        },
     },
 
     settings: {

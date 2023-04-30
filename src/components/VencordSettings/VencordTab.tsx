@@ -100,40 +100,35 @@ function VencordSettings() {
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
-                    {IS_WEB ? (
-                        <Button
-                            onClick={() => require("../Monaco").launchMonacoEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
-                        </Button>
-                    ) : (
-                        <React.Fragment>
+                    <React.Fragment>
+                        {!IS_WEB && (
                             <Button
                                 onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.quickCss.openEditor()}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDir === "Loading..."}>
-                                Open QuickCSS File
-                            </Button>
+                        )}
+                        <Button
+                            onClick={() => VencordNative.quickCss.openEditor()}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDir === "Loading..."}>
+                            Open QuickCSS File
+                        </Button>
+                        {!IS_WEB && (
                             <Button
                                 onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDirPending}>
-                                Open in GitHub
-                            </Button>
-                        </React.Fragment>
-                    )}
+                        )}
+                        <Button
+                            onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDirPending}>
+                            Open in GitHub
+                        </Button>
+                    </React.Fragment>
                 </Card>
             </Forms.FormSection>
 
