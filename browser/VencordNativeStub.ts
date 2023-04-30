@@ -42,10 +42,10 @@ window.VencordNative = {
     },
 
     updater: {
-        getRepo: async () => "https://github.com/Vendicated/Vencord",
+        getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
         getUpdates: async () => ({ ok: true, value: [] }),
-        rebuild: NOOP_ASYNC,
-        update: NOOP_ASYNC
+        rebuild: async () => ({ ok: true, value: void 0 }),
+        update: async () => ({ ok: true, value: false })
     },
 
     quickCss: {
