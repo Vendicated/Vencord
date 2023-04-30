@@ -31,18 +31,18 @@ interface PreferredTheme {
 let nextChange: NodeJS.Timeout;
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
-const Themes: Record<number, string> = findLazy(m => m[16] === "EASTER_EGG");
-const updateTheme: (gah: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void> = findByCodeLazy("clientThemeSettings:{");
+const Themes = findLazy(m => m[16] === "EASTER_EGG") as Record<number, string>;
+const updateTheme = findByCodeLazy("clientThemeSettings:{") as ({ }: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
 
 const getBasicTheme = () =>
     PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
 const getClientThemeId = () =>
     PreloadedUserSettings.getCurrentValue().appearance.clientThemeSettings?.backgroundGradientPresetId?.value as number ?? -1;
 
-const canUseClientThemes = () =>
-    Vencord.Plugins.isPluginEnabled("FakeNitro") || (UserStore.getCurrentUser().premiumType ?? 0) === 2;
 const canActuallyUseClientThemes = () =>
     (UserStore.getCurrentUser().premiumType ?? 0) === 2;
+const canUseClientThemes = () =>
+    Vencord.Plugins.isPluginEnabled("FakeNitro") || canActuallyUseClientThemes();
 
 function updateThemeIfNecessary(theme: string) {
     const currentTheme = getBasicTheme();
