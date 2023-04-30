@@ -1,3 +1,4 @@
+/* stylelint-disable function-url-quotes */
 .vc-more-stickers-icon {
     fill: #b9bbbe;
     margin-top: 20%;
@@ -55,8 +56,12 @@
     width: 100%;
 }
 
-.vc-more-stickers-foreign-object:hover {
-    /* stylelint-disable-next-line function-url-quotes */
+.vc-more-stickers-foreign-object {
+    mask: url(#svg-mask-avatar-default) !important;
+}
+
+.vc-more-stickers-foreign-object:hover,
+.vc-more-stickers-foreign-object-active {
     mask: url(#svg-mask-squircle) !important;
 }
 

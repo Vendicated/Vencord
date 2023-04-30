@@ -77,7 +77,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                                 }}
                                 isActive={activePack?.id === pack.id}
                             >
-                                <CategoryImage src={pack.iconUrl!} alt={pack.name} isActive={activePack === pack} />
+                                <CategoryImage src={pack.iconUrl!} alt={pack.name} isActive={activePack?.id === pack.id} />
                             </StickerCategory>
                         );
                     })

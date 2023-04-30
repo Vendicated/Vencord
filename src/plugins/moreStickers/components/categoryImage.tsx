@@ -32,18 +32,18 @@ export function CategoryImage({ src, alt, isActive }: CategoryImageProps) {
                 overflowClipMargin: "content-box",
             }}>
                 <foreignObject
-                    className={"vc-more-stickers-foreign-object"}
+                    className={
+                        "vc-more-stickers-foreign-object" + (
+                            isActive ?
+                                " vc-more-stickers-foreign-object-active"
+                                : ""
+                        )
+                    }
 
                     x={0} y={0}
                     width={32}
                     height={32}
                     overflow="visible"
-
-                    mask={
-                        isActive ?
-                            "url(#svg-mask-squircle)"
-                            : "url(#svg-mask-avatar-default)"
-                    }
                 >
                     <img
                         src={src}
