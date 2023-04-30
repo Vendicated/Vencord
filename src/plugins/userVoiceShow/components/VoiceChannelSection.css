@@ -13,6 +13,14 @@
     margin-bottom: 6px;
 }
 
-.vc-uvs-modal-margin > [class^="section"] {
+.vc-uvs-modal-margin {
     margin: 0 12px;
+}
+
+.vc-uvs-modal-margin div {
+    margin-bottom: 0 !important;
+}
+
+.vc-uvs-popout-margin > [class^="section"] {
+    margin-top: -12px;
 }
