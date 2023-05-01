@@ -125,7 +125,6 @@ export default definePlugin({
     name: "VencordToolbox",
     description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
     authors: [Devs.Ven],
-    enabledByDefault: true,
 
     patches: [
         {
