@@ -194,9 +194,10 @@ page.on("console", async e => {
                     return a.toString();
                 }
             })
-        ).then(a => a.join(" "));
+        ).then(a => a.join(" ").trim());
 
-        if (!text.startsWith("Failed to load resource: the server responded with a status of")) {
+
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of")) {
             console.error("Got unexpected error", text);
             report.otherErrors.push(text);
         }
