@@ -16,66 +16,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { awaitAndFormatPronouns } from "../pronoundbUtils";
+import { useFormattedPronouns } from "../pronoundbUtils";
+import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
 function shouldShow(message: Message): boolean {
-    // Respect showInMessages
-    if (!Settings.plugins.PronounDB.showInMessages)
+    if (!settings.store.showInMessages)
         return false;
-    // Don't bother fetching bot or system users
     if (message.author.bot || message.author.system)
         return false;
-    // Respect showSelf options
-    if (!Settings.plugins.PronounDB.showSelf && message.author.id === UserStore.getCurrentUser().id)
+    if (!settings.store.showSelf && message.author.id === UserStore.getCurrentUser().id)
         return false;
 
     return true;
 }
 
 export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
-    if (!shouldShow(message))
-        return null;
-
-    return <PronounsChatComponent message={message} />;
+    return shouldShow(message)
+        ? <PronounsChatComponent message={message} />
+        : null;
 }
 
 export function CompactPronounsChatComponentWrapper({ message }: { message: Message; }) {
-    if (!shouldShow(message))
-        return null;
-
-    return <CompactPronounsChatComponent message={message} />;
+    return shouldShow(message)
+        ? <CompactPronounsChatComponent message={message} />
+        : null;
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const result = awaitAndFormatPronouns(message.author.id);
-    if (result != null) {
-        return (
+    const result = useFormattedPronouns(message.author.id);
+
+    return result
+        ? (
             <span
                 className={classes(styles.timestampInline, styles.timestamp)}
             >• {result}</span>
-        );
-    }
-
-    return null;
+        )
+        : null;
 }
 
 export function CompactPronounsChatComponent({ message }: { message: Message; }) {
-    const result = awaitAndFormatPronouns(message.author.id);
-    if (result != null) {
-        return (
+    const result = useFormattedPronouns(message.author.id);
+
+    return result
+        ? (
             <span
                 className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
             >• {result}</span>
-        );
-    }
-
-    return null;
+        )
+        : null;
 }

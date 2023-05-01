@@ -150,7 +150,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 );
             });
 
-            return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
+            return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
         }
     }
 
@@ -180,7 +180,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
-            <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
+            <ModalContent>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
                     <Forms.FormText>{plugin.description}</Forms.FormText>
