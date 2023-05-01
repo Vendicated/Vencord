@@ -26,10 +26,12 @@ export default definePlugin({
     patches: [
         {
             find: '"MessageActionCreators"',
-            replacement: [{
-                match: /\beditMessage:(function\([^)]+\)){/,
+            replacement: {
+                // editMessage: function (...) {
+                match: /\beditMessage:(function\(.+?\))\{/,
+                // editMessage: async function (...) { await handlePreEdit(...); ...
                 replace: "editMessage:async $1{await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
-            }]
+            }
         },
         {
             find: ".handleSendMessage=",
