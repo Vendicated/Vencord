@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
 import { Button, Text } from "@webpack/common";
 
@@ -49,10 +50,28 @@ function NoDMNotificationsModal({ modalProps }: { modalProps: ModalProps; }) {
     );
 }
 
+const settings = definePluginSettings({
+    guild: {
+        description: "Mute Guild",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    everyone: {
+        description: "Suppress @everyone and @here",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    role: {
+        description: "Suppress All Role @mentions",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+});
+
 export default definePlugin({
     name: "MuteNewGuild",
     description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
     patches: [
         {
             find: ",acceptInvite:function",
@@ -62,10 +81,17 @@ export default definePlugin({
             }
         }
     ],
+    settings,
 
     handleMute(guildId: string | null) {
         if (guildId === "@me" || guildId === "null" || guildId == null) return;
-        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId, { muted: true, suppress_everyone: true, suppress_roles: true });
+        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId,
+            {
+                muted: settings.store.guild,
+                suppress_everyone: settings.store.everyone,
+                suppress_roles: settings.store.role
+            }
+        );
     },
 
     start() {
