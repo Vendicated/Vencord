@@ -102,6 +102,7 @@ function createTab(t: ChannelProps, jumpTo?: string | boolean) {
     if (jumpTo) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}${window._.isString(jumpTo) ? `/${jumpTo}` : ""}`);
 }
 function closeTab(i: number) {
+    if (openChannels.length <= 1) return;
     openChannels.splice(i, 1);
     if (openChannelHistory.length >= 2) {
         openChannelHistory.pop(); // once to remove the entry for the current channel
