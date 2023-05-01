@@ -36,10 +36,10 @@ function VencordPopout(onClose: () => void) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
-                    key={`vc-menu-${plugin.name}`}
+                    key={`vc-toolbox-${plugin.name}`}
                 >
                     {Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                        const key = `vc-menu-${plugin.name}-${text}`;
+                        const key = `vc-toolbox-${plugin.name}-${text}`;
 
                         return (
                             <Menu.MenuItem
@@ -57,16 +57,16 @@ function VencordPopout(onClose: () => void) {
 
     return (
         <Menu.Menu
-            navId="vencord-menu"
+            navId="vc-toolbox"
             onClose={onClose}
         >
             <Menu.MenuItem
-                id="vc-menu-notifications"
+                id="vc-toolbox-notifications"
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
             <Menu.MenuItem
-                id="vc-menu-quickcss"
+                id="vc-toolbox-quickcss"
                 label="Open QuickCSS"
                 action={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
             />
@@ -81,7 +81,7 @@ function VencordPopoutIcon() {
             width={24}
             height={24}
             src="https://raw.githubusercontent.com/Vencord/Website/main/public/assets/favicon.png"
-            alt="Vencord Menu"
+            alt="Vencord Toolbox"
         />
     );
 }
@@ -101,7 +101,7 @@ function VencordPopoutButton() {
             {(_, { isShown }) => (
                 <HeaderBarIcon
                     onClick={() => setShow(v => !v)}
-                    tooltip={isShown ? null : "Vencord Menu"}
+                    tooltip={isShown ? null : "Vencord Toolbox"}
                     icon={VencordPopoutIcon}
                     selected={isShown}
                 />
