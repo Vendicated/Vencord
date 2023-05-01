@@ -305,6 +305,12 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
         {openChannels.map((ch, i) => <div
             className={classes(cl("tab"), isTabSelected(ch) ? cl("tab-selected") : null)}
             key={i}
+            onAuxClick={e => {
+                if (e.button === 1 /* middle click */) {
+                    closeTab(i);
+                    update();
+                }
+            }}
             onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu channelInfo={ch} pos={i} update={update} />)}
         >
             <button
