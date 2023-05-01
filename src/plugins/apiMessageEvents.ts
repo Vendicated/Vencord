@@ -35,9 +35,9 @@ export default definePlugin({
             find: ".handleSendMessage=",
             replacement: {
                 // checkIsMessageValid().then((function (isValidData) { ... getSendMessageOptionsForReply(data); ... sendMessage(channel.id, msg, void 0, mergeMessageSendOptions(...))
-                match: /\.then\(\(function\((\i)\)\{(var \i=\i\.valid.+?\.getSendMessageOptionsForReply\(\i\);)(?=.+?\.sendMessage\((\i)\.id,(\i),void 0,(\i\(.+?)\):)/,
+                match: /(?<=uploads:\i,channel:\i\}\)\.then\(\()function\((\i)\)\{(var \i=\i\.valid.+?\.getSendMessageOptionsForReply\(\i\);)(?=.+?\.sendMessage\((\i)\.id,(\i),void 0,(\i\(.+?)\):)/,
                 // checkIsMessageValid().then((async function (isValidData) { ...; if (await handlePresend(channel.id, msg, extra)) return; ...
-                replace: ".then((async function($1){$2 if (await Vencord.Api.MessageEvents._handlePreSend($3.id,$4,$5)) return {shouldClear:true,shouldRefocus:true};"
+                replace: "async function($1){$2 if (await Vencord.Api.MessageEvents._handlePreSend($3.id,$4,$5)) return {shouldClear:true,shouldRefocus:true};"
             }
         },
         {
