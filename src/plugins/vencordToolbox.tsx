@@ -32,13 +32,13 @@ function VencordPopout(onClose: () => void) {
     const pluginEntries = [] as ReactNode[];
 
     for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolbarActions) {
+        if (plugin.toolboxActions) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
                     key={`vc-menu-${plugin.name}`}
                 >
-                    {Object.entries(plugin.toolbarActions).map(([text, action]) => {
+                    {Object.entries(plugin.toolboxActions).map(([text, action]) => {
                         const key = `vc-menu-${plugin.name}-${text}`;
 
                         return (
@@ -68,11 +68,7 @@ function VencordPopout(onClose: () => void) {
             <Menu.MenuItem
                 id="vc-menu-quickcss"
                 label="Open QuickCSS"
-                action={() =>
-                    IS_WEB
-                        ? require("@components/Monaco").launchMonacoEditor()
-                        : VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)
-                }
+                action={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
             />
             {...pluginEntries}
         </Menu.Menu>
@@ -84,7 +80,7 @@ function VencordPopoutIcon() {
         <img
             width={24}
             height={24}
-            src="https://vencord.dev/assets/favicon.png"
+            src="https://raw.githubusercontent.com/Vencord/Website/main/public/assets/favicon.png"
             alt="Vencord Menu"
         />
     );
@@ -114,14 +110,19 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolbarFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(children.length - 1, 0, <VencordPopoutButton />);
+function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
+    children.splice(
+        children.length - 1, 0,
+        <ErrorBoundary noop={true}>
+            <VencordPopoutButton />
+        </ErrorBoundary>
+    );
 
     return <>{children}</>;
 }
 
 export default definePlugin({
-    name: "VencordToolbarMenu",
+    name: "VencordToolbox",
     description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
     authors: [Devs.Ven],
     enabledByDefault: true,
@@ -131,12 +132,12 @@ export default definePlugin({
             find: ".mobileToolbar",
             replacement: {
                 match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolbarFragmentWrapper,"
+                replace: "$self.ToolboxFragmentWrapper,"
             }
         }
     ],
 
-    ToolbarFragmentWrapper: ErrorBoundary.wrap(ToolbarFragmentWrapper, {
+    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
         fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
     })
 });
