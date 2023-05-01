@@ -108,10 +108,6 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
-    /**
-     * Allow you to add actions to the vencord toolbar menu
-     */
-    toolbarActions?: Record<string, () => void>;
 }
 
 export enum OptionType {
