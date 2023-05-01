@@ -22,17 +22,21 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MessageEventsAPI",
     description: "Api required by anything using message events.",
-    authors: [Devs.Arjix, Devs.hunt],
+    authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
             find: '"MessageActionCreators"',
             replacement: [{
-                match: /_sendMessage:(function\([^)]+\)){/,
-                replace: "_sendMessage:async $1{if(await Vencord.Api.MessageEvents._handlePreSend(...arguments))return;"
-            }, {
                 match: /\beditMessage:(function\([^)]+\)){/,
                 replace: "editMessage:async $1{await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
             }]
+        },
+        {
+            find: ".handleSendMessage=",
+            replacement: {
+                match: /\.then\(\(function\((\i)\)\{(var \i=\i\.valid.+?\.getSendMessageOptionsForReply\(\i\);)(?=.+?\.sendMessage\((\i)\.id,(\i),void 0,(\i\(.+?)\):)/,
+                replace: ".then((async function($1){$2 if (await Vencord.Api.MessageEvents._handlePreSend($3.id,$4,$5)) return {shouldClear:true,shouldRefocus:true};"
+            }
         },
         {
             find: '("interactionUsernameProfile',
