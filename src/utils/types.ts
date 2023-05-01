@@ -108,6 +108,8 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
+
+    tags?: string[];
 }
 
 export enum OptionType {
@@ -133,6 +135,7 @@ export type PluginSettingDef = (
     | PluginSettingSelectDef
     | PluginSettingSliderDef
     | PluginSettingComponentDef
+    | PluginSettingBigIntDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {

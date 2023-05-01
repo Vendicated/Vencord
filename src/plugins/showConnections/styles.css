@@ -1,0 +1,5 @@
+.vc-user-connection {
+    all: unset;
+    display: inline-block;
+    cursor: pointer;
+}

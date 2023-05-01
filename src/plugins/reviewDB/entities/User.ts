@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+export const enum UserType {
+    Banned = -1,
+    Normal = 0,
+    Admin = 1
+}
 
-export default definePlugin({
-    name: "NoDevtoolsWarning",
-    description: "Disables the 'HOLD UP' banner in the console. As a side effect, also prevents Discord from hiding your token, which prevents random logouts.",
-    authors: [Devs.Ven],
-    patches: [{
-        find: "setDevtoolsCallbacks",
-        replacement: {
-            match: /if\(.{0,10}\|\|"0.0.0"!==.{0,2}\.remoteApp\.getVersion\(\)\)/,
-            replace: "if(false)"
-        }
-    }]
-});
+export interface ReviewDBUser {
+    lastReviewID: number,
+    type: UserType;
+}
