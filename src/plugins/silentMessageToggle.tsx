@@ -98,6 +98,8 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
+    dependencies: ["MessageEventsAPI"],
+
     settings,
     patches: [
         {
