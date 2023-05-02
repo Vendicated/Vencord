@@ -35,6 +35,7 @@ interface TextReplaceProps {
     title: string;
     rulesArray: Rule[];
     rulesKey: string;
+    update: () => void;
 }
 
 const makeEmptyRule: () => Rule = () => ({
@@ -51,19 +52,26 @@ const settings = definePluginSettings({
     replace: {
         type: OptionType.COMPONENT,
         description: "",
-        component: () =>
-            <>
-                <TextReplace
-                    title="Using String"
-                    rulesArray={stringRules}
-                    rulesKey={STRING_RULES_KEY}
-                />
-                <TextReplace
-                    title="Using Regex"
-                    rulesArray={regexRules}
-                    rulesKey={REGEX_RULES_KEY}
-                />
-            </>
+        component: () => {
+            const update = useForceUpdater();
+            return (
+                <>
+                    <TextReplace
+                        title="Using String"
+                        rulesArray={stringRules}
+                        rulesKey={STRING_RULES_KEY}
+                        update={update}
+                    />
+                    <TextReplace
+                        title="Using Regex"
+                        rulesArray={regexRules}
+                        rulesKey={REGEX_RULES_KEY}
+                        update={update}
+                    />
+                    <TextReplaceTesting />
+                </>
+            );
+        }
     },
 });
 
@@ -111,10 +119,8 @@ function Input({ initialValue, onChange, placeholder }: {
     );
 }
 
-function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
+function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) {
     const isRegexRules = title === "Using Regex";
-
-    const update = useForceUpdater();
 
     async function onClickRemove(index: number) {
         rulesArray.splice(index, 1);
@@ -191,12 +197,57 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
     );
 }
 
+function TextReplaceTesting() {
+    const [value, setValue] = useState("");
+    return (
+        <>
+            <Forms.FormTitle tag="h4">Test Rules</Forms.FormTitle>
+            <TextInput placeholder="Type a message" onChange={setValue} />
+            <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} />
+        </>
+    );
+}
+
+function applyRules(content: string): string {
+    if (content.length === 0)
+        return content;
+
+    // pad so that rules can use " word " to only match whole "word"
+    content = " " + content + " ";
+
+    if (stringRules) {
+        for (const rule of stringRules) {
+            if (!rule.find || !rule.replace) continue;
+            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+
+            content = content.replaceAll(rule.find, rule.replace);
+        }
+    }
+
+    if (regexRules) {
+        for (const rule of regexRules) {
+            if (!rule.find || !rule.replace) continue;
+            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+
+            try {
+                const regex = stringToRegex(rule.find);
+                content = content.replace(regex, rule.replace);
+            } catch (e) {
+                new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
+            }
+        }
+    }
+
+    content = content.trim();
+    return content;
+}
+
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in the Vencord Server",
-    authors: [Devs.Samu, Devs.AutumnVN],
+    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
+    authors: [Devs.Samu, Devs.AutumnVN, Devs.TheKodeToad],
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -208,34 +259,7 @@ export default definePlugin({
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
             if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-
-            // pad so that rules can use " word " to only match whole "word"
-            msg.content = " " + msg.content + " ";
-
-            if (stringRules) {
-                for (const rule of stringRules) {
-                    if (!rule.find || !rule.replace) continue;
-                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-
-                    msg.content = msg.content.replaceAll(rule.find, rule.replace);
-                }
-            }
-
-            if (regexRules) {
-                for (const rule of regexRules) {
-                    if (!rule.find || !rule.replace) continue;
-                    if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
-
-                    try {
-                        const regex = stringToRegex(rule.find);
-                        msg.content = msg.content.replace(regex, rule.replace);
-                    } catch (e) {
-                        new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-                    }
-                }
-            }
-
-            msg.content = msg.content.trim();
+            msg.content = applyRules(msg.content);
         });
     },
 
