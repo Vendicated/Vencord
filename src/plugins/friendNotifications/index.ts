@@ -17,8 +17,8 @@
 */
 
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
 
 import { contextMenuOpen, UserContext } from "./context";
 import settings from "./settings";
@@ -28,14 +28,8 @@ export default definePlugin({
     name: "Friend Notifications",
     description: "Send notifications when friends change their status.",
     authors: [
-        {
-            id: 372682605386137612n,
-            name: "axu5",
-        },
-        {
-            id: 131602100332396544n,
-            name: "x3rt",
-        }
+        Devs.axu,
+        Devs.x3rt
     ],
     settings,
     contextMenuOpen,
