@@ -108,6 +108,13 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
+    /**
+     * Allows you to add custom actions to the Vencord Toolbox.
+     * The key will be used as text for the button
+     */
+    toolboxActions?: Record<string, () => void>;
+
+    tags?: string[];
 }
 
 export enum OptionType {
@@ -133,6 +140,7 @@ export type PluginSettingDef = (
     | PluginSettingSelectDef
     | PluginSettingSliderDef
     | PluginSettingComponentDef
+    | PluginSettingBigIntDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
