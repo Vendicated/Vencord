@@ -82,7 +82,7 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
 function TypingIndicator(props: { isTyping: boolean; }) {
     const { isTyping } = props;
     return isTyping
-        ? <div style={{ marginLeft: 2 }}><ThreeDots dotRadius={3} themed={true} /></div>
+        ? <div className={cl("typing-indicator")}><ThreeDots dotRadius={3} themed={true} /></div>
         : null;
 }
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {

@@ -105,6 +105,10 @@
     width: 12px;
 }
 
+.vc-channeltabs-typing-indicator {
+    margin-left: 2px;
+}
+
 .vc-channeltabs-preview-tab {
     display: flex;
     flex-direction: row;
@@ -114,6 +118,14 @@
     min-width: 0;
     border-radius: 4px;
     border: 1px solid var(--background-modifier-accent);
+}
+
+.vc-channeltabs-preview-tab > :is(
+.vc-channeltabs-emoji-container,
+.vc-channeltabs-typing-indicator,
+[data-has-mention]
+) {
+    display: none;
 }
 
 .vc-channeltabs-preview-text {
