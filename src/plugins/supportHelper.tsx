@@ -45,7 +45,7 @@ export default definePlugin({
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
             const client = (() => {
-                if (IS_DISCORD_DESKTOP) return `Desktop v${DiscordNative.app.getVersion()}`;
+                if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
                 if (IS_VENCORD_DESKTOP) return `Vencord Desktop v${VencordDesktopNative.app.getVersion()}`;
                 if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
                 return `Web (${navigator.userAgent})`;
@@ -58,6 +58,7 @@ export default definePlugin({
 > Client: ${client}
 > Platform: ${window.navigator.platform}
 > Vencord Version: ${gitHash}${settings.additionalInfo}
+> OpenAsar: ${"openasar" in window}
 > Outdated: ${isOutdated}
 > Enabled Plugins:
 ${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).join(", "))}
