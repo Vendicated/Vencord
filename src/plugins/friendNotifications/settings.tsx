@@ -17,8 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/settings";
+import { useForceUpdater } from "@utils/misc";
 import { OptionType } from "@utils/types";
-import { Button, UserStore, useState } from "@webpack/common";
+import { Button, UserStore } from "@webpack/common";
 import User from "discord-types/general/User";
 
 import { tracked, writeTrackedToDataStore } from "./utils";
@@ -43,10 +44,6 @@ export default definePluginSettings({
         type: OptionType.COMPONENT,
         description: "People that should be tracked",
         component: () => {
-            // Use useState to force a re-render on update to underlying data
-            // TODO find something more elegant
-            const [_count, setCount] = useState(0);
-
             const ids = Array.from(tracked.keys());
             // If they aren't a friend, you cannot access this data.
             // Therefore a check has to be done and data has to be cleaned
@@ -97,7 +94,7 @@ export default definePluginSettings({
                             await writeTrackedToDataStore();
 
                             // Force re-render
-                            setCount(c => c + 1);
+                            useForceUpdater();
                         }}>
                             DELETE
                         </Button>
