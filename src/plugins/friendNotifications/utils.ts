@@ -45,10 +45,6 @@ export async function init() {
     });
 }
 
-function getAvatarURL(id: string, avatar: string) {
-    return `https://cdn.discordapp.com/avatars/${id}/${avatar}.webp?size=80`;
-}
-
 export async function presenceUpdate({ updates }: { updates: { user: User; status: Status; guildId: string; }[]; }) {
     // If they come online, then notify
     // If they go offline, then notify
