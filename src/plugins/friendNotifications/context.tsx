@@ -17,19 +17,21 @@
 */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Menu, RelationshipStore, UserStore } from "@webpack/common";
+import { Menu, PresenceStore, RelationshipStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import { UserContextProps } from "./types";
+import type { Platform, Status, UserContextProps } from "./types";
 import { tracked, writeTrackedToDataStore } from "./utils";
 
 export async function contextMenuOpen(user: User) {
     const { id: userId } = user;
+    const statuses = PresenceStore.getState().clientStatuses as Record<string, Record<Platform, Status>>;
+    const status = statuses[userId];
+    const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
 
-    // Cannot determine status from user object
     tracked.has(userId) ?
         tracked.delete(userId) :
-        tracked.set(userId, null);
+        tracked.set(userId, s);
 
     // Persist data
     await writeTrackedToDataStore();
