@@ -20,7 +20,6 @@ export * from "./ChangeList";
 export * as Constants from "./constants";
 export * from "./debounce";
 export * as Discord from "./discord";
-export { default as IpcEvents } from "./IpcEvents";
 export { default as Logger } from "./Logger";
 export * from "./margins";
 export * from "./misc";
