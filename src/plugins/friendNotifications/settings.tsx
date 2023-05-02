@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./settings.css";
+
 import { definePluginSettings } from "@api/settings";
 import { useForceUpdater } from "@utils/misc";
 import { OptionType } from "@utils/types";
@@ -68,27 +70,13 @@ export default definePluginSettings({
 
             return <div> {
                 users.map(user => {
-                    return <div key={user.id} style={{
-                        display: "flex",
-                        height: "100%",
-                        color: "var(--text-default)",
-                        width: "75%",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        fontSize: "1rem",
-                        background: "var(--background-floating)",
-                        borderRadius: "5px",
-                        margin: "0.5rem auto",
-                        padding: "0.5rem 2rem"
-                    }}>
+                    return <div key={user.id} className="friend-notifications-settings">
                         <span>
-                            {user.username}<span style={{
-                                color: "var(--text-muted)"
-                            }}>
+                            {user.username}<span className="friend-notifications-settings-discriminator">
                                 #{user.discriminator}
                             </span>
                         </span>
-                        <Button style={{ cursor: "pointer" }} onClick={async () => {
+                        <Button className="friend-notifications-settings-delete" onClick={async () => {
                             tracked.delete(user.id);
                             // Persist data
                             await writeTrackedToDataStore();
