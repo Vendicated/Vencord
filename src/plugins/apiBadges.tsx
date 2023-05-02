@@ -47,9 +47,11 @@ const ContributorBadge: ProfileBadge = {
     link: "https://github.com/Vendicated/Vencord"
 };
 
-const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;
+let DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;
 
 async function loadBadges(noCache = false) {
+    DonorBadges = {};
+
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
