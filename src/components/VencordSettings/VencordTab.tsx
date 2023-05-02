@@ -23,7 +23,6 @@ import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
 import { identity, useAwaiter } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
@@ -39,7 +38,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function VencordSettings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), {
+    const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
         fallbackValue: "Loading..."
     });
     const settings = useSettings();
@@ -101,40 +100,35 @@ function VencordSettings() {
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
-                    {IS_WEB ? (
-                        <Button
-                            onClick={() => require("../Monaco").launchMonacoEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
-                        </Button>
-                    ) : (
-                        <React.Fragment>
+                    <React.Fragment>
+                        {!IS_WEB && (
                             <Button
                                 onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDir === "Loading..."}>
-                                Open QuickCSS File
-                            </Button>
+                        )}
+                        <Button
+                            onClick={() => VencordNative.quickCss.openEditor()}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDir === "Loading..."}>
+                            Open QuickCSS File
+                        </Button>
+                        {!IS_WEB && (
                             <Button
                                 onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/Vendicated/Vencord")}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDirPending}>
-                                Open in GitHub
-                            </Button>
-                        </React.Fragment>
-                    )}
+                        )}
+                        <Button
+                            onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDirPending}>
+                            Open in GitHub
+                        </Button>
+                    </React.Fragment>
                 </Card>
             </Forms.FormSection>
 
