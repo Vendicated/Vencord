@@ -36,10 +36,36 @@ export interface Emoji {
 export interface MessageObject {
     content: string,
     validNonShortcutEmojis: Emoji[];
+    invalidEmojis: any[];
+    tts: boolean;
 }
 
+export interface Upload {
+    classification: string;
+    currentSize: number;
+    description: string | null;
+    filename: string;
+    id: string;
+    isImage: boolean;
+    isVideo: boolean;
+    item: {
+        file: File;
+        platform: number;
+    };
+    loaded: number;
+    mimeType: string;
+    preCompressionSize: number;
+    responseUrl: string;
+    sensitive: boolean;
+    showLargeMessageDialog: boolean;
+    spoiler: boolean;
+    status: string;
+    uniqueId: string;
+    uploadedFilename: string;
+}
 export interface MessageExtra {
     stickerIds?: string[];
+    uploads?: Upload[];
 }
 
 export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
@@ -48,7 +74,8 @@ export type EditListener = (channelId: string, messageId: string, messageObj: Me
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, uploads: Upload[]) {
+    extra.uploads = uploads;
     for (const listener of sendListeners) {
         try {
             const result = await listener(channelId, messageObj, extra);
