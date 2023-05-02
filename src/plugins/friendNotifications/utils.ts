@@ -73,12 +73,13 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
                 });
             }
         }
-        const { id, username, avatar } = user;
+        const { id, username } = user;
         if (!username || !id) continue;
         // Skip non-friends
         const prevStatus = tracked.get(id);
         // Equals explicitly undefined (only true of key isn't defined)
         if (prevStatus === undefined) continue;
+        const avatarURL = UserStore.getUser(id).getAvatarURL();
 
         // Set new status
         tracked.set(id, status);
@@ -100,13 +101,13 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
             settings.store.offlineNotifications &&
             status === "offline"
         ) {
-            notify(`${username} went offline`, getAvatarURL(id, avatar));
+            notify(`${username} went offline`, avatarURL);
         } else if (
             settings.store.onlineNotifications &&
             ((prevStatus === null || prevStatus === "offline") &&
                 ["online", "dnd", "idle"].includes(status))
         ) {
-            notify(`${username} came online`, getAvatarURL(id, avatar));
+            notify(`${username} came online`, avatarURL);
         }
     }
 }
