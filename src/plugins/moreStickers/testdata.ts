@@ -19,7 +19,7 @@
 import { setRecentStickers } from "./components/recent";
 import {
     convert,
-    getStickerPack
+    getStickerPackById
 } from "./lineStickers";
 import {
     deleteStickerPack,
@@ -54,7 +54,7 @@ export async function initTest() {
     for (const id of lineStickerPackIds) {
         ps.push((async () => {
             try {
-                const lsp = await getStickerPack(id);
+                const lsp = await getStickerPackById(id);
                 const sp = convert(lsp);
                 return sp;
             } catch (e) {

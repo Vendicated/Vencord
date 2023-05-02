@@ -17,7 +17,7 @@
     width: 100%;
 }
 
-.vc-more-stickers-picker-container > div:first-child {
+.vc-more-stickers-picker-container>div:first-child {
     display: flex;
     flex: 1 1 auto;
     flex-flow: wrap;
@@ -45,7 +45,7 @@
     margin-right: 8px;
 }
 
-.vc-more-stickers-foreign-object > img {
+.vc-more-stickers-foreign-object>img {
     text-indent: -9999px;
     align-items: center;
     background-color: var(--background-primary);
@@ -99,13 +99,13 @@
     flex: 1 1 auto;
 }
 
-.vc-more-stickers-category-scroller > :first-child {
+.vc-more-stickers-category-scroller> :first-child {
     inset: 8px;
     contain: layout;
     position: absolute;
 }
 
-.vc-more-stickers-category-scroller > :last-child {
+.vc-more-stickers-category-scroller> :last-child {
     position: "absolute";
     pointer-events: none;
     min-height: 0;
@@ -321,6 +321,7 @@
     top: 0;
 
     /* prettier-ignore */
+    -webkit-mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
     mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
     transition: background-color 0.08s ease-out, color 0.08s ease-out;
     z-index: -1;
@@ -341,6 +342,7 @@
 
 .vc-more-stickers-picker-content-row-grid-asset-wrapper:hover {
     /* prettier-ignore */
+    -webkit-mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
     mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
 }
 
@@ -424,28 +426,28 @@
 
 .vc-more-stickers-picker-settings-cog {
     cursor: pointer;
-    border-radius: 2em;
-    background-color: var(--background-primary);
-    padding: 8px;
+    border-radius: 12px;
+    background-color: var(--button-outline-primary-background);
+    padding: 1px 8px 1px 8px;
     transform: translate(-5%, 10%);
     transition: all 0.15s ease-out;
 }
 
 .vc-more-stickers-picker-settings-cog-active {
-    border-radius: 1em;
-    background-color: var(--green-300);
+    border-radius: 12px;
+    background-color: var(--button-outline-primary-background-hover);
 }
 
-.vc-more-stickers-picker-settings-cog > svg {
-    color: var(--green-360) !important;
+.vc-more-stickers-picker-settings-cog>svg {
+    color: var(--button-outline-primary-text) !important;
     width: 100%;
     height: 100%;
     transform: translateY(10%);
 }
 
 /* prettier-ignore */
-.vc-more-stickers-picker-settings-cog-active > svg {
-    color: var(--white-360) !important;
+.vc-more-stickers-picker-settings-cog-active>svg {
+    color: var(--button-outline-primary-text-hover) !important;
 }
 
 .vc-more-stickers-picker-content-header-collapse-icon {
@@ -453,6 +455,41 @@
 }
 
 .vc-more-stickers-settings {
+    margin-top: 16px;
+}
+
+.vc-more-stickers-settings .bg {
+    border-radius: 8px;
+    background-color: var(--background-secondary);
+    padding: 16px;
+    margin: 8px 16px 16px;
+}
+
+.vc-more-stickers-settings .sticker-pack {
+    position: relative;
+}
+
+.vc-more-stickers-settings .sticker-pack button {
     display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 8px;
+    background: var(--background-secondary);
+    width: 26px;
+    height: 0px;
+    align-items: center;
     justify-content: center;
+    padding: 2px;
+    opacity: 0;
+}
+
+.vc-more-stickers-settings button.show {
+    height: 26px;
+    opacity: 1;
+    transition: opacity 0.25s linear;
+}
+
+.vc-more-stickers-settings .section {
+    margin-top: 8px;
 }
