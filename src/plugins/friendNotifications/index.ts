@@ -33,11 +33,6 @@ export default definePlugin({
     ],
     settings,
     contextMenuOpen,
-    // Delete `patches` if you are not using code patches, as it will make
-    // your plugin require restarts, and your stop() method will not be
-    // invoked at all.  The presence of the key in the object alone is
-    // enough to trigger this behavior, even if the value is an empty array.
-    patches: [],
 
     flux: {
         PRESENCE_UPDATES: presenceUpdate
