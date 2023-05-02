@@ -18,7 +18,7 @@
 
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
-import { ChannelStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
@@ -106,12 +106,16 @@ export function deleteGuild(id: string) {
 }
 
 export async function syncGuilds() {
+    guilds.clear();
+
+    const me = UserStore.getCurrentUser().id;
     for (const [id, { name, icon }] of Object.entries(GuildStore.getGuilds())) {
-        guilds.set(id, {
-            id,
-            name,
-            iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
-        });
+        if (GuildMemberStore.isMember(id, me))
+            guilds.set(id, {
+                id,
+                name,
+                iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
+            });
     }
     await DataStore.set(guildsKey(), guilds);
 }
@@ -126,6 +130,8 @@ export function deleteGroup(id: string) {
 }
 
 export async function syncGroups() {
+    groups.clear();
+
     for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
         if (type === ChannelType.GROUP_DM)
             groups.set(id, {
