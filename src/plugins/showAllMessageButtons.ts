@@ -17,7 +17,6 @@
 */
 
 import { Devs } from "@utils/constants";
-import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
@@ -29,23 +28,9 @@ export default definePlugin({
         {
             find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
             replacement: {
-                // getTODOMessages().find...isExpanded: V,
-                match: /getTODOMessages\(\).+?isExpanded:(\i),/,
-                replace: (m, isExpanded) => {
-                    // ,V = G &&...
-                    const shiftKeyDownRegex = canonicalizeMatch(RegExp(`(?<=,${isExpanded}=)\\i(?=&&)`));
-
-                    // G
-                    const shiftKeyDown = m.match(shiftKeyDownRegex)?.[0];
-                    if (shiftKeyDown) {
-                        // ,G = (0, nn.Z)(), H =
-                        const shiftKeyDownOverrideRegex = canonicalizeMatch(RegExp(`(?<=,${shiftKeyDown}=).+?(?=,\\i=)`));
-                        // ,G = true, H =
-                        m = m.replace(shiftKeyDownOverrideRegex, "true");
-                    }
-
-                    return m;
-                }
+                // isExpanded: V, (?<=,V = shiftKeyDown && !H...;)
+                match: /isExpanded:(\i),(?<=,\1=\i&&(!.+);.+?)/,
+                replace: "isExpanded:$2,"
             }
         }
     ]
