@@ -45,16 +45,16 @@ export default definePlugin({
     // enough to trigger this behavior, even if the value is an empty array.
     patches: [],
 
+    flux: {
+        PRESENCE_UPDATES: presenceUpdate
+    },
+
     // Delete these two below if you are only using code patches
     async start() {
         await init();
         addContextMenuPatch("user-context", UserContext);
-
-        FluxDispatcher.subscribe("PRESENCE_UPDATES", presenceUpdate);
     },
     stop() {
         removeContextMenuPatch("user-context", UserContext);
-
-        FluxDispatcher.unsubscribe("PRESENCE_UPDATES", presenceUpdate);
     },
 });
