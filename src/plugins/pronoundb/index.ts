@@ -60,7 +60,7 @@ export default definePlugin({
             find: ".USER_PROFILE_ACTIVITY",
             replacement: {
                 match: /\).showPronouns/,
-                replace: ").showPronouns||true;if(arguments[0].displayProfile)arguments[0].displayProfile.pronouns=$self.useProfilePronouns(arguments[0].user.id)"
+                replace: ").showPronouns||true;const vcPronounce=$self.useProfilePronouns(arguments[0].user.id);if(arguments[0].displayProfile)arguments[0].displayProfile.pronouns=vcPronounce"
             }
         }
     ],

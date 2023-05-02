@@ -130,7 +130,7 @@ async function printReport() {
                     },
                     {
                         title: "Discord Errors",
-                        description: toCodeBlock(report.otherErrors.join("\n")),
+                        description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n")) : "None",
                         color: report.otherErrors.length ? 0xff0000 : 0x00ff00
                     }
                 ]
@@ -194,9 +194,10 @@ page.on("console", async e => {
                     return a.toString();
                 }
             })
-        ).then(a => a.join(" "));
+        ).then(a => a.join(" ").trim());
 
-        if (!text.startsWith("Failed to load resource: the server responded with a status of")) {
+
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of")) {
             console.error("Got unexpected error", text);
             report.otherErrors.push(text);
         }
@@ -233,7 +234,7 @@ function runTime(token: string) {
             // Needs native server to run
             if (p.name === "WebRichPresence (arRPC)") return;
 
-            p.required = true;
+            Vencord.Settings.plugins[p.name].enabled = true;
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
