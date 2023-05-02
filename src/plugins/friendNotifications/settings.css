@@ -12,6 +12,15 @@
     padding: 0.5rem 2rem;
 }
 
+.friend-notifications-settings-info {
+    margin: 0 auto;
+    color: var(--text-muted);
+}
+
+.friend-notifications-settings-username {
+    color: var(--text-normal);
+}
+
 .friend-notifications-settings-discriminator {
     color: var(--text-muted);
 }

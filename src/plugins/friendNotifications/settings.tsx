@@ -49,7 +49,7 @@ export default definePluginSettings({
             const updater = useForceUpdater();
             const ids = Array.from(tracked.keys());
             // If they aren't a friend, you cannot access this data.
-            // Therefore a check has to be done and data has to be cleaned
+            // Therefore, a check has to be done and data has to be cleaned
             const users = ids
                 .reduce((acc, curId) => {
                     const user = UserStore.getUser(curId);
@@ -64,15 +64,15 @@ export default definePluginSettings({
                 }, [] as User[]);
 
             if (users.length === 0) {
-                return <span style={{
-                    color: "var(--text-muted)"
-                }}>You don't have anyone added to your friend notifications</span>;
+                return <span className="friend-notifications-settings-info">
+                    You don't have anyone added to your friend notifications
+                </span>;
             }
 
             return <div> {
                 users.map(user => {
                     return <div key={user.id} className="friend-notifications-settings">
-                        <span>
+                        <span className="friend-notifications-settings-username">
                             {user.username}<span className="friend-notifications-settings-discriminator">
                                 #{user.discriminator}
                             </span>
