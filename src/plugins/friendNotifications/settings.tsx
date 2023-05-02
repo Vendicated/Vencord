@@ -42,6 +42,24 @@ export default definePluginSettings({
         description: "Notifies you when a friend comes online",
         default: true
     },
+    notificationAction: {
+        type: OptionType.SELECT,
+        description: "What should happen when you click a notification?",
+        options: [
+            {
+                label: "Open DM",
+                value: "open"
+            },
+            {
+                label: "Open Profile",
+                value: "profile"
+            },
+            {
+                label: "Dismiss",
+                value: "dismiss"
+            }],
+        default: "open"
+    },
     tracking: {
         type: OptionType.COMPONENT,
         description: "People that should be tracked",

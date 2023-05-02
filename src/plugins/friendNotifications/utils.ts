@@ -18,7 +18,15 @@
 
 import { DataStore } from "@api/index";
 import { showNotification } from "@api/Notifications";
-import { PresenceStore, RelationshipStore, UserStore } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import {
+    ChannelStore,
+    NavigationRouter,
+    PresenceStore,
+    RelationshipStore,
+    SelectedChannelStore,
+    UserStore
+} from "@webpack/common";
 import { User } from "discord-types/general";
 
 import plugin from "./index";
@@ -28,6 +36,7 @@ import type { FriendNotificationStore, Platform, Status } from "./types";
 export const tracked = new Map<string, Status | null>();
 export const friends = new Set<string>();
 export const trackingKey = () => `friend-notifications-tracking-${UserStore.getCurrentUser().id}`;
+const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
 
 export async function init() {
     const friendsArr = RelationshipStore.getFriendIDs();
@@ -75,7 +84,6 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
         const prevStatus = tracked.get(id);
         // Equals explicitly undefined (only true of key isn't defined)
         if (prevStatus === undefined) continue;
-        const avatarURL = UserStore.getUser(id).getAvatarURL();
 
         // Set new status
         tracked.set(id, status);
@@ -97,26 +105,43 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
             settings.store.offlineNotifications &&
             status === "offline"
         ) {
-            notify(`${username} went offline`, avatarURL);
+            notify(`${username} went offline`, user);
         } else if (
             settings.store.onlineNotifications &&
             ((prevStatus === null || prevStatus === "offline") &&
                 ["online", "dnd", "idle"].includes(status))
         ) {
-            notify(`${username} came online`, avatarURL);
+            notify(`${username} came online`, user);
         }
     }
 }
 
-export function notify(text: string, icon?: string) {
+export function notify(text: string, user: User) {
     if (!settings.store.notifications) return;
+    const action = settings.store.notificationAction;
+    const { id } = user;
+    const dmChannelId = ChannelStore.getDMFromUserId(id);
+    const avatarURL = UserStore.getUser(id)?.getAvatarURL();
 
     showNotification({
         title: plugin.name,
         body: text,
-        icon,
-        dismissOnClick: true,
-    });
+        icon: avatarURL,
+        onClick: () => {
+            if (action === "open") {
+                if (!dmChannelId) return;
+                window.focus();
+                const link = "/channels/@me/" + dmChannelId;
+                NavigationRouter.transitionTo(link);
+            } else if (action === "profile") {
+                openProfile({
+                    userId: user.id,
+                    guildId: null,
+                    channelId: SelectedChannelStore.getChannelId(),
+                });
+            }
+        }
+    }).then();
 }
 
 export async function writeTrackedToDataStore() {
