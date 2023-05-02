@@ -155,12 +155,12 @@ export default definePlugin({
     },
 
     get electronVersion() {
-        return VencordNative.getVersions().electron || window.armcord?.electron || null;
+        return VencordNative.native.getVersions().electron || window.armcord?.electron || null;
     },
 
     get chromiumVersion() {
         try {
-            return VencordNative.getVersions().chrome
+            return VencordNative.native.getVersions().chrome
                 // @ts-ignore Typescript will add userAgentData IMMEDIATELY
                 || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
                 || null;
