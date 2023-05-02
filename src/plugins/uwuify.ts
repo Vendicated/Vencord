@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,10 @@
 */
 
 import { findOption, RequiredMessageOption } from "@api/Commands";
+import { MessageObject } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 const endings = [
     "rawr x3",
@@ -65,6 +67,15 @@ const replacements = [
     ["meow", "nya~"],
 ];
 
+const settings = definePluginSettings({
+    uwuEveryMessage: {
+        description: "Make every single message uwuified",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
+    }
+});
+
 function selectRandomElement(arr) {
     // generate a random index based on the length of the array
     const randomIndex = Math.floor(Math.random() * arr.length);
@@ -94,8 +105,16 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [Devs.echo, Devs.skyevg],
-    dependencies: ["CommandsAPI"],
+    authors: [Devs.echo, Devs.skyevg, Devs.PandaNinjas],
+    dependencies: ["CommandsAPI", "MessageEventsAPI"],
+    settings,
+
+    onSend(msg: MessageObject) {
+        // Only run when it's enabled
+        if (settings.store.uwuEveryMessage) {
+            msg.content = uwuify(msg.content);
+        }
+    },
 
     commands: [
         {
