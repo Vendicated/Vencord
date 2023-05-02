@@ -59,7 +59,7 @@ export interface Upload {
     sensitive: boolean;
     showLargeMessageDialog: boolean;
     spoiler: boolean;
-    status: string;
+    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
     uniqueId: string;
     uploadedFilename: string;
 }
