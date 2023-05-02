@@ -17,7 +17,7 @@
 */
 
 import { findOption, RequiredMessageOption } from "@api/Commands";
-import { MessageObject } from "@api/MessageEvents";
+import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -109,13 +109,6 @@ export default definePlugin({
     dependencies: ["CommandsAPI", "MessageEventsAPI"],
     settings,
 
-    onSend(msg: MessageObject) {
-        // Only run when it's enabled
-        if (settings.store.uwuEveryMessage) {
-            msg.content = uwuify(msg.content);
-        }
-    },
-
     commands: [
         {
             name: "uwuify",
@@ -127,4 +120,23 @@ export default definePlugin({
             }),
         },
     ],
+
+    onSend(msg: MessageObject) {
+        // Only run when it's enabled
+        if (settings.store.uwuEveryMessage) {
+            msg.content = uwuify(msg.content);
+        }
+    },
+
+    start() {
+        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
+        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
+            this.onSend(msg)
+        );
+    },
+
+    stop() {
+        removePreSendListener(this.preSend);
+        removePreEditListener(this.preEdit);
+    },
 });
