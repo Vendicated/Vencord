@@ -193,7 +193,7 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages",
+    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in the Vencord Server",
     authors: [Devs.Samu, Devs.AutumnVN],
     dependencies: ["MessageEventsAPI"],
 
