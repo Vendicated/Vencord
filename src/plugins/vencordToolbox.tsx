@@ -19,7 +19,6 @@
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import IpcEvents from "@utils/IpcEvents";
 import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
@@ -68,7 +67,7 @@ function VencordPopout(onClose: () => void) {
             <Menu.MenuItem
                 id="vc-toolbox-quickcss"
                 label="Open QuickCSS"
-                action={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
+                action={() => VencordNative.quickCss.openEditor()}
             />
             {...pluginEntries}
         </Menu.Menu>
