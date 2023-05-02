@@ -22,17 +22,25 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MessageEventsAPI",
     description: "Api required by anything using message events.",
-    authors: [Devs.Arjix, Devs.hunt],
+    authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
             find: '"MessageActionCreators"',
-            replacement: [{
-                match: /_sendMessage:(function\([^)]+\)){/,
-                replace: "_sendMessage:async $1{if(await Vencord.Api.MessageEvents._handlePreSend(...arguments))return;"
-            }, {
-                match: /\beditMessage:(function\([^)]+\)){/,
+            replacement: {
+                // editMessage: function (...) {
+                match: /\beditMessage:(function\(.+?\))\{/,
+                // editMessage: async function (...) { await handlePreEdit(...); ...
                 replace: "editMessage:async $1{await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
-            }]
+            }
+        },
+        {
+            find: ".handleSendMessage=",
+            replacement: {
+                // checkIsMessageValid().then((function (isValidData) { ... getSendMessageOptionsForReply(data); ... sendMessage(channel.id, msg, void 0, mergeMessageSendOptions(...))
+                match: /(?<=uploads:(\i),channel:\i\}\)\.then\(\()function\((\i)\)\{(var \i=\i\.valid.+?\.getSendMessageOptionsForReply\(\i\);)(?=.+?\.sendMessage\((\i)\.id,(\i),void 0,(\i\(.+?)\):)/,
+                // checkIsMessageValid().then((async function (isValidData) { ...; if (await handlePresend(channel.id, msg, extra)) return; ...
+                replace: "async function($2){$3 if (await Vencord.Api.MessageEvents._handlePreSend($4.id,$5,$6,$1)) return {shouldClear:true,shouldRefocus:true};"
+            }
         },
         {
             find: '("interactionUsernameProfile',
