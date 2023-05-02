@@ -20,16 +20,12 @@ import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCal
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex.jsx";
 import { Devs } from "@utils/constants.js";
-import { LazyComponent } from "@utils/misc.jsx";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
 import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
 import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
-
-const Keybind = LazyComponent(() => findByProps("KeyCombo").KeyCombo);
 
 const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
 const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
@@ -160,27 +156,31 @@ export default definePlugin({
         ChannelTabsUtils.createTab(tab, message.id);
     },
 
-    settingsAboutComponent: () => <>
-        <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
-        <Flex flexDirection="row">
-            <Forms.FormSection>
-                <Forms.FormTitle>Switch between tabs</Forms.FormTitle>
-                <Keybind shortcut="mod+tab" />
-                <Keybind shortcut="mod+shift+tab" />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Switch between tabs with unreads</Forms.FormTitle>
-                <Keybind shortcut="ctrl+shift+left" />
-                <Keybind shortcut="ctrl+shift+right" />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Open and close tabs</Forms.FormTitle>
-                <Keybind shortcut="mod+n" />
-                <Keybind shortcut="mod+w" />
-            </Forms.FormSection>
-        </Flex>
-        <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>
-    </>,
+    settingsAboutComponent: () => {
+        // @ts-ignore
+        const { KeyCombo } = Forms;
+        return <>
+            <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
+            <Flex flexDirection="row">
+                <Forms.FormSection>
+                    <Forms.FormTitle>Switch between tabs</Forms.FormTitle>
+                    <KeyCombo shortcut="mod+tab" />
+                    <KeyCombo shortcut="mod+shift+tab" />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Switch between tabs with unreads</Forms.FormTitle>
+                    <KeyCombo shortcut="ctrl+shift+left" />
+                    <KeyCombo shortcut="ctrl+shift+right" />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Open and close tabs</Forms.FormTitle>
+                    <KeyCombo shortcut="mod+n" />
+                    <KeyCombo shortcut="mod+w" />
+                </Forms.FormSection>
+            </Flex>
+            <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>
+        </>;
+    },
 
     // TODO: remove
     util: ChannelTabsUtils
