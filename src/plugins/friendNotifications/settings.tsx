@@ -46,6 +46,7 @@ export default definePluginSettings({
         type: OptionType.COMPONENT,
         description: "People that should be tracked",
         component: () => {
+            const updater = useForceUpdater();
             const ids = Array.from(tracked.keys());
             // If they aren't a friend, you cannot access this data.
             // Therefore a check has to be done and data has to be cleaned
@@ -82,7 +83,7 @@ export default definePluginSettings({
                             await writeTrackedToDataStore();
 
                             // Force re-render
-                            useForceUpdater();
+                            updater();
                         }}>
                             DELETE
                         </Button>
