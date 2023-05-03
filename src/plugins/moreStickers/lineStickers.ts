@@ -122,7 +122,7 @@ export function parseHtml(html: string): LineStickerPack {
     const id = mainImage.id;
 
     const stickers =
-        [...doc.querySelectorAll('[class$="StickerPreviewItem"]')]
+        [...doc.querySelectorAll('[data-test="sticker-item"]')]
             .map(x => JSON.parse((x as HTMLElement).dataset.preview ?? "null"))
             .filter(x => x !== null)
             .map(x => ({ ...x, stickerPackId: id })) as LineSticker[];
