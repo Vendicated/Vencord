@@ -149,7 +149,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
-    authors: [Devs.TheKodeToad, Devs.AutumnVN],
+    authors: [Devs.TheKodeToad],
     patches: [
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
