@@ -120,7 +120,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 
     return (
         <Tooltip
-            text={`${connection.name}${!connection.verified ? " (unverified)" : ""} (click to ${url ? "open" : "copy"})`}
+            text={`${connection.name}${!connection.verified ? " (unverified)" : ""}`}
             key={connection.id}
         >
             {tooltipProps =>
@@ -149,7 +149,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
-    authors: [Devs.TheKodeToad],
+    authors: [Devs.TheKodeToad, Devs.AutumnVN],
     patches: [
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
