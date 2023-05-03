@@ -493,3 +493,13 @@
 .vc-more-stickers-settings .section {
     margin-top: 8px;
 }
+
+.vc-more-stickers-settings .tab-bar {
+    margin-bottom: 16px;
+}
+
+.vc-more-stickers-settings .tab-bar-item {
+    margin-right: 16px;
+    padding-bottom: 4px;
+    margin-bottom: -4px;
+}

@@ -16,30 +16,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Text, Forms, React, Button, Toasts, TextInput, TextArea } from "@webpack/common";
+import { Forms, React, Button, Toasts, TextArea, TabBar } from "@webpack/common";
 import { Flex } from "@components/Flex";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { getStickerPackMetas, deleteStickerPack, saveStickerPack } from "../stickers";
 import { StickerPackMeta } from "../types";
 import { getIdFromUrl as getLineIdFromUrl, getStickerPackById, parseHtml as getLineSPFromHtml, convert as convertLineSP } from "../lineStickers";
 
+enum SettingsTabsKey {
+    ADD_STICKER = "Add Sticker",
+    ADD_STICKER_HTML = "Add Sticker from HTML",
+}
+
 export const Settings = () => {
     const [stickerPackMetas, setstickerPackMetas] = React.useState<StickerPackMeta[]>([]);
     const [addStickerUrl, setAddStickerUrl] = React.useState<string>("");
     const [addStickerHtml, setAddStickerHtml] = React.useState<string>("");
+    const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER);
+    const [hoveredStickerPackId, setHoveredStickerPackId] = React.useState<string | null>(null);
+
     async function refreshStickerPackMetas() {
         setstickerPackMetas(await getStickerPackMetas());
     }
     React.useEffect(() => {
         refreshStickerPackMetas();
     }, []);
-    const [hoveredStickerPackId, setHoveredStickerPackId] = React.useState<string | null>(null);
 
     return (
         <div className="vc-more-stickers-settings">
             <Forms.FormTitle tag="h3">Stickers Management</Forms.FormTitle>
 
-            <div className="section">
+            <TabBar
+                type="top"
+                look="brand"
+                selectedItem={tab}
+                onItemSelect={setTab}
+                className="tab-bar"
+            >
+                {
+                    Object.values(SettingsTabsKey).map(k => (
+                        <TabBar.Item key={k} id={k} className="tab-bar-item">
+                            {k}
+                        </TabBar.Item>
+                    ))
+                }
+            </TabBar>
+
+            <div className="section" style={{
+                display: tab === SettingsTabsKey.ADD_STICKER ? "unset" : "none"
+            }}>
                 <Forms.FormTitle tag="h5">Add Sticker</Forms.FormTitle>
                 <Flex flexDirection="row" style={{
                     alignItems: "center",
@@ -98,7 +123,9 @@ export const Settings = () => {
                     >Insert</Button>
                 </Flex>
             </div>
-            <div className="section">
+            <div className="section" style={{
+                display: tab === SettingsTabsKey.ADD_STICKER_HTML ? "unset" : "none"
+            }}>
                 <Forms.FormTitle tag="h5">Add Sticker from HTML</Forms.FormTitle>
                 <Forms.FormText>
                     <p>
