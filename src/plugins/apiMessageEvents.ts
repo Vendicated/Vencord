@@ -36,12 +36,10 @@ export default definePlugin({
         {
             find: ".handleSendMessage=",
             replacement: {
-                // type: i.props.chatInputType...then((function...getSendMessageOptionsForReply(s); (?=...channelId: a.id, uplads: c, draftType:..., parsedMessage: d, options: ...)
-                match: /(props\.chatInputType,.+?\.then\(\()(.+?getSendMessageOptionsForReply\(\i\);)(?=.+?channelId:(\i\.id),uploads:(\i),draftType:.+?,parsedMessage:(\i),options:(.+?)}\);)/,
-                // type: i.props.chatInputType...then((async function...getSendMessageOptionsForReply(s); if (await handlePresend(channel.id, msg, options, uploads)) return{...};
-                replace: (_, rest1, rest2, channelId, uploads, parsedMessage, options) => ""
-                    + `${rest1}async ${rest2}`
-                    + `if(await Vencord.Api.MessageEvents._handlePreSend(${channelId},${parsedMessage},${options},${uploads}))return{shouldClear:true,shouldRefocus:true};`
+                // checkIsMessageValid().then((function (isValidData) { ... getSendMessageOptionsForReply(data); ... sendMessage(channel.id, msg, void 0, mergeMessageSendOptions(...))
+                match: /(?<=uploads:(\i),channel:\i\}\)\.then\(\()function\((\i)\)\{(var \i=\i\.valid.+?\.getSendMessageOptionsForReply\(\i\);)(?=.+?\.sendMessage\((\i)\.id,(\i),void 0,(\i\(.+?)\):)/,
+                // checkIsMessageValid().then((async function (isValidData) { ...; if (await handlePresend(channel.id, msg, extra)) return; ...
+                replace: "async function($2){$3 if (await Vencord.Api.MessageEvents._handlePreSend($4.id,$5,$6,$1)) return {shouldClear:true,shouldRefocus:true};"
             }
         },
         {
