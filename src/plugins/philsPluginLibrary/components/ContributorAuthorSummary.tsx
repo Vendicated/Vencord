@@ -35,7 +35,7 @@ export const ContributorAuthorSummary = ({ author, contributors }: ContributorAu
             {author &&
                 <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
                     <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
-                        Author: <a onClick={() => openURL(author.github)}>{`${author.name}`}</a>
+                        Author: <a onClick={() => author.github && openURL(author.github)}>{`${author.name}`}</a>
                     </Text>
                     <AuthorUserSummaryItem authors={[author]} />
                 </Flex>

@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "@utils/IpcEvents";
 import { UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 export const createDummyUser = (props: Partial<User>) => new (UserStore.getCurrentUser().constructor as any)(props);
-export const openURL = (url?: string) => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
+export const openURL = (url: string) => VencordNative.native.openExternal(url);
 export const validateNumberInput = (value: string) => parseInt(value) ? parseInt(value) : undefined;
 export const validateTextInputNumber = (value: string) => /^[0-9\b]+$/.test(value) || value === "";
 export const replaceObjectValuesIfExist =
