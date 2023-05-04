@@ -1,5 +1,11 @@
+.vc-seventv-button {
+    padding-right: 7px;
+    padding-left: 3px;
+}
+
 .seventv-emotes {
     width: 100%;
+    min-height: 310px;
     text-align: center;
 }
 
@@ -32,8 +38,5 @@
 }
 
 .seventv-pagetext {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    text-align: center;
 }

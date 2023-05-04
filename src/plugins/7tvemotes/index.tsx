@@ -138,7 +138,7 @@ const settings = definePluginSettings({
     limit: {
         type: OptionType.NUMBER,
         description: "How many emotes per page?",
-        default: 6,
+        default: 20,
     },
     category: {
         type: OptionType.SELECT,
@@ -288,6 +288,7 @@ export default definePlugin({
                     </div>
 
                     <Forms.FormDivider></Forms.FormDivider>
+                    <br></br>
 
                     <div className="seventv-navigation">
                         <Button className="seventv-pagebutton"
@@ -309,7 +310,7 @@ export default definePlugin({
                     </div>
                 </div>
 
-                <div className={cl("seventv-footer")}>
+                <div className={cl("footer")}>
                     <Forms.FormText className="seventv-pagetext">Page {page}</Forms.FormText>
                 </div>
             </div>
