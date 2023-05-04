@@ -44,8 +44,6 @@ export const Settings = () => {
 
     return (
         <div className="vc-more-stickers-settings">
-            <Forms.FormTitle tag="h3">Stickers Management</Forms.FormTitle>
-
             <TabBar
                 type="top"
                 look="brand"
@@ -183,8 +181,10 @@ export const Settings = () => {
             </div>
             <Forms.FormDivider style={{
                 marginTop: "8px",
-                marginBottom: "4px"
+                marginBottom: "8px"
             }} />
+            <Forms.FormTitle tag="h5">Stickers Management</Forms.FormTitle>
+
             <div className="section">
                 <div style={{
                     display: "grid",
