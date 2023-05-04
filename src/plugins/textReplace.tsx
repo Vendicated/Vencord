@@ -191,9 +191,11 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
     );
 }
 
+const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
+
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages",
+    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in the Vencord Server",
     authors: [Devs.Samu, Devs.AutumnVN],
     dependencies: ["MessageEventsAPI"],
 
@@ -203,7 +205,10 @@ export default definePlugin({
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
         regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
 
-        this.preSend = addPreSendListener((_, msg) => {
+        this.preSend = addPreSendListener((channelId, msg) => {
+            // Channel used for sharing rules, applying rules here would be messy
+            if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
+
             // pad so that rules can use " word " to only match whole "word"
             msg.content = " " + msg.content + " ";
 
