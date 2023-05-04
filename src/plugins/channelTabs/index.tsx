@@ -27,28 +27,6 @@ import { Channel, Message } from "discord-types/general/index.js";
 import { ChannelsTabsContainer } from "./components";
 import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
-const messageLinkRegex = /^https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})(?:\/(\d{17,20}))?$/;
-const messageLinkContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
-        if (!props) return;
-        const { itemHref }: { itemHref?: string; } = props;
-        if (!itemHref) return;
-        const [_, guildId, channelId, messageId] = itemHref.match(messageLinkRegex) ?? [];
-        if (!channelId) return;
-        const group = findGroupChildrenByChildId("copy-native-link", children);
-        if (group)
-            group.push(<Menu.MenuItem
-                label="Open In New Tab"
-                id="open-link-in-tab"
-                key="open-link-in-tab"
-                action={() => ChannelTabsUtils.createTab({
-                    guildId,
-                    channelId
-                }, messageId ?? true)}
-            />);
-    };
-};
-
 const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     return () => {
         if (!props) return;
@@ -121,13 +99,11 @@ export default definePlugin({
     settings: channelTabsSettings,
 
     start() {
-        addContextMenuPatch("message", messageLinkContextMenuPatch);
         addContextMenuPatch("channel-mention-context", channelMentionContextMenuPatch);
         addContextMenuPatch("channel-context", channelContextMenuPatch);
     },
 
     stop() {
-        removeContextMenuPatch("message", messageLinkContextMenuPatch);
         removeContextMenuPatch("channel-mention-context", channelContextMenuPatch);
         removeContextMenuPatch("channel-context", channelContextMenuPatch);
     },
