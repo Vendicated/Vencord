@@ -16,17 +16,80 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Forms, React, Button, Toasts, TextArea, TabBar } from "@webpack/common";
-import { Flex } from "@components/Flex";
 import { CheckedTextInput } from "@components/CheckedTextInput";
-import { getStickerPackMetas, deleteStickerPack, saveStickerPack } from "../stickers";
+import { Flex } from "@components/Flex";
+import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/common";
+
+import { convert as convertLineSP, getIdFromUrl as getLineIdFromUrl, getStickerPackById, parseHtml as getLineSPFromHtml } from "../lineStickers";
+import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
 import { StickerPackMeta } from "../types";
-import { getIdFromUrl as getLineIdFromUrl, getStickerPackById, parseHtml as getLineSPFromHtml, convert as convertLineSP } from "../lineStickers";
 
 enum SettingsTabsKey {
     ADD_STICKER = "Add Sticker",
     ADD_STICKER_HTML = "Add Sticker from HTML",
 }
+
+const noDrag = {
+    onMouseDown: e => { e.preventDefault(); return false; },
+    onDragStart: e => { e.preventDefault(); return false; }
+};
+
+const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPackId, refreshStickerPackMetas }:
+    { meta: StickerPackMeta, [key: string]: any; }
+) => {
+    return (
+        <div className="sticker-pack"
+            onMouseEnter={() => setHoveredStickerPackId(meta.id)}
+            onMouseLeave={() => setHoveredStickerPackId(null)}
+        >
+            <div className={
+                [
+                    "vc-more-stickers-picker-content-row-grid-inspected-indicator",
+                    hoveredStickerPackId === meta.id ? "inspected" : ""
+                ].join(" ")
+            } style={{
+                top: "unset",
+                left: "unset",
+                height: "96px",
+                width: "96px",
+            }}></div>
+            <img src={meta.logo.image} width="96" {...noDrag} />
+            <button
+                className={hoveredStickerPackId === meta.id ? "show" : ""}
+                onClick={async () => {
+                    try {
+                        await deleteStickerPack(meta.id);
+                        Toasts.show({
+                            message: "Sticker Pack deleted",
+                            type: Toasts.Type.SUCCESS,
+                            id: Toasts.genId(),
+                            options: {
+                                duration: 1000
+                            }
+                        });
+                        await refreshStickerPackMetas();
+                    } catch (e: any) {
+                        Toasts.show({
+                            message: e.message,
+                            type: Toasts.Type.FAILURE,
+                            id: Toasts.genId(),
+                            options: {
+                                duration: 1000
+                            }
+                        });
+                    }
+                }}
+            >
+                <svg width="24" height="24" viewBox="0 0 24 24" style={{ fill: "var(--status-danger)" }}>
+                    <title>Delete</title>
+                    <path d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" />
+                    <path d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
+                </svg>
+            </button>
+            <Text className="vc-more-stickers-pack-title" tag="span">{meta.title}</Text>
+        </div>
+    );
+};
 
 export const Settings = () => {
     const [stickerPackMetas, setstickerPackMetas] = React.useState<StickerPackMeta[]>([]);
@@ -60,125 +123,124 @@ export const Settings = () => {
                 }
             </TabBar>
 
-            <div className="section" style={{
-                display: tab === SettingsTabsKey.ADD_STICKER ? "unset" : "none"
-            }}>
-                <Forms.FormTitle tag="h5">Add Sticker</Forms.FormTitle>
-                <Flex flexDirection="row" style={{
-                    alignItems: "center",
-                    justifyContent: "center"
-                }} >
-                    <span style={{
-                        flexGrow: 1
-                    }}>
-                        <CheckedTextInput
-                            value={addStickerUrl}
-                            onChange={setAddStickerUrl}
-                            validate={(v: string) => {
-                                try {
-                                    getLineIdFromUrl(v);
-                                } catch (e: any) {
-                                    return e.message;
-                                }
+            {tab === SettingsTabsKey.ADD_STICKER &&
+                <div className="section">
+                    <Forms.FormTitle tag="h5">Add Sticker</Forms.FormTitle>
+                    <Flex flexDirection="row" style={{
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }} >
+                        <span style={{
+                            flexGrow: 1
+                        }}>
+                            <CheckedTextInput
+                                value={addStickerUrl}
+                                onChange={setAddStickerUrl}
+                                validate={(v: string) => {
+                                    try {
+                                        getLineIdFromUrl(v);
+                                    } catch (e: any) {
+                                        return e.message;
+                                    }
 
-                                return true;
-                            }
-                            }
-                            placeholder="Sticker Pack URL"
-                        />
-                    </span>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        onClick={async (e) => {
-                            e.preventDefault();
-                            try {
-                                const id = getLineIdFromUrl(addStickerUrl);
-                                const lineSP = await getStickerPackById(id);
-                                const stickerPack = convertLineSP(lineSP);
-                                await saveStickerPack(stickerPack);
-                                setAddStickerUrl("");
-                                refreshStickerPackMetas();
-                                Toasts.show({
-                                    message: "Sticker Pack added",
-                                    type: Toasts.Type.SUCCESS,
-                                    id: Toasts.genId(),
-                                    options: {
-                                        duration: 1000
-                                    }
-                                });
-                            } catch (e: any) {
-                                console.error(e);
-                                Toasts.show({
-                                    message: e.message,
-                                    type: Toasts.Type.FAILURE,
-                                    id: Toasts.genId(),
-                                    options: {
-                                        duration: 1000
-                                    }
-                                });
-                            }
-                        }}
-                    >Insert</Button>
-                </Flex>
-            </div>
-            <div className="section" style={{
-                display: tab === SettingsTabsKey.ADD_STICKER_HTML ? "unset" : "none"
-            }}>
-                <Forms.FormTitle tag="h5">Add Sticker from HTML</Forms.FormTitle>
-                <Forms.FormText>
-                    <p>
-                        When encountering errors while adding a sticker pack, you can try to add it using the HTML source code of the sticker pack page.<br />
-                        This applies to stickers which are region locked / OS locked / etc.<br />
-                        The region LINE recognized may vary from the region you are in due to the CORS proxy we're using.
-                    </p>
-                </Forms.FormText>
-                <Flex flexDirection="row" style={{
-                    alignItems: "center",
-                    justifyContent: "center"
-                }} >
-                    <span style={{
-                        flexGrow: 1
-                    }}>
-                        <TextArea
-                            value={addStickerHtml}
-                            onChange={setAddStickerHtml}
-                            placeholder="Paste HTML here"
-                            rows={1}
-                        />
-                    </span>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        onClick={async (e) => {
-                            e.preventDefault();
-                            try {
-                                const lineSP = getLineSPFromHtml(addStickerHtml);
-                                const stickerPack = convertLineSP(lineSP);
-                                await saveStickerPack(stickerPack);
-                                Toasts.show({
-                                    message: "Sticker Pack added",
-                                    type: Toasts.Type.SUCCESS,
-                                    id: Toasts.genId(),
-                                    options: {
-                                        duration: 1000
-                                    }
-                                });
-                                setAddStickerHtml("");
-                                refreshStickerPackMetas();
-                            } catch (e: any) {
-                                console.error(e);
-                                Toasts.show({
-                                    message: e.message,
-                                    type: Toasts.Type.FAILURE,
-                                    id: Toasts.genId(),
-                                    options: {
-                                        duration: 1000
-                                    }
-                                });
-                            }
-                        }}
-                    >Insert from HTML</Button>
-                </Flex>
-            </div>
+                                    return true;
+                                }
+                                }
+                                placeholder="Sticker Pack URL"
+                            />
+                        </span>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={async e => {
+                                e.preventDefault();
+                                try {
+                                    const id = getLineIdFromUrl(addStickerUrl);
+                                    const lineSP = await getStickerPackById(id);
+                                    const stickerPack = convertLineSP(lineSP);
+                                    await saveStickerPack(stickerPack);
+                                    setAddStickerUrl("");
+                                    refreshStickerPackMetas();
+                                    Toasts.show({
+                                        message: "Sticker Pack added",
+                                        type: Toasts.Type.SUCCESS,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                } catch (e: any) {
+                                    console.error(e);
+                                    Toasts.show({
+                                        message: e.message,
+                                        type: Toasts.Type.FAILURE,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                }
+                            }}
+                        >Insert</Button>
+                    </Flex>
+                </div>}
+            {tab === SettingsTabsKey.ADD_STICKER_HTML &&
+                <div className="section">
+                    <Forms.FormTitle tag="h5">Add Sticker from HTML</Forms.FormTitle>
+                    <Forms.FormText>
+                        <p>
+                            When encountering errors while adding a sticker pack, you can try to add it using the HTML source code of the sticker pack page.<br />
+                            This applies to stickers which are region locked / OS locked / etc.<br />
+                            The region LINE recognized may vary from the region you are in due to the CORS proxy we're using.
+                        </p>
+                    </Forms.FormText>
+                    <Flex flexDirection="row" style={{
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }} >
+                        <span style={{
+                            flexGrow: 1
+                        }}>
+                            <TextArea
+                                value={addStickerHtml}
+                                onChange={setAddStickerHtml}
+                                placeholder="Paste HTML here"
+                                rows={1}
+                            />
+                        </span>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={async e => {
+                                e.preventDefault();
+                                try {
+                                    const lineSP = getLineSPFromHtml(addStickerHtml);
+                                    const stickerPack = convertLineSP(lineSP);
+                                    await saveStickerPack(stickerPack);
+                                    Toasts.show({
+                                        message: "Sticker Pack added",
+                                        type: Toasts.Type.SUCCESS,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                    setAddStickerHtml("");
+                                    refreshStickerPackMetas();
+                                } catch (e: any) {
+                                    console.error(e);
+                                    Toasts.show({
+                                        message: e.message,
+                                        type: Toasts.Type.FAILURE,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                }
+                            }}
+                        >Insert from HTML</Button>
+                    </Flex>
+                </div>}
+
             <Forms.FormDivider style={{
                 marginTop: "8px",
                 marginBottom: "8px"
@@ -192,61 +254,14 @@ export const Settings = () => {
                     gap: "8px"
                 }}>
                     {
-                        stickerPackMetas.map((meta) => (
-                            <React.Fragment key={meta.id}>
-                                <div className="sticker-pack"
-                                    onMouseEnter={() => setHoveredStickerPackId(meta.id)}
-                                    onMouseLeave={() => setHoveredStickerPackId(null)}
-                                >
-                                    <div className={
-                                        [
-                                            "vc-more-stickers-picker-content-row-grid-inspected-indicator",
-                                            `${hoveredStickerPackId === meta.id ? "inspected" : ""}`
-                                        ].join(" ")
-                                    } style={{
-                                        top: "unset",
-                                        left: "unset",
-                                        height: "96px",
-                                        width: "96px",
-                                    }}></div>
-                                    <img src={meta.logo.image} width="96" />
-                                    <button className={
-                                        [
-                                            hoveredStickerPackId === meta.id ? "show" : ""
-                                        ].join(" ")
-                                    }
-                                        onClick={async () => {
-                                            try {
-                                                await deleteStickerPack(meta.id);
-                                                Toasts.show({
-                                                    message: "Sticker Pack deleted",
-                                                    type: Toasts.Type.SUCCESS,
-                                                    id: Toasts.genId(),
-                                                    options: {
-                                                        duration: 1000
-                                                    }
-                                                });
-                                                await refreshStickerPackMetas();
-                                            } catch (e: any) {
-                                                Toasts.show({
-                                                    message: e.message,
-                                                    type: Toasts.Type.FAILURE,
-                                                    id: Toasts.genId(),
-                                                    options: {
-                                                        duration: 1000
-                                                    }
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        <svg width="24" height="24" viewBox="0 0 24 24">
-                                            <title>Delete</title>
-                                            <path fill="var(--status-danger)" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" />
-                                            <path fill="var(--status-danger)" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </React.Fragment>
+                        stickerPackMetas.map(meta => (
+                            <StickerPackMetadata
+                                key={meta.id}
+                                meta={meta}
+                                hoveredStickerPackId={hoveredStickerPackId}
+                                setHoveredStickerPackId={setHoveredStickerPackId}
+                                refreshStickerPackMetas={refreshStickerPackMetas}
+                            />
                         ))
                     }
                 </div>

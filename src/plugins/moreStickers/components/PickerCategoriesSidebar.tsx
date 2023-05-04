@@ -95,9 +95,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                                     <ModalHeader>
                                         <Text tag="h2">Stickers+</Text>
                                     </ModalHeader>
-                                    <ModalContent style={{
-                                        marginLeft: "24px"
-                                    }}>
+                                    <ModalContent>
                                         <Settings />
                                     </ModalContent>
                                 </ModalRoot>
