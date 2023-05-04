@@ -281,5 +281,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     carince: {
         name: "carince",
         id: 818323528755314698n
+    },
+    crwn: {
+        name: "crwn",
+        id: 241507339876827146n
     }
 });
