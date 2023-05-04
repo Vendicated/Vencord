@@ -17,7 +17,6 @@
 */
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
 import { localStorage } from "@utils/localStorage";
 import Logger from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
@@ -94,7 +93,7 @@ const DefaultSettings: Settings = {
 };
 
 try {
-    var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
+    var settings = JSON.parse(VencordNative.settings.get()) as Settings;
     mergeDefaults(settings, DefaultSettings);
 } catch (err) {
     var settings = mergeDefaults({} as Settings, DefaultSettings);
@@ -173,7 +172,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             PlainSettings.cloud.settingsSyncVersion = Date.now();
             localStorage.Vencord_settingsDirty = true;
             saveSettingsOnFrequentAction();
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            VencordNative.settings.set(JSON.stringify(root, null, 4));
             return true;
         }
     });
@@ -249,10 +248,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
-            VencordNative.ipc.invoke(
-                IpcEvents.SET_SETTINGS,
-                JSON.stringify(settings, null, 4)
-            );
+            VencordNative.settings.set(JSON.stringify(settings, null, 4));
             break;
         }
     }
