@@ -641,7 +641,7 @@ export default definePlugin({
                 if (!settings.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickerStore.getStickerById(extra?.stickerIds?.[0]!);
+                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -663,7 +663,7 @@ export default definePlugin({
                         link = `https://distok.top/stickers/${packId}/${sticker.id}.gif`;
                     }
 
-                    delete extra.stickerIds;
+                    extra.stickers!.length = 0;
                     messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
                 }
             }

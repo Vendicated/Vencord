@@ -63,9 +63,23 @@ export interface Upload {
     uniqueId: string;
     uploadedFilename: string;
 }
+
+export interface MessageReplyOptions {
+    messageReference: Message["messageReference"];
+    allowedMentions?: {
+        parse: Array<string>;
+        repliedUser: boolean;
+    };
+}
+
 export interface MessageExtra {
-    stickerIds?: string[];
+    stickers?: string[];
     uploads?: Upload[];
+    replyOptions: MessageReplyOptions;
+    content: string;
+    channel: Channel;
+    type?: any;
+    openWarningPopout: (props: any) => any;
 }
 
 export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
@@ -74,8 +88,8 @@ export type EditListener = (channelId: string, messageId: string, messageObj: Me
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, uploads: Upload[]) {
-    extra.uploads = uploads;
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
+    extra.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
             const result = await listener(channelId, messageObj, extra);
