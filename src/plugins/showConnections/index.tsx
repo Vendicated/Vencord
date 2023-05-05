@@ -18,10 +18,11 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { copyWithToast, LazyComponent } from "@utils/misc";
+import { copyWithToast } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { Text, Tooltip } from "@webpack/common";

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 
 if (IS_DEV) {
     var traces = {} as Record<string, [number, any[]]>;
