@@ -55,7 +55,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    const myId = UserStore.getCurrentUser().id;
+    const myId = UserStore.getCurrentUser()?.id;
 
     const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
