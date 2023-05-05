@@ -36,6 +36,12 @@ const settings = definePluginSettings({
             { label: "Nitro banner", value: true, default: true },
             { label: "USRBG banner", value: false },
         ]
+    },
+    voiceBackground: {
+        description: "Use USRBG banners as voice chat backgrounds",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -57,6 +63,16 @@ export default definePlugin({
                     replace: "$self.useBannerHook($1),"
                 }
             ]
+        },
+        {
+            find: "\"data-selenium-video-tile\":",
+            predicate: () => settings.store.voiceBackground,
+            replacement: [
+                {
+                    match: /(\i)\.style,/,
+                    replace: "$self.voiceBackgroundHook($1),"
+                }
+            ]
         }
     ],
 
@@ -64,6 +80,19 @@ export default definePlugin({
         return (
             <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
+    },
+
+    voiceBackgroundHook({ className, participantUserId }: any) {
+        if (className.includes("tile-")) {
+            if (data[participantUserId]) {
+                return {
+                    backgroundImage: `url(${data[participantUserId]})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat"
+                };
+            }
+        }
     },
 
     useBannerHook({ displayProfile, user }: any) {
