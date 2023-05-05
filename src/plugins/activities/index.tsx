@@ -17,17 +17,20 @@
 */
 
 import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Text, Tooltip } from "@webpack/common";
+import { findByCode, findStoreLazy } from "@webpack";
+import { React, Tooltip, useStateFromStores } from "@webpack/common";
+import { Guild, User } from "discord-types/general";
 
-import { ActivityIcon, ControllerIcon, HeadsetIcon, PlaystationIcon, RichActivityIcon, XboxIcon } from "./icons";
+import { ActivityIcon, Caret, ControllerIcon, HeadsetIcon, PlaystationIcon, RichActivityIcon, XboxIcon } from "./icons";
 import { Activity, ActivityProps, ActivityType } from "./types";
-import { useStore } from "./utils";
 
 const PresenceStore = findStoreLazy("PresenceStore");
 const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?):null/;
-const self = "Vencord.Plugins.plugins.Activities";
+const ActivityView = LazyComponent(() => findByCode("onOpenGameProfile:"));
+
+import "./style.css";
 
 export default definePlugin({
     name: "Activities",
@@ -39,21 +42,110 @@ export default definePlugin({
             find: "().textRuler,",
             replacement: {
                 match: regex,
-                replace: (m, activities, icon) => m.replace(icon, `${self}.ActivitiesComponent({...${activities}})`)
+                replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent({...${activities}})`)
             }
-        }, {
-            find: 'getTypeClass("activity")',
+        },
+        {
+            find: "().customStatusSection",
             replacement: {
-                match: /(return\(0,\w\.jsxs?\))\("div",{className:\w\(\)\(this\.getTypeClass\("activity"\).*?;/,
-                replace: (_, head) => `${head}($self.ShowAllActivitiesComponent,{This:this})};`
+                match: /\(0,\w\.jsx\)\((\w\.Z),{activity:\w,user:\w,guild:\w,channelId:\w,onClose:\w}\)/,
+                replace: (m, comp) => m.replace(comp, "$self.ShowAllActivitiesComponent")
             }
         }
     ],
 
-    ShowAllActivitiesComponent({ This }) {
-        const activities = useStore<Activity[]>("PresenceStore", store => store.getActivities(This.props.user.id));
+    /*
+        Stolen from <https://betterdiscord.app/plugin/ShowAllActivities>
+    */
+    ShowAllActivitiesComponent({ activity, user, guild, channelId, onClose }:
+        { activity: Activity; user: User, guild: Guild, channelId: string, onClose: () => void; }
+    ) {
+        const [currentActivity, setCurrentActivity] = React.useState<Activity | null>(
+            activity?.type !== ActivityType.CustomStatus
+                ? activity!
+                : null
+        );
 
-        return <Text>{activities?.map(a => a.name)?.join(", ")}</Text>;
+        const activities = useStateFromStores<Activity[]>([PresenceStore],
+            () => PresenceStore.getActivities(user.id)
+                .filter((a: Activity) => a.type !== ActivityType.CustomStatus)
+        ) ?? [];
+
+        React.useEffect(() => {
+            if (!activities.length) {
+                setCurrentActivity(null);
+                return;
+            }
+
+            if (!currentActivity || !activities.includes(currentActivity))
+                setCurrentActivity(activities[0]);
+        }, [activities]);
+
+        if (!activities.length) return null;
+
+        return (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+                <ActivityView
+                    activity={currentActivity}
+                    user={user}
+                    guild={guild}
+                    channelId={channelId}
+                    onClose={onClose}
+                />
+                <div
+                    className="vc-activities-controls"
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Tooltip text="Left" tooltipClassName="vc-activities-controls-tooltip">{({ onMouseEnter, onMouseLeave }) => {
+                        return <span
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => {
+                                const idx = activities.indexOf(currentActivity!);
+                                if (idx - 1 >= 0)
+                                    setCurrentActivity(activities[idx - 1]);
+                            }}
+                        >
+                            <Caret
+                                disabled={activities.indexOf(currentActivity!) < 1}
+                                direction="left"
+                            />
+                        </span>;
+                    }}</Tooltip>
+
+                    <div className="carousell">
+                        {activities.map((act, i) => (
+                            <div
+                                key={"dot--" + i}
+                                onClick={() => setCurrentActivity(act)}
+                                className={`dot ${currentActivity === act ? "selected" : ""}`}
+                            />
+                        ))}
+                    </div>
+
+                    <Tooltip text="Right" tooltipClassName="vc-activities-controls-tooltip">{({ onMouseEnter, onMouseLeave }) => {
+                        return <span
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => {
+                                const idx = activities.indexOf(currentActivity!);
+                                if (idx + 1 < activities.length)
+                                    setCurrentActivity(activities[idx + 1]);
+                            }}
+                        >
+                            <Caret
+                                disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
+                                direction="right"
+                            />
+                        </span>;
+                    }}</Tooltip>
+                </div>
+            </div>
+        );
     },
 
     ActivitiesComponent(props: ActivityProps) {
@@ -67,7 +159,7 @@ export default definePlugin({
                     showRichActivityTooltip = false;
 
                     const isXbox = activity.platform === "xbox";
-                    const isPlaystation = ["ps4", "ps5"].includes(activity.platform!);
+                    const isPlaystation = /ps\d/.test(activity.platform ?? "");
 
                     let icon: React.ReactNode = <ControllerIcon width={14} height={14} />;
 
