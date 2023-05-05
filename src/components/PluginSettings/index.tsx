@@ -33,6 +33,7 @@ import Logger from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, LazyComponent, useAwaiter } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
+import { onlyOnce } from "@utils/onlyOnce";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
@@ -341,7 +342,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     );
 }, {
     message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
-    onError: handleComponentFailed,
+    onError: onlyOnce(handleComponentFailed),
 });
 
 function makeDependencyList(deps: string[]) {
