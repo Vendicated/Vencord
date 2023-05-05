@@ -28,7 +28,7 @@ export default definePlugin({
 
     start() {
         this.clickListener = addClickListener((msg, _, event) => {
-            const match = msg.content.match(/^https?:\/\/open\.spotify\.com\/(track|album)\/([a-zA-Z0-9]+)$/);
+            const match = msg.content.match(/^https?:\/\/open\.spotify\.com\/(track|album)\/([a-zA-Z0-9]+)(\?.*)?$/);
             if (!match) return;
 
             VencordNative.native.openExternal(`spotify://${match[1]}/${match[2]}`);
