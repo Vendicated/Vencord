@@ -1,6 +1,6 @@
-/*!
+/*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./ChangeList";
-export * as Constants from "./constants";
-export * from "./debounce";
-export * as Discord from "./discord";
-export { default as Logger } from "./Logger";
-export * from "./margins";
-export * from "./misc";
-export * as Modals from "./modal";
-export * from "./onceDefined";
-export * from "./onlyOnce";
-export * from "./proxyLazy";
-export * from "./Queue";
-export * from "./text";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+export default definePlugin({
+    name: "ShowAllMessageButtons",
+    description: "Always show all message buttons no matter if you are holding the shift key or not.",
+    authors: [Devs.Nuckyz],
+
+    patches: [
+        {
+            find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
+            replacement: {
+                // isExpanded: V, (?<=,V = shiftKeyDown && !H...;)
+                match: /isExpanded:(\i),(?<=,\1=\i&&(!.+);.+?)/,
+                replace: "isExpanded:$2,"
+            }
+        }
+    ]
+});
