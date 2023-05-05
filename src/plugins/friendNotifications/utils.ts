@@ -83,7 +83,7 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
         // Skip non-friends
         const prevStatus = tracked.get(id);
         // Equals explicitly undefined (only true of key isn't defined)
-        if (prevStatus === undefined) continue;
+        if (prevStatus === undefined || prevStatus === status) continue;
 
         // Set new status
         tracked.set(id, status);
@@ -122,12 +122,11 @@ export async function notify(text: string, user: User) {
     // Set to the default action in case
     const action = settings.store.notificationAction || "open";
     const dmChannelId = ChannelStore.getDMFromUserId(user.id);
-    const avatarURL = user.getAvatarURL();
 
     await showNotification({
         title: plugin.name,
         body: text,
-        icon: avatarURL,
+        icon: getAvatarURL(user),
         dismissOnClick: action === "dismiss",
         onClick: () => {
             if (action === "open") {
@@ -150,4 +149,8 @@ export async function writeTrackedToDataStore() {
     const keys = Array.from(tracked.keys());
     const set = new Set(keys);
     await DataStore.set(trackingKey(), set);
+}
+
+function getAvatarURL(user: User) {
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=80`;
 }
