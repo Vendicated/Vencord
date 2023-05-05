@@ -153,7 +153,7 @@ function TextReplace({ title, rulesArray, rulesKey }: TextReplaceProps) {
                                     <Input
                                         placeholder="Replace"
                                         initialValue={rule.replace}
-                                        onChange={e => onChange(e, index, "replace")}
+                                        onChange={e => onChange(e.replaceAll("\\n", "\n"), index, "replace")}
                                     />
                                     <Input
                                         placeholder="Only if includes"
