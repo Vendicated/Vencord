@@ -22,6 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { isMobile } from "@utils/misc";
+import { onlyOnce } from "@utils/onlyOnce";
 import { Forms, SettingsRouter, TabBar, Text } from "@webpack/common";
 
 import BackupRestoreTab from "./BackupRestoreTab";
@@ -86,8 +87,10 @@ function Settings(props: SettingsProps) {
     </Forms.FormSection >;
 }
 
+const onError = onlyOnce(handleComponentFailed);
+
 export default function (props: SettingsProps) {
-    return <ErrorBoundary onError={handleComponentFailed}>
+    return <ErrorBoundary onError={onError}>
         <Settings tab={props.tab} />
     </ErrorBoundary>;
 }
