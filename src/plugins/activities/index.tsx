@@ -18,8 +18,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Tooltip } from "@webpack/common";
 
-import { ActivityProps } from "./types";
+import { ActivityIcon, ControllerIcon, HeadsetIcon, PlaystationIcon, RichActivityIcon, XboxIcon } from "./icons";
+import { ActivityProps, ActivityType } from "./types";
 
 
 const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?):null/;
@@ -35,18 +37,70 @@ export default definePlugin({
             find: "().textRuler,",
             replacement: {
                 match: regex,
-                replace: (m, activities, icon) => m.replace(icon, `${self}.ActivitiesComponent(${activities})`)
+                replace: (m, activities, icon) => m.replace(icon, `${self}.ActivitiesComponent({...${activities}})`)
             }
         }
     ],
 
     ActivitiesComponent(props: ActivityProps) {
-        console.log("ayo?", props);
-        const icons = [];
+        if (!props.activities.length) return null;
+        let showRichActivityTooltip = true;
+
+        const icons = props.activities.map(activity => {
+            switch (activity.type) {
+                case ActivityType.Competing:
+                case ActivityType.Playing: {
+                    showRichActivityTooltip = false;
+
+                    const isXbox = activity.platform === "xbox";
+                    const isPlaystation = ["ps4", "ps5"].includes(activity.platform!);
+
+                    let icon: React.ReactNode = <ControllerIcon width={14} height={14} />;
+
+                    if (isXbox) icon = <XboxIcon width={14} height={14} />;
+                    if (isPlaystation) icon = <PlaystationIcon width={14} height={14} />;
+
+                    return (
+                        <Tooltip text={`Playing “${activity.name}”`}>{
+                            ({ onMouseEnter, onMouseLeave }) => {
+                                return <span
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                >
+                                    {icon}
+                                </span>;
+                            }
+                        }</Tooltip>
+                    );
+                }
+
+                case ActivityType.Listening: {
+                    showRichActivityTooltip = false;
+                    return <Tooltip text={`Listening to “${activity.details}” by “${activity.state?.replace(/;/g, ",")}”`}>
+                        {({ onMouseEnter, onMouseLeave }) => {
+                            return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                <HeadsetIcon width={14} height={14} />
+                            </span>;
+                        }}
+                    </Tooltip>;
+                }
+            }
+        }).filter(Boolean);
+
+        const richDetails = props.activities.find(activity => (activity.assets || activity.details) && !activity.platform);
+        const activityIcon = richDetails ?
+            <RichActivityIcon width={16} height={16} />
+            : <ActivityIcon width={16} height={16} />;
+
+        icons.splice(0, 0, <Tooltip text={richDetails?.name} shouldShow={!!richDetails?.name?.trim() && showRichActivityTooltip}>
+            {({ onMouseEnter, onMouseLeave }) => {
+                return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{activityIcon}</span>;
+            }}
+        </Tooltip>);
 
         return (
-            <span>
-                Ω
+            <span style={{ display: "flex", alignItems: "center" }}>
+                {icons}
             </span>
         );
     },
