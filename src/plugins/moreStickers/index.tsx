@@ -171,6 +171,7 @@ export default definePlugin({
                     setSelectedStickerPackId={setSelectedStickerPackId}
                     channelId={channel.id}
                     closePopout={closePopout}
+                    query={query}
                 />
                 <PickerSidebar
                     packMetas={

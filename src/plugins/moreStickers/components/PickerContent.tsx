@@ -30,6 +30,7 @@ export interface PickerContent {
     setSelectedStickerPackId: React.Dispatch<React.SetStateAction<string | null>>;
     channelId: string;
     closePopout: () => void;
+    query?: string;
 }
 
 export interface PickerContentHeader {
@@ -225,7 +226,7 @@ export function PickerContentHeader({
     );
 }
 
-export function PickerContent({ stickerPacks, selectedStickerPackId, setSelectedStickerPackId, channelId, closePopout }: PickerContent) {
+export function PickerContent({ stickerPacks, selectedStickerPackId, setSelectedStickerPackId, channelId, closePopout, query }: PickerContent) {
     const [currentSticker, setCurrentSticker] = (
         React.useState<Sticker | null>((
             stickerPacks.length && stickerPacks[0].stickers.length) ?
@@ -239,6 +240,11 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
 
     const stickerPacksElemRef = React.useRef<HTMLDivElement>(null);
     const scrollerRef = React.useRef<HTMLDivElement>(null);
+
+    function queryFilter(stickers: Sticker[]): Sticker[] {
+        if (!query) return stickers;
+        return stickers.filter(sticker => sticker.title.toLowerCase().includes(query.toLowerCase()));
+    }
 
     async function fetchRecentStickers() {
         const recentStickers = await getRecentStickers();
@@ -318,12 +324,14 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                                 afterScroll={() => { setSelectedStickerPackId(null); }}
                             >
                                 {
-                                    ...stickersToRows(recentStickers)
+                                    ...stickersToRows(
+                                        queryFilter(recentStickers)
+                                    )
                                 }
                             </PickerContentHeader>
                             {
                                 stickerPacks.map(sp => {
-                                    const rows = stickersToRows(sp.stickers);
+                                    const rows = stickersToRows(queryFilter(sp.stickers));
                                     return (
                                         <PickerContentHeader
                                             image={sp.logo.image}
