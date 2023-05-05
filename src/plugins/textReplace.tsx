@@ -159,7 +159,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
                                     <Input
                                         placeholder="Replace"
                                         initialValue={rule.replace}
-                                        onChange={e => onChange(e.replaceAll("\\n", "\n"), index, "replace")}
+                                        onChange={e => onChange(e, index, "replace")}
                                     />
                                     <Input
                                         placeholder="Only if includes"
@@ -220,7 +220,7 @@ function applyRules(content: string): string {
             if (!rule.find || !rule.replace) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            content = content.replaceAll(rule.find, rule.replace);
+            content = content.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n"));
         }
     }
 
@@ -231,7 +231,7 @@ function applyRules(content: string): string {
 
             try {
                 const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace);
+                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
             } catch (e) {
                 new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
             }
