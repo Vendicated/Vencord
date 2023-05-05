@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";

@@ -17,10 +17,10 @@
 */
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildStore, PresenceStore, RelationshipStore } from "@webpack/common";
 

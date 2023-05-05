@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default class Logger {
+export class Logger {
     /**
      * Returns the console format args for a title with the specified background colour and black text
      * @param color Background colour

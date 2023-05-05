@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import { proxyLazy } from "@utils/proxyLazy";
+import { Settings } from "@api/Settings";
+import { proxyLazy } from "@utils/lazy";
 import { findByPropsLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 

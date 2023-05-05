@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/proxyLazy.js";
+import { proxyLazy } from "@utils/lazy.js";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";

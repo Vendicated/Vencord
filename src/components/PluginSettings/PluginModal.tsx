@@ -17,13 +17,14 @@
 */
 
 import { generateId } from "@api/Commands";
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { proxyLazy } from "@utils/proxyLazy";
+import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";

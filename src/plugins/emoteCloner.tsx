@@ -19,7 +19,7 @@
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";

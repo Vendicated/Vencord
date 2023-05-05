@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import Logger from "@utils/Logger";
+import { Settings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";

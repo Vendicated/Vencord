@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
 import { Card, Forms, React, TextArea } from "@webpack/common";
 

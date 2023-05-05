@@ -17,7 +17,7 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";

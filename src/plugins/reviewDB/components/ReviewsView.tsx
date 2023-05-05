@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import { classes, useAwaiter } from "@utils/misc";
+import { Settings } from "@api/Settings";
+import { classes } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
 import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";

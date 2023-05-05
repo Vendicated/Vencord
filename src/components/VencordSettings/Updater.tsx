@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
+import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 

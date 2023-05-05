@@ -17,10 +17,10 @@
 */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findByCode, findByPropsLazy } from "@webpack";
 import { GuildMemberStore, Menu } from "@webpack/common";

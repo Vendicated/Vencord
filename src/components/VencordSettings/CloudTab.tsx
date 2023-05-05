@@ -17,7 +17,7 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { Settings, useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";

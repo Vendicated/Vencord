@@ -17,11 +17,11 @@
 */
 
 import { addContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import PatchHelper from "@components/PatchHelper";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
-import { LazyComponent } from "@utils/misc";
+import { Logger } from "@utils/Logger";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
