@@ -51,7 +51,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Activities",
-    description: "TODO!()",
+    description: "A combination of the ActivityIcons and ShowAllActivities BD plugins.",
     authors: [Devs.Arjix],
     settings,
 
