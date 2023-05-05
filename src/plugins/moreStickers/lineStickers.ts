@@ -19,7 +19,6 @@
 import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
 import { corsFetch } from "./utils";
 
-
 export interface StickerCategory {
     title: string;
     id: number;
@@ -29,7 +28,6 @@ export interface StickerCategory {
         img: string;
     }[];
 }
-
 
 const stickerPacksResource = "https://arjix.is-a.dev/line-stickers/";
 export const GetStickerPacksForLINE = async () => {

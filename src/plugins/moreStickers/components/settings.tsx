@@ -22,11 +22,12 @@ import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/c
 
 import { convert as convertLineSP, getIdFromUrl as getLineIdFromUrl, getStickerPackById, parseHtml as getLineSPFromHtml } from "../lineStickers";
 import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
-import { StickerPackMeta } from "../types";
+import { StickerPackMeta, StickerPack } from "../types";
 
 enum SettingsTabsKey {
-    ADD_STICKER = "Add Sticker",
-    ADD_STICKER_HTML = "Add Sticker from HTML",
+    ADD_STICKER_PACK_URL = "Add from URL",
+    ADD_STICKER_PACK_HTML = "Add from HTML",
+    ADD_STICKER_PACK_FILE = "Add from File",
 }
 
 const noDrag = {
@@ -95,7 +96,7 @@ export const Settings = () => {
     const [stickerPackMetas, setstickerPackMetas] = React.useState<StickerPackMeta[]>([]);
     const [addStickerUrl, setAddStickerUrl] = React.useState<string>("");
     const [addStickerHtml, setAddStickerHtml] = React.useState<string>("");
-    const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER);
+    const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER_PACK_URL);
     const [hoveredStickerPackId, setHoveredStickerPackId] = React.useState<string | null>(null);
 
     async function refreshStickerPackMetas() {
@@ -123,9 +124,9 @@ export const Settings = () => {
                 }
             </TabBar>
 
-            {tab === SettingsTabsKey.ADD_STICKER &&
+            {tab === SettingsTabsKey.ADD_STICKER_PACK_URL &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Add Sticker</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">Add Sticker Pack from URL</Forms.FormTitle>
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
                         justifyContent: "center"
@@ -144,8 +145,7 @@ export const Settings = () => {
                                     }
 
                                     return true;
-                                }
-                                }
+                                }}
                                 placeholder="Sticker Pack URL"
                             />
                         </span>
@@ -182,10 +182,11 @@ export const Settings = () => {
                             }}
                         >Insert</Button>
                     </Flex>
-                </div>}
-            {tab === SettingsTabsKey.ADD_STICKER_HTML &&
+                </div>
+            }
+            {tab === SettingsTabsKey.ADD_STICKER_PACK_HTML &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Add Sticker from HTML</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">Add Sticker Pack from HTML</Forms.FormTitle>
                     <Forms.FormText>
                         <p>
                             When encountering errors while adding a sticker pack, you can try to add it using the HTML source code of the sticker pack page.<br />
@@ -239,8 +240,64 @@ export const Settings = () => {
                             }}
                         >Insert from HTML</Button>
                     </Flex>
-                </div>}
+                </div>
+            }
+            {
+                tab === SettingsTabsKey.ADD_STICKER_PACK_FILE &&
+                <div className="section">
+                    <Forms.FormTitle tag="h5">Add Sticker Pack from File</Forms.FormTitle>
 
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        onClick={async e => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = ".stickerpack,.stickerpacks,.json";
+                            input.onchange = async e => {
+                                try {
+                                    const file = input.files?.[0];
+                                    if (!file) return;
+
+                                    const fileText = await file.text();
+                                    const fileJson = JSON.parse(fileText);
+                                    let stickerPacks: StickerPack[] = [];
+                                    if (Array.isArray(fileJson)) {
+                                        stickerPacks = fileJson;
+                                    } else {
+                                        stickerPacks = [fileJson];
+                                    }
+
+                                    for (const stickerPack of stickerPacks) {
+                                        await saveStickerPack(stickerPack);
+                                    }
+
+                                    Toasts.show({
+                                        message: "Sticker Packs added",
+                                        type: Toasts.Type.SUCCESS,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                } catch (e: any) {
+                                    console.error(e);
+                                    Toasts.show({
+                                        message: e.message,
+                                        type: Toasts.Type.FAILURE,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                }
+                            };
+                            input.click();
+                        }}
+                    >
+                        Open Sticker Pack File
+                    </Button>
+                </div>
+            }
             <Forms.FormDivider style={{
                 marginTop: "8px",
                 marginBottom: "8px"

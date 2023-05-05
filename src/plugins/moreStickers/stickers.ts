@@ -18,6 +18,8 @@
 
 import * as DataStore from "@api/DataStore";
 
+import { removeRecentStickerByPackId } from "./components/recent";
+
 import { StickerPack, StickerPackMeta } from "./types";
 import { Mutex } from "./utils";
 const mutex = new Mutex();
@@ -103,6 +105,7 @@ export async function getStickerPackMeta(id: string): Promise<StickerPackMeta | 
 export async function deleteStickerPack(id: string): Promise<void> {
     await Promise.all([
         DataStore.del(id),
+        removeRecentStickerByPackId(id),
         (async () => {
             const unlock = await mutex.lock();
 

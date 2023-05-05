@@ -17,8 +17,10 @@
 */
 
 import * as DataStore from "@api/DataStore";
-
+import { Mutex } from "../utils";
 import { Sticker } from "../types";
+
+const mutex = new Mutex();
 
 // The ID of recent sticker and recent sticker pack
 export const RECENT_STICKERS_ID = "recent";
@@ -31,7 +33,12 @@ export async function getRecentStickers(): Promise<Sticker[]> {
 }
 
 export async function setRecentStickers(stickers: Sticker[]): Promise<void> {
-    await DataStore.set(KEY, stickers);
+    const unlock = await mutex.lock();
+    try {
+        await DataStore.set(KEY, stickers);
+    } finally {
+        unlock();
+    }
 }
 
 export async function addRecentSticker(sticker: Sticker): Promise<void> {
@@ -45,4 +52,9 @@ export async function addRecentSticker(sticker: Sticker): Promise<void> {
         stickers.pop();
     }
     await setRecentStickers(stickers);
+}
+
+export async function removeRecentStickerByPackId(packId: string): Promise<void> {
+    const stickers = await getRecentStickers();
+    await setRecentStickers(stickers.filter(s => s.stickerPackId !== packId));
 }
