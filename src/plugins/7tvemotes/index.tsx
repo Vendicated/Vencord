@@ -265,7 +265,7 @@ export default definePlugin({
                         <div className="seventv-searchbutton" style={{
                             boxSizing: "border-box"
                         }} onClick={() => {
-                            if (searching === false) {
+                            if (!searching) {
                                 page = 1;
                                 FetchEmotes(value, handleRefresh);
                             }
@@ -308,7 +308,7 @@ export default definePlugin({
                         <Button className="seventv-pagebutton"
                             look={Button.Looks.BLANK}
                             onClick={() => {
-                                if (searching === false) {
+                                if (!searching) {
                                     page--;
                                     FetchEmotes(value, handleRefresh);
                                 }
@@ -322,7 +322,7 @@ export default definePlugin({
                         <Button className="seventv-pagebutton"
                             look={Button.Looks.BLANK}
                             onClick={() => {
-                                if (searching === false) {
+                                if (!searching) {
                                     page++;
                                     FetchEmotes(value, handleRefresh);
                                 }
