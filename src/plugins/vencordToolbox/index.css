@@ -1,15 +1,8 @@
-.vc-toolbox {
-    display: block;
-    width: 24px;
-    height: 24px;
-    -webkit-app-region: no-drag;
-    color: var(--channel-icon);
-}
-
-[class|="selected"] .vc-toolbox {
-    color: var(--interactive-active);
-}
-
-[class|="clickable"] .vc-toolbox {
+.vc-toolbox-btn svg {
     color: var(--interactive-normal);
+}
+
+.vc-toolbox-btn svg:hover,
+.vc-toolbox-btn[class*="selected"] svg {
+    color: var(--interactive-active);
 }
