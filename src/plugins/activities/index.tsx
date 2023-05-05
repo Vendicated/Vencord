@@ -18,7 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findStoreLazy } from "@webpack";
 import { React, Tooltip, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
@@ -32,10 +32,28 @@ const ActivityView = LazyComponent(() => findByCode("onOpenGameProfile:"));
 
 import "./style.css";
 
+import { definePluginSettings } from "@api/settings";
+
+const settings = definePluginSettings({
+    moreActivityIcons: {
+        type: OptionType.BOOLEAN,
+        restartNeeded: true,
+        default: true,
+        description: "Enable/Disable the extra activity icons (e.g. the controller icon for games).",
+    },
+    showAllActivities: {
+        type: OptionType.BOOLEAN,
+        restartNeeded: true,
+        default: true,
+        description: "Enable/Disable the activities carousel in the user profile."
+    },
+});
+
 export default definePlugin({
     name: "Activities",
     description: "TODO!()",
     authors: [Devs.Arjix],
+    settings,
 
     patches: [
         {
@@ -43,14 +61,16 @@ export default definePlugin({
             replacement: {
                 match: regex,
                 replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent({...${activities}})`)
-            }
+            },
+            predicate: () => settings.store.moreActivityIcons
         },
         {
             find: "().customStatusSection",
             replacement: {
                 match: /\(0,\w\.jsx\)\((\w\.Z),{activity:\w,user:\w,guild:\w,channelId:\w,onClose:\w}\)/,
                 replace: (m, comp) => m.replace(comp, "$self.ShowAllActivitiesComponent")
-            }
+            },
+            predicate: () => settings.store.showAllActivities
         }
     ],
 
