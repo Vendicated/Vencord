@@ -33,7 +33,7 @@ import plugin from "./index";
 import settings from "./settings";
 import type { FriendNotificationStore, Platform, Status } from "./types";
 
-export const tracked = new Map<string, Status | null>();
+export const tracked = new Map<string, Status>();
 export const friends = new Set<string>();
 export const trackingKey = () => `friend-notifications-tracking-${UserStore.getCurrentUser().id}`;
 const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
@@ -105,28 +105,30 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
             settings.store.offlineNotifications &&
             status === "offline"
         ) {
-            notify(`${username} went offline`, user);
+            await notify(`${username} went offline`, user);
         } else if (
             settings.store.onlineNotifications &&
             ((prevStatus === null || prevStatus === "offline") &&
                 ["online", "dnd", "idle"].includes(status))
         ) {
-            notify(`${username} came online`, user);
+            await notify(`${username} came online`, user);
         }
     }
 }
 
-export function notify(text: string, user: User) {
+export async function notify(text: string, user: User) {
     if (!settings.store.notifications) return;
-    const action = settings.store.notificationAction;
-    const { id } = user;
-    const dmChannelId = ChannelStore.getDMFromUserId(id);
-    const avatarURL = UserStore.getUser(id)?.getAvatarURL();
 
-    showNotification({
+    // Set to the default action in case
+    const action = settings.store.notificationAction || "open";
+    const dmChannelId = ChannelStore.getDMFromUserId(user.id);
+    const avatarURL = user.getAvatarURL();
+
+    await showNotification({
         title: plugin.name,
         body: text,
         icon: avatarURL,
+        dismissOnClick: action === "dismiss",
         onClick: () => {
             if (action === "open") {
                 if (!dmChannelId) return;
@@ -141,7 +143,7 @@ export function notify(text: string, user: User) {
                 });
             }
         }
-    }).then();
+    });
 }
 
 export async function writeTrackedToDataStore() {

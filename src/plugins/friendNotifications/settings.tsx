@@ -25,6 +25,8 @@ import { Button, UserStore } from "@webpack/common";
 import User from "discord-types/general/User";
 
 import { tracked, writeTrackedToDataStore } from "./utils";
+import { NotificationAction } from "./types";
+
 
 export default definePluginSettings({
     notifications: {
@@ -48,18 +50,23 @@ export default definePluginSettings({
         options: [
             {
                 label: "Open DM",
-                value: "open"
+                value: "open" as NotificationAction
             },
             {
                 label: "Open Profile",
-                value: "profile"
+                value: "profile" as NotificationAction
             },
             {
                 label: "Dismiss",
-                value: "dismiss"
-            }],
-        default: "open"
+                value: "dismiss" as NotificationAction
+            }
+        ],
+        default: "open" as NotificationAction
     },
+    // TODO hook into the settings field and fix
+    // UB of Save & Close saving this info to
+    // the settings.json file. This should be done
+    // so that all users can be stored to the cloud
     tracking: {
         type: OptionType.COMPONENT,
         description: "People that should be tracked",
@@ -82,12 +89,14 @@ export default definePluginSettings({
                 }, [] as User[]);
 
             if (users.length === 0) {
-                return <span className="friend-notifications-settings-info">
-                    You don't have anyone added to your friend notifications
-                </span>;
+                return <div>
+                    <span className="friend-notifications-settings-info">
+                        You don't have anyone added to your friend notifications
+                    </span>
+                </div>;
             }
 
-            return <div> {
+            return <div>{
                 users.map(user => {
                     return <div key={user.id} className="friend-notifications-settings">
                         <span className="friend-notifications-settings-username">

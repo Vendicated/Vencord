@@ -20,6 +20,7 @@ import { Channel, User } from "discord-types/general";
 
 export type Status = "online" | "idle" | "dnd" | "offline";
 export type Platform = "web" | "mobile" | "desktop";
+export type NotificationAction = "open" | "profile" | "dismiss";
 
 export type UserContextProps = {
     channel: Channel;
