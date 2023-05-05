@@ -138,7 +138,7 @@ const settings = definePluginSettings({
     limit: {
         type: OptionType.NUMBER,
         description: "How many emotes per page?",
-        default: 20,
+        default: 42,
     },
     category: {
         type: OptionType.SELECT,
