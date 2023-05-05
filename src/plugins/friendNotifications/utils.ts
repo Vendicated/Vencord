@@ -25,7 +25,8 @@ import {
     PresenceStore,
     RelationshipStore,
     SelectedChannelStore,
-    UserStore
+    UserStore,
+    UserUtils
 } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -122,11 +123,12 @@ export async function notify(text: string, user: User) {
     // Set to the default action in case
     const action = settings.store.notificationAction || "open";
     const dmChannelId = ChannelStore.getDMFromUserId(user.id);
+    const avatarURL = UserStore.getUser(user.id).getAvatarURL();
 
     await showNotification({
         title: plugin.name,
         body: text,
-        icon: getAvatarURL(user),
+        icon: avatarURL,
         dismissOnClick: action === "dismiss",
         onClick: () => {
             if (action === "open") {
@@ -149,8 +151,4 @@ export async function writeTrackedToDataStore() {
     const keys = Array.from(tracked.keys());
     const set = new Set(keys);
     await DataStore.set(trackingKey(), set);
-}
-
-function getAvatarURL(user: User) {
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=80`;
 }
