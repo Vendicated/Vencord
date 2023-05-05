@@ -18,12 +18,14 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Tooltip } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { Text, Tooltip } from "@webpack/common";
 
 import { ActivityIcon, ControllerIcon, HeadsetIcon, PlaystationIcon, RichActivityIcon, XboxIcon } from "./icons";
-import { ActivityProps, ActivityType } from "./types";
+import { Activity, ActivityProps, ActivityType } from "./types";
+import { useStore } from "./utils";
 
-
+const PresenceStore = findStoreLazy("PresenceStore");
 const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?):null/;
 const self = "Vencord.Plugins.plugins.Activities";
 
@@ -39,8 +41,20 @@ export default definePlugin({
                 match: regex,
                 replace: (m, activities, icon) => m.replace(icon, `${self}.ActivitiesComponent({...${activities}})`)
             }
+        }, {
+            find: 'getTypeClass("activity")',
+            replacement: {
+                match: /(return\(0,\w\.jsxs?\))\("div",{className:\w\(\)\(this\.getTypeClass\("activity"\).*?;/,
+                replace: (_, head) => `${head}($self.ShowAllActivitiesComponent,{This:this})};`
+            }
         }
     ],
+
+    ShowAllActivitiesComponent({ This }) {
+        const activities = useStore<Activity[]>("PresenceStore", store => store.getActivities(This.props.user.id));
+
+        return <Text>{activities?.map(a => a.name)?.join(", ")}</Text>;
+    },
 
     ActivitiesComponent(props: ActivityProps) {
         if (!props.activities.length) return null;
