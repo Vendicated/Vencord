@@ -36,6 +36,12 @@ const settings = definePluginSettings({
             { label: "Nitro banner", value: true, default: true },
             { label: "USRBG banner", value: false },
         ]
+    },
+    voiceBackground: {
+        description: "Use USRBG banners as voice chat backgrounds",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -46,11 +52,27 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".bannerSrc,",
-            replacement: {
-                match: /(\i)\.bannerSrc,/,
-                replace: "$self.useBannerHook($1),"
-            }
+            find: ".NITRO_BANNER,",
+            replacement: [
+                {
+                    match: /(\i)\.premiumType/,
+                    replace: "$self.premiumHook($1)||$&"
+                },
+                {
+                    match: /(\i)\.bannerSrc,/,
+                    replace: "$self.useBannerHook($1),"
+                }
+            ]
+        },
+        {
+            find: "\"data-selenium-video-tile\":",
+            predicate: () => settings.store.voiceBackground,
+            replacement: [
+                {
+                    match: /(\i)\.style,/,
+                    replace: "$self.voiceBackgroundHook($1),"
+                }
+            ]
         }
     ],
 
@@ -60,9 +82,26 @@ export default definePlugin({
         );
     },
 
+    voiceBackgroundHook({ className, participantUserId }: any) {
+        if (className.includes("tile-")) {
+            if (data[participantUserId]) {
+                return {
+                    backgroundImage: `url(${data[participantUserId]})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat"
+                };
+            }
+        }
+    },
+
     useBannerHook({ displayProfile, user }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
         if (data[user.id]) return data[user.id];
+    },
+
+    premiumHook({ userId }: any) {
+        if (data[userId]) return 2;
     },
 
     async start() {
