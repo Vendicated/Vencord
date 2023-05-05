@@ -52,7 +52,7 @@ function GetEmoteURL(emote: SevenTVEmote) {
     return "https:" + emote.host.url + "/" + settings.store.imagesize + "." + extension;
 }
 
-async function FetchEmotes(value) {
+async function FetchEmotes(value, handleRefresh) {
 
     const currentTime = Date.now();
     const timeSinceLastCall = currentTime - lastApiCall;
@@ -103,7 +103,7 @@ async function FetchEmotes(value) {
         .then(data => {
             emotes = data.data.emotes.items;
             searching = false;
-            self.SevenTVComponent(props);
+            handleRefresh();
         })
         .catch(error => { console.error("[7TVEmotes] " + error); searching = false; });
 }
@@ -239,6 +239,11 @@ export default definePlugin({
         closePopout: () => void;
     }) {
         const [value, setValue] = useState<string>();
+        const [count, setCount] = useState(0);
+
+        const handleRefresh = () => {
+            setCount(count + 1);
+        };
 
         props = { channel, closePopout };
 
@@ -254,22 +259,24 @@ export default definePlugin({
                             type="string"
                             value={value}
                             onChange={e => setValue(e)}
-                            placeholder="Emote name..."
+                            placeholder="Search 7TV Emotes"
                             spellCheck="false"
                             style={{
                                 colorScheme: getTheme() === Theme.Light ? "light" : "dark",
                             }}
                         />
-
-                        <Button className="seventv-searchbutton"
-                            onClick={() => {
-                                if (searching === false) {
-                                    page = 1;
-                                    FetchEmotes(value);
-                                    closePopout();
-                                }
-                            }}
-                        >Search</Button>
+                        <div className="seventv-searchbutton" style={{
+                            boxSizing: "border-box"
+                        }} onClick={() => {
+                            if (searching === false) {
+                                page = 1;
+                                FetchEmotes(value, handleRefresh);
+                            }
+                        }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="24px" height="24px">
+                                <path d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z" />
+                            </svg>
+                        </div>
                     </div>
 
                     <br></br>
@@ -305,7 +312,7 @@ export default definePlugin({
                             onClick={() => {
                                 if (searching === false) {
                                     page--;
-                                    FetchEmotes(value);
+                                    FetchEmotes(value, handleRefresh);
                                 }
                             }}
                         >{"<"}</Button>
@@ -313,7 +320,7 @@ export default definePlugin({
                             onClick={() => {
                                 if (searching === false) {
                                     page++;
-                                    FetchEmotes(value);
+                                    FetchEmotes(value, handleRefresh);
                                 }
                             }}
                         >{">"}</Button>
@@ -323,7 +330,7 @@ export default definePlugin({
                 <div className={cl("footer")}>
                     <Forms.FormText className="seventv-pagetext">Page {page}</Forms.FormText>
                 </div>
-            </div>
+            </div >
         );
     },
 
