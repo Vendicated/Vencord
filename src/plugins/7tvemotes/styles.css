@@ -1,13 +1,38 @@
+.vc-seventv-button {
+    padding-right: 7px;
+    padding-left: 3px;
+}
+
 .seventv-emotes {
     width: 100%;
+    max-width: 500px;
+    min-height: 310px;
+    max-height: 310px;
     text-align: center;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.seventv-emotes::-webkit-scrollbar {
+    width: 12px; /* set the width of the scrollbar */
+}
+
+.seventv-emotes::-webkit-scrollbar-thumb {
+    background-color: #1a1b1e; /* set the color of the scrollbar handle */
+    border-radius: 6px; /* round the corners of the handle */
+    border: 3px solid #2b2d31; /* add a border to the handle */
+}
+
+.seventv-emotes::-webkit-scrollbar-thumb:hover {
+    background-color: #7289da; /* set the color of the scrollbar handle on hover */
 }
 
 .seventv-emotebutton {
     display: inline-block;
     width: auto;
+    max-width: 250px;
     height: auto;
-    margin: 5px;
+    margin-top: 7px;
 }
 
 .seventv-navigation {
@@ -15,7 +40,8 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    margin: 0 auto;
+    width: 95%;
 }
 
 .seventv-searchinput {
@@ -23,8 +49,17 @@
     width: 90%;
 }
 
+.seventv-searchinput input {
+    height: 35px;
+}
+
 .seventv-searchbutton {
     display: inline-block;
+    padding-left: 7px;
+    width: "20px";
+    height: "20px";
+    position: "relative";
+    cursor: "pointer";
 }
 
 .seventv-pagebutton {
@@ -32,8 +67,5 @@
 }
 
 .seventv-pagetext {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    text-align: center;
 }
