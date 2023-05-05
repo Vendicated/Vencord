@@ -29,11 +29,12 @@ export enum BadgePosition {
 
 export interface ProfileBadge {
     /** The tooltip to show on hover. Required for image badges */
-    tooltip?: string;
+    description?: string;
     /** Custom component for the badge (tooltip not included) */
     component?: ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
     image?: string;
+    link?: string;
     /** Action to perform when you click the badge */
     onClick?(): void;
     /** Should the user display this badge? */
@@ -69,17 +70,19 @@ export function removeBadge(badge: ProfileBadge) {
  * Inject badges into the profile badges array.
  * You probably don't need to use this.
  */
-export function inject(badgeArray: ProfileBadge[], args: BadgeUserArgs) {
+export function _getBadges(args: BadgeUserArgs) {
+    const badges = [] as ProfileBadge[];
     for (const badge of Badges) {
         if (!badge.shouldShow || badge.shouldShow(args)) {
             badge.position === BadgePosition.START
-                ? badgeArray.unshift({ ...badge, ...args })
-                : badgeArray.push({ ...badge, ...args });
+                ? badges.unshift({ ...badge, ...args })
+                : badges.push({ ...badge, ...args });
         }
     }
-    (Plugins.BadgeAPI as any).addDonorBadge(badgeArray, args.user.id);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/apiBadges").default).getDonorBadges(args.user.id);
+    if (donorBadges) badges.unshift(...donorBadges);
 
-    return badgeArray;
+    return badges;
 }
 
 export interface BadgeUserArgs {

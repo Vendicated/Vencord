@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,18 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch],
+    name: "ShowAllMessageButtons",
+    description: "Always show all message buttons no matter if you are holding the shift key or not.",
+    authors: [Devs.Nuckyz],
+
     patches: [
         {
-            find: ",acceptInvite:function",
+            find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
             replacement: {
-                match: /(\w=null!==[^;]+)/,
-                replace: "$1;Vencord.Webpack.findByProps('updateGuildNotificationSettings').updateGuildNotificationSettings($1,{'muted':true,'suppress_everyone':true,'suppress_roles':true})"
+                // isExpanded: V, (?<=,V = shiftKeyDown && !H...;)
+                match: /isExpanded:(\i),(?<=,\1=\i&&(!.+);.+?)/,
+                replace: "isExpanded:$2,"
             }
         }
-    ],
+    ]
 });

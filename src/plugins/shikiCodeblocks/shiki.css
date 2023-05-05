@@ -44,6 +44,7 @@
 .shiki-btn {
     border-radius: 4px 4px 0 0;
     padding: 4px 8px;
+    user-select: none;
 }
 
 .shiki-btn ~ .shiki-btn {
@@ -60,10 +61,7 @@
     display: flex;
     position: absolute;
     justify-content: center;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
 }
 
 .shiki-preview {

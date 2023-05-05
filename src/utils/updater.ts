@@ -18,7 +18,6 @@
 
 import gitHash from "~git-hash";
 
-import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
 import { relaunch } from "./native";
 import { IpcRes } from "./types";
@@ -39,7 +38,7 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    changes = await Unwrap(VencordNative.updater.getUpdates());
     if (changes.some(c => c.hash === gitHash)) {
         isNewer = true;
         return (isOutdated = false);
@@ -50,37 +49,18 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE));
+    const res = await Unwrap(VencordNative.updater.update());
 
-    if (res)
+    if (res) {
         isOutdated = false;
+        if (!await Unwrap(VencordNative.updater.rebuild()))
+            throw new Error("The Build failed. Please try manually building the new update");
+    }
 
     return res;
 }
 
-export function getRepo() {
-    return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
-}
-
-type Hashes = Record<"patcher.js" | "main.js" | "preload.js" | "renderer.js" | "renderer.css", string>;
-
-/**
- * @returns true if hard restart is required
- */
-export async function rebuild() {
-    const oldHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
-
-    if (!await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.BUILD)))
-        throw new Error("The Build failed. Please try manually building the new update");
-
-    const newHashes = await Unwrap(VencordNative.ipc.invoke<IpcRes<Hashes>>(IpcEvents.GET_HASHES));
-
-    if (oldHashes["preload.js"] !== newHashes["preload.js"]) return true;
-    if (IS_DISCORD_DESKTOP && oldHashes["patcher.js"] !== newHashes["patcher.js"]) return true;
-    if (IS_VENCORD_DESKTOP && oldHashes["main.js"] !== newHashes["main.js"]) return true;
-
-    return false;
-}
+export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
     if (IS_WEB) return;
@@ -93,11 +73,7 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
             if (wantsUpdate) {
                 await update();
-                const needFullRestart = await rebuild();
-                if (needFullRestart)
-                    relaunch();
-                else
-                    location.reload();
+                relaunch();
             }
         }
     } catch (err) {

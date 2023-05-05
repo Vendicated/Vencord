@@ -20,13 +20,12 @@ export * from "./ChangeList";
 export * as Constants from "./constants";
 export * from "./debounce";
 export * as Discord from "./discord";
-export { default as IpcEvents } from "./IpcEvents";
 export { default as Logger } from "./Logger";
 export * from "./margins";
 export * from "./misc";
 export * as Modals from "./modal";
 export * from "./onceDefined";
+export * from "./onlyOnce";
 export * from "./proxyLazy";
 export * from "./Queue";
 export * from "./text";
-

@@ -20,9 +20,15 @@ import { Settings } from "@api/settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import { useAwaiter } from "@utils/misc";
+import { UserStore } from "@webpack/common";
 
-import { PronounsFormat } from ".";
+import { settings } from "./settings";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
+
+export const enum PronounsFormat {
+    Lowercase = "LOWERCASE",
+    Capitalized = "CAPITALIZED"
+}
 
 // A map of cached pronouns so the same request isn't sent twice
 const cache: Record<string, PronounCode> = {};
@@ -35,29 +41,44 @@ const bulkFetch = debounce(async () => {
     const pronouns = await bulkFetchPronouns(ids);
     for (const id of ids) {
         // Call all callbacks for the id
-        requestQueue[id].forEach(c => c(pronouns[id]));
+        requestQueue[id]?.forEach(c => c(pronouns[id]));
         delete requestQueue[id];
     }
 });
 
-export function awaitAndFormatPronouns(id: string): string | null {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(id), {
-        fallbackValue: null,
+export function useFormattedPronouns(id: string): string | null {
+    const [result] = useAwaiter(() => fetchPronouns(id), {
+        fallbackValue: getCachedPronouns(id),
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
 
-    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return the mappings
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result])
+    // If the result is present and not "unspecified", and there is a mapping for the code, then return the mappings
+    if (result && result !== "unspecified" && PronounMapping[result])
         return formatPronouns(result);
 
     return null;
+}
+
+export function useProfilePronouns(id: string) {
+    const pronouns = useFormattedPronouns(id);
+
+    if (!settings.store.showInProfile) return null;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
+
+    return pronouns;
+}
+
+
+// Gets the cached pronouns, if you're too impatient for a promise!
+export function getCachedPronouns(id: string): PronounCode | null {
+    return cache[id] ?? null;
 }
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
 export function fetchPronouns(id: string): Promise<PronounCode> {
     return new Promise(res => {
         // If cached, return the cached pronouns
-        if (id in cache) res(cache[id]);
+        if (id in cache) res(getCachedPronouns(id)!);
         // If there is already a request added, then just add this callback to it
         else if (id in requestQueue) requestQueue[id].push(res);
         // If not already added, then add it and call the debounced function to make sure the request gets executed
