@@ -217,7 +217,7 @@ export default definePlugin({
                     if (!rule.find || !rule.replace) continue;
                     if (rule.onlyIfIncludes && !msg.content.includes(rule.onlyIfIncludes)) continue;
 
-                    msg.content = msg.content.replaceAll(rule.find, rule.replace);
+                    msg.content = msg.content.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n"));
                 }
             }
 
@@ -228,7 +228,7 @@ export default definePlugin({
 
                     try {
                         const regex = stringToRegex(rule.find);
-                        msg.content = msg.content.replace(regex, rule.replace);
+                        msg.content = msg.content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
                     } catch (e) {
                         new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
                     }
