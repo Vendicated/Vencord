@@ -22,10 +22,13 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, Tooltip } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { Tooltip } from "@webpack/common";
 
 const counts = {} as Record<string, [number, number]>;
 let forceUpdate: () => void;
+
+const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore");
 
 function MemberCount() {
     const guildId = getCurrentChannel().guild_id;
@@ -37,7 +40,8 @@ function MemberCount() {
 
     let total = c[0].toLocaleString();
     if (total === "0" && c[1] > 0) {
-        total = "Loading...";
+        const approx = GuildMemberCountStore.getMemberCount(guildId);
+        total = approx ? approx.toLocaleString() : "Loading...";
     }
 
     const online = c[1].toLocaleString();
@@ -103,27 +107,21 @@ export default definePlugin({
         }
     }],
 
-    onGuildMemberListUpdate({ guildId, groups, memberCount, id }) {
-        // eeeeeh - sometimes it has really wrong counts??? like 10 times less than actual
-        // but if we only listen to everyone updates, sometimes we never get the count?
-        // this seems to work but isn't optional
-        if (id !== "everyone" && counts[guildId]) return;
+    flux: {
+        GUILD_MEMBER_LIST_UPDATE({ guildId, groups, memberCount, id }) {
+            // eeeeeh - sometimes it has really wrong counts??? like 10 times less than actual
+            // but if we only listen to everyone updates, sometimes we never get the count?
+            // this seems to work but isn't optional
+            if (id !== "everyone" && counts[guildId]) return;
 
-        let count = 0;
-        for (const group of groups) {
-            if (group.id !== "offline")
-                count += group.count;
+            let count = 0;
+            for (const group of groups) {
+                if (group.id !== "offline")
+                    count += group.count;
+            }
+            counts[guildId] = [memberCount, count];
+            forceUpdate?.();
         }
-        counts[guildId] = [memberCount, count];
-        forceUpdate?.();
-    },
-
-    start() {
-        FluxDispatcher.subscribe("GUILD_MEMBER_LIST_UPDATE", this.onGuildMemberListUpdate);
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("GUILD_MEMBER_LIST_UPDATE", this.onGuildMemberListUpdate);
     },
 
     render: () => (

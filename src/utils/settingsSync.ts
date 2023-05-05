@@ -22,8 +22,8 @@ import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
-import IpcEvents from "./IpcEvents";
 import Logger from "./Logger";
+import { saveFile } from "./web";
 
 export async function importSettings(data: string) {
     try {
@@ -34,15 +34,16 @@ export async function importSettings(data: string) {
     }
 
     if ("settings" in parsed && "quickCss" in parsed) {
-        await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(parsed.settings, null, 4));
-        await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, parsed.quickCss);
+        Object.assign(PlainSettings, parsed.settings);
+        await VencordNative.settings.set(JSON.stringify(parsed.settings, null, 4));
+        await VencordNative.quickCss.set(parsed.quickCss);
     } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
 export async function exportSettings() {
-    const settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS));
-    const quickCss = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+    const settings = JSON.parse(VencordNative.settings.get());
+    const quickCss = await VencordNative.quickCss.get();
     return JSON.stringify({ settings, quickCss }, null, 4);
 }
 
@@ -54,17 +55,7 @@ export async function downloadSettingsBackup() {
     if (IS_DISCORD_DESKTOP) {
         DiscordNative.fileManager.saveWithDialog(data, filename);
     } else {
-        const file = new File([data], filename, { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(file);
-        a.download = filename;
-
-        document.body.appendChild(a);
-        a.click();
-        setImmediate(() => {
-            URL.revokeObjectURL(a.href);
-            document.body.removeChild(a);
-        });
+        saveFile(new File([data], filename, { type: "application/json" }));
     }
 }
 
@@ -155,13 +146,14 @@ export async function putCloudSettings() {
 
         const { written } = await res.json();
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         showNotification({
             title: "Cloud Settings",
             body: "Synchronized your settings to the cloud!",
-            color: "var(--green-360)"
+            color: "var(--green-360)",
+            noPersist: true
         });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
@@ -189,7 +181,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "There are no settings in the cloud."
+                    body: "There are no settings in the cloud.",
+                    noPersist: true
                 });
             return false;
         }
@@ -199,7 +192,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "Your settings are up to date."
+                    body: "Your settings are up to date.",
+                    noPersist: true
                 });
             return false;
         }
@@ -222,7 +216,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             if (shouldNotify)
                 showNotification({
                     title: "Cloud Settings",
-                    body: "Your local settings are newer than the cloud ones."
+                    body: "Your local settings are newer than the cloud ones.",
+                    noPersist: true,
                 });
             return;
         }
@@ -234,7 +229,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         // sync with server timestamp instead of local one
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
@@ -242,7 +237,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch()
+                onClick: () => window.DiscordNative.app.relaunch(),
+                noPersist: true
             });
 
         return true;

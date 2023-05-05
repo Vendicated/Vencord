@@ -20,13 +20,14 @@ import { definePluginSettings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
+const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {
@@ -82,7 +83,14 @@ export default definePlugin({
         );
     },
 
-    patchPopout: ({ user }: UserProps) => <VoiceChannelField user={user} />,
+    patchPopout: ({ user }: UserProps) => {
+        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+        return (
+            <div className={isSelfUser ? `vc-uvs-popout-margin ${UserPopoutSectionCssClasses.lastSection}` : ""}>
+                <VoiceChannelField user={user} />
+            </div>
+        );
+    },
 
     patches: [
         {
@@ -96,9 +104,9 @@ export default definePlugin({
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                match: /,{user:\w{1,2}}\)(?!;case)/,
+                match: /\(\)\.body.+?displayProfile:\i}\),/,
                 // paste my fancy custom button below the username
-                replace: "$&,$self.patchModal(arguments[0])",
+                replace: "$&$self.patchModal(arguments[0]),",
             }
         }
     ],

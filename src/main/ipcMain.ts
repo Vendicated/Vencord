@@ -19,7 +19,7 @@
 import "./updater";
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
+import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
@@ -93,7 +93,7 @@ export function initIpc(mainWindow: BrowserWindow) {
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     const win = new BrowserWindow({
-        title: "QuickCss Editor",
+        title: "Vencord QuickCSS Editor",
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {

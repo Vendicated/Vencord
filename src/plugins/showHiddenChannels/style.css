@@ -85,7 +85,7 @@
 .shc-lock-screen-default-emoji-container > [class^="emojiContainer"] {
     background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 8px;
-    padding: 3px 4px;
+    padding: 5px 6px;
     margin-left: 5px;
 }
 
