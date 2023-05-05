@@ -33,6 +33,11 @@ const settings = definePluginSettings({
         onChange(newValue: boolean) {
             if (newValue === false) lastState = false;
         }
+    },
+    autoDisable: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically disable the state of the silent message after sending a message.",
+        default: true,
     }
 });
 
@@ -51,7 +56,7 @@ function SilentMessageToggle(chatBoxProps: {
     React.useEffect(() => {
         const listener: SendListener = (_, message) => {
             if (enabled) {
-                setEnabledValue(false);
+                if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
