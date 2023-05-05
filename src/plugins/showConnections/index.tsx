@@ -120,7 +120,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 
     return (
         <Tooltip
-            text={`${connection.name}${!connection.verified ? " (unverified)" : ""} (click to ${url ? "open" : "copy"})`}
+            text={`${connection.name}${!connection.verified ? " (unverified)" : ""}`}
             key={connection.id}
         >
             {tooltipProps =>
