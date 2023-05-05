@@ -25,6 +25,7 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes, useAwaiter } from "@utils/misc";
 import { relaunch } from "@utils/native";
+import { onlyOnce } from "@utils/onlyOnce";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
@@ -250,5 +251,5 @@ function Updater() {
 
 export default IS_WEB ? null : ErrorBoundary.wrap(Updater, {
     message: "Failed to render the Updater. If this persists, try using the installer to reinstall!",
-    onError: handleComponentFailed,
+    onError: onlyOnce(handleComponentFailed),
 });
