@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex.jsx";
 import { classes, LazyComponent, useForceUpdater } from "@utils/misc.jsx";
 import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
-    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, Menu, ReadStateStore, Text, TypingStore,
+    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu, ReadStateStore, Text, TypingStore,
     useDrag, useDrop, useEffect, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
@@ -118,7 +118,7 @@ function ChannelContextMenu(props: { tab: ChannelTabsProps, update: () => void; 
             <Menu.MenuItem
                 key="mark-as-read"
                 id="mark-as-read"
-                label="Mark as Read"
+                label={i18n.Messages.MARK_AS_READ}
                 disabled={!ReadStateStore.hasUnread(channel.id)}
                 action={() => ReadStateUtils.markAsRead(channel)}
             />
@@ -191,16 +191,16 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
                 <TypingIndicator isTyping={isTyping} />
             </>;
         else {
-            let name = "Unknown (" + channelId + ")";
+            let name = `${i18n.Messages.UNKNOWN_CHANNEL} (${channelId})`;
             switch (channelId) {
                 case "customize-community":
-                    name = "Channels & Roles";
+                    name = i18n.Messages.CHANNELS_AND_ROLES;
                     break;
                 case "channel-browser":
-                    name = "Browse Channels";
+                    name = i18n.Messages.GUILD_SIDEBAR_CHANNEL_BROWSER;
                     break;
                 case "@home":
-                    name = "Server Guide";
+                    name = i18n.Messages.SERVER_GUIDE;
                     break;
             }
             return <>
@@ -221,7 +221,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         } else { // Group DM
             return <>
                 <ChannelIcon channel={channel} />
-                <Text className={cl("channel-name-text")}>{channel?.name || "Group DM"}</Text>
+                <Text className={cl("channel-name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -231,12 +231,12 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     if (guildId === "@me" || guildId === undefined)
         return <>
             <FriendsIcon height={24} width={24} />
-            <Text className={cl("channel-name-text")}>Friends</Text>
+            <Text className={cl("channel-name-text")}>{i18n.Messages.FRIENDS}</Text>
         </>;
 
     return <>
         <QuestionIcon height={24} width={24} />
-        <Text className={cl("channel-name-text")}>Unknown</Text>
+        <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>
     </>;
 }
 function ChannelTab(props: ChannelTabsProps) {
