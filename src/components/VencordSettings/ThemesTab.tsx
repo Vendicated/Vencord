@@ -93,7 +93,7 @@ export default ErrorBoundary.wrap(function () {
             <Card className="vc-settings-card vc-text-selectable">
                 <Forms.FormTitle tag="h5">Paste links to .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
-                <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
+                <Forms.FormText><strong>Make sure to use the raw links or github.io links!</strong></Forms.FormText>
                 <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
                 <div style={{ marginBottom: ".5em" }}>
