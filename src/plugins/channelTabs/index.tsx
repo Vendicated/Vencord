@@ -40,7 +40,7 @@ const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, p
                 action={() => ChannelTabsUtils.createTab({
                     guildId: channel.guild_id,
                     channelId: channel.id
-                }, messageId ?? true)}
+                }, true, messageId)}
             />);
     };
 };
@@ -129,7 +129,7 @@ export default definePlugin({
             channelId: message.channel_id,
             guildId: ChannelStore.getChannel(message.channel_id)?.guild_id
         };
-        ChannelTabsUtils.createTab(tab, message.id);
+        ChannelTabsUtils.createTab(tab, true, message.id);
     },
 
     settingsAboutComponent: () => {

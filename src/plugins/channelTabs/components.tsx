@@ -27,11 +27,11 @@ import {
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { ChannelProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    isTabSelected, moveToTab, moveToTabRelative, saveChannels, shiftCurrentTab, openStartupTabs
+    isTabSelected, moveToTab, moveToTabRelative, saveTabs, openStartupTabs
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -105,10 +105,10 @@ function ChannelEmoji({ channel, emoji }: { channel: Channel, emoji: string | un
         <Emoji emojiName={emoji} className={cl("emoji")} />
     </div>;
 }
-function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, update: () => void; }) {
-    const { channelInfo, pos, update } = props;
-    const channel = ChannelStore.getChannel(channelInfo.channelId);
-    const { openChannels } = ChannelTabsUtils;
+function ChannelContextMenu(props: { tab: ChannelTabsProps, update: () => void; }) {
+    const { tab, update } = props;
+    const channel = ChannelStore.getChannel(tab.channelId);
+    const { openTabs } = ChannelTabsUtils;
     return <Menu.Menu
         navId="channeltabs-channel-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
@@ -123,19 +123,19 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
                 action={() => ReadStateUtils.markAsRead(channel)}
             />
         </Menu.MenuGroup>}
-        {openChannels.length !== 1 && <Menu.MenuGroup>
+        {openTabs.length !== 1 && <Menu.MenuGroup>
             <Menu.MenuItem
                 key="close-tab"
                 id="close-tab"
                 label="Close Tab"
-                action={() => { closeTab(pos); update(); }}
+                action={() => { closeTab(tab.id); update(); }}
             />
             <Menu.MenuItem
                 key="close-other-tabs"
                 id="close-other-tabs"
                 label="Close Other Tabs"
                 action={() => {
-                    closeOtherTabs(pos);
+                    closeOtherTabs(tab.id);
                     update();
                 }}
             />
@@ -143,9 +143,9 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
                 key="close-right-tabs"
                 id="close-right-tabs"
                 label="Close Tabs to the Right"
-                disabled={openChannels.length === (pos + 1)}
+                disabled={openTabs.indexOf(tab) === openTabs.length - 1}
                 action={() => {
-                    closeTabsToTheRight(pos);
+                    closeTabsToTheRight(tab.id);
                     update();
                 }}
             />
@@ -153,7 +153,7 @@ function ChannelContextMenu(props: { channelInfo: ChannelProps, pos: number, upd
     </Menu.Menu>;
 }
 
-function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Channel; }) {
+function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
     const { guildId, channel, channelId } = props;
     const guild = props.guild ?? GuildStore.getGuild(channel?.guild_id!);
     const userId = UserStore.getCurrentUser()?.id;
@@ -239,7 +239,7 @@ function ChannelTabContent(props: ChannelProps & { guild?: Guild, channel?: Chan
         <Text className={cl("channel-name-text")}>Unknown</Text>
     </>;
 }
-function ChannelTab(props: ChannelProps) {
+function ChannelTab(props: ChannelTabsProps) {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
@@ -260,10 +260,10 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
     const _update = useForceUpdater();
     function update() {
         _update();
-        saveChannels(props.userId);
+        saveTabs(props.userId);
     }
-    const { openChannels } = ChannelTabsUtils;
-    if (!openChannels.length) openStartupTabs(props, update);
+    const { openTabs } = ChannelTabsUtils;
+    if (!openTabs.length) openStartupTabs(props, update);
     function handleKeybinds(e: KeyboardEvent) {
         if (e.key === "Tab" && e.ctrlKey) {
             const direction = e.shiftKey ? -1 : 1;
@@ -282,10 +282,10 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
     }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);
-        FluxDispatcher.subscribe("CHANNEL_SELECT", saveChannels);
+        FluxDispatcher.subscribe("CHANNEL_SELECT", saveTabs);
         return () => {
             document.removeEventListener("keydown", handleKeybinds);
-            FluxDispatcher.unsubscribe("CHANNEL_SELECT", saveChannels);
+            FluxDispatcher.unsubscribe("CHANNEL_SELECT", saveTabs);
         };
     }, []);
 
@@ -302,25 +302,25 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
     handleChannelSwitch(props);
 
     return <div className={cl("container")} ref={drop}>
-        {openChannels.map((ch, i) => <div
-            className={classes(cl("tab"), isTabSelected(ch) ? cl("tab-selected") : null)}
+        {openTabs.map((ch, i) => <div
+            className={classes(cl("tab"), isTabSelected(ch.id) ? cl("tab-selected") : null)}
             key={i}
             onAuxClick={e => {
                 if (e.button === 1 /* middle click */) {
-                    closeTab(i);
+                    closeTab(ch.id);
                     update();
                 }
             }}
-            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu channelInfo={ch} pos={i} update={update} />)}
+            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu tab={ch} update={update} />)}
         >
             <button
                 className={classes(cl("button"), cl("channel-info"))}
-                onClick={() => { moveToTab(i); update(); }}
+                onClick={() => { moveToTab(ch.id); update(); }}
             >
                 <ChannelTab {...ch} />
             </button>
-            {openChannels.length > 1 && <button className={classes(cl("button"), cl("close-button"))} onClick={() => {
-                closeTab(i);
+            {openTabs.length > 1 && <button className={classes(cl("button"), cl("close-button"))} onClick={() => {
+                closeTab(ch.id);
                 update();
             }}>
                 <XIcon width={16} height={16} />
@@ -328,12 +328,12 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
         </div>)
         }
         <button onClick={() => {
-            createTab(props);
+            createTab(props, true);
             update();
         }} className={classes(cl("button"), cl("new-button"))}><PlusIcon /></button>
     </div >;
 }
-const PreviewTab = (props: ChannelProps) => {
+const PreviewTab = (props: ChannelTabsProps) => {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
@@ -345,8 +345,8 @@ export function ChannelTabsPreivew(p) {
     const id = UserStore.getCurrentUser()?.id;
     if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
 
-    const { setValue }: { setValue: (v: { [userId: string]: ChannelProps[]; }) => void; } = p;
-    const { tabSet }: { tabSet: { [userId: string]: ChannelProps[]; }; } = channelTabsSettings.use();
+    const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
+    const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = channelTabsSettings.use();
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
 
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
@@ -354,14 +354,14 @@ export function ChannelTabsPreivew(p) {
         <Forms.FormTitle>Startup tabs</Forms.FormTitle>
         <Flex flexDirection="row" style={{ gap: "2px" }}>
             {currentTabs.map(t => <>
-                <PreviewTab channelId={t.channelId} guildId={t.guildId} />
+                <PreviewTab {...t} />
             </>)}
         </Flex>
         <Flex flexDirection="row-reverse">
             <Button
                 onClick={() => {
-                    setCurrentTabs([...ChannelTabsUtils.openChannels]);
-                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openChannels] });
+                    setCurrentTabs([...ChannelTabsUtils.openTabs]);
+                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openTabs] });
                 }}
             >Set to currently open tabs</Button>
         </Flex>

@@ -18,6 +18,7 @@
 
 import { DataStore } from "@api/index.js";
 import { definePluginSettings } from "@api/settings.js";
+import Logger from "@utils/Logger.js";
 import { OptionType } from "@utils/types.js";
 import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
 
@@ -30,6 +31,15 @@ export type ChannelProps = {
 export interface ChannelTabsProps extends ChannelProps {
     id: number;
 }
+interface PersistedTabs {
+    [userId: string]: {
+        openTabs: ChannelTabsProps[],
+        openTabIndex: number;
+    };
+}
+
+// TODO: probably remove when finished
+const logger = new Logger("ChannelTabs");
 
 export const channelTabsSettings = definePluginSettings({
     onStartup: {
@@ -59,93 +69,125 @@ export const channelTabsSettings = definePluginSettings({
         default: false
     }
 });
-
-function without<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
-    const obj2 = { ...obj };
-    keys.forEach(k => { delete obj2[k]; });
-    return obj2;
+function replaceArray<T>(array: T[], ...values: T[]) {
+    const len = array.length;
+    for (let i = 0; i < len; i++) array.pop();
+    array.push(...values);
 }
 
+let i = 0;
+const genId = () => i++;
 
-// TODO: this entire utils section needs a rewrite
-let openChannelIndex = 0;
-const openChannelHistory = [0];
-const maxHistoryLength = 10;
+const openTabs: ChannelTabsProps[] = [];
+let currentlyOpenTab: number;
+const openTabHistory: number[] = [];
 
-const openChannels: ChannelProps[] = [];
+function createTab(props: ChannelProps, moveToTab?: boolean, messageId?: string) {
+    const { channelId, guildId } = props;
+    const id = genId();
+    openTabs.push({ ...props, id });
+    if (moveToTab) setOpenTab(id);
+    else return;
+
+    let path = `/channels/${guildId}/${channelId}`;
+    if (messageId) path += `/${messageId}`;
+    if (channelId !== SelectedChannelStore.getChannelId() && !messageId)
+        NavigationRouter.transitionTo(path);
+}
+
+function closeTab(id: number) {
+    if (openTabs.length <= 1) return;
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    openTabs.splice(i, 1);
+    if (id === currentlyOpenTab) {
+        if (openTabHistory.length) {
+            openTabHistory.pop();
+            let newTab: ChannelTabsProps | undefined = undefined;
+            while (!newTab) {
+                const maybeNewTabId = openTabHistory.at(-1);
+                openTabHistory.pop();
+                if (!maybeNewTabId) {
+                    // TODO: go to the tab behind it(?), not having tabs in history should be rare
+                    moveToTab(openTabs[0].id);
+                }
+                const maybeNewTab = openTabs.find(t => t.id === maybeNewTabId);
+                if (maybeNewTab) newTab = maybeNewTab;
+            }
+            moveToTab(newTab.id);
+            openTabHistory.pop();
+        }
+        else
+            // TODO: go to the tab behind it(?), not having tabs in history should be rare
+            moveToTab(openTabs[0].id);
+    }
+}
+
+function closeCurrentTab() {
+    closeTab(currentlyOpenTab);
+}
+
+function closeOtherTabs(id: number) {
+    const tab = openTabs.find(v => v.id === id);
+    if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    const lastTab = openTabs.find(v => v.id === currentlyOpenTab)!;
+    replaceArray(openTabs, tab);
+    setOpenTab(id);
+    replaceArray(openTabHistory, id);
+    if (tab.channelId !== lastTab.channelId) moveToTab(id);
+}
+
+function closeTabsToTheRight(id: number) {
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    const tabsToTheLeft = openTabs.filter((_, ind) => ind <= i);
+    replaceArray(openTabs, ...tabsToTheLeft);
+    if (!tabsToTheLeft.find(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
+}
 
 function handleChannelSwitch(ch: ChannelProps) {
-    if (openChannels[openChannelIndex].channelId !== ch.channelId) openChannels[openChannelIndex] = ch;
+    const tab = openTabs.find(c => c.id === currentlyOpenTab)!;
+    if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
+    if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, ...ch };
 }
-function isTabSelected(ch: ChannelProps) {
-    return openChannels.indexOf(ch) === openChannelIndex;
+
+function isTabSelected(id: number) {
+    return id === currentlyOpenTab;
 }
-function setOpenChannel(i: number) {
-    openChannelIndex = i;
-    openChannelHistory.push(i);
-    if (openChannelHistory.length > maxHistoryLength) openChannelHistory.shift();
+
+function moveToTab(id: number) {
+    const tab = openTabs.find(v => v.id === id);
+    if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    setOpenTab(id);
+    if (tab.channelId !== SelectedChannelStore.getChannelId())
+        NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
 }
-function moveToTab(i: number) {
-    if (i < 0 || i >= openChannels.length) return;
-    const chnl = openChannels[i];
-    setOpenChannel(i);
-    if (chnl.channelId !== SelectedChannelStore.getChannelId())
-        NavigationRouter.transitionToGuild(chnl.guildId, chnl.channelId);
-}
+
 function moveToTabRelative(d: number) {
-    const i = d + openChannelIndex;
-    moveToTab(i);
+    const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
+    const newTab = currentIndex + d;
+    if (newTab < 0 || newTab >= openTabs.length) return;
+    moveToTab(openTabs[newTab].id);
 }
-function createTab(t: ChannelProps, jumpTo?: string | boolean) {
-    openChannels.push({ ...t });
-    setOpenChannel(openChannels.length - 1);
-    if (jumpTo) NavigationRouter.transitionTo(`/channels/${t.guildId}/${t.channelId}${window._.isString(jumpTo) ? `/${jumpTo}` : ""}`);
+
+const saveTabs = async (userId: string) => {
+    if (!userId) return;
+    DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => ({
+        // TODO: figure out where [object Object] comes from
+        ...(old ?? {}),
+        [userId]: { openTabs, openTabIndex: openTabs.findIndex(t => t.id === currentlyOpenTab) }
+    }));
+};
+
+function setOpenTab(id: number) {
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    currentlyOpenTab = id;
+    openTabHistory.push(id);
 }
-function closeTab(i: number) {
-    if (openChannels.length <= 1) return;
-    openChannels.splice(i, 1);
-    if (openChannelHistory.length >= 2) {
-        openChannelHistory.pop(); // once to remove the entry for the current channel
-        const newTab = openChannelHistory.at(-1)!;
-        openChannelHistory.pop(); // and once to remove the last item in history
-        if (openChannelIndex < newTab) moveToTab(newTab - 1);
-        else moveToTab(newTab);
-    } else {
-        if (openChannelIndex === i) moveToTab(Math.max(i - 1, 0));
-        if (openChannelIndex > i) setOpenChannel(openChannelIndex - 1);
-    }
-}
-function closeOtherTabs(i: number) {
-    const { length } = openChannels;
-    const channel = openChannels[i];
-    const lastCurrentChannel = openChannels[openChannelIndex];
-    for (let n = 0; n < length; n++) openChannels.pop();
-    openChannels.push(channel);
-    setOpenChannel(0);
-    for (let j = 0; j <= openChannelHistory.length; j++) openChannelHistory.pop();
-    if (channel.channelId !== lastCurrentChannel.channelId) moveToTab(openChannelIndex);
-}
-function closeTabsToTheRight(i: number) {
-    const { length } = openChannels;
-    for (let n = i; n < length - 1; n++) openChannels.pop();
-    if (openChannelIndex > (openChannels.length - 1)) {
-        setOpenChannel(openChannels.length - 1);
-        moveToTab(openChannelIndex);
-    }
-}
-function closeCurrentTab() {
-    if (openChannels.length === 1) return;
-    openChannels.splice(openChannelIndex, 1);
-    moveToTab(Math.max(openChannelIndex - 1, 0));
-}
-function shiftCurrentTab(direction: 1 /* right */ | -1 /* left */) {
-    const prev = openChannels[openChannelIndex + direction];
-    if (!prev || !("channelId" in prev)) return;
-    openChannels[openChannelIndex + direction] = openChannels[openChannelIndex];
-    openChannels[openChannelIndex] = prev;
-    setOpenChannel(openChannelIndex + direction);
-}
+
 function openStartupTabs(props: ChannelProps & { userId: string; }, update: () => void) {
+    const { userId } = props;
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({
             id: Toasts.genId(),
@@ -159,40 +201,30 @@ function openStartupTabs(props: ChannelProps & { userId: string; }, update: () =
     }
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
-            DataStore.get("ChannelTabs_openChannels").then(t => {
-                openChannels.pop();
-                openChannels.push(...t[props.userId].openChannels);
-                ({ openChannelIndex } = t[props.userId]);
-                if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
-                    NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
+            DataStore.get<PersistedTabs>("ChannelTabs_openChannels_v2").then(tabs => {
+                const t = tabs?.[userId];
+                if (!t) return;
+                replaceArray(openTabs);
+                t.openTabs.forEach(tab => createTab(tab));
+                currentlyOpenTab = openTabs.find((_, i) => i === t.openTabIndex)!.id;
+                moveToTab(currentlyOpenTab);
                 update();
             });
             break;
         }
         case "preset": {
-            const tabs = channelTabsSettings.store.tabSet[props.userId];
-            if (tabs) openChannels.push(...channelTabsSettings.store.tabSet[props.userId]);
-            else openChannels.push(without(props, "userId"));
-            break;
-        }
-        default: {
-            openChannels.push(without(props, "userId"));
+            const tabs = channelTabsSettings.store.tabSet?.[userId];
+            tabs.forEach(t => createTab(t));
+            setOpenTab(0);
         }
     }
-    if (!openChannels.length) openChannels.push(without(props, "userId"));
-    if (openChannels[openChannelIndex].channelId !== SelectedChannelStore.getChannelId())
-        NavigationRouter.transitionToGuild(openChannels[openChannelIndex].guildId, openChannels[openChannelIndex].channelId);
+    if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true);
+    for (let i = 0; i < openTabHistory.length; i++) openTabHistory.pop();
+    moveToTab(currentlyOpenTab);
     update();
 }
-const saveChannels = async (userId: string) => {
-    if (!userId) return;
-    DataStore.set("ChannelTabs_openChannels", {
-        ...(await DataStore.get("ChannelTabs_openChannels") ?? {}),
-        [userId]: { openChannels, openChannelIndex }
-    });
-};
 
 export const ChannelTabsUtils = {
-    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
-    moveToTab, moveToTabRelative, openChannelHistory, openChannels, saveChannels, shiftCurrentTab, openStartupTabs
+    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch,
+    isTabSelected, moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs
 };
