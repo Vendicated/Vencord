@@ -37,7 +37,6 @@ interface SevenTVHost {
     url: string;
 }
 
-let props;
 let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
 let page: number = 1;
@@ -244,8 +243,6 @@ export default definePlugin({
         const handleRefresh = () => {
             setCount(count + 1);
         };
-
-        props = { channel, closePopout };
 
         if ((value === undefined) && (savedvalue !== "undefined" && savedvalue !== ""))
             setValue(savedvalue);
