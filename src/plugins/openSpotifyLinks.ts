@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -27,16 +26,22 @@ export default definePlugin({
     patches: [],
 
     start() {
-        this.clickListener = addClickListener((msg, _, event) => {
-            const match = msg.content.match(/^https?:\/\/open\.spotify\.com\/(track|album)\/([a-zA-Z0-9]+)(\?.*)?$/);
+        this.clickListener = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!(target instanceof HTMLAnchorElement)) return;
+
+            const spotifyLinkRegex = /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)(\?.*)?$/;
+            const match = target.href.match(spotifyLinkRegex);
             if (!match) return;
 
             VencordNative.native.openExternal(`spotify://${match[1]}/${match[2]}`);
             event.preventDefault();
-        });
+        };
+
+        window.addEventListener("click", this.clickListener, { capture: true });
     },
 
     stop() {
-        removeClickListener(this.clickListener);
-    }
+        window.removeEventListener("click", this.clickListener);
+    },
 });
