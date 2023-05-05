@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./index.css";
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/misc";
@@ -25,8 +26,6 @@ import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
-
-import style from "./index.css?managed";
 
 const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
 
@@ -137,9 +136,5 @@ export default definePlugin({
 
     ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
         fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
-    }),
-
-    start() {
-        enableStyle(style);
-    }
+    })
 });
