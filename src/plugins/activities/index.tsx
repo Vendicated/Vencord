@@ -18,11 +18,12 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ActivityProps, ActivityType } from "./types";
+
+import { ActivityProps } from "./types";
 
 
-const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?)\:null/;
-const self = `Vencord.Plugins.plugins.Activities`;
+const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?):null/;
+const self = "Vencord.Plugins.plugins.Activities";
 
 export default definePlugin({
     name: "Activities",
