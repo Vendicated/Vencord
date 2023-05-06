@@ -267,7 +267,7 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
     function handleKeybinds(e: KeyboardEvent) {
         if (e.key === "Tab" && e.ctrlKey) {
             const direction = e.shiftKey ? -1 : 1;
-            moveToTabRelative(direction);
+            moveToTabRelative(direction, true);
             update();
         }
         // Ctrl+T is taken by discord

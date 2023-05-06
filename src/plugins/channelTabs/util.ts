@@ -163,10 +163,19 @@ function moveToTab(id: number) {
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
 }
 
-function moveToTabRelative(d: number) {
+function moveToTabRelative(offset: number, wrapAround?: boolean) {
     const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
-    const newTab = currentIndex + d;
-    if (newTab < 0 || newTab >= openTabs.length) return;
+    const maybeNewTab = currentIndex + offset;
+    if (!wrapAround) {
+        if (maybeNewTab < 0 || maybeNewTab >= openTabs.length) return;
+        moveToTab(openTabs[maybeNewTab].id);
+    }
+    const newTab = maybeNewTab < 0
+        ? openTabs.length + offset
+        : maybeNewTab > openTabs.length - 1
+            ? maybeNewTab - openTabs.length
+            : maybeNewTab;
+    if (!openTabs[newTab]) return logger.error("Cannot move to nonexistent tab with index " + newTab, openTabs);
     moveToTab(openTabs[newTab].id);
 }
 
