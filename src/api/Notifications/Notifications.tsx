@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Queue } from "@utils/Queue";
 import { ReactDOM } from "@webpack/common";
 import type { ReactNode } from "react";
@@ -77,6 +77,8 @@ function _showNotification(notification: NotificationData, id: number) {
 }
 
 function shouldBeNative() {
+    if (typeof Notification === "undefined") return false;
+
     const { useNative } = Settings.notifications;
     if (useNative === "always") return true;
     if (useNative === "not-focused") return !document.hasFocus();

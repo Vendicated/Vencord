@@ -17,11 +17,11 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
-import { proxyLazy } from "@utils/proxyLazy";
+import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
@@ -148,8 +148,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-
-migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
@@ -534,12 +532,12 @@ export default definePlugin({
 
         switch (type) {
             case "STICKER": {
-                node.push(" This is a Fake Nitro sticker. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+                node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
             case "EMOJI": {
-                node.push(" This is a Fake Nitro emoji. Only you can see it rendered like a real one, for non Vencord users it will show as a link.");
+                node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
@@ -643,7 +641,7 @@ export default definePlugin({
                 if (!settings.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickerStore.getStickerById(extra?.stickerIds?.[0]!);
+                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -665,7 +663,7 @@ export default definePlugin({
                         link = `https://distok.top/stickers/${packId}/${sticker.id}.gif`;
                     }
 
-                    delete extra.stickerIds;
+                    extra.stickers!.length = 0;
                     messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
                 }
             }

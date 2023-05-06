@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
@@ -121,7 +121,7 @@ export default definePlugin({
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
+                match: /return \i\.\i\?/,
                 replace: "return true?"
             }
         },
@@ -146,7 +146,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'navId:"textarea-context"',
+            find: ':"command-suggestions"',
             predicate: () => settings.store.addBack,
             replacement: [
                 {

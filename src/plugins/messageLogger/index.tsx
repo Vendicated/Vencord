@@ -19,11 +19,11 @@
 import "./messageLogger.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
@@ -43,20 +43,38 @@ function addDeleteStyle() {
     }
 }
 
-const MENU_ITEM_ID = "message-logger-remove-history";
+const REMOVE_HISTORY_ID = "ml-remove-history";
+const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
 
     if (!deleted && !editHistory?.length) return;
 
+    toggle: {
+        if (!deleted) break toggle;
+
+        const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
+        if (!domElement) break toggle;
+
+        children.push((
+            <Menu.MenuItem
+                id={TOGGLE_DELETE_STYLE_ID}
+                key={TOGGLE_DELETE_STYLE_ID}
+                label="Toggle Deleted Highlight"
+                action={() => domElement.classList.toggle("messagelogger-deleted")}
+            />
+        ));
+    }
+
     children.push((
         <Menu.MenuItem
-            id={MENU_ITEM_ID}
-            key={MENU_ITEM_ID}
+            id={REMOVE_HISTORY_ID}
+            key={REMOVE_HISTORY_ID}
             label="Remove Message History"
+            color="danger"
             action={() => {
-                if (message.deleted) {
+                if (deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
                         channelId: channel_id,
@@ -75,7 +93,6 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven],
-    dependencies: ["ContextMenuAPI"],
 
     start() {
         addDeleteStyle();

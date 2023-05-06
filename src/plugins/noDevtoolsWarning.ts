@@ -16,11 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
-migratePluginSettings("NoDevtoolsWarning", "STFU");
 
 export default definePlugin({
     name: "NoDevtoolsWarning",

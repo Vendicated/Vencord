@@ -17,7 +17,7 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
@@ -85,7 +85,7 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ marginRight: "2px" }}
+                        style={{ padding: "0 4px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg

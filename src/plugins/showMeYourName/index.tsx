@@ -18,13 +18,13 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "discord-types/general";
 
 interface UsernameProps {
-    author: { nick: string };
+    author: { nick: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
@@ -70,9 +70,9 @@ export default definePlugin({
             if (username === nick || isRepliedMessage && !settings.store.inReplies)
                 return prefix + nick;
             if (settings.store.mode === "user-nick")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-            if (settings.store.mode === "nick-user")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+            if (settings.store.mode === "nick-user")
+                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
             return prefix + username;
         } catch {
             return author?.nick;
