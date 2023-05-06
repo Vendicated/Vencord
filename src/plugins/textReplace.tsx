@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { openModalLazy } from "@utils/modal";
+import { openModal, openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
@@ -253,11 +253,9 @@ const plugin = definePlugin({
     dependencies: ["MessageEventsAPI"],
     toolboxActions: {
         "Open Settings": () => {
-            openModalLazy(async () => {
-                return modalProps => {
-                    //@ts-ignore unhelpful error message that doesnt stop anything lol
-                    return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
-                };
+            openModal(modalProps => {
+                //@ts-ignore useless error
+                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
             });
         },
     },
