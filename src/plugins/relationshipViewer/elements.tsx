@@ -20,7 +20,7 @@ import "./relationsStyles.css";
 
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { Button, Card, FluxDispatcher, Text } from "@webpack/common";
 import { User } from "discord-types/general";
