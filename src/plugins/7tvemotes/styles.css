@@ -70,11 +70,11 @@
     text-align: center;
 }
 
-.vc-7tv-chat-icon {
+.vc-seventv-chat-icon {
     fill: var(--interactive-normal);
 }
 
-.vc-7tv-chat-icon:hover,
-.vc-7tv-chat-icon.active {
+.vc-seventv-chat-icon:hover,
+.vc-seventv-chat-icon.active {
     fill: var(--interactive-active);
 }

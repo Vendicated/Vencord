@@ -371,7 +371,7 @@ export default definePlugin({
                                     width="24"
                                     height="24"
                                     viewBox="0 0 109.6 80.9"
-                                    className={"vc-7tv-chat-icon" + (active ? " active" : "")}
+                                    className={cl("chat-icon") + (active ? " active" : "")}
                                 >
                                     <g>
                                         <path d="M84.1,22.2l5-8.7,2.7-4.6L86.8.2V0H60.1l5,8.7,5,8.7,2.8,4.8H84.1"></path>
