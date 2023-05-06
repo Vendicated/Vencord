@@ -255,7 +255,7 @@ const plugin = definePlugin({
         "Open Settings": () => {
             openModalLazy(async () => {
                 return modalProps => {
-
+                    //@ts-ignore unhelpful error message that doesnt stop anything lol
                     return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
                 };
             });
