@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { openModal, openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, Plugin } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
@@ -254,8 +254,7 @@ const plugin = definePlugin({
     toolboxActions: {
         "Open Settings": () => {
             openModal(modalProps => {
-                //@ts-ignore useless error
-                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
+                return <PluginModal {...modalProps} plugin={plugin as unknown as Plugin} onRestartNeeded={() => null} />;
             });
         },
     },
