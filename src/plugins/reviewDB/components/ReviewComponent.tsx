@@ -94,7 +94,7 @@ export default LazyComponent(() => {
                         className={classes(avatar, clickable)}
                         onClick={openModal}
                         src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                        style={{ left: "0px" }}
+                        style={{ left: "0px", zIndex: 0 }}
                     />
                     <span
                         className={classes(clickable, username)}
