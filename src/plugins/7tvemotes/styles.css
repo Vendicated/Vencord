@@ -69,3 +69,12 @@
 .seventv-pagetext {
     text-align: center;
 }
+
+.vc-7tv-chat-icon {
+    fill: var(--interactive-normal);
+}
+
+.vc-7tv-chat-icon:hover,
+.vc-7tv-chat-icon.active {
+    fill: var(--interactive-active);
+}

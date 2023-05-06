@@ -179,7 +179,6 @@ export default definePlugin({
     name: "7TV Emotes",
     description: "Search for 7TV Emotes in your Discord Client!",
     authors: [Devs.Xslash, Devs.Arjix],
-    dependencies: [],
 
     patches: [
         {
@@ -355,7 +354,6 @@ export default definePlugin({
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div style={{ display: "flex" }}>
                         <Button
-                            style={active ? { color: "black" } : undefined}
                             aria-haspopup="dialog"
                             aria-label=""
                             size=""
@@ -373,11 +371,12 @@ export default definePlugin({
                                     width="24"
                                     height="24"
                                     viewBox="0 0 109.6 80.9"
+                                    className={"vc-7tv-chat-icon" + (active ? " active" : "")}
                                 >
-                                    <g fill="none" fill-rule="evenodd">
-                                        <path d="M84.1,22.2l5-8.7,2.7-4.6L86.8.2V0H60.1l5,8.7,5,8.7,2.8,4.8H84.1" fill="currentColor"></path>
-                                        <path d="M29,80.6l5-8.7,5-8.7,5-8.7,5-8.7,5-8.7,5-8.7L62.7,22l-5-8.7-5-8.7L49.9.1H7.7l-5,8.7L0,13.4l5,8.7v.2h32l-5,8.7-5,8.7-5,8.7-5,8.7-5,8.7L8.5,72l5,8.7v.2H29" fill="currentColor"></path>
-                                        <path d="M70.8,80.6H86.1l5-8.7,5-8.7,5-8.7,5-8.7,3.5-6-5-8.7v-.2H89.2l-5,8.7-5,8.7-.7,1.3-5-8.7-5-8.7-.7-1.3-5,8.7-5,8.7L55,53.1l5,8.7,5,8.7,5,8.7.8,1.4" fill="currentColor"></path>
+                                    <g>
+                                        <path d="M84.1,22.2l5-8.7,2.7-4.6L86.8.2V0H60.1l5,8.7,5,8.7,2.8,4.8H84.1"></path>
+                                        <path d="M29,80.6l5-8.7,5-8.7,5-8.7,5-8.7,5-8.7,5-8.7L62.7,22l-5-8.7-5-8.7L49.9.1H7.7l-5,8.7L0,13.4l5,8.7v.2h32l-5,8.7-5,8.7-5,8.7-5,8.7-5,8.7L8.5,72l5,8.7v.2H29"></path>
+                                        <path d="M70.8,80.6H86.1l5-8.7,5-8.7,5-8.7,5-8.7,3.5-6-5-8.7v-.2H89.2l-5,8.7-5,8.7-.7,1.3-5-8.7-5-8.7-.7-1.3-5,8.7-5,8.7L55,53.1l5,8.7,5,8.7,5,8.7.8,1.4"></path>
                                     </g>
                                 </svg>
                             </div>
