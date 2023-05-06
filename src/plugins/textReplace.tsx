@@ -246,7 +246,7 @@ function applyRules(content: string): string {
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
-let plugin = definePlugin({
+const plugin = definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
@@ -255,7 +255,7 @@ let plugin = definePlugin({
         "Open Settings": () => {
             openModalLazy(async () => {
                 return modalProps => {
-                    //@ts-ignore unhelpful error message that doesnt stop anything lol
+
                     return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
                 };
             });
