@@ -52,7 +52,7 @@ function GetEmoteURL(emote: SevenTVEmote) {
 }
 
 async function FetchEmotes(value, handleRefresh) {
-
+    console.log("[7TVEmotes] trying to fetch...");
     const currentTime = Date.now();
     const timeSinceLastCall = currentTime - lastApiCall;
     if (timeSinceLastCall < MINIMUM_API_DELAY)
@@ -76,24 +76,40 @@ async function FetchEmotes(value, handleRefresh) {
 
     if (page < 1) page = 1;
 
-    const variables = {
-        "query": value,
-        "limit": settings.store.limit,
-        "page": page,
-        "sort": {
-            "value": settings.store.sort_value,
-            "order": settings.store.sort_order
-        },
-        "filter": {
-            "category": settings.store.category,
-            "exact_match": settings.store.exact_match,
-            "case_sensitive": settings.store.case_sensitive,
-            "ignore_tags": settings.store.ignore_tags,
-            "zero_width": settings.store.zero_width,
-            "animated": settings.store.animated,
-            "aspect_ratio": ""
-        }
-    };
+    let variables = {};
+    if (value !== "" && value !== undefined)
+        variables = {
+            "query": value,
+            "limit": settings.store.limit,
+            "page": page,
+            "sort": {
+                "value": settings.store.sort_value,
+                "order": settings.store.sort_order
+            },
+            "filter": {
+                "category": settings.store.category,
+                "exact_match": settings.store.exact_match,
+                "case_sensitive": settings.store.case_sensitive,
+                "ignore_tags": settings.store.ignore_tags,
+                "zero_width": settings.store.zero_width,
+                "animated": settings.store.animated,
+                "aspect_ratio": ""
+            }
+        };
+    else
+        variables = {
+            "query": "",
+            "limit": settings.store.limit,
+            "page": page,
+            "sort": {
+                "value": settings.store.sort_value,
+                "order": settings.store.sort_order
+            },
+            "filter": {
+                "category": settings.store.category
+            }
+        };
+
     fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -246,6 +262,9 @@ export default definePlugin({
         if ((value === undefined) && (savedvalue !== "undefined" && savedvalue !== ""))
             setValue(savedvalue);
         savedvalue = value + "";
+
+        if (emotes.length === 0)
+            FetchEmotes(value, handleRefresh);
 
         return (
             <div className={cl("picker")}>
