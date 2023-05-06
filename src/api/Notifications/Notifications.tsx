@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Queue } from "@utils/Queue";
 import { ReactDOM } from "@webpack/common";
 import type { ReactNode } from "react";

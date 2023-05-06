@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { makeLazy } from "./misc";
+import { makeLazy } from "./lazy";
 
 /*
     Add dynamically loaded dependencies for plugins here.
