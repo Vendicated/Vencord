@@ -18,10 +18,10 @@
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
+import { sleep } from "@utils/misc";
+import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
-import definePlugin from "@utils/types";
-import { sleep } from "@utils/misc";
 
 const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 
@@ -41,20 +41,20 @@ export default definePlugin({
         {
             find: "type:\"MESSAGE_LENGTH_UPSELL\"",
             replacement: {
-                match: /if\(\i\.length\>\i\)(.{1,100})type\:"MESSAGE_LENGTH_UPSELL"/,
+                match: /if\(\i\.length>\i\)(.{1,100})type:"MESSAGE_LENGTH_UPSELL"/,
                 replace: "if(0==1)$1type:\"MESSAGE_LENGTH_UPSELL\""
             }
         },
     ],
 
     continueWithError(failureReason: string) {
-        return failureReason != "MESSAGE_TOO_LONG";
+        return failureReason !== "MESSAGE_TOO_LONG";
     },
 
     async start() {
         // Check the users's nitro. If they have full nitro, set the character limit to 4000
         const nitroType = UserStore.getCurrentUser()?.premiumType;
-        const characterLimit = nitroType == 2 ? 4000 : 2000;
+        const characterLimit = nitroType === 2 ? 4000 : 2000;
 
         this.preSend = addPreSendListener((channelId, msg) => {
             if (msg.content.length < characterLimit) return;
@@ -62,12 +62,12 @@ export default definePlugin({
             const textToSend: Array<string> = [];
             for (let i = characterLimit; i < msg.content.length; i += characterLimit) {
                 textToSend.push(msg.content.substring(i, i + characterLimit));
-            };
+            }
 
             msg.content = msg.content.substring(0, characterLimit);
 
             sleep(500).then(() => {
-                textToSend.forEach(async (text) => {
+                textToSend.forEach(async text => {
                     await MessageCreator.sendMessage(channelId, {
                         content: text
                     });
