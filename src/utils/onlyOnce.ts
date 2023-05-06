@@ -16,18 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const enum IpcEvents {
-    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
-    GET_QUICK_CSS = "VencordGetQuickCss",
-    SET_QUICK_CSS = "VencordSetQuickCss",
-    GET_SETTINGS_DIR = "VencordGetSettingsDir",
-    GET_SETTINGS = "VencordGetSettings",
-    SET_SETTINGS = "VencordSetSettings",
-    OPEN_EXTERNAL = "VencordOpenExternal",
-    OPEN_QUICKCSS = "VencordOpenQuickCss",
-    GET_UPDATES = "VencordGetUpdates",
-    GET_REPO = "VencordGetRepo",
-    UPDATE = "VencordUpdate",
-    BUILD = "VencordBuild",
-    OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+export function onlyOnce<F extends Function>(f: F): F {
+    let called = false;
+    let result: any;
+    return function onlyOnceWrapper(this: unknown) {
+        if (called) return result;
+
+        called = true;
+
+        return (result = f.apply(this, arguments));
+    } as unknown as F;
 }

@@ -19,11 +19,11 @@
 import "./messageLogger.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore, ChannelStore } from "@webpack/common";
