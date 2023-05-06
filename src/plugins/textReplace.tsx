@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { openModal, openModalLazy } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, Plugin } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
