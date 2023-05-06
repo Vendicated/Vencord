@@ -41,6 +41,7 @@ let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
 let page: number = 1;
 let lastApiCall = 0;
+let lastError = "";
 const MINIMUM_API_DELAY = 500;
 const API_URL = "https://7tv.io/v3/gql";
 let savedvalue = "";
@@ -52,7 +53,6 @@ function GetEmoteURL(emote: SevenTVEmote) {
 }
 
 async function FetchEmotes(value, handleRefresh) {
-    console.log("[7TVEmotes] trying to fetch...");
     const currentTime = Date.now();
     const timeSinceLastCall = currentTime - lastApiCall;
     if (timeSinceLastCall < MINIMUM_API_DELAY)
@@ -60,6 +60,7 @@ async function FetchEmotes(value, handleRefresh) {
 
     lastApiCall = currentTime;
 
+    lastError = "";
     searching = true;
     const query = `query SearchEmotes($query: String!, $page: Int, $sort: Sort, $limit: Int, $filter: EmoteSearchFilter) {
         emotes(query: $query, page: $page, sort: $sort, limit: $limit, filter: $filter) {
@@ -116,7 +117,10 @@ async function FetchEmotes(value, handleRefresh) {
         body: JSON.stringify({ query, variables })
     }).then(response => response.json())
         .then(data => {
-            emotes = data.data.emotes.items;
+            if (data.data.emotes != null)
+                emotes = data.data.emotes.items;
+            else
+                lastError = data.errors[0].message;
             searching = false;
             handleRefresh();
         })
@@ -358,7 +362,7 @@ export default definePlugin({
                 </div>
 
                 <div className={cl("footer")}>
-                    <Forms.FormText className="seventv-pagetext">Page {page}</Forms.FormText>
+                    <Forms.FormText className="seventv-pagetext">{lastError === "" ? (<>Page {page}</>) : (<>{lastError}</>)}</Forms.FormText>
                 </div>
             </div >
         );
