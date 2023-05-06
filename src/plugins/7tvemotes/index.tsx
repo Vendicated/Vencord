@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
