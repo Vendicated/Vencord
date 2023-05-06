@@ -20,8 +20,10 @@ import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import PluginModal from "@components/PluginSettings/PluginModal";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
@@ -244,13 +246,24 @@ function applyRules(content: string): string {
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
-export default definePlugin({
+let plugin = definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
     dependencies: ["MessageEventsAPI"],
+    toolboxActions: {
+        "Open Settings": () => {
+            openModalLazy(async () => {
+                return modalProps => {
+                    //@ts-ignore unhelpful error message that doesnt stop anything lol
+                    return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => null} />;
+                };
+            });
+        },
+    },
 
     settings,
+
 
     async start() {
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
@@ -267,3 +280,5 @@ export default definePlugin({
         removePreSendListener(this.preSend);
     }
 });
+
+export default plugin;
