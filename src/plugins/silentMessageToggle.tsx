@@ -37,7 +37,7 @@ const settings = definePluginSettings({
     autoDisable: {
         type: OptionType.BOOLEAN,
         description: "Automatically disable the state of the silent message after sending a message.",
-        default: true,
+        default: true
     }
 });
 
@@ -101,7 +101,7 @@ function SilentMessageToggle(chatBoxProps: {
 
 export default definePlugin({
     name: "SilentMessageToggle",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
     dependencies: ["MessageEventsAPI"],
 
