@@ -1,4 +1,4 @@
-.messagelogger-deleted :is(div, h1, h2, h3, p) {
+.messagelogger-deleted :is(div, h1, h2, h3, p):not(h3 > span > span > div) {
     color: #f04747 !important;
 }
 
