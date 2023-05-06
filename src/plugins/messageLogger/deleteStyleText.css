@@ -1,4 +1,4 @@
-.messagelogger-deleted :is(div, h1, h2, h3, p):not(.newMemberBadge-3PdStX) {
+.messagelogger-deleted > .message-2CShn3 :is(div, h1, h2, h3, p):not(.newMemberBadge-3PdStX) {
     color: #f04747 !important;
 }
 
