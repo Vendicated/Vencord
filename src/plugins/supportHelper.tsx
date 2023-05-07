@@ -18,7 +18,7 @@
 
 import { DataStore } from "@api/index";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
-import { makeCodeblock } from "@utils/misc";
+import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { isOutdated } from "@utils/updater";
 import { Alerts, Forms, UserStore } from "@webpack/common";

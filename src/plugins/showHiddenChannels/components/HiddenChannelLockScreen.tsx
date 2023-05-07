@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
 import { find, findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";

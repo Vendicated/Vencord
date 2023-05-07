@@ -16,25 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/react";
+export function onlyOnce<F extends Function>(f: F): F {
+    let called = false;
+    let result: any;
+    return function onlyOnceWrapper(this: unknown) {
+        if (called) return result;
 
-// eslint-disable-next-line path-alias/no-relative
-import { FilterFn, filters, waitFor } from "../webpack";
+        called = true;
 
-export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
-    let myValue: T = function () {
-        throw new Error(`Vencord could not find the ${name} Component`);
-    } as any;
-
-    const lazyComponent = LazyComponent(() => myValue) as T;
-    waitFor(filter, (v: any) => {
-        myValue = v;
-        Object.assign(lazyComponent, v);
-    });
-
-    return lazyComponent;
-}
-
-export function waitForStore(name: string, cb: (v: any) => void) {
-    waitFor(filters.byStoreName(name), cb);
+        return (result = f.apply(this, arguments));
+    } as unknown as F;
 }
