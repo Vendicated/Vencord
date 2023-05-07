@@ -28,12 +28,12 @@ import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
 import { showNotification } from "./api/Notifications";
-import { PlainSettings, Settings } from "./api/settings";
+import { PlainSettings, Settings } from "./api/Settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
-import { checkForUpdates, update,UpdateLogger } from "./utils/updater";
+import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 

@@ -17,15 +17,18 @@
 */
 
 export * from "./ChangeList";
-export * as Constants from "./constants";
+export * from "./constants";
 export * from "./debounce";
-export * as Discord from "./discord";
-export { default as Logger } from "./Logger";
+export * from "./discord";
+export * from "./guards";
+export * from "./lazy";
+export * from "./localStorage";
+export * from "./Logger";
 export * from "./margins";
 export * from "./misc";
-export * as Modals from "./modal";
+export * from "./modal";
 export * from "./onceDefined";
-export * from "./proxyLazy";
+export * from "./onlyOnce";
+export * from "./patches";
 export * from "./Queue";
 export * from "./text";
-

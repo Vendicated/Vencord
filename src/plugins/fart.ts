@@ -17,7 +17,7 @@
 */
 
 import { ApplicationCommandOptionType } from "@api/Commands";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
