@@ -257,13 +257,25 @@ function ChannelTab(props: ChannelTabsProps) {
 }
 
 export function ChannelsTabsContainer(props: ChannelProps & { userId: string; }) {
+    let { userId } = props;
     const _update = useForceUpdater();
     function update() {
         _update();
-        saveTabs(props.userId);
+        saveTabs(userId);
     }
     const { openTabs } = ChannelTabsUtils;
     if (!openTabs.length) openStartupTabs(props, update);
+    useEffect(() => {
+        const initialRender = () => {
+            if (!userId) {
+                userId = UserStore.getCurrentUser().id;
+                _update();
+            }
+            FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
+        };
+        FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
+    }, []);
+
     function handleKeybinds(e: KeyboardEvent) {
         if (e.key === "Tab" && e.ctrlKey) {
             const direction = e.shiftKey ? -1 : 1;
