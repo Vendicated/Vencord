@@ -47,16 +47,14 @@ export const UserContext: NavContextMenuPatchCallback = (children, { user }: Use
     if (!group) return;
 
     group.push(
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="friend-notifications"
-                label={
-                    tracked.has(userId) ?
-                        "Disable Friend Notifications" :
-                        "Enable Friend Notifications"
-                }
-                action={() => contextMenuOpen(user)}
-            />
-        </Menu.MenuGroup>
+        <Menu.MenuItem
+            id="friend-notifications"
+            label={
+                tracked.has(userId) ?
+                    "Disable Friend Notifications" :
+                    "Enable Friend Notifications"
+            }
+            action={() => contextMenuOpen(user)}
+        />
     );
 };

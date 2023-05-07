@@ -24,8 +24,8 @@ import { OptionType } from "@utils/types";
 import { Button, UserStore } from "@webpack/common";
 import User from "discord-types/general/User";
 
-import { tracked, writeTrackedToDataStore } from "./utils";
 import { NotificationAction } from "./types";
+import { tracked, writeTrackedToDataStore } from "./utils";
 
 
 export default definePluginSettings({

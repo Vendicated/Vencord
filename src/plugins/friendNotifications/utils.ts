@@ -26,7 +26,6 @@ import {
     RelationshipStore,
     SelectedChannelStore,
     UserStore,
-    UserUtils
 } from "@webpack/common";
 import { User } from "discord-types/general";
 
