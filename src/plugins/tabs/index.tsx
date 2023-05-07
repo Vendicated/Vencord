@@ -18,115 +18,28 @@
 
 import "./tabs.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { Menu, NavigationRouter, ReactDOM, UserStore } from "@webpack/common";
+import { ReactDOM } from "@webpack/common";
+
+import { ContextMenu } from "./components/ContextMenu";
+import TabParent from "./components/TabParent";
+import { Tab } from "./types";
+import { tabs, tabsKey } from "./utils";
 
 /**
  * TODO Add middle click close tab
  * TODO Add draggable/ re-orderable tabs
- * TODO Add GDMs into tabs
+ * DONE Add GDMs into tabs
  * TODO Update styling when channel is changed
  * TODO Do not allow navigation to the same channel user is currently in
  * TODO Right click on tab brings up correct context menu
  * TODO Horizontal Scroll
+ * TODO Show notifications from tabs (with number)
+ * TODO Make tabs keyboard navigable
+ * TODO Add favorite tabs
  */
-
-type Tab = {
-    tabName: string;
-    isFavorite: boolean;
-    channelId: string;
-    guildId: string | null;
-};
-
-// Array of Ids
-export const tabs = new Map<string, Tab>();
-
-type ForceUpdate = undefined | (() => void);
-let globalUpdateTabs: ForceUpdate;
-
-// tabs key
-const tabsKey = () => `tabs-${UserStore.getCurrentUser().id}`;
-
-// const ChannelTypes = {
-//     GUILD_CHANNEL: 0,
-//     USER_CHANNEL: 1,
-//     GUILD_VOICE: 2,
-//     GUILD_CATEGORY: 4,
-// } as const;
-
-const ContextMenu: NavContextMenuPatchCallback = (children: unknown[], props) => () => {
-    if (props.channel.type > 1) return;
-    const channelId = props.channel.id;
-
-    if (tabs.has(channelId)) return;
-
-    async function handleAddTab() {
-        tabs.set(channelId, {
-            channelId: channelId,
-            tabName: props.channel.name || props.user.username,
-            isFavorite: false,
-            guildId: props?.guild?.id ?? null,
-        });
-
-        // Persist data
-        await DataStore.set(tabsKey(), tabs);
-
-        if (globalUpdateTabs) {
-            globalUpdateTabs();
-        }
-    }
-
-    children.push(
-        <Menu.MenuItem
-            id="tabs-seomeitsodsf"
-            label="Create a tab"
-            action={handleAddTab}
-        />
-    );
-};
-
-function TabChild({ tab }: { tab: Tab; }) {
-    function handleTransition() {
-        const linkBase = "/channels/";
-        const link = linkBase +
-            (tab.guildId ? `${tab.guildId}/${tab.channelId}` : `@me/${tab.channelId}`);
-        window.focus();
-
-        NavigationRouter.transitionTo(link);
-    }
-
-    async function handleDelete() {
-        tabs.delete(tab.channelId);
-        // Persist data
-        await DataStore.set(tabsKey(), tabs);
-        if (globalUpdateTabs) {
-            globalUpdateTabs();
-        }
-    }
-
-    return <div
-        className="tab-link"
-    >
-        <div onClick={handleTransition} className="tab-name">
-            {tab.tabName}
-        </div>
-        <button onClick={handleDelete} className="tab-remove">
-            x
-        </button>
-    </div>;
-}
-
-function TabParent() {
-    globalUpdateTabs = useForceUpdater();
-    return <div className="tabs-parent">
-        {Array.from(tabs).map(([_id, tab]) => {
-            return <TabChild tab={tab} />;
-        })}
-    </div>;
-}
 
 export default definePlugin({
     name: "Tabs",
@@ -140,12 +53,21 @@ export default definePlugin({
 
         if (!div || !appMount || !contentDiv) return;
 
-        await DataStore.set(tabsKey(), new Map());
-
         // Load tabs
-        const storedTabs: typeof tabs = await DataStore.get(tabsKey()) || tabs;
+        const storedTabs: Map<string, Tab> = await DataStore.get(tabsKey()) || tabs;
         for (const [id, tab] of Array.from(storedTabs)) {
             tabs.set(id, tab);
+            if (
+                tab.name === undefined ||
+                tab.description === undefined ||
+                tab.guildId === undefined ||
+                tab.isFavorite === undefined ||
+                tab.channelId === undefined
+            ) {
+                tabs.clear();
+                await DataStore.set(tabsKey(), tabs);
+                break;
+            }
         }
 
         // Inject before everything
@@ -154,9 +76,11 @@ export default definePlugin({
 
         addContextMenuPatch("channel-context", ContextMenu);
         addContextMenuPatch("user-context", ContextMenu);
+        addContextMenuPatch("gdm-context", ContextMenu);
     },
     stop() {
         removeContextMenuPatch("channel-context", ContextMenu);
         removeContextMenuPatch("user-context", ContextMenu);
+        addContextMenuPatch("gdm-context", ContextMenu);
     }
 });

@@ -6,17 +6,9 @@
 }
 
 .tab-link {
-    padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-    margin: 1rem 0.5rem 0 0;
-    background-color: var(--background-mentioned);
-    color: var(--text-default);
     min-width: 10rem;
-    height: 1rem;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 5px 5px 0 0;
+    color: var(--text-default);
+    background-color: var(--background-mentioned);
 }
 
 .tab-link:hover {
@@ -26,7 +18,7 @@
 
 .tab-favorite {
     background-color: green;
-    color: black;
+    color: var(--text-default);
 }
 
 .tab-remove {
@@ -39,6 +31,7 @@
     margin: auto 0;
     width: 1rem;
     height: 1rem;
+    color: var(--text-default);
 }
 
 .tab-remove:hover {
