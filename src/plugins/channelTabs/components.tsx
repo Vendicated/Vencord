@@ -28,7 +28,7 @@ import {
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
@@ -257,7 +257,7 @@ function ChannelTab(props: ChannelTabsProps) {
     return tab;
 }
 
-export function ChannelsTabsContainer(props: ChannelProps & { userId: string; }) {
+export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     let { userId } = props;
     const _update = useForceUpdater();
     function update() {

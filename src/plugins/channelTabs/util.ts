@@ -24,11 +24,11 @@ import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common"
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
-export type ChannelProps = {
+export type BasicChannelTabsProps = {
     guildId: string;
     channelId: string;
 };
-export interface ChannelTabsProps extends ChannelProps {
+export interface ChannelTabsProps extends BasicChannelTabsProps {
     id: number;
 }
 interface PersistedTabs {
@@ -84,7 +84,7 @@ const closedTabs: ChannelTabsProps[] = [];
 let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
 
-function createTab(props: ChannelProps, moveToTab?: boolean, messageId?: string) {
+function createTab(props: BasicChannelTabsProps, moveToTab?: boolean, messageId?: string) {
     const { channelId, guildId } = props;
     const id = genId();
     openTabs.push({ ...props, id });
@@ -152,7 +152,7 @@ function closeTabsToTheRight(id: number) {
     if (!tabsToTheLeft.some(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
 }
 
-function handleChannelSwitch(ch: ChannelProps) {
+function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab)!;
     if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
     if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, ...ch };
@@ -202,7 +202,7 @@ function setOpenTab(id: number) {
     openTabHistory.push(id);
 }
 
-function openStartupTabs(props: ChannelProps & { userId: string; }, update: () => void) {
+function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, update: () => void) {
     const { userId } = props;
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({

@@ -25,7 +25,7 @@ import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import { ChannelsTabsContainer } from "./components";
-import { ChannelProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
 const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     return () => {
@@ -109,7 +109,7 @@ export default definePlugin({
     },
 
     render({ currentChannel, children }: {
-        currentChannel: ChannelProps,
+        currentChannel: BasicChannelTabsProps,
         children: JSX.Element; // original children passed by discord
     }) {
         const id = UserStore.getCurrentUser()?.id;
