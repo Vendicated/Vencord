@@ -19,7 +19,8 @@
 import "./style.css";
 
 import { Flex } from "@components/Flex.jsx";
-import { classes, LazyComponent, useForceUpdater } from "@utils/misc.jsx";
+import { classes } from "@utils/misc.jsx";
+import { LazyComponent, useForceUpdater } from "@utils/react.jsx";
 import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu, ReadStateStore, Text, TypingStore,

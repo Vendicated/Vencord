@@ -17,8 +17,8 @@
 */
 
 import { DataStore } from "@api/index.js";
-import { definePluginSettings } from "@api/settings.js";
-import Logger from "@utils/Logger.js";
+import { definePluginSettings } from "@api/Settings.js";
+import { Logger } from "@utils/Logger.js";
 import { OptionType } from "@utils/types.js";
 import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
 
