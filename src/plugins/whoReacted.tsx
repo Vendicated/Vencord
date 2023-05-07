@@ -18,8 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent, sleep, useForceUpdater } from "@utils/misc";
+import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { LazyComponent, useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
