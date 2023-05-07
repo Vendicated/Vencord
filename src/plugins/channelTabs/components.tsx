@@ -32,7 +32,7 @@ import { ChannelProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils }
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    isTabSelected, moveToTab, moveToTabRelative, saveTabs, openStartupTabs
+    isTabSelected, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -291,6 +291,9 @@ export function ChannelsTabsContainer(props: ChannelProps & { userId: string; })
         else if (["W", "w"].includes(e.key) && e.ctrlKey) {
             closeCurrentTab();
             update();
+        }
+        else if (["T", "t"].includes(e.key) && e.ctrlKey && e.shiftKey) {
+            reopenClosedTab();
         }
     }
     useEffect(() => {

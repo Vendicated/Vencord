@@ -69,6 +69,7 @@ export const channelTabsSettings = definePluginSettings({
         default: false
     }
 });
+
 function replaceArray<T>(array: T[], ...values: T[]) {
     const len = array.length;
     for (let i = 0; i < len; i++) array.pop();
@@ -79,6 +80,7 @@ let i = 0;
 const genId = () => i++;
 
 const openTabs: ChannelTabsProps[] = [];
+const closedTabs: ChannelTabsProps[] = [];
 let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
 
@@ -99,7 +101,8 @@ function closeTab(id: number) {
     if (openTabs.length <= 1) return;
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
-    openTabs.splice(i, 1);
+    const closed = openTabs.splice(i, 1);
+    closedTabs.push(...closed);
     if (id === currentlyOpenTab) {
         if (openTabHistory.length) {
             openTabHistory.pop();
@@ -130,6 +133,8 @@ function closeCurrentTab() {
 function closeOtherTabs(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    const removedTabs = openTabs.filter(v => v.id !== id);
+    closedTabs.push(...removedTabs.reverse());
     const lastTab = openTabs.find(v => v.id === currentlyOpenTab)!;
     replaceArray(openTabs, tab);
     setOpenTab(id);
@@ -140,9 +145,11 @@ function closeOtherTabs(id: number) {
 function closeTabsToTheRight(id: number) {
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+    const tabsToTheRight = openTabs.filter((_, ind) => ind > i);
+    closedTabs.push(...tabsToTheRight.reverse());
     const tabsToTheLeft = openTabs.filter((_, ind) => ind <= i);
     replaceArray(openTabs, ...tabsToTheLeft);
-    if (!tabsToTheLeft.find(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
+    if (!tabsToTheLeft.some(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
 }
 
 function handleChannelSwitch(ch: ChannelProps) {
@@ -233,7 +240,13 @@ function openStartupTabs(props: ChannelProps & { userId: string; }, update: () =
     update();
 }
 
+function reopenClosedTab() {
+    if (!closedTabs.length) return;
+    const tab = closedTabs.pop()!;
+    createTab(tab, true);
+}
+
 export const ChannelTabsUtils = {
-    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    isTabSelected, moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs
+    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
+    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab
 };

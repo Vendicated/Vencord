@@ -153,6 +153,10 @@ export default definePlugin({
                     <KeyCombo shortcut="mod+n" />
                     <KeyCombo shortcut="mod+w" />
                 </Forms.FormSection>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Reopen a recently closed tab</Forms.FormTitle>
+                    <KeyCombo shortcut="mod+shift+t" />
+                </Forms.FormSection>
             </Flex>
             <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>
         </>;
