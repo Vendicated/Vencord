@@ -42,12 +42,15 @@ export const ContextMenu: NavContextMenuPatchCallback = (children, props) => {
         if (tabs.has(channelId)) return;
 
         async function handleAddTab() {
+            const name = props.channel.name || props.user.username;
             tabs.set(channelId, {
                 channelId: channelId,
-                name: props.channel.name || props.user.username,
-                description: props.guild?.name || props.user?.bio || "",
+                name: name,
+                displayName: name,
+                description: props.guild?.name || "DM Channel",
                 isFavorite: false,
                 guildId: props.guild?.id ?? null,
+                hasUnread: false,
             });
 
             // Persist data
@@ -57,7 +60,7 @@ export const ContextMenu: NavContextMenuPatchCallback = (children, props) => {
 
         children.push(
             <Menu.MenuItem
-                id="tabs-seomeitsodsf"
+                id="create-a-tab"
                 label="Create a tab"
                 action={handleAddTab}
             />

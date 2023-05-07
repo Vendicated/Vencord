@@ -32,3 +32,14 @@ export function updateTabs() {
         globalUpdateTabs();
     }
 }
+
+export function messageCreateHandler(event) {
+    const tab = tabs.get(event.channelId);
+
+    if (!tab) return;
+
+    tab.hasUnread = true;
+
+    console.log(tab.name, "is now unread");
+    updateTabs();
+}

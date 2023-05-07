@@ -18,8 +18,10 @@
 
 export type Tab = {
     name: string;
+    displayName: string;
     description: string;
     isFavorite: boolean;
+    hasUnread: boolean;
     channelId: string;
     guildId: string | null;
 };

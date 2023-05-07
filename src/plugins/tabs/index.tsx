@@ -26,10 +26,10 @@ import { ReactDOM } from "@webpack/common";
 import { ContextMenu } from "./components/ContextMenu";
 import TabParent from "./components/TabParent";
 import { Tab } from "./types";
-import { tabs, tabsKey } from "./utils";
+import { messageCreateHandler, tabs, tabsKey } from "./utils";
 
 /**
- * TODO Add middle click close tab
+ * DONE Add middle click close tab
  * TODO Add draggable/ re-orderable tabs
  * DONE Add GDMs into tabs
  * TODO Update styling when channel is changed
@@ -37,7 +37,7 @@ import { tabs, tabsKey } from "./utils";
  * TODO Right click on tab brings up correct context menu
  * TODO Horizontal Scroll
  * TODO Show notifications from tabs (with number)
- * TODO Make tabs keyboard navigable
+ * TODO Make tabs keyboard navigable (with the tab key)
  * TODO Add favorite tabs
  */
 
@@ -46,6 +46,9 @@ export default definePlugin({
     description: "Adds browser tabs to Discord",
     // TODO add devs.axu
     authors: [],
+    flux: {
+        MESSAGE_CREATE: messageCreateHandler
+    },
     async start() {
         const div = document.createElement("div");
         const appMount = document.querySelector("#app-mount");
@@ -62,7 +65,8 @@ export default definePlugin({
                 tab.description === undefined ||
                 tab.guildId === undefined ||
                 tab.isFavorite === undefined ||
-                tab.channelId === undefined
+                tab.channelId === undefined ||
+                tab.displayName === undefined
             ) {
                 tabs.clear();
                 await DataStore.set(tabsKey(), tabs);

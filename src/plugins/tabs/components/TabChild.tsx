@@ -33,7 +33,8 @@ export default function TabChild({ tab }: { tab: Tab; }) {
     }
 
     function handleAuxClick(e) {
-        if (e.nativeEvent.button === 1) handleDelete();
+        // Middle mouse click
+        if (e.nativeEvent.button === 1) return handleDelete();
     }
 
     async function handleDelete() {
@@ -43,7 +44,7 @@ export default function TabChild({ tab }: { tab: Tab; }) {
         updateTabs();
     }
 
-    return <li onAuxClick={handleAuxClick} className="tab-link channel-1Shao0 container-32HW5s" role="listitem" aria-setsize={157}>
+    return <li onAuxClick={handleAuxClick} className={`tab-link ${tab.hasUnread ? "tab-link-unread" : "tab-link-up-to-date"} channel-1Shao0 container-32HW5s`} role="listitem" aria-setsize={157}>
         <div className="interactive-26HRN_ interactive-iyXY_x">
             <a onClick={handleNavigation} className="link-39sEB3" aria-label={`${tab.name} | ${tab.description} (tab)`} data-list-item-id="private-channels-uid_22___372858082730049536">
                 <div className="layout-1LjVue">
@@ -51,13 +52,28 @@ export default function TabChild({ tab }: { tab: Tab; }) {
                         <div className="nameAndDecorators-2A8Bbk">
                             <div className="name-2m3Cms">
                                 <div className="overflow-1wOqNV">
-                                    {tab.name}
+                                    {tab.displayName}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="subText-3Sk0zy">
+                            <div className="activity-1-H7Zd subtext-14b69p">
+                                <div className="activityText-ev7Z1T">
+                                    {tab.description}
+                                </div>
+                                <div className="textRuler-1DsANg activityText-ev7Z1T" aria-hidden="true">
+                                    {tab.description}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </a>
+            <div className="tabs-badge-outer lowerBadge-3j0ZAg">
+                <div className="tabs-badge-inner numberBadge-37OJ3S base-3IDx3L eyebrow-132Xza baseShapeRound-3epLEv" >
+                    4
+                </div>
+            </div>
             <div onClick={handleDelete} className="closeButton-mupH76" aria-label="Close Tab" role="button">
                 <svg aria-hidden="false" role="img" className="closeIcon-1NwtbI" width="24" height="24" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">

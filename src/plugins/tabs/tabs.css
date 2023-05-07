@@ -7,13 +7,28 @@
 
 .tab-link {
     min-width: 10rem;
+    max-width: 10rem;
     color: var(--text-default);
-    background-color: var(--background-mentioned);
 }
 
 .tab-link:hover {
-    background-color: var(--background-mentioned-hover);
     cursor: pointer;
+}
+
+.tab-link-up-to-date {
+    background-color: var(--background-mentioned);
+}
+
+.tab-link-up-to-date:hover {
+    background-color: var(--background-mentioned-hover);
+}
+
+.tab-link-unread {
+    background-color: var(--background-message-highlight);
+}
+
+.tab-link-unread:hover {
+    background-color: var(--background-message-highlight-hover);
 }
 
 .tab-favorite {
@@ -44,4 +59,15 @@
 
 .tab-selected {
     background-color: var(--background-modifier-selected);
+}
+
+.tabs-badge-outer {
+    opacity: 1;
+    transform: translate(0px, 0px);
+}
+
+.tabs-badge-inner {
+    background-color: var(--status-danger);
+    width: 16px;
+    padding-right: 1px;
 }
