@@ -17,11 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { Flex } from "@components/Flex.jsx";
+import { Switch } from "@components/Switch.jsx";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy.js";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByPropsLazy } from "@webpack";
-import { ChannelStore, GuildStore } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { ChannelStore, Forms, GuildStore, TextInput, Tooltip, useState } from "@webpack/common";
+import { RC } from "@webpack/types";
 import { Channel, Message, User } from "discord-types/general";
 
 type PermissionName = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "CREATE_GUILD_EXPRESSIONS" | "VIEW_AUDIT_LOG" | "VIEW_CHANNEL" | "VIEW_GUILD_ANALYTICS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "MODERATE_MEMBERS" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "ADD_REACTIONS" | "USE_APPLICATION_COMMANDS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "PRIORITY_SPEAKER" | "STREAM" | "USE_EMBEDDED_ACTIVITIES" | "USE_SOUNDBOARD" | "USE_EXTERNAL_SOUNDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "CREATE_EVENTS";
@@ -36,6 +38,21 @@ interface Tag {
     condition?(message: Message | null, user: User, channel: Channel): boolean;
 }
 
+interface TagSetting {
+    text: string;
+    showInChat: boolean;
+    showInNotChat: boolean;
+}
+interface TagSettings {
+    WEBHOOK: TagSetting,
+    OWNER: TagSetting,
+    ADMINISTRATOR: TagSetting,
+    MODERATOR_STAFF: TagSetting,
+    MODERATOR: TagSetting,
+    VOICE_MODERATOR: TagSetting,
+    [k: string]: TagSetting;
+}
+
 const CLYDE_ID = "1081004946872352958";
 
 // PermissionStore.computePermissions is not the same function and doesn't work here
@@ -44,7 +61,7 @@ const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") 
 };
 
 const Permissions = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS") as Record<PermissionName, bigint>;
-const Tags = proxyLazy(() => find(m => m.Types?.[0] === "BOT").Types) as Record<string, number>;
+const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 
@@ -81,51 +98,89 @@ const tags: Tag[] = [
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     }
 ];
+const defaultSettings = Object.fromEntries(
+    tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
+) as TagSettings;
+
+function SettingsComponent(props) {
+    if (!settings.store.tagSettings) settings.store.tagSettings = defaultSettings;
+    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings ?? defaultSettings as TagSettings);
+    const setValue = (v: TagSettings) => {
+        setTagSettings(v);
+        props.setValue(v);
+    };
+    return <>
+        {tags.map(t => <Flex flexDirection="column" style={{ gap: 5 }}>
+            <Forms.FormDivider />
+            <Forms.FormTitle style={{ width: "fit-content" }}>
+                <Tooltip text={t.description}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                        >
+                            {t.displayName} Tag{" "}
+                            <Tag type={Tag.Types[t.name]} />
+                        </div>
+                    )}
+                </Tooltip>
+            </Forms.FormTitle>
+            <TextInput
+                type="text"
+                value={tagSettings[t.name]?.text ?? t.displayName}
+                placeholder={`Text on tag (default: ${t.displayName})`}
+                onChange={v => {
+                    tagSettings[t.name].text = v;
+                    setValue(tagSettings);
+                }}
+            />
+            <Flex flexDirection="column" style={{ gap: 8, marginTop: 6, width: "fit-content" }}>
+                <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
+                    <Forms.FormText>Show tag in messages</Forms.FormText>
+                    <Switch checked={tagSettings[t.name]?.showInChat ?? true} onChange={v => {
+                        tagSettings[t.name].showInChat = v;
+                        setValue(tagSettings);
+                    }} />
+                </Flex>
+                <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
+                    <Forms.FormText>Show tag in member list and profiles</Forms.FormText>
+                    <Switch checked={tagSettings[t.name]?.showInNotChat ?? true} onChange={v => {
+                        tagSettings[t.name].showInNotChat = v;
+                        setValue(tagSettings);
+                    }} />
+                </Flex>
+            </Flex>
+        </Flex>)}
+    </>;
+}
 
 const settings = definePluginSettings({
     dontShowForBots: {
-        description: "Don't show tags (not including the webhook tag) for bots",
+        description: "Don't show extra tags for bots (excluding webhooks)",
         type: OptionType.BOOLEAN
     },
     dontShowBotTag: {
-        description: "Don't show [BOT] text for bots with other tags (verified bots will still have checkmark)",
+        description: "Only show extra tags for bots / Hide [BOT] text",
         type: OptionType.BOOLEAN
     },
-    ...Object.fromEntries(tags.map(({ name, displayName, description }) => [
-        `visibility_${name}`, {
-            description: `Show ${displayName} tags (${description})`,
-            type: OptionType.SELECT,
-            options: [
-                {
-                    label: "Always",
-                    value: "always",
-                    default: true
-                }, {
-                    label: "Only in chat",
-                    value: "chat"
-                }, {
-                    label: "Only in member list and profiles",
-                    value: "not-chat"
-                }, {
-                    label: "Never",
-                    value: "never"
-                }
-            ]
-        }
-    ]))
+    tagSettings: {
+        type: OptionType.COMPONENT,
+        component: SettingsComponent,
+        description: "fill me",
+    }
 });
 
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias],
     settings,
     patches: [
         // add tags to the tag list
         {
             find: '.BOT=0]="BOT"',
             replacement: [
-                // add tags to the exported tags list (the Tags variable here)
+                // add tags to the exported tags list (Tag.Types)
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
                     replace: "$&$1=$self.addTagVariants($1);"
@@ -190,6 +245,39 @@ return type!==null?$2.botTag,type"
         },
     ],
 
+    start() {
+        if (!settings.store.tagSettings) {
+            // @ts-ignore
+            if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
+            else {
+                const newSettings = { ...defaultSettings };
+                Object.entries(Vencord.PlainSettings.plugins.MoreUserTags).forEach(([name, value]) => {
+                    const [setting, tag] = name.split("_");
+                    if (setting === "visibility") {
+                        switch (value) {
+                            case "always":
+                                // its the default
+                                break;
+                            case "chat":
+                                newSettings[tag].showInNotChat = false;
+                                break;
+                            case "not-chat":
+                                newSettings[tag].showInChat = false;
+                                break;
+                            case "never":
+                                newSettings[tag].showInChat = false;
+                                newSettings[tag].showInNotChat = false;
+                                break;
+                        }
+                    }
+                    settings.store.tagSettings = newSettings;
+                    Vencord.Settings.plugins.MoreUserTags[name] = null;
+                    console.log(Vencord.Settings.plugins.MoreUserTags);
+                });
+            }
+        }
+    },
+
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
@@ -215,7 +303,7 @@ return type!==null?$2.botTag,type"
         return val;
     },
 
-    isOPTag: (tag: number) => tag === Tags.ORIGINAL_POSTER || tags.some(t => tag === Tags[`${t.name}-OP`]),
+    isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
         if (!passedTagName) return "BOT";
@@ -224,13 +312,14 @@ return type!==null?$2.botTag,type"
         if (!tag) return "BOT";
         if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.BOT_TAG_BOT;
 
+        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
         switch (variant) {
             case "OP":
-                return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tag.displayName}`;
+                return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
             case "BOT":
-                return `${strings.BOT_TAG_BOT} • ${tag.displayName}`;
+                return `${strings.BOT_TAG_BOT} • ${tagText}`;
             default:
-                return tag.displayName;
+                return tagText;
         }
     },
 
@@ -242,12 +331,12 @@ return type!==null?$2.botTag,type"
         channel?: Channel & { isForumPost(): boolean; },
         channelId?: string;
         origType?: number;
-        location: string;
+        location: "chat" | "not-chat";
     }): number | null {
         if (location === "chat" && user.id === "1")
-            return Tags.OFFICIAL;
+            return Tag.Types.OFFICIAL;
         if (user.id === CLYDE_ID)
-            return Tags.AI;
+            return Tag.Types.AI;
 
         let type = typeof origType === "number" ? origType : null;
 
@@ -258,24 +347,19 @@ return type!==null?$2.botTag,type"
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            switch (settings[`visibility_${tag.name}`]) {
-                case "always":
-                case location:
-                    break;
-                default:
-                    continue;
-            }
+            if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
+            if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
 
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message!, user, channel))
             ) {
                 if (channel.isForumPost() && channel.ownerId === user.id)
-                    type = Tags[`${tag.name}-OP`];
+                    type = Tag.Types[`${tag.name}-OP`];
                 else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
-                    type = Tags[`${tag.name}-BOT`];
+                    type = Tag.Types[`${tag.name}-BOT`];
                 else
-                    type = Tags[tag.name];
+                    type = Tag.Types[tag.name];
                 break;
             }
         }
