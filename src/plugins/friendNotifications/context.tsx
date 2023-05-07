@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Menu, PresenceStore, RelationshipStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -42,7 +42,11 @@ export const UserContext: NavContextMenuPatchCallback = (children, { user }: Use
     if (!RelationshipStore.isFriend(userId)) return;
     if (!UserStore.getUser(userId)) return;
 
-    children.splice(1, 0, (
+    const group = findGroupChildrenByChildId("block", children);
+
+    if (!group) return;
+
+    group.push(
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="friend-notifications"
@@ -54,5 +58,5 @@ export const UserContext: NavContextMenuPatchCallback = (children, { user }: Use
                 action={() => contextMenuOpen(user)}
             />
         </Menu.MenuGroup>
-    ));
+    );
 };
