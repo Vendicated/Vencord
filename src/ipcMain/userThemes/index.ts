@@ -39,11 +39,11 @@ function makeHeader(fileName: string, opts: Partial<UserThemeHeader> = {}): User
         name: opts.name ?? fileName.replace(/\.css$/i, ""),
         author: opts.author ?? "Unknown Author",
         description: opts.description ?? "A Discord Theme.",
-        version: opts.version ?? undefined,
-        license: opts.license ?? undefined,
-        source: opts.source ?? undefined,
-        website: opts.website ?? undefined,
-        invite: opts.invite ?? undefined,
+        version: opts.version,
+        license: opts.license,
+        source: opts.source,
+        website: opts.website,
+        invite: opts.invite
     };
 }
 
@@ -56,8 +56,10 @@ export function stripBOM(fileContent: string) {
 
 export function getThemeInfo(css: string, fileName: string): UserThemeHeader {
     if (!css) return makeHeader(fileName);
+
     const block = css.split("/**", 2)?.[1]?.split("*/", 1)?.[0];
     if (!block) return makeHeader(fileName);
+
     const header: Partial<UserThemeHeader> = {};
     let field = "";
     let accum = "";

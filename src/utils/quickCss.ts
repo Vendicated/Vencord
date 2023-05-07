@@ -48,7 +48,7 @@ async function initThemes() {
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
-            const themeData: string = await VencordNative.ipc.invoke(IpcEvents.GET_THEME_DATA, theme).catch(() => null);
+            const themeData = await VencordNative.themes.getThemeData(theme);
             if (!themeData) continue;
             const blob = new Blob([themeData], { type: "text/css" });
             links.push(URL.createObjectURL(blob));

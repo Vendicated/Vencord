@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
-import { intersperse } from "@utils/misc";
+import { classes, intersperse } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
@@ -185,6 +185,7 @@ export default ErrorBoundary.wrap(function () {
 
         const decoder = new TextDecoder("utf-8");
 
+        const uploads: Array<Promise<void>> = [];
         for (const file of files) {
             const { name } = file;
             if (!name.endsWith(".css")) continue;
@@ -195,8 +196,11 @@ export default ErrorBoundary.wrap(function () {
             const text = decoder.decode(buffer);
             if (!text) continue;
 
-            VencordNative.themes.uploadTheme(name, text);
+            uploads.push(VencordNative.themes.uploadTheme(name, text));
         }
+
+        await Promise.all(uploads);
+        refreshLocalThemes();
     }
 
     function renderLocalThemes() {
@@ -204,7 +208,7 @@ export default ErrorBoundary.wrap(function () {
             <>
                 <Card className="vc-settings-card">
                     <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                    <div style={{ marginBottom: ".5em" }}>
+                    <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                         <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
                             BetterDiscord Themes
                         </Link>
@@ -214,38 +218,39 @@ export default ErrorBoundary.wrap(function () {
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
-                    <div className={cl("button-flex")}>
-                        {IS_WEB ?
-                            (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    disabled={themeDirPending}
-                                >
-                                    Upload Theme
-                                    <FileInput
-                                        ref={fileInputRef}
-                                        onChange={onFileUpload}
-                                        multiple={true}
-                                        filters={[{ extensions: ["*.css"] }]}
-                                    />
-                                </Button>
-                            ) : (
-
-                                <Button
-                                    onClick={() => window.DiscordNative.fileManager.showItemInFolder(themeDir)}
-                                    size={Button.Sizes.SMALL}
-                                    disabled={themeDirPending}
-                                >
-                                    Open Themes Folder
-                                </Button>
-                            )}
-                        <Button
-                            onClick={refreshLocalThemes}
-                            size={Button.Sizes.SMALL}
-                        >
-                            Refresh Theme List
-                        </Button>
-                    </div>
+                    <Card className="vc-settings-quick-actions-card">
+                        <React.Fragment>
+                            {IS_WEB ?
+                                (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        disabled={themeDirPending}
+                                    >
+                                        Upload Theme
+                                        <FileInput
+                                            ref={fileInputRef}
+                                            onChange={onFileUpload}
+                                            multiple={true}
+                                            filters={[{ extensions: ["*.css"] }]}
+                                        />
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => window.DiscordNative.fileManager.showItemInFolder(themeDir)}
+                                        size={Button.Sizes.SMALL}
+                                        disabled={themeDirPending}
+                                    >
+                                        Open Themes Folder
+                                    </Button>
+                                )}
+                            <Button
+                                onClick={refreshLocalThemes}
+                                size={Button.Sizes.SMALL}
+                            >
+                                Refresh Theme List
+                            </Button>
+                        </React.Fragment>
+                    </Card>
 
                     <div className={cl("grid")}>
                         {userThemes?.map(theme => (
@@ -253,15 +258,16 @@ export default ErrorBoundary.wrap(function () {
                                 key={theme.fileName}
                                 enabled={settings.enabledThemes.includes(theme.fileName)}
                                 onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
-                                onDelete={() => {
+                                onDelete={async () => {
                                     onLocalThemeChange(theme.fileName, false);
-                                    VencordNative.themes.deleteTheme(theme.fileName);
+                                    await VencordNative.themes.deleteTheme(theme.fileName);
+                                    refreshLocalThemes();
                                 }}
                                 theme={theme}
                             />
                         ))}
                     </div>
-                </Forms.FormSection>
+                </Forms.FormSection >
             </>
         );
     }
@@ -286,7 +292,7 @@ export default ErrorBoundary.wrap(function () {
                     <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
                     <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
                     <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                    <div style={{ marginBottom: ".5em" }}>
+                    <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                         <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
                             BetterDiscord Themes
                         </Link>
@@ -307,16 +313,13 @@ export default ErrorBoundary.wrap(function () {
 
                 <Forms.FormSection title="Online Themes" tag="h5">
                     <TextArea
-                        style={{
-                            padding: ".5em",
-                            border: "1px solid var(--background-modifier-accent)"
-                        }}
                         value={themeText}
                         onChange={setThemeText}
-                        className={TextAreaProps.textarea}
+                        className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
                         placeholder="Theme Links"
                         spellCheck={false}
                         onBlur={onBlur}
+                        rows={10}
                     />
                     <Validators themeLinks={settings.themeLinks} />
                 </Forms.FormSection>
@@ -325,7 +328,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <>;
+        <>
             <TabBar
                 type="top"
                 look="brand"
@@ -345,7 +348,7 @@ export default ErrorBoundary.wrap(function () {
                 >
                     Online Themes
                 </TabBar.Item>
-            </TabBar>;
+            </TabBar>
 
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}

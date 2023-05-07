@@ -39,11 +39,12 @@ const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
 // probably should make this less cursed at some point
 window.VencordNative = {
-    theme: {
+    themes: {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
+        getThemesDir: async () => "",
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
-            entries.map(([k, v]) => getThemeInfo(v, k.toString()))
+            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
         ),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore)
     },

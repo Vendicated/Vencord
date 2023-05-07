@@ -17,6 +17,7 @@
 */
 
 import "./settingsStyles.css";
+import "./themesStyles.css";
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
