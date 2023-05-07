@@ -44,7 +44,7 @@ export function readSettings() {
     }
 }
 
-export function getSettings(): typeof import("@api/settings").Settings {
+export function getSettings(): typeof import("@api/Settings").Settings {
     try {
         return JSON.parse(readSettings());
     } catch {
