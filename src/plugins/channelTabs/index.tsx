@@ -142,11 +142,6 @@ export default definePlugin({
                     <KeyCombo shortcut="mod+shift+tab" />
                 </Forms.FormSection>
                 <Forms.FormSection>
-                    <Forms.FormTitle>Switch between tabs with unreads</Forms.FormTitle>
-                    <KeyCombo shortcut="ctrl+shift+left" />
-                    <KeyCombo shortcut="ctrl+shift+right" />
-                </Forms.FormSection>
-                <Forms.FormSection>
                     <Forms.FormTitle>Open and close tabs</Forms.FormTitle>
                     <KeyCombo shortcut="mod+n" />
                     <KeyCombo shortcut="mod+w" />
