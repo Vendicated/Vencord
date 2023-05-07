@@ -93,7 +93,7 @@ function createTab(props: BasicChannelTabsProps, moveToTab?: boolean, messageId?
 
     let path = `/channels/${guildId}/${channelId}`;
     if (messageId) path += `/${messageId}`;
-    if (channelId !== SelectedChannelStore.getChannelId() && !messageId)
+    if (channelId !== SelectedChannelStore.getChannelId() || messageId)
         NavigationRouter.transitionTo(path);
 }
 
