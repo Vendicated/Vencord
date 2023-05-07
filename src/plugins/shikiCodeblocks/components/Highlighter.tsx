@@ -17,8 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { useAwaiter } from "@utils/misc";
-import { useIntersection } from "@utils/react";
+import { useAwaiter, useIntersection } from "@utils/react";
 import { hljs, React } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
@@ -57,7 +57,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    const myId = UserStore.getCurrentUser().id;
+    const myId = UserStore.getCurrentUser()?.id;
 
     const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, Forms } from "@webpack/common";

@@ -22,12 +22,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
-import IpcEvents from "@utils/IpcEvents";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
+import { Forms, Toasts } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
 
@@ -48,7 +47,29 @@ const ContributorBadge: ProfileBadge = {
     link: "https://github.com/Vendicated/Vencord"
 };
 
-const DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;
+let DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;
+
+async function loadBadges(noCache = false) {
+    DonorBadges = {};
+
+    const init = {} as RequestInit;
+    if (noCache)
+        init.cache = "no-cache";
+
+    const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv", init)
+        .then(r => r.text());
+
+    const lines = badges.trim().split("\n");
+    if (lines.shift() !== "id,tooltip,image") {
+        new Logger("BadgeAPI").error("Invalid badges.csv file!");
+        return;
+    }
+
+    for (const line of lines) {
+        const [id, description, image] = line.split(",");
+        (DonorBadges[id] ??= []).push({ image, description });
+    }
+}
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -82,24 +103,27 @@ export default definePlugin({
         }
     ],
 
+    toolboxActions: {
+        async "Refetch Badges"() {
+            await loadBadges(true);
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "Successfully refetched badges!",
+                type: Toasts.Type.SUCCESS
+            });
+        }
+    },
+
+    async start() {
+        Vencord.Api.Badges.addBadge(ContributorBadge);
+        await loadBadges();
+    },
+
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
         const Component = badge.component!;
         return <Component {...badge} />;
     }, { noop: true }),
 
-    async start() {
-        Vencord.Api.Badges.addBadge(ContributorBadge);
-        const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv").then(r => r.text());
-        const lines = badges.trim().split("\n");
-        if (lines.shift() !== "id,tooltip,image") {
-            new Logger("BadgeAPI").error("Invalid badges.csv file!");
-            return;
-        }
-        for (const line of lines) {
-            const [id, description, image] = line.split(",");
-            (DonorBadges[id] ??= []).push({ image, description });
-        }
-    },
 
     getDonorBadges(userId: string) {
         return DonorBadges[userId]?.map(badge => ({
@@ -115,7 +139,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>

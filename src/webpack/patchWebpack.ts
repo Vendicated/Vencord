@@ -17,7 +17,7 @@
 */
 
 import { WEBPACK_CHUNK } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 

@@ -16,65 +16,82 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/// <reference path="../src/modules.d.ts" />
+/// <reference path="../src/globals.d.ts" />
+
+import monacoHtml from "~fileContent/../src/components/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
+import { debounce } from "../src/utils";
+import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/ipcMain/userThemes";
-import IpcEvents from "../src/utils/IpcEvents";
+
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
 
 // listeners for ipc.on
-const listeners = {} as Record<string, Set<Function>>;
+const cssListeners = new Set<(css: string) => void>();
+const NOOP = () => { };
+const NOOP_ASYNC = async () => { };
+
+const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
-const handlers = {
-    [IpcEvents.GET_REPO]: () => "https://github.com/Vendicated/Vencord", // shrug
-    [IpcEvents.GET_SETTINGS_DIR]: () => "LocalStorage",
-
-    [IpcEvents.UPLOAD_THEME]: (fileName: string, fileData: string) => {
-        DataStore.set(fileName, fileData, themeStore);
-    },
-    [IpcEvents.DELETE_THEME]: (fileName: string) => {
-        DataStore.del(fileName, themeStore);
-    },
-    [IpcEvents.GET_THEMES_LIST]: () => {
-        return DataStore.entries(themeStore)
-            .then(entries => entries.map(([k, v]) => getThemeInfo(v, k.toString())));
-    },
-    [IpcEvents.GET_THEME_DATA]: (fileName: string) => DataStore.get(fileName, themeStore),
-
-    [IpcEvents.GET_QUICK_CSS]: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
-    [IpcEvents.SET_QUICK_CSS]: (css: string) => {
-        DataStore.set("VencordQuickCss", css);
-        listeners[IpcEvents.QUICK_CSS_UPDATE]?.forEach(l => l(null, css));
-    },
-
-    [IpcEvents.GET_SETTINGS]: () => localStorage.getItem("VencordSettings") || "{}",
-    [IpcEvents.SET_SETTINGS]: (s: string) => localStorage.setItem("VencordSettings", s),
-
-    [IpcEvents.GET_UPDATES]: () => ({ ok: true, value: [] }),
-
-    [IpcEvents.OPEN_EXTERNAL]: (url: string) => open(url, "_blank"),
-};
-
-function onEvent(event: string, ...args: any[]) {
-    const handler = handlers[event];
-    if (!handler) throw new Error(`Event ${event} not implemented.`);
-    return handler(...args);
-}
-
 // probably should make this less cursed at some point
 window.VencordNative = {
-    getVersions: () => ({}),
-    ipc: {
-        send: (event: string, ...args: any[]) => void onEvent(event, ...args),
-        sendSync: onEvent,
-        on(event: string, listener: () => {}) {
-            (listeners[event] ??= new Set()).add(listener);
-        },
-        off(event: string, listener: () => {}) {
-            return listeners[event]?.delete(listener);
-        },
-        invoke: async (event: string, ...args: any[]) => onEvent(event, ...args)
+    theme: {
+        uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
+        deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
+        getThemesList: () => DataStore.entries(themeStore).then(entries =>
+            entries.map(([k, v]) => getThemeInfo(v, k.toString()))
+        ),
+        getThemeData: (fileName: string) => DataStore.get(fileName, themeStore)
     },
+
+    native: {
+        getVersions: () => ({}),
+        openExternal: async (url) => void open(url, "_blank")
+    },
+
+    updater: {
+        getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
+        getUpdates: async () => ({ ok: true, value: [] }),
+        update: async () => ({ ok: true, value: false }),
+        rebuild: async () => ({ ok: true, value: true }),
+    },
+
+    quickCss: {
+        get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
+        set: async (css: string) => {
+            await DataStore.set("VencordQuickCss", css);
+            cssListeners.forEach(l => l(css));
+        },
+        addChangeListener(cb) {
+            cssListeners.add(cb);
+        },
+        openFile: NOOP_ASYNC,
+        async openEditor() {
+            const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
+            const win = open("about:blank", "VencordQuickCss", features);
+            if (!win) {
+                alert("Failed to open QuickCSS popup. Make sure to allow popups!");
+                return;
+            }
+
+            win.setCss = setCssDebounced;
+            win.getCurrentCss = () => VencordNative.quickCss.get();
+            win.getTheme = () =>
+                getTheme() === Theme.Light
+                    ? "vs-light"
+                    : "vs-dark";
+
+            win.document.write(monacoHtml);
+        },
+    },
+
+    settings: {
+        get: () => localStorage.getItem("VencordSettings") || "{}",
+        set: async (s: string) => localStorage.setItem("VencordSettings", s),
+        getSettingsDir: async () => "LocalStorage"
+    }
 };

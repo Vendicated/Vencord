@@ -16,17 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./styles.css";
-
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
-import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
-import { intersperse, useAwaiter } from "@utils/misc";
+import { intersperse } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
@@ -158,14 +156,14 @@ export default ErrorBoundary.wrap(function () {
     const [currentTab, setCurrentTab] = React.useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = React.useState(settings.themeLinks.join("\n"));
     const [userThemes, setUserThemes] = React.useState<UserThemeHeader[] | null>(null);
-    const [themeDir, , themeDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_THEMES_DIR).catch(() => ""));
+    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     React.useEffect(() => {
         refreshLocalThemes();
     }, []);
 
     async function refreshLocalThemes() {
-        const themes = await VencordNative.ipc.invoke<UserThemeHeader[]>(IpcEvents.GET_THEMES_LIST).catch(() => []);
+        const themes = await VencordNative.themes.getThemesList();
         setUserThemes(themes);
     }
 
@@ -197,9 +195,7 @@ export default ErrorBoundary.wrap(function () {
             const text = decoder.decode(buffer);
             if (!text) continue;
 
-            VencordNative.ipc.invoke(IpcEvents.UPLOAD_THEME, name, text)
-                .then(() => { refreshLocalThemes(); })
-                .catch(console.error);
+            VencordNative.themes.uploadTheme(name, text);
         }
     }
 
@@ -259,8 +255,7 @@ export default ErrorBoundary.wrap(function () {
                                 onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
                                 onDelete={() => {
                                     onLocalThemeChange(theme.fileName, false);
-                                    VencordNative.ipc.invoke(IpcEvents.DELETE_THEME, theme.fileName)
-                                        .then(() => { refreshLocalThemes(); });
+                                    VencordNative.themes.deleteTheme(theme.fileName);
                                 }}
                                 theme={theme}
                             />
