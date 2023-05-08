@@ -84,11 +84,11 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                     fetching.add(id);
                     queue.push(() =>
                         fetchUser(id)
-                            .then(() => setUserId(id))
-                            .finally(() => {
+                            .then(() => {
+                                setUserId(id);
                                 fetching.delete(id);
-                                sleep(200);
                             })
+                            .finally(() => sleep(200))
                     );
                 }}
             >
