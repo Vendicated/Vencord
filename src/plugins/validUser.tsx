@@ -22,7 +22,7 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { useState } from "@webpack/common";
+import { UserStore, useState } from "@webpack/common";
 import type { User } from "discord-types/general";
 import type { ComponentType } from "react";
 
@@ -80,6 +80,9 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
 
                     if (fetching.has(id))
                         return;
+
+                    if (UserStore.getUser(id))
+                        return setUserId(id);
 
                     fetching.add(id);
                     queue.push(() =>
