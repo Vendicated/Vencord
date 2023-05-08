@@ -26,19 +26,19 @@ import { ReactDOM } from "@webpack/common";
 import { ContextMenu } from "./components/ContextMenu";
 import TabParent from "./components/TabParent";
 import { Tab } from "./types";
-import { messageAckHandler, messageCreateHandler, tabs, tabsKey } from "./utils";
+import { channelUpdatesHandler, guildUpdateHandler, messageAckHandler, messageCreateHandler, tabs, tabsKey } from "./utils";
 
 /**
  * DONE Add middle click close tab
  * TODO Add draggable/ re-orderable tabs
  * DONE Add GDMs into tabs
  * TODO Update styling when channel is changed
- * TODO Do not allow navigation to the same channel user is currently in
  * TODO Right click on tab brings up correct context menu
  * TODO Horizontal Scroll
  * DONE Show notifications from tabs (with number)
  * TODO Make tabs keyboard navigable (with the tab key)
  * TODO Add favorite tabs
+ * TODO Update when nickname changes, username
  * DONE Add nickname into tab
  */
 
@@ -50,6 +50,8 @@ export default definePlugin({
     flux: {
         MESSAGE_CREATE: messageCreateHandler,
         MESSAGE_ACK: messageAckHandler,
+        CHANNEL_UPDATES: channelUpdatesHandler,
+        GUILD_UPDATE: guildUpdateHandler,
     },
     async start() {
         const div = document.createElement("div");
@@ -68,7 +70,6 @@ export default definePlugin({
                 tab.guildId === undefined ||
                 tab.isFavorite === undefined ||
                 tab.channelId === undefined ||
-                tab.displayName === undefined ||
                 tab.notificationCount === undefined
             ) {
                 tabs.clear();

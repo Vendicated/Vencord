@@ -52,3 +52,33 @@ export function messageAckHandler(event) {
 
     updateTabs();
 }
+
+export function channelUpdatesHandler(event) {
+    for (const channel of event.channels) {
+        const { id, name } = channel;
+        const tab = tabs.get(id);
+
+        if (!tab) continue;
+
+        tab.name = name;
+    }
+
+    updateTabs();
+}
+
+export function guildUpdateHandler(event) {
+    // Find all guilds with the guild id
+    const guildId = event.guild.id;
+
+    const tabsToUpdate = Array.from(tabs).filter(([, tab]) => {
+        return tab.guildId === guildId;
+    });
+
+    if (!tabsToUpdate.length) return;
+
+    for (const [, tab] of tabsToUpdate) {
+        tab.description = event.guild.name;
+    }
+
+    updateTabs();
+}

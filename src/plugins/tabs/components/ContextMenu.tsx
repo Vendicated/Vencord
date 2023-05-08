@@ -48,7 +48,6 @@ export const ContextMenu: NavContextMenuPatchCallback = (children, props) => {
             tabs.set(channelId, {
                 channelId: channelId,
                 name: name,
-                displayName: name,
                 description: props.guild?.name || "DM Channel",
                 isFavorite: false,
                 guildId: props.guild?.id ?? null,

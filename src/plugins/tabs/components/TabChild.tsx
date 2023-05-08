@@ -58,7 +58,7 @@ export default function TabChild({ tab }: { tab: Tab; }) {
                                     </div>
                                 }
                                 <div className="overflow-1wOqNV">
-                                    {tab.displayName}
+                                    {tab.name}
                                 </div>
                             </div>
                         </div>
