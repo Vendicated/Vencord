@@ -65,7 +65,7 @@ export const channelTabsSettings = definePluginSettings({
     },
     channelNameEmojis: {
         type: OptionType.BOOLEAN,
-        description: "Channel name emojis",
+        description: "Channel name emojis (temporarily disabled)",
         default: false
     }
 });

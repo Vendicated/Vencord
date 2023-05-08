@@ -39,7 +39,7 @@ enum ChannelTypes {
     DM = 1,
     GROUP_DM = 3
 }
-const ChannelNameEmojisStore = findStoreLazy("ChannelNameEmojisStore");
+const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore");
 const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
 const getDotWidth = findByCodeLazy("<10?16:");
 const styles = findByPropsLazy("numberBadge");
@@ -160,15 +160,16 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
-        [ReadStateStore, TypingStore, ChannelNameEmojisStore],
+        [ReadStateStore, TypingStore, /* ChannelEmojisStore*/],
         () => [
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            (channel
-                ? ChannelNameEmojisStore.getGuildChannelEmojis(props.guildId)?.[channel.name?.toLowerCase()]
-                : undefined
-            ) as string | undefined
+            // (channel
+            //     ? ChannelEmojisStore.getGuildChannelEmojis(props.guildId)?.[channel.name?.toLowerCase()]
+            //     : undefined
+            // ) as string | undefined
+            undefined
         ],
         null,
         // is this necessary?
