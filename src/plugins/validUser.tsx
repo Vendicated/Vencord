@@ -85,7 +85,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                         return setUserId(id);
 
                     fetching.add(id);
-                    queue.push(() =>
+                    queue.unshift(() =>
                         fetchUser(id)
                             .then(() => {
                                 setUserId(id);
