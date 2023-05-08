@@ -39,7 +39,7 @@ import { messageAckHandler, messageCreateHandler, tabs, tabsKey } from "./utils"
  * DONE Show notifications from tabs (with number)
  * TODO Make tabs keyboard navigable (with the tab key)
  * TODO Add favorite tabs
- * TODO Add nickname into tab
+ * DONE Add nickname into tab
  */
 
 export default definePlugin({

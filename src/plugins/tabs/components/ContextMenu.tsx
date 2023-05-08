@@ -18,7 +18,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { Menu } from "@webpack/common";
+import { Menu, RelationshipStore } from "@webpack/common";
 
 import { tabs, tabsKey, updateTabs } from "../utils";
 
@@ -41,8 +41,10 @@ export const ContextMenu: NavContextMenuPatchCallback = (children, props) => {
         const channelId = props.channel.id;
         if (tabs.has(channelId)) return;
 
+        const nickname = RelationshipStore.getNickname(props.user?.id || "");
+
         async function handleAddTab() {
-            const name = props.channel.name || props.user.username;
+            const name = props.channel.name || nickname || props.user.username;
             tabs.set(channelId, {
                 channelId: channelId,
                 name: name,
