@@ -23,14 +23,6 @@
     background-color: var(--background-mentioned-hover);
 }
 
-.tab-link-unread {
-    background-color: var(--background-message-highlight);
-}
-
-.tab-link-unread:hover {
-    background-color: var(--background-message-highlight-hover);
-}
-
 .tab-favorite {
     background-color: green;
     color: var(--text-default);
@@ -57,17 +49,18 @@
     width: 100%;
 }
 
-.tab-selected {
-    background-color: var(--background-modifier-selected);
+.tabs-title {
+    display: flex;
+    flex-direction: row;
 }
 
-.tabs-badge-outer {
-    opacity: 1;
-    transform: translate(0px, 0px);
+.tab-selected {
+    background-color: var(--background-modifier-selected);
 }
 
 .tabs-badge-inner {
     background-color: var(--status-danger);
     width: 16px;
     padding-right: 1px;
+    margin-right: 0.5rem;
 }

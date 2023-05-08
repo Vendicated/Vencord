@@ -50,7 +50,7 @@ export const ContextMenu: NavContextMenuPatchCallback = (children, props) => {
                 description: props.guild?.name || "DM Channel",
                 isFavorite: false,
                 guildId: props.guild?.id ?? null,
-                hasUnread: false,
+                notificationCount: 0
             });
 
             // Persist data

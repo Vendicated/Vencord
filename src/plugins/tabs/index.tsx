@@ -26,7 +26,7 @@ import { ReactDOM } from "@webpack/common";
 import { ContextMenu } from "./components/ContextMenu";
 import TabParent from "./components/TabParent";
 import { Tab } from "./types";
-import { messageCreateHandler, tabs, tabsKey } from "./utils";
+import { messageAckHandler, messageCreateHandler, tabs, tabsKey } from "./utils";
 
 /**
  * DONE Add middle click close tab
@@ -36,9 +36,10 @@ import { messageCreateHandler, tabs, tabsKey } from "./utils";
  * TODO Do not allow navigation to the same channel user is currently in
  * TODO Right click on tab brings up correct context menu
  * TODO Horizontal Scroll
- * TODO Show notifications from tabs (with number)
+ * DONE Show notifications from tabs (with number)
  * TODO Make tabs keyboard navigable (with the tab key)
  * TODO Add favorite tabs
+ * TODO Add nickname into tab
  */
 
 export default definePlugin({
@@ -47,7 +48,8 @@ export default definePlugin({
     // TODO add devs.axu
     authors: [],
     flux: {
-        MESSAGE_CREATE: messageCreateHandler
+        MESSAGE_CREATE: messageCreateHandler,
+        MESSAGE_ACK: messageAckHandler,
     },
     async start() {
         const div = document.createElement("div");
@@ -66,7 +68,8 @@ export default definePlugin({
                 tab.guildId === undefined ||
                 tab.isFavorite === undefined ||
                 tab.channelId === undefined ||
-                tab.displayName === undefined
+                tab.displayName === undefined ||
+                tab.notificationCount === undefined
             ) {
                 tabs.clear();
                 await DataStore.set(tabsKey(), tabs);

@@ -38,8 +38,17 @@ export function messageCreateHandler(event) {
 
     if (!tab) return;
 
-    tab.hasUnread = true;
+    ++tab.notificationCount;
 
-    console.log(tab.name, "is now unread");
+    updateTabs();
+}
+
+export function messageAckHandler(event) {
+    const tab = tabs.get(event.channelId);
+
+    if (!tab) return;
+
+    tab.notificationCount = 0;
+
     updateTabs();
 }

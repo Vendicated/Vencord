@@ -21,7 +21,7 @@ export type Tab = {
     displayName: string;
     description: string;
     isFavorite: boolean;
-    hasUnread: boolean;
+    notificationCount: number;
     channelId: string;
     guildId: string | null;
 };
