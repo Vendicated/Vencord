@@ -23,7 +23,7 @@ import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
-import { User } from "discord-types/general";
+import type { User } from "discord-types/general";
 import type { ComponentType } from "react";
 
 const fetching = new Set<string>();
