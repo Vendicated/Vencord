@@ -99,7 +99,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                                         fetching.delete(id);
                                     }
                                 })
-                                .finally(() => sleep(500))
+                                .finally(() => sleep(300))
                         );
                     };
 
