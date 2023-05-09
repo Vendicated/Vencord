@@ -32,6 +32,7 @@ interface TranslationData {
 
 export async function translate(inputLang: Language, outputLang: Language, text: string) {
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
+        // see https://stackoverflow.com/a/29537590 for more params
         // holy shidd nvidia
         client: "gtx",
         // source language
