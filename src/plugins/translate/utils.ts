@@ -23,6 +23,7 @@ import { Language } from "./languages";
 export const cl = classNameFactory("vc-trans-");
 
 interface TranslationData {
+    src: string;
     sentences: {
         // 🏳️‍⚧️
         trans: string;
@@ -47,10 +48,13 @@ export async function translate(inputLang: Language, outputLang: Language, text:
             + `\n${res.status} ${res.statusText}`
         );
 
-    const data: TranslationData = await res.json();
+    const { src, sentences }: TranslationData = await res.json();
 
-    return data.sentences
-        .map(s => s?.trans)
-        .filter(Boolean)
-        .join("");
+    return {
+        src,
+        text: sentences.
+            map(s => s?.trans).
+            filter(Boolean).
+            join("")
+    };
 }
