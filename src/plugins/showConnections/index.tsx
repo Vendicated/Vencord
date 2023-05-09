@@ -20,7 +20,6 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
@@ -28,8 +27,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { Text, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
-
-import { VerifiedIcon } from "./VerifiedIcon";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
 const UserProfileStore = findStoreLazy("UserProfileStore");
@@ -122,17 +119,9 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
         />
     );
 
-    const TooltipIcon = url ? LinkIcon : CopyIcon;
-
     return (
         <Tooltip
-            text={
-                <span className="vc-sc-tooltip">
-                    {connection.name}
-                    <TooltipIcon height={16} width={16} />
-                    {connection.verified && <VerifiedIcon />}
-                </span>
-            }
+            text={`${connection.name}${!connection.verified ? " (unverified)" : ""}`}
             key={connection.id}
         >
             {tooltipProps =>

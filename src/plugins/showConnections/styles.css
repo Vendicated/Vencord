@@ -3,9 +3,3 @@
     display: inline-block;
     cursor: pointer;
 }
-
-.vc-sc-tooltip {
-    display: inline-flex;
-    gap: 0.25em;
-    align-items: center;
-}
