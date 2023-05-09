@@ -27,7 +27,7 @@ import type { User } from "discord-types/general";
 import type { ComponentType } from "react";
 
 const fetching = new Set<string>();
-const queue = new Queue();
+const queue = new Queue(5);
 const fetchUser = findByCodeLazy("USER(") as (id: string) => Promise<User>;
 
 interface MentionProps {
