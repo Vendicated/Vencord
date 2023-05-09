@@ -104,7 +104,7 @@ const defaultSettings = Object.fromEntries(
 
 function SettingsComponent(props) {
     settings.store.tagSettings ??= defaultSettings;
-    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings ?? defaultSettings as TagSettings);
+    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
     const setValue = (v: TagSettings) => {
         setTagSettings(v);
         props.setValue(v);
