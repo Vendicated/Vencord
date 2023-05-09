@@ -26,6 +26,7 @@ import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu, ReadStateStore, Text, TypingStore,
     useDrag, useDrop, useEffect, UserStore, useState, useStateFromStores
 } from "@webpack/common";
+import { FluxStore } from "@webpack/types";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
@@ -39,7 +40,9 @@ enum ChannelTypes {
     DM = 1,
     GROUP_DM = 3
 }
-const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore");
+const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore") as FluxStore & {
+    getChannelEmoji(channelId: string): [string, unknown] | undefined;
+};
 const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
 const getDotWidth = findByCodeLazy("<10?16:");
 const styles = findByPropsLazy("numberBadge");
@@ -160,16 +163,12 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
-        [ReadStateStore, TypingStore, /* ChannelEmojisStore*/],
+        [ReadStateStore, TypingStore, ChannelEmojisStore],
         () => [
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            // (channel
-            //     ? ChannelEmojisStore.getGuildChannelEmojis(props.guildId)?.[channel.name?.toLowerCase()]
-            //     : undefined
-            // ) as string | undefined
-            undefined
+            ChannelEmojisStore.getChannelEmoji(channelId)?.[0]
         ],
         null,
         // is this necessary?
