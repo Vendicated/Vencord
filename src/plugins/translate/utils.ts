@@ -18,7 +18,8 @@
 
 import { classNameFactory } from "@api/Styles";
 
-import { Language } from "./languages";
+import { settings } from "./settings";
+
 
 export const cl = classNameFactory("vc-trans-");
 
@@ -30,15 +31,23 @@ interface TranslationData {
     }[];
 }
 
-export async function translate(inputLang: Language, outputLang: Language, text: string) {
+export interface TranslationValue {
+    src: string;
+    text: string;
+}
+
+export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+    const sourceLang = settings.store[kind + "Input"];
+    const targetLang = settings.store[kind + "Output"];
+
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
         // see https://stackoverflow.com/a/29537590 for more params
         // holy shidd nvidia
         client: "gtx",
         // source language
-        sl: inputLang,
+        sl: sourceLang,
         // target language
-        tl: outputLang,
+        tl: targetLang,
         // what to return, t = translation probably
         dt: "t",
         // Send json object response instead of weird array
@@ -51,7 +60,7 @@ export async function translate(inputLang: Language, outputLang: Language, text:
     const res = await fetch(url);
     if (!res.ok)
         throw new Error(
-            `Failed to translate "${text}" (${inputLang} -> ${outputLang}`
+            `Failed to translate "${text}" (${sourceLang} -> ${targetLang}`
             + `\n${res.status} ${res.statusText}`
         );
 

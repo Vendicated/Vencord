@@ -18,20 +18,24 @@
 
 import "./styles.css";
 
+import { addAccessory } from "@api/MessageAccessories";
+import { addButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, Tooltip } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateIcon } from "./TranslateIcon";
 import { TranslateModal } from "./TranslateModal";
+import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate",
     authors: [Devs.Ven],
+    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
 
     settings,
 
@@ -46,6 +50,25 @@ export default definePlugin({
             }
         },
     ],
+
+    start() {
+        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+
+        addButton("vc-translate", message => {
+            if (!message.content) return null;
+
+            return {
+                label: "Translate",
+                icon: TranslateIcon,
+                message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: async () => {
+                    const trans = await translate("received", message.content);
+                    handleTranslate(message.id, trans);
+                }
+            };
+        });
+    },
 
     chatBarIcon() {
         return (
