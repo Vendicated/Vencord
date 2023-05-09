@@ -1,0 +1,12 @@
+.vc-trans-modal-content {
+    padding: 1em;
+}
+
+.vc-trans-modal-header {
+    justify-content: space-between;
+    align-content: center;
+}
+
+.vc-trans-modal-header h1 {
+    margin: 0;
+}
