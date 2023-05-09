@@ -84,15 +84,26 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                     if (UserStore.getUser(id))
                         return setUserId(id);
 
-                    fetching.add(id);
-                    queue.unshift(() =>
-                        fetchUser(id)
-                            .then(() => {
-                                setUserId(id);
-                                fetching.delete(id);
-                            })
-                            .finally(() => sleep(200))
-                    );
+                    const fetch = () => {
+                        fetching.add(id);
+
+                        queue.unshift(() =>
+                            fetchUser(id)
+                                .then(() => {
+                                    setUserId(id);
+                                    fetching.delete(id);
+                                })
+                                .catch(e => {
+                                    if (e?.status === 429) {
+                                        queue.unshift(() => sleep(1000).then(fetch));
+                                        fetching.delete(id);
+                                    }
+                                })
+                                .finally(() => sleep(300))
+                        );
+                    };
+
+                    fetch();
                 }}
             >
                 {children}
