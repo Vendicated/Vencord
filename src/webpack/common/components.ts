@@ -44,7 +44,8 @@ export let Popout: t.Popout;
 export let Dialog: t.Dialog;
 export let TabBar: any;
 // token lagger real
-export let useToken: any;
+/** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
+export let useToken: t.useToken;
 
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
