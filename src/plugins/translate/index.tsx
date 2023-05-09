@@ -18,16 +18,16 @@
 
 import "./styles.css";
 
-import { addAccessory } from "@api/MessageAccessories";
-import { addButton } from "@api/MessagePopover";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addButton, removeButton } from "@api/MessagePopover";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, Tooltip } from "@webpack/common";
+import { ChannelStore } from "@webpack/common";
 
 import { settings } from "./settings";
-import { TranslateIcon } from "./TranslateIcon";
-import { TranslateModal } from "./TranslateModal";
+import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
@@ -36,9 +36,8 @@ export default definePlugin({
     description: "Translate messages with Google Translate",
     authors: [Devs.Ven],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
-
     settings,
-
+    // not used, just here in case some other plugin wants it or w/e
     translate,
 
     patches: [
@@ -68,35 +67,20 @@ export default definePlugin({
                 }
             };
         });
+
+        this.preSend = addPreSendListener(async (_, message) => {
+            if (!settings.store.autoTranslate) return;
+            if (!message.content) return;
+
+            message.content = (await translate("sent", message.content)).text;
+        });
     },
 
-    chatBarIcon() {
-        return (
-            <Tooltip text="Open Translate Modal">
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div style={{ display: "flex" }}>
-                        <Button
-                            aria-haspopup="dialog"
-                            aria-label=""
-                            size=""
-                            look={ButtonLooks.BLANK}
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                            innerClassName={ButtonWrapperClasses.button}
-                            onClick={() =>
-                                openModal(props => (
-                                    <TranslateModal rootProps={props} />
-                                ))
-                            }
-                            style={{ padding: "0 4px" }}
-                        >
-                            <div className={ButtonWrapperClasses.buttonWrapper}>
-                                <TranslateIcon />
-                            </div>
-                        </Button>
-                    </div>
-                )}
-            </Tooltip>
-        );
+    stop() {
+        removePreSendListener(this.preSend);
+        removeButton("vc-translate");
+        removeAccessory("vc-translation");
     },
+
+    chatBarIcon: ErrorBoundary.wrap(TranslateChatBarIcon, { noop: true }),
 });
