@@ -32,12 +32,18 @@ interface TranslationData {
 
 export async function translate(inputLang: Language, outputLang: Language, text: string) {
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
+        // holy shidd nvidia
         client: "gtx",
+        // source language
         sl: inputLang,
+        // target language
         tl: outputLang,
+        // what to return, t = translation probably
         dt: "t",
+        // Send json object response instead of weird array
         dj: "1",
         source: "input",
+        // query, duh
         q: text
     });
 
