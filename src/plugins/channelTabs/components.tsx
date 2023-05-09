@@ -41,6 +41,8 @@ enum ChannelTypes {
     GROUP_DM = 3
 }
 const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore") as FluxStore & {
+    // from what i can tell the unknown is supposed to be the background color for the emoji but it's just null atm
+    // also it looks like they'll allow custom emojis in the future ([0] as emoji id instead of unicode char) so probably handle that
     getChannelEmoji(channelId: string): [string, unknown] | undefined;
 };
 const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
