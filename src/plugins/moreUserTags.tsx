@@ -273,8 +273,7 @@ return type!==null?$2.botTag,type"
                     }
                 }
                 settings.store.tagSettings = newSettings;
-                Vencord.Settings.plugins.MoreUserTags[name] = null;
-                console.log(Vencord.Settings.plugins.MoreUserTags);
+                delete Vencord.Settings.plugins.MoreUserTags[name];
             });
         }
     },
