@@ -109,49 +109,51 @@ function SettingsComponent(props) {
         setTagSettings(v);
         props.setValue(v);
     };
-    return <>
-        {tags.map(t => <Flex flexDirection="column" style={{ gap: 5 }}>
-            <Forms.FormDivider />
-            <Forms.FormTitle style={{ width: "fit-content" }}>
-                <Tooltip text={t.description}>
-                    {({ onMouseEnter, onMouseLeave }) => (
-                        <div
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                        >
-                            {t.displayName} Tag{" "}
-                            <Tag type={Tag.Types[t.name]} />
-                        </div>
-                    )}
-                </Tooltip>
-            </Forms.FormTitle>
-            <TextInput
-                type="text"
-                value={tagSettings[t.name]?.text ?? t.displayName}
-                placeholder={`Text on tag (default: ${t.displayName})`}
-                onChange={v => {
-                    tagSettings[t.name].text = v;
-                    setValue(tagSettings);
-                }}
-            />
-            <Flex flexDirection="column" style={{ gap: 8, marginTop: 6, width: "fit-content" }}>
-                <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
-                    <Forms.FormText>Show tag in messages</Forms.FormText>
-                    <Switch checked={tagSettings[t.name]?.showInChat ?? true} onChange={v => {
-                        tagSettings[t.name].showInChat = v;
+    return (
+        <div>
+            {tags.map(t => <Flex flexDirection="column" style={{ gap: 5 }}>
+                <Forms.FormDivider />
+                <Forms.FormTitle style={{ width: "fit-content" }}>
+                    <Tooltip text={t.description}>
+                        {({ onMouseEnter, onMouseLeave }) => (
+                            <div
+                                onMouseEnter={onMouseEnter}
+                                onMouseLeave={onMouseLeave}
+                            >
+                                {t.displayName} Tag{" "}
+                                <Tag type={Tag.Types[t.name]} />
+                            </div>
+                        )}
+                    </Tooltip>
+                </Forms.FormTitle>
+                <TextInput
+                    type="text"
+                    value={tagSettings[t.name]?.text ?? t.displayName}
+                    placeholder={`Text on tag (default: ${t.displayName})`}
+                    onChange={v => {
+                        tagSettings[t.name].text = v;
                         setValue(tagSettings);
-                    }} />
+                    }}
+                />
+                <Flex flexDirection="column" style={{ gap: 8, marginTop: 6, width: "fit-content" }}>
+                    <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Forms.FormText>Show tag in messages</Forms.FormText>
+                        <Switch checked={tagSettings[t.name]?.showInChat ?? true} onChange={v => {
+                            tagSettings[t.name].showInChat = v;
+                            setValue(tagSettings);
+                        }} />
+                    </Flex>
+                    <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Forms.FormText>Show tag in member list and profiles</Forms.FormText>
+                        <Switch checked={tagSettings[t.name]?.showInNotChat ?? true} onChange={v => {
+                            tagSettings[t.name].showInNotChat = v;
+                            setValue(tagSettings);
+                        }} />
+                    </Flex>
                 </Flex>
-                <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
-                    <Forms.FormText>Show tag in member list and profiles</Forms.FormText>
-                    <Switch checked={tagSettings[t.name]?.showInNotChat ?? true} onChange={v => {
-                        tagSettings[t.name].showInNotChat = v;
-                        setValue(tagSettings);
-                    }} />
-                </Flex>
-            </Flex>
-        </Flex>)}
-    </>;
+            </Flex>)}
+        </div>
+    );
 }
 
 const settings = definePluginSettings({
