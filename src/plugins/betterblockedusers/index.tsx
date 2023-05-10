@@ -19,29 +19,8 @@
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Channel, Message } from "discord-types/general";
 
 import style from "./style.css?managed";
-
-interface ActionBarProps {
-    channel: Channel;
-    unreadId: string;
-    collapsedReason: {
-        message: string;
-        hasMarkdown: boolean;
-    };
-    messages: {
-        type: string;
-        content: {
-            type: string;
-            content: Message;
-            groupId: string;
-            isHighlight: boolean;
-        }[];
-        key: string;
-        isHighlight: boolean;
-    };
-}
 
 // export const settings = definePluginSettings({
 //     showingAllowed: {
@@ -57,14 +36,14 @@ export default definePlugin({
     authors: [Devs.IThundxr],
     // settings,
     patches: [{
-        find: "forum-post-action-bar-",
+        find: "isBeforeGroup:",
         replacement: {
-            match: /(\w\.type===.{2,5}\.MESSAGE_GROUP_BLOCKED.*?;return\(0,\w\.jsx\)\()(\w+),\{/,
-            replace: (_, head, component) => `${head}$self.actionBarComponent,{originalComponent:${component},`
+            match: /(\.collapsedReason;return\(0,\w\.jsx\)\(\w+\.Z,{.*?childrenMessageContent:\(0,\w\.jsx\)\()\w+\.Z,/,
+            replace: (_, head) => `${head}$self.actionBarComponent,`
         }
     }],
 
-    actionBarComponent(props: ActionBarProps & { originalComponent: React.FC<ActionBarProps>; }) {
+    actionBarComponent(props: { children: React.ReactNode[]; compact: boolean; }) {
         // const { showingAllowed } = settings.use(["showingAllowed"]);
 
         return (
@@ -78,6 +57,8 @@ export default definePlugin({
                     </span>
                 </div>
                 {/* {showingAllowed ? (<props.originalComponent {...props} />) : null} */}
+                {props.children}
+                {/* {self.shouldShowContent(true)} */}
             </div>
         );
     },
