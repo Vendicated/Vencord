@@ -20,6 +20,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
@@ -100,7 +101,13 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             >
                 Connections
             </Text>
-            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            <Flex style={{
+                gap: getSpacingPx(settings.store.iconSpacing),
+                marginTop: getSpacingPx(settings.store.iconSpacing),
+                flexWrap: "wrap"
+            }}>
+                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            </Flex>
         </Section>
     );
 }
@@ -114,8 +121,6 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
             aria-label={connection.name}
             src={theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG}
             style={{
-                marginTop: getSpacingPx(settings.store.iconSpacing),
-                marginRight: getSpacingPx(settings.store.iconSpacing),
                 width: settings.store.iconSize,
                 height: settings.store.iconSize
             }}
