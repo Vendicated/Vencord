@@ -23,22 +23,26 @@ export const settings = definePluginSettings({
     receivedInput: {
         type: OptionType.STRING,
         description: "Input language for received messages",
-        default: "auto"
+        default: "auto",
+        hidden: true
     },
     receivedOutput: {
         type: OptionType.STRING,
         description: "Output language for received messages",
-        default: "en"
+        default: "en",
+        hidden: true
     },
     sentInput: {
         type: OptionType.STRING,
         description: "Input language for sent messages",
-        default: "auto"
+        default: "auto",
+        hidden: true
     },
     sentOutput: {
         type: OptionType.STRING,
         description: "Output language for sent messages",
-        default: "en"
+        default: "en",
+        hidden: true
     },
     autoTranslate: {
         type: OptionType.BOOLEAN,
