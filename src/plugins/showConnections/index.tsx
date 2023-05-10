@@ -102,8 +102,8 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
                 Connections
             </Text>
             <Flex style={{
+                marginTop: "8px",
                 gap: getSpacingPx(settings.store.iconSpacing),
-                marginTop: getSpacingPx(settings.store.iconSpacing),
                 flexWrap: "wrap"
             }}>
                 {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
