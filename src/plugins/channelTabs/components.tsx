@@ -23,8 +23,8 @@ import { classes } from "@utils/misc.jsx";
 import { LazyComponent, useForceUpdater } from "@utils/react.jsx";
 import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
-    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu, ReadStateStore, Text, TypingStore,
-    useDrag, useDrop, useEffect, UserStore, useState, useStateFromStores
+    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu,
+    ReadStateStore, Text, TypingStore, useEffect, useRef, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 import { FluxStore } from "@webpack/types";
 import { Channel, Guild, User } from "discord-types/general";
@@ -33,7 +33,7 @@ import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings, ChannelTa
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    isTabSelected, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab
+    isTabSelected, moveDraggedTabs, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -51,6 +51,8 @@ const styles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
+const useDrag = findByCodeLazy(".disconnectDragSource(");
+const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
@@ -242,18 +244,38 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>
     </>;
 }
-function ChannelTab(props: ChannelTabsProps) {
-    const guild = GuildStore.getGuild(props.guildId);
-    const channel = ChannelStore.getChannel(props.channelId);
+function ChannelTab(props: ChannelTabsProps & { index: number, update: () => void; }) {
+    const { channelId, guildId, id, index, update } = props;
+    const guild = GuildStore.getGuild(guildId);
+    const channel = ChannelStore.getChannel(channelId);
 
-    const [{ isDragging }, drag] = useDrag(() => ({
+    const ref = useRef<HTMLDivElement>(null);
+    const [, drag] = useDrag(() => ({
         type: "vc_ChannelTab",
+        item: () => {
+            return { id, index };
+        },
         collect: monitor => ({
             isDragging: !!monitor.isDragging()
         }),
     }));
+    const [, drop] = useDrop(() => ({
+        accept: "vc_ChannelTab",
+        hover: item => {
+            if (!ref.current) return;
 
-    const tab = <div className={cl("tab-base")} ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
+            const dragIndex = item.index;
+            const hoverIndex = index;
+            if (dragIndex === hoverIndex) return;
+
+            moveDraggedTabs(dragIndex, hoverIndex);
+            item.index = hoverIndex;
+            update();
+        },
+    }), []);
+    drag(drop(ref));
+
+    const tab = <div className={cl("tab-base")} ref={ref}>
         <ChannelTabContent {...props} guild={guild} channel={channel} />
     </div>;
     return tab;
@@ -307,19 +329,9 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         };
     }, []);
 
-    const [, drop] = useDrop(() => ({
-        accept: "vc_ChannelTab",
-        collect: monitor => ({
-            isOver: !!monitor.isOver(),
-        }),
-        drop: (item, monitor) => {
-            // TODO: figure this out
-        },
-    }), []);
-
     handleChannelSwitch(props);
 
-    return <div className={cl("container")} ref={drop}>
+    return <div className={cl("container")}>
         {openTabs.map((ch, i) => <div
             className={classes(cl("tab"), isTabSelected(ch.id) ? cl("tab-selected") : null)}
             key={i}
@@ -335,7 +347,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
                 className={classes(cl("button"), cl("channel-info"))}
                 onClick={() => { moveToTab(ch.id); update(); }}
             >
-                <ChannelTab {...ch} />
+                <ChannelTab {...ch} index={i} update={update} />
             </button>
             {openTabs.length > 1 && <button className={classes(cl("button"), cl("close-button"))} onClick={() => {
                 closeTab(ch.id);

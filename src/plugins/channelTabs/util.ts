@@ -246,7 +246,14 @@ function reopenClosedTab() {
     createTab(tab, true);
 }
 
+function moveDraggedTabs(index1: number, index2: number) {
+    if (index1 < 0 || index2 > openTabs.length)
+        return console.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
+    const firstItem = openTabs.splice(index1, 1)[0];
+    openTabs.splice(index2, 0, firstItem);
+}
+
 export const ChannelTabsUtils = {
     closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
-    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab
+    moveDraggedTabs, moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab
 };
