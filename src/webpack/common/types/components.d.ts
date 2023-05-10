@@ -375,3 +375,15 @@ export type Popout = ComponentType<{
 };
 
 export type Dialog = ComponentType<PropsWithChildren<any>>;
+
+type Resolve = (data: { theme: "light" | "dark", saturation: number; }) => {
+    hex(): string;
+    hsl(): string;
+    int(): number;
+    spring(): string;
+};
+
+export type useToken = (color: {
+    css: string;
+    resolve: Resolve;
+}) => ReturnType<Resolve>;

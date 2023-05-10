@@ -20,6 +20,8 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
@@ -27,6 +29,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { Text, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
+
+import { VerifiedIcon } from "./VerifiedIcon";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
 const UserProfileStore = findStoreLazy("UserProfileStore");
@@ -97,7 +101,13 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             >
                 Connections
             </Text>
-            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            <Flex style={{
+                marginTop: "8px",
+                gap: getSpacingPx(settings.store.iconSpacing),
+                flexWrap: "wrap"
+            }}>
+                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            </Flex>
         </Section>
     );
 }
@@ -111,17 +121,23 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
             aria-label={connection.name}
             src={theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG}
             style={{
-                marginTop: getSpacingPx(settings.store.iconSpacing),
-                marginRight: getSpacingPx(settings.store.iconSpacing),
                 width: settings.store.iconSize,
                 height: settings.store.iconSize
             }}
         />
     );
 
+    const TooltipIcon = url ? LinkIcon : CopyIcon;
+
     return (
         <Tooltip
-            text={`${connection.name}${!connection.verified ? " (unverified)" : ""}`}
+            text={
+                <span className="vc-sc-tooltip">
+                    {connection.name}
+                    {connection.verified && <VerifiedIcon />}
+                    <TooltipIcon height={16} width={16} />
+                </span>
+            }
             key={connection.id}
         >
             {tooltipProps =>
