@@ -64,7 +64,7 @@ export default definePlugin({
                 },
                 {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
-                    replace: "&&$self.showBadge(arguments[0])$&"
+                    replace: "&&$self.shouldShowBadge(arguments[0])$&"
                 }
             ]
         },
@@ -108,7 +108,7 @@ export default definePlugin({
         if (data[userId]) return 2;
     },
 
-    showBadge({ displayProfile, user }: any) {
+    shouldShowBadge({ displayProfile, user }: any) {
         return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
     },
 
