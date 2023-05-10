@@ -20,7 +20,6 @@ import { classNameFactory } from "@api/Styles";
 
 import { settings } from "./settings";
 
-
 export const cl = classNameFactory("vc-trans-");
 
 interface TranslationData {
