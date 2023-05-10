@@ -41,10 +41,6 @@ export const friendsPreviousStatusesKey = () => `friend-notifications-tracking-$
 
 const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
 
-/**
- * FIXME visual glitch with long custom status text
- */
-
 export async function init() {
     const friendsArr = RelationshipStore.getFriendIDs();
     for (const friend of friendsArr) {
@@ -78,6 +74,14 @@ export async function init() {
     });
 }
 
+function truncateString(str: string, num: number) {
+    if (str.length <= num) {
+        return str;
+    } else {
+        return str.slice(0, num) + "...";
+    }
+}
+
 async function statusTextHandler(activities: Activity[], user: User) {
     const { id, username } = user;
 
@@ -100,17 +104,20 @@ async function statusTextHandler(activities: Activity[], user: User) {
 
     if (!customStatusActivity && !lastStatus) return;
 
+    const prevShort = truncateString(lastStatus?.state ?? "", 10);
+    const currentShort = truncateString(customStatusActivity?.state ?? "", 10);
+
     /**
       * Case 1. User set their status to something
       * Case 2. User's status was bye-bye'd (or it expired)
       * Case 3. User changed their status
       */
     if (!lastStatus && customStatusActivity) {
-        await notify(`${username} set status text to "${customStatusActivity.state}"`, user);
+        await notify(`${username} set status text to "${currentShort}"`, user);
     } else if (lastStatus && !customStatusActivity) {
-        await notify(`${username}'s status text was deleted "${lastStatus.state}"`, user);
+        await notify(`${username}'s status text was deleted "${prevShort}"`, user);
     } else if (lastStatus && customStatusActivity && lastStatus.state !== customStatusActivity.state) {
-        await notify(`${username} changed status text, previously: "${lastStatus.state}," currently: "${customStatusActivity.state}"`, user);
+        await notify(`${username} changed status text, previously: "${prevShort}," currently: "${currentShort}"`, user);
     }
 
     // Update values
