@@ -85,7 +85,7 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ padding: "0 4px" }}
+                        style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
