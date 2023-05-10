@@ -52,7 +52,7 @@ export function LinkIcon({ height = 24, width = 24, className }: IconProps) {
         <Icon
             height={height}
             width={width}
-            className={className}
+            className={classes(className, "vc-link-icon")}
             viewBox="0 0 24 24"
         >
             <g fill="none" fill-rule="evenodd">
@@ -71,6 +71,7 @@ export function CopyIcon(props: IconProps) {
     return (
         <Icon
             {...props}
+            className={classes(props.className, "vc-copy-icon")}
             viewBox="0 0 24 24"
         >
             <g fill="currentColor">
