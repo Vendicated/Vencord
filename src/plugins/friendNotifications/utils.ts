@@ -74,12 +74,19 @@ export async function init() {
     });
 }
 
+
 function truncateString(str: string, num: number) {
     if (str.length <= num) {
         return str;
-    } else {
-        return str.slice(0, num) + "...";
     }
+    let truncated = str.slice(0, num);
+
+    const lastSpaceIndex = truncated.lastIndexOf(" ");
+    if (lastSpaceIndex !== -1) {
+        truncated = truncated.slice(0, lastSpaceIndex);
+    }
+
+    return truncated + "...";
 }
 
 async function statusTextHandler(activities: Activity[], user: User) {
@@ -104,8 +111,12 @@ async function statusTextHandler(activities: Activity[], user: User) {
 
     if (!customStatusActivity && !lastStatus) return;
 
-    const prevShort = truncateString(lastStatus?.state ?? "", 10);
-    const currentShort = truncateString(customStatusActivity?.state ?? "", 10);
+    const prevShort = truncateString(lastStatus?.state ?? "", 15);
+    const currentShort = truncateString(customStatusActivity?.state ?? "", 15);
+
+    // Get nickname
+    const nickname = RelationshipStore.getNickname(id);
+    const displayName = nickname ?? username;
 
     /**
       * Case 1. User set their status to something
@@ -113,11 +124,11 @@ async function statusTextHandler(activities: Activity[], user: User) {
       * Case 3. User changed their status
       */
     if (!lastStatus && customStatusActivity) {
-        await notify(`${username} set status text to "${currentShort}"`, user);
+        await notify(`${displayName} set status`, currentShort, user);
     } else if (lastStatus && !customStatusActivity) {
-        await notify(`${username}'s status text was deleted "${prevShort}"`, user);
+        await notify(`${displayName} deleted status`, prevShort, user);
     } else if (lastStatus && customStatusActivity && lastStatus.state !== customStatusActivity.state) {
-        await notify(`${username} changed status text, previously: "${prevShort}," currently: "${currentShort}"`, user);
+        await notify(`${displayName} set status`, `from "${prevShort}" to "${currentShort}"`, user);
     }
 
     // Update values
@@ -168,6 +179,10 @@ export async function presenceUpdate({ updates }: { updates: Update[]; }) {
         // Set new status
         tracked.set(id, status);
 
+        // Get nick
+        const nickname = RelationshipStore.getNickname(user.id);
+        const displayName = nickname ?? username;
+
         /*
          * Figure out what happened.
          * Case 1. Current status is offline
@@ -184,20 +199,20 @@ export async function presenceUpdate({ updates }: { updates: Update[]; }) {
          */
         if (status === "offline") {
             if (!settings.store.offlineNotifications) continue;
-            await notify(`${username} went offline`, user);
+            await notify(plugin.name, `${displayName} went offline`, user);
         } else if (
             ((prevStatus === null || prevStatus === "offline") &&
                 ["online", "dnd", "idle"].includes(status))
         ) {
             if (!settings.store.onlineNotifications) continue;
-            await notify(`${username} came online`, user);
+            await notify(plugin.name, `${displayName} came online`, user);
         } else {
             await statusTextHandler(activities, user);
         }
     }
 }
 
-export async function notify(text: string, user: User) {
+export async function notify(title: string, body: string, user: User) {
     if (!settings.store.notifications) return;
 
     // Set to the default action in case
@@ -206,8 +221,8 @@ export async function notify(text: string, user: User) {
     const avatarURL = UserStore.getUser(user.id).getAvatarURL();
 
     await showNotification({
-        title: plugin.name,
-        body: text,
+        title: title,
+        body: body,
         icon: avatarURL,
         dismissOnClick: action === "dismiss",
         onClick: () => {
