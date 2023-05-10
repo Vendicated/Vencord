@@ -124,9 +124,4 @@ export default definePluginSettings({
             }</div>;
         }
     },
-    debug: {
-        type: OptionType.BOOLEAN,
-        description: "Adds debug information (recommended is keeping this disabled unless you know what you're doing)",
-        default: false
-    },
 });
