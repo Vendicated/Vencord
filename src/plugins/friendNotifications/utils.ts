@@ -63,8 +63,6 @@ export async function init() {
 
     const storeValuesArray = Array.from(storeValues);
     storeValuesArray.forEach(async (tmp, i) => {
-        console.log(tmp);
-
         // Typescript is so much fun (I have no idea how to destructure
         // an array and give each element the correct type)
         const id = tmp[0] as string;
@@ -76,7 +74,6 @@ export async function init() {
         tracked.set(id, s);
 
         const user = UserStore.getUser(id);
-        console.log("now tracking ", user.username);
         await statusTextHandler(presenceStoreState.activities[id], user);
     });
 }
@@ -163,8 +160,6 @@ export async function presenceUpdate({ updates }: { updates: Update[]; }) {
 
         // Set new status
         tracked.set(id, status);
-
-        console.log("status update on", username);
 
         /*
          * Figure out what happened.
