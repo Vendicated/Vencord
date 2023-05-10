@@ -53,8 +53,8 @@ interface ActionBarProps {
 
 export default definePlugin({
     name: "Better Blocked Messages",
-    description: "this changes blocked messages to be cleaner and better",
-    authors: [Devs.Arjix, Devs.IThundxr],
+    description: "this changes blocked messages to be cleaner and better \n\n\nThanks to ArjixWasTaken for the patches code",
+    authors: [Devs.IThundxr],
     // settings,
     patches: [{
         find: "forum-post-action-bar-",
