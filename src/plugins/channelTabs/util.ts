@@ -38,7 +38,6 @@ interface PersistedTabs {
     };
 }
 
-// TODO: probably remove when finished
 const logger = new Logger("ChannelTabs");
 
 export const channelTabsSettings = definePluginSettings({
@@ -111,8 +110,7 @@ function closeTab(id: number) {
                 const maybeNewTabId = openTabHistory.at(-1);
                 openTabHistory.pop();
                 if (!maybeNewTabId) {
-                    // TODO: go to the tab behind it(?), not having tabs in history should be rare
-                    moveToTab(openTabs[0].id);
+                    moveToTab(openTabs[Math.max(i - 1, 0)].id);
                 }
                 const maybeNewTab = openTabs.find(t => t.id === maybeNewTabId);
                 if (maybeNewTab) newTab = maybeNewTab;
@@ -120,9 +118,7 @@ function closeTab(id: number) {
             moveToTab(newTab.id);
             openTabHistory.pop();
         }
-        else
-            // TODO: go to the tab behind it(?), not having tabs in history should be rare
-            moveToTab(openTabs[0].id);
+        else moveToTab(openTabs[Math.max(i - 1, 0)].id);
     }
 }
 
@@ -188,11 +184,12 @@ function moveToTabRelative(offset: number, wrapAround?: boolean) {
 
 const saveTabs = async (userId: string) => {
     if (!userId) return;
-    DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => ({
-        // TODO: figure out where [object Object] comes from
-        ...(old ?? {}),
-        [userId]: { openTabs, openTabIndex: openTabs.findIndex(t => t.id === currentlyOpenTab) }
-    }));
+    DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => {
+        return {
+            ...(old ?? {}),
+            [userId]: { openTabs, openTabIndex: openTabs.findIndex(t => t.id === currentlyOpenTab) }
+        };
+    });
 };
 
 function setOpenTab(id: number) {
@@ -203,6 +200,7 @@ function setOpenTab(id: number) {
 }
 
 function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, update: () => void) {
+    if (openTabs.length) return;
     const { userId } = props;
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({
@@ -230,8 +228,10 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, upd
         }
         case "preset": {
             const tabs = channelTabsSettings.store.tabSet?.[userId];
+            if (!tabs) break;
             tabs.forEach(t => createTab(t));
             setOpenTab(0);
+            break;
         }
     }
     if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true);
@@ -248,7 +248,7 @@ function reopenClosedTab() {
 
 function moveDraggedTabs(index1: number, index2: number) {
     if (index1 < 0 || index2 > openTabs.length)
-        return console.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
+        return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
     const firstItem = openTabs.splice(index1, 1)[0];
     openTabs.splice(index2, 0, firstItem);
 }

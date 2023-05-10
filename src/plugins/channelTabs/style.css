@@ -7,6 +7,7 @@
 .vc-channeltabs-guild-acronym-icon {
     height: 20px;
     width: 24px;
+    min-width: 24px;
     border-radius: 50%;
     padding-top: 4px;
     background-color: var(--background-primary);

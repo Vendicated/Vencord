@@ -47,7 +47,7 @@ const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore") as FluxStore & {
 };
 const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
 const getDotWidth = findByCodeLazy("<10?16:");
-const styles = findByPropsLazy("numberBadge");
+const dotStyles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
@@ -87,8 +87,7 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
         }
         className={cl("icon")}
     />;
-function TypingIndicator(props: { isTyping: boolean; }) {
-    const { isTyping } = props;
+function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
     return isTyping
         ? <div className={cl("typing-indicator")}><ThreeDots dotRadius={3} themed={true} /></div>
         : null;
@@ -97,7 +96,7 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
     return unreadCount > 0 ?
         <div
             data-has-mention={!!mentionCount}
-            className={classes(styles.numberBadge, styles.baseShapeRound)}
+            className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
                 backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
                 width: getDotWidth(mentionCount || unreadCount)
@@ -113,8 +112,7 @@ function ChannelEmoji({ channel, emoji }: { channel: Channel, emoji: string | un
         <Emoji emojiName={emoji} className={cl("emoji")} />
     </div>;
 }
-function ChannelContextMenu(props: { tab: ChannelTabsProps, update: () => void; }) {
-    const { tab, update } = props;
+function ChannelContextMenu({ tab, update }: { tab: ChannelTabsProps, update: () => void; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
     const { openTabs } = ChannelTabsUtils;
     return <Menu.Menu
@@ -166,6 +164,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     const guild = props.guild ?? GuildStore.getGuild(channel?.guild_id!);
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
+
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
         [ReadStateStore, TypingStore, ChannelEmojisStore],
         () => [
@@ -178,6 +177,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         // is this necessary?
         (o, n) => o.every((v, i) => v === n[i])
     );
+
     if (guildId === "@favorites")
         return <>
             <GuildIcon guild={guild} />
@@ -289,13 +289,11 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         saveTabs(userId);
     }
     const { openTabs } = ChannelTabsUtils;
-    if (!openTabs.length) openStartupTabs(props, update);
+    openStartupTabs(props, update);
     useEffect(() => {
         const initialRender = () => {
-            if (!userId) {
-                userId = UserStore.getCurrentUser().id;
-                _update();
-            }
+            userId = UserStore.getCurrentUser().id;
+            _update();
             FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
         };
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
@@ -322,14 +320,13 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);
-        FluxDispatcher.subscribe("CHANNEL_SELECT", saveTabs);
         return () => {
             document.removeEventListener("keydown", handleKeybinds);
-            FluxDispatcher.unsubscribe("CHANNEL_SELECT", saveTabs);
         };
     }, []);
 
     handleChannelSwitch(props);
+    saveTabs(userId);
 
     return <div className={cl("container")}>
         {openTabs.map((ch, i) => <div

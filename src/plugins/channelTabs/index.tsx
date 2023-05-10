@@ -27,41 +27,43 @@ import { Channel, Message } from "discord-types/general/index.js";
 import { ChannelsTabsContainer } from "./components";
 import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
 
-const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
+const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
+    () => {
         if (!props) return;
         const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
         const group = findGroupChildrenByChildId("channel-copy-link", children);
         if (group)
-            group.push(<Menu.MenuItem
-                label="Open In New Tab"
-                id="open-link-in-tab"
-                key="open-link-in-tab"
-                action={() => ChannelTabsUtils.createTab({
-                    guildId: channel.guild_id,
-                    channelId: channel.id
-                }, true, messageId)}
-            />);
+            group.push(
+                <Menu.MenuItem
+                    label="Open In New Tab"
+                    id="open-link-in-tab"
+                    key="open-link-in-tab"
+                    action={() => ChannelTabsUtils.createTab({
+                        guildId: channel.guild_id,
+                        channelId: channel.id
+                    }, true, messageId)}
+                />
+            );
     };
-};
 
-const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    return () => {
+const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
+    () => {
         if (!props) return;
         const { channel }: { channel: Channel; } = props;
         const group = findGroupChildrenByChildId("channel-copy-link", children);
         if (group)
-            group.push(<Menu.MenuItem
-                label="Open In New Tab"
-                id="open-link-in-tab"
-                key="open-link-in-tab"
-                action={() => ChannelTabsUtils.createTab({
-                    guildId: channel.guild_id,
-                    channelId: channel.id
-                }, true)}
-            />);
+            group.push(
+                <Menu.MenuItem
+                    label="Open In New Tab"
+                    id="open-link-in-tab"
+                    key="open-link-in-tab"
+                    action={() => ChannelTabsUtils.createTab({
+                        guildId: channel.guild_id,
+                        channelId: channel.id
+                    }, true)}
+                />
+            );
     };
-};
 
 export default definePlugin({
     name: "ChannelTabs",
@@ -155,6 +157,5 @@ export default definePlugin({
         </>;
     },
 
-    // TODO: remove
     util: ChannelTabsUtils
 });
