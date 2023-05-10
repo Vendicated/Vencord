@@ -282,7 +282,8 @@ function ChannelTab(props: ChannelTabsProps & { index: number, update: () => voi
 }
 
 export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
-    let { userId } = props;
+    let userId: string;
+    userId ??= props.userId;
     const _update = useForceUpdater();
     function update() {
         _update();

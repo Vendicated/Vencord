@@ -115,7 +115,6 @@ export default definePlugin({
         children: JSX.Element; // original children passed by discord
     }) {
         const id = UserStore.getCurrentUser()?.id;
-        if (!id) return <>{children}</>;
         return <>
             <ErrorBoundary>
                 <ChannelsTabsContainer {...currentChannel} userId={id} />

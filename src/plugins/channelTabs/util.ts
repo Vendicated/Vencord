@@ -83,6 +83,8 @@ const closedTabs: ChannelTabsProps[] = [];
 let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
 
+let lastUserId: string;
+
 function createTab(props: BasicChannelTabsProps, moveToTab?: boolean, messageId?: string) {
     const { channelId, guildId } = props;
     const id = genId();
@@ -200,8 +202,15 @@ function setOpenTab(id: number) {
 }
 
 function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, update: () => void) {
-    if (openTabs.length) return;
     const { userId } = props;
+    if (lastUserId && lastUserId !== userId) {
+        replaceArray(openTabs);
+        replaceArray(openTabHistory);
+        i = 0;
+    }
+    if (!userId) return;
+    lastUserId = userId;
+    if (openTabs.length) return;
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({
             id: Toasts.genId(),
