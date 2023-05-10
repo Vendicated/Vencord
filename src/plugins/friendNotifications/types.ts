@@ -29,3 +29,27 @@ export type UserContextProps = {
 };
 
 export type FriendNotificationStore = Set<string>;
+export type FriendNotificationStatusStore = Map<string, Activity>;
+
+export type Activity = {
+    created_at: string;
+    id: "custom" | string;
+    name: "Custom Status" | string;
+    state: string; // The custom status
+    timestamps: {
+        end: string; // Unix time of when status expires
+    };
+    type: number; // 4???
+};
+
+export type Update = {
+    user: User;
+    status: Status;
+    guildId: string;
+    activities: Activity[];
+};
+
+export type PresenceStoreState = {
+    activities: Record<string, Activity[]>,
+    clientStatuses: Record<string, Record<Platform, Status>>;
+};

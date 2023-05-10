@@ -31,12 +31,19 @@ import { User } from "discord-types/general";
 
 import plugin from "./index";
 import settings from "./settings";
-import type { FriendNotificationStore, Platform, Status } from "./types";
+import type { Activity, FriendNotificationStatusStore, FriendNotificationStore, PresenceStoreState, Status, Update } from "./types";
 
 export const tracked = new Map<string, Status>();
+export const trackingStatusText = new Map<string, Activity | undefined>();
 export const friends = new Set<string>();
-export const trackingKey = () => `friend-notifications-tracking-${UserStore.getCurrentUser().id}`;
+export const friendsTrackingKey = () => `friend-notifications-tracking-${UserStore.getCurrentUser().id}`;
+export const friendsPreviousStatusesKey = () => `friend-notifications-tracking-${UserStore.getCurrentUser().id}`;
+
 const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
+
+/**
+ * FIXME visual glitch with long custom status text
+ */
 
 export async function init() {
     const friendsArr = RelationshipStore.getFriendIDs();
@@ -44,49 +51,120 @@ export async function init() {
         friends.add(friend);
     }
 
-    const storeValues: FriendNotificationStore = await DataStore.get(trackingKey()) || new Set();
-    const statuses = PresenceStore.getState().clientStatuses as Record<string, Record<Platform, Status>>;
-    Array.from(storeValues).forEach(id => {
+    const storeValues: FriendNotificationStore = await DataStore.get(friendsTrackingKey()) || new Set();
+    const storeValues2: FriendNotificationStatusStore = await DataStore.get(friendsPreviousStatusesKey()) || new Map();
+
+    for (const [k, v] of Array.from(storeValues2)) {
+        trackingStatusText.set(k, v);
+    }
+
+    const presenceStoreState: PresenceStoreState = PresenceStore.getState();
+    const statuses = presenceStoreState.clientStatuses;
+
+    const storeValuesArray = Array.from(storeValues);
+    storeValuesArray.forEach(async (tmp, i) => {
+        console.log(tmp);
+
+        // Typescript is so much fun (I have no idea how to destructure
+        // an array and give each element the correct type)
+        const id = tmp[0] as string;
+        const activities = tmp[1] as unknown as Activity[];
+
         const status = statuses[id];
         const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
 
         tracked.set(id, s);
+
+        const user = UserStore.getUser(id);
+        console.log("now tracking ", user.username);
+        await statusTextHandler(presenceStoreState.activities[id], user);
     });
 }
 
-export async function presenceUpdate({ updates }: { updates: { user: User; status: Status; guildId: string; }[]; }) {
+async function statusTextHandler(activities: Activity[], user: User) {
+    const { id, username } = user;
+
+    // Exit early if user isn't in the settings list
+    if (!tracked.has(id)) return;
+
+    // Find user's custom status activity
+    const customStatusActivity = activities.find((act: Activity) =>
+        act.id === "custom"
+    );
+
+    // If custom status notifications are off, track changes and move on
+    if (!settings.store.statusTextNotifications) {
+        trackingStatusText.set(id, customStatusActivity);
+        return;
+    }
+
+    // Check activities compared to last
+    const lastStatus = trackingStatusText.get(id);
+
+    if (!customStatusActivity && !lastStatus) return;
+
+    /**
+      * Case 1. User set their status to something
+      * Case 2. User's status was bye-bye'd (or it expired)
+      * Case 3. User changed their status
+      */
+    if (!lastStatus && customStatusActivity) {
+        await notify(`${username} set status text to "${customStatusActivity.state}"`, user);
+    } else if (lastStatus && !customStatusActivity) {
+        await notify(`${username}'s status text was deleted "${lastStatus.state}"`, user);
+    } else if (lastStatus && customStatusActivity && lastStatus.state !== customStatusActivity.state) {
+        await notify(`${username} changed status text, previously: "${lastStatus.state}," currently: "${customStatusActivity.state}"`, user);
+    }
+
+    // Update values
+    trackingStatusText.set(id, customStatusActivity);
+    await DataStore.set(friendsPreviousStatusesKey(), trackingStatusText);
+}
+
+export async function presenceUpdate({ updates }: { updates: Update[]; }) {
     // If they come online, then notify
     // If they go offline, then notify
-    for (const { user, status } of updates) {
+    for (const { user: _user, status, activities } of updates) {
         if (settings.store.debug) {
-            if (!user.username) {
-                const guildUser = UserStore.getUser(user.id);
+            if (!_user.username) {
+                const guildUser = UserStore.getUser(_user.id);
                 // User friend
                 console.table({
                     time: `[${new Date()}]`,
                     username: guildUser.username,
                     status: status,
-                    id: user.id
+                    id: _user.id
                 });
             } else {
                 // User friend
                 console.table({
                     time: `[${new Date()}]`,
-                    username: user.username,
+                    username: _user.username,
                     status: status,
-                    id: user.id
+                    id: _user.id
                 });
             }
         }
-        const { id, username } = user;
+
+        // Interestingly at runtime, username can be undefined
+        const { id } = _user;
+
+        const user: User = typeof _user.username === undefined ?
+            UserStore.getUser(id) :
+            _user;
+
+        const { username } = user;
+
         if (!username || !id) continue;
         // Skip non-friends
         const prevStatus = tracked.get(id);
         // Equals explicitly undefined (only true of key isn't defined)
-        if (prevStatus === undefined || prevStatus === status) continue;
+        if (prevStatus === undefined) continue;
 
         // Set new status
         tracked.set(id, status);
+
+        console.log("status update on", username);
 
         /*
          * Figure out what happened.
@@ -100,18 +178,19 @@ export async function presenceUpdate({ updates }: { updates: { user: User; statu
          *   - Friend came online
          * Case 4. None of the conditions are met
          *   - Friend changed their status while online
+         *   - Or they changed their custom status text
          */
-        if (
-            settings.store.offlineNotifications &&
-            status === "offline"
-        ) {
+        if (status === "offline") {
+            if (!settings.store.offlineNotifications) continue;
             await notify(`${username} went offline`, user);
         } else if (
-            settings.store.onlineNotifications &&
             ((prevStatus === null || prevStatus === "offline") &&
                 ["online", "dnd", "idle"].includes(status))
         ) {
+            if (!settings.store.onlineNotifications) continue;
             await notify(`${username} came online`, user);
+        } else {
+            await statusTextHandler(activities, user);
         }
     }
 }
@@ -149,5 +228,5 @@ export async function notify(text: string, user: User) {
 export async function writeTrackedToDataStore() {
     const keys = Array.from(tracked.keys());
     const set = new Set(keys);
-    await DataStore.set(trackingKey(), set);
+    await DataStore.set(friendsTrackingKey(), set);
 }

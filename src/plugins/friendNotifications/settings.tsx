@@ -44,6 +44,11 @@ export default definePluginSettings({
         description: "Notifies you when a friend comes online",
         default: true
     },
+    statusTextNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Notifies you when a friend changes their custom status",
+        default: false
+    },
     notificationAction: {
         type: OptionType.SELECT,
         description: "What should happen when you click a notification?",

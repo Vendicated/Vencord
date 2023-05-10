@@ -20,18 +20,25 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Menu, PresenceStore, RelationshipStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import type { Platform, Status, UserContextProps } from "./types";
-import { tracked, writeTrackedToDataStore } from "./utils";
+import type { PresenceStoreState, Status, UserContextProps } from "./types";
+import { tracked, trackingStatusText, writeTrackedToDataStore } from "./utils";
 
 export async function contextMenuOpen(user: User) {
     const { id: userId } = user;
-    const statuses = PresenceStore.getState().clientStatuses as Record<string, Record<Platform, Status>>;
-    const status = statuses[userId];
-    const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
 
-    tracked.has(userId) ?
-        tracked.delete(userId) :
+    if (tracked.has(userId)) {
+        trackingStatusText.delete(userId);
+        tracked.delete(userId);
+    } else {
+        const presenceStoreState = PresenceStore.getState() as PresenceStoreState;
+
+        const status = presenceStoreState.clientStatuses[userId];
+        const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
         tracked.set(userId, s);
+
+        const activity = presenceStoreState.activities[userId].find(act => act.id === "custom");
+        trackingStatusText.set(userId, activity);
+    }
 
     // Persist data
     await writeTrackedToDataStore();

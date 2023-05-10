@@ -24,6 +24,10 @@ import { contextMenuOpen, UserContext } from "./context";
 import settings from "./settings";
 import { init, presenceUpdate } from "./utils";
 
+/**
+ * TODO fix glitch with long status text
+ */
+
 export default definePlugin({
     name: "Friend Notifications",
     description: "Send notifications when friends change their status.",
@@ -35,7 +39,7 @@ export default definePlugin({
     contextMenuOpen,
 
     flux: {
-        PRESENCE_UPDATES: presenceUpdate
+        PRESENCE_UPDATES: presenceUpdate,
     },
 
     // Delete these two below if you are only using code patches
