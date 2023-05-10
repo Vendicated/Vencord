@@ -6,7 +6,7 @@
     margin-bottom: 4px;
     margin-left: 1rem;
     margin-right: 0.875rem;
-    z-index: 1;
+    /* z-index: 1; */
     height: 0;
     border-top: thin solid var(--background-modifier-accent);
     display: -webkit-box;
@@ -70,5 +70,10 @@
 }
 
 .vc-betterblockedusers-button {
+    all: unset;
     cursor: pointer;
+}
+
+.vc-betterblockedusers-button:focus {
+    outline: 10px solid white;
 }
