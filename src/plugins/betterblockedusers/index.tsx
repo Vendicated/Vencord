@@ -45,7 +45,6 @@ export default definePlugin({
 
     actionBarComponent(props: { children: React.ReactNode[]; compact: boolean; }) {
         // const { showingAllowed } = settings.use(["showingAllowed"]);
-
         return (
             <div>
                 <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator">
