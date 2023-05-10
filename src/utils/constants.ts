@@ -286,5 +286,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     carince: {
         name: "carince",
         id: 818323528755314698n
+    },
+    IThundxr: {
+        name: "IThundxr",
+        id: 694604709591384226n
     }
 });
