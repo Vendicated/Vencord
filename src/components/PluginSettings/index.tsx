@@ -28,6 +28,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
+import { SettingsHeading } from "@components/VencordSettings/Heading";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -303,7 +304,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection className={Margins.top16}>
+        <Forms.FormSection>
+            <SettingsHeading title="Plugins" />
+
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>

@@ -23,9 +23,13 @@ import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Forms, Text } from "@webpack/common";
 
+import { SettingsHeading } from "./Heading";
+
 function BackupRestoreTab() {
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
+        <Forms.FormSection>
+            <SettingsHeading title="Backup & Restore" />
+
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>

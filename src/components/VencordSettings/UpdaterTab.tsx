@@ -32,6 +32,8 @@ import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@web
 
 import gitHash from "~git-hash";
 
+import { SettingsHeading } from "./Heading";
+
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
         dispatcher(true);
@@ -199,7 +201,9 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection className={Margins.top16}>
+        <Forms.FormSection>
+            <SettingsHeading title="Vencord Updater" />
+
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.notifyAboutUpdates}

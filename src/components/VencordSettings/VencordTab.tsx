@@ -29,6 +29,8 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
+import { SettingsHeading } from "./Heading";
+
 const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
@@ -97,7 +99,9 @@ function VencordSettings() {
         ];
 
     return (
-        <React.Fragment>
+        <Forms.FormSection>
+            <SettingsHeading title="Vencord Settings" />
+
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
@@ -153,7 +157,7 @@ function VencordSettings() {
 
 
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
-        </React.Fragment>
+        </Forms.FormSection>
     );
 }
 
