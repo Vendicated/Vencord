@@ -105,33 +105,34 @@ export default definePlugin({
                 if (user.lastReviewID !== 0)
                     showToast("You have new reviews on your profile!");
             }
-            settings.user = user;
-            if (!user.ban_info) return;
 
-            const endDate = new Date(user.ban_info.banEndDate);
-            if (endDate > new Date() && (settings.banEndDate ?? 0) < endDate) {
+            if (user.ban_info) {
+                const endDate = new Date(user.ban_info.banEndDate);
+                if (endDate > new Date() && (settings.user?.ban_info?.banEndDate ?? 0) < endDate) {
 
-                settings.banEndDate = endDate;
-                Alerts.show({
-                    title: "You have been banned from ReviewDB",
-                    body: <>
-                        <p>
-                            You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
-                        </p>
-                        <p>
-                            Offending Review: {user.ban_info.reviewContent}
-                        </p>
-                        <p>
-                            Continued offenses will result in a permanent ban.
-                        </p>
-                    </>,
-                    cancelText: "Appeal",
-                    confirmText: "Ok",
-                    onCancel: () => {
-                        window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
-                    }
-                });
+                    Alerts.show({
+                        title: "You have been banned from ReviewDB",
+                        body: <>
+                            <p>
+                                You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
+                            </p>
+                            <p>
+                                Offending Review: {user.ban_info.reviewContent}
+                            </p>
+                            <p>
+                                Continued offenses will result in a permanent ban.
+                            </p>
+                        </>,
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: () => {
+                            window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
+                        }
+                    });
+                }
             }
+
+            settings.user = user;
         }, 4000);
     },
 
