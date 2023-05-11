@@ -20,7 +20,7 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -29,10 +29,12 @@ import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
 import { ChangeList } from "@utils/ChangeList";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { classes, LazyComponent, useAwaiter } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
+import { onlyOnce } from "@utils/onlyOnce";
+import { LazyComponent, useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
@@ -125,7 +127,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches) {
+        if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name);
             return;
@@ -258,6 +260,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         requiredPlugins = [];
 
         for (const p of sortedPlugins) {
+            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+                continue;
+
             if (!pluginFilter(p)) continue;
 
             const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
@@ -341,7 +346,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     );
 }, {
     message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
-    onError: handleComponentFailed,
+    onError: onlyOnce(handleComponentFailed),
 });
 
 function makeDependencyList(deps: string[]) {

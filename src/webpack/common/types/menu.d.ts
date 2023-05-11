@@ -38,6 +38,7 @@ export interface Menu {
         label: string;
         action?(e: MouseEvent): void;
 
+        color?: string;
         render?: ComponentType;
         onChildrenScroll?: Function;
         childRowHeight?: number;

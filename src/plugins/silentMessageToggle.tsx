@@ -17,7 +17,7 @@
 */
 
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -72,7 +72,7 @@ function SilentMessageToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ padding: "0 8px" }}
+                        style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -98,6 +98,8 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
+    dependencies: ["MessageEventsAPI"],
+
     settings,
     patches: [
         {
