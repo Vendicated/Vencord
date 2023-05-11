@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
-import { Button, Card, Forms, Text } from "@webpack/common";
+import { Button, Card, Text } from "@webpack/common";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 function BackupRestoreTab() {
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
+        <SettingsTab title="Backup & Restore">
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>
@@ -59,8 +60,8 @@ function BackupRestoreTab() {
                     Export Settings
                 </Button>
             </Flex>
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 
-export default ErrorBoundary.wrap(BackupRestoreTab);
+export default wrapTab(BackupRestoreTab, "Backup & Restore");

@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { CheckedTextInput } from "@components/CheckedTextInput";
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, Clipboard, Forms, Parser, React, Switch, Text, TextInput } from "@webpack/common";
+import { Button, Clipboard, Forms, Parser, React, Switch, TextInput } from "@webpack/common";
 
-import { CheckedTextInput } from "./CheckedTextInput";
-import ErrorBoundary from "./ErrorBoundary";
+import { SettingsTab, wrapTab } from "./shared";
 
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {
@@ -258,8 +258,7 @@ function PatchHelper() {
     }
 
     return (
-        <Forms.FormSection>
-            <Text variant="heading-md/normal" tag="h2" className={Margins.bottom8}>Patch Helper</Text>
+        <SettingsTab title="Patch Helper">
             <Forms.FormTitle>find</Forms.FormTitle>
             <TextInput
                 type="text"
@@ -304,8 +303,8 @@ function PatchHelper() {
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 
-export default IS_DEV ? ErrorBoundary.wrap(PatchHelper) : null;
+export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
