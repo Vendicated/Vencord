@@ -45,7 +45,7 @@ export default definePlugin({
             find: ".activeCommandOption",
             replacement: {
                 match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],
@@ -82,5 +82,9 @@ export default definePlugin({
         removeAccessory("vc-translation");
     },
 
-    chatBarIcon: ErrorBoundary.wrap(TranslateChatBarIcon, { noop: true }),
+    chatBarIcon: (slateProps: any) => (
+        <ErrorBoundary noop>
+            <TranslateChatBarIcon slateProps={slateProps} />
+        </ErrorBoundary>
+    )
 });
