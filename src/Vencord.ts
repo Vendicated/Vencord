@@ -37,8 +37,6 @@ import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
-export let Components: any;
-
 async function syncSettings() {
     if (
         Settings.cloud.settingsSync && // if it's enabled
