@@ -94,6 +94,13 @@ export default definePlugin({
                 }
             }
         },
+        {
+            find: ".insertText=function",
+            replacement: {
+                match: /;\w\.insertText=function\(\w\){1===\w\.length&&"remove_text"=/,
+                replace: ";$self.textEditor=arguments[0]$&"
+            }
+        }
     ],
     stickerButton({
         innerClassName,

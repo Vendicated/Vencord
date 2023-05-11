@@ -32,9 +32,11 @@ export async function sendSticker({
     channelId,
     sticker,
     sendAsLink,
-    dontSend
-}: { channelId: string, sticker: Sticker, sendAsLink?: boolean, dontSend?: boolean; }) {
+    ctrlKey,
+    shiftKey
+}: { channelId: string; sticker: Sticker; sendAsLink?: boolean; ctrlKey: boolean; shiftKey: boolean; }) {
     let messageContent = "";
+    const { textEditor } = Vencord.Plugins.plugins.MoreStickers as any;
     if (DraftStore) {
         messageContent = DraftStore.getDraft(channelId, 0);
     }
@@ -47,7 +49,7 @@ export async function sendSticker({
         }
     }
 
-    if (dontSend || !sendAsLink) {
+    if ((ctrlKey || !sendAsLink) && !shiftKey) {
         const response = await fetch(sticker.image, { cache: "force-cache" });
         const blob = await response.blob();
         const filename = (new URL(sticker.image)).pathname.split("/").pop();
@@ -55,7 +57,7 @@ export async function sendSticker({
 
         const file = new File([blob], filename!, { type: `image/${ext}` });
 
-        if (dontSend) {
+        if (ctrlKey) {
             promptToUpload([file], ChannelStore.getChannel(channelId), 0);
             return;
         }
@@ -75,6 +77,17 @@ export async function sendSticker({
                 }, channelId, false, 0)
             ]
         });
+    } else if (shiftKey) {
+        if (!messageContent.endsWith(" ") || !messageContent.endsWith("\n")) messageContent += " ";
+        messageContent += sticker.image;
+
+        if (ctrlKey && textEditor && textEditor.insertText && typeof textEditor.insertText === "function") {
+            textEditor.insertText(messageContent);
+        } else {
+            MessageUtils._sendMessage(channelId, {
+                content: sticker.image
+            }, messageOptions || {});
+        }
     } else {
         MessageUtils._sendMessage(channelId, {
             content: `${messageContent} ${sticker.image}`.trim()

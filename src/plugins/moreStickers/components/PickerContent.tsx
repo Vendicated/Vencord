@@ -71,15 +71,6 @@ function PickerContentRowGrid({
     onSend = () => { },
     isHovered = false
 }: PickerContentRowGrid) {
-    const [isCtrlDown, setIsCtrlDown] = React.useState(false);
-
-    React.useEffect(() => {
-        const cb = (e: KeyboardEvent) => setIsCtrlDown(e.ctrlKey);
-        window.addEventListener("keydown", cb);
-
-        return () => window.removeEventListener("keydown", cb);
-    }, []);
-
     return (
         <div
             role="gridcell"
@@ -87,10 +78,10 @@ function PickerContentRowGrid({
             aria-colindex={colIndex}
             id={`vc-more-stickers-picker-content-row-grid-${rowIndex}-${colIndex}`}
             onMouseEnter={() => onHover(sticker)}
-            onClick={() => {
+            onClick={e => {
                 if (!channelId) return;
 
-                sendSticker({ channelId, sticker, dontSend: isCtrlDown });
+                sendSticker({ channelId, sticker, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
                 addRecentSticker(sticker);
                 onSend(sticker);
             }}
