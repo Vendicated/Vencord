@@ -20,7 +20,7 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -97,7 +97,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings([`plugins.${plugin.name}.enabled`]).plugins[plugin.name];
+    const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => settings.enabled ?? false;
 
