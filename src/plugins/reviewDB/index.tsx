@@ -115,7 +115,8 @@ export default definePlugin({
                 Alerts.show({
                     title: "You have been banned from ReviewDB",
                     body: `You are banned from ReviewDB ${(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
-                    \nReason: ${user.ban_info.reviewContent}`,
+                    \nOffending Review: ${user.ban_info.reviewContent}
+                    \nContinued offenses will result in a permanent ban.`,
                 });
             }
         }, 4000);
