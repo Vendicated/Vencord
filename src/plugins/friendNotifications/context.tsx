@@ -36,7 +36,9 @@ export async function contextMenuOpen(user: User) {
         const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
         tracked.set(userId, s);
 
-        const activity = presenceStoreState.activities[userId].find(act => act.id === "custom");
+        const activity = presenceStoreState.activities[userId]?.find(act =>
+            act.id === "custom"
+        ) ?? undefined;
         trackingStatusText.set(userId, activity);
     }
 

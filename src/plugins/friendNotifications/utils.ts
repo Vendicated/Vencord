@@ -58,20 +58,16 @@ export async function init() {
     const statuses = presenceStoreState.clientStatuses;
 
     const storeValuesArray = Array.from(storeValues);
-    storeValuesArray.forEach(async (tmp, i) => {
-        // Typescript is so much fun (I have no idea how to destructure
-        // an array and give each element the correct type)
-        const id = tmp[0] as string;
-        const activities = tmp[1] as unknown as Activity[];
-
+    for (const id of storeValuesArray) {
         const status = statuses[id];
         const s: Status = typeof status === "object" ? Object.values(status)[0] || "offline" : "offline";
 
         tracked.set(id, s);
 
         const user = UserStore.getUser(id);
-        await statusTextHandler(presenceStoreState.activities[id], user);
-    });
+        const activities = presenceStoreState.activities[id];
+        await statusTextHandler(activities, user);
+    }
 }
 
 
@@ -96,9 +92,9 @@ async function statusTextHandler(activities: Activity[], user: User) {
     if (!tracked.has(id)) return;
 
     // Find user's custom status activity
-    const customStatusActivity = activities.find((act: Activity) =>
+    const customStatusActivity = activities?.find((act: Activity) =>
         act.id === "custom"
-    );
+    ) ?? undefined;
 
     // If custom status notifications are off, track changes and move on
     if (!settings.store.statusTextNotifications) {
@@ -140,27 +136,6 @@ export async function presenceUpdate({ updates }: { updates: Update[]; }) {
     // If they come online, then notify
     // If they go offline, then notify
     for (const { user: _user, status, activities } of updates) {
-        if (settings.store.debug) {
-            if (!_user.username) {
-                const guildUser = UserStore.getUser(_user.id);
-                // User friend
-                console.table({
-                    time: `[${new Date()}]`,
-                    username: guildUser.username,
-                    status: status,
-                    id: _user.id
-                });
-            } else {
-                // User friend
-                console.table({
-                    time: `[${new Date()}]`,
-                    username: _user.username,
-                    status: status,
-                    id: _user.id
-                });
-            }
-        }
-
         // Interestingly at runtime, username can be undefined
         const { id } = _user;
 
@@ -228,9 +203,11 @@ export async function notify(title: string, body: string, user: User) {
         onClick: () => {
             if (action === "open") {
                 if (!dmChannelId) return;
-                window.focus();
                 const link = "/channels/@me/" + dmChannelId;
                 NavigationRouter.transitionTo(link);
+                setTimeout(() => {
+                    window.focus();
+                }, 200);
             } else if (action === "profile") {
                 openProfile({
                     userId: user.id,
