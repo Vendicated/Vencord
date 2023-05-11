@@ -17,8 +17,9 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { Mutex } from "../utils";
+
 import { Sticker } from "../types";
+import { Mutex } from "../utils";
 
 const mutex = new Mutex();
 

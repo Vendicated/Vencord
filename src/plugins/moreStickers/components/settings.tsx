@@ -22,7 +22,7 @@ import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/c
 
 import { convert as convertLineSP, getIdFromUrl as getLineIdFromUrl, getStickerPackById, parseHtml as getLineSPFromHtml } from "../lineStickers";
 import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
-import { StickerPackMeta, StickerPack } from "../types";
+import { StickerPack,StickerPackMeta } from "../types";
 
 enum SettingsTabsKey {
     ADD_STICKER_PACK_URL = "Add from URL",
