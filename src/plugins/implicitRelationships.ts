@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FluxDispatcher, ChannelStore, GuildStore, RelationshipStore, UserStore } from "@webpack/common";
-import { findStoreLazy, findByProps } from "@webpack";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findByProps, findStoreLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, UserStore } from "@webpack/common";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
 
@@ -63,7 +63,7 @@ export default definePlugin({
 
     hasDM(userId: string): boolean {
         const privateChannels = ChannelStore.getSortedPrivateChannels();
-        return privateChannels.some((channel) => channel.recipients.includes(userId));
+        return privateChannels.some(channel => channel.recipients.includes(userId));
     },
 
     async fetchImplicitRelationships() {
@@ -73,14 +73,14 @@ export default definePlugin({
         // 3. Have a mutual guild with
         const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
         const nonFriendAffinities = Array.from(userAffinities).filter(
-            (id) => !RelationshipStore.getRelationshipType(id)
+            id => !RelationshipStore.getRelationshipType(id)
         );
 
         // I would love to just check user cache here (falling back to the gateway of course)
         // However, users in user cache may just be there because they share a DM or group DM with you
         // So there's no guarantee that a user being in user cache means they have a mutual with you
         // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
-        const toRequest = nonFriendAffinities.filter((id) => !UserStore.getUser(id) || this.hasDM(id));
+        const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || this.hasDM(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
         let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
 
@@ -90,7 +90,7 @@ export default definePlugin({
         // as they haven't implemented the nonce parameter :grrrr:
         const ignore = new Set(toRequest);
         const callback = ({ members }) => {
-            members.forEach((member) => {
+            members.forEach(member => {
                 ignore.delete(member.user.id);
             });
             if (--count === 0) {
@@ -107,12 +107,12 @@ export default definePlugin({
             });
         }
         for (let i = 0; i < 50 && count > 0; i++) {
-            await new Promise((r) => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 100));
         }
 
-        const implicitRelationships = nonFriendAffinities.map((id) => UserStore.getUser(id)).filter((user) => user && !ignore.has(user.id));
-        const relationships = RelationshipStore.__getLocalVars().relationships;
-        implicitRelationships.forEach((user) => relationships[user.id] = 5);
+        const implicitRelationships = nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id));
+        const { relationships } = RelationshipStore.__getLocalVars();
+        implicitRelationships.forEach(user => relationships[user.id] = 5);
     },
 
     start() {
