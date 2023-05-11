@@ -19,6 +19,7 @@
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { React } from "@webpack/common";
 
 import style from "./style.css?managed";
 
@@ -56,16 +57,14 @@ export default definePlugin({
         // const { showingAllowed } = settings.use(["showingAllowed"]);
 
         return (
-            <div style={{ zIndex: -5 }}>
-                <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator" style={{ zIndex: -4 }}>
-                    <span className="vc-betterblockedusers-divider" style={{ zIndex: -3 }}>
-                        <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13" style={{ zIndex: -2 }}>
-                            <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" style={{ zIndex: -1 }} d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
-                        </svg>
-                        <button className="vc-betterblockedusers-button" style={{ zIndex: 1 }} onClick={onClick}>Blocked Message</button>
-                        {/* <span className="vc-betterblockedusers-button">Blocked Message</span> */}
-                    </span>
-                </div>
+            <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator">
+                <span className="vc-betterblockedusers-divider">
+                    <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
+                        <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
+                    </svg>
+                    <button className="vc-betterblockedusers-button" onClick={onClick}>Blocked Message</button>
+                    {/* <span className="vc-betterblockedusers-button">Blocked Message</span> */}
+                </span>
             </div>
         );
     },
