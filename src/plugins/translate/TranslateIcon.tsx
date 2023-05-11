@@ -43,6 +43,8 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
     if (slateProps.type.analyticsName !== "normal")
         return null;
 
+    const toggle = () => settings.store.autoTranslate = !autoTranslate;
+
     return (
         <Tooltip text="Open Translate Modal">
             {({ onMouseEnter, onMouseLeave }) => (
@@ -55,11 +57,14 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
-                        onClick={() =>
+                        onClick={e => {
+                            if (e.shiftKey) return toggle();
+
                             openModal(props => (
                                 <TranslateModal rootProps={props} />
-                            ))
-                        }
+                            ));
+                        }}
+                        onContextMenu={() => toggle()}
                         style={{ padding: "0 4px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
