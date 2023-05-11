@@ -114,9 +114,22 @@ export default definePlugin({
                 settings.banEndDate = endDate;
                 Alerts.show({
                     title: "You have been banned from ReviewDB",
-                    body: `You are banned from ReviewDB ${(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
-                    \nOffending Review: ${user.ban_info.reviewContent}
-                    \nContinued offenses will result in a permanent ban.`,
+                    body: <>
+                        <p>
+                            You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
+                        </p>
+                        <p>
+                            Offending Review: {user.ban_info.reviewContent}
+                        </p>
+                        <p>
+                            Continued offenses will result in a permanent ban.
+                        </p>
+                    </>,
+                    cancelText: "Appeal",
+                    confirmText: "Ok",
+                    onCancel: () => {
+                        window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
+                    }
                 });
             }
         }, 4000);
