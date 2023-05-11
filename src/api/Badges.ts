@@ -79,8 +79,8 @@ export function _getBadges(args: BadgeUserArgs) {
                 : badges.push({ ...badge, ...args });
         }
     }
-    const donorBadge = (Plugins.BadgeAPI as any).getDonorBadge(args.user.id);
-    if (donorBadge) badges.unshift(donorBadge);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/apiBadges").default).getDonorBadges(args.user.id);
+    if (donorBadges) badges.unshift(...donorBadges);
 
     return badges;
 }

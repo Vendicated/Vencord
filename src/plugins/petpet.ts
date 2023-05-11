@@ -19,7 +19,7 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { getGifEncoder } from "@utils/dependencies";
-import { makeLazy } from "@utils/misc";
+import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 

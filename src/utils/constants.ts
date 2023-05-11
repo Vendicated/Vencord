@@ -19,6 +19,11 @@
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
+export {
+    gitHash,
+    gitRemote
+};
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
@@ -273,5 +278,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     FieryFlames: {
         name: "Fiery",
         id: 890228870559698955n
+    },
+    KannaDev: {
+        name: "Kanna",
+        id: 317728561106518019n
+    },
+    carince: {
+        name: "carince",
+        id: 818323528755314698n
     }
 });

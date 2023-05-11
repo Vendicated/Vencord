@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings, useSettings } from "@api/settings";
+import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 

@@ -18,7 +18,8 @@
 
 
 // This plugin is a port from Alyxia's Vendetta plugin
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
