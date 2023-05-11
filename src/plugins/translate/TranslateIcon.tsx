@@ -37,8 +37,11 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
     );
 }
 
-export function TranslateChatBarIcon() {
+export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { analyticsName: string; }; }; }) {
     const { autoTranslate } = settings.use(["autoTranslate"]);
+
+    if (slateProps.type.analyticsName !== "normal")
+        return null;
 
     return (
         <Tooltip text="Open Translate Modal">
