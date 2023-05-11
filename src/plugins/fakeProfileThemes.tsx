@@ -19,7 +19,6 @@
 
 // This plugin is a port from Alyxia's Vendetta plugin
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -208,8 +207,8 @@ export default definePlugin({
                         <ProfileModal
                             user={UserStore.getCurrentUser()}
                             pendingThemeColors={[c1, c2]}
-                            onAvatarChange={() => {}}
-                            onBannerChange={() => {}}
+                            onAvatarChange={() => { }}
+                            onBannerChange={() => { }}
                             canUsePremiumCustomization={true}
                             hideExampleButton={true}
                             hideFakeActivity={true}
