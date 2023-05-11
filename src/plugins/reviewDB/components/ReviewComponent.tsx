@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, Timestamp, UserStore } from "@webpack/common";
+import moment from "moment";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -34,17 +34,13 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
-        { contents },
+        { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
-        { defaultColor }
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
-        p("contents"),
         p("button", "wrapper", "selected"),
-        p("defaultColor")
     );
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
@@ -89,7 +85,7 @@ export default LazyComponent(() => {
                 }
             }>
 
-                <div className={contents} style={{ paddingLeft: "0px" }}>
+                <div style={{ paddingLeft: "0px" }}>
                     <img
                         className={classes(avatar, clickable)}
                         onClick={openModal}
@@ -105,18 +101,13 @@ export default LazyComponent(() => {
                     </span>
                     {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
-                    {
-                        !Settings.plugins.ReviewDB.hideTimestamps && (
-                            <Timestamp
-                                timestamp={moment(review.timestamp * 1000)}
-                                compact={true}
-                            />
-                        )
-                    }
+                    <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                        {moment(review.timestamp * 1000).format("DD/MM/YYYY") }
+                    </Timestamp>
 
                     <p
-                        className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4 }}
+                        className={classes(messageContent)}
+                        style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
                     >
                         {review.comment}
                     </p>

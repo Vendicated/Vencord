@@ -27,7 +27,7 @@ import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findLazy(m => typeof m.textarea === "string");
+const Classes = findLazy(m => m.inputDefault);
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const { token } = Settings.plugins.ReviewDB;
@@ -65,7 +65,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 tag="h2"
                 variant="eyebrow"
                 style={{
-                    marginBottom: "12px",
+                    marginBottom: "8px",
                     color: "var(--header-primary)"
                 }}
             >
@@ -79,13 +79,17 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 />
             )}
             {reviews?.length === 0 && (
-                <Forms.FormText style={{ padding: "12px", paddingTop: "0px", paddingLeft: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
             <textarea
-                className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
-                // this produces something like '-_59yqs ...' but since no class exists with that name its fine
+                className={classes(Classes.inputDefault, "enter-comment")}
+                onKeyDownCapture={e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault(); // prevent newlines
+                    }
+                }}
                 placeholder={
                     token
                         ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
@@ -106,6 +110,9 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                     resize: "none",
                     marginBottom: "12px",
                     overflow: "hidden",
+                    background: "transparent",
+                    border: "1px solid var(--profile-message-input-border-color)",
+                    fontSize: "14px",
                 }}
             />
         </div>

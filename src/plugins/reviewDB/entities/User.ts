@@ -22,7 +22,23 @@ export const enum UserType {
     Admin = 1
 }
 
+export interface BanInfo {
+    id: string;
+    discordID: string;
+    reviewID: number;
+    reviewContent: string;
+    banEndDate: string;
+}
+
 export interface ReviewDBUser {
-    lastReviewID: number,
-    type: UserType;
+    ID: number
+    discordID: string
+    username: string
+    profilePhoto: string
+    clientMod: string
+    warningCount: number
+    badges: any[]
+    ban_info: BanInfo | null
+    lastReviewID: number
+    type: UserType
 }

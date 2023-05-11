@@ -44,20 +44,19 @@ export function authorize(callback?: any) {
             {...props}
             scopes={["identify"]}
             responseType="code"
-            redirectUri="https://manti.vendicated.dev/URauth"
+            redirectUri="https://manti.vendicated.dev/api/reviewdb/auth"
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
             callback={async (u: string) => {
                 try {
                     const url = new URL(u);
-                    url.searchParams.append("returnType", "json");
                     url.searchParams.append("clientMod", "vencord");
                     const res = await fetch(url, {
                         headers: new Headers({ Accept: "application/json" })
                     });
-                    const { token, status } = await res.json();
-                    if (status === 0) {
+                    const { token, success } = await res.json();
+                    if (success) {
                         Settings.plugins.ReviewDB.token = token;
                         showToast("Successfully logged in!");
                         callback?.();
@@ -65,7 +64,7 @@ export function authorize(callback?: any) {
                         showToast("An Error occurred while logging in.");
                     }
                 } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorise", e);
+                    new Logger("ReviewDB").error("Failed to authorize", e);
                 }
             }}
         />
@@ -86,5 +85,5 @@ export function showToast(text: string) {
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.userType === UserType.Admin) return true;
+    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user.type === UserType.Admin) return true;
 }
