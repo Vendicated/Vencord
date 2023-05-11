@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import PluginSettings from "@components/PluginSettings";
 
-export default ErrorBoundary.wrap(PluginSettings);
+import { wrapTab } from "./shared";
+
+export default wrapTab(PluginSettings, "Plugins");

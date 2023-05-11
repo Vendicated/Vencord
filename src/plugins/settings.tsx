@@ -18,16 +18,12 @@
 
 import { addContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
-import PatchHelper from "@components/PatchHelper";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { React, SettingsRouter } from "@webpack/common";
 
 import gitHash from "~git-hash";
-
-const SettingsComponent = LazyComponent(() => require("../components/VencordSettings").default);
 
 export default definePlugin({
     name: "Settings",
@@ -95,37 +91,37 @@ export default definePlugin({
             {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: () => <SettingsComponent tab="VencordSettings" />
+                element: require("@components/VencordSettings/VencordTab").default
             },
             {
                 section: "VencordPlugins",
                 label: "Plugins",
-                element: () => <SettingsComponent tab="VencordPlugins" />,
+                element: require("@components/VencordSettings/PluginsTab").default,
             },
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: () => <SettingsComponent tab="VencordThemes" />,
+                element: require("@components/VencordSettings/ThemesTab").default,
             },
             !IS_WEB && {
                 section: "VencordUpdater",
                 label: "Updater",
-                element: () => <SettingsComponent tab="VencordUpdater" />,
+                element: require("@components/VencordSettings/UpdaterTab").default,
             },
             {
                 section: "VencordCloud",
                 label: "Cloud",
-                element: () => <SettingsComponent tab="VencordCloud" />,
+                element: require("@components/VencordSettings/CloudTab").default,
             },
             {
                 section: "VencordSettingsSync",
                 label: "Backup & Restore",
-                element: () => <SettingsComponent tab="VencordSettingsSync" />,
+                element: require("@components/VencordSettings/BackupAndRestoreTab").default,
             },
             IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
-                element: PatchHelper!,
+                element: require("@components/VencordSettings/PatchHelperTab").default,
             },
             IS_VENCORD_DESKTOP && {
                 section: "VencordDesktop",

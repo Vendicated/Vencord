@@ -17,12 +17,13 @@
 */
 
 import { useSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
 import { Card, Forms, React, TextArea } from "@webpack/common";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
@@ -74,8 +75,8 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
     );
 }
 
-export default ErrorBoundary.wrap(function () {
-    const settings = useSettings();
+function ThemesTab() {
+    const settings = useSettings(["themeLinks"]);
     const [themeText, setThemeText] = React.useState(settings.themeLinks.join("\n"));
 
     function onBlur() {
@@ -89,7 +90,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <>
+        <SettingsTab title="Themes">
             <Card className="vc-settings-card vc-text-selectable">
                 <Forms.FormTitle tag="h5">Paste links to .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
@@ -124,6 +125,8 @@ export default ErrorBoundary.wrap(function () {
                 onBlur={onBlur}
             />
             <Validators themeLinks={settings.themeLinks} />
-        </>
+        </SettingsTab>
     );
-});
+}
+
+export default wrapTab(ThemesTab, "Themes");

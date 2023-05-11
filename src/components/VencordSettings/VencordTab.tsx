@@ -21,13 +21,14 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 const cl = classNameFactory("vc-settings-");
 
@@ -97,7 +98,7 @@ function VencordSettings() {
         ];
 
     return (
-        <React.Fragment>
+        <SettingsTab title="Vencord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
@@ -153,7 +154,7 @@ function VencordSettings() {
 
 
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
-        </React.Fragment>
+        </SettingsTab>
     );
 }
 
@@ -263,4 +264,4 @@ function DonateCard({ image }: DonateCardProps) {
     );
 }
 
-export default ErrorBoundary.wrap(VencordSettings);
+export default wrapTab(VencordSettings, "Vencord Settings");
