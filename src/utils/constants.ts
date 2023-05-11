@@ -286,5 +286,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     carince: {
         name: "carince",
         id: 818323528755314698n
+    },
+    axu: {
+        name: "axu5",
+        id: 372682605386137612n
+    },
+    x3rt: {
+        name: "x3rt",
+        id: 131602100332396544n
     }
 });
