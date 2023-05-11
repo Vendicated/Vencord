@@ -21,15 +21,13 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
-import { Button, Card, Forms, Text } from "@webpack/common";
+import { Button, Card, Text } from "@webpack/common";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 function BackupRestoreTab() {
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Backup & Restore" />
-
+        <SettingsTab title="Backup & Restore">
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
                     <strong>Warning</strong>
@@ -63,7 +61,7 @@ function BackupRestoreTab() {
                     Export Settings
                 </Button>
             </Flex>
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 

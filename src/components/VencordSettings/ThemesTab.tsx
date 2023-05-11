@@ -24,7 +24,7 @@ import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
 import { Card, Forms, React, TextArea } from "@webpack/common";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
@@ -91,9 +91,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Themes" />
-
+        <SettingsTab title="Themes">
             <Card className="vc-settings-card vc-text-selectable">
                 <Forms.FormTitle tag="h5">Paste links to .theme.css files here</Forms.FormTitle>
                 <Forms.FormText>One link per line</Forms.FormText>
@@ -128,6 +126,6 @@ export default ErrorBoundary.wrap(function () {
                 onBlur={onBlur}
             />
             <Validators themeLinks={settings.themeLinks} />
-        </Forms.FormSection>
+        </SettingsTab>
     );
 });

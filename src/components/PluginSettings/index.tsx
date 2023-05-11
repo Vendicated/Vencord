@@ -28,7 +28,7 @@ import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
-import { SettingsHeading } from "@components/VencordSettings/Heading";
+import SettingsTab from "@components/VencordSettings/SettingsTab";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -304,9 +304,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Plugins" />
-
+        <SettingsTab title="Plugins">
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
@@ -345,7 +343,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
             <div className={cl("grid")}>
                 {requiredPlugins}
             </div>
-        </Forms.FormSection >
+        </SettingsTab >
     );
 }, {
     message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",

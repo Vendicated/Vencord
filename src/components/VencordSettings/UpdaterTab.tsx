@@ -32,7 +32,7 @@ import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@web
 
 import gitHash from "~git-hash";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -201,9 +201,7 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Vencord Updater" />
-
+        <SettingsTab title="Vencord Updater">
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.notifyAboutUpdates}
@@ -250,7 +248,7 @@ function Updater() {
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </Forms.FormSection >
+        </SettingsTab>
     );
 }
 

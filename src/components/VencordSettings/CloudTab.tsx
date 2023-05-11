@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 function validateUrl(url: string) {
     try {
@@ -116,9 +116,7 @@ function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Vencord Cloud" />
-
+        <SettingsTab title="Vencord Cloud">
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
@@ -161,7 +159,7 @@ function CloudTab() {
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 

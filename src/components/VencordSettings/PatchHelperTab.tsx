@@ -26,7 +26,7 @@ import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Clipboard, Forms, Parser, React, Switch, TextInput } from "@webpack/common";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {
@@ -259,9 +259,7 @@ function PatchHelper() {
     }
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Patch Helper" />
-
+        <SettingsTab title="Patch Helper">
             <Forms.FormTitle>find</Forms.FormTitle>
             <TextInput
                 type="text"
@@ -306,7 +304,7 @@ function PatchHelper() {
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 

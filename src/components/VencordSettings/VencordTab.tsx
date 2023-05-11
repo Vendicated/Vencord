@@ -29,7 +29,7 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
 
-import { SettingsHeading } from "./Heading";
+import SettingsTab from "./SettingsTab";
 
 const cl = classNameFactory("vc-settings-");
 
@@ -99,9 +99,7 @@ function VencordSettings() {
         ];
 
     return (
-        <Forms.FormSection>
-            <SettingsHeading title="Vencord Settings" />
-
+        <SettingsTab title="Vencord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
@@ -157,7 +155,7 @@ function VencordSettings() {
 
 
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
-        </Forms.FormSection>
+        </SettingsTab>
     );
 }
 
