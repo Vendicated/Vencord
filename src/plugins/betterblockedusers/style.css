@@ -1,45 +1,24 @@
-/* stylelint-disable */
-/* make stylelint ignore this file */
-
 .vc-betterblockedusers-main {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    margin-left: 1rem;
-    margin-right: 0.875rem;
-    z-index: 1;
+    margin: -2.6px -2px 0 -56px;
     height: 0;
     border-top: thin solid var(--background-modifier-accent);
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
     justify-content: center;
     position: relative;
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
     flex: 0 0 auto;
-    pointer-events: none;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    --divider-color: rgb(63, 65, 71);
+
+    --divider-color: rgb(63 65 71);
+
     border-color: var(--divider-color);
 }
 
 .vc-betterblockedusers-divider {
     background-color: var(--divider-color);
     position: absolute;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
     justify-content: center;
     top: -7px;
     height: 13px;
@@ -51,7 +30,6 @@
     border-radius: 0 4px 4px 0;
     text-transform: uppercase;
     color: var(--white-500);
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     border-left: none;
 }
@@ -72,8 +50,13 @@
 .vc-betterblockedusers-button {
     all: unset;
     cursor: pointer;
+    user-select: none;
 }
 
-.vc-betterblockedusers-button:focus {
-    outline: 10px solid white;
+.vc-betterblockedusers-span {
+    user-select: none;
+}
+
+[class*="wrapper"] {
+    min-height: unset;
 }

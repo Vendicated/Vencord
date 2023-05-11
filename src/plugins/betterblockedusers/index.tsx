@@ -16,26 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { disableStyle, enableStyle } from "@api/Styles";
+import "./style.css";
+
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { React } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { React, Tooltip } from "@webpack/common";
 
-import style from "./style.css?managed";
-
-// export const settings = definePluginSettings({
-//     showingAllowed: {
-//         description: "Allow Blocked Messages to be opened",
-//         type: OptionType.BOOLEAN,
-//         default: true
-//     }
-// });
+export const settings = definePluginSettings({
+    showingAllowed: {
+        description: "Allow Blocked Messages to be opened",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "Better Blocked Messages",
-    description: "this changes blocked messages to be cleaner and better \n\n\nThanks to ArjixWasTaken for the patches code",
+    description: "Makes blocked messages less intrusive and cleaner to look at",
     authors: [Devs.IThundxr],
-    // settings,
+    settings,
     patches: [{
         find: "isBeforeGroup:",
         replacement: {
@@ -54,7 +54,7 @@ export default definePlugin({
         if (!props) return null;
         const { onClick } = props;
 
-        // const { showingAllowed } = settings.use(["showingAllowed"]);
+        const { showingAllowed } = settings.use(["showingAllowed"]);
 
         return (
             <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator">
@@ -62,18 +62,25 @@ export default definePlugin({
                     <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
                         <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
                     </svg>
-                    <button className="vc-betterblockedusers-button" onClick={onClick}>Blocked Message</button>
-                    {/* <span className="vc-betterblockedusers-button">Blocked Message</span> */}
+                    {
+                        showingAllowed ?
+                            // if showing is allowed show a button and tooltip
+                            <Tooltip text={props.expanded ? "Hide Blocked Message" : "Show Blocked Message"}>
+                                {(tooltipProps: any) => (
+                                    <div style={{ display: "flex" }}>
+                                        <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
+                                            <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
+                                        </svg>
+                                        <button {...tooltipProps} className="vc-betterblockedusers-button" onClick={onClick}>Blocked Message</button>
+                                    </div>
+                                )}
+                            </Tooltip>
+                            :
+                            // if showing isn't allowed just show a span
+                            <span className="vc-betterblockedusers-span">Blocked Message</span>
+                    }
                 </span>
             </div>
         );
     },
-
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    }
 });
