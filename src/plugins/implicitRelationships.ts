@@ -43,8 +43,8 @@ export default definePlugin({
                 },
                 // Sections header
                 {
-                    match: /\(0,([^;]+)\.jsx\)\(([^;]+)\.TabBar\.Item,\{id:([^;]+)\.([^;]+)\.BLOCKED,([^\s]+)children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
-                    replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,$5children:\"Implicit\"}),$&"
+                    match: /\(0,(.{1})\.jsx\)\((.{1})\.TabBar\.Item,\{id:(.{1})\.(.{1,3})\.BLOCKED,className:([^\s]+)\.item,children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
+                    replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,className:$5.item,children:\"Implicit\"}),$&"
                 },
                 // Sections content
                 {
