@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./settingsStyles.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
 import { Forms, Text } from "@webpack/common";
-import type { PropsWithChildren } from "react";
+import type { ComponentType, PropsWithChildren } from "react";
 
-function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
+export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
         <Forms.FormSection>
             <Text
@@ -39,6 +41,11 @@ function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>)
     );
 }
 
-export default ErrorBoundary.wrap(SettingsTab, {
-    onError: onlyOnce(handleComponentFailed)
-});
+const onError = onlyOnce(handleComponentFailed);
+
+export function wrapTab(component: ComponentType, tab: string) {
+    return ErrorBoundary.wrap(component, {
+        message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
+        onError,
+    });
+}

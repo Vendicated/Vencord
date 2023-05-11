@@ -22,19 +22,16 @@ import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
-import SettingsTab from "@components/VencordSettings/SettingsTab";
+import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
-import { onlyOnce } from "@utils/onlyOnce";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
@@ -180,7 +177,7 @@ enum SearchStatus {
     DISABLED
 }
 
-export default ErrorBoundary.wrap(function PluginSettings() {
+export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -345,10 +342,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
             </div>
         </SettingsTab >
     );
-}, {
-    message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
-    onError: onlyOnce(handleComponentFailed),
-});
+}
 
 function makeDependencyList(deps: string[]) {
     return (

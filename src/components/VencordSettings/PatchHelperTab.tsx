@@ -17,7 +17,6 @@
 */
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
@@ -26,7 +25,7 @@ import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Clipboard, Forms, Parser, React, Switch, TextInput } from "@webpack/common";
 
-import SettingsTab from "./SettingsTab";
+import { SettingsTab, wrapTab } from "./shared";
 
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {
@@ -308,4 +307,4 @@ function PatchHelper() {
     );
 }
 
-export default IS_DEV ? ErrorBoundary.wrap(PatchHelper) : null;
+export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;

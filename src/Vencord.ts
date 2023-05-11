@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./components/VencordSettings/settingsStyles.css";
-
 export * as Api from "./api";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";

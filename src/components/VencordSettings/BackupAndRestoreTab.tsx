@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Text } from "@webpack/common";
 
-import SettingsTab from "./SettingsTab";
+import { SettingsTab, wrapTab } from "./shared";
 
 function BackupRestoreTab() {
     return (
@@ -65,4 +64,4 @@ function BackupRestoreTab() {
     );
 }
 
-export default ErrorBoundary.wrap(BackupRestoreTab);
+export default wrapTab(BackupRestoreTab, "Backup & Restore");
