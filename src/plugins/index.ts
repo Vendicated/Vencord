@@ -17,8 +17,8 @@
 */
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
-import { Settings } from "@api/settings";
-import Logger from "@utils/Logger";
+import { Settings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
 import { Patch, Plugin } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
@@ -110,10 +110,12 @@ export function startDependenciesRecursive(p: Plugin) {
     p.dependencies?.forEach(dep => {
         if (!Settings.plugins[dep].enabled) {
             startDependenciesRecursive(Plugins[dep]);
+
             // If the plugin has patches, don't start the plugin, just enable it.
+            Settings.plugins[dep].enabled = true;
+            
             if (Plugins[dep].patches || Plugins[dep].keybinds) {
                 logger.warn(`Enabling dependency ${dep} requires restart.`);
-                Settings.plugins[dep].enabled = true;
                 restartNeeded = true;
                 return;
             }

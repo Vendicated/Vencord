@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -35,7 +35,6 @@ const settings = definePluginSettings({
     }
 });
 
-migratePluginSettings("SpotifyCrack", "Ify");
 export default definePlugin({
     name: "SpotifyCrack",
     description: "Free listen along, no auto-pausing in voice chat, and allows activity to continue playing when idling",

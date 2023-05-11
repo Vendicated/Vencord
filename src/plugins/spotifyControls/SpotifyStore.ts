@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import IpcEvents from "@utils/IpcEvents";
-import { proxyLazy } from "@utils/proxyLazy";
+import { Settings } from "@api/Settings";
+import { proxyLazy } from "@utils/lazy";
 import { findByPropsLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
@@ -94,7 +93,7 @@ export const SpotifyStore = proxyLazy(() => {
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
-            VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
+            VencordNative.native.openExternal(url);
         }
 
         // Need to keep track of this manually
