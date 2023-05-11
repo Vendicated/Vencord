@@ -260,6 +260,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         requiredPlugins = [];
 
         for (const p of sortedPlugins) {
+            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+                continue;
+
             if (!pluginFilter(p)) continue;
 
             const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
