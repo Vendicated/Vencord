@@ -290,5 +290,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     IThundxr: {
         name: "IThundxr",
         id: 694604709591384226n
+    },
+    CatNoir: {
+        name: "CatNoir",
+        id: 260371016348336128n
     }
 });
