@@ -17,7 +17,6 @@
 */
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
 import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
 import { join } from "path";
@@ -58,8 +57,8 @@ if (location.protocol !== "data:") {
     }
 } // Monaco popout
 else {
-    contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
-    contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
+    contextBridge.exposeInMainWorld("setCss", debounce(VencordNative.quickCss.set));
+    contextBridge.exposeInMainWorld("getCurrentCss", VencordNative.quickCss.get);
     // shrug
     contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
 }

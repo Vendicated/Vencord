@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useForceUpdater } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Tooltip } from "webpack/common";

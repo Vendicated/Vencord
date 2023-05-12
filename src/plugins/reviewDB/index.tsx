@@ -18,15 +18,15 @@
 
 import "./style.css";
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, UserStore } from "@webpack/common";
+import { Button } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
-import { getLastReviewID } from "./Utils/ReviewDBAPI";
+import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";
 
 export default definePlugin({
@@ -58,19 +58,31 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Notify about new reviews on startup",
             default: true,
+        },
+        showWarning: {
+            type: OptionType.BOOLEAN,
+            description: "Display warning to be respectful at the top of the reviews list",
+            default: true,
+        },
+        hideTimestamps: {
+            type: OptionType.BOOLEAN,
+            description: "Hide timestamps on reviews",
+            default: false,
         }
     },
 
     async start() {
         const settings = Settings.plugins.ReviewDB;
-        if (!settings.lastReviewId || !settings.notifyReviews) return;
+        if (!settings.notifyReviews || !settings.token) return;
 
         setTimeout(async () => {
-            const id = await getLastReviewID(UserStore.getCurrentUser().id);
-            if (settings.lastReviewId < id) {
-                showToast("You have new reviews on your profile!");
-                settings.lastReviewId = id;
+            const user = await getCurrentUserInfo(settings.token);
+            if (settings.lastReviewId < user.lastReviewID) {
+                settings.lastReviewId = user.lastReviewID;
+                if (user.lastReviewID !== 0)
+                    showToast("You have new reviews on your profile!");
             }
+            settings.userType = user.type;
         }, 4000);
     },
 

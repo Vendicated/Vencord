@@ -19,7 +19,7 @@
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -66,7 +66,7 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user: User; inline?: boolean; marginLeft?: string; }) => {
+const PlatformIndicator = ({ user, wantMargin = true }: { user: User; wantMargin?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -105,23 +105,27 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
     if (!icons.length) return null;
 
     return (
-        <div
+        <span
             className="vc-platform-indicator"
             style={{
-                marginLeft,
-                gap: "4px",
-                display: inline ? "inline-flex" : "flex",
-                alignItems: "center",
-                transform: inline ? "translateY(4px)" : undefined
+                display: "inline-flex",
+                justifyContent: "center",
+                marginLeft: wantMargin ? 4 : 0,
+                verticalAlign: "top",
+                position: "relative",
+                top: wantMargin ? 1 : 0,
+                padding: !wantMargin ? 2 : 0,
+                gap: 4
             }}
+
         >
             {icons}
-        </div>
+        </span>
     );
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} marginLeft="" />,
+    component: p => <PlatformIndicator {...p} wantMargin={false} />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -146,7 +150,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} inline />
+                <PlatformIndicator user={props.message?.author} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
