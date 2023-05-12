@@ -41,26 +41,25 @@ export default definePlugin({
         find: ".UPLOAD_FILE_LIMIT_ERROR,{existing_count",
         replacement: {
             match: /else if\(.{1,5}.getUploadCount\(\w\.id,\w\)\+\w\.length.*?\.length}\)}/,
-            replace: "/*$&*/",
+            replace: "",
         }
     }],
 
     start() {
         this.preSendListener = addPreSendListener(async (channelId, message, { uploads, replyOptions }) => {
             if (uploads && uploads.length > 10) {
-                if (message.content.trim())
+                const sendMessage = !!message.content.trim();
+                if (sendMessage)
                     MessageUtils._sendMessage(channelId, message, replyOptions);
 
                 for (let i = 0; i < uploads.length; i += 10) {
-                    const chunk = uploads.slice(i, i + 10);
-
-                    await MessageUpload.uploadFiles({
+                    MessageUpload.uploadFiles({
                         channelId,
                         draftType: DraftType.ChannelMessage,
                         hasSpoiler: false,
-                        options: (!message.content.trim()) ? replyOptions : {},
+                        options: !sendMessage ? replyOptions : {},
                         parsedMessage: { content: i === 0 ? message.content : "" },
-                        uploads: chunk
+                        uploads: uploads.slice(i, i + 10)
                     });
                 }
 
