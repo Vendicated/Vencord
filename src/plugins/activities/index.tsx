@@ -27,7 +27,7 @@ import { ActivityIcon, Caret, ControllerIcon, HeadsetIcon, PlaystationIcon, Rich
 import { Activity, ActivityProps, ActivityType } from "./types";
 
 const PresenceStore = findStoreLazy("PresenceStore");
-const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?\w\.some\(.{3}\)\?(.*?):null/;
+const regex = /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?(\w\.some\(.{3}\)\?.*?:null)/;
 const ActivityView = LazyComponent(() => findByCode("onOpenGameProfile:"));
 
 import "./style.css";
@@ -60,7 +60,7 @@ export default definePlugin({
             find: "().textRuler,",
             replacement: {
                 match: regex,
-                replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent({...${activities}})`)
+                replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent(${activities})`)
             },
             predicate: () => settings.store.moreActivityIcons
         },
@@ -170,13 +170,16 @@ export default definePlugin({
 
     ActivitiesComponent(props: ActivityProps) {
         if (!props.activities.length) return null;
-        let showRichActivityTooltip = true;
+        const otherActivities: Activity[] = [];
 
         const icons = props.activities.map(activity => {
             switch (activity.type) {
                 case ActivityType.Competing:
                 case ActivityType.Playing: {
-                    showRichActivityTooltip = false;
+                    if (!activity.platform) {
+                        otherActivities.push(activity);
+                        return;
+                    }
 
                     const isXbox = activity.platform === "xbox";
                     const isPlaystation = /ps\d/.test(activity.platform ?? "");
@@ -201,8 +204,16 @@ export default definePlugin({
                 }
 
                 case ActivityType.Listening: {
-                    showRichActivityTooltip = false;
-                    return <Tooltip text={`Listening to “${activity.details}” by “${activity.state?.replace(/;/g, ",")}”`}>
+                    const artists = (activity?.state?.split(";") ?? []).map(a => a.trim());
+                    let songTitle = activity.details || "";
+
+                    for (const artist of artists) {
+                        songTitle = songTitle.replace(`(feat. ${artist})`, "");
+                    }
+
+                    songTitle = songTitle.trim();
+
+                    return <Tooltip text={`Listening to “${songTitle}” by “${artists.join(", ")}”`}>
                         {({ onMouseEnter, onMouseLeave }) => {
                             return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                                 <HeadsetIcon width={14} height={14} />
@@ -210,23 +221,31 @@ export default definePlugin({
                         }}
                     </Tooltip>;
                 }
+                default: {
+                    otherActivities.push(activity);
+                    return;
+                }
             }
         }).filter(Boolean);
 
-        const richDetails = props.activities.find(activity => (activity.assets || activity.details) && !activity.platform);
-        const activityIcon = richDetails ?
-            <RichActivityIcon width={16} height={16} />
-            : <ActivityIcon width={16} height={16} />;
+        const richDetails = otherActivities.filter(activity => (activity.assets || activity.details));
 
-        icons.splice(0, 0, <Tooltip text={richDetails?.name} shouldShow={!!richDetails?.name?.trim() && showRichActivityTooltip}>
-            {({ onMouseEnter, onMouseLeave }) => {
-                return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{activityIcon}</span>;
-            }}
-        </Tooltip>);
+        const otherIcons: React.ReactNode[] = [];
+        for (const detail of richDetails) {
+            const activityIcon = detail ?
+                <RichActivityIcon width={16} height={16} />
+                : <ActivityIcon width={16} height={16} />;
+
+            detail && otherIcons.push(<Tooltip text={detail?.name} shouldShow={!!detail?.name?.trim()}>
+                {({ onMouseEnter, onMouseLeave }) => {
+                    return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{activityIcon}</span>;
+                }}
+            </Tooltip>);
+        }
 
         return (
             <span style={{ display: "flex", alignItems: "center" }}>
-                {icons}
+                {otherIcons.concat(icons)}
             </span>
         );
     },
