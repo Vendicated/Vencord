@@ -17,10 +17,11 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { PermissionStore, UserStore } from "@webpack/common";
+import { FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -28,24 +29,36 @@ const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = 
 
 const MANAGE_CHANNELS = 1n << 4n;
 
+const settings = definePluginSettings({
+    enableDeleteOnClick: {
+        type: OptionType.BOOLEAN,
+        description: "Enable delete on click",
+        default: true
+    },
+    enableDoubleClickToEdit: {
+        type: OptionType.BOOLEAN,
+        description: "Enable double click to edit",
+        default: true
+    },
+    enableDoubleClickToReply: {
+        type: OptionType.BOOLEAN,
+        description: "Enable double click to reply",
+        default: true
+    },
+    requireModifier: {
+        type: OptionType.BOOLEAN,
+        description: "Only do double click actions when shift/ctrl is held",
+        default: false
+    }
+});
+
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit",
+    description: "Hold Backspace and click to delete, double click to edit/reply",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
-    options: {
-        enableDeleteOnClick: {
-            type: OptionType.BOOLEAN,
-            description: "Enable delete on click",
-            default: true
-        },
-        enableDoubleClickToEdit: {
-            type: OptionType.BOOLEAN,
-            description: "Enable double click to edit",
-            default: true
-        }
-    },
+    settings,
 
     start() {
         const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
@@ -54,15 +67,30 @@ export default definePlugin({
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg, chan, event) => {
+        this.onClick = addClickListener((msg, channel, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
-                if (Vencord.Settings.plugins.MessageClickActions.enableDoubleClickToEdit && (isMe && event.detail >= 2 && !EditStore.isEditing(chan.id, msg.id))) {
-                    MessageActions.startEditMessage(chan.id, msg.id, msg.content);
+                if (event.detail < 2) return;
+                if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
+
+                if (isMe) {
+                    if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
+
+                    MessageActions.startEditMessage(channel.id, msg.id, msg.content);
                     event.preventDefault();
+                } {
+                    if (!settings.store.enableDoubleClickToReply) return;
+
+                    FluxDispatcher.dispatch({
+                        type: "CREATE_PENDING_REPLY",
+                        channel,
+                        message: msg,
+                        shouldMention: !Settings.plugins.NoReplyMention.enabled,
+                        showMentionToggle: channel.guild_id !== null
+                    });
                 }
-            } else if (Vencord.Settings.plugins.MessageClickActions.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, chan))) {
-                MessageActions.deleteMessage(chan.id, msg.id);
+            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, channel))) {
+                MessageActions.deleteMessage(channel.id, msg.id);
                 event.preventDefault();
             }
         });
