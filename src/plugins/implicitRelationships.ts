@@ -33,29 +33,29 @@ export default definePlugin({
             replacement: [
                 // Counts header
                 {
-                    match: /toString\(\)\}\);case (\i\.\i\.BLOCKED)/,
+                    match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
                     replace: "toString()});case $1.IMPLICIT:return \"Implicit — \"+arguments[1].toString();case $1.BLOCKED"
                 },
                 // No friends page
                 {
-                    match: /case ([^;]+)\.([^;]+)\.ONLINE:return ([^;]+)\.SECTION_ONLINE/,
-                    replace: "case $1.$2.ONLINE:case $1.$2.IMPLICIT:return $3.SECTION_ONLINE"
+                    match: /case (\i\.\i)\.ONLINE:return (\i)\.SECTION_ONLINE/,
+                    replace: "case $1.ONLINE:case $1.IMPLICIT:return $2.SECTION_ONLINE"
                 },
                 // Sections header
                 {
-                    match: /\(0,(.{1})\.jsx\)\((.{1})\.TabBar\.Item,\{id:(.{1})\.(.{1,3})\.BLOCKED,className:([^\s]+)\.item,children:([^;]+)\.([^;]+)\.Messages\.BLOCKED\}\)/,
+                    match: /\(0,(\i)\.jsx\)\((\i)\.TabBar\.Item,\{id:(\i)\.(\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
                     replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,className:$5.item,children:\"Implicit\"}),$&"
                 },
                 // Sections content
                 {
-                    match: /case ([^;]+)\.([^;]+)\.BLOCKED:return ([^;]+)\.type===([^;]+)\.([^;]+)\.BLOCKED/,
-                    replace: "case $1.$2.BLOCKED:return $3.type===$4.$5.BLOCKED;case $1.$2.IMPLICIT:return $3.type===5"
+                    match: /case (\i\.\i)\.BLOCKED:return (\i)\.type===(\i\.\i)\.BLOCKED/,
+                    replace: "case $1.BLOCKED:return $2.type===$3.BLOCKED;case $1.IMPLICIT:return $2.type===5"
                 },
                 // Piggyback relationship fetch
                 {
-                    match: /([^;]+)\.([^;]+)\.fetchRelationships\(\)/,
+                    match: /(\i\.\i)\.fetchRelationships\(\)/,
                     // This relationship fetch is actually completely useless, but whatevs
-                    replace: "$1.$2.fetchRelationships(),$self.fetchImplicitRelationships()"
+                    replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
                 },
             ],
         },
