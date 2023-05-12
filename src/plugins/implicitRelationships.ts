@@ -34,7 +34,7 @@ export default definePlugin({
                 // Counts header
                 {
                     match: /toString\(\)\}\);case ([^;]+)\.([^;]+)\.BLOCKED/,
-                    replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+t.toString();case $1.$2.BLOCKED"
+                    replace: "toString()});case $1.$2.IMPLICIT:return \"Implicit — \"+arguments[1].toString();case $1.$2.BLOCKED"
                 },
                 // No friends page
                 {
