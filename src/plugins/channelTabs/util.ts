@@ -83,6 +83,7 @@ const openTabs: ChannelTabsProps[] = [];
 const closedTabs: ChannelTabsProps[] = [];
 let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
+let persistedTabs: Promise<PersistedTabs | undefined>;
 
 let lastUserId: string;
 
@@ -223,6 +224,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
         replaceArray(openTabHistory);
         i = 0;
     }
+    persistedTabs ??= DataStore.get("ChannelTabs_openChannels_v2");
     if (!userId) return;
     lastUserId = userId;
     if (openTabs.length) return;
@@ -239,7 +241,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     }
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
-            DataStore.get<PersistedTabs>("ChannelTabs_openChannels_v2").then(tabs => {
+            persistedTabs.then(tabs => {
                 const t = tabs?.[userId];
                 if (!t) return;
                 replaceArray(openTabs);
