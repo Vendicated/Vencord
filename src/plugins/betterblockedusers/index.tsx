@@ -56,6 +56,7 @@ export default definePlugin({
 
         const { showingAllowed } = settings.use(["showingAllowed"]);
 
+
         return (
             <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator">
                 <span className="vc-betterblockedusers-divider">
