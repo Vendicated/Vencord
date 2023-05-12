@@ -77,7 +77,7 @@ function SilentMessageToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ padding: "0 8px" }}
+                        style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg

@@ -47,8 +47,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "USRBG",
-    description: "USRBG is a community maintained database of Discord banners, allowing anyone to get a banner without requiring Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix],
+    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
@@ -61,6 +61,10 @@ export default definePlugin({
                 {
                     match: /(\i)\.bannerSrc,/,
                     replace: "$self.useBannerHook($1),"
+                },
+                {
+                    match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
+                    replace: "&&$self.shouldShowBadge(arguments[0])$&"
                 }
             ]
         },
@@ -102,6 +106,10 @@ export default definePlugin({
 
     premiumHook({ userId }: any) {
         if (data[userId]) return 2;
+    },
+
+    shouldShowBadge({ displayProfile, user }: any) {
+        return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
     },
 
     async start() {
