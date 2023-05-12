@@ -57,6 +57,6 @@
     user-select: none;
 }
 
-[class*="wrapper"] {
+[class*="wrapper"]:has(.vc-betterblockedusers-main) {
     min-height: unset;
 }
