@@ -62,7 +62,6 @@ export default definePlugin({
     ],
 
     hasDM(userId: string): boolean {
-        const privateChannels = ChannelStore.getSortedPrivateChannels();
         return ChannelStore.getSortedPrivateChannels().some(channel => channel.recipients.includes(userId));
     },
 
