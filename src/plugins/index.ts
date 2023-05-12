@@ -113,7 +113,7 @@ export function startDependenciesRecursive(p: Plugin) {
 
             // If the plugin has patches, don't start the plugin, just enable it.
             Settings.plugins[dep].enabled = true;
-            
+
             if (Plugins[dep].patches || Plugins[dep].keybinds) {
                 logger.warn(`Enabling dependency ${dep} requires restart.`);
                 restartNeeded = true;
