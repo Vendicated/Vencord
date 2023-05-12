@@ -49,7 +49,7 @@ export default definePlugin({
                 // Sections content
                 {
                     match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
-                    replace: "case $1.BLOCKED:return $2.type===$3.BLOCKED;case $1.IMPLICIT:return $2.type===5"
+                    replace: ";case $1.IMPLICIT:return $2.type===5"
                 },
                 // Piggyback relationship fetch
                 {
