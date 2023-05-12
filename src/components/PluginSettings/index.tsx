@@ -228,9 +228,12 @@ export default function PluginSettings() {
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
         if (!searchValue.value.length) return true;
+
+        const v = searchValue.value.toLowerCase();
         return (
-            plugin.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-            plugin.description.toLowerCase().includes(searchValue.value.toLowerCase())
+            plugin.name.toLowerCase().includes(v) ||
+            plugin.description.toLowerCase().includes(v) ||
+            plugin.tags?.some(t => t.toLowerCase().includes(v))
         );
     };
 
