@@ -86,10 +86,15 @@ const openTabHistory: number[] = [];
 
 let lastUserId: string;
 
+let update = () => {
+    logger.warn("Update function not set");
+};
+
 function createTab(props: BasicChannelTabsProps, switchToTab?: boolean, messageId?: string) {
     const id = genId();
     openTabs.push({ ...props, id, messageId });
     if (switchToTab) moveToTab(id);
+    update();
 }
 
 function closeTab(id: number) {
@@ -116,6 +121,7 @@ function closeTab(id: number) {
         }
         else moveToTab(openTabs[Math.max(i - 1, 0)].id);
     }
+    update();
 }
 
 function closeCurrentTab() {
@@ -132,6 +138,7 @@ function closeOtherTabs(id: number) {
     setOpenTab(id);
     replaceArray(openTabHistory, id);
     if (tab.channelId !== lastTab.channelId) moveToTab(id);
+    else update();
 }
 
 function closeTabsToTheRight(id: number) {
@@ -142,6 +149,7 @@ function closeTabsToTheRight(id: number) {
     const tabsToTheLeft = openTabs.filter((_, ind) => ind <= i);
     replaceArray(openTabs, ...tabsToTheLeft);
     if (!tabsToTheLeft.some(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
+    else update();
 }
 
 function handleChannelSwitch(ch: BasicChannelTabsProps) {
@@ -154,6 +162,14 @@ function isTabSelected(id: number) {
     return id === currentlyOpenTab;
 }
 
+function moveDraggedTabs(index1: number, index2: number) {
+    if (index1 < 0 || index2 > openTabs.length)
+        return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
+    const firstItem = openTabs.splice(index1, 1)[0];
+    openTabs.splice(index2, 0, firstItem);
+    update();
+}
+
 function moveToTab(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
@@ -164,6 +180,7 @@ function moveToTab(id: number) {
     }
     else if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
+    else update();
 }
 
 function moveToTabRelative(offset: number, wrapAround?: boolean) {
@@ -199,7 +216,7 @@ function setOpenTab(id: number) {
     openTabHistory.push(id);
 }
 
-function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, update: () => void) {
+function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     const { userId } = props;
     if (lastUserId && lastUserId !== userId) {
         replaceArray(openTabs);
@@ -253,14 +270,11 @@ function reopenClosedTab() {
     createTab(tab, true);
 }
 
-function moveDraggedTabs(index1: number, index2: number) {
-    if (index1 < 0 || index2 > openTabs.length)
-        return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
-    const firstItem = openTabs.splice(index1, 1)[0];
-    openTabs.splice(index2, 0, firstItem);
+function setUpdaterFunction(fn: () => void) {
+    update = fn;
 }
 
 export const ChannelTabsUtils = {
-    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
-    moveDraggedTabs, moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab
+    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected, moveDraggedTabs,
+    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction
 };
