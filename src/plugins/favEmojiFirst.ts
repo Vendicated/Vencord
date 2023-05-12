@@ -23,6 +23,18 @@ import { findByPropsLazy } from "@webpack";
 
 const DisambiguatedEmojiContext = findByPropsLazy("getDisambiguatedEmojiContext");
 
+interface EmojiAutocompleteState {
+    query?: {
+        type: string;
+        typeInfo: {
+            sentinel: string;
+        };
+        results: {
+            emojis: Emoji[];
+        };
+    };
+}
+
 export default definePlugin({
     name: "FavoriteEmojiFirst",
     authors: [Devs.Aria],
@@ -37,19 +49,23 @@ export default definePlugin({
         }
     ],
 
-    sortEmojis(state) {
+    sortEmojis(state: EmojiAutocompleteState) {
         if (
-            state?.query?.type !== "EMOJIS_AND_STICKERS"
-            || state?.query?.typeInfo?.sentinel !== ":"
-            || !state?.query?.results?.emojis.length
+            state.query == null
+            || state.query.type !== "EMOJIS_AND_STICKERS"
+            || state.query.typeInfo?.sentinel !== ":"
+            || state.query.results?.emojis?.length === 0
         ) return;
+
+        const emojiContext = DisambiguatedEmojiContext.getDisambiguatedEmojiContext();
+
         state.query.results.emojis = state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
-            const aIsFavrioute = DisambiguatedEmojiContext.getDisambiguatedEmojiContext().isFavoriteEmojiWithoutFetchingLatest(a);
-            const bIsFavrioute = DisambiguatedEmojiContext.getDisambiguatedEmojiContext().isFavoriteEmojiWithoutFetchingLatest(b);
+            const aIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(a);
+            const bIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(b);
 
-            if (aIsFavrioute && !bIsFavrioute) return -1;
+            if (aIsFavorite && !bIsFavorite) return -1;
 
-            if (!aIsFavrioute && bIsFavrioute) return 1;
+            if (!aIsFavorite && bIsFavorite) return 1;
 
             return 0;
         });
