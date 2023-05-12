@@ -102,8 +102,10 @@ function closeTab(id: number) {
     if (openTabs.length <= 1) return;
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
     const closed = openTabs.splice(i, 1);
     closedTabs.push(...closed);
+
     if (id === currentlyOpenTab) {
         if (openTabHistory.length) {
             openTabHistory.pop();
@@ -117,6 +119,7 @@ function closeTab(id: number) {
                 const maybeNewTab = openTabs.find(t => t.id === maybeNewTabId);
                 if (maybeNewTab) newTab = maybeNewTab;
             }
+
             moveToTab(newTab.id);
             openTabHistory.pop();
         }
@@ -132,12 +135,14 @@ function closeCurrentTab() {
 function closeOtherTabs(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
     const removedTabs = openTabs.filter(v => v.id !== id);
     closedTabs.push(...removedTabs.reverse());
     const lastTab = openTabs.find(v => v.id === currentlyOpenTab)!;
     replaceArray(openTabs, tab);
     setOpenTab(id);
     replaceArray(openTabHistory, id);
+
     if (tab.channelId !== lastTab.channelId) moveToTab(id);
     else update();
 }
@@ -145,10 +150,12 @@ function closeOtherTabs(id: number) {
 function closeTabsToTheRight(id: number) {
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
     const tabsToTheRight = openTabs.filter((_, ind) => ind > i);
     closedTabs.push(...tabsToTheRight.reverse());
     const tabsToTheLeft = openTabs.filter((_, ind) => ind <= i);
     replaceArray(openTabs, ...tabsToTheLeft);
+
     if (!tabsToTheLeft.some(v => v.id === currentlyOpenTab)) moveToTab(openTabs.at(-1)!.id);
     else update();
 }
@@ -156,6 +163,7 @@ function closeTabsToTheRight(id: number) {
 function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab)!;
     if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
+
     if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, ...ch };
 }
 
@@ -166,6 +174,7 @@ function isTabSelected(id: number) {
 function moveDraggedTabs(index1: number, index2: number) {
     if (index1 < 0 || index2 > openTabs.length)
         return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
+
     const firstItem = openTabs.splice(index1, 1)[0];
     openTabs.splice(index2, 0, firstItem);
     update();
@@ -174,6 +183,7 @@ function moveDraggedTabs(index1: number, index2: number) {
 function moveToTab(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
     setOpenTab(id);
     if (tab.messageId) {
         NavigationRouter.transitionTo(`/channels/${tab.guildId}/${tab.channelId}/${tab.messageId}`);
@@ -187,10 +197,12 @@ function moveToTab(id: number) {
 function moveToTabRelative(offset: number, wrapAround?: boolean) {
     const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
     const maybeNewTab = currentIndex + offset;
+
     if (!wrapAround) {
         if (maybeNewTab < 0 || maybeNewTab >= openTabs.length) return;
-        moveToTab(openTabs[maybeNewTab].id);
+        return moveToTab(openTabs[maybeNewTab].id);
     }
+
     const newTab = maybeNewTab < 0
         ? openTabs.length + offset
         : maybeNewTab > openTabs.length - 1
@@ -202,6 +214,7 @@ function moveToTabRelative(offset: number, wrapAround?: boolean) {
 
 const saveTabs = async (userId: string) => {
     if (!userId) return;
+
     DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => {
         return {
             ...(old ?? {}),
@@ -213,6 +226,7 @@ const saveTabs = async (userId: string) => {
 function setOpenTab(id: number) {
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
     currentlyOpenTab = id;
     openTabHistory.push(id);
 }
@@ -228,6 +242,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     if (!userId) return;
     lastUserId = userId;
     if (openTabs.length) return;
+
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({
             id: Toasts.genId(),
@@ -239,6 +254,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
             }
         });
     }
+
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
             persistedTabs.then(tabs => {
@@ -260,6 +276,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
             break;
         }
     }
+
     if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true);
     for (let i = 0; i < openTabHistory.length; i++) openTabHistory.pop();
     moveToTab(currentlyOpenTab);

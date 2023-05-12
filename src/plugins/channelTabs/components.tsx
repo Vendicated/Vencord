@@ -45,14 +45,11 @@ const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore") as FluxStore & {
     // also it looks like they'll allow custom emojis in the future ([0] as emoji id instead of unicode char) so probably handle that
     getChannelEmoji(channelId: string): [string, unknown] | undefined;
 };
-const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
-const useDrag = findByCodeLazy(".disconnectDragSource(");
-const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
@@ -60,6 +57,10 @@ const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
 const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
+
+const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
+const useDrag = findByCodeLazy(".disconnectDragSource(");
+const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
@@ -71,6 +72,7 @@ const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     : <div className={cl("guild-acronym-icon")}>
         <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
     </div>;
+
 const UserAvatar = ({ user }: { user: User; }) =>
     <img
         src={user.avatar
@@ -79,6 +81,7 @@ const UserAvatar = ({ user }: { user: User; }) =>
         }
         className={cl("icon")}
     />;
+
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
         src={channel?.icon
@@ -87,11 +90,13 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
         }
         className={cl("icon")}
     />;
+
 function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
     return isTyping
         ? <div className={cl("typing-indicator")}><ThreeDots dotRadius={3} themed={true} /></div>
         : null;
 }
+
 const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     return unreadCount > 0 ?
         <div
@@ -105,16 +110,20 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
             {mentionCount || unreadCount}
         </div> : null;
 };
+
 function ChannelEmoji({ channel, emoji }: { channel: Channel, emoji: string | undefined; }) {
     if (!emoji || !channelTabsSettings.store.channelNameEmojis) return null;
     const backgroundColor = useChannelEmojiBgColor(emoji, channel);
+
     return <div className={cl("emoji-container")} style={{ backgroundColor }}>
         <Emoji emojiName={emoji} className={cl("emoji")} />
     </div>;
 }
+
 function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
     const { openTabs } = ChannelTabsUtils;
+
     return <Menu.Menu
         navId="channeltabs-channel-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
@@ -179,6 +188,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
         </>;
+
     if (guild) {
         if (channel)
             return <>
@@ -207,6 +217,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
             </>;
         }
     }
+
     if (channel && recipients?.length) {
         if (channel.type === ChannelTypes.DM) {
             const user = UserStore.getUser(recipients[0]);
@@ -274,15 +285,15 @@ function ChannelTab(props: ChannelTabsProps & { index: number; }) {
 }
 
 export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
+    const { openTabs } = ChannelTabsUtils;
     let userId: string;
     userId ??= props.userId;
+
     const _update = useForceUpdater();
     function update() {
         _update();
         saveTabs(userId);
     }
-    const { openTabs } = ChannelTabsUtils;
-    openStartupTabs(props);
     useEffect(() => {
         setUpdaterFunction(update);
         const initialRender = () => {
@@ -292,6 +303,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         };
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
     }, []);
+    openStartupTabs(props);
 
     function handleKeybinds(e: KeyboardEvent) {
         if (e.key === "Tab" && e.ctrlKey) {
@@ -343,11 +355,14 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
             >
                 <XIcon width={16} height={16} />
             </button>}
-        </div>)
-        }
-        <button onClick={() => {
-            createTab(props, true);
-        }} className={classes(cl("button"), cl("new-button"))}><PlusIcon /></button>
+        </div>)}
+
+        <button
+            onClick={() => createTab(props, true)}
+            className={classes(cl("button"), cl("new-button"))}
+        >
+            <PlusIcon />
+        </button>
     </div >;
 }
 const PreviewTab = (props: ChannelTabsProps) => {
@@ -365,8 +380,8 @@ export function ChannelTabsPreivew(p) {
     const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
     const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = channelTabsSettings.use(["tabSet"]);
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
-
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
+
     return <>
         <Forms.FormTitle>Startup tabs</Forms.FormTitle>
         <Flex flexDirection="row" style={{ gap: "2px" }}>
