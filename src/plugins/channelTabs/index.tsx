@@ -128,7 +128,7 @@ export default definePlugin({
             channelId: message.channel_id,
             guildId: ChannelStore.getChannel(message.channel_id)?.guild_id
         };
-        ChannelTabsUtils.createTab(tab, true, message.id);
+        ChannelTabsUtils.createTab(tab, false, message.id);
     },
 
     settingsAboutComponent: () => {

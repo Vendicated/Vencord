@@ -29,6 +29,7 @@ export type BasicChannelTabsProps = {
     channelId: string;
 };
 export interface ChannelTabsProps extends BasicChannelTabsProps {
+    messageId?: string;
     id: number;
 }
 interface PersistedTabs {
@@ -85,17 +86,10 @@ const openTabHistory: number[] = [];
 
 let lastUserId: string;
 
-function createTab(props: BasicChannelTabsProps, moveToTab?: boolean, messageId?: string) {
-    const { channelId, guildId } = props;
+function createTab(props: BasicChannelTabsProps, switchToTab?: boolean, messageId?: string) {
     const id = genId();
-    openTabs.push({ ...props, id });
-    if (moveToTab) setOpenTab(id);
-    else return;
-
-    let path = `/channels/${guildId}/${channelId}`;
-    if (messageId) path += `/${messageId}`;
-    if (channelId !== SelectedChannelStore.getChannelId() || messageId)
-        NavigationRouter.transitionTo(path);
+    openTabs.push({ ...props, id, messageId });
+    if (switchToTab) moveToTab(id);
 }
 
 function closeTab(id: number) {
@@ -164,7 +158,11 @@ function moveToTab(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
     setOpenTab(id);
-    if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
+    if (tab.messageId) {
+        NavigationRouter.transitionTo(`/channels/${tab.guildId}/${tab.channelId}/${tab.messageId}`);
+        delete openTabs[openTabs.indexOf(tab)].messageId;
+    }
+    else if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
 }
 
