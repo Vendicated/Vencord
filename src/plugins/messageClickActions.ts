@@ -78,7 +78,7 @@ export default definePlugin({
 
                     MessageActions.startEditMessage(channel.id, msg.id, msg.content);
                     event.preventDefault();
-                } {
+                } else {
                     if (!settings.store.enableDoubleClickToReply) return;
 
                     FluxDispatcher.dispatch({
