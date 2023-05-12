@@ -18,7 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -234,12 +234,15 @@ export default definePlugin({
                         });
                         break; // end 'preview'
                     }
-                }
 
-                return sendBotMessage(ctx.channel.id, {
-                    author,
-                    content: "Invalid sub-command"
-                });
+                    default: {
+                        sendBotMessage(ctx.channel.id, {
+                            author,
+                            content: "Invalid sub-command"
+                        });
+                        break;
+                    }
+                }
             }
         }
     ]

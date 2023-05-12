@@ -19,7 +19,7 @@
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +30,7 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
-    return ({ color, tooltip }: { color: string; tooltip: string; }) => (
+    return ({ color, tooltip, wantMargin }: { color: string; tooltip: string; wantMargin: boolean; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
@@ -39,6 +39,12 @@ function Icon(path: string, viewBox = "0 0 24 24") {
                     width="20"
                     viewBox={viewBox}
                     fill={color}
+                    style={{
+                        marginLeft: wantMargin ? 4 : 0,
+                        verticalAlign: "top",
+                        position: "relative",
+                        top: wantMargin ? 1 : 0,
+                    }}
                 >
                     <path d={path} />
                 </svg>
@@ -57,16 +63,16 @@ type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
-const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
+const PlatformIcon = ({ platform, status, wantMargin }: { platform: Platform, status: string; wantMargin: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} wantMargin={wantMargin} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user: User; inline?: boolean; marginLeft?: string; }) => {
+const PlatformIndicator = ({ user, wantMargin = true }: { user: User; wantMargin?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -99,29 +105,21 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
             key={platform}
             platform={platform as Platform}
             status={status}
+            wantMargin={wantMargin}
         />
     ));
 
     if (!icons.length) return null;
 
     return (
-        <div
-            className="vc-platform-indicator"
-            style={{
-                marginLeft,
-                gap: "4px",
-                display: inline ? "inline-flex" : "flex",
-                alignItems: "center",
-                transform: inline ? "translateY(4px)" : undefined
-            }}
-        >
+        <span className="vc-platform-indicator">
             {icons}
-        </div>
+        </span>
     );
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} marginLeft="" />,
+    component: p => <PlatformIndicator {...p} wantMargin={false} />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -146,7 +144,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} inline />
+                <PlatformIndicator user={props.message?.author} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")

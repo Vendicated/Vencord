@@ -18,8 +18,9 @@
 
 import "./styles.css";
 
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { classes } from "@utils/misc";
 import { React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
@@ -33,8 +34,10 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     onClick,
     onClose,
     image,
-    permanent
-}: NotificationData) {
+    permanent,
+    className,
+    dismissOnClick
+}: NotificationData & { className?: string; }) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
@@ -61,11 +64,12 @@ export default ErrorBoundary.wrap(function NotificationComponent({
 
     return (
         <button
-            className="vc-notification-root"
+            className={classes("vc-notification-root", className)}
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
             onClick={() => {
-                onClose!();
                 onClick?.();
+                if (dismissOnClick !== false)
+                    onClose!();
             }}
             onContextMenu={e => {
                 e.preventDefault();

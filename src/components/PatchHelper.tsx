@@ -18,8 +18,8 @@
 
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
-import { makeCodeblock } from "@utils/misc";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
+import { makeCodeblock } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Clipboard, Forms, Parser, React, Switch, Text, TextInput } from "@webpack/common";
@@ -186,9 +186,10 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 error={error ?? replacementError}
             />
             {!isFunc && (
-                <>
+                <div className="vc-text-selectable">
                     <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
+                        "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
                         "$$": "Insert a $",
                         "$&": "Insert the entire match",
                         "$`\u200b": "Insert the substring before the match",
@@ -200,7 +201,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                             {Parser.parse("`" + placeholder + "`")}: {desc}
                         </Forms.FormText>
                     ))}
-                </>
+                </div>
             )}
 
             <Switch

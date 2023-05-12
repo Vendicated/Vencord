@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { addContextMenuPatch } from "@api/ContextMenu";
+import { Settings } from "@api/Settings";
 import PatchHelper from "@components/PatchHelper";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
-import { LazyComponent } from "@utils/misc";
+import { Logger } from "@utils/Logger";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
@@ -33,6 +34,23 @@ export default definePlugin({
     description: "Adds Settings UI and debug info",
     authors: [Devs.Ven, Devs.Megu],
     required: true,
+
+    start() {
+        // The settings shortcuts in the user settings cog context menu
+        // read the elements from a hardcoded map which for obvious reason
+        // doesn't contain our sections. This patches the actions of our
+        // sections to manually use SettingsRouter (which only works on desktop
+        // but the context menu is usually not available on mobile anyway)
+        addContextMenuPatch("user-settings-cog", children => () => {
+            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
+            section?.forEach(c => {
+                if (c?.props?.id?.startsWith("Vencord")) {
+                    c.props.action = () => SettingsRouter.open(c.props.id);
+                }
+            });
+        });
+    },
+
     patches: [{
         find: ".versionHash",
         replacement: [
@@ -69,61 +87,55 @@ export default definePlugin({
     }],
 
     makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
-        const makeOnClick = (tab: string) => () => SettingsRouter.open(tab);
-
-        const cats = [
+        return [
             {
                 section: ID.HEADER,
                 label: "Vencord"
-            }, {
+            },
+            {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: () => <SettingsComponent tab="VencordSettings" />,
-                onClick: makeOnClick("VencordSettings")
-            }, {
+                element: () => <SettingsComponent tab="VencordSettings" />
+            },
+            {
                 section: "VencordPlugins",
                 label: "Plugins",
                 element: () => <SettingsComponent tab="VencordPlugins" />,
-                onClick: makeOnClick("VencordPlugins")
-            }, {
+            },
+            {
                 section: "VencordThemes",
                 label: "Themes",
                 element: () => <SettingsComponent tab="VencordThemes" />,
-                onClick: makeOnClick("VencordThemes")
-            }
-        ] as Array<{
-            section: unknown,
-            label?: string;
-            element?: React.ComponentType;
-            onClick?(): void;
-        }>;
-
-        if (!IS_WEB)
-            cats.push({
+            },
+            !IS_WEB && {
                 section: "VencordUpdater",
                 label: "Updater",
                 element: () => <SettingsComponent tab="VencordUpdater" />,
-                onClick: makeOnClick("VencordUpdater")
-            });
-
-        cats.push({
-            section: "VencordSettingsSync",
-            label: "Backup & Restore",
-            element: () => <SettingsComponent tab="VencordSettingsSync" />,
-            onClick: makeOnClick("VencordSettingsSync")
-        });
-
-        if (IS_DEV)
-            cats.push({
+            },
+            {
+                section: "VencordCloud",
+                label: "Cloud",
+                element: () => <SettingsComponent tab="VencordCloud" />,
+            },
+            {
+                section: "VencordSettingsSync",
+                label: "Backup & Restore",
+                element: () => <SettingsComponent tab="VencordSettingsSync" />,
+            },
+            IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
                 element: PatchHelper!,
-                onClick: makeOnClick("VencordPatchHelper")
-            });
-
-        cats.push({ section: ID.DIVIDER });
-
-        return cats;
+            },
+            IS_VENCORD_DESKTOP && {
+                section: "VencordDesktop",
+                label: "Desktop Settings",
+                element: VencordDesktop.Components.Settings,
+            },
+            {
+                section: ID.DIVIDER
+            }
+        ].filter(Boolean);
     },
 
     options: {
@@ -142,21 +154,13 @@ export default definePlugin({
         },
     },
 
-    tabs: {
-        vencord: () => <SettingsComponent tab="VencordSettings" />,
-        plugins: () => <SettingsComponent tab="VencordPlugins" />,
-        themes: () => <SettingsComponent tab="VencordThemes" />,
-        updater: () => <SettingsComponent tab="VencordUpdater" />,
-        sync: () => <SettingsComponent tab="VencordSettingsSync" />
-    },
-
     get electronVersion() {
-        return VencordNative.getVersions().electron || window.armcord?.electron || null;
+        return VencordNative.native.getVersions().electron || window.armcord?.electron || null;
     },
 
     get chromiumVersion() {
         try {
-            return VencordNative.getVersions().chrome
+            return VencordNative.native.getVersions().chrome
                 // @ts-ignore Typescript will add userAgentData IMMEDIATELY
                 || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
                 || null;
@@ -168,6 +172,7 @@ export default definePlugin({
     get additionalInfo() {
         if (IS_DEV) return " (Dev)";
         if (IS_WEB) return " (Web)";
+        if (IS_VENCORD_DESKTOP) return ` (VencordDesktop v${VencordDesktopNative.app.getVersion()})`;
         if (IS_STANDALONE) return " (Standalone)";
         return "";
     },

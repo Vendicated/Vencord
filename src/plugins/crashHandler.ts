@@ -17,9 +17,9 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
@@ -43,6 +43,7 @@ const settings = definePluginSettings({
 
 let crashCount: number = 0;
 let lastCrashTimestamp: number = 0;
+let shouldAttemptNextHandle = false;
 
 export default definePlugin({
     name: "CrashHandler",
@@ -72,12 +73,17 @@ export default definePlugin({
     ],
 
     handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
+        if (Date.now() - lastCrashTimestamp <= 1_000 && !shouldAttemptNextHandle) return true;
+
+        shouldAttemptNextHandle = false;
+
         if (++crashCount > 5) {
             try {
                 showNotification({
                     color: "#eed202",
                     title: "Discord has crashed!",
                     body: "Awn :( Discord has crashed more than five times, not attempting to recover.",
+                    noPersist: true,
                 });
             } catch { }
 
@@ -111,6 +117,7 @@ export default definePlugin({
                     color: "#eed202",
                     title: "Discord has crashed!",
                     body: "Attempting to recover...",
+                    noPersist: true,
                 });
             } catch { }
         }
@@ -149,6 +156,7 @@ export default definePlugin({
         }
 
         try {
+            shouldAttemptNextHandle = true;
             _this.forceUpdate();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to update crash handler component.", err);

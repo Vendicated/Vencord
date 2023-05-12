@@ -19,6 +19,11 @@
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
+export {
+    gitHash,
+    gitRemote
+};
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
@@ -194,6 +199,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Captain",
         id: 347366054806159360n
     },
+    nick: {
+        name: "nick",
+        id: 347884694408265729n
+    },
     whqwert: {
         name: "whqwert",
         id: 586239091520176128n
@@ -202,8 +211,80 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "lewisakura",
         id: 96269247411400704n
     },
+    RuiNtD: {
+        name: "RuiNtD",
+        id: 157917665162297344n
+    },
+    hunt: {
+        name: "hunt-g",
+        id: 222800179697287168n
+    },
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
+    },
+    Aria: {
+        name: "Syncxv",
+        id: 549244932213309442n,
+    },
+    TheKodeToad: {
+        name: "TheKodeToad",
+        id: 706152404072267788n
+    },
+    LordElias: {
+        name: "LordElias",
+        id: 319460781567639554n
+    },
+    juby: {
+        name: "Juby210",
+        id: 324622488644616195n
+    },
+    Alyxia: {
+        name: "Alyxia Sother",
+        id: 952185386350829688n
+    },
+    Remty: {
+        name: "Remty",
+        id: 335055032204656642n
+    },
+    skyevg: {
+        name: "skyevg",
+        id: 1090310844283363348n
+    },
+    Dziurwa: {
+        name: "Dziurwa",
+        id: 787017887877169173n
+    },
+    AutumnVN: {
+        name: "AutumnVN",
+        id: 393694671383166998n
+    },
+    pylix: {
+        name: "pylix",
+        id: 492949202121261067n
+    },
+    Tyler: {
+        name: "\\\\GGTyler\\\\",
+        id: 143117463788191746n
+    },
+    RyanCaoDev: {
+        name: "RyanCaoDev",
+        id: 952235800110694471n,
+    },
+    Strencher: {
+        name: "Strencher",
+        id: 415849376598982656n
+    },
+    FieryFlames: {
+        name: "Fiery",
+        id: 890228870559698955n
+    },
+    KannaDev: {
+        name: "Kanna",
+        id: 317728561106518019n
+    },
+    carince: {
+        name: "carince",
+        id: 818323528755314698n
     }
 });
