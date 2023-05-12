@@ -20,7 +20,7 @@ import { DataStore } from "@api/index.js";
 import { definePluginSettings } from "@api/Settings.js";
 import { Logger } from "@utils/Logger.js";
 import { OptionType } from "@utils/types.js";
-import { NavigationRouter, SelectedChannelStore, Toasts } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
 
 import { ChannelTabsPreivew } from "./components.jsx";
 
@@ -164,7 +164,7 @@ function moveToTab(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
     setOpenTab(id);
-    if (tab.channelId !== SelectedChannelStore.getChannelId())
+    if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
 }
 

@@ -160,8 +160,7 @@ function ChannelContextMenu({ tab, update }: { tab: ChannelTabsProps, update: ()
 }
 
 function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
-    const { guildId, channel, channelId } = props;
-    const guild = props.guild ?? GuildStore.getGuild(channel?.guild_id!);
+    const { guild, guildId, channel, channelId } = props;
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
 
@@ -180,7 +179,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
 
     if (guildId === "@favorites")
         return <>
-            <GuildIcon guild={guild} />
+            <Emoji emojiName={"⭐"} className={cl("icon")} />
             <ChannelEmoji emoji={channelEmoji} channel={channel!} />
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
