@@ -30,7 +30,7 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
-    return ({ color, tooltip, wantMargin }: { color: string; tooltip: string; wantMargin: boolean; }) => (
+    return ({ color, tooltip }: { color: string; tooltip: string; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
@@ -39,12 +39,6 @@ function Icon(path: string, viewBox = "0 0 24 24") {
                     width="20"
                     viewBox={viewBox}
                     fill={color}
-                    style={{
-                        marginLeft: wantMargin ? 4 : 0,
-                        verticalAlign: "top",
-                        position: "relative",
-                        top: wantMargin ? 1 : 0,
-                    }}
                 >
                     <path d={path} />
                 </svg>
@@ -63,11 +57,11 @@ type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
-const PlatformIcon = ({ platform, status, wantMargin }: { platform: Platform, status: string; wantMargin: boolean; }) => {
+const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} wantMargin={wantMargin} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
@@ -105,14 +99,26 @@ const PlatformIndicator = ({ user, wantMargin = true }: { user: User; wantMargin
             key={platform}
             platform={platform as Platform}
             status={status}
-            wantMargin={wantMargin}
         />
     ));
 
     if (!icons.length) return null;
 
     return (
-        <span className="vc-platform-indicator">
+        <span
+            className="vc-platform-indicator"
+            style={{
+                display: "inline-flex",
+                justifyContent: "center",
+                marginLeft: wantMargin ? 4 : 0,
+                verticalAlign: "top",
+                position: "relative",
+                top: wantMargin ? 1 : 0,
+                padding: !wantMargin ? 2 : 0,
+                gap: 4
+            }}
+
+        >
             {icons}
         </span>
     );
