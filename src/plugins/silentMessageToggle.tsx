@@ -36,7 +36,7 @@ const settings = definePluginSettings({
     },
     autoDisable: {
         type: OptionType.BOOLEAN,
-        description: "Automatically disable the state of the silent message after sending a message.",
+        description: "Automatically disable the silent message toggle again after sending one",
         default: true
     }
 });
