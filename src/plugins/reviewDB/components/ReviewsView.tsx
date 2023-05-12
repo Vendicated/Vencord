@@ -19,7 +19,7 @@
 import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
-import { findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
@@ -27,7 +27,7 @@ import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findLazy(m => m.inputDefault);
+const Classes = findByPropsLazy("inputDefault");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const { token } = Settings.plugins.ReviewDB;

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, Timestamp, UserStore } from "@webpack/common";
-import moment from "moment";
+import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -85,7 +85,7 @@ export default LazyComponent(() => {
                 }
             }>
 
-                <div style={{ paddingLeft: "0px" }}>
+                <div>
                     <img
                         className={classes(avatar, clickable)}
                         onClick={openModal}
@@ -101,9 +101,12 @@ export default LazyComponent(() => {
                     </span>
                     {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
-                    <Timestamp timestamp={moment(review.timestamp * 1000)} >
-                        {moment(review.timestamp * 1000).format("DD/MM/YYYY") }
-                    </Timestamp>
+                    {
+                        !Settings.plugins.ReviewDB.hideTimestamps && (
+                            <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                                {moment(review.timestamp * 1000).format("DD/MM/YYYY")}
+                            </Timestamp>)
+                    }
 
                     <p
                         className={classes(messageContent)}
