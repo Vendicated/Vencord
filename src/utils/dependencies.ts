@@ -81,3 +81,13 @@ export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wa
 
 // @ts-expect-error SHUT UP
 export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+
+export const getZipJs = makeLazy(async () => {
+    const exports = {};
+    const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
+
+    const code = await fetch("https://unpkg.com/@zip.js/zip.js@2.7.11/dist/zip.min.js").then(r => r.text());
+    Function("e", code.match(/}\)\(this,\(function\(\w\)\{(.*)}/)![1])(winProxy);
+
+    return exports as typeof import("@zip.js/zip.js");
+});

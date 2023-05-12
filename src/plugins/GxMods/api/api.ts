@@ -27,7 +27,7 @@ const domParser = makeLazy(() => new DOMParser());
 
 const CORS_PROXY = "https://corsproxy.io?";
 
-function corsUrl(url: string | URL) {
+export function corsUrl(url: string | URL) {
     return CORS_PROXY + encodeURIComponent(url.toString());
 }
 

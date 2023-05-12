@@ -17,10 +17,12 @@
 */
 
 import { Devs } from "@utils/constants";
+import { getZipJs } from "@utils/dependencies";
 import definePlugin from "@utils/types";
 import { Text } from "@webpack/common";
 
 import { getCrxLink, getModInfo } from "./api/api";
+import { fetchCrxFile } from "./utils";
 
 
 // Anime mod
@@ -45,7 +47,16 @@ export default definePlugin({
         const modInfo = await getModInfo(modId);
         const crxLink = await getCrxLink(modInfo.data.crxId);
 
-        console.log("GxMods", crxLink);
+        const { TextWriter } = await getZipJs();
+        const crx = await fetchCrxFile(crxLink!);
+        const entries = await crx.getEntries();
+
+        const manifest = new TextWriter();
+        const manifestFile = entries.find(e => e.filename === "manifest.json")!;
+        await manifestFile.getData!(manifest);
+
+        const manifestJson = JSON.parse(await manifest.getData());
+        console.log("GxMods", manifestJson);
     },
     stop() { },
 });

@@ -44,12 +44,18 @@ devDependencies:
   '@types/yazl':
     specifier: ^2.4.2
     version: 2.4.2
+  '@types/zip.js':
+    specifier: ^2.0.29
+    version: 2.0.29
   '@typescript-eslint/eslint-plugin':
     specifier: ^5.59.1
     version: 5.59.1(@typescript-eslint/parser@5.59.1)(eslint@8.28.0)(typescript@5.0.4)
   '@typescript-eslint/parser':
     specifier: ^5.59.1
     version: 5.59.1(eslint@8.28.0)(typescript@5.0.4)
+  '@zip.js/zip.js':
+    specifier: ^2.7.11
+    version: 2.7.11
   diff:
     specifier: ^5.1.0
     version: 5.1.0
@@ -569,6 +575,10 @@ packages:
       '@types/node': 18.16.3
     dev: true
 
+  /@types/zip.js@2.0.29:
+    resolution: {integrity: sha512-cFrPPas4GPQpyBXSJnZ5xUi+0mwMYTYqnBC0MFXEu4qcvJ1UGmMv8sDgLtT94nqYCTmSoWdgX5LI0QdjxushzQ==}
+    dev: true
+
   /@typescript-eslint/eslint-plugin@5.59.1(@typescript-eslint/parser@5.59.1)(eslint@8.28.0)(typescript@5.0.4):
     resolution: {integrity: sha512-AVi0uazY5quFB9hlp2Xv+ogpfpk77xzsgsIEWyVS7uK/c7MZ5tw7ZPbapa0SbfkqE0fsAMkz5UwtgMLVk2BQAg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -721,6 +731,11 @@ packages:
       vscode-oniguruma: 1.7.0
       vscode-textmate: 5.2.0
     dev: false
+
+  /@zip.js/zip.js@2.7.11:
+    resolution: {integrity: sha512-r6MpBxrbWfktXh+4t4fn5SGBgMKmcIgnqcW51ux2dfZJgKq2UwljDDl4i1cet0qWWqu0bsyjGO4R+TLRkE/u+A==}
+    engines: {deno: '>=1.0.0', node: '>=16.5.0'}
+    dev: true
 
   /acorn-jsx@5.3.2(acorn@8.8.0):
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
