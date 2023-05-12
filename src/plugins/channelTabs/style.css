@@ -24,10 +24,6 @@
     background-color: var(--brand-experiment);
 }
 
-.vc-channeltabs-has-mention {
-    background-color: var(--status-danger);
-}
-
 .vc-channeltabs-channel-name-text {
     overflow: hidden;
     white-space: nowrap;
