@@ -38,7 +38,7 @@ export interface ReviewDBUser {
     clientMod: string
     warningCount: number
     badges: any[]
-    ban_info: BanInfo | null
+    banInfo: BanInfo | null
     lastReviewID: number
     type: UserType
 }

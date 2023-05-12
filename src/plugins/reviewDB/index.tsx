@@ -106,9 +106,9 @@ export default definePlugin({
                     showToast("You have new reviews on your profile!");
             }
 
-            if (user.ban_info) {
-                const endDate = new Date(user.ban_info.banEndDate);
-                if (endDate > new Date() && (settings.user?.ban_info?.banEndDate ?? 0) < endDate) {
+            if (user.banInfo) {
+                const endDate = new Date(user.banInfo.banEndDate);
+                if (endDate > new Date() && (settings.user?.banInfo?.banEndDate ?? 0) < endDate) {
 
                     Alerts.show({
                         title: "You have been banned from ReviewDB",
@@ -117,7 +117,7 @@ export default definePlugin({
                                 You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
                             </p>
                             <p>
-                                Offending Review: {user.ban_info.reviewContent}
+                                Offending Review: {user.banInfo.reviewContent}
                             </p>
                             <p>
                                 Continued offenses will result in a permanent ban.
