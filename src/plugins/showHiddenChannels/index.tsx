@@ -371,7 +371,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.{0,120}?channelId:(\i)\.id)/,
+                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
