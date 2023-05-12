@@ -17,7 +17,7 @@
 */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
@@ -130,6 +130,8 @@ export default definePlugin({
     name: "ImageZoom",
     description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
     authors: [Devs.Aria],
+    tags: ["ImageUtilities"],
+
     patches: [
         {
             find: '"renderLinkComponent","maxWidth"',

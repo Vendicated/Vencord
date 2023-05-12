@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { makeLazy } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
@@ -30,7 +29,7 @@ export default definePlugin({
         {
             find: "hideNote:",
             all: true,
-            predicate: makeLazy(() => Vencord.Settings.plugins.BetterNotesBox.hide),
+            predicate: () => Vencord.Settings.plugins.BetterNotesBox.hide,
             replacement: {
                 match: /hideNote:.+?(?=[,}])/g,
                 replace: "hideNote:true",
