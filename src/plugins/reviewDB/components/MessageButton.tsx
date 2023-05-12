@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { findByProps } from "@webpack";
 
 export default LazyComponent(() => {
-    const { button, dangerous } = findByProps("button", "wrapper", "disabled","separator");
+    const { button, dangerous } = findByProps("button", "wrapper", "disabled", "separator");
 
     return function MessageButton(props) {
         return props.type === "delete"

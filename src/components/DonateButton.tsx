@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import IpcEvents from "@utils/IpcEvents";
 import { Button } from "@webpack/common";
 
 import { Heart } from "./Heart";
@@ -27,9 +26,7 @@ export default function DonateButton(props: any) {
             {...props}
             look={Button.Looks.LINK}
             color={Button.Colors.TRANSPARENT}
-            onClick={() =>
-                VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/sponsors/Vendicated")
-            }
+            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
         >
             <Heart />
             Donate
