@@ -316,6 +316,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         };
     }, []);
 
+    if (!userId) return null;
     handleChannelSwitch(props);
     saveTabs(userId);
 
