@@ -84,7 +84,7 @@ function openImage(url: string) {
 const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
-    children.splice(1, 0, (
+    children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="view-avatar"
@@ -109,13 +109,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
 const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => () => {
     if (!banner && !icon) return;
 
-    // before copy id (if it exists)
-    const idx = children.length +
-        children[children.length - 1]?.props?.children?.props?.id === "devmode-copy-id"
-        ? -2
-        : -1;
-
-    children.splice(idx, 0, (
+    children.splice(-1, 0, (
         <Menu.MenuGroup>
             {icon ? (
                 <Menu.MenuItem
@@ -151,6 +145,7 @@ export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz],
     description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
+    tags: ["ImageUtilities"],
 
     settings,
 
