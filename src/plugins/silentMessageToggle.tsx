@@ -33,6 +33,11 @@ const settings = definePluginSettings({
         onChange(newValue: boolean) {
             if (newValue === false) lastState = false;
         }
+    },
+    autoDisable: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically disable the silent message toggle again after sending one",
+        default: true
     }
 });
 
@@ -51,7 +56,7 @@ function SilentMessageToggle(chatBoxProps: {
     React.useEffect(() => {
         const listener: SendListener = (_, message) => {
             if (enabled) {
-                setEnabledValue(false);
+                if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
@@ -96,7 +101,7 @@ function SilentMessageToggle(chatBoxProps: {
 
 export default definePlugin({
     name: "SilentMessageToggle",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
     dependencies: ["MessageEventsAPI"],
 
