@@ -327,6 +327,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
+                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                if (sticker?.format_type === 3 /* LOTTIE */) return;
+
                 return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
         }
     })();
@@ -347,7 +350,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
             name,
             isAnimated: firstChild && isGifUrl(firstChild.src)
         })));
-    } else if (type === "sticker") {
+    } else if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
         children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
     }
 };
