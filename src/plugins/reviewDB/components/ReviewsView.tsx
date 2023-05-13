@@ -27,7 +27,7 @@ import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findByPropsLazy("inputDefault");
+const Classes = findByPropsLazy("inputDefault", "editable");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     const { token } = Settings.plugins.ReviewDB;
