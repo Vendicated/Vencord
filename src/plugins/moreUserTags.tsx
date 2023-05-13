@@ -186,16 +186,21 @@ export default definePlugin({
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
                     replace: "$&$1=$self.addTagVariants($1);"
-                },
+                }
+            ]
+        },
+        {
+            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP;",
+            replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
                     replace: (_, origSwitch, variant, tags, displayedText, strings) =>
                         `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
                 },
                 // show OP tags correctly
                 {
-                    match: /(\i)=(\i)===\i\.ORIGINAL_POSTER/,
+                    match: /(\i)=(\i)===\i(?:\.\i)?\.ORIGINAL_POSTER/,
                     replace: "$1=$self.isOPTag($2)"
                 },
                 // add HTML data attributes (for easier theming)
@@ -226,15 +231,15 @@ return type!==null?$2.botTag,type"
         {
             find: ".hasAvatarForGuild(null==",
             replacement: {
-                match: /\.usernameSection,user/,
-                replace: ".usernameSection,moreTags_channelId:arguments[0].channelId,user"
+                match: /(?=usernameIcon:)/,
+                replace: "moreTags_channelId:arguments[0].channelId,"
             }
         },
         {
             find: 'copyMetaData:"User Tag"',
             replacement: {
-                match: /discriminatorClass:(.{1,100}),botClass:/,
-                replace: "discriminatorClass:$1,moreTags_channelId:arguments[0].moreTags_channelId,botClass:"
+                match: /(?=,botClass:)/,
+                replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
         // in profiles
@@ -290,26 +295,26 @@ return type!==null?$2.botTag,type"
             .filter(Boolean);
     },
 
-    addTagVariants(val: any /* i cant think of a good name */) {
+    addTagVariants(tagConstant) {
         let i = 100;
         tags.forEach(({ name }) => {
-            val[name] = ++i;
-            val[i] = name;
-            val[`${name}-BOT`] = ++i;
-            val[i] = `${name}-BOT`;
-            val[`${name}-OP`] = ++i;
-            val[i] = `${name}-OP`;
+            tagConstant[name] = ++i;
+            tagConstant[i] = name;
+            tagConstant[`${name}-BOT`] = ++i;
+            tagConstant[i] = `${name}-BOT`;
+            tagConstant[`${name}-OP`] = ++i;
+            tagConstant[i] = `${name}-OP`;
         });
-        return val;
+        return tagConstant;
     },
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return "BOT";
+        if (!passedTagName) return strings.BOT_TAG_BOT;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return "BOT";
+        if (!tag) return strings.BOT_TAG_BOT;
         if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.BOT_TAG_BOT;
 
         const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
