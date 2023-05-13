@@ -186,16 +186,21 @@ export default definePlugin({
                 {
                     match: /(\i)\[.\.BOT=0\]="BOT";/,
                     replace: "$&$1=$self.addTagVariants($1);"
-                },
+                }
+            ]
+        },
+        {
+            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP;",
+            replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(\i\.\i\.Messages)\.BOT_TAG_BOT/,
                     replace: (_, origSwitch, variant, tags, displayedText, strings) =>
                         `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
                 },
                 // show OP tags correctly
                 {
-                    match: /(\i)=(\i)===\i\.ORIGINAL_POSTER/,
+                    match: /(\i)=(\i)===\i(?:\.\i)?\.ORIGINAL_POSTER/,
                     replace: "$1=$self.isOPTag($2)"
                 },
                 // add HTML data attributes (for easier theming)
