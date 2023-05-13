@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings, useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/Settings";
 
 export type PluginSettings = {
     [key: string]: any;
