@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "@utils/misc";
+import { Settings } from "@api/Settings";
+import { classes } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, UserStore } from "@webpack/common";
+import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -32,7 +34,7 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
         { contents },
         buttonClasses,
         { defaultColor }
@@ -41,13 +43,13 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("contents"),
-        p("button", "wrapper", "disabled"),
+        p("button", "wrapper", "selected"),
         p("defaultColor")
     );
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
-            openUserProfileModal(review.senderdiscordid);
+            openUserProfileModal(review.sender.discordID);
         }
 
         function delReview() {
@@ -58,7 +60,7 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 onConfirm: () => {
                     deleteReview(review.id).then(res => {
-                        if (res.successful) {
+                        if (res.success) {
                             refetch();
                         }
                         showToast(res.message);
@@ -91,7 +93,7 @@ export default LazyComponent(() => {
                     <img
                         className={classes(avatar, clickable)}
                         onClick={openModal}
-                        src={review.profile_photo || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                        src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                         style={{ left: "0px" }}
                     />
                     <span
@@ -99,9 +101,19 @@ export default LazyComponent(() => {
                         style={{ color: "var(--channels-default)", fontSize: "14px" }}
                         onClick={() => openModal()}
                     >
-                        {review.username}
+                        {review.sender.username}
                     </span>
-                    {review.badges.map(badge => <ReviewBadge {...badge} />)}
+                    {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+
+                    {
+                        !Settings.plugins.ReviewDB.hideTimestamps && (
+                            <Timestamp
+                                timestamp={moment(review.timestamp * 1000)}
+                                compact={true}
+                            />
+                        )
+                    }
+
                     <p
                         className={classes(messageContent, defaultColor)}
                         style={{ fontSize: 15, marginTop: 4 }}

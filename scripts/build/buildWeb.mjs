@@ -36,16 +36,18 @@ const commonOptions = {
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
     format: "iife",
-    external: ["plugins", "git-hash"],
+    external: ["plugins", "git-hash", "/assets/*"],
     plugins: [
-        globPlugins,
+        globPlugins("web"),
         ...commonOpts.plugins,
     ],
     target: ["esnext"],
     define: {
         IS_WEB: "true",
         IS_STANDALONE: "true",
-        IS_DEV: JSON.stringify(watch)
+        IS_DEV: JSON.stringify(watch),
+        IS_DISCORD_DESKTOP: "false",
+        IS_VENCORD_DESKTOP: "false"
     }
 };
 
@@ -140,6 +142,7 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 await Promise.all([
     appendCssRuntime,
     buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], true),
-    buildPluginZip("extension-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], false),
+    buildPluginZip("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], false),
+    buildPluginZip("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"], false),
 ]);
 

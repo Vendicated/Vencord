@@ -18,8 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent, sleep, useForceUpdater } from "@utils/misc";
+import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { LazyComponent, useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
@@ -85,16 +86,20 @@ function makeRenderMoreUsers(users: User[]) {
     };
 }
 
+function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+    event.stopPropagation();
+}
+
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the Avatars of reactors",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.KannaDev],
 
     patches: [{
         find: ",reactionRef:",
         replacement: {
-            match: /((.)=(.{1,3})\.hideCount)(,.+?reactionCount.+?\}\))/,
-            replace: "$1,whoReactedProps=$3$4,$2?null:$self.renderUsers(whoReactedProps)"
+            match: /(?<=(\i)=(\i)\.hideCount,)(.+?reactionCount.+?\}\))/,
+            replace: (_, hideCount, props, rest) => `whoReactedProps=${props},${rest},${hideCount}?null:$self.renderUsers(whoReactedProps)`
         }
     }],
 
@@ -132,15 +137,17 @@ export default definePlugin({
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <UserSummaryItem
-                    users={users}
-                    guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
-                    renderIcon={false}
-                    max={5}
-                    showDefaultAvatarsForNullUsers
-                    showUserPopout
-                    renderMoreUsers={makeRenderMoreUsers(users)}
-                />
+                <div onClick={handleClickAvatar}>
+                    <UserSummaryItem
+                        users={users}
+                        guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
+                        renderIcon={false}
+                        max={5}
+                        showDefaultAvatarsForNullUsers
+                        showUserPopout
+                        renderMoreUsers={makeRenderMoreUsers(users)}
+                    />
+                </div>
             </div>
         );
     }

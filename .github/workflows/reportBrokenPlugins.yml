@@ -36,7 +36,7 @@ jobs:
                 export PATH="$PWD/node_modules/.bin:$PATH"
                 export CHROMIUM_BIN=$(which chromium-browser)
 
-                esbuild test/generateReport.ts > dist/report.mjs
+                esbuild scripts/generateReport.ts > dist/report.mjs
                 node dist/report.mjs >> $GITHUB_STEP_SUMMARY
               env:
                 DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
@@ -50,7 +50,7 @@ jobs:
                 export CHROMIUM_BIN=$(which chromium-browser)
                 export USE_CANARY=true
 
-                esbuild test/generateReport.ts > dist/report.mjs
+                esbuild scripts/generateReport.ts > dist/report.mjs
                 node dist/report.mjs >> $GITHUB_STEP_SUMMARY
               env:
                 DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}

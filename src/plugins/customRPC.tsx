@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
-import { useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import {
@@ -215,7 +215,8 @@ async function setRpc(disable?: boolean) {
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !disable ? activity : {}
+        activity: !disable ? activity : null,
+        socketId: "CustomRPC",
     });
 }
 

@@ -18,9 +18,9 @@
 
 
 export interface Badge {
-    badge_name: string;
-    badge_description: string;
-    badge_icon: string;
-    redirect_url: string;
-    badge_type: number;
+    name: string;
+    description: string;
+    icon: string;
+    redirectURL : string;
+    type: number;
 }

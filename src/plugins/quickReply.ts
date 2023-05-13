@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -29,12 +29,34 @@ const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
 let editIdx = -1;
 
-migratePluginSettings("QuickReply", "InteractionKeybinds");
+
+const enum MentionOptions {
+    DISABLED,
+    ENABLED,
+    NO_REPLY_MENTION_PLUGIN
+}
+
+const settings = definePluginSettings({
+    shouldMention: {
+        type: OptionType.SELECT,
+        description: "Ping reply by default",
+        options: [
+            {
+                label: "Follow NoReplyMention",
+                value: MentionOptions.NO_REPLY_MENTION_PLUGIN,
+                default: true
+            },
+            { label: "Enabled", value: MentionOptions.ENABLED },
+            { label: "Disabled", value: MentionOptions.DISABLED },
+        ]
+    }
+});
 
 export default definePlugin({
     name: "QuickReply",
-    authors: [Devs.obscurity, Devs.Ven],
+    authors: [Devs.obscurity, Devs.Ven, Devs.pylix],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
+    settings,
 
     start() {
         Dispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
@@ -111,7 +133,7 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Message[] = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
+    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
     if (!isReply) { // we are editing so only include own
         const meId = UserStore.getCurrentUser().id;
         messages = messages.filter(m => m.author.id === meId);
@@ -121,13 +143,28 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         ? Math.min(messages.length - 1, i + 1)
         : Math.max(-1, i - 1);
 
+    const findNextNonDeleted = (i: number) => {
+        do {
+            i = mutate(i);
+        } while (i !== -1 && messages[messages.length - i - 1]?.deleted === true);
+        return i;
+    };
+
     let i: number;
     if (isReply)
-        replyIdx = i = mutate(replyIdx);
+        replyIdx = i = findNextNonDeleted(replyIdx);
     else
-        editIdx = i = mutate(editIdx);
+        editIdx = i = findNextNonDeleted(editIdx);
 
     return i === - 1 ? undefined : messages[messages.length - i - 1];
+}
+
+function shouldMention() {
+    switch (settings.store.shouldMention) {
+        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return !Settings.plugins.NoReplyMention.enabled;
+        case MentionOptions.DISABLED: return false;
+        default: return true;
+    }
 }
 
 // handle next/prev reply
@@ -142,11 +179,12 @@ function nextReply(isUp: boolean) {
 
     const channel = ChannelStore.getChannel(message.channel_id);
     const meId = UserStore.getCurrentUser().id;
+
     Dispatcher.dispatch({
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
-        shouldMention: true,
+        shouldMention: shouldMention(),
         showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });

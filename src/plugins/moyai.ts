@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, SelectedChannelStore, UserStore } from "@webpack/common";
+import { SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, ReactionEmoji } from "discord-types/general";
 
 interface IMessageCreate {
@@ -54,76 +54,65 @@ const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
 
+const settings = definePluginSettings({
+    volume: {
+        description: "Volume of the 🗿🗿🗿",
+        type: OptionType.SLIDER,
+        markers: makeRange(0, 1, 0.1),
+        default: 0.5,
+        stickToMarkers: false
+    },
+    triggerWhenUnfocused: {
+        description: "Trigger the 🗿 even when the window is unfocused",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    ignoreBots: {
+        description: "Ignore bots",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
+
 export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu, Devs.Nuckyz],
     description: "🗿🗿🗿🗿🗿🗿🗿🗿",
+    settings,
 
-    async onMessage(e: IMessageCreate) {
-        if (e.optimistic || e.type !== "MESSAGE_CREATE") return;
-        if (e.message.state === "SENDING") return;
-        if (Settings.plugins.Moyai.ignoreBots && e.message.author?.bot) return;
-        if (!e.message.content) return;
-        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
+    flux: {
+        async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
+            if (optimistic || type !== "MESSAGE_CREATE") return;
+            if (message.state === "SENDING") return;
+            if (settings.store.ignoreBots && message.author?.bot) return;
+            if (!message.content) return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
 
-        const moyaiCount = getMoyaiCount(e.message.content);
+            const moyaiCount = getMoyaiCount(message.content);
 
-        for (let i = 0; i < moyaiCount; i++) {
+            for (let i = 0; i < moyaiCount; i++) {
+                boom();
+                await sleep(300);
+            }
+        },
+
+        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, emoji }: IReactionAdd) {
+            if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
+            if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
+
+            const name = emoji.name.toLowerCase();
+            if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
             boom();
-            await sleep(300);
-        }
-    },
-
-    onReaction(e: IReactionAdd) {
-        if (e.optimistic || e.type !== "MESSAGE_REACTION_ADD") return;
-        if (Settings.plugins.Moyai.ignoreBots && UserStore.getUser(e.userId)?.bot) return;
-        if (e.channelId !== SelectedChannelStore.getChannelId()) return;
-
-        const name = e.emoji.name.toLowerCase();
-        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
-
-        boom();
-    },
-
-    onVoiceChannelEffect(e: IVoiceChannelEffectSendEvent) {
-        if (!e.emoji?.name) return;
-        const name = e.emoji.name.toLowerCase();
-        if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
-
-        boom();
-    },
-
-    start() {
-        FluxDispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
-        FluxDispatcher.subscribe("MESSAGE_REACTION_ADD", this.onReaction);
-        FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
-        FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD", this.onReaction);
-        FluxDispatcher.unsubscribe("VOICE_CHANNEL_EFFECT_SEND", this.onVoiceChannelEffect);
-    },
-
-    options: {
-        volume: {
-            description: "Volume of the 🗿🗿🗿",
-            type: OptionType.SLIDER,
-            markers: makeRange(0, 1, 0.1),
-            default: 0.5,
-            stickToMarkers: false,
         },
-        triggerWhenUnfocused: {
-            description: "Trigger the 🗿 even when the window is unfocused",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: false,
-        },
-        ignoreBots: {
-            description: "Ignore bots",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: false,
+
+        VOICE_CHANNEL_EFFECT_SEND({ emoji }: IVoiceChannelEffectSendEvent) {
+            if (!emoji?.name) return;
+            const name = emoji.name.toLowerCase();
+            if (name !== MOYAI && !name.includes("moyai") && !name.includes("moai")) return;
+
+            boom();
         }
     }
 });
@@ -158,9 +147,9 @@ function getMoyaiCount(message: string) {
 }
 
 function boom() {
-    if (!Settings.plugins.Moyai.triggerWhenUnfocused && !document.hasFocus()) return;
+    if (!settings.store.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
     audioElement.src = MOYAI_URL;
-    audioElement.volume = Settings.plugins.Moyai.volume;
+    audioElement.volume = settings.store.volume;
     audioElement.play();
 }

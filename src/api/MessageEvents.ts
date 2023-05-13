@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { MessageStore } from "@webpack/common";
 import type { Channel, Message } from "discord-types/general";
+import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
@@ -35,22 +36,63 @@ export interface Emoji {
 export interface MessageObject {
     content: string,
     validNonShortcutEmojis: Emoji[];
+    invalidEmojis: any[];
+    tts: boolean;
+}
+
+export interface Upload {
+    classification: string;
+    currentSize: number;
+    description: string | null;
+    filename: string;
+    id: string;
+    isImage: boolean;
+    isVideo: boolean;
+    item: {
+        file: File;
+        platform: number;
+    };
+    loaded: number;
+    mimeType: string;
+    preCompressionSize: number;
+    responseUrl: string;
+    sensitive: boolean;
+    showLargeMessageDialog: boolean;
+    spoiler: boolean;
+    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
+    uniqueId: string;
+    uploadedFilename: string;
+}
+
+export interface MessageReplyOptions {
+    messageReference: Message["messageReference"];
+    allowedMentions?: {
+        parse: Array<string>;
+        repliedUser: boolean;
+    };
 }
 
 export interface MessageExtra {
-    stickerIds?: string[];
+    stickers?: string[];
+    uploads?: Upload[];
+    replyOptions: MessageReplyOptions;
+    content: string;
+    channel: Channel;
+    type?: any;
+    openWarningPopout: (props: any) => any;
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => void | { cancel: boolean; };
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => void;
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void>;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
+    extra.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
-            const result = listener(channelId, messageObj, extra);
+            const result = await listener(channelId, messageObj, extra);
             if (result && result.cancel === true) {
                 return true;
             }
@@ -61,10 +103,10 @@ export function _handlePreSend(channelId: string, messageObj: MessageObject, ext
     return false;
 }
 
-export function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
+export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
-            listener(channelId, messageId, messageObj);
+            await listener(channelId, messageId, messageObj);
         } catch (e) {
             MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
         }

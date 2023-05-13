@@ -16,17 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, useAwaiter } from "@utils/misc";
+import { Settings } from "@api/Settings";
+import { classes } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
 import { Forms, React, Text, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
+import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findLazy(m => typeof m.textarea === "string");
 
 export default function ReviewsView({ userId }: { userId: string; }) {
+    const { token } = Settings.plugins.ReviewDB;
     const [refetchCount, setRefetchCount] = React.useState(0);
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
         fallbackValue: [],
@@ -45,16 +49,18 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 comment: (target as HTMLInputElement).value,
                 star: -1
             }).then(res => {
-                if (res === 0 || res === 1) {
+                if (res?.success) {
                     (target as HTMLInputElement).value = ""; // clear the input
                     dirtyRefetch();
+                } else if (res?.message) {
+                    showToast(res.message);
                 }
             });
         }
     }
 
     return (
-        <div className="ReviewDB">
+        <div className="vc-reviewdb-view">
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -80,8 +86,21 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             <textarea
                 className={classes(Classes.textarea.replace("textarea", ""), "enter-comment")}
                 // this produces something like '-_59yqs ...' but since no class exists with that name its fine
-                placeholder={reviews?.some(r => r.senderdiscordid === UserStore.getCurrentUser().id) ? `Update review for @${username}` : `Review @${username}`}
+                placeholder={
+                    token
+                        ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
+                            ? `Update review for @${username}`
+                            : `Review @${username}`)
+                        : "You need to authorize to review users!"
+                }
                 onKeyDown={onKeyPress}
+                onClick={() => {
+                    if (!token) {
+                        showToast("Opening authorization window...");
+                        authorize();
+                    }
+                }}
+
                 style={{
                     marginTop: "6px",
                     resize: "none",

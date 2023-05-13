@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Queue } from "@utils/Queue";
 import { ReactDOM } from "@webpack/common";
 import type { ReactNode } from "react";
 import type { Root } from "react-dom/client";
 
 import NotificationComponent from "./NotificationComponent";
+import { persistNotification } from "./notificationLog";
 
 const NotificationQueue = new Queue();
 
@@ -56,6 +57,10 @@ export interface NotificationData {
     color?: string;
     /** Whether this notification should not have a timeout */
     permanent?: boolean;
+    /** Whether this notification should not be persisted in the Notification Log */
+    noPersist?: boolean;
+    /** Whether this notification should be dismissed when clicked (defaults to true) */
+    dismissOnClick?: boolean;
 }
 
 function _showNotification(notification: NotificationData, id: number) {
@@ -72,6 +77,8 @@ function _showNotification(notification: NotificationData, id: number) {
 }
 
 function shouldBeNative() {
+    if (typeof Notification === "undefined") return false;
+
     const { useNative } = Settings.notifications;
     if (useNative === "always") return true;
     if (useNative === "not-focused") return !document.hasFocus();
@@ -86,6 +93,8 @@ export async function requestPermission() {
 }
 
 export async function showNotification(data: NotificationData) {
+    persistNotification(data);
+
     if (shouldBeNative() && await requestPermission()) {
         const { title, body, icon, image, onClick = null, onClose = null } = data;
         const n = new Notification(title, {

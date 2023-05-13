@@ -19,15 +19,15 @@
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const SessionStore = findByPropsLazy("getActiveSession");
+const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, viewBox = "0 0 24 24") {
     return ({ color, tooltip }: { color: string; tooltip: string; }) => (
@@ -66,11 +66,11 @@ const PlatformIcon = ({ platform, status }: { platform: Platform, status: string
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user: User; inline?: boolean; marginLeft?: string; }) => {
+const PlatformIndicator = ({ user, wantMargin = true }: { user: User; wantMargin?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
-        const sessions = SessionStore.getSessions();
+        const sessions = SessionsStore.getSessions();
         if (typeof sessions !== "object") return null;
         const sortedSessions = Object.values(sessions).sort(({ status: a }: any, { status: b }: any) => {
             if (a === b) return 0;
@@ -105,23 +105,27 @@ const PlatformIndicator = ({ user, inline = false, marginLeft = "4px" }: { user:
     if (!icons.length) return null;
 
     return (
-        <div
+        <span
             className="vc-platform-indicator"
             style={{
-                marginLeft,
-                gap: "4px",
-                display: inline ? "inline-flex" : "flex",
-                alignItems: "center",
-                transform: inline ? "translateY(4px)" : undefined
+                display: "inline-flex",
+                justifyContent: "center",
+                marginLeft: wantMargin ? 4 : 0,
+                verticalAlign: "top",
+                position: "relative",
+                top: wantMargin ? 1 : 0,
+                padding: !wantMargin ? 1 : 0,
+                gap: 2
             }}
+
         >
             {icons}
-        </div>
+        </span>
     );
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} marginLeft="" />,
+    component: p => <PlatformIndicator {...p} wantMargin={false} />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -146,7 +150,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} inline />
+                <PlatformIndicator user={props.message?.author} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecoration("platform-indicator")
@@ -156,7 +160,7 @@ const indicatorLocations = {
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
-    authors: [Devs.kemo, Devs.TheSun],
+    authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
@@ -185,6 +189,55 @@ export default definePlugin({
         });
     },
 
+    patches: [
+        {
+            find: ".Masks.STATUS_ONLINE_MOBILE",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: [
+                {
+                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
+                    match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
+                    replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                },
+                {
+                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
+                    match: /(switch\(\i\){case \i\.\i\.ONLINE:return )(\i)\?({.+?}):/,
+                    replace: (_, rest, isMobile, component) => `if(${isMobile})return${component};${rest}`
+                }
+            ]
+        },
+        {
+            find: ".AVATAR_STATUS_MOBILE_16;",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: [
+                {
+                    // Return the AVATAR_STATUS_MOBILE size mask if the user is on mobile, no matter the status
+                    match: /\i===\i\.\i\.ONLINE&&(?=.{0,70}\.AVATAR_STATUS_MOBILE_16;)/,
+                    replace: ""
+                },
+                {
+                    // Fix sizes for mobile indicators which aren't online
+                    match: /(?<=\(\i\.status,)(\i)(?=,(\i),\i\))/,
+                    replace: (_, userStatus, isMobile) => `${isMobile}?"online":${userStatus}`
+                },
+                {
+                    // Make isMobile true no matter the status
+                    match: /(?<=\i&&!\i)&&\i===\i\.\i\.ONLINE/,
+                    replace: ""
+                }
+            ]
+        },
+        {
+            find: "isMobileOnline=function",
+            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            replacement: {
+                // Make isMobileOnline return true no matter what is the user status
+                match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
+                replace: "!= null"
+            }
+        }
+    ],
+
     options: {
         ...Object.fromEntries(
             Object.entries(indicatorLocations).map(([key, value]) => {
@@ -196,6 +249,12 @@ export default definePlugin({
                     default: true
                 }];
             })
-        )
+        ),
+        colorMobileIndicator: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to make the mobile indicator match the color of the user status.",
+            default: true,
+            restartNeeded: true
+        }
     }
 });

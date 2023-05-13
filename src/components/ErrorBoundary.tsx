@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { React } from "@webpack/common";
 
 import { ErrorCard } from "./ErrorCard";
@@ -105,7 +105,7 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): React.ComponentType<T>;
+        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): React.FunctionComponent<T>;
     };
 
 ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (

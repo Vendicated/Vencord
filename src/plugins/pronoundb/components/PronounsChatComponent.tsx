@@ -16,42 +16,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { fetchPronouns, formatPronouns } from "../pronoundbUtils";
-import { PronounMapping } from "../types";
+import { useFormattedPronouns } from "../pronoundbUtils";
+import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
-export default function PronounsChatComponentWrapper({ message }: { message: Message; }) {
-    // Don't bother fetching bot or system users
+function shouldShow(message: Message): boolean {
+    if (!settings.store.showInMessages)
+        return false;
     if (message.author.bot || message.author.system)
-        return null;
-    // Respect showSelf options
-    if (!Settings.plugins.PronounDB.showSelf && message.author.id === UserStore.getCurrentUser().id)
-        return null;
+        return false;
+    if (!settings.store.showSelf && message.author.id === UserStore.getCurrentUser().id)
+        return false;
 
-    return <PronounsChatComponent message={message} />;
+    return true;
+}
+
+export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
+    return shouldShow(message)
+        ? <PronounsChatComponent message={message} />
+        : null;
+}
+
+export function CompactPronounsChatComponentWrapper({ message }: { message: Message; }) {
+    return shouldShow(message)
+        ? <CompactPronounsChatComponent message={message} />
+        : null;
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(message.author.id), {
-        fallbackValue: null,
-        onError: e => console.error("Fetching pronouns failed: ", e)
-    });
+    const result = useFormattedPronouns(message.author.id);
 
-    // If the promise completed, the result was not "unspecified", and there is a mapping for the code, then return a span with the pronouns
-    if (!isPending && result && result !== "unspecified" && PronounMapping[result]) {
-        return (
+    return result
+        ? (
             <span
                 className={classes(styles.timestampInline, styles.timestamp)}
-            >• {formatPronouns(result)}</span>
-        );
-    }
+            >• {result}</span>
+        )
+        : null;
+}
 
-    return null;
+export function CompactPronounsChatComponent({ message }: { message: Message; }) {
+    const result = useFormattedPronouns(message.author.id);
+
+    return result
+        ? (
+            <span
+                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
+            >• {result}</span>
+        )
+        : null;
 }

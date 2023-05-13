@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addSettingsListener, Settings } from "@api/settings";
+import { addSettingsListener, Settings } from "@api/Settings";
 
-import IpcEvents from "./IpcEvents";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -29,8 +28,8 @@ export async function toggle(isEnabled: boolean) {
             style = document.createElement("style");
             style.id = "vencord-custom-css";
             document.head.appendChild(style);
-            VencordNative.ipc.on(IpcEvents.QUICK_CSS_UPDATE, (_, css: string) => style.textContent = css);
-            style.textContent = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+            VencordNative.quickCss.addChangeListener(css => style.textContent = css);
+            style.textContent = await VencordNative.quickCss.get();
         }
     } else
         style.disabled = !isEnabled;

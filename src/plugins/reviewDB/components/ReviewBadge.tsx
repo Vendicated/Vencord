@@ -23,19 +23,19 @@ import { Badge } from "../entities/Badge";
 export default function ReviewBadge(badge: Badge) {
     return (
         <Tooltip
-            text={badge.badge_name}>
+            text={badge.name}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <img
                     width="24px"
                     height="24px"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
-                    src={badge.badge_icon}
-                    alt={badge.badge_description}
+                    src={badge.icon}
+                    alt={badge.description}
                     style={{ verticalAlign: "middle", marginLeft: "4px" }}
                     onClick={() =>
                         MaskedLinkStore.openUntrustedLink({
-                            href: badge.redirect_url,
+                            href: badge.redirectURL,
                         })
                     }
                 />

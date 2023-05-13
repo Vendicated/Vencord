@@ -17,7 +17,7 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
@@ -64,7 +64,13 @@ function Indicator() {
 
 }
 
-function ChatBarIcon() {
+function ChatBarIcon(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
+
     return (
         <Tooltip text="Encrypt Message">
             {({ onMouseEnter, onMouseLeave }) => (
@@ -85,14 +91,14 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ marginRight: "2px" }}
+                        style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
                                 aria-hidden
                                 role="img"
-                                width="24"
-                                height="24"
+                                width="32"
+                                height="32"
                                 viewBox={"0 0 64 64"}
                                 style={{ scale: "1.1" }}
                             >
@@ -119,6 +125,7 @@ export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way! This plugin makes requests to >>https://embed.sammcheese.net<< to provide embeds to decrypted links!",
     authors: [Devs.SammCheese],
+    dependencies: ["MessagePopoverAPI"],
     patches: [
         {
             // Indicator
@@ -131,8 +138,8 @@ export default definePlugin({
         {
             find: ".activeCommandOption",
             replacement: {
-                match: /.=.\.activeCommand,.=.\.activeCommandOption,.{1,133}(.)=\[\];/,
-                replace: "$&;$1.push($self.chatBarIcon());",
+                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],
