@@ -37,9 +37,10 @@ export interface Menu {
         id: string;
         label: string;
         action?(e: MouseEvent): void;
+        icon?: ComponentType<any>;
 
         color?: string;
-        render?: ComponentType;
+        render?: ComponentType<any>;
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
