@@ -21,23 +21,115 @@ import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Forms, GuildStore, Menu, PermissionStore, React, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { FluxDispatcher, Forms, GuildStore, Menu, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Promisable } from "type-fest";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
-const GuildEmojiStore = findByPropsLazy("getGuilds", "getGuildEmoji");
+const GuildEmojiStore = findStoreLazy("EmojiStore");
+const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS(");
 
-function getGuildCandidates(isAnimated: boolean) {
+interface Sticker {
+    description: string;
+    format_type: number;
+    guild_id: string;
+    id: string;
+    name: string;
+    tags: string;
+    type: number;
+}
+
+interface Emoji {
+    id: string;
+    name: string;
+    isAnimated: boolean;
+}
+
+type Data = Emoji | Sticker;
+
+const enum Type {
+    Emoji,
+    Sticker
+}
+
+const StickerExt = [, "png", "png", "json", "gif"] as const;
+
+function getUrl(type: Type, data: Data) {
+    if (type === Type.Emoji)
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${(data as Emoji).isAnimated ? "gif" : "png"}`;
+
+    return `${location.origin}/stickers/${data.id}.${StickerExt[(data as Sticker).format_type]}`;
+}
+
+async function fetchSticker(id: string) {
+    const cached = StickersStore.getStickerById(id);
+    if (cached) return cached;
+
+    const { body } = await RestAPI.get({
+        url: `/stickers/${id}`
+    });
+
+    FluxDispatcher.dispatch({
+        type: "STICKER_FETCH_SUCCESS",
+        sticker: body
+    });
+
+    return body as Sticker;
+}
+
+async function cloneSticker(guildId: string, sticker: Sticker) {
+    const data = new FormData();
+    data.append("name", sticker.name);
+    data.append("tags", sticker.tags);
+    data.append("description", sticker.description);
+    data.append("file", await fetchBlob(getUrl(Type.Sticker, sticker)));
+
+    const { body } = await RestAPI.post({
+        url: `/guilds/${guildId}/stickers`,
+        body: data,
+    });
+
+    FluxDispatcher.dispatch({
+        type: "GUILD_STICKERS_CREATE_SUCCESS",
+        guildId,
+        sticker: {
+            ...body,
+            user: UserStore.getCurrentUser()
+        }
+    });
+}
+
+async function cloneEmoji(guildId: string, emoji: Emoji) {
+    const data = await fetchBlob(getUrl(Type.Emoji, emoji));
+
+    const dataUrl = await new Promise<string>(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(data);
+    });
+
+    return uploadEmoji({
+        guildId,
+        name: emoji.name.split("~")[0],
+        image: dataUrl
+    });
+}
+
+function getGuildCandidates(type: Type, data: Data) {
     const meId = UserStore.getCurrentUser().id;
 
     return Object.values(GuildStore.getGuilds()).filter(g => {
         const canCreate = g.ownerId === meId ||
             BigInt(PermissionStore.getGuildPermissions({ id: g.id }) & MANAGE_EMOJIS_AND_STICKERS) === MANAGE_EMOJIS_AND_STICKERS;
         if (!canCreate) return false;
+
+        if (type === Type.Sticker) return true;
+
+        const { isAnimated } = data as Emoji;
 
         const emojiSlots = g.getMaxEmojiSlots();
         const { emojis } = GuildEmojiStore.getGuilds()[g.id];
@@ -49,33 +141,34 @@ function getGuildCandidates(isAnimated: boolean) {
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function doClone(guildId: string, id: string, name: string, isAnimated: boolean) {
-    const data = await fetch(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${id}.${isAnimated ? "gif" : "png"}`)
-        .then(r => r.blob());
-    const reader = new FileReader();
+async function fetchBlob(url: string) {
+    const res = await fetch(url);
+    if (!res.ok)
+        throw new Error(`Failed to fetch ${url} - ${res.status}`);
 
-    reader.onload = () => {
-        uploadEmoji({
-            guildId,
-            name: name.split("~")[0],
-            image: reader.result
-        }).then(() => {
-            Toasts.show({
-                message: `Successfully cloned ${name}!`,
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId()
-            });
-        }).catch((e: any) => {
-            new Logger("EmoteCloner").error("Failed to upload emoji", e);
-            Toasts.show({
-                message: "Oopsie something went wrong :( Check console!!!",
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId()
-            });
+    return res.blob();
+}
+
+async function doClone(type: Type, guildId: string, data: Sticker | Emoji) {
+    try {
+        if (type === Type.Sticker)
+            await cloneSticker(guildId, data as Sticker);
+        else
+            await cloneEmoji(guildId, data as Emoji);
+
+        Toasts.show({
+            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId()
         });
-    };
-
-    reader.readAsDataURL(data);
+    } catch (e) {
+        new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
+        Toasts.show({
+            message: "Oopsie something went wrong :( Check console!!!",
+            type: Toasts.Type.FAILURE,
+            id: Toasts.genId()
+        });
+    }
 }
 
 const getFontSize = (s: string) => {
@@ -86,13 +179,13 @@ const getFontSize = (s: string) => {
 
 const nameValidator = /^\w+$/i;
 
-function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: string; isAnimated: boolean; }) {
+function CloneModal({ type, data }: { type: Type, data: Sticker | Emoji; }) {
     const [isCloning, setIsCloning] = React.useState(false);
-    const [name, setName] = React.useState(emojiName);
+    const [name, setName] = React.useState(data.name);
 
     const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
 
-    const guilds = React.useMemo(() => getGuildCandidates(isAnimated), [isAnimated, x]);
+    const guilds = React.useMemo(() => getGuildCandidates(Type.Emoji, data), [data.id, x]);
 
     return (
         <>
@@ -135,7 +228,7 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
                                 }}
                                 onClick={isCloning ? void 0 : async () => {
                                     setIsCloning(true);
-                                    doClone(g.id, id, name, isAnimated).finally(() => {
+                                    doClone(type, g.id, data).finally(() => {
                                         invalidateMemo();
                                         setIsCloning(false);
                                     });
@@ -175,32 +268,37 @@ function CloneModal({ id, name: emojiName, isAnimated }: { id: string; name: str
     );
 }
 
-function buildMenuItem(id: string, name: string, isAnimated: boolean) {
+function buildMenuItem(type: Type, fetchData: () => Promisable<Sticker | Emoji>) {
     return (
         <Menu.MenuItem
             id="emote-cloner"
             key="emote-cloner"
-            label="Clone Emote"
+            label={`Clone ${type === Type.Emoji ? "Emoji" : "Sticker"}`}
             action={() =>
-                openModal(modalProps => (
-                    <ModalRoot {...modalProps}>
-                        <ModalHeader>
-                            <img
-                                role="presentation"
-                                aria-hidden
-                                src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${id}.${isAnimated ? "gif" : "png"}`}
-                                alt=""
-                                height={24}
-                                width={24}
-                                style={{ marginRight: "0.5em" }}
-                            />
-                            <Forms.FormText>Clone {name}</Forms.FormText>
-                        </ModalHeader>
-                        <ModalContent>
-                            <CloneModal id={id} name={name} isAnimated={isAnimated} />
-                        </ModalContent>
-                    </ModalRoot>
-                ))
+                openModalLazy(async () => {
+                    const data = await fetchData();
+                    const url = getUrl(type, data);
+
+                    return modalProps => (
+                        <ModalRoot {...modalProps}>
+                            <ModalHeader>
+                                <img
+                                    role="presentation"
+                                    aria-hidden
+                                    src={url}
+                                    alt=""
+                                    height={24}
+                                    width={24}
+                                    style={{ marginRight: "0.5em" }}
+                                />
+                                <Forms.FormText>Clone {data.name}</Forms.FormText>
+                            </ModalHeader>
+                            <ModalContent>
+                                <CloneModal type={type} data={data} />
+                            </ModalContent>
+                        </ModalRoot>
+                    );
+                })
             }
         />
     );
@@ -213,23 +311,44 @@ function isGifUrl(url: string) {
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
-    if (!favoriteableId || favoriteableType !== "emoji") return;
+    if (!favoriteableId) return;
 
-    const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-    if (!match) return;
-    const name = match[1] ?? "FakeNitroEmoji";
+    const menuItem = (() => {
+        switch (favoriteableType) {
+            case "emoji":
+                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
+                if (!match) return;
+                const name = match[1] ?? "FakeNitroEmoji";
 
-    const group = findGroupChildrenByChildId("copy-link", children);
-    if (group) group.push(buildMenuItem(favoriteableId, name, isGifUrl(itemHref ?? itemSrc)));
+                return buildMenuItem(Type.Emoji, () => ({
+                    id: favoriteableId,
+                    name,
+                    isAnimated: isGifUrl(itemHref ?? itemSrc)
+                }));
+            case "sticker":
+                return buildMenuItem(Type.Sticker, () => fetchSticker(favoriteableId));
+        }
+    })();
+
+    if (menuItem)
+        findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
     const { id, name, type } = props?.target?.dataset ?? {};
-    if (!id || !name || type !== "emoji") return;
+    if (!id) return;
 
-    const firstChild = props.target.firstChild as HTMLImageElement;
+    if (type === "emoji" && name) {
+        const firstChild = props.target.firstChild as HTMLImageElement;
 
-    children.push(buildMenuItem(id, name, firstChild && isGifUrl(firstChild.src)));
+        children.push(buildMenuItem(Type.Emoji, () => ({
+            id,
+            name,
+            isAnimated: firstChild && isGifUrl(firstChild.src)
+        })));
+    } else if (type === "sticker") {
+        children.push(buildMenuItem(Type.Sticker, () => fetchSticker(id)));
+    }
 };
 
 export default definePlugin({
