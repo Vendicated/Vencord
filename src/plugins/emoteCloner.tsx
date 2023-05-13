@@ -354,7 +354,8 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
 export default definePlugin({
     name: "EmoteCloner",
-    description: "Adds a Clone context menu item to emotes to clone them your own server",
+    description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
+    tags: ["StickerCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
 
     start() {
