@@ -17,11 +17,12 @@
 */
 
 import { addAccessory } from "@api/MessageAccessories";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findByCode, findByPropsLazy } from "@webpack";
 import {

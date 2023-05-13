@@ -40,6 +40,8 @@ export let Select: t.Select;
 export let SearchableSelect: t.SearchableSelect;
 export let Slider: t.Slider;
 export let ButtonLooks: t.ButtonLooks;
+export let Popout: t.Popout;
+export let Dialog: t.Dialog;
 export let TabBar: any;
 
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
@@ -48,6 +50,6 @@ export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 
 waitFor("FormItem", m => {
-    ({ Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar } = m);
+    ({ Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog } = m);
     Forms = m;
 });

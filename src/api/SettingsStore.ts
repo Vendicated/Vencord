@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
-import { proxyLazy } from "@utils/proxyLazy";
+import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import { findModuleId, wreq } from "@webpack";
 
-import { Settings } from "./settings";
+import { Settings } from "./Settings";
 
 interface Setting<T> {
     /**

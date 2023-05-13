@@ -17,13 +17,14 @@
 */
 
 import { generateId } from "@api/Commands";
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { proxyLazy } from "@utils/proxyLazy";
+import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
@@ -150,7 +151,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 );
             });
 
-            return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
+            return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
         }
     }
 
@@ -180,7 +181,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
-            <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
+            <ModalContent>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
                     <Forms.FormText>{plugin.description}</Forms.FormText>

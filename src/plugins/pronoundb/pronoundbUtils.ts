@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
-import { useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import { UserStore } from "@webpack/common";
 
 import { settings } from "./settings";

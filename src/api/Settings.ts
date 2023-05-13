@@ -17,9 +17,8 @@
 */
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
 import { localStorage } from "@utils/localStorage";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
@@ -96,7 +95,7 @@ const DefaultSettings: Settings = {
 };
 
 try {
-    var settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS)) as Settings;
+    var settings = JSON.parse(VencordNative.settings.get()) as Settings;
     mergeDefaults(settings, DefaultSettings);
 } catch (err) {
     var settings = mergeDefaults({} as Settings, DefaultSettings);
@@ -110,7 +109,7 @@ const saveSettingsOnFrequentAction = debounce(async () => {
     }
 }, 60_000);
 
-type SubscriptionCallback = ((newValue: any, path: string) => void) & { _path?: string; };
+type SubscriptionCallback = ((newValue: any, path: string) => void) & { _paths?: Array<string>; };
 const subscriptions = new Set<SubscriptionCallback>();
 
 const proxyCache = {} as Record<string, any>;
@@ -167,7 +166,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             const setPath = `${path}${path && "."}${p}`;
             delete proxyCache[setPath];
             for (const subscription of subscriptions) {
-                if (!subscription._path || subscription._path === setPath) {
+                if (!subscription._paths || subscription._paths.includes(setPath)) {
                     subscription(v, setPath);
                 }
             }
@@ -175,7 +174,7 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
             PlainSettings.cloud.settingsSyncVersion = Date.now();
             localStorage.Vencord_settingsDirty = true;
             saveSettingsOnFrequentAction();
-            VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(root, null, 4));
+            VencordNative.settings.set(JSON.stringify(root, null, 4));
             return true;
         }
     });
@@ -238,7 +237,7 @@ type ResolvePropDeep<T, P> = P extends "" ? T :
 export function addSettingsListener<Path extends keyof Settings>(path: Path, onUpdate: (newValue: Settings[Path], path: Path) => void): void;
 export function addSettingsListener<Path extends string>(path: Path, onUpdate: (newValue: Path extends "" ? any : ResolvePropDeep<Settings, Path>, path: Path extends "" ? string : Path) => void): void;
 export function addSettingsListener(path: string, onUpdate: (newValue: any, path: string) => void) {
-    (onUpdate as SubscriptionCallback)._path = path;
+    ((onUpdate as SubscriptionCallback)._paths ??= []).push(path);
     subscriptions.add(onUpdate);
 }
 
@@ -251,10 +250,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
-            VencordNative.ipc.invoke(
-                IpcEvents.SET_SETTINGS,
-                JSON.stringify(settings, null, 4)
-            );
+            VencordNative.settings.set(JSON.stringify(settings, null, 4));
             break;
         }
     }

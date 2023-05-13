@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes, LazyComponent } from "@utils/misc";
+import { Settings } from "@api/Settings";
+import { classes } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, UserStore } from "@webpack/common";
+import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
 import { Review } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
@@ -32,7 +34,7 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
         { contents },
         buttonClasses,
         { defaultColor }
@@ -102,6 +104,16 @@ export default LazyComponent(() => {
                         {review.sender.username}
                     </span>
                     {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+
+                    {
+                        !Settings.plugins.ReviewDB.hideTimestamps && (
+                            <Timestamp
+                                timestamp={moment(review.timestamp * 1000)}
+                                compact={true}
+                            />
+                        )
+                    }
+
                     <p
                         className={classes(messageContent, defaultColor)}
                         style={{ fontSize: 15, marginTop: 4 }}

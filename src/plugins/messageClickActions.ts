@@ -17,7 +17,6 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -28,8 +27,6 @@ const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed 
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
 const MANAGE_CHANNELS = 1n << 4n;
-
-migratePluginSettings("MessageClickActions", "MessageQuickActions");
 
 export default definePlugin({
     name: "MessageClickActions",

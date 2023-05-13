@@ -19,7 +19,7 @@
 import "./updater";
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
+import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
@@ -74,7 +74,7 @@ export function readSettings() {
     }
 }
 
-export function getSettings(): typeof import("@api/settings").Settings {
+export function getSettings(): typeof import("@api/Settings").Settings {
     try {
         return JSON.parse(readSettings());
     } catch {
