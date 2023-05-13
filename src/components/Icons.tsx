@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./iconStyles.css";
+
 import { classes } from "@utils/misc";
 import type { PropsWithChildren } from "react";
 
@@ -78,6 +80,37 @@ export function CopyIcon(props: IconProps) {
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z" />
                 <path d="M15 5H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z" />
             </g>
+        </Icon>
+    );
+}
+
+/**
+ * Discord's open external icon, as seen in the user profile connections
+ */
+export function OpenExternalIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-open-external-icon")}
+            viewBox="0 0 24 24"
+        >
+            <polygon
+                fill="currentColor"
+                fill-rule="nonzero"
+                points="13 20 11 20 11 8 5.5 13.5 4.08 12.08 12 4.16 19.92 12.08 18.5 13.5 13 8"
+            />
+        </Icon>
+    );
+}
+
+export function ImageIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-image-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path fill="currentColor" d="M21,19V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2zM8.5,13.5l2.5,3.01L14.5,12l4.5,6H5l3.5,-4.5z" />
         </Icon>
     );
 }
