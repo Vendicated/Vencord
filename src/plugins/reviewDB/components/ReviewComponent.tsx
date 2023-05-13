@@ -34,18 +34,16 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
-        { contents },
+        { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
-        { defaultColor }
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
-        p("contents"),
         p("button", "wrapper", "selected"),
-        p("defaultColor")
     );
+
+    const dateFormat = new Intl.DateTimeFormat();
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
@@ -89,7 +87,7 @@ export default LazyComponent(() => {
                 }
             }>
 
-                <div className={contents} style={{ paddingLeft: "0px" }}>
+                <div>
                     <img
                         className={classes(avatar, clickable)}
                         onClick={openModal}
@@ -107,16 +105,14 @@ export default LazyComponent(() => {
 
                     {
                         !Settings.plugins.ReviewDB.hideTimestamps && (
-                            <Timestamp
-                                timestamp={moment(review.timestamp * 1000)}
-                                compact={true}
-                            />
-                        )
+                            <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                                {dateFormat.format(review.timestamp * 1000)}
+                            </Timestamp>)
                     }
 
                     <p
-                        className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4 }}
+                        className={classes(messageContent)}
+                        style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
                     >
                         {review.comment}
                     </p>
