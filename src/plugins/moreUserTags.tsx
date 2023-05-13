@@ -17,12 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { Flex } from "@components/Flex.jsx";
-import { Switch } from "@components/Switch.jsx";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, Forms, GuildStore, TextInput, Tooltip, useState } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildStore, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Message, User } from "discord-types/general";
 
@@ -102,57 +102,66 @@ const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
-function SettingsComponent(props) {
+function SettingsComponent(props: { setValue(v: any): void; }) {
     settings.store.tagSettings ??= defaultSettings;
+
     const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
     const setValue = (v: TagSettings) => {
         setTagSettings(v);
         props.setValue(v);
     };
+
     return (
-        <div>
-            {tags.map(t => <Flex flexDirection="column" style={{ gap: 5 }}>
-                <Forms.FormDivider />
-                <Forms.FormTitle style={{ width: "fit-content" }}>
-                    <Tooltip text={t.description}>
-                        {({ onMouseEnter, onMouseLeave }) => (
-                            <div
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                            >
-                                {t.displayName} Tag{" "}
-                                <Tag type={Tag.Types[t.name]} />
-                            </div>
-                        )}
-                    </Tooltip>
-                </Forms.FormTitle>
-                <TextInput
-                    type="text"
-                    value={tagSettings[t.name]?.text ?? t.displayName}
-                    placeholder={`Text on tag (default: ${t.displayName})`}
-                    onChange={v => {
-                        tagSettings[t.name].text = v;
-                        setValue(tagSettings);
-                    }}
-                />
-                <Flex flexDirection="column" style={{ gap: 8, marginTop: 6, width: "fit-content" }}>
-                    <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <Forms.FormText>Show tag in messages</Forms.FormText>
-                        <Switch checked={tagSettings[t.name]?.showInChat ?? true} onChange={v => {
+        <Flex flexDirection="column">
+            {tags.map(t => (
+                <Card style={{ padding: "1em" }}>
+                    <Forms.FormTitle style={{ width: "fit-content" }}>
+                        <Tooltip text={t.description}>
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <div
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                >
+                                    {t.displayName} Tag <Tag type={Tag.Types[t.name]} />
+                                </div>
+                            )}
+                        </Tooltip>
+                    </Forms.FormTitle>
+
+                    <TextInput
+                        type="text"
+                        value={tagSettings[t.name]?.text ?? t.displayName}
+                        placeholder={`Text on tag (default: ${t.displayName})`}
+                        onChange={v => {
+                            tagSettings[t.name].text = v;
+                            setValue(tagSettings);
+                        }}
+                        className={Margins.bottom16}
+                    />
+
+                    <Switch
+                        value={tagSettings[t.name]?.showInChat ?? true}
+                        onChange={v => {
                             tagSettings[t.name].showInChat = v;
                             setValue(tagSettings);
-                        }} />
-                    </Flex>
-                    <Flex style={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <Forms.FormText>Show tag in member list and profiles</Forms.FormText>
-                        <Switch checked={tagSettings[t.name]?.showInNotChat ?? true} onChange={v => {
+                        }}
+                    >
+                        Show in messages
+                    </Switch>
+
+                    <Switch
+                        value={tagSettings[t.name]?.showInNotChat ?? true}
+                        onChange={v => {
                             tagSettings[t.name].showInNotChat = v;
                             setValue(tagSettings);
-                        }} />
-                    </Flex>
-                </Flex>
-            </Flex>)}
-        </div>
+                        }}
+                        hideBorder={true}
+                    >
+                        Show in member list and profiles
+                    </Switch>
+                </Card>
+            ))}
+        </Flex>
     );
 }
 
