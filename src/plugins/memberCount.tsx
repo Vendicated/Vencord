@@ -20,31 +20,34 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import { useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Tooltip } from "@webpack/common";
+import { SelectedChannelStore, Tooltip, useStateFromStores } from "@webpack/common";
+import { FluxStore } from "@webpack/types";
 
-const counts = {} as Record<string, [number, number]>;
-let forceUpdate: () => void;
-
-const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore");
+const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
+const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
+    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
+};
 
 function MemberCount() {
-    const guildId = getCurrentChannel().guild_id;
-    const c = counts[guildId];
+    const { id: channelId, guild_id: guildId } = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
+    const { groups } = useStateFromStores(
+        [ChannelMemberStore],
+        () => ChannelMemberStore.getProps(guildId, channelId)
+    );
+    const total = useStateFromStores(
+        [GuildMemberCountStore],
+        () => GuildMemberCountStore.getMemberCount(guildId)
+    );
 
-    forceUpdate = useForceUpdater();
+    if (total == null)
+        return null;
 
-    if (!c) return null;
-
-    let total = c[0].toLocaleString();
-    if (total === "0" && c[1] > 0) {
-        const approx = GuildMemberCountStore.getMemberCount(guildId);
-        total = approx ? approx.toLocaleString() : "Loading...";
-    }
-
-    const online = c[1].toLocaleString();
+    const online =
+        (groups.length === 1 && groups[0].id === "unknown")
+            ? 0
+            : groups.reduce((count, curr) => count + (curr.id === "offline" ? 0 : curr.count), 0);
 
     return (
         <Flex id="vc-membercount" style={{
@@ -55,7 +58,7 @@ function MemberCount() {
             alignContent: "center",
             gap: 0
         }}>
-            <Tooltip text={`${online} Online`} position="bottom">
+            <Tooltip text={`${online} Online in this Channel`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -72,7 +75,7 @@ function MemberCount() {
                     </div>
                 )}
             </Tooltip>
-            <Tooltip text={`${total} Total Members`} position="bottom">
+            <Tooltip text={`${total} Total Server Members`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -102,31 +105,10 @@ export default definePlugin({
     patches: [{
         find: ".isSidebarVisible,",
         replacement: {
-            match: /(var (.)=.\.className.+?children):\[(.\.useMemo[^}]+"aria-multiselectable")/,
+            match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
             replace: "$1:[$2.startsWith('members')?$self.render():null,$3"
         }
     }],
 
-    flux: {
-        GUILD_MEMBER_LIST_UPDATE({ guildId, groups, memberCount, id }) {
-            // eeeeeh - sometimes it has really wrong counts??? like 10 times less than actual
-            // but if we only listen to everyone updates, sometimes we never get the count?
-            // this seems to work but isn't optional
-            if (id !== "everyone" && counts[guildId]) return;
-
-            let count = 0;
-            for (const group of groups) {
-                if (group.id !== "offline")
-                    count += group.count;
-            }
-            counts[guildId] = [memberCount, count];
-            forceUpdate?.();
-        }
-    },
-
-    render: () => (
-        <ErrorBoundary noop>
-            <MemberCount />
-        </ErrorBoundary>
-    )
+    render: ErrorBoundary.wrap(MemberCount, { noop: true })
 });

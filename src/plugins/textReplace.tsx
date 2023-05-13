@@ -18,11 +18,11 @@
 
 import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
-import { useForceUpdater } from "@utils/misc";
+import { Logger } from "@utils/Logger";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
@@ -159,7 +159,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
                                     <Input
                                         placeholder="Replace"
                                         initialValue={rule.replace}
-                                        onChange={e => onChange(e.replaceAll("\\n", "\n"), index, "replace")}
+                                        onChange={e => onChange(e, index, "replace")}
                                     />
                                     <Input
                                         placeholder="Only if includes"
@@ -220,7 +220,7 @@ function applyRules(content: string): string {
             if (!rule.find || !rule.replace) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            content = content.replaceAll(rule.find, rule.replace);
+            content = content.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n"));
         }
     }
 
@@ -231,7 +231,7 @@ function applyRules(content: string): string {
 
             try {
                 const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace);
+                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
             } catch (e) {
                 new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
             }

@@ -18,7 +18,7 @@
 
 
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
