@@ -43,6 +43,8 @@ export default LazyComponent(() => {
         p("button", "wrapper", "selected"),
     );
 
+    const dateFormat = new Intl.DateTimeFormat();
+
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
             openUserProfileModal(review.sender.discordID);
@@ -104,7 +106,7 @@ export default LazyComponent(() => {
                     {
                         !Settings.plugins.ReviewDB.hideTimestamps && (
                             <Timestamp timestamp={moment(review.timestamp * 1000)} >
-                                {moment(review.timestamp * 1000).format("DD/MM/YYYY")}
+                                {dateFormat.format(review.timestamp * 1000)}
                             </Timestamp>)
                     }
 
