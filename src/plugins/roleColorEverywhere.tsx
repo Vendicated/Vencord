@@ -39,6 +39,12 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the voice chat user list",
         restartNeeded: true
+    },
+    chatMessages: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show role colors in chat messages",
+        restartNeeded: true
     }
 });
 
@@ -87,10 +93,21 @@ export default definePlugin({
             replacement: [
                 {
                     match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
-                    replace: "$&...$self.getVoiceProps(this.props),"
+                    replace: "$&...$self.getInlineStyle(this.props),"
                 }
             ],
             predicate: () => settings.store.voiceUsers,
+        },
+        // Chat messages
+        {
+            find: "Messages.SOURCE_MESSAGE_DELETED",
+            replacement: [
+                {
+                    match: /function \i\((\i)\).{5,20}className.{5,10}message.{40,80}isEdited.{250,300}jsxs.{20,35}ref:\i/,
+                    replace: "$&,...$self.getInlineStyle({user:$1.message.author,channelId:$1.message.channel_id})"
+                }
+            ],
+            predicate: () => settings.store.chatMessages,
         }
     ],
     settings,
@@ -116,10 +133,10 @@ export default definePlugin({
         }}>{title} &mdash; {count}</span>;
     },
 
-    getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
+    getInlineStyle({ user: { id: userId }, guildId, channelId }: { user: { id: string; }; guildId?: string; channelId?: string; }) {
         return {
             style: {
-                color: this.getColor(userId, { guildId })
+                color: this.getColor(userId, { guildId, channelId })
             }
         };
     }
