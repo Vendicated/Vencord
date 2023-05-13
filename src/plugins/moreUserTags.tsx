@@ -114,7 +114,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
     return (
         <Flex flexDirection="column">
             {tags.map(t => (
-                <Card style={{ padding: "1em" }}>
+                <Card style={{ padding: "1em 1em 0" }}>
                     <Forms.FormTitle style={{ width: "fit-content" }}>
                         <Tooltip text={t.description}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -145,6 +145,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                             tagSettings[t.name].showInChat = v;
                             setValue(tagSettings);
                         }}
+                        hideBorder
                     >
                         Show in messages
                     </Switch>
@@ -155,7 +156,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                             tagSettings[t.name].showInNotChat = v;
                             setValue(tagSettings);
                         }}
-                        hideBorder={true}
+                        hideBorder
                     >
                         Show in member list and profiles
                     </Switch>
