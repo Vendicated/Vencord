@@ -18,6 +18,8 @@
 
 
 // This plugin is a port from Alyxia's Vendetta plugin
+import "./index.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
