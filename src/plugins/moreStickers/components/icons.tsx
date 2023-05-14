@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 
 export const SearchIcon = LazyComponent(() => findByCode("M21.707 20.293L16.314 14.9C17.403"));
