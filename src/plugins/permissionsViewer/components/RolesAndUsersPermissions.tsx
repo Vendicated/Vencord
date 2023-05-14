@@ -123,31 +123,31 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className="permviewer-perms-title" variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className="vc-permviewer-perms-title" variant="heading-lg/semibold">{header} permissions:</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent>
                 {!selectedItem && (
-                    <div className="permviewer-perms-no-perms">
+                    <div className="vc-permviewer-perms-no-perms">
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
                     </div>
                 )}
 
                 {selectedItem && (
-                    <div className="permviewer-perms-container">
-                        <div className="permviewer-perms-list">
+                    <div className="vc-permviewer-perms-container">
+                        <div className="vc-permviewer-perms-list">
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
                                 const role = guild.roles[permission.id ?? ""];
 
                                 return (
                                     <button
-                                        className="permviewer-perms-list-item-btn"
+                                        className="vc-permviewer-perms-list-item-btn"
                                         onClick={() => selectItem(index)}
                                     >
                                         <div
-                                            className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
+                                            className={classes("vc-permviewer-perms-list-item", selectedItemIndex === index ? "vc-permviewer-perms-list-item-active" : "")}
                                             onContextMenu={e => {
                                                 if (permission.type === PermissionType.Role)
                                                     ContextMenu.open(e, () => (
@@ -161,13 +161,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         >
                                             {permission.type === PermissionType.Role && (
                                                 <span
-                                                    className="permviewer-perms-role-circle"
+                                                    className="vc-permviewer-perms-role-circle"
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
                                                 />
                                             )}
                                             {permission.type === PermissionType.User && user !== undefined && (
                                                 <img
-                                                    className="permviewer-perms-user-img"
+                                                    className="vc-permviewer-perms-user-img"
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
@@ -183,10 +183,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 );
                             })}
                         </div>
-                        <div className="permviewer-perms-perms">
+                        <div className="vc-permviewer-perms-perms">
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
-                                <div className="permviewer-perms-perms-item">
-                                    <div className="permviewer-perms-perms-item-icon">
+                                <div className="vc-permviewer-perms-perms-item">
+                                    <div className="vc-permviewer-perms-perms-item-icon">
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
@@ -221,7 +221,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
     return (
         <Menu.Menu
-            navId="permviewer-role-context-menu"
+            navId="vc-permviewer-role-context-menu"
             onClose={ContextMenu.close}
             aria-label="Role Options"
         >

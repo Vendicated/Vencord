@@ -102,15 +102,15 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
     return (
         <div>
-            <div className="permviewer-userperms-title-container">
-                <Text className="permviewer-userperms-title" variant="eyebrow">Permissions</Text>
+            <div className="vc-permviewer-userperms-title-container">
+                <Text className="vc-permviewer-userperms-title" variant="eyebrow">Permissions</Text>
 
                 <div>
                     <Tooltip text="Role Details">
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
-                                className="permviewer-userperms-permdetails-btn"
+                                className="vc-permviewer-userperms-permdetails-btn"
                                 onClick={() =>
                                     openRolesAndUsersPermissionsModal(
                                         rolePermissions,
@@ -134,7 +134,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
-                                className="permviewer-userperms-toggleperms-btn"
+                                className="vc-permviewer-userperms-toggleperms-btn"
                                 onClick={() => setViewPermissions(v => !v)}
                             >
                                 <svg
