@@ -51,7 +51,7 @@ export default definePlugin({
                     const linkify = text => text
                         .replaceAll("\r\n", "\n")
                         .replace(/([*>_`~\\])/gsi, "\\$1")
-                        .replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)} "Define "${word}" on Urban Dictionary")`)
+                        .replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)} "Define '${word}' on Urban Dictionary")`)
                         .trim();
 
                     list.sort((a, b) => (b.thumbs_up / b.thumbs_down) - a.thumbs_up / a.thumbs_down);
