@@ -32,7 +32,7 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "Better Blocked Messages",
+    name: "BetterBlockedMessages",
     description: "Makes blocked messages less intrusive and cleaner to look at",
     authors: [Devs.IThundxr],
     settings,
