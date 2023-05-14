@@ -24,7 +24,7 @@ import { Text, Toasts } from "@webpack/common";
 
 const pluginName = "AssetExplorer" as const;
 export default definePlugin({
-    name: pluginName,
+    name: "AssetExplorer",
     description: "Dev util for exploring icons bundled with discord.",
     authors: [Devs.Arjix],
 
