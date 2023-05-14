@@ -295,4 +295,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "IThundxr",
         id: 694604709591384226n
     },
+    outfoxxed: {
+        name: "outfoxxed",
+        id: 837425748435796060n
+    },
 });
