@@ -17,12 +17,13 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { InfoIcon } from "@components/Icons";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { type Guild } from "discord-types/general";
 
-import { getPermissionString } from "../utils";
+import { getPermissionDescription, getPermissionString } from "../utils";
 
 export const enum PermissionType {
     Role = 0,
@@ -203,6 +204,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         })()}
                                     </div>
                                     <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
+
+                                    <Tooltip text={getPermissionDescription(permissionName) || "No Description"}>
+                                        {props => <InfoIcon {...props} />}
+                                    </Tooltip>
                                 </div>
                             ))}
                         </div>

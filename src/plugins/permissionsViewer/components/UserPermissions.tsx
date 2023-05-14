@@ -22,14 +22,15 @@ import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
+import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from "..";
-import { getPermissionDescription, getPermissionString, getSortedRoles } from "../utils";
+import { getPermissionString, getSortedRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
-    permissionDescription: string;
+    permissionDescription?: ReactNode;
     roleColor: string;
     rolePosition: number;
     roleName: string;
@@ -69,7 +70,6 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             const OWNER = i18n.Messages.GUILD_OWNER || "Server Owner";
             userPermissions.push({
                 permission: OWNER,
-                permissionDescription: "",
                 roleColor: "var(--primary-300)",
                 rolePosition: Infinity,
                 roleName: OWNER
@@ -83,7 +83,6 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
                         permission: getPermissionString(permission),
-                        permissionDescription: getPermissionDescription(permission),
                         roleColor: colorString || "var(--primary-300)",
                         rolePosition: position,
                         roleName: name
@@ -154,30 +153,24 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
             {viewPermissions && userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
-                    {userPermissions.map(({ permission, roleColor, permissionDescription }) => {
-                        return (
-                            <Tooltip text={permissionDescription} hide={!permissionDescription}>
-                                {tooltipProps => (
-                                    <div {...tooltipProps} className={classes(role, rolePill, rolePillBorder)}>
-                                        <div className={roleRemoveButton}>
-                                            <span
-                                                className={roleCircle}
-                                                style={{ backgroundColor: roleColor }}
-                                            />
-                                        </div>
-                                        <div className={roleName}>
-                                            <Text
-                                                className={roleNameOverflow}
-                                                variant="text-xs/medium"
-                                            >
-                                                {permission}
-                                            </Text>
-                                        </div>
-                                    </div>
-                                )}
-                            </Tooltip>
-                        );
-                    })}
+                    {userPermissions.map(({ permission, roleColor }) => (
+                        <div className={classes(role, rolePill, rolePillBorder)}>
+                            <div className={roleRemoveButton}>
+                                <span
+                                    className={roleCircle}
+                                    style={{ backgroundColor: roleColor }}
+                                />
+                            </div>
+                            <div className={roleName}>
+                                <Text
+                                    className={roleNameOverflow}
+                                    variant="text-xs/medium"
+                                >
+                                    {permission}
+                                </Text>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

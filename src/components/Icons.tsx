@@ -19,27 +19,27 @@
 import "./iconStyles.css";
 
 import { classes } from "@utils/misc";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, SVGProps } from "react";
 
 interface BaseIconProps extends IconProps {
     viewBox: string;
 }
 
-interface IconProps {
+interface IconProps extends SVGProps<SVGSVGElement> {
     className?: string;
     height?: number;
     width?: number;
 }
 
-function Icon({ height = 24, width = 24, className, children, viewBox }: PropsWithChildren<BaseIconProps>) {
+function Icon({ height = 24, width = 24, className, children, viewBox, ...svgProps }: PropsWithChildren<BaseIconProps>) {
     return (
         <svg
             className={classes(className, "vc-icon")}
-            aria-hidden="true"
             role="img"
             width={width}
             height={height}
             viewBox={viewBox}
+            {...svgProps}
         >
             {children}
         </svg>
@@ -111,6 +111,18 @@ export function ImageIcon(props: IconProps) {
             viewBox="0 0 24 24"
         >
             <path fill="currentColor" d="M21,19V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2zM8.5,13.5l2.5,3.01L14.5,12l4.5,6H5l3.5,-4.5z" />
+        </Icon>
+    );
+}
+
+export function InfoIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-info-icon")}
+            viewBox="0 0 12 12"
+        >
+            <path fill="currentColor" d="M6 1C3.243 1 1 3.244 1 6c0 2.758 2.243 5 5 5s5-2.242 5-5c0-2.756-2.243-5-5-5zm0 2.376a.625.625 0 110 1.25.625.625 0 010-1.25zM7.5 8.5h-3v-1h1V6H5V5h1a.5.5 0 01.5.5v2h1v1z" />
         </Icon>
     );
 }

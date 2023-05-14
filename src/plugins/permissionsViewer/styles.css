@@ -97,6 +97,7 @@
 }
 
 .permviewer-perms-perms-item {
+    position: relative;
     display: flex;
     align-items: center;
     padding: 10px;
@@ -112,4 +113,15 @@
     width: 25px;
     height: 25px;
     margin-right: 5px;
+}
+
+.permviewer-perms-perms-item .vc-info-icon {
+    color: var(--text-muted);
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+}
+
+.permviewer-perms-perms-item .vc-info-icon:hover {
+    color: var(--interactive-active);
 }

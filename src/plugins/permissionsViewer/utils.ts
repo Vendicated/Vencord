@@ -17,8 +17,9 @@
 */
 
 import { wordsToTitle } from "@utils/text";
-import { i18n } from "@webpack/common";
+import { i18n, Parser } from "@webpack/common";
 import { Guild, GuildMember } from "discord-types/general";
+import { ReactNode } from "react";
 
 
 function formatPermissionWithoutMatchingString(permission: string) {
@@ -44,7 +45,7 @@ export function getPermissionString(permission: string) {
         formatPermissionWithoutMatchingString(permission);
 }
 
-export function getPermissionDescription(permission: string) {
+export function getPermissionDescription(permission: string): ReactNode {
     // DISCORD PLEEEEEEEEAAAAASE IM BEGGING YOU :(
     if (permission === "USE_APPLICATION_COMMANDS")
         permission = "USE_APPLICATION_COMMANDS_GUILD";
@@ -53,7 +54,13 @@ export function getPermissionDescription(permission: string) {
     else if (permission !== "STREAM")
         permission = PermissionKeyMap[permission] || permission;
 
-    return i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] || "";
+    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] as any;
+    if (msg?.hasMarkdown)
+        return Parser.parse(msg.message);
+
+    if (typeof msg === "string") return msg;
+
+    return "";
 }
 
 export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
