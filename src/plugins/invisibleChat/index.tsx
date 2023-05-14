@@ -64,7 +64,13 @@ function Indicator() {
 
 }
 
-function ChatBarIcon() {
+function ChatBarIcon(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
+
     return (
         <Tooltip text="Encrypt Message">
             {({ onMouseEnter, onMouseLeave }) => (
@@ -85,7 +91,7 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ padding: "0 4px" }}
+                        style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -133,7 +139,7 @@ export default definePlugin({
             find: ".activeCommandOption",
             replacement: {
                 match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],

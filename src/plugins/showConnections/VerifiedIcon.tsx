@@ -16,29 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const enum UserType {
-    Banned = -1,
-    Normal = 0,
-    Admin = 1
-}
+import { LazyComponent } from "@utils/react";
+import { findByCode, findLazy } from "@webpack";
+import { i18n, useToken } from "@webpack/common";
 
-export interface BanInfo {
-    id: string;
-    discordID: string;
-    reviewID: number;
-    reviewContent: string;
-    banEndDate: string;
-}
+const ColorMap = findLazy(m => m.colors?.INTERACTIVE_MUTED?.css);
+const VerifiedIconComponent = LazyComponent(() => findByCode(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP"));
 
-export interface ReviewDBUser {
-    ID: number
-    discordID: string
-    username: string
-    profilePhoto: string
-    clientMod: string
-    warningCount: number
-    badges: any[]
-    banInfo: BanInfo | null
-    lastReviewID: number
-    type: UserType
+export function VerifiedIcon() {
+    const color = useToken(ColorMap.colors.INTERACTIVE_MUTED).hex();
+    const forcedIconColor = useToken(ColorMap.colors.INTERACTIVE_ACTIVE).hex();
+
+    return (
+        <VerifiedIconComponent
+            color={color}
+            forcedIconColor={forcedIconColor}
+            size={16}
+            tooltipText={i18n.Messages.CONNECTION_VERIFIED}
+        />
+    );
 }
