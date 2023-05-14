@@ -25,7 +25,7 @@ import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from "..";
-import { getPermissionString, getSortedRoles } from "../utils";
+import { cl, getPermissionString, getSortedRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -102,15 +102,15 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
     return (
         <div>
-            <div className="vc-permviewer-userperms-title-container">
-                <Text className="vc-permviewer-userperms-title" variant="eyebrow">Permissions</Text>
+            <div className={cl("userperms-title-container")}>
+                <Text className={cl("userperms-title")} variant="eyebrow">Permissions</Text>
 
                 <div>
                     <Tooltip text="Role Details">
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
-                                className="vc-permviewer-userperms-permdetails-btn"
+                                className={cl("userperms-permdetails-btn")}
                                 onClick={() =>
                                     openRolesAndUsersPermissionsModal(
                                         rolePermissions,
@@ -134,7 +134,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
-                                className="vc-permviewer-userperms-toggleperms-btn"
+                                className={cl("userperms-toggleperms-btn")}
                                 onClick={() => setViewPermissions(v => !v)}
                             >
                                 <svg

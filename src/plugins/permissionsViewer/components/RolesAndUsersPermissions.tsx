@@ -18,12 +18,11 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { InfoIcon } from "@components/Icons";
-import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { type Guild } from "discord-types/general";
 
-import { getPermissionDescription, getPermissionString } from "../utils";
+import { cl, getPermissionDescription, getPermissionString } from "../utils";
 
 export const enum PermissionType {
     Role = 0,
@@ -123,31 +122,31 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className="vc-permviewer-perms-title" variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className={cl("perms-title")} variant="heading-lg/semibold">{header} permissions:</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent>
                 {!selectedItem && (
-                    <div className="vc-permviewer-perms-no-perms">
+                    <div className={cl("perms-no-perms")}>
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
                     </div>
                 )}
 
                 {selectedItem && (
-                    <div className="vc-permviewer-perms-container">
-                        <div className="vc-permviewer-perms-list">
+                    <div className={cl("perms-container")}>
+                        <div className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
                                 const role = guild.roles[permission.id ?? ""];
 
                                 return (
                                     <button
-                                        className="vc-permviewer-perms-list-item-btn"
+                                        className={cl("perms-list-item-btn")}
                                         onClick={() => selectItem(index)}
                                     >
                                         <div
-                                            className={classes("vc-permviewer-perms-list-item", selectedItemIndex === index ? "vc-permviewer-perms-list-item-active" : "")}
+                                            className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
                                                 if (permission.type === PermissionType.Role)
                                                     ContextMenu.open(e, () => (
@@ -161,13 +160,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         >
                                             {permission.type === PermissionType.Role && (
                                                 <span
-                                                    className="vc-permviewer-perms-role-circle"
+                                                    className={cl("perms-role-circle")}
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
                                                 />
                                             )}
                                             {permission.type === PermissionType.User && user !== undefined && (
                                                 <img
-                                                    className="vc-permviewer-perms-user-img"
+                                                    className={cl("perms-user-img")}
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
@@ -183,10 +182,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 );
                             })}
                         </div>
-                        <div className="vc-permviewer-perms-perms">
+                        <div className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
-                                <div className="vc-permviewer-perms-perms-item">
-                                    <div className="vc-permviewer-perms-perms-item-icon">
+                                <div className={cl("perms-perms-item")}>
+                                    <div className={cl("perms-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
@@ -214,14 +213,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     </div>
                 )}
             </ModalContent>
-        </ModalRoot>
+        </ModalRoot >
     );
 }
 
 function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
     return (
         <Menu.Menu
-            navId="vc-permviewer-role-context-menu"
+            navId={cl("role-context-menu")}
             onClose={ContextMenu.close}
             aria-label="Role Options"
         >

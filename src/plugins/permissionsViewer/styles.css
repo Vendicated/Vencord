@@ -116,10 +116,11 @@
 }
 
 .vc-permviewer-perms-perms-item .vc-info-icon {
-    color: var(--text-muted);
+    color: var(--interactive-muted);
     cursor: pointer;
     position: absolute;
     right: 0;
+    scale: 0.9;
 }
 
 .vc-permviewer-perms-perms-item .vc-info-icon:hover {

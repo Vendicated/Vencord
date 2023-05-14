@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
 import { wordsToTitle } from "@utils/text";
 import { i18n, Parser } from "@webpack/common";
 import { Guild, GuildMember } from "discord-types/general";
 import { ReactNode } from "react";
 
+export const cl = classNameFactory("vc-permviewer-");
 
 function formatPermissionWithoutMatchingString(permission: string) {
     console.log(permission);
