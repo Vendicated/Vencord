@@ -49,6 +49,48 @@ function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermissi
     ));
 }
 
+function PermissionDeniedIcon() {
+    return (
+        <svg
+            height="24"
+            width="24"
+            viewBox="0 0 24 24"
+        >
+            <title>Denied</title>
+            <path fill="var(--status-danger)" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+        </svg>
+    );
+}
+
+function PermissionAllowedIcon() {
+    return (
+        <svg
+            height="24"
+            width="24"
+            viewBox="0 0 24 24"
+        >
+            <title>Allowed</title>
+            <path fill="var(--text-positive)" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17ZZ" />
+        </svg>
+    );
+}
+
+function PermissionDefaultIcon() {
+    return (
+        <svg
+            height="24"
+            width="24"
+            viewBox="0 0 16 16"
+        >
+            <g>
+                <title>Not overwritten</title>
+                <polygon fill="var(--text-normal)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
+            </g>
+        </svg>
+    );
+}
+
+
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     permissions.sort((a, b) => a.type - b.type);
 
@@ -105,13 +147,28 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     >
                                         <div
                                             className={classes("permviewer-perms-list-item", selectedItemIndex === index ? "permviewer-perms-list-item-active" : "")}
-                                            onContextMenu={e => permission.type === PermissionType.Role && ContextMenu.open(e, () => <RoleContextMenu guild={guild} roleId={permission.id!} onClose={modalProps.onClose} />)}
+                                            onContextMenu={e => {
+                                                if (permission.type === PermissionType.Role)
+                                                    ContextMenu.open(e, () => (
+                                                        <RoleContextMenu
+                                                            guild={guild}
+                                                            roleId={permission.id!}
+                                                            onClose={modalProps.onClose}
+                                                        />
+                                                    ));
+                                            }}
                                         >
                                             {permission.type === PermissionType.Role && (
-                                                <span className="permviewer-perms-role-circle" style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }} />
+                                                <span
+                                                    className="permviewer-perms-role-circle"
+                                                    style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
+                                                />
                                             )}
                                             {permission.type === PermissionType.User && user !== undefined && (
-                                                <img className="permviewer-perms-user-img" src={user.getAvatarURL(void 0, void 0, false)} />
+                                                <img
+                                                    className="permviewer-perms-user-img"
+                                                    src={user.getAvatarURL(void 0, void 0, false)}
+                                                />
                                             )}
                                             <Text variant="text-md/normal">{
                                                 permission.type === PermissionType.Role
@@ -132,69 +189,17 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
-                                            let permissionState: boolean | null;
+                                            if (permissions)
+                                                return (permissions & bit) === bit
+                                                    ? PermissionAllowedIcon()
+                                                    : PermissionDeniedIcon();
 
-                                            outer: {
-                                                if (permissions !== undefined) {
-                                                    if ((permissions & bit) > 0n) permissionState = true;
-                                                    else permissionState = false;
-                                                } else {
-                                                    if (overwriteAllow !== undefined) {
-                                                        if ((overwriteAllow & bit) > 0n) {
-                                                            permissionState = true;
-                                                            break outer;
-                                                        }
-                                                    }
-                                                    if (overwriteDeny !== undefined) {
-                                                        if ((overwriteDeny & bit) > 0n) {
-                                                            permissionState = false;
-                                                            break outer;
-                                                        }
-                                                    }
-                                                    permissionState = null;
-                                                }
-                                            }
+                                            if (overwriteAllow && (overwriteAllow & bit) === bit)
+                                                return PermissionAllowedIcon();
+                                            if (overwriteDeny && (overwriteDeny & bit) === bit)
+                                                return PermissionDeniedIcon();
 
-                                            switch (permissionState) {
-                                                case false: {
-                                                    return (
-                                                        <svg
-                                                            height="24"
-                                                            width="24"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path fill="var(--status-danger)" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-                                                        </svg>
-                                                    );
-                                                }
-                                                case null: {
-                                                    return (
-                                                        <svg
-                                                            height="24"
-                                                            width="24"
-                                                            viewBox="0 0 16 16"
-                                                        >
-                                                            <g>
-                                                                <polygon fill="var(--text-normal)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
-                                                            </g>
-                                                        </svg>
-                                                    );
-                                                }
-                                                case true: {
-                                                    return (
-                                                        <svg
-                                                            height="24"
-                                                            width="24"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path fill="var(--text-positive)" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17ZZ" />
-                                                        </svg>
-                                                    );
-                                                }
-                                                default:
-                                                    return null;
-                                            }
-
+                                            return PermissionDefaultIcon();
                                         })()}
                                     </div>
                                     <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
