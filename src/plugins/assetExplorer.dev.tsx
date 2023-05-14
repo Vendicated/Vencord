@@ -17,7 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Text, Toasts } from "@webpack/common";
 
@@ -43,7 +43,6 @@ export default definePlugin({
             const key = openModal(modalProps => (
                 <AssetExplorerModal
                     modalProps={modalProps}
-                    close={() => closeModal(key)}
                     assets={(Vencord.Plugins.plugins[pluginName] as any).assets}
                 />
             ));
@@ -58,12 +57,12 @@ interface AssetProps {
     color: string;
 }
 
-function AssetExplorerModal({ modalProps, assets, close }: { modalProps: ModalProps; close(): void; assets: React.FC<AssetProps>[]; }) {
+function AssetExplorerModal({ modalProps, assets }: { modalProps: ModalProps; assets: React.FC<AssetProps>[]; }) {
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Asset Explorer</Text>
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent>
