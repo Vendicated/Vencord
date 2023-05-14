@@ -23,7 +23,7 @@ import { PermissionsBits, Text, Tooltip, UserStore, useState } from "@webpack/co
 import { Guild, GuildMember, Role } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
-import { getPermissionString } from "../formatting";
+import { getPermissionString, getSortedRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -41,22 +41,14 @@ const RolePillClasses = findByPropsLazy("roleNameOverflow", "root", "roleName", 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
     const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
-    const rolePermissions: Array<RoleOrUserPermission> = [];
     const userPermissions: UserPermissions = [];
 
-    const { roles: userRolesIds } = guildMember;
-    const { roles } = guild;
-    const userRoles = [...userRolesIds.map(id => roles[id]), roles[guild.id]];
+    const userRoles = getSortedRoles(guild, guildMember);
 
-    userRoles.sort(({ position: a }, { position: b }) => b - a);
-
-    for (const userRole of userRoles) {
-        rolePermissions.push({
-            type: PermissionType.Role,
-            id: userRole.id,
-            permissions: userRole.permissions
-        });
-    }
+    const rolePermissions: Array<RoleOrUserPermission> = userRoles.map(role => ({
+        type: PermissionType.Role,
+        ...role
+    }));
 
     if (guild.ownerId === guildMember.userId) {
         rolePermissions.push({
@@ -74,12 +66,12 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
     sortUserRoles(userRoles);
 
     for (const [permission, bit] of Object.entries(PermissionsBits)) {
-        for (const userRole of userRoles) {
-            if ((userRole.permissions & bit) === bit) {
+        for (const { permissions, colorString, position } of userRoles) {
+            if ((permissions & bit) === bit) {
                 userPermissions.push({
                     permission: getPermissionString(permission),
-                    roleColor: userRole.colorString ?? "var(--primary-300)",
-                    rolePosition: userRole.position
+                    roleColor: colorString || "var(--primary-300)",
+                    rolePosition: position
                 });
 
                 break;

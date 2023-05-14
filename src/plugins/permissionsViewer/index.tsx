@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
+import { getSortedRoles } from "./utils";
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -56,73 +57,67 @@ export const settings = definePluginSettings({
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
-    const guild = GuildStore.getGuild(guildId);
-
-    const permissions = [] as RoleOrUserPermission[];
-    let header: string;
-
-    switch (type) {
-        case MenuItemParentType.User: {
-            const guildMember = GuildMemberStore.getMember(guildId, id!);
-
-            const roles = [...guildMember.roles.map(roleId => guild.roles[roleId]), guild.roles[guild.id]];
-            roles.sort(({ position: a }, { position: b }) => b - a);
-
-            for (const role of roles) {
-                permissions.push({
-                    type: PermissionType.Role,
-                    id: role.id,
-                    permissions: role.permissions
-                });
-            }
-
-            if (guild.ownerId === id!) {
-                permissions.push({
-                    type: PermissionType.Owner,
-                    permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
-                });
-            }
-
-            header = guildMember.nick ?? UserStore.getUser(guildMember.userId).username;
-
-            break;
-        }
-        case MenuItemParentType.Channel: {
-            const channel = ChannelStore.getChannel(id!);
-
-            Object.values(channel.permissionOverwrites).forEach(overwrite => {
-                permissions.push({
-                    type: overwrite.type as PermissionType,
-                    id: overwrite.id,
-                    overwriteAllow: overwrite.allow,
-                    overwriteDeny: overwrite.deny
-                });
-            });
-
-            header = channel.name;
-
-            break;
-        }
-        default: {
-            Object.values(guild.roles).forEach(role => {
-                permissions.push({
-                    type: PermissionType.Role,
-                    id: role.id,
-                    permissions: role.permissions
-                });
-            });
-
-            header = guild.name;
-
-            break;
-        }
-    }
-
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
             label="Permissions"
-            action={() => openRolesAndUsersPermissionsModal(permissions, guild, header)}
+            action={() => {
+                const guild = GuildStore.getGuild(guildId);
+
+                let permissions: RoleOrUserPermission[];
+                let header: string;
+
+                switch (type) {
+                    case MenuItemParentType.User: {
+                        const member = GuildMemberStore.getMember(guildId, id!);
+
+                        permissions = getSortedRoles(guild, member)
+                            .map(role => ({
+                                type: PermissionType.Role,
+                                ...role
+                            }));
+
+                        if (guild.ownerId === id) {
+                            permissions.push({
+                                type: PermissionType.Owner,
+                                permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
+                            });
+                        }
+
+                        header = member.nick ?? UserStore.getUser(member.userId).username;
+
+                        break;
+                    }
+
+                    case MenuItemParentType.Channel: {
+                        const channel = ChannelStore.getChannel(id!);
+
+                        permissions = Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                            type: type as PermissionType,
+                            id,
+                            overwriteAllow: allow,
+                            overwriteDeny: deny
+                        }));
+
+                        header = channel.name;
+
+                        break;
+                    }
+
+                    default: {
+                        permissions = Object.values(guild.roles).map(role => ({
+                            type: PermissionType.Role,
+                            ...role
+                        }));
+
+                        header = guild.name;
+
+                        break;
+                    }
+                }
+
+                openRolesAndUsersPermissionsModal(permissions, guild, header);
+            }}
         />
     );
 }
@@ -135,18 +130,15 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
 
         if (group) {
             switch (type) {
-                case MenuItemParentType.User: {
+                case MenuItemParentType.User:
                     group.push(MenuItem(props.guildId, props.user.id, type));
                     break;
-                }
-                case MenuItemParentType.Channel: {
+                case MenuItemParentType.Channel:
                     group.push(MenuItem(props.guild.id, props.channel.id, type));
                     break;
-                }
-                case MenuItemParentType.Guild: {
+                case MenuItemParentType.Guild:
                     group.push(MenuItem(props.guild.id));
                     break;
-                }
             }
         }
     };

@@ -18,6 +18,7 @@
 
 import { wordsToTitle } from "@utils/text";
 import { i18n } from "@webpack/common";
+import { Guild, GuildMember } from "discord-types/general";
 
 function formatPermissionWithoutMatchingString(permission: string) {
     return wordsToTitle(permission.toLowerCase().split("_"));
@@ -25,4 +26,10 @@ function formatPermissionWithoutMatchingString(permission: string) {
 
 export function getPermissionString(permission: string) {
     return i18n.Messages[permission] ?? formatPermissionWithoutMatchingString(permission);
+}
+
+export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
+    return [...member.roles, id]
+        .map(id => roles[id])
+        .sort((a, b) => b.position - a.position);
 }
