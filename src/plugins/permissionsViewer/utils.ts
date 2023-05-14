@@ -25,7 +25,7 @@ function formatPermissionWithoutMatchingString(permission: string) {
 }
 
 export function getPermissionString(permission: string) {
-    return i18n.Messages[permission] ?? formatPermissionWithoutMatchingString(permission);
+    return i18n.Messages[permission] || formatPermissionWithoutMatchingString(permission);
 }
 
 export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
