@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +30,7 @@ function toggleHoverControls(value: boolean) {
 
 export default definePlugin({
     name: "SpotifyControls",
-    description: "Spotify Controls",
+    description: "Adds a Spotify player above the account panel",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
     options: {
         hoverControls: {

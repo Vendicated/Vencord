@@ -59,7 +59,9 @@ async function checkCors(url, method) {
     const origin = headers["access-control-allow-origin"];
     if (origin !== "*" && origin !== window.location.origin) return false;
 
-    const methods = headers["access-control-allow-methods"]?.toLowerCase().split(/,\s/g);
+    const methods = headers["access-control-allow-methods"]?.toLowerCase()
+        .split(",")
+        .map(s => s.trim());
     if (methods && !methods.includes(method.toLowerCase())) return false;
 
     return true;

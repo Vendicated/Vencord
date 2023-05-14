@@ -21,11 +21,11 @@ import "./styles.css";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { getTheme, Theme } from "@utils/discord";
+import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, ComponentDispatch, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
 
 function parseTime(time: string) {
     const cleanTime = time.slice(1, -1).replace(/(\d)(AM|PM)$/i, "$1 $2");
@@ -104,7 +104,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
             <ModalFooter>
                 <Button
                     onClick={() => {
-                        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: formatted });
+                        insertTextIntoChatInputBox(formatted + " ");
                         close();
                     }}
                 >Insert</Button>

@@ -18,7 +18,7 @@
 
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
-import { ChannelStore, GuildStore, RelationshipStore, UserUtils } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
@@ -30,11 +30,20 @@ const friends = {
     requests: [] as string[]
 };
 
+const guildsKey = () => `relationship-notifier-guilds-${UserStore.getCurrentUser().id}`;
+const groupsKey = () => `relationship-notifier-groups-${UserStore.getCurrentUser().id}`;
+const friendsKey = () => `relationship-notifier-friends-${UserStore.getCurrentUser().id}`;
+
+async function runMigrations() {
+    DataStore.delMany(["relationship-notifier-guilds", "relationship-notifier-groups", "relationship-notifier-friends"]);
+}
+
 export async function syncAndRunChecks() {
+    await runMigrations();
     const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
-        "relationship-notifier-guilds",
-        "relationship-notifier-groups",
-        "relationship-notifier-friends"
+        guildsKey(),
+        groupsKey(),
+        friendsKey()
     ]) as [Map<string, SimpleGuild> | undefined, Map<string, SimpleGroupChannel> | undefined, Record<"friends" | "requests", string[]> | undefined];
 
     await Promise.all([syncGuilds(), syncGroups(), syncFriends()]);
@@ -97,14 +106,18 @@ export function deleteGuild(id: string) {
 }
 
 export async function syncGuilds() {
+    guilds.clear();
+
+    const me = UserStore.getCurrentUser().id;
     for (const [id, { name, icon }] of Object.entries(GuildStore.getGuilds())) {
-        guilds.set(id, {
-            id,
-            name,
-            iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
-        });
+        if (GuildMemberStore.isMember(id, me))
+            guilds.set(id, {
+                id,
+                name,
+                iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
+            });
     }
-    await DataStore.set("relationship-notifier-guilds", guilds);
+    await DataStore.set(guildsKey(), guilds);
 }
 
 export function getGroup(id: string) {
@@ -117,6 +130,8 @@ export function deleteGroup(id: string) {
 }
 
 export async function syncGroups() {
+    groups.clear();
+
     for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
         if (type === ChannelType.GROUP_DM)
             groups.set(id, {
@@ -126,7 +141,7 @@ export async function syncGroups() {
             });
     }
 
-    await DataStore.set("relationship-notifier-groups", groups);
+    await DataStore.set(groupsKey(), groups);
 }
 
 export async function syncFriends() {
@@ -145,5 +160,5 @@ export async function syncFriends() {
         }
     }
 
-    await DataStore.set("relationship-notifier-friends", friends);
+    await DataStore.set(friendsKey(), friends);
 }

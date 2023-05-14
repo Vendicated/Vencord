@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
@@ -121,7 +121,7 @@ export default definePlugin({
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?(?=\(0,\i\.jsxs?\)\(\i\.Menu)/,
+                match: /return \i\.\i\?/,
                 replace: "return true?"
             }
         },
@@ -146,7 +146,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'navId:"textarea-context"',
+            find: ':"command-suggestions"',
             predicate: () => settings.store.addBack,
             replacement: [
                 {
@@ -157,9 +157,9 @@ export default definePlugin({
                     replace: "$1=[],$2=[]",
                 },
                 {
-                    // if (!IS_DESKTOP) return
-                    match: /(?<=showApplicationCommandSuggestions;)if\(!\i\.\i\)/,
-                    replace: "if(false)"
+                    // if (!IS_DESKTOP) return null;
+                    match: /if\(!\i\.\i\)return null;/,
+                    replace: ""
                 },
                 {
                     // do not add menu items for entries removed in patch 1. Using a lookbehind for group 1 is slow,

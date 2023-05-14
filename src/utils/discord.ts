@@ -17,7 +17,7 @@
 */
 
 import { findLazy } from "@webpack";
-import { ChannelStore, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
@@ -41,4 +41,11 @@ export const enum Theme {
 
 export function getTheme(): Theme {
     return PreloadedUserSettings.getCurrentValue()?.appearance?.theme;
+}
+
+export function insertTextIntoChatInputBox(text: string) {
+    ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
+        rawText: text,
+        plainText: text
+    });
 }

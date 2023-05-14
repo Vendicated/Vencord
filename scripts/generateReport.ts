@@ -130,7 +130,7 @@ async function printReport() {
                     },
                     {
                         title: "Discord Errors",
-                        description: toCodeBlock(report.otherErrors.join("\n")),
+                        description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n")) : "None",
                         color: report.otherErrors.length ? 0xff0000 : 0x00ff00
                     }
                 ]
@@ -186,8 +186,18 @@ page.on("console", async e => {
     } else if (isDebug) {
         console.error(e.text());
     } else if (level === "error") {
-        const text = e.text();
-        if (!text.startsWith("Failed to load resource: the server responded with a status of")) {
+        const text = await Promise.all(
+            e.args().map(async a => {
+                try {
+                    return await maybeGetError(a) || await a.jsonValue();
+                } catch (e) {
+                    return a.toString();
+                }
+            })
+        ).then(a => a.join(" ").trim());
+
+
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of")) {
             console.error("Got unexpected error", text);
             report.otherErrors.push(text);
         }
@@ -224,7 +234,7 @@ function runTime(token: string) {
             // Needs native server to run
             if (p.name === "WebRichPresence (arRPC)") return;
 
-            p.required = true;
+            Vencord.Settings.plugins[p.name].enabled = true;
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
@@ -258,7 +268,7 @@ function runTime(token: string) {
                 if (!isWasm)
                     await wreq.e(id as any);
 
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 150));
             }
             console.error("[PUP_DEBUG]", "Finished loading chunks!");
 
