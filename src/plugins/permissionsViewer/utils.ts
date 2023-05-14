@@ -20,12 +20,40 @@ import { wordsToTitle } from "@utils/text";
 import { i18n } from "@webpack/common";
 import { Guild, GuildMember } from "discord-types/general";
 
+
 function formatPermissionWithoutMatchingString(permission: string) {
+    console.log(permission);
     return wordsToTitle(permission.toLowerCase().split("_"));
 }
 
+// because discord is unable to be consistent with their names
+const PermissionKeyMap = {
+    MANAGE_GUILD: "MANAGE_SERVER",
+    MANAGE_GUILD_EXPRESSIONS: "MANAGE_EXPRESSIONS",
+    CREATE_GUILD_EXPRESSIONS: "CREATE_EXPRESSIONS",
+    MODERATE_MEMBERS: "MODERATE_MEMBER",
+    STREAM: "VIDEO",
+    SEND_VOICE_MESSAGES: "ROLE_PERMISSIONS_SEND_VOICE_MESSAGE",
+} as const;
+
 export function getPermissionString(permission: string) {
-    return i18n.Messages[permission] || formatPermissionWithoutMatchingString(permission);
+    permission = PermissionKeyMap[permission] || permission;
+
+    return i18n.Messages[permission] ||
+        // shouldn't get here but just in case
+        formatPermissionWithoutMatchingString(permission);
+}
+
+export function getPermissionDescription(permission: string) {
+    // DISCORD PLEEEEEEEEAAAAASE IM BEGGING YOU :(
+    if (permission === "USE_APPLICATION_COMMANDS")
+        permission = "USE_APPLICATION_COMMANDS_GUILD";
+    else if (permission === "SEND_VOICE_MESSAGES")
+        permission = "SEND_VOICE_MESSAGE_GUILD";
+    else if (permission !== "STREAM")
+        permission = PermissionKeyMap[permission] || permission;
+
+    return i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] || "";
 }
 
 export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {

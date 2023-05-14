@@ -20,15 +20,16 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
-import { PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
+import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
-import { getPermissionString, getSortedRoles } from "../utils";
+import { getPermissionDescription, getPermissionString, getSortedRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
+    permissionDescription: string;
     roleColor: string;
     rolePosition: number;
     roleName: string;
@@ -65,11 +66,13 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
             });
 
+            const OWNER = i18n.Messages.GUILD_OWNER || "Server Owner";
             userPermissions.push({
-                permission: "Server Owner",
+                permission: OWNER,
+                permissionDescription: "",
                 roleColor: "var(--primary-300)",
                 rolePosition: Infinity,
-                roleName: "Server Owner"
+                roleName: OWNER
             });
         }
 
@@ -80,6 +83,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
                         permission: getPermissionString(permission),
+                        permissionDescription: getPermissionDescription(permission),
                         roleColor: colorString || "var(--primary-300)",
                         rolePosition: position,
                         roleName: name
@@ -95,7 +99,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         return [rolePermissions, userPermissions];
     }, []);
 
-    const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle } = Classes;
+    const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
 
     return (
         <div>
@@ -150,24 +154,30 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
             {viewPermissions && userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
-                    {userPermissions.map(({ permission, roleColor, roleName }) => (
-                        <div className={classes(role, rolePill, rolePillBorder)}>
-                            <div className={roleRemoveButton}>
-                                <span
-                                    className={roleCircle}
-                                    style={{ backgroundColor: roleColor }}
-                                />
-                            </div>
-                            <div className={roleName}>
-                                <Text
-                                    className={roleNameOverflow}
-                                    variant="text-xs/medium"
-                                >
-                                    {permission}
-                                </Text>
-                            </div>
-                        </div>
-                    ))}
+                    {userPermissions.map(({ permission, roleColor, permissionDescription }) => {
+                        return (
+                            <Tooltip text={permissionDescription} hide={!permissionDescription}>
+                                {tooltipProps => (
+                                    <div {...tooltipProps} className={classes(role, rolePill, rolePillBorder)}>
+                                        <div className={roleRemoveButton}>
+                                            <span
+                                                className={roleCircle}
+                                                style={{ backgroundColor: roleColor }}
+                                            />
+                                        </div>
+                                        <div className={roleName}>
+                                            <Text
+                                                className={roleNameOverflow}
+                                                variant="text-xs/medium"
+                                            >
+                                                {permission}
+                                            </Text>
+                                        </div>
+                                    </div>
+                                )}
+                            </Tooltip>
+                        );
+                    })}
                 </div>
             )}
         </div>

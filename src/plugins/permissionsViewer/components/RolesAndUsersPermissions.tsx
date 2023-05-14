@@ -119,7 +119,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     return (
         <ModalRoot
             {...modalProps}
-            size={ModalSize.MEDIUM}
+            size={ModalSize.LARGE}
         >
             <ModalHeader>
                 <Text className="permviewer-perms-title" variant="heading-lg/semibold">{header} permissions:</Text>
