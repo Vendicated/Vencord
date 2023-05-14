@@ -24,7 +24,7 @@ import { type Guild } from "discord-types/general";
 
 import { getPermissionString } from "../formatting";
 
-export enum PermissionType {
+export const enum PermissionType {
     Role = 0,
     User = 1,
     Owner = 2

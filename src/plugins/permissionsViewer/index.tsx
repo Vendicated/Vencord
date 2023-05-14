@@ -28,9 +28,15 @@ import { Guild, GuildMember } from "discord-types/general";
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 
-export enum PermissionsSortOrder {
+export const enum PermissionsSortOrder {
     HighestRole,
     LowestRole
+}
+
+const enum MenuItemParentType {
+    User,
+    Channel,
+    Guild
 }
 
 export const settings = definePluginSettings({
@@ -49,16 +55,10 @@ export const settings = definePluginSettings({
     }
 });
 
-enum MenuItemParentType {
-    User,
-    Channel,
-    Guild
-}
-
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     const guild = GuildStore.getGuild(guildId);
 
-    const permissions: Array<RoleOrUserPermission> = [];
+    const permissions = [] as RoleOrUserPermission[];
     let header: string;
 
     switch (type) {
@@ -121,9 +121,8 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
-            key="perm-viewer-permissions"
             label="Permissions"
-            action={async () => openRolesAndUsersPermissionsModal(permissions, guild, header)}
+            action={() => openRolesAndUsersPermissionsModal(permissions, guild, header)}
         />
     );
 }
@@ -155,11 +154,9 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
 
 export default definePlugin({
     name: "PermissionsViewer",
-    description: "View the permissions an user or channel has, and the roles of a server.",
+    description: "View the permissions an user or channel has, and the roles of a server",
     authors: [Devs.Nuckyz],
     settings,
-
-    dependencies: ["ContextMenuAPI"],
 
     patches: [
         {

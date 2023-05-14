@@ -75,7 +75,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
 
     for (const [permission, bit] of Object.entries(PermissionsBits)) {
         for (const userRole of userRoles) {
-            if ((userRole.permissions & bit) > 0n) {
+            if ((userRole.permissions & bit) === bit) {
                 userPermissions.push({
                     permission: getPermissionString(permission),
                     roleColor: userRole.colorString ?? "var(--primary-300)",
@@ -87,7 +87,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         }
     }
 
-    userPermissions.sort(({ rolePosition: a }, { rolePosition: b }) => b - a);
+    userPermissions.sort((a, b) => b.rolePosition - a.rolePosition);
 
     return (
         <div>
@@ -145,17 +145,14 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
     );
 }
 
-function sortUserRoles(roles: Array<Role>) {
+function sortUserRoles(roles: Role[]) {
     switch (settings.store.permissionsSortOrder) {
-        case PermissionsSortOrder.HighestRole: {
-            return roles.sort(({ position: a }, { position: b }) => b - a);
-        }
-        case PermissionsSortOrder.LowestRole: {
-            return roles.sort(({ position: a }, { position: b }) => a - b);
-        }
-        default: {
+        case PermissionsSortOrder.HighestRole:
+            return roles.sort((a, b) => b.position - a.position);
+        case PermissionsSortOrder.LowestRole:
+            return roles.sort((a, b) => a.position - b.position);
+        default:
             return roles;
-        }
     }
 }
 

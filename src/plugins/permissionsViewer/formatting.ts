@@ -17,14 +17,12 @@
 */
 
 import { wordsToTitle } from "@utils/text";
-import { findLazy } from "@webpack";
-
-const PermissionsStrings: Record<string, string> = findLazy(m => typeof m.ADMINISTRATOR === "string");
+import { i18n } from "@webpack/common";
 
 function formatPermissionWithoutMatchingString(permission: string) {
     return wordsToTitle(permission.toLowerCase().split("_"));
 }
 
 export function getPermissionString(permission: string) {
-    return PermissionsStrings[permission] ?? formatPermissionWithoutMatchingString(permission);
+    return i18n.Messages[permission] ?? formatPermissionWithoutMatchingString(permission);
 }
