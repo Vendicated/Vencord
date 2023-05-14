@@ -165,7 +165,7 @@ export default definePlugin({
                 if (!type) continue;
 
                 const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = Settings.plugins.VcNarrator["narrateSelf"] && isMe ? "" : UserStore.getUser(userId).username;
+                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel));
