@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, UIEvent } from "react";
+import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
 
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
@@ -35,11 +35,12 @@ export interface Menu {
     }>;
     MenuItem: RC<{
         id: string;
-        label: string;
+        label: ReactNode;
         action?(e: MouseEvent): void;
+        icon?: ComponentType<any>;
 
         color?: string;
-        render?: ComponentType;
+        render?: ComponentType<any>;
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
