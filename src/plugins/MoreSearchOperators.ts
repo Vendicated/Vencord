@@ -23,8 +23,8 @@ interface SearchFilter {
     componentType: "FILTER";
     regex: RegExp;
     key: string;
-    validator: (match: any) => boolean;
-    getAutocompletions: (match: any) => { text: string; }[];
+    validator?: (match?: any) => boolean;
+    getAutocompletions: (match?: string, serverId?: string, maxResults?: number) => { text: string; }[];
     _title: string;
     _options: string;
 }
@@ -44,7 +44,6 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /sortOrder:/i,
         key: "sortOrder:",
-        validator: () => true,
         getAutocompletions: () => [{ text: "descending" }, { text: "ascending" }],
         _title: "Sort order",
         _options: "descending, ascending"
@@ -53,7 +52,6 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /sortBy:/i,
         key: "sortBy:",
-        validator: () => true,
         getAutocompletions: () => [{ text: "relevance" }, { text: "timestamp" }],
         _title: "Sort by",
         _options: "relevance, timestamp"
@@ -62,7 +60,6 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /embedType:/i,
         key: "embedType:",
-        validator: () => true,
         getAutocompletions: () => [{ text: "image" }, { text: "video" }, { text: "gifv" }, { text: "article" }],
         _title: "Embed type",
         _options: "type"
@@ -71,7 +68,6 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /fileName:/i,
         key: "fileName:",
-        validator: () => true,
         getAutocompletions: () => [],
         _title: "File name",
         _options: "file name"
@@ -80,7 +76,6 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /fileType:/i,
         key: "fileType:",
-        validator: () => true,
         getAutocompletions: () => [{ text: "png" }, { text: "jpg" }, { text: "webp" }, { text: "gif" }, { text: "mp4" }, { text: "txt" }, { text: "js" }, { text: "css" }, { text: "zip" }],
         _title: "File type",
         _options: "extension"
@@ -92,7 +87,7 @@ const searchAnswers: { [name: string]: SearchAnswer; } = {
         componentType: "ANSWER",
         regex: /\s*(asc|desc)(?:ending)?/i,
         validator: function (match) {
-            let value = match.getMatch(1);
+            const value = match.getMatch(1);
             switch (value) {
                 case "asc":
                     match.setData("sortOrder", "asc");
@@ -113,7 +108,7 @@ const searchAnswers: { [name: string]: SearchAnswer; } = {
         componentType: "ANSWER",
         regex: /\s*(relevance|timestamp)/i,
         validator: function (match) {
-            let value = match.getMatch(1);
+            const value = match.getMatch(1);
             switch (value) {
                 case "relevance":
                     match.setData("sortBy", "relevance");
@@ -168,46 +163,77 @@ const searchAnswers: { [name: string]: SearchAnswer; } = {
     },
 };
 
+function registerSearchOperators(originalOperators: { [name: string]: SearchFilter | SearchAnswer; }) {
+    for (const [name, operator] of Object.entries(searchOperators)) {
+        originalOperators[name] = operator;
+    }
+    for (const [name, operator] of Object.entries(searchAnswers)) {
+        originalOperators[name] = operator;
+    }
+}
+
+// Makes all of the custom operators visible by default
+function setAsVisible(originalOperators: { [name: string]: boolean; }) {
+    for (const name in searchOperators) {
+        originalOperators[name] = true; // null for hidden
+    }
+}
+
+// Defines the text displayed above the list of autocompletions
+function setHeaderText(originalOperators: { [name: string]: { titleText: () => string; }; }) {
+    for (const [name, operator] of Object.entries(searchOperators)) {
+        originalOperators[name] = { titleText: () => operator._title };
+    }
+}
+
 export default definePlugin({
     name: "MoreSearchOperators",
     description: "Adds experimental search operators.",
     authors: [Devs.Davri],
 
-    patches: [{
-        find: "Messages.SEARCH_SHORTCUT",
-        replacement: {
-            match: /(\i)\((\i),\i\.\i\.ANSWER_PINNED/,
-            replace: Object.keys(searchOperators).map(a => `$1($2,"${a}",$self.searchOperators.${a}),`).join("") + Object.keys(searchAnswers).map(a => `$1($2,"${a}",$self.searchAnswers.${a}),`).join("") + "$&"
+    patches: [
+        {
+            find: "Messages.SEARCH_SHORTCUT",
+            replacement: {
+                match: /\i\((\i),\i\.\i\.ANSWER_PINNED/,
+                replace: "$self.registerSearchOperators($1),$&"
+            }
+        },
+        {
+            find: "Messages.SEARCH_ANSWER_FROM",
+            replacement: {
+                match: /(?<=\i\.forEach\(\(function\((\i)\).{300,500})var (\i)=\i\[\i\];switch\(\i\)\{/,
+                // Adds query parameters to the search url
+                replace: "$&" + Object.entries(searchAnswers).map(([k, v]) => `case "${k}":$2.add($1.getData("${v._dataKey}"));break;`).join("")
+            }
+        },
+        {
+            find: "Messages.SEARCH_ANSWER_FROM",
+            replacement: {
+                match: /function \i\(\i\)\{switch\(\i\)\{/,
+                // Defines the example text next to the initial list of autocompletions
+                replace: "$&" + Object.entries(searchOperators).map(([k, v]) => `case "${k}":return "${v._options}";`).join("")
+            }
+        },
+        {
+            find: "Messages.SEARCH_GROUP_HEADER",
+            replacement: {
+                match: /\i\((\i),\i\.\i\.FILTER_HAS,\{titleText/,
+                replace: "$self.setHeaderText($1),$&"
+            }
+        },
+        {
+            find: "displayName=\"SearchAutocompleteStore\"",
+            replacement: {
+                match: /\i\((\i),\i\.\i\.FILTER_PINNED,!0\),/,
+                replace: "$self.setAsVisible($1),$&"
+            }
         }
-    }, {
-        find: "Messages.SEARCH_ANSWER_FROM",
-        replacement: {
-            match: /(?<=\i\.forEach\(\(function\((\i)\).{300,500})var (\i)=\i\[\i\];switch\(\i\)\{/,
-            replace: "$&" + Object.entries(searchAnswers).map(([k, v]) => `case "${k}":$2.add($1.getData("${v['_dataKey']}"));break;`).join("")
-        }
-    },
-    {
-        find: "Messages.SEARCH_ANSWER_FROM",
-        replacement: {
-            match: /function \i\(\i\)\{switch\(\i\)\{/,
-            replace: "$&" + Object.entries(searchOperators).map(([k, v]) => `case \"${k}\":return \"${v['_options']}\";`).join("")
-        }
-    },
-    {
-        find: "Messages.SEARCH_GROUP_HEADER",
-        replacement: {
-            match: /(\i)\((\i),\i\.\i\.FILTER_HAS,\{titleText:function\(\)\{return \i\.\i\.Messages.SEARCH_GROUP_HEADER_HAS\}\}\)/,
-            replace: Object.entries(searchOperators).map(([k, v]) => `$1($2,\"${k}\",{titleText:()=>\"${v['_title']}\"}),`).join("") + "$&"
-        }
-    },
-    {
-        find: "displayName=\"SearchAutocompleteStore\"",
-        replacement: {
-            match: /(\i)\((\i),\i\.\i\.FILTER_PINNED,!0\),/,
-            replace: "$&" + Object.keys(searchOperators).map(k => `$1($2,"${k}",true),`).join("")
-        }
-    }],
+    ],
 
     searchOperators,
-    searchAnswers
+    searchAnswers,
+    registerSearchOperators,
+    setAsVisible,
+    setHeaderText
 });
