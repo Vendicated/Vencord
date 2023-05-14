@@ -69,7 +69,7 @@ function AssetExplorerModal({ modalProps, assets, close }: { modalProps: ModalPr
             <ModalContent>
                 <div style={{ marginBottom: "10px" }}></div>
                 {assets.map(Asset => {
-                    if (`${Asset}`.includes("\"svg\""))
+                    if (`${Asset}`.includes('"svg"'))
                         return <span style={{ marginRight: "5px", cursor: "pointer" }} onClick={() => {
                             console.log("Right click to find the definition!\n\n", Asset, "\n\nSome icons are not exported, so you'll have to either manually export them or copy them in ur plugin.");
                             Toasts.show({
