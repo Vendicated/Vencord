@@ -22,12 +22,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { Button, Flex, Forms, React, Text, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
-const UserProfileStore = findByPropsLazy("getUserProfile");
+const UserProfileStore = findStoreLazy("UserProfileStore");
 
 interface UserProfile extends User {
     themeColors?: Array<number>;
@@ -188,8 +188,6 @@ export default definePlugin({
                             }}
                             color={Button.Colors.PRIMARY}
                             size={Button.Sizes.XLARGE}
-                            // Why the fuck is this needed again?
-                            style={{ cursor: "pointer", userSelect: "none" }}
                         >
                             Copy 3y3
                         </Button>
@@ -198,17 +196,12 @@ export default definePlugin({
                         style={{ marginTop: "8px", marginBottom: "8px" }}
                     />
                     <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
-                    <div
-                        onClick={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }}
-                    >
+                    <div className="vc-fpt-preview">
                         <ProfileModal
                             user={UserStore.getCurrentUser()}
                             pendingThemeColors={[c1, c2]}
-                            onAvatarChange={() => { }}
-                            onBannerChange={() => { }}
+                            onAvatarChange={() => {}}
+                            onBannerChange={() => {}}
                             canUsePremiumCustomization={true}
                             hideExampleButton={true}
                             hideFakeActivity={true}
