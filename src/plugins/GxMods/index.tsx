@@ -63,11 +63,10 @@ const pluginDef = definePlugin<PluginDef & {
 
     flux: {
         CHANNEL_SELECT: ({ guildId }) => {
+            pluginDef.onChannelChange(pluginDef._currentGuildId !== guildId);
+
             if (pluginDef._currentGuildId !== guildId) {
                 pluginDef._currentGuildId = guildId;
-                pluginDef.onGuildChange();
-            } else {
-                pluginDef.onChannelChange();
             }
         }
     },
@@ -283,32 +282,17 @@ const pluginDef = definePlugin<PluginDef & {
         window.addEventListener("keydown", this.keyDownCallback, true);
     },
 
-    onGuildChange() {
-        if (!this.sfx.tab.close.sounds.length) return;
+    onChannelChange(guildChanged: boolean) {
+        const type = guildChanged ? "close" : "slash";
+        if (!this.sfx.tab[type].sounds.length) return;
 
-        this.sfx.tab.close.idx += 1;
-        if (this.sfx.tab.close.idx === this.sfx.tab.close.sounds.length) {
-            this.sfx.tab.close.idx = 0;
+        this.sfx.tab[type].idx += 1;
+        if (this.sfx.tab[type].idx === this.sfx.tab[type].sounds.length) {
+            this.sfx.tab[type].idx = 0;
         }
 
         const audio = Object.assign(document.createElement("audio"), {
-            src: URL.createObjectURL(this.sfx.tab.close.sounds[this.sfx.tab.close.idx]),
-        });
-        audio.onended = () => audio.remove();
-
-        document.body.appendChild(audio);
-        audio.play();
-    },
-    onChannelChange() {
-        if (!this.sfx.tab.slash.sounds.length) return;
-
-        this.sfx.tab.slash.idx += 1;
-        if (this.sfx.tab.slash.idx === this.sfx.tab.slash.sounds.length) {
-            this.sfx.tab.slash.idx = 0;
-        }
-
-        const audio = Object.assign(document.createElement("audio"), {
-            src: URL.createObjectURL(this.sfx.tab.slash.sounds[this.sfx.tab.slash.idx]),
+            src: URL.createObjectURL(this.sfx.tab[type].sounds[this.sfx.tab[type].idx]),
         });
         audio.onended = () => audio.remove();
 
