@@ -21,7 +21,7 @@ import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
-import { Guild, GuildMember } from "discord-types/general";
+import type { Guild, GuildMember } from "discord-types/general";
 
 import { settings } from "..";
 import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
