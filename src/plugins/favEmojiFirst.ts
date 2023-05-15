@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-const DisambiguatedEmojiContext = findByPropsLazy("getDisambiguatedEmojiContext");
+const EmojiStore = findStoreLazy("EmojiStore");
 
 interface EmojiAutocompleteState {
     query?: {
