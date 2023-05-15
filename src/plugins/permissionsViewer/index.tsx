@@ -143,7 +143,7 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
 
         if (group)
             group.push(item);
-        else if (childId === "roles")
+        else if (childId === "roles" && props.guildId)
             // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
             children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
     };
