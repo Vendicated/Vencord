@@ -194,8 +194,8 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                     setName(v);
                 }}
                 validate={v =>
-                    data.t !== "Sticker" && ((v.length > 1 && v.length < 32 && nameValidator.test(v))
-                        || "Name must be between 2 and 32 characters and only contain alphanumeric characters") || true
+                    data.t === "Sticker" || ((v.length > 1 && v.length < 32 && nameValidator.test(v))
+                        || "Name must be between 2 and 32 characters and only contain alphanumeric characters")
                 }
             />
             <div style={{
