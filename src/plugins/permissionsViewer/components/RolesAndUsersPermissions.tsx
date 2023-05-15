@@ -176,7 +176,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                         ? role?.name || "Unknown Role"
                                                         : permission.type === PermissionType.User
                                                             ? user?.tag || "Unknown User"
-                                                            : "@owner"
+                                                            : <>@owner <span className={cl("crown")}>👑</span></>
                                                 }
                                             </Text>
                                         </div>
