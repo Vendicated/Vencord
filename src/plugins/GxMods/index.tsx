@@ -171,12 +171,18 @@ export default definePlugin<PluginDef & {
             }
         }));
 
-        window.addEventListener("mouseup", () => {
+        window.addEventListener("mouseup", ({ target }) => {
             if (!this.sfx.click.sounds.length) return;
+
+            {
+                // If no element with `cursor: pointer` is clicked, then we don't want to play the sound.
+                const style = getComputedStyle(target as HTMLElement);
+                const cursor = style.getPropertyValue("cursor");
+                if (cursor !== "pointer") return;
+            }
 
             const audio = document.createElement("audio");
             audio.onended = () => audio.remove();
-
 
             this.sfx.click.idx += 1;
             if (this.sfx.click.idx === this.sfx.click.sounds.length) {
