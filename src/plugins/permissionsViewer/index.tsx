@@ -128,19 +128,24 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
 
         const group = findGroupChildrenByChildId(childId, children);
 
-        if (group) {
+        const item = (() => {
             switch (type) {
                 case MenuItemParentType.User:
-                    group.push(MenuItem(props.guildId, props.user.id, type));
-                    break;
+                    return MenuItem(props.guildId, props.user.id, type);
                 case MenuItemParentType.Channel:
-                    group.push(MenuItem(props.guild.id, props.channel.id, type));
-                    break;
+                    return MenuItem(props.guild.id, props.channel.id, type);
                 case MenuItemParentType.Guild:
-                    group.push(MenuItem(props.guild.id));
-                    break;
+                    return MenuItem(props.guild.id);
+                default:
+                    throw new Error("Invalid type");
             }
-        }
+        })();
+
+        if (group)
+            group.push(item);
+        else if (childId === "roles")
+            // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+            children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
     };
 }
 
@@ -160,7 +165,7 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember) => <UserPermissions guild={guild} guildMember={guildMember} />,
+    UserPermissions: (guild: Guild, guildMember: GuildMember) => !!guild && <UserPermissions guild={guild} guildMember={guildMember} />,
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
     channelContextMenuPatch: makeContextMenuPatch("mute-channel", MenuItemParentType.Channel),
