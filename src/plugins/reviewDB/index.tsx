@@ -18,14 +18,15 @@
 
 import "./style.css";
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button } from "@webpack/common";
+import { Alerts, Button } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
+import { UserType } from "./entities/User";
 import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";
 
@@ -47,10 +48,10 @@ export default definePlugin({
     options: {
         authorize: {
             type: OptionType.COMPONENT,
-            description: "Authorise with ReviewDB",
+            description: "Authorize with ReviewDB",
             component: () => (
                 <Button onClick={authorize}>
-                    Authorise with ReviewDB
+                    Authorize with ReviewDB
                 </Button>
             )
         },
@@ -68,7 +69,29 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Hide timestamps on reviews",
             default: false,
-        }
+        },
+        website: {
+            type: OptionType.COMPONENT,
+            description: "ReviewDB website",
+            component: () => (
+                <Button onClick={() => {
+                    window.open("https://reviewdb.mantikafasi.dev");
+                }}>
+                    ReviewDB website
+                </Button>
+            )
+        },
+        supportServer: {
+            type: OptionType.COMPONENT,
+            description: "ReviewDB Support Server",
+            component: () => (
+                <Button onClick={() => {
+                    window.open("https://discord.gg/eWPBSbvznt");
+                }}>
+                    ReviewDB Support Server
+                </Button>
+            )
+        },
     },
 
     async start() {
@@ -82,7 +105,34 @@ export default definePlugin({
                 if (user.lastReviewID !== 0)
                     showToast("You have new reviews on your profile!");
             }
-            settings.userType = user.type;
+
+            if (user.banInfo) {
+                const endDate = new Date(user.banInfo.banEndDate);
+                if (endDate > new Date() && (settings.user?.banInfo?.banEndDate ?? 0) < endDate) {
+
+                    Alerts.show({
+                        title: "You have been banned from ReviewDB",
+                        body: <>
+                            <p>
+                                You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
+                            </p>
+                            <p>
+                                Offending Review: {user.banInfo.reviewContent}
+                            </p>
+                            <p>
+                                Continued offenses will result in a permanent ban.
+                            </p>
+                        </>,
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: () => {
+                            window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
+                        }
+                    });
+                }
+            }
+
+            settings.user = user;
         }, 4000);
     },
 

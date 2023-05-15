@@ -17,12 +17,12 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { PlainSettings, Settings } from "@api/settings";
+import { PlainSettings, Settings } from "@api/Settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
-import Logger from "./Logger";
+import { Logger } from "./Logger";
 import { saveFile } from "./web";
 
 export async function importSettings(data: string) {

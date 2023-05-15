@@ -29,6 +29,7 @@ interface Dev {
 interface PluginData {
     name: string;
     description: string;
+    tags: string[];
     authors: Dev[];
     dependencies: string[];
     hasPatches: boolean;
@@ -106,6 +107,7 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
+            tags: [] as string[]
         } as PluginData;
 
         for (const prop of pluginObj.properties) {
@@ -129,6 +131,13 @@ async function parseFile(fileName: string) {
                     data.authors = value.elements.map(e => {
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
                         return devs[getName(e)!];
+                    });
+                    break;
+                case "tags":
+                    if (!isArrayLiteralExpression(value)) throw fail("tags is not an array literal");
+                    data.tags = value.elements.map(e => {
+                        if (!isStringLiteral(e)) throw fail("tags array contains non-string literals");
+                        return e.text;
                     });
                     break;
                 case "dependencies":

@@ -47,7 +47,7 @@ function MemberCount() {
     const online =
         (groups.length === 1 && groups[0].id === "unknown")
             ? 0
-            : groups.reduce((count, curr) => count + curr.count, 0);
+            : groups.reduce((count, curr) => count + (curr.id === "offline" ? 0 : curr.count), 0);
 
     return (
         <Flex id="vc-membercount" style={{

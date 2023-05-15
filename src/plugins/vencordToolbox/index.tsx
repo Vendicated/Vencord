@@ -21,7 +21,7 @@ import "./index.css";
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
