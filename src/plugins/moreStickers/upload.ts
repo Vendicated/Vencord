@@ -28,6 +28,55 @@ const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 
+async function resizeImage(url: string) {
+    const originalImage = new Image();
+    originalImage.crossOrigin = "anonymous"; // If the image is hosted on a different domain, enable CORS
+
+    const loadImage = new Promise((resolve, reject) => {
+        originalImage.onload = resolve;
+        originalImage.onerror = reject;
+        originalImage.src = url;
+    });
+
+    await loadImage;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not get canvas context");
+
+    // Determine the target size of the processed image (160x160)
+    const targetSize = 160;
+
+    // Calculate the scale factor to resize the image
+    const scaleFactor = Math.min(targetSize / originalImage.width, targetSize / originalImage.height);
+
+    // Calculate the dimensions for resizing the image while maintaining aspect ratio
+    const resizedWidth = originalImage.width * scaleFactor;
+    const resizedHeight = originalImage.height * scaleFactor;
+
+    // Set the canvas size to the target dimensions
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+
+    // Draw the resized image onto the canvas
+    ctx.drawImage(originalImage, 0, 0, resizedWidth, resizedHeight);
+
+    // Get the canvas image data
+    const imageData = ctx.getImageData(0, 0, targetSize, targetSize);
+    const data = imageData.data;
+
+    // Apply any additional image processing or filters here if desired
+
+    // Convert the image data to a Blob
+    const blob: Blob | null = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/png");
+    });
+    if (!blob) throw new Error("Could not convert canvas to blob");
+
+    // return the object URL representing the Blob
+    return blob;
+}
+
 export async function sendSticker({
     channelId,
     sticker,
@@ -51,11 +100,12 @@ export async function sendSticker({
 
     if ((ctrlKey || !sendAsLink) && !shiftKey) {
         const response = await fetch(sticker.image, { cache: "force-cache" });
-        const blob = await response.blob();
-        const filename = (new URL(sticker.image)).pathname.split("/").pop();
-        const ext = filename?.split(".").pop() ?? "png";
+        // const blob = await response.blob();
+        const orgImageUrl = URL.createObjectURL(await response.blob());
+        const processedImage = await resizeImage(orgImageUrl);
 
-        const file = new File([blob], filename!, { type: `image/${ext}` });
+        const filename = (new URL(sticker.image)).pathname.split("/").pop();
+        const file = new File([processedImage], filename!, { type: `image/png` });
 
         if (ctrlKey) {
             promptToUpload([file], ChannelStore.getChannel(channelId), 0);
