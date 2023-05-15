@@ -54,7 +54,7 @@ export default definePlugin({
             state.query == null
             || state.query?.type !== "EMOJIS_AND_STICKERS"
             || state.query.typeInfo?.sentinel !== ":"
-            || state.query.results?.emojis?.length === 0
+            || !state.query.results?.emojis?.length
         ) return;
 
         const emojiContext = DisambiguatedEmojiContext.getDisambiguatedEmojiContext();
