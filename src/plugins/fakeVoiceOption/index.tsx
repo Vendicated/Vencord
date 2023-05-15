@@ -75,6 +75,10 @@ export default definePlugin({
     name: "Fake Voice Options",
     description: "fake mute & deafen",
     authors: [{
+        name: "SaucyDuck",
+        id: 1004904120056029256n,
+    },
+    {
         name: "GeorgeV22",
         id: 261487490769092608n,
     }],
