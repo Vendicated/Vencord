@@ -38,7 +38,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     // dms and group chats
     const dmGroup = findGroupChildrenByChildId("pin", children);
     if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
-        const pinIndex = dmGroup.findIndex(c => c.props.id === "pin");
+        const pinIndex = dmGroup.findIndex(c => c?.props.id === "pin");
         return dmGroup.splice(pinIndex + 1, 0, (
             <Menu.MenuItem
                 id="reply"

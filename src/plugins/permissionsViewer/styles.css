@@ -59,7 +59,7 @@
     align-items: center;
     padding: 8px 5px;
     cursor: pointer;
-    width: 165px;
+    width: 230px;
 }
 
 .vc-permviewer-perms-list-item > div {
@@ -121,6 +121,7 @@
     position: absolute;
     right: 0;
     scale: 0.9;
+    transition: color ease-in 0.1s;
 }
 
 .vc-permviewer-perms-perms-item .vc-info-icon:hover {
