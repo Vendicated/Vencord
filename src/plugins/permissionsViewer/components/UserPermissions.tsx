@@ -21,10 +21,10 @@ import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
-import { Guild, GuildMember, Role } from "discord-types/general";
+import { Guild, GuildMember } from "discord-types/general";
 
-import { PermissionsSortOrder, settings } from "..";
-import { cl, getPermissionString, getSortedRoles } from "../utils";
+import { settings } from "..";
+import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -170,17 +170,6 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             )}
         </div>
     );
-}
-
-function sortUserRoles(roles: Role[]) {
-    switch (settings.store.permissionsSortOrder) {
-        case PermissionsSortOrder.HighestRole:
-            return roles.sort((a, b) => b.position - a.position);
-        case PermissionsSortOrder.LowestRole:
-            return roles.sort((a, b) => a.position - b.position);
-        default:
-            return roles;
-    }
 }
 
 export default ErrorBoundary.wrap(UserPermissionsComponent, { noop: true });

@@ -19,8 +19,10 @@
 import { classNameFactory } from "@api/Styles";
 import { wordsToTitle } from "@utils/text";
 import { i18n, Parser } from "@webpack/common";
-import { Guild, GuildMember } from "discord-types/general";
-import { ReactNode } from "react";
+import { Guild, GuildMember, Role } from "discord-types/general";
+import type { ReactNode } from "react";
+
+import { PermissionsSortOrder, settings } from ".";
 
 export const cl = classNameFactory("vc-permviewer-");
 
@@ -68,4 +70,15 @@ export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
     return [...member.roles, id]
         .map(id => roles[id])
         .sort((a, b) => b.position - a.position);
+}
+
+export function sortUserRoles(roles: Role[]) {
+    switch (settings.store.permissionsSortOrder) {
+        case PermissionsSortOrder.HighestRole:
+            return roles.sort((a, b) => b.position - a.position);
+        case PermissionsSortOrder.LowestRole:
+            return roles.sort((a, b) => a.position - b.position);
+        default:
+            return roles;
+    }
 }
