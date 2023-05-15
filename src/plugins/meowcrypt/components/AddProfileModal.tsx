@@ -39,7 +39,7 @@ export function AddProfileModal(props: any) {
                 <Forms.FormTitle tag="h4">Add Profile</Forms.FormTitle>
             </ModalHeader>
 
-            <ModalContent>
+            <ModalContent style={{ marginTop: "20px" }}>
                 <Forms.FormTitle tag="h5">Name</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
