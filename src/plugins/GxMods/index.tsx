@@ -226,27 +226,31 @@ const pluginDef = definePlugin<PluginDef & {
 
             const audio = document.createElement("audio");
             audio.onended = () => audio.remove();
+            audio.src = URL.createObjectURL(this.sfx.click.sounds[this.sfx.click.idx]);
 
             this.sfx.click.idx += 1;
             if (this.sfx.click.idx === this.sfx.click.sounds.length) {
                 this.sfx.click.idx = 0;
             }
 
-            audio.src = URL.createObjectURL(this.sfx.click.sounds[this.sfx.click.idx]);
-
             document.body.appendChild(audio);
             audio.play();
         };
         window.addEventListener("mouseup", this.mouseUpCallback);
 
-        let keyReleased = true;
-        this.keyRelaseCallback = () => keyReleased = true;
+        /*
+         * We only want to play a key sound when the key is pressed, not when it is repeated after the initial press.
+         * By keeping the state of the keys, we can know which key is "repeated" and which is not.
+         */
+        const keyStates: Record<string, boolean> = {};
+
+        this.keyRelaseCallback = ({ key }) => keyStates[key] = true;
         window.addEventListener("keyup", this.keyRelaseCallback, true);
 
         this.keyDownCallback = ({ key }) => {
-            if (!keyReleased) return;
+            if (!keyStates[key]) return;
 
-            keyReleased = false;
+            keyStates[key] = false;
             const audio = document.createElement("audio");
             audio.onended = () => audio.remove();
 
@@ -269,12 +273,12 @@ const pluginDef = definePlugin<PluginDef & {
             }
 
             if (!this.sfx.typing[type].sounds.length) return;
+            audio.src = URL.createObjectURL(this.sfx.typing[type].sounds[this.sfx.typing[type].idx]!);
 
             this.sfx.typing[type].idx += 1;
             if (this.sfx.typing[type].idx === this.sfx.typing[type].sounds.length) {
                 this.sfx.typing[type].idx = 0;
             }
-            audio.src = URL.createObjectURL(this.sfx.typing[type].sounds[this.sfx.typing[type].idx]!);
 
             document.body.appendChild(audio);
             audio.play();
@@ -286,15 +290,15 @@ const pluginDef = definePlugin<PluginDef & {
         const type = guildChanged ? "close" : "slash";
         if (!this.sfx.tab[type].sounds.length) return;
 
-        this.sfx.tab[type].idx += 1;
-        if (this.sfx.tab[type].idx === this.sfx.tab[type].sounds.length) {
-            this.sfx.tab[type].idx = 0;
-        }
-
         const audio = Object.assign(document.createElement("audio"), {
             src: URL.createObjectURL(this.sfx.tab[type].sounds[this.sfx.tab[type].idx]),
         });
         audio.onended = () => audio.remove();
+
+        this.sfx.tab[type].idx += 1;
+        if (this.sfx.tab[type].idx === this.sfx.tab[type].sounds.length) {
+            this.sfx.tab[type].idx = 0;
+        }
 
         document.body.appendChild(audio);
         audio.play();
