@@ -53,7 +53,6 @@ export const getMods = (page: number = 1) => {
     return fetchCached<ModCatalogue>(`https://api.gx.me/store/mods?page=${page}`);
 };
 
-// 12b2e9d1-5d7c-4ff3-aa1f-a67027ffe322
 
 export const getModInfo = (modId: string) => {
     return fetchCached<GxModInfo>(`https://api.gx.me/store/mods/${modId}`);

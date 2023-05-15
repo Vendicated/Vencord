@@ -28,12 +28,13 @@ import { fetchCrxFile } from "./utils";
 
 const logger = new Logger("GxMod");
 
-// Anime mod
+// TODO: Make this a setting.
 const modId = "605a8f04-f91b-4f94-8e33-94f4c56e3b05";
+
 let GxModCrx: import("@zip.js/zip.js").ZipReader<unknown> | null = null;
 
-type SfxCollection = { sounds: Blob[]; idx: number; };
 
+type SfxCollection = { sounds: Blob[]; idx: number; };
 export default definePlugin<PluginDef & {
     manifestJson?: GxModManifest;
     sfx: { click: SfxCollection; typing: Record<string, SfxCollection>; };
@@ -96,7 +97,6 @@ export default definePlugin<PluginDef & {
         await music.getData?.(blobWriter);
 
         this.bgmBlob = await blobWriter.getData();
-
         const player = this.getAudioPlayer();
 
         player.src = URL.createObjectURL(this.bgmBlob);
