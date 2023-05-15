@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { InfoIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, GuildMemberStore, i18n, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { type Guild } from "discord-types/general";
 
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
@@ -158,7 +158,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     ));
                                             }}
                                         >
-                                            {permission.type === PermissionType.Role && (
+                                            {(permission.type === PermissionType.Role || permission.type === PermissionType.Owner) && (
                                                 <span
                                                     className={cl("perms-role-circle")}
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
@@ -170,13 +170,15 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
-                                            <Text variant="text-md/normal">{
-                                                permission.type === PermissionType.Role
-                                                    ? role?.name ?? "Unknown Role"
-                                                    : permission.type === PermissionType.User
-                                                        ? user?.tag ?? "Unknown User"
-                                                        : "@owner"
-                                            }</Text>
+                                            <Text variant="text-md/normal">
+                                                {
+                                                    permission.type === PermissionType.Role
+                                                        ? role?.name || "Unknown Role"
+                                                        : permission.type === PermissionType.User
+                                                            ? user?.tag || "Unknown User"
+                                                            : i18n.Messages.GUILD_OWNER || "Server Owner"
+                                                }
+                                            </Text>
                                         </div>
                                     </button>
                                 );
