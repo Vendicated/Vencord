@@ -19,7 +19,7 @@
 import { Emoji } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 
 const EmojiStore = findStoreLazy("EmojiStore");
 
@@ -57,7 +57,7 @@ export default definePlugin({
             || !state.query.results?.emojis?.length
         ) return;
 
-        const emojiContext = DisambiguatedEmojiContext.getDisambiguatedEmojiContext();
+        const emojiContext = EmojiStore.getDisambiguatedEmojiContext();
 
         state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
             const aIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(a);
