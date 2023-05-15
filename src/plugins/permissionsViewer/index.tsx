@@ -57,6 +57,8 @@ export const settings = definePluginSettings({
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
+    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id!)) return null;
+
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
@@ -122,7 +124,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     );
 }
 
-function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
+function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => () => {
         if (!props) return children;
 
@@ -137,9 +139,11 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
                 case MenuItemParentType.Guild:
                     return MenuItem(props.guild.id);
                 default:
-                    throw new Error("Invalid type");
+                    return null;
             }
         })();
+
+        if (item == null) return;
 
         if (group)
             group.push(item);
@@ -165,10 +169,10 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember) => !!guild && <UserPermissions guild={guild} guildMember={guildMember} />,
+    UserPermissions: (guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} />,
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
-    channelContextMenuPatch: makeContextMenuPatch("channel-notifications", MenuItemParentType.Channel),
+    channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
     guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
 
     start() {
