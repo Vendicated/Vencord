@@ -89,8 +89,8 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
 }
 
 /**
- * A helper function for finding the children array of a group nested inside a context menu based on the id(s) of its childs
- * @param id The id(s) of the child(s)
+ * A helper function for finding the children array of a group nested inside a context menu based on the id(s) of its children
+ * @param id The id(s) of the child/children
  * @param children The context menu children
  */
 export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>, _itemsArray?: Array<ReactElement | null>): Array<ReactElement | null> | null {
