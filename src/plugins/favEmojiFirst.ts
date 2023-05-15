@@ -59,7 +59,7 @@ export default definePlugin({
 
         const emojiContext = DisambiguatedEmojiContext.getDisambiguatedEmojiContext();
 
-        state.query.results.emojis = state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
+        state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
             const aIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(a);
             const bIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(b);
 
