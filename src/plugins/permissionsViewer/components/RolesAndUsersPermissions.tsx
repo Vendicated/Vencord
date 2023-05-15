@@ -17,7 +17,8 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { InfoIcon } from "@components/Icons";
+import { Flex } from "@components/Flex";
+import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { type Guild } from "discord-types/general";
@@ -176,7 +177,16 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                         ? role?.name || "Unknown Role"
                                                         : permission.type === PermissionType.User
                                                             ? user?.tag || "Unknown User"
-                                                            : <>@owner <span className={cl("crown")}>👑</span></>
+                                                            : (
+                                                                <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
+                                                                    @owner
+                                                                    <OwnerCrownIcon
+                                                                        height={18}
+                                                                        width={18}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </Flex>
+                                                            )
                                                 }
                                             </Text>
                                         </div>

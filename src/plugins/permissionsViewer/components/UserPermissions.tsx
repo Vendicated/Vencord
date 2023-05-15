@@ -22,7 +22,6 @@ import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
-import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from "..";
 import { cl, getPermissionString, getSortedRoles } from "../utils";
@@ -30,10 +29,8 @@ import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermi
 
 interface UserPermission {
     permission: string;
-    permissionDescription?: ReactNode;
     roleColor: string;
     rolePosition: number;
-    roleName: string;
 }
 
 type UserPermissions = Array<UserPermission>;
@@ -71,8 +68,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             userPermissions.push({
                 permission: OWNER,
                 roleColor: "var(--primary-300)",
-                rolePosition: Infinity,
-                roleName: OWNER
+                rolePosition: Infinity
             });
         }
 
@@ -84,8 +80,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                     userPermissions.push({
                         permission: getPermissionString(permission),
                         roleColor: colorString || "var(--primary-300)",
-                        rolePosition: position,
-                        roleName: name
+                        rolePosition: position
                     });
 
                     break;
