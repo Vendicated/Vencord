@@ -147,7 +147,7 @@ function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavCo
 export default definePlugin({
     name: "PermissionsViewer",
     description: "View the permissions an user or channel has, and the roles of a server",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.Ven],
     settings,
 
     patches: [
