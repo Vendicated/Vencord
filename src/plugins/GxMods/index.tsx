@@ -18,15 +18,19 @@
 
 import { Devs } from "@utils/constants";
 import { getZipJs } from "@utils/dependencies";
+import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { PluginDef } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Text } from "@webpack/common";
 
 import { getCrxLink, getModInfo } from "./api/api";
 import { GxModManifest } from "./types";
 import { fetchCrxFile } from "./utils";
 
-const logger = new Logger("GxMod");
+const logger = new Logger("GxMod", "#FA1E4E");
+
+const classes = findByPropsLazy("listItem", "serverEmoji");
 
 // TODO: Make this a setting.
 const modId = "605a8f04-f91b-4f94-8e33-94f4c56e3b05";
@@ -35,9 +39,13 @@ let GxModCrx: import("@zip.js/zip.js").ZipReader<unknown> | null = null;
 
 
 type SfxCollection = { sounds: Blob[]; idx: number; };
-export default definePlugin<PluginDef & {
+const pluginDef = definePlugin<PluginDef & {
     manifestJson?: GxModManifest;
-    sfx: { click: SfxCollection; typing: Record<string, SfxCollection>; };
+    sfx: {
+        click: SfxCollection;
+        typing: Record<string, SfxCollection>;
+        tab: Record<string, SfxCollection>;
+    };
 }>({
     name: "GxMods",
     description: "Integrates OperaGX Mods into discord.",
@@ -51,6 +59,17 @@ export default definePlugin<PluginDef & {
                 return false;
             }} href="https://store.gx.me"
             >https://store.gx.me</a>)</Text>;
+    },
+
+    flux: {
+        CHANNEL_SELECT: ({ guildId }) => {
+            if (pluginDef._currentGuildId !== guildId) {
+                pluginDef._currentGuildId = guildId;
+                pluginDef.onGuildChange();
+            } else {
+                pluginDef.onChannelChange();
+            }
+        }
     },
 
     async start() {
@@ -69,11 +88,12 @@ export default definePlugin<PluginDef & {
         this.bgmFilename = this.manifestJson.mod.payload.background_music[0];
 
         logger.info("Loaded manifest!");
+        this._currentGuildId = getCurrentGuild()?.id;
 
         this.registerSounds();
     },
 
-    getAudioPlayer(): HTMLAudioElement {
+    getBgmPlayer(): HTMLAudioElement {
         if (this.player) return this.player;
 
         this.player = Object.assign(document.createElement("audio"), {
@@ -97,7 +117,7 @@ export default definePlugin<PluginDef & {
         await music.getData?.(blobWriter);
 
         this.bgmBlob = await blobWriter.getData();
-        const player = this.getAudioPlayer();
+        const player = this.getBgmPlayer();
 
         player.src = URL.createObjectURL(this.bgmBlob);
         player.play();
@@ -106,34 +126,27 @@ export default definePlugin<PluginDef & {
     },
 
     sfx: {
-        click: {
-            sounds: [],
-            idx: 0
-        },
+        click: { sounds: [], idx: 0 },
         typing: {
-            letter: {
-                sounds: [],
-                idx: 0
-            },
-            space: {
-                sounds: [],
-                idx: 0
-            },
-            enter: {
-                sounds: [],
-                idx: 0
-            },
-            backspace: {
-                sounds: [],
-                idx: 0
-            }
+            letter: { sounds: [], idx: 0 },
+            space: { sounds: [], idx: 0 },
+            enter: { sounds: [], idx: 0 },
+            backspace: { sounds: [], idx: 0 },
+        },
+        tab: {
+            close: { sounds: [], idx: 0 },
+            insert: { sounds: [], idx: 0 },
+            slash: { sounds: [], idx: 0 },
         }
     },
+
     async registerSounds() {
         this.playBgm();
 
         const entries = await GxModCrx?.getEntries();
         if (!entries) return;
+
+        logger.info(this.manifestJson?.mod.payload.browser_sounds);
 
         const { BlobWriter } = await getZipJs();
 
@@ -146,6 +159,31 @@ export default definePlugin<PluginDef & {
             await entry.getData?.(blobWriter);
             this.sfx.click?.sounds.push(await await blobWriter.getData());
         }
+
+        await Promise.all(Object.entries(this.manifestJson!.mod.payload.browser_sounds)
+            .filter(([type, _]) => type.startsWith("TAB_"))
+            .map(async ([type, sounds]) => {
+                type = type.split("_")[1].toLowerCase();
+                switch (type) {
+                    case "close":
+                    case "insert":
+                    case "slash": {
+                        for (const sound of sounds as string[]) {
+                            const entry = entries.find(e => e.filename === sound);
+                            if (!entry) continue;
+
+                            const soundBlob = new BlobWriter();
+                            await entry.getData?.(soundBlob);
+
+                            this.sfx.tab[type].sounds.push(await soundBlob.getData());
+                        }
+                        break;
+                    }
+                    default: {
+                        logger.warn(`Unknown browser sound found. [${type}]`);
+                    }
+                }
+            }));
 
         await Promise.all(Object.entries(this.manifestJson!.mod.payload.keyboard_sounds).map(async ([type, sounds]) => {
             type = type.split("_")[1].toLowerCase();
@@ -171,7 +209,7 @@ export default definePlugin<PluginDef & {
             }
         }));
 
-        window.addEventListener("mouseup", ({ target }) => {
+        this.mouseUpCallback = ({ target }) => {
             if (!this.sfx.click.sounds.length) return;
 
             {
@@ -179,6 +217,12 @@ export default definePlugin<PluginDef & {
                 const style = getComputedStyle(target as HTMLElement);
                 const cursor = style.getPropertyValue("cursor");
                 if (cursor !== "pointer") return;
+            }
+
+            {
+                // Don't play the click sound when clicking channels/guilds.
+                if ((target as HTMLElement).matches("#channels li *")) return;
+                if ((target as HTMLElement).matches(`.${classes.listItem} *`)) return;
             }
 
             const audio = document.createElement("audio");
@@ -193,70 +237,92 @@ export default definePlugin<PluginDef & {
 
             document.body.appendChild(audio);
             audio.play();
-        });
+        };
+        window.addEventListener("mouseup", this.mouseUpCallback);
 
         let keyReleased = true;
+        this.keyRelaseCallback = () => keyReleased = true;
+        window.addEventListener("keyup", this.keyRelaseCallback, true);
 
-        window.addEventListener("keyup", () => {
-            keyReleased = true;
-        }, true);
-
-        window.addEventListener("keydown", ({ key }) => {
+        this.keyDownCallback = ({ key }) => {
             if (!keyReleased) return;
 
             keyReleased = false;
             const audio = document.createElement("audio");
             audio.onended = () => audio.remove();
 
-            switch (key.toLowerCase()) {
+            let type = key;
+
+            switch (key) {
                 case " ": {
-                    if (!this.sfx.typing.space.sounds.length) return;
-
-                    this.sfx.typing.space.idx += 1;
-                    if (this.sfx.typing.space.idx === this.sfx.typing.space.sounds.length) {
-                        this.sfx.typing.space.idx = 0;
-                    }
-                    audio.src = URL.createObjectURL(this.sfx.typing.space.sounds[this.sfx.typing.space.idx]!);
+                    type = "space";
                     break;
                 }
-                case "Backspace": {
-                    if (!this.sfx.typing.backspace.sounds.length) return;
-
-                    this.sfx.typing.backspace.idx += 1;
-                    if (this.sfx.typing.backspace.idx === this.sfx.typing.backspace.sounds.length) {
-                        this.sfx.typing.backspace.idx = 0;
-                    }
-                    audio.src = URL.createObjectURL(this.sfx.typing.backspace.sounds[this.sfx.typing.backspace.idx]!);
-                    break;
-                }
+                case "Backspace":
                 case "Enter": {
-                    if (!this.sfx.typing.enter.sounds.length) return;
-
-                    this.sfx.typing.enter.idx += 1;
-                    if (this.sfx.typing.enter.idx === this.sfx.typing.enter.sounds.length) {
-                        this.sfx.typing.enter.idx = 0;
-                    }
-                    audio.src = URL.createObjectURL(this.sfx.typing.enter.sounds[this.sfx.typing.enter.idx]!);
+                    type = key.toLowerCase();
                     break;
                 }
                 default: {
-                    if (!this.sfx.typing.letter.sounds.length) return;
-
-                    this.sfx.typing.letter.idx += 1;
-                    if (this.sfx.typing.letter.idx === this.sfx.typing.letter.sounds.length) {
-                        this.sfx.typing.letter.idx = 0;
-                    }
-                    audio.src = URL.createObjectURL(this.sfx.typing.letter.sounds[this.sfx.typing.letter.idx]!);
+                    type = "letter";
                     break;
                 }
             }
 
+            if (!this.sfx.typing[type].sounds.length) return;
+
+            this.sfx.typing[type].idx += 1;
+            if (this.sfx.typing[type].idx === this.sfx.typing[type].sounds.length) {
+                this.sfx.typing[type].idx = 0;
+            }
+            audio.src = URL.createObjectURL(this.sfx.typing[type].sounds[this.sfx.typing[type].idx]!);
+
             document.body.appendChild(audio);
             audio.play();
-        }, true);
+        };
+        window.addEventListener("keydown", this.keyDownCallback, true);
+    },
+
+    onGuildChange() {
+        if (!this.sfx.tab.close.sounds.length) return;
+
+        this.sfx.tab.close.idx += 1;
+        if (this.sfx.tab.close.idx === this.sfx.tab.close.sounds.length) {
+            this.sfx.tab.close.idx = 0;
+        }
+
+        const audio = Object.assign(document.createElement("audio"), {
+            src: URL.createObjectURL(this.sfx.tab.close.sounds[this.sfx.tab.close.idx]),
+        });
+        audio.onended = () => audio.remove();
+
+        document.body.appendChild(audio);
+        audio.play();
+    },
+    onChannelChange() {
+        if (!this.sfx.tab.slash.sounds.length) return;
+
+        this.sfx.tab.slash.idx += 1;
+        if (this.sfx.tab.slash.idx === this.sfx.tab.slash.sounds.length) {
+            this.sfx.tab.slash.idx = 0;
+        }
+
+        const audio = Object.assign(document.createElement("audio"), {
+            src: URL.createObjectURL(this.sfx.tab.slash.sounds[this.sfx.tab.slash.idx]),
+        });
+        audio.onended = () => audio.remove();
+
+        document.body.appendChild(audio);
+        audio.play();
     },
 
     stop() {
-        this.getAudioPlayer().pause();
+        this.getBgmPlayer().pause();
+        window.removeEventListener("keyup", this.keyRelaseCallback, true);
+        window.removeEventListener("keydown", this.keyDownCallback, true);
+        window.removeEventListener("mouseup", this.mouseUpCallback);
     },
 });
+
+
+export default pluginDef;
