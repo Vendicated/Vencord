@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { InfoIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, GuildMemberStore, i18n, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { type Guild } from "discord-types/general";
 
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
@@ -176,7 +176,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                         ? role?.name || "Unknown Role"
                                                         : permission.type === PermissionType.User
                                                             ? user?.tag || "Unknown User"
-                                                            : i18n.Messages.GUILD_OWNER || "Server Owner"
+                                                            : "@owner"
                                                 }
                                             </Text>
                                         </div>

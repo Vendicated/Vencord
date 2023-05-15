@@ -25,7 +25,6 @@ import { ReactNode } from "react";
 export const cl = classNameFactory("vc-permviewer-");
 
 function formatPermissionWithoutMatchingString(permission: string) {
-    console.log(permission);
     return wordsToTitle(permission.toLowerCase().split("_"));
 }
 
