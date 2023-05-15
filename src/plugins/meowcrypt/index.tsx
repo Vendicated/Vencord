@@ -20,7 +20,7 @@ import * as DataStore from "@api/DataStore";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ContextMenu, FluxDispatcher, Menu, React, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
