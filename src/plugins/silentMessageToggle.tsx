@@ -17,7 +17,7 @@
 */
 
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -33,6 +33,11 @@ const settings = definePluginSettings({
         onChange(newValue: boolean) {
             if (newValue === false) lastState = false;
         }
+    },
+    autoDisable: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically disable the silent message toggle again after sending one",
+        default: true
     }
 });
 
@@ -51,7 +56,7 @@ function SilentMessageToggle(chatBoxProps: {
     React.useEffect(() => {
         const listener: SendListener = (_, message) => {
             if (enabled) {
-                setEnabledValue(false);
+                if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
@@ -72,7 +77,7 @@ function SilentMessageToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ padding: "0 8px" }}
+                        style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -96,8 +101,10 @@ function SilentMessageToggle(chatBoxProps: {
 
 export default definePlugin({
     name: "SilentMessageToggle",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
+    dependencies: ["MessageEventsAPI"],
+
     settings,
     patches: [
         {

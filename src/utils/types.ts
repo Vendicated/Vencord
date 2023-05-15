@@ -108,6 +108,13 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
+    /**
+     * Allows you to add custom actions to the Vencord Toolbox.
+     * The key will be used as text for the button
+     */
+    toolboxActions?: Record<string, () => void>;
+
+    tags?: string[];
 }
 
 export enum OptionType {
@@ -133,14 +140,22 @@ export type PluginSettingDef = (
     | PluginSettingSelectDef
     | PluginSettingSliderDef
     | PluginSettingComponentDef
+    | PluginSettingBigIntDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
     description: string;
     placeholder?: string;
     onChange?(newValue: any): void;
+    /**
+     * Whether changing this setting requires a restart
+     */
     restartNeeded?: boolean;
     componentProps?: Record<string, any>;
+    /**
+     * Hide this setting from the settings UI
+     */
+    hidden?: boolean;
     /**
      * Set this if the setting only works on Browser or Desktop, not both
      */

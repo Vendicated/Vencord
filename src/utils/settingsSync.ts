@@ -17,13 +17,12 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { PlainSettings, Settings } from "@api/settings";
+import { PlainSettings, Settings } from "@api/Settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
-import IpcEvents from "./IpcEvents";
-import Logger from "./Logger";
+import { Logger } from "./Logger";
 import { saveFile } from "./web";
 
 export async function importSettings(data: string) {
@@ -36,15 +35,15 @@ export async function importSettings(data: string) {
 
     if ("settings" in parsed && "quickCss" in parsed) {
         Object.assign(PlainSettings, parsed.settings);
-        await VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(parsed.settings, null, 4));
-        await VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, parsed.quickCss);
+        await VencordNative.settings.set(JSON.stringify(parsed.settings, null, 4));
+        await VencordNative.quickCss.set(parsed.quickCss);
     } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
 export async function exportSettings() {
-    const settings = JSON.parse(VencordNative.ipc.sendSync(IpcEvents.GET_SETTINGS));
-    const quickCss = await VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS);
+    const settings = JSON.parse(VencordNative.settings.get());
+    const quickCss = await VencordNative.quickCss.get();
     return JSON.stringify({ settings, quickCss }, null, 4);
 }
 
@@ -147,7 +146,7 @@ export async function putCloudSettings() {
 
         const { written } = await res.json();
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
         showNotification({
@@ -230,7 +229,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         // sync with server timestamp instead of local one
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.ipc.invoke(IpcEvents.SET_SETTINGS, JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -36,21 +36,47 @@ const settings = definePluginSettings({
             { label: "Nitro banner", value: true, default: true },
             { label: "USRBG banner", value: false },
         ]
+    },
+    voiceBackground: {
+        description: "Use USRBG banners as voice chat backgrounds",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
 export default definePlugin({
     name: "USRBG",
-    description: "USRBG is a community maintained database of Discord banners, allowing anyone to get a banner without requiring Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix],
+    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
-            find: ".bannerSrc,",
-            replacement: {
-                match: /(\i)\.bannerSrc,/,
-                replace: "$self.useBannerHook($1),"
-            }
+            find: ".NITRO_BANNER,",
+            replacement: [
+                {
+                    match: /(\i)\.premiumType/,
+                    replace: "$self.premiumHook($1)||$&"
+                },
+                {
+                    match: /(\i)\.bannerSrc,/,
+                    replace: "$self.useBannerHook($1),"
+                },
+                {
+                    match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
+                    replace: "&&$self.shouldShowBadge(arguments[0])$&"
+                }
+            ]
+        },
+        {
+            find: "\"data-selenium-video-tile\":",
+            predicate: () => settings.store.voiceBackground,
+            replacement: [
+                {
+                    match: /(\i)\.style,/,
+                    replace: "$self.voiceBackgroundHook($1),"
+                }
+            ]
         }
     ],
 
@@ -60,9 +86,30 @@ export default definePlugin({
         );
     },
 
+    voiceBackgroundHook({ className, participantUserId }: any) {
+        if (className.includes("tile-")) {
+            if (data[participantUserId]) {
+                return {
+                    backgroundImage: `url(${data[participantUserId]})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat"
+                };
+            }
+        }
+    },
+
     useBannerHook({ displayProfile, user }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
         if (data[user.id]) return data[user.id];
+    },
+
+    premiumHook({ userId }: any) {
+        if (data[userId]) return 2;
+    },
+
+    shouldShowBadge({ displayProfile, user }: any) {
+        return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
     },
 
     async start() {

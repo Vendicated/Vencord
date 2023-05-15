@@ -17,7 +17,7 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -57,7 +57,7 @@ function SilentTypingToggle(chatBoxProps: {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ padding: "0 8px" }}
+                        style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
