@@ -177,7 +177,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 overwriteDeny: overwrite.deny
             })));
         }
-    }, []);
+    }, [channelId]);
 
     return (
         <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
