@@ -22,14 +22,14 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { PluginDef } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React, Text, Tooltip } from "@webpack/common";
+import { React, Text } from "@webpack/common";
 
 import { getCrxLink, getModInfo } from "./api/api";
+import { ControlPanel } from "./components";
 import { GxModManifest } from "./types";
 import { fetchCrxFile } from "./utils";
 
 const logger = new Logger("GxMod", "#FA1E4E");
-import { MusicNote, MusicNoteSlashed, OperaGX, Options } from "./icons";
 
 const classes = findByPropsLazy("listItem", "serverEmoji");
 
@@ -57,70 +57,15 @@ const pluginDef = definePlugin<PluginDef & {
         find: ".Messages.AGE_GATE_UNDERAGE_EXISTING_BODY_DELETION_WITH_DAYS.format",
         replacement: {
             match: /section:\w\.\w+\.ACCOUNT_PANEL,children:(.*?}\))/,
-            replace: (m, child) => m.replace(child, `[$self.getControlPanel(),${child}]`)
+            replace: (m, child) => m.replace(child, `[$self.ControlPanel($self),${child}]`)
         }
     }],
+
+    ControlPanel,
 
     bgmMuted: false,
     onBgmToggle() {
         this.getBgmPlayer().muted = this.bgmMuted;
-    },
-
-    getControlPanel() {
-        const MuteBtn = () => {
-            const [muted, setMuted] = React.useState<boolean>(this.bgmMuted);
-
-            return <span
-                onClick={() => {
-                    this.bgmMuted = !this.bgmMuted;
-                    this.onBgmToggle();
-
-                    setMuted(this.bgmMuted);
-                }}
-            >
-                <Tooltip text={muted ? "Unmute music" : "Mute music"} >
-                    {({ onMouseEnter, onMouseLeave }) => {
-                        return <span
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                        >
-                            {!muted && <MusicNote width={22} height={22} color="var(--interactive-normal)" />}
-                            {muted && <MusicNoteSlashed width={22} height={22} color="var(--interactive-normal)" slashColor="var(--button-danger-background)" />}
-                        </span>;
-                    }}
-                </Tooltip>
-            </span>;
-        };
-
-        return (
-            <span>
-                <div style={{
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "space-between"
-                }}>
-                    <span
-                        style={{ cursor: "pointer" }}
-                        onClick={() => VencordNative.native.openExternal("https://store.gx.me")}
-                    >
-                        <Tooltip text="GX Mods">{({ onMouseEnter, onMouseLeave }) => {
-                            return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                                <OperaGX width={26} height={26} />
-                            </span>;
-                        }}</Tooltip>
-                    </span>
-                    <span style={{ display: "flex", gap: "15px" }}>
-                        <MuteBtn />
-                        <Tooltip text="GXMod Settings">{({ onMouseEnter, onMouseLeave }) => {
-                            return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                                <Options width={22} height={22} />
-                            </span>;
-                        }}</Tooltip>
-                    </span>
-                </div>
-                <Forms.FormDivider />
-            </span>
-        );
     },
 
     settingsAboutComponent: () => {
