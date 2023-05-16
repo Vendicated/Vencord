@@ -51,7 +51,6 @@ export default definePlugin({
 
     sortEmojis(state: EmojiAutocompleteState) {
         if (
-            state.query == null
             || state.query?.type !== "EMOJIS_AND_STICKERS"
             || state.query.typeInfo?.sentinel !== ":"
             || !state.query.results?.emojis?.length
