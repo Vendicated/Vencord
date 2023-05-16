@@ -17,7 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings.js";
-import { Devs } from "@utils/constants.js";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Forms, Toasts, UserStore } from "@webpack/common";
