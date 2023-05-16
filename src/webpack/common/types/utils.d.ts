@@ -68,7 +68,7 @@ export interface SnowflakeUtils {
     extractTimestamp(snowflake: string): number;
     age(snowflake: string): number;
     atPreviousMillisecond(snowflake: string): string;
-    compare(snowflake1: string, snowflake2: string): number;
+    compare(snowflake1?: string, snowflake2?: string): number;
 }
 
 interface RestRequestData {

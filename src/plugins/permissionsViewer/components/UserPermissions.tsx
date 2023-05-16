@@ -17,13 +17,14 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
-import { PermissionsBits, Text, Tooltip, UserStore, useState } from "@webpack/common";
-import { Guild, GuildMember, Role } from "discord-types/general";
+import { filters, findBulk } from "@webpack";
+import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
+import type { Guild, GuildMember } from "discord-types/general";
 
-import { PermissionsSortOrder, settings } from "..";
-import { getPermissionString } from "../formatting";
+import { settings } from "..";
+import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { type RoleOrUserPermission, PermissionType } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -34,91 +35,108 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const RoleClasses = findByPropsLazy("roles", "rolePill", "rolePillBorder") as Record<"roles" | "rolePill" | "rolePillBorder", string>;
-const RoleCircleClasses = findByPropsLazy("roleCircle", "dotBorderBase", "dotBorderColor") as Record<"desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase", string>;
-const RolePillClasses = findByPropsLazy("roleNameOverflow", "root", "roleName", "roleRemoveButton") as Record<"flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
+const Classes = proxyLazy(() => {
+    const modules = findBulk(
+        filters.byProps("roles", "rolePill", "rolePillBorder"),
+        filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
+        filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
+    );
+
+    return Object.assign({}, ...modules);
+}) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
     const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
-    const rolePermissions: Array<RoleOrUserPermission> = [];
-    const userPermissions: UserPermissions = [];
+    const [rolePermissions, userPermissions] = useMemo(() => {
+        const userPermissions: UserPermissions = [];
 
-    const { roles: userRolesIds } = guildMember;
-    const { roles } = guild;
-    const userRoles = [...userRolesIds.map(id => roles[id]), roles[guild.id]];
+        const userRoles = getSortedRoles(guild, guildMember);
 
-    userRoles.sort(({ position: a }, { position: b }) => b - a);
-
-    for (const userRole of userRoles) {
-        rolePermissions.push({
+        const rolePermissions: Array<RoleOrUserPermission> = userRoles.map(role => ({
             type: PermissionType.Role,
-            id: userRole.id,
-            permissions: userRole.permissions
-        });
-    }
+            ...role
+        }));
 
-    if (guild.ownerId === guildMember.userId) {
-        rolePermissions.push({
-            type: PermissionType.Owner,
-            permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
-        });
+        if (guild.ownerId === guildMember.userId) {
+            rolePermissions.push({
+                type: PermissionType.Owner,
+                permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
+            });
 
-        userPermissions.push({
-            permission: "Server Owner",
-            roleColor: "var(--primary-300)",
-            rolePosition: Infinity
-        });
-    }
+            const OWNER = i18n.Messages.GUILD_OWNER || "Server Owner";
+            userPermissions.push({
+                permission: OWNER,
+                roleColor: "var(--primary-300)",
+                rolePosition: Infinity
+            });
+        }
 
-    sortUserRoles(userRoles);
+        sortUserRoles(userRoles);
 
-    for (const [permission, bit] of Object.entries(PermissionsBits)) {
-        for (const userRole of userRoles) {
-            if ((userRole.permissions & bit) > 0n) {
-                userPermissions.push({
-                    permission: getPermissionString(permission),
-                    roleColor: userRole.colorString ?? "var(--primary-300)",
-                    rolePosition: userRole.position
-                });
+        for (const [permission, bit] of Object.entries(PermissionsBits)) {
+            for (const { permissions, colorString, position, name } of userRoles) {
+                if ((permissions & bit) === bit) {
+                    userPermissions.push({
+                        permission: getPermissionString(permission),
+                        roleColor: colorString || "var(--primary-300)",
+                        rolePosition: position
+                    });
 
-                break;
+                    break;
+                }
             }
         }
-    }
 
-    userPermissions.sort(({ rolePosition: a }, { rolePosition: b }) => b - a);
+        userPermissions.sort((a, b) => b.rolePosition - a.rolePosition);
+
+        return [rolePermissions, userPermissions];
+    }, []);
+
+    const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
 
     return (
         <div>
-            <div className="permviewer-userperms-title-container">
-                <Text className="permviewer-userperms-title" variant="eyebrow">Permissions</Text>
+            <div className={cl("userperms-title-container")}>
+                <Text className={cl("userperms-title")} variant="eyebrow">Permissions</Text>
+
                 <div>
-                    <Tooltip text="Details">
+                    <Tooltip text="Role Details">
                         {tooltipProps => (
-                            <button className="permviewer-userperms-permdetails-btn">
+                            <button
+                                {...tooltipProps}
+                                className={cl("userperms-permdetails-btn")}
+                                onClick={() =>
+                                    openRolesAndUsersPermissionsModal(
+                                        rolePermissions,
+                                        guild,
+                                        guildMember.nick || UserStore.getUser(guildMember.userId).username
+                                    )
+                                }
+                            >
                                 <svg
-                                    {...tooltipProps}
                                     width="24"
                                     height="24"
                                     viewBox="0 0 24 24"
-                                    onClick={() => openRolesAndUsersPermissionsModal(rolePermissions, guild, guildMember.nick ?? UserStore.getUser(guildMember.userId).username)}
                                 >
                                     <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
                                 </svg>
                             </button>
                         )}
                     </Tooltip>
+
                     <Tooltip text={viewPermissions ? "Hide Permissions" : "View Permissions"}>
                         {tooltipProps => (
-                            <button className="permviewer-userperms-toggleperms-btn">
+                            <button
+                                {...tooltipProps}
+                                className={cl("userperms-toggleperms-btn")}
+                                onClick={() => setViewPermissions(v => !v)}
+                            >
                                 <svg
-                                    {...tooltipProps}
                                     width="24"
                                     height="24"
                                     viewBox="0 0 24 24"
                                     transform={viewPermissions ? "scale(1 -1)" : "scale(1 1)"}
-                                    onClick={() => setViewPermissions(!viewPermissions)}
                                 >
                                     <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
                                 </svg>
@@ -127,15 +145,24 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                     </Tooltip>
                 </div>
             </div>
+
             {viewPermissions && userPermissions.length > 0 && (
-                <div className={classes(RolePillClasses.root, RoleClasses.roles)}>
-                    {userPermissions.map(permission => (
-                        <div className={classes(RolePillClasses.role, RoleClasses.rolePill, RoleClasses.rolePillBorder)}>
-                            <div className={RolePillClasses.roleRemoveButton}>
-                                <span className={RoleCircleClasses.roleCircle} style={{ backgroundColor: permission.roleColor }} />
+                <div className={classes(root, roles)}>
+                    {userPermissions.map(({ permission, roleColor }) => (
+                        <div className={classes(role, rolePill, rolePillBorder)}>
+                            <div className={roleRemoveButton}>
+                                <span
+                                    className={roleCircle}
+                                    style={{ backgroundColor: roleColor }}
+                                />
                             </div>
-                            <div className={RolePillClasses.roleName}>
-                                <Text className={RolePillClasses.roleNameOverflow} variant="text-xs/medium">{permission.permission}</Text>
+                            <div className={roleName}>
+                                <Text
+                                    className={roleNameOverflow}
+                                    variant="text-xs/medium"
+                                >
+                                    {permission}
+                                </Text>
                             </div>
                         </div>
                     ))}
@@ -143,20 +170,6 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             )}
         </div>
     );
-}
-
-function sortUserRoles(roles: Array<Role>) {
-    switch (settings.store.permissionsSortOrder) {
-        case PermissionsSortOrder.HighestRole: {
-            return roles.sort(({ position: a }, { position: b }) => b - a);
-        }
-        case PermissionsSortOrder.LowestRole: {
-            return roles.sort(({ position: a }, { position: b }) => a - b);
-        }
-        default: {
-            return roles;
-        }
-    }
 }
 
 export default ErrorBoundary.wrap(UserPermissionsComponent, { noop: true });

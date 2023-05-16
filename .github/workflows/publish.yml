@@ -35,15 +35,15 @@ jobs:
 
             - name: Publish extension
               run: |
-                cd dist/extension-unpacked
-
                 # Do not fail so that even if chrome fails, firefox gets a shot. But also store exit code to fail workflow later
                 EXIT_CODE=0
 
                 # Chrome
+                cd dist/chromium-unpacked
                 pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish || EXIT_CODE=$?
 
                 # Firefox
+                cd ../firefox-unpacked
                 npm i -g web-ext@7.4.0 web-ext-submit@7.4.0
                 web-ext-submit || EXIT_CODE=$?
 
@@ -58,4 +58,3 @@ jobs:
                 # Firefox
                 WEB_EXT_API_KEY: ${{ secrets.WEBEXT_USER }}
                 WEB_EXT_API_SECRET: ${{ secrets.WEBEXT_SECRET }}
-

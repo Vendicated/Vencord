@@ -21,14 +21,14 @@ import definePlugin from "@utils/types";
 import { Channel } from "discord-types/general";
 
 import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, snapshotArray, usePinnedDms } from "./settings";
+import { getPinAt, isPinned, settings, snapshotArray, sortedSnapshot, usePinnedDms } from "./settings";
 
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or reorder pins, right click DMs",
     authors: [Devs.Ven, Devs.Strencher],
 
-    dependencies: ["ContextMenuAPI"],
+    settings,
 
     start: addContextMenus,
     stop: removeContextMenus,
@@ -44,7 +44,7 @@ export default definePlugin({
     },
 
     isPinned,
-    getSnapshot: () => snapshotArray,
+    getSnapshot: sortedSnapshot,
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))

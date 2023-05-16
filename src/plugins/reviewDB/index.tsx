@@ -16,15 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import "./style.css";
+
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, UserStore } from "@webpack/common";
+import { Alerts, Button } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
-import { getLastReviewID } from "./Utils/ReviewDBAPI";
+import { UserType } from "./entities/User";
+import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
 import { authorize, showToast } from "./Utils/Utils";
 
 export default definePlugin({
@@ -38,17 +41,17 @@ export default definePlugin({
             replacement: {
                 match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
-            },
+            }
         }
     ],
 
     options: {
         authorize: {
             type: OptionType.COMPONENT,
-            description: "Authorise with ReviewDB",
+            description: "Authorize with ReviewDB",
             component: () => (
                 <Button onClick={authorize}>
-                    Authorise with ReviewDB
+                    Authorize with ReviewDB
                 </Button>
             )
         },
@@ -56,19 +59,80 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Notify about new reviews on startup",
             default: true,
-        }
+        },
+        showWarning: {
+            type: OptionType.BOOLEAN,
+            description: "Display warning to be respectful at the top of the reviews list",
+            default: true,
+        },
+        hideTimestamps: {
+            type: OptionType.BOOLEAN,
+            description: "Hide timestamps on reviews",
+            default: false,
+        },
+        website: {
+            type: OptionType.COMPONENT,
+            description: "ReviewDB website",
+            component: () => (
+                <Button onClick={() => {
+                    window.open("https://reviewdb.mantikafasi.dev");
+                }}>
+                    ReviewDB website
+                </Button>
+            )
+        },
+        supportServer: {
+            type: OptionType.COMPONENT,
+            description: "ReviewDB Support Server",
+            component: () => (
+                <Button onClick={() => {
+                    window.open("https://discord.gg/eWPBSbvznt");
+                }}>
+                    ReviewDB Support Server
+                </Button>
+            )
+        },
     },
 
     async start() {
         const settings = Settings.plugins.ReviewDB;
-        if (!settings.lastReviewId || !settings.notifyReviews) return;
+        if (!settings.notifyReviews || !settings.token) return;
 
         setTimeout(async () => {
-            const id = await getLastReviewID(UserStore.getCurrentUser().id);
-            if (settings.lastReviewId < id) {
-                showToast("You have new reviews on your profile!");
-                settings.lastReviewId = id;
+            const user = await getCurrentUserInfo(settings.token);
+            if (settings.lastReviewId < user.lastReviewID) {
+                settings.lastReviewId = user.lastReviewID;
+                if (user.lastReviewID !== 0)
+                    showToast("You have new reviews on your profile!");
             }
+
+            if (user.banInfo) {
+                const endDate = new Date(user.banInfo.banEndDate);
+                if (endDate > new Date() && (settings.user?.banInfo?.banEndDate ?? 0) < endDate) {
+
+                    Alerts.show({
+                        title: "You have been banned from ReviewDB",
+                        body: <>
+                            <p>
+                                You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
+                            </p>
+                            <p>
+                                Offending Review: {user.banInfo.reviewContent}
+                            </p>
+                            <p>
+                                Continued offenses will result in a permanent ban.
+                            </p>
+                        </>,
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: () => {
+                            window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
+                        }
+                    });
+                }
+            }
+
+            settings.user = user;
         }, 4000);
     },
 

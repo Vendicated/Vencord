@@ -16,13 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
-import { useAwaiter } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
+import { UserStore } from "@webpack/common";
 
-import { PronounsFormat } from ".";
+import { settings } from "./settings";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
+
+export const enum PronounsFormat {
+    Lowercase = "LOWERCASE",
+    Capitalized = "CAPITALIZED"
+}
 
 // A map of cached pronouns so the same request isn't sent twice
 const cache: Record<string, PronounCode> = {};
@@ -40,8 +46,8 @@ const bulkFetch = debounce(async () => {
     }
 });
 
-export function awaitAndFormatPronouns(id: string): string | null {
-    const [result, , isPending] = useAwaiter(() => fetchPronouns(id), {
+export function useFormattedPronouns(id: string): string | null {
+    const [result] = useAwaiter(() => fetchPronouns(id), {
         fallbackValue: getCachedPronouns(id),
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
@@ -52,6 +58,16 @@ export function awaitAndFormatPronouns(id: string): string | null {
 
     return null;
 }
+
+export function useProfilePronouns(id: string) {
+    const pronouns = useFormattedPronouns(id);
+
+    if (!settings.store.showInProfile) return null;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
+
+    return pronouns;
+}
+
 
 // Gets the cached pronouns, if you're too impatient for a promise!
 export function getCachedPronouns(id: string): PronounCode | null {
