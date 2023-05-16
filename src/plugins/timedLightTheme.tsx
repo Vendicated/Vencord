@@ -32,7 +32,7 @@ let nextChange: NodeJS.Timeout;
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
 const Themes = findLazy(m => m[16] === "EASTER_EGG") as Record<number, string>;
-const updateTheme = findByCodeLazy("clientThemeSettings:{") as ({ }: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
+const updateTheme = findByCodeLazy("clientThemeSettings:{") as (data: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
 
 const getBasicTheme = () =>
     PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
