@@ -54,7 +54,6 @@ export default definePlugin({
                         .replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)} "Define '${word}' on Urban Dictionary")`)
                         .trim();
 
-                    list.sort((a, b) => (b.thumbs_up / b.thumbs_down) - a.thumbs_up / a.thumbs_down);
                     const [definition] = list;
 
                     return void sendBotMessage(ctx.channel.id, {
