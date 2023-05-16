@@ -17,10 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings.js";
-import { Devs } from "@utils/constants";
+import { Devs } from "@utils/constants.js";
+import { wordsFromSnake, wordsToTitle } from "@utils/text.js";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findLazy } from "@webpack";
-import { Forms, Toasts, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Forms, PreloadedUserSettings, Toasts, UserStore } from "@webpack/common";
+
+import { isPluginEnabled } from "./index.js";
 
 // the plugin uses -1 as a fallback for no client theme. discord doesn't
 interface PreferredTheme {
@@ -30,9 +33,8 @@ interface PreferredTheme {
 
 let nextChange: NodeJS.Timeout;
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName?.includes("PreloadedUserSettings"));
-const Themes = findLazy(m => m[16] === "EASTER_EGG") as Record<number, string>;
-const updateTheme = findByCodeLazy("clientThemeSettings:{") as (data: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
+const Themes = findByPropsLazy("MINT_APPLE", "CRIMSON_MOON") as Record<number, string>;
+const updateTheme = findByCodeLazy("clientThemeSettings:{") as ({ }: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
 
 const getBasicTheme = () =>
     PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
@@ -40,9 +42,11 @@ const getClientThemeId = () =>
     PreloadedUserSettings.getCurrentValue().appearance.clientThemeSettings?.backgroundGradientPresetId?.value as number ?? -1;
 
 const canActuallyUseClientThemes = () =>
-    UserStore.getCurrentUser().premiumType === 2;
+    (UserStore.getCurrentUser().premiumType ?? 0) === 2;
 const canUseClientThemes = () =>
-    Vencord.Plugins.isPluginEnabled("FakeNitro") || canActuallyUseClientThemes();
+    isPluginEnabled("FakeNitro") || canActuallyUseClientThemes();
+
+const snakeToTitleCase = t => wordsToTitle(wordsFromSnake(t));
 
 function updateThemeIfNecessary(theme: string) {
     const currentTheme = getBasicTheme();
@@ -77,8 +81,6 @@ function showError() {
         }
     });
 }
-const snakeToTitleCase = (text: string) =>
-    text.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 
 function updatePreferredThemes(e) {
     const newTheme = e?.changes?.appearance?.settings as {
@@ -107,6 +109,41 @@ function DisplayThemeComponent() {
     </>;
 }
 
+function checkForUpdate() {
+    const { start, end } = settings.store;
+    if (!start || !end)
+        return showError();
+
+    const startTimestamp = toAdjustedTimestamp(start);
+    const endTimestamp = toAdjustedTimestamp(end);
+    if (startTimestamp >= endTimestamp)
+        return showError();
+
+    const now = Date.now();
+
+    const themeId = getClientThemeId();
+    if (!settings.store.preferredTheme) {
+        const theme = getBasicTheme();
+        settings.store.preferredTheme = {
+            light: theme === "light" ? themeId : -1,
+            dark: theme === "dark" ? themeId : -1
+        };
+    }
+
+    if (now < startTimestamp) {
+        updateThemeIfNecessary("dark");
+        nextChange = setTimeout(() => checkForUpdate(), startTimestamp - now);
+    }
+    else if (now >= startTimestamp && now <= endTimestamp) {
+        updateThemeIfNecessary("light");
+        nextChange = setTimeout(() => checkForUpdate(), endTimestamp - now);
+    }
+    else if (now > endTimestamp) {
+        updateThemeIfNecessary("dark");
+        nextChange = setTimeout(() => checkForUpdate(), (startTimestamp + 86400_000) - now);
+    }
+}
+
 const settings = definePluginSettings({
     start: {
         description: "When to enter light mode (24-hour time)",
@@ -114,7 +151,7 @@ const settings = definePluginSettings({
         default: "08:00",
         placeholder: "xx:xx",
         isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-        onChange: () => Vencord.Plugins.isPluginEnabled("TimedLightTheme") && (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+        onChange: () => isPluginEnabled("TimedLightTheme") && checkForUpdate(),
     },
     end: {
         description: "When to enter dark mode (24-hour time)",
@@ -122,7 +159,7 @@ const settings = definePluginSettings({
         default: "20:00",
         placeholder: "xx:xx",
         isValid: t => /^\d{0,2}(?::\d{0,2})?$/.test(t),
-        onChange: () => Vencord.Plugins.isPluginEnabled("TimedLightTheme") && (Vencord.Plugins.plugins.TimedLightTheme as any).checkForUpdate(),
+        onChange: () => isPluginEnabled("TimedLightTheme") && checkForUpdate(),
     },
     preferredTheme: {
         description: "Store which theme to use for light and dark mode",
@@ -137,47 +174,12 @@ export default definePlugin({
     description: "Automatically enables/disables light theme based on the time of day",
     settings,
 
-    checkForUpdate() {
-        const { start, end } = settings.store;
-        if (!start || !end)
-            return showError();
-
-        const startTimestamp = toAdjustedTimestamp(start);
-        const endTimestamp = toAdjustedTimestamp(end);
-        if (startTimestamp >= endTimestamp)
-            return showError();
-
-        const now = Date.now();
-
-        const themeId = getClientThemeId();
-        if (!settings.store.preferredTheme) {
-            const theme = getBasicTheme();
-            settings.store.preferredTheme = {
-                light: theme === "light" ? themeId : -1,
-                dark: theme === "dark" ? themeId : -1
-            };
-        }
-
-        if (now < startTimestamp) {
-            updateThemeIfNecessary("dark");
-            nextChange = setTimeout(() => this.checkForUpdate(), startTimestamp - now);
-        }
-        else if (now >= startTimestamp && now <= endTimestamp) {
-            updateThemeIfNecessary("light");
-            nextChange = setTimeout(() => this.checkForUpdate(), endTimestamp - now);
-        }
-        else if (now > endTimestamp) {
-            updateThemeIfNecessary("dark");
-            nextChange = setTimeout(() => this.checkForUpdate(), (startTimestamp + 86400_000) - now);
-        }
-    },
-
     flux: {
         SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE: updatePreferredThemes
     },
 
     start() {
-        this.checkForUpdate();
+        checkForUpdate();
     },
 
     stop() {
