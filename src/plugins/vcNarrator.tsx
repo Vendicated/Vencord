@@ -230,8 +230,8 @@ export default definePlugin({
                 markers: [0.1, 0.5, 1, 2, 5, 10],
                 stickToMarkers: false
             },
-            narrateSelf: {
-                description: "Narrate Self",
+            sayOwnName: {
+                description: "Say own name",
                 type: OptionType.BOOLEAN,
                 default: false
             },
