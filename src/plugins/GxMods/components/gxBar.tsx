@@ -16,11 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { useForceUpdater } from "@utils/react";
 import { Forms, React, Tooltip } from "@webpack/common";
 
+import { GxModManifest } from "../types";
 import { MusicNote, MusicNoteSlashed, OperaGX, Options } from "./icons";
 
-export const ControlPanel = (This: { bgmMuted: boolean; onBgmToggle: () => void; }) => {
+export const ControlPanel = (This: {
+    bgmMuted: boolean;
+    onBgmToggle: () => void;
+    onModInfoChange: (cb: () => void) => void;
+    manifestJson?: GxModManifest;
+}) => {
+    const forceUpdate = useForceUpdater();
+
+    React.useEffect(() => {
+        This.onModInfoChange(forceUpdate);
+    }, [This, forceUpdate]);
+
     const MuteBtn = () => {
         const [muted, setMuted] = React.useState<boolean>(This.bgmMuted);
         const [isHovered, setIsHovered] = React.useState<boolean>(false);
@@ -68,7 +81,8 @@ export const ControlPanel = (This: { bgmMuted: boolean; onBgmToggle: () => void;
             <div style={{
                 padding: "5px",
                 display: "flex",
-                justifyContent: "space-between"
+                justifyContent: "space-between",
+                alignItems: "center",
             }}>
                 <span
                     style={{
@@ -90,6 +104,12 @@ export const ControlPanel = (This: { bgmMuted: boolean; onBgmToggle: () => void;
                         </div>;
                     }}</Tooltip>
                 </span>
+                {/* <div>
+                    <Forms.FormText variant="text-xs/normal">“{This.manifestJson?.name}”</Forms.FormText>
+                    <Forms.FormText variant="text-xs/medium">
+                        “{This.manifestJson?.developer.name}”
+                    </Forms.FormText>
+                </div> */}
                 <span style={{ display: "flex" }}>
                     <MuteBtn />
                     <Tooltip text="GXMod Settings">{({ onMouseEnter, onMouseLeave }) => {
@@ -100,7 +120,7 @@ export const ControlPanel = (This: { bgmMuted: boolean; onBgmToggle: () => void;
                                 alignItems: "center",
                                 borderRadius: "4px",
                                 padding: "4px",
-                                paddingInline: "7px",
+                                paddingInline: "5px",
                                 ...(OptionsIconHovered ? { backgroundColor: "var(--background-modifier-selected)" } : {})
                             }}
                             onMouseEnter={_ => { onMouseEnter(); setOptionsIconHovered(true); }}

@@ -49,7 +49,7 @@ const pluginDef = definePlugin<PluginDef & {
         tab: Record<string, SfxCollection>;
     };
 }>({
-    name: "GxMods",
+    name: "GxMod",
     description: "Integrates OperaGX Mods into discord.",
     authors: [Devs.Arjix],
 
@@ -66,6 +66,16 @@ const pluginDef = definePlugin<PluginDef & {
     bgmMuted: false,
     onBgmToggle() {
         this.getBgmPlayer().muted = this.bgmMuted;
+    },
+
+    modInfoListeners: [],
+    onModInfoChange(cb) {
+        this.modInfoListeners.push(cb);
+    },
+    fireModInfoChange() {
+        for (const cb of this.modInfoListeners) {
+            cb();
+        }
     },
 
     settingsAboutComponent: () => {
@@ -106,6 +116,7 @@ const pluginDef = definePlugin<PluginDef & {
         this._currentGuildId = getCurrentGuild()?.id;
 
         this.registerSounds();
+        this.fireModInfoChange();
     },
 
     getBgmPlayer(): HTMLAudioElement {
