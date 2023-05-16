@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index.js";
-import { definePluginSettings } from "@api/Settings.js";
-import { Logger } from "@utils/Logger.js";
-import { OptionType } from "@utils/types.js";
+import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
+import { OptionType } from "@utils/types";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
 
 import { ChannelTabsPreivew } from "./components.jsx";

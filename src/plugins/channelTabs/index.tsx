@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu.js";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex.jsx";
-import { Devs } from "@utils/constants.js";
+import { Flex } from "@components/Flex";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
