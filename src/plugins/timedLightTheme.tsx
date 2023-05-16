@@ -40,7 +40,7 @@ const getClientThemeId = () =>
     PreloadedUserSettings.getCurrentValue().appearance.clientThemeSettings?.backgroundGradientPresetId?.value as number ?? -1;
 
 const canActuallyUseClientThemes = () =>
-    (UserStore.getCurrentUser().premiumType ?? 0) === 2;
+    UserStore.getCurrentUser().premiumType === 2;
 const canUseClientThemes = () =>
     Vencord.Plugins.isPluginEnabled("FakeNitro") || canActuallyUseClientThemes();
 
