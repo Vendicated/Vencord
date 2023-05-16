@@ -10,7 +10,7 @@ The cutest Discord client mod
 
 -   Super easy to install (Download Installer, open, click install button, done)
 -   100+ plugins built in: [See a list](https://vencord.dev/plugins)
-    -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, CustomCommands, ShowHiddenChannels, PronounDB
+    -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, PermissionsViewer, CustomCommands, ShowHiddenChannels, PronounDB
 -   Fairly lightweight despite the many inbuilt plugins
 -   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript
 -   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience I recommend stable!)
@@ -32,11 +32,20 @@ Click the below button to install Vencord to the Discord Desktop app
 
 Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Vencord.user.js) - Please note that the CSS Editor, Themes loaded from remote sources and co. will not work in the UserScript. Use the extension if you need any of those
 
-## Installing our Desktop App
+<details>
+<summary>Alternative Downloads</summary>
+
+## Vencord Desktop
+
+> **Warning**
+> This is an alternative app. It currently doesn't support screensharing or keybinds. If you just want to install to the normal Discord Desktop app, scroll up
+
 
 As an alternative to the Discord Desktop app, Vencord also has its own standalone Desktop app that is snappier and lighter than Discord's official Desktop app. It is currently in beta and we have yet to implement some features like screensharing, but you can try the beta nonetheless
 
 [![Download Vencord Desktop](https://img.shields.io/github/v/release/Vencord/Desktop?label=Download%20Vencord%20Desktop&style=for-the-badge)](https://github.com/Vencord/Desktop#vencord-desktop)
+
+</details>
 
 ## Join our Support/Community Server
 
@@ -48,7 +57,7 @@ Discord is trademark of Discord Inc. and solely mentioned for the sake of descri
 Mention of it does not imply any affiliation with or endorsement by Discord Inc.
 
 <details>
-<summary>Using Vencord violates Discord's terms of service</summary> 
+<summary>Using Vencord violates Discord's terms of service</summary>
 
 Client modifications are against Discord’s Terms of Service.
 
