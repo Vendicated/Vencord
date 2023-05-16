@@ -192,7 +192,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
                     <Text variant="text-lg/normal">
                         You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                        {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+                        {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
                     </Text >
                 )}
 
