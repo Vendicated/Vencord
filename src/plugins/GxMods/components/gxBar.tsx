@@ -23,7 +23,7 @@ import { GxModManifest } from "../types";
 import { MusicNote, MusicNoteSlashed, OperaGX, Options } from "./icons";
 
 export const ControlPanel = (This: {
-    bgmMuted: boolean;
+    bgmMuted: { value: boolean; mode: "manual" | "auto"; };
     onBgmToggle: () => void;
     onModInfoChange: (cb: () => void) => void;
     manifestJson?: GxModManifest;
@@ -35,7 +35,7 @@ export const ControlPanel = (This: {
     }, [This, forceUpdate]);
 
     const MuteBtn = () => {
-        const [muted, setMuted] = React.useState<boolean>(This.bgmMuted);
+        const [muted, setMuted] = React.useState<boolean>(This.bgmMuted.value);
         const [isHovered, setIsHovered] = React.useState<boolean>(false);
 
         const Note = !muted ? MusicNote : MusicNoteSlashed;
@@ -56,10 +56,11 @@ export const ControlPanel = (This: {
                     onMouseEnter={_ => { onMouseEnter(); setIsHovered(true); }}
                     onMouseLeave={_ => { onMouseLeave(); setIsHovered(false); }}
                     onClick={() => {
-                        This.bgmMuted = !This.bgmMuted;
+                        This.bgmMuted.value = !This.bgmMuted.value;
+                        This.bgmMuted.mode = This.bgmMuted.value ? "manual" : "auto";
                         This.onBgmToggle();
 
-                        setMuted(This.bgmMuted);
+                        setMuted(This.bgmMuted.value);
                     }}
                 >
                     <Note

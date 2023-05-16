@@ -63,9 +63,13 @@ const pluginDef = definePlugin<PluginDef & {
 
     ControlPanel,
 
-    bgmMuted: false,
+    bgmMuted: {
+        value: false,
+        mode: "auto"
+    },
+
     onBgmToggle() {
-        this.getBgmPlayer().muted = this.bgmMuted;
+        this.getBgmPlayer().muted = this.bgmMuted.value;
     },
 
     modInfoListeners: [],
@@ -117,6 +121,7 @@ const pluginDef = definePlugin<PluginDef & {
 
         this.registerSounds();
         this.fireModInfoChange();
+        this.startlisteningForSounds();
     },
 
     getBgmPlayer(): HTMLAudioElement {
@@ -126,6 +131,8 @@ const pluginDef = definePlugin<PluginDef & {
             loop: true,
             volume: 0.1
         });
+
+        this.player.className = "vc-gx-mod-audio-source";
 
         document.body.appendChild(this.player);
 
@@ -254,6 +261,7 @@ const pluginDef = definePlugin<PluginDef & {
             const audio = document.createElement("audio");
             audio.onended = () => audio.remove();
             audio.src = URL.createObjectURL(this.sfx.click.sounds[this.sfx.click.idx]);
+            audio.className = "vc-gx-mod-audio-source";
 
             this.sfx.click.idx += 1;
             if (this.sfx.click.idx === this.sfx.click.sounds.length) {
@@ -301,6 +309,7 @@ const pluginDef = definePlugin<PluginDef & {
 
             if (!this.sfx.typing[type].sounds.length) return;
             audio.src = URL.createObjectURL(this.sfx.typing[type].sounds[this.sfx.typing[type].idx]!);
+            audio.className = "vc-gx-mod-audio-source";
 
             this.sfx.typing[type].idx += 1;
             if (this.sfx.typing[type].idx === this.sfx.typing[type].sounds.length) {
@@ -320,6 +329,7 @@ const pluginDef = definePlugin<PluginDef & {
         const audio = Object.assign(document.createElement("audio"), {
             src: URL.createObjectURL(this.sfx.tab[type].sounds[this.sfx.tab[type].idx]),
         });
+        audio.className = "vc-gx-mod-audio-source";
         audio.onended = () => audio.remove();
 
         this.sfx.tab[type].idx += 1;
@@ -333,9 +343,40 @@ const pluginDef = definePlugin<PluginDef & {
 
     stop() {
         this.getBgmPlayer().pause();
+        this.stopListeningForSounds();
         window.removeEventListener("keyup", this.keyRelaseCallback, true);
         window.removeEventListener("keydown", this.keyDownCallback, true);
         window.removeEventListener("mouseup", this.mouseUpCallback);
+    },
+
+    startlisteningForSounds() {
+        const selector = [
+            "audio:not(.vc-gx-mod-audio-source)",
+            "video:not(.vc-gx-mod-audio-source)"
+        ].join(",");
+
+        this._sound_check_interval = setInterval(() => {
+            if (this.bgmMuted.mode === "manual") return;
+
+            const nodes = document.querySelectorAll<HTMLMediaElement>(selector);
+            let value: boolean = false;
+
+            for (const node of nodes) {
+                if (node.paused || node.muted || node.volume <= 0) continue;
+
+                value = true;
+                break;
+            }
+
+            if (this.bgmMuted.value === value) return;
+
+            this.bgmMuted.value = value;
+            this.onBgmToggle();
+            this.fireModInfoChange(); // to update the panel
+        }, 200);
+    },
+    stopListeningForSounds() {
+        clearInterval(this._sound_check_interval);
     },
 });
 
