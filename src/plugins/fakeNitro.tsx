@@ -321,7 +321,7 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        if ((!proto.appearance && !AppearanceSettingsProto) || !UserSettingsProtoStore) return;
+        if (proto == null || typeof proto === "string" || !UserSettingsProtoStore || (!proto.appearance && !AppearanceSettingsProto)) return;
 
         const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 

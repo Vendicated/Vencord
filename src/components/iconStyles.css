@@ -1,0 +1,7 @@
+.vc-open-external-icon {
+    transform: rotate(45deg);
+}
+
+.vc-owner-crown-icon {
+    color: var(--text-warning);
+}

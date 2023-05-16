@@ -286,5 +286,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     carince: {
         name: "carince",
         id: 818323528755314698n
-    }
+    },
+    CatNoir: {
+        name: "CatNoir",
+        id: 260371016348336128n
+    },
+    outfoxxed: {
+        name: "outfoxxed",
+        id: 837425748435796060n
+    },
 });
