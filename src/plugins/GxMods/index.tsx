@@ -350,6 +350,7 @@ const pluginDef = definePlugin<PluginDef & {
     },
 
     startlisteningForSounds() {
+        // CSP doesn't allow us to access iframes, so yeah, embedded videos eg youtube videos will not auto-mute the music.
         const selector = [
             "audio:not(.vc-gx-mod-audio-source)",
             "video:not(.vc-gx-mod-audio-source)"
