@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
 import { find, findByPropsLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useState } from "@webpack/common";
+import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
@@ -127,6 +127,7 @@ const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
 function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     const [viewAllowedUsersAndRoles, setViewAllowedUsersAndRoles] = useState(settings.store.defaultAllowedUsersAndRolesDropdownState);
+    const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
 
     const {
         type,
@@ -144,40 +145,39 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         bitrate,
         rtcRegion,
         videoQualityMode,
-        permissionOverwrites
+        permissionOverwrites,
+        guild_id
     } = channel;
 
-    const membersToFetch: Array<string> = [];
+    useEffect(() => {
+        const membersToFetch: Array<string> = [];
 
-    const guildOwnerId = GuildStore.getGuild(channel.guild_id).ownerId;
-    if (!GuildMemberStore.getMember(channel.guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
+        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
+        if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
-    Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
-        if (type === 1) {
-            if (!GuildMemberStore.getMember(channel.guild_id, userId)) membersToFetch.push(userId);
-        }
-    });
-
-    if (membersToFetch.length > 0) {
-        FluxDispatcher.dispatch({
-            type: "GUILD_MEMBERS_REQUEST",
-            guildIds: [channel.guild_id],
-            userIds: membersToFetch
+        Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
+            if (type === 1 && !GuildMemberStore.getMember(guild_id, userId)) {
+                membersToFetch.push(userId);
+            }
         });
-    }
 
-    const permissions: Array<RoleOrUserPermission> = [];
+        if (membersToFetch.length > 0) {
+            FluxDispatcher.dispatch({
+                type: "GUILD_MEMBERS_REQUEST",
+                guildIds: [guild_id],
+                userIds: membersToFetch
+            });
+        }
 
-    if (Settings.plugins.PermissionsViewer.enabled) {
-        Object.values(permissionOverwrites).forEach(overwrite => {
-            permissions.push({
+        if (Settings.plugins.PermissionsViewer.enabled) {
+            setPermissions(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
                 overwriteAllow: overwrite.allow,
                 overwriteDeny: overwrite.deny
-            });
-        });
-    }
+            })));
+        }
+    }, []);
 
     return (
         <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
@@ -287,7 +287,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <div className="shc-lock-screen-allowed-users-and-roles-container">
                     <div className="shc-lock-screen-allowed-users-and-roles-container-title">
                         {Settings.plugins.PermissionsViewer.enabled && (
-                            <Tooltip text="Permissions Details">
+                            <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button
                                         onMouseLeave={onMouseLeave}
@@ -313,7 +313,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
                                     className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
-                                    onClick={() => setViewAllowedUsersAndRoles(!viewAllowedUsersAndRoles)}
+                                    onClick={() => setViewAllowedUsersAndRoles(v => !v)}
                                 >
                                     <svg
                                         width="24"
