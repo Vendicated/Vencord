@@ -44,9 +44,9 @@ interface Mod {
 }
 
 interface Payload {
-    background_music: string[];
-    browser_sounds: { [key: string]: string[]; };
-    keyboard_sounds: KeyboardSounds;
+    background_music?: string[];
+    browser_sounds?: { [key: string]: string[]; };
+    keyboard_sounds?: KeyboardSounds;
     theme: Theme;
     wallpaper: Wallpaper;
 }

@@ -22,15 +22,17 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { PluginDef } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Text } from "@webpack/common";
+import { Forms, React, Text, Tooltip } from "@webpack/common";
 
 import { getCrxLink, getModInfo } from "./api/api";
 import { GxModManifest } from "./types";
 import { fetchCrxFile } from "./utils";
 
 const logger = new Logger("GxMod", "#FA1E4E");
+import { MusicNote, MusicNoteSlashed, OperaGX, Options } from "./icons";
 
 const classes = findByPropsLazy("listItem", "serverEmoji");
+
 
 // TODO: Make this a setting.
 const modId = "605a8f04-f91b-4f94-8e33-94f4c56e3b05";
@@ -50,6 +52,76 @@ const pluginDef = definePlugin<PluginDef & {
     name: "GxMods",
     description: "Integrates OperaGX Mods into discord.",
     authors: [Devs.Arjix],
+
+    patches: [{
+        find: ".Messages.AGE_GATE_UNDERAGE_EXISTING_BODY_DELETION_WITH_DAYS.format",
+        replacement: {
+            match: /section:\w\.\w+\.ACCOUNT_PANEL,children:(.*?}\))/,
+            replace: (m, child) => m.replace(child, `[$self.getControlPanel(),${child}]`)
+        }
+    }],
+
+    bgmMuted: false,
+    onBgmToggle() {
+        this.getBgmPlayer().muted = this.bgmMuted;
+    },
+
+    getControlPanel() {
+        const MuteBtn = () => {
+            const [muted, setMuted] = React.useState<boolean>(this.bgmMuted);
+
+            return <span
+                onClick={() => {
+                    this.bgmMuted = !this.bgmMuted;
+                    this.onBgmToggle();
+
+                    setMuted(this.bgmMuted);
+                }}
+            >
+                <Tooltip text={muted ? "Unmute music" : "Mute music"} >
+                    {({ onMouseEnter, onMouseLeave }) => {
+                        return <span
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                        >
+                            {!muted && <MusicNote width={22} height={22} color="var(--interactive-normal)" />}
+                            {muted && <MusicNoteSlashed width={22} height={22} color="var(--interactive-normal)" slashColor="var(--button-danger-background)" />}
+                        </span>;
+                    }}
+                </Tooltip>
+            </span>;
+        };
+
+        return (
+            <span>
+                <div style={{
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "space-between"
+                }}>
+                    <span
+                        style={{ cursor: "pointer" }}
+                        onClick={() => VencordNative.native.openExternal("https://store.gx.me")}
+                    >
+                        <Tooltip text="GX Mods">{({ onMouseEnter, onMouseLeave }) => {
+                            return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                <OperaGX width={26} height={26} />
+                            </span>;
+                        }}</Tooltip>
+                    </span>
+                    <span style={{ display: "flex", gap: "15px" }}>
+                        <MuteBtn />
+                        <Tooltip text="GXMod Settings">{({ onMouseEnter, onMouseLeave }) => {
+                            return <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                <Options width={22} height={22} />
+                            </span>;
+                        }}</Tooltip>
+                    </span>
+                </div>
+                <Forms.FormDivider />
+            </span>
+        );
+    },
 
     settingsAboutComponent: () => {
         return <Text>Integrates OperaGX Mods into discord. (
@@ -84,7 +156,6 @@ const pluginDef = definePlugin<PluginDef & {
         await manifestFile.getData!(manifest);
 
         this.manifestJson = JSON.parse(await manifest.getData()) as GxModManifest;
-        this.bgmFilename = this.manifestJson.mod.payload.background_music[0];
 
         logger.info("Loaded manifest!");
         this._currentGuildId = getCurrentGuild()?.id;
@@ -106,7 +177,7 @@ const pluginDef = definePlugin<PluginDef & {
     },
 
     async playBgm() {
-        const bgmFilename = this.manifestJson!.mod.payload.background_music[0];
+        const bgmFilename = this.manifestJson!.mod.payload?.background_music?.[0];
         const music = await GxModCrx?.getEntries().then(entries => entries.find(e => e.filename === bgmFilename));
         if (!music) return;
 
@@ -121,7 +192,7 @@ const pluginDef = definePlugin<PluginDef & {
         player.src = URL.createObjectURL(this.bgmBlob);
         player.play();
 
-        logger.info("Started playing bgm!");
+        logger.info("Started playing the background music!");
     },
 
     sfx: {
@@ -149,17 +220,17 @@ const pluginDef = definePlugin<PluginDef & {
 
         const { BlobWriter } = await getZipJs();
 
-        const clickSounds = this.manifestJson!.mod.payload.browser_sounds.CLICK;
+        const clickSounds = this.manifestJson!.mod.payload?.browser_sounds?.CLICK ?? [];
         for (const sound of clickSounds) {
             const entry = entries.find(e => e.filename === sound);
             if (!entry) continue;
 
             const blobWriter = new BlobWriter();
             await entry.getData?.(blobWriter);
-            this.sfx.click?.sounds.push(await await blobWriter.getData());
+            this.sfx.click?.sounds.push(await blobWriter.getData());
         }
 
-        await Promise.all(Object.entries(this.manifestJson!.mod.payload.browser_sounds)
+        await Promise.all(Object.entries(this.manifestJson!.mod.payload?.browser_sounds ?? {})
             .filter(([type, _]) => type.startsWith("TAB_"))
             .map(async ([type, sounds]) => {
                 type = type.split("_")[1].toLowerCase();
@@ -184,7 +255,7 @@ const pluginDef = definePlugin<PluginDef & {
                 }
             }));
 
-        await Promise.all(Object.entries(this.manifestJson!.mod.payload.keyboard_sounds).map(async ([type, sounds]) => {
+        await Promise.all(Object.entries(this.manifestJson!.mod.payload?.keyboard_sounds ?? {}).map(async ([type, sounds]) => {
             type = type.split("_")[1].toLowerCase();
             switch (type) {
                 case "letter":
