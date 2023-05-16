@@ -42,23 +42,31 @@ export default definePlugin({
     patches: [
         {
             find: ".activeCommandOption",
-            replacement: {
-                match: /\(\(function\(.{1,15}\){.{1,400}(?<stateVar>\i)=\i\[0\].{1,200}selectedIndex\);/,
-                replace: "$&$self.sortEmojis($<stateVar>);"
-            }
+            replacement: [
+                {
+                    match: /\(\(function\(.{1,15}\){.{1,400}(?<stateVar>\i)=\i\[0\].{1,200}selectedIndex\);/,
+                    replace: "$&$self.sortEmojis($<stateVar>);"
+                },
+
+                // set max results to -1 to show all emojis
+                {
+                    match: /(queryResults:function.{1,300}moreEmojisToShow,\i)=.{1,20},/,
+                    replace: "$1=-1,"
+                }
+            ]
         }
     ],
 
     sortEmojis(state: EmojiAutocompleteState) {
         if (
-            || state.query?.type !== "EMOJIS_AND_STICKERS"
+            state.query?.type !== "EMOJIS_AND_STICKERS"
             || state.query.typeInfo?.sentinel !== ":"
             || !state.query.results?.emojis?.length
         ) return;
 
         const emojiContext = EmojiStore.getDisambiguatedEmojiContext();
 
-        state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
+        state.query.results.emojis = state.query.results.emojis.sort((a: Emoji, b: Emoji) => {
             const aIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(a);
             const bIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(b);
 
@@ -67,6 +75,6 @@ export default definePlugin({
             if (!aIsFavorite && bIsFavorite) return 1;
 
             return 0;
-        });
+        }).slice(0, 6);
     }
 });
