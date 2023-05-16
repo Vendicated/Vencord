@@ -18,13 +18,13 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "discord-types/general";
 
 interface UsernameProps {
-    author: { nick: string };
+    author: { nick: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;

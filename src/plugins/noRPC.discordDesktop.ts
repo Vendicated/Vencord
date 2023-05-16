@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-migratePluginSettings("NoRPC", "No RPC");
 export default definePlugin({
     name: "NoRPC",
     description: "Disables Discord's RPC server.",

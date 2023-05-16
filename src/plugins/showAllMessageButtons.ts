@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Samu
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreSendListener, MessageObject, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-const re = /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g;
-
 export default definePlugin({
-    name: "FxTwitter",
-    description: "Uses FxTwitter to improve embeds from twitter on send",
-    authors: [Devs.Samu],
-    dependencies: ["MessageEventsAPI"],
+    name: "ShowAllMessageButtons",
+    description: "Always show all message buttons no matter if you are holding the shift key or not.",
+    authors: [Devs.Nuckyz],
 
-    addPrefix(msg: MessageObject) {
-        msg.content = msg.content.replace(re, "https://fxtwitter.com");
-    },
-
-    start() {
-        this.preSend = addPreSendListener((_, msg) => this.addPrefix(msg));
-    },
-
-    stop() {
-        removePreSendListener(this.preSend);
-    }
+    patches: [
+        {
+            find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
+            replacement: {
+                // isExpanded: V, (?<=,V = shiftKeyDown && !H...;)
+                match: /isExpanded:(\i),(?<=,\1=\i&&(!.+);.+?)/,
+                replace: "isExpanded:$2,"
+            }
+        }
+    ]
 });

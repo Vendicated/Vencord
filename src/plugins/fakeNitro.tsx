@@ -17,12 +17,12 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
-import Logger from "@utils/Logger";
-import { proxyLazy } from "@utils/proxyLazy";
+import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
@@ -149,8 +149,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-
-migratePluginSettings("FakeNitro", "NitroBypass");
 
 export default definePlugin({
     name: "FakeNitro",
@@ -716,7 +714,7 @@ export default definePlugin({
                 if (!settings.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickerStore.getStickerById(extra?.stickerIds?.[0]!);
+                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -738,7 +736,7 @@ export default definePlugin({
                         link = `https://distok.top/stickers/${packId}/${sticker.id}.gif`;
                     }
 
-                    delete extra.stickerIds;
+                    extra.stickers!.length = 0;
                     messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
                 }
             }

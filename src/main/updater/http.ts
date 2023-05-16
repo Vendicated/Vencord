@@ -17,7 +17,7 @@
 */
 
 import { VENCORD_USER_AGENT } from "@utils/constants";
-import IpcEvents from "@utils/IpcEvents";
+import { IpcEvents } from "@utils/IpcEvents";
 import { ipcMain } from "electron";
 import { writeFile } from "fs/promises";
 import { join } from "path";

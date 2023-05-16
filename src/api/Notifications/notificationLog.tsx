@@ -17,10 +17,10 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { useAwaiter } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { useAwaiter } from "@utils/react";
 import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
