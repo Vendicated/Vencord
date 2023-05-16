@@ -27,6 +27,7 @@ export default definePlugin({
     name: "AssetExplorer",
     description: "Dev util for exploring icons bundled with discord.",
     authors: [Devs.Arjix],
+    dependencies: ["VencordToolbox"],
 
     assets: [],
     patches: [{
