@@ -70,9 +70,9 @@ function toAdjustedTimestamp(t: string): number {
     const [hours, minutes] = t.split(":").map(i => i && parseInt(i, 10));
     return new Date().setHours(hours as number, minutes || 0, 0, 0);
 }
-function showError() {
+function showError(error: string) {
     Toasts.show({
-        message: "TimedLightTheme - Invalid settings",
+        message: `TimedLightTheme - ${error}`,
         id: Toasts.genId(),
         type: Toasts.Type.FAILURE,
         options: {
@@ -112,12 +112,12 @@ function DisplayThemeComponent() {
 function checkForUpdate() {
     const { start, end } = settings.store;
     if (!start || !end)
-        return showError();
+        return showError("Missing start or end time");
 
     const startTimestamp = toAdjustedTimestamp(start);
     const endTimestamp = toAdjustedTimestamp(end);
     if (startTimestamp >= endTimestamp)
-        return showError();
+        return showError("Start time higher than end time");
 
     const now = Date.now();
 
@@ -131,16 +131,19 @@ function checkForUpdate() {
     }
 
     if (now < startTimestamp) {
+        // |--x-|------------|----| 🌑 -> check for update once the day begins
         updateThemeIfNecessary("dark");
         nextChange = setTimeout(() => checkForUpdate(), startTimestamp - now);
     }
     else if (now >= startTimestamp && now <= endTimestamp) {
+        // |----|---x--------|----| 🔆 -> check for update once the day ends
         updateThemeIfNecessary("light");
         nextChange = setTimeout(() => checkForUpdate(), endTimestamp - now);
     }
     else if (now > endTimestamp) {
+        // |----|------------|-x--| 🌑 -> check for update once the next day begins
         updateThemeIfNecessary("dark");
-        nextChange = setTimeout(() => checkForUpdate(), (startTimestamp + 86400_000) - now);
+        nextChange = setTimeout(() => checkForUpdate(), (startTimestamp + 86_400_000) - now);
     }
 }
 
