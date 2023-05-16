@@ -41,14 +41,14 @@ let GxModCrx: import("@zip.js/zip.js").ZipReader<unknown> | null = null;
 
 
 type SfxCollection = { sounds: Blob[]; idx: number; };
-const pluginDef = definePlugin<PluginDef & {
+const pluginDef: PluginDef & {
     manifestJson?: GxModManifest;
     sfx: {
         click: SfxCollection;
         typing: Record<string, SfxCollection>;
         tab: Record<string, SfxCollection>;
     };
-}>({
+} & Record<string, any> = {
     name: "GxMod",
     description: "Integrates OperaGX Mods into discord.",
     authors: [Devs.Arjix],
@@ -379,7 +379,7 @@ const pluginDef = definePlugin<PluginDef & {
     stopListeningForSounds() {
         clearInterval(this._sound_check_interval);
     },
-});
+};
 
 
-export default pluginDef;
+export default definePlugin(pluginDef);
