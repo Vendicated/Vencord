@@ -25,7 +25,7 @@ import type { Guild, GuildMember } from "discord-types/general";
 
 import { settings } from "..";
 import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
-import openRolesAndUsersPermissionsModal, { type RoleOrUserPermission, PermissionType } from "./RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
