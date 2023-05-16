@@ -18,6 +18,7 @@
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
@@ -90,6 +91,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                 id="view-avatar"
                 label="View Avatar"
                 action={() => openImage(BannerStore.getUserAvatarURL(user, true, 512))}
+                icon={ImageIcon}
             />
             {memberAvatar && (
                 <Menu.MenuItem
@@ -100,6 +102,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                         avatar: memberAvatar,
                         guildId
                     }, true))}
+                    icon={ImageIcon}
                 />
             )}
         </Menu.MenuGroup>
@@ -123,6 +126,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon
                             canAnimate: true
                         }))
                     }
+                    icon={ImageIcon}
                 />
             ) : null}
             {banner ? (
@@ -135,6 +139,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon
                             banner,
                         }, true))
                     }
+                    icon={ImageIcon}
                 />
             ) : null}
         </Menu.MenuGroup>
