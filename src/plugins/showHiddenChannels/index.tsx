@@ -39,7 +39,7 @@ enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hideUnreads: {
         description: "Hide Unreads",
         type: OptionType.BOOLEAN,
@@ -54,6 +54,11 @@ const settings = definePluginSettings({
             { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
+    },
+    defaultAllowedUsersAndRolesDropdownState: {
+        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
