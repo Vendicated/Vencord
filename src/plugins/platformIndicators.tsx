@@ -114,8 +114,8 @@ const PlatformIndicator = ({ user, wantMargin = true }: { user: User; wantMargin
                 verticalAlign: "top",
                 position: "relative",
                 top: wantMargin ? 1 : 0,
-                padding: !wantMargin ? 2 : 0,
-                gap: 4
+                padding: !wantMargin ? 1 : 0,
+                gap: 2
             }}
 
         >
@@ -160,7 +160,7 @@ const indicatorLocations = {
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
-    authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz],
+    authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
 
     start() {
