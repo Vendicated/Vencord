@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings.js";
-import { Devs } from "@utils/constants.js";
-import { wordsFromSnake, wordsToTitle } from "@utils/text.js";
+import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
+import { wordsFromSnake, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Forms, PreloadedUserSettings, Toasts, UserStore } from "@webpack/common";
@@ -34,7 +34,7 @@ interface PreferredTheme {
 let nextChange: NodeJS.Timeout;
 
 const Themes = findByPropsLazy("MINT_APPLE", "CRIMSON_MOON") as Record<number, string>;
-const updateTheme = findByCodeLazy("clientThemeSettings:{") as ({ }: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
+const updateTheme = findByCodeLazy("clientThemeSettings:{") as (data: { theme: "light" | "dark", backgroundGradientPresetId?: number; }) => Promise<void>;
 
 const getBasicTheme = () =>
     PreloadedUserSettings.getCurrentValue().appearance.theme === 1 ? "dark" : "light";
@@ -42,7 +42,7 @@ const getClientThemeId = () =>
     PreloadedUserSettings.getCurrentValue().appearance.clientThemeSettings?.backgroundGradientPresetId?.value as number ?? -1;
 
 const canActuallyUseClientThemes = () =>
-    (UserStore.getCurrentUser().premiumType ?? 0) === 2;
+    UserStore.getCurrentUser().premiumType === 2;
 const canUseClientThemes = () =>
     isPluginEnabled("FakeNitro") || canActuallyUseClientThemes();
 
