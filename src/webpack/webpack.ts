@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
-import { proxyLazy } from "@utils/proxyLazy";
+import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
