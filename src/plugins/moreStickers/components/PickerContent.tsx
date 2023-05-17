@@ -57,7 +57,7 @@ export interface PickerContentRowGrid {
     onHover: (sticker: Sticker | null) => void;
     isHovered?: boolean;
     channelId?: string;
-    onSend?: (sticker?: Sticker) => void;
+    onSend?: (sticker?: Sticker, shouldClose?: boolean) => void;
 }
 
 const cl = classNameFactory("vc-more-stickers-picker-");
@@ -83,7 +83,7 @@ function PickerContentRowGrid({
 
                 sendSticker({ channelId, sticker, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
                 addRecentSticker(sticker);
-                onSend(sticker);
+                onSend(sticker, e.ctrlKey);
             }}
         >
             <div
@@ -269,7 +269,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                     colIndex: 1,
                     sticker: stickers[0],
                     onHover: setCurrentSticker,
-                    onSend: closePopout,
+                    onSend: (_, s) => { !s && closePopout(); },
                     isHovered: currentSticker?.id === stickers[0].id
                 }}
                 grid2={
@@ -278,7 +278,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                         colIndex: 2,
                         sticker: stickers[1],
                         onHover: setCurrentSticker,
-                        onSend: closePopout,
+                        onSend: (_, s) => { !s && closePopout(); },
                         isHovered: currentSticker?.id === stickers[1].id
                     } : undefined
                 }
@@ -288,7 +288,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                         colIndex: 3,
                         sticker: stickers[2],
                         onHover: setCurrentSticker,
-                        onSend: closePopout,
+                        onSend: (_, s) => { !s && closePopout(); },
                         isHovered: currentSticker?.id === stickers[2].id
                     } : undefined
                 }
