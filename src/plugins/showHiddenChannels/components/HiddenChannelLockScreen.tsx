@@ -16,15 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip } from "@webpack/common";
+import { find, findByPropsLazy } from "@webpack";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
-import { VIEW_CHANNEL } from "..";
+import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
+import { settings, VIEW_CHANNEL } from "..";
 
 enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -92,7 +94,6 @@ const TagComponent = LazyComponent(() => find(m => {
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
 
-const EmojiStore = findStoreLazy("EmojiStore");
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
 
@@ -124,6 +125,9 @@ const VideoQualityModesToNames = {
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
 function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
+    const [viewAllowedUsersAndRoles, setViewAllowedUsersAndRoles] = useState(settings.store.defaultAllowedUsersAndRolesDropdownState);
+    const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
+
     const {
         type,
         topic,
@@ -140,27 +144,39 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         bitrate,
         rtcRegion,
         videoQualityMode,
-        permissionOverwrites
+        permissionOverwrites,
+        guild_id
     } = channel;
 
-    const membersToFetch: Array<string> = [];
+    useEffect(() => {
+        const membersToFetch: Array<string> = [];
 
-    const guildOwnerId = GuildStore.getGuild(channel.guild_id).ownerId;
-    if (!GuildMemberStore.getMember(channel.guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
+        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
+        if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
-    Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
-        if (type === 1) {
-            if (!GuildMemberStore.getMember(channel.guild_id, userId)) membersToFetch.push(userId);
-        }
-    });
-
-    if (membersToFetch.length > 0) {
-        FluxDispatcher.dispatch({
-            type: "GUILD_MEMBERS_REQUEST",
-            guildIds: [channel.guild_id],
-            userIds: membersToFetch
+        Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
+            if (type === 1 && !GuildMemberStore.getMember(guild_id, userId)) {
+                membersToFetch.push(userId);
+            }
         });
-    }
+
+        if (membersToFetch.length > 0) {
+            FluxDispatcher.dispatch({
+                type: "GUILD_MEMBERS_REQUEST",
+                guildIds: [guild_id],
+                userIds: membersToFetch
+            });
+        }
+
+        if (Settings.plugins.PermissionsViewer.enabled) {
+            setPermissions(Object.values(permissionOverwrites).map(overwrite => ({
+                type: overwrite.type as PermissionType,
+                id: overwrite.id,
+                overwriteAllow: overwrite.allow,
+                overwriteDeny: overwrite.deny
+            })));
+        }
+    }, [channelId]);
 
     return (
         <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
@@ -182,7 +198,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                     aria-hidden={true}
                                     role="img"
                                 >
-                                    <path d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
+                                    <path fill="currentColor" d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
                                 </svg>
                             )}
                         </Tooltip>
@@ -192,7 +208,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
                     <Text variant="text-lg/normal">
                         You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                        {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+                        {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
                     </Text >
                 )}
 
@@ -268,8 +284,49 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     </div>
                 }
                 <div className="shc-lock-screen-allowed-users-and-roles-container">
-                    <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                    <ChannelBeginHeader channel={channel} />
+                    <div className="shc-lock-screen-allowed-users-and-roles-container-title">
+                        {Settings.plugins.PermissionsViewer.enabled && (
+                            <Tooltip text="Permission Details">
+                                {({ onMouseLeave, onMouseEnter }) => (
+                                    <button
+                                        onMouseLeave={onMouseLeave}
+                                        onMouseEnter={onMouseEnter}
+                                        className="shc-lock-screen-allowed-users-and-roles-container-permdetails-btn"
+                                        onClick={() => openRolesAndUsersPermissionsModal(permissions, GuildStore.getGuild(channel.guild_id), channel.name)}
+                                    >
+                                        <svg
+                                            width="24"
+                                            height="24"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path fill="currentColor" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </Tooltip>
+                        )}
+                        <Text variant="text-lg/bold">Allowed users and roles:</Text>
+                        <Tooltip text={viewAllowedUsersAndRoles ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <button
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
+                                    onClick={() => setViewAllowedUsersAndRoles(v => !v)}
+                                >
+                                    <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        transform={viewAllowedUsersAndRoles ? "scale(1 -1)" : "scale(1 1)"}
+                                    >
+                                        <path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
+                                    </svg>
+                                </button>
+                            )}
+                        </Tooltip>
+                    </div>
+                    {viewAllowedUsersAndRoles && <ChannelBeginHeader channel={channel} />}
                 </div>
             </div>
         </div>
