@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
+import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import type { ReactNode } from "react";
 
@@ -38,8 +38,6 @@ const StickerStore = findStoreLazy("StickersStore") as {
     getAllGuildStickers(): Map<string, Sticker[]>;
     getStickerById(id: string): Sticker | undefined;
 };
-const EmojiStore = findStoreLazy("EmojiStore");
-
 
 function searchProtoClass(localName: string, parentProtoClass: any) {
     if (!parentProtoClass) return;
