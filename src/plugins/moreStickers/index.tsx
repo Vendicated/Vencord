@@ -20,13 +20,14 @@ import "./style.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
+import { Settings } from "./components/settings";
 import { Wrapper } from "./components/wrapper";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
 import { StickerPack, StickerPackMeta } from "./types";
@@ -38,10 +39,12 @@ export default definePlugin({
     description: "Adds sticker packs from other social media platforms. (e.g. LINE)",
     authors: [Devs.Arjix, Devs.Leko],
 
-    start() {
-    },
-
-    stop() {
+    options: {
+        settings: {
+            type: OptionType.COMPONENT,
+            description: "Why is this here? Who is going to read this on a custom component? It isn't even rendered? What is its purpose?",
+            component: Settings
+        }
     },
 
     patches: [
