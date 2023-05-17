@@ -17,14 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { GenericStore } from "@webpack/common";
 
-import { waitForStore } from "../../webpack/common/internal";
 
-
-let PoggerModeSettingsStore: GenericStore;
-let initialized: boolean = false;
+const PoggerModeSettingsStore: GenericStore = findStoreLazy("PoggermodeSettingsStore");
 
 enum Intensity {
     Normal,
@@ -41,20 +40,19 @@ const settings = definePluginSettings({
             { label: "Better", value: Intensity.Better },
             { label: "Project X", value: Intensity.ProjectX },
         ],
-        restartNeeded: false
+        restartNeeded: false,
+        onChange: (value: Intensity) => {
+            setSettings(value);
+        },
     },
 });
+
 export default definePlugin({
     name: "Party mode 🎉",
     description: "Allows you to use party mode cause party never ends ✨",
-    authors: [
-        {
-            id: 691413039156690994n,
-            name: "UwU",
-        },
-    ],
+    authors: [Devs.UwUDev],
     settings,
-    patches: [],
+
     start() {
         setPoggerState(true);
         setSettings(settings.store.superIntensePartyMode);
@@ -65,47 +63,45 @@ export default definePlugin({
 });
 
 function setPoggerState(state: boolean) {
-    if (!initialized) {
-        waitForStore("PoggermodeSettingsStore", m => PoggerModeSettingsStore = m);
-        initialized = true;
-    }
-    PoggerModeSettingsStore.__getLocalVars().state.enabled = state;
-    PoggerModeSettingsStore.__getLocalVars().state.settingsVisible = state;
+    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, {
+        enabled: state,
+        settingsVisible: state
+    });
 }
 
 function setSettings(intensity: Intensity) {
-    if (intensity === Intensity.Normal) {
-        console.log("Set party to normal mode");
-        PoggerModeSettingsStore.__getLocalVars().state.screenshakeEnabledLocations = {
-            0: true,
-            1: false,
-            2: false
-        };
-        PoggerModeSettingsStore.__getLocalVars().state.shakeIntensity = 1;
-        PoggerModeSettingsStore.__getLocalVars().state.confettiSize = 16;
-        PoggerModeSettingsStore.__getLocalVars().state.confettiCount = 5;
-        PoggerModeSettingsStore.__getLocalVars().state.combosRequiredCount = 5;
-    } else if (intensity === Intensity.Better) {
-        console.log("Set party to metter mode");
-        PoggerModeSettingsStore.__getLocalVars().state.screenshakeEnabledLocations = {
-            0: true,
-            1: true,
-            2: true
-        };
-        PoggerModeSettingsStore.__getLocalVars().state.shakeIntensity = 1;
-        PoggerModeSettingsStore.__getLocalVars().state.confettiSize = 12;
-        PoggerModeSettingsStore.__getLocalVars().state.confettiCount = 8;
-        PoggerModeSettingsStore.__getLocalVars().state.combosRequiredCount = 1;
-    } else {
-        console.log("Set party to project X mode");
-        PoggerModeSettingsStore.__getLocalVars().state.screenshakeEnabledLocations = {
-            0: true,
-            1: true,
-            2: true
-        };
-        PoggerModeSettingsStore.__getLocalVars().state.shakeIntensity = 20; // wtf is happening xd
-        PoggerModeSettingsStore.__getLocalVars().state.confettiSize = 25;
-        PoggerModeSettingsStore.__getLocalVars().state.confettiCount = 15;
-        PoggerModeSettingsStore.__getLocalVars().state.combosRequiredCount = 1;
+    const state = {
+        screenshakeEnabledLocations: { 0: true, 1: true, 2: true },
+        shakeIntensity: 1,
+        confettiSize: 16,
+        confettiCount: 5,
+        combosRequiredCount: 1
+    };
+
+    switch (intensity) {
+        case Intensity.Normal: {
+            Object.assign(state, {
+                screenshakeEnabledLocations: { 0: true, 1: false, 2: false },
+                combosRequiredCount: 5
+            });
+            break;
+        }
+        case Intensity.Better: {
+            Object.assign(state, {
+                confettiSize: 12,
+                confettiCount: 8,
+            });
+            break;
+        }
+        case Intensity.ProjectX: {
+            Object.assign(state, {
+                shakeIntensity: 20,
+                confettiSize: 25,
+                confettiCount: 15,
+            });
+            break;
+        }
     }
+
+    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, state);
 }
