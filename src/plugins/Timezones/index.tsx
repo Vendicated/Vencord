@@ -19,7 +19,6 @@
 
 import * as DataStore from "@api/DataStore";
 import { Devs, VENCORD_USER_AGENT } from "@utils/constants";
-import { classes, makeLazy, useForceUpdater } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
@@ -32,6 +31,10 @@ const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 
 const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
 
+
+import { makeLazy } from "@utils/lazy";
+import { classes } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
 
 import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
 const styles = findByPropsLazy("timestampInline");
