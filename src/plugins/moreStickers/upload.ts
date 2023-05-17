@@ -63,12 +63,12 @@ async function resizeImage(url: string) {
 
     // Get the canvas image data
     const imageData = ctx.getImageData(0, 0, targetSize, targetSize);
-    const data = imageData.data;
+    const { data } = imageData;
 
     // Apply any additional image processing or filters here if desired
 
     // Convert the image data to a Blob
-    const blob: Blob | null = await new Promise((resolve) => {
+    const blob: Blob | null = await new Promise(resolve => {
         canvas.toBlob(resolve, "image/png");
     });
     if (!blob) throw new Error("Could not convert canvas to blob");
@@ -105,7 +105,7 @@ export async function sendSticker({
         const processedImage = await resizeImage(orgImageUrl);
 
         const filename = (new URL(sticker.image)).pathname.split("/").pop();
-        const file = new File([processedImage], filename!, { type: `image/png` });
+        const file = new File([processedImage], filename!, { type: "image/png" });
 
         if (ctrlKey) {
             promptToUpload([file], ChannelStore.getChannel(channelId), 0);
