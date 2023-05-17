@@ -30,7 +30,7 @@ interface EmojiAutocompleteState {
             sentinel: string;
         };
         results: {
-            emojis: Emoji[];
+            emojis: Emoji[] & { sliceTo?: number; };
         };
     };
 }
@@ -44,14 +44,18 @@ export default definePlugin({
             find: ".activeCommandOption",
             replacement: [
                 {
+                    // = someFunc(a.selectedIndex); ...trackEmojiSearch({ state: theState, isInPopoutExperimental: someBool })
                     match: /=\i\(\i\.selectedIndex\);(?=.+?state:(\i),isInPopoutExperiment:\i)/,
+                    // self.sortEmojis(theState)
                     replace: "$&$self.sortEmojis($1);"
                 },
 
-                // set max results to -1 to show all emojis
+                // set maxCount to Infinity so our sortEmojis callback gets the entire list, not just the first 10
                 {
-                    match: /(?<=queryResults:function.{1,300}moreEmojisToShow,\i)=.{1,20},/,
-                    replace: "=Infinity,"
+                    // searchEmojis(...,maxCount: stuff) ... endEmojis = emojis.slice(0, maxCount - gifResults.length)
+                    match: /,maxCount:(\i)(.+?)=(\i)\.slice\(0,(\1-\i\.length)\)/,
+                    // ,maxCount:Infinity ... endEmojis = (emojis.sliceTo = n, emojis)
+                    replace: ",maxCount:Infinity$2=($3.sliceTo=$4,$3)"
                 }
             ]
         }
@@ -75,6 +79,6 @@ export default definePlugin({
             if (!aIsFavorite && bIsFavorite) return 1;
 
             return 0;
-        }).slice(0, 6);
+        }).slice(0, query.results.emojis.sliceTo ?? 10);
     }
 });
