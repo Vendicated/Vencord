@@ -18,7 +18,7 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
@@ -39,7 +39,7 @@ enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hideUnreads: {
         description: "Hide Unreads",
         type: OptionType.BOOLEAN,
@@ -54,6 +54,11 @@ const settings = definePluginSettings({
             { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
+    },
+    defaultAllowedUsersAndRolesDropdownState: {
+        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -371,7 +376,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.{0,120}?channelId:(\i)\.id)/,
+                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],

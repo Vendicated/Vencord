@@ -16,19 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/settings";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
-import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
-import { classes, useAwaiter } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
+import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -197,7 +198,7 @@ function Updater() {
     };
 
     return (
-        <Forms.FormSection className={Margins.top16}>
+        <SettingsTab title="Vencord Updater">
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.notifyAboutUpdates}
@@ -244,11 +245,8 @@ function Updater() {
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </Forms.FormSection >
+        </SettingsTab>
     );
 }
 
-export default IS_WEB ? null : ErrorBoundary.wrap(Updater, {
-    message: "Failed to render the Updater. If this persists, try using the installer to reinstall!",
-    onError: handleComponentFailed,
-});
+export default IS_WEB ? null : wrapTab(Updater, "Updater");
