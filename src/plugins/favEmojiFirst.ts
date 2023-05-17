@@ -51,7 +51,7 @@ export default definePlugin({
                 // set max results to -1 to show all emojis
                 {
                     match: /(?<=queryResults:function.{1,300}moreEmojisToShow,\i)=.{1,20},/,
-                    replace: "=-1,"
+                    replace: "=Infinity,"
                 }
             ]
         }
