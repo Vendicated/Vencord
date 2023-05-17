@@ -16,12 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Emoji } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-
-const EmojiStore = findStoreLazy("EmojiStore");
+import { EmojiStore } from "@webpack/common";
+import { Emoji } from "@webpack/types";
 
 interface EmojiAutocompleteState {
     query?: {
@@ -37,7 +35,7 @@ interface EmojiAutocompleteState {
 
 export default definePlugin({
     name: "FavoriteEmojiFirst",
-    authors: [Devs.Aria],
+    authors: [Devs.Aria, Devs.Ven],
     description: "Puts your favorite emoji first in the emoji autocomplete.",
     patches: [
         {
@@ -71,7 +69,7 @@ export default definePlugin({
 
         const emojiContext = EmojiStore.getDisambiguatedEmojiContext();
 
-        query.results.emojis = query.results.emojis.sort((a: Emoji, b: Emoji) => {
+        query.results.emojis = query.results.emojis.sort((a, b) => {
             const aIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(a);
             const bIsFavorite = emojiContext.isFavoriteEmojiWithoutFetchingLatest(b);
 

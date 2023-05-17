@@ -18,24 +18,15 @@
 
 import { Logger } from "@utils/Logger";
 import { MessageStore } from "@webpack/common";
+import { CustomEmoji } from "@webpack/types";
 import type { Channel, Message } from "discord-types/general";
 import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
-export interface Emoji {
-    require_colons: boolean,
-    originalName: string,
-    animated: boolean;
-    guildId: string,
-    name: string,
-    url: string,
-    id: string,
-}
-
 export interface MessageObject {
     content: string,
-    validNonShortcutEmojis: Emoji[];
+    validNonShortcutEmojis: CustomEmoji[];
     invalidEmojis: any[];
     tts: boolean;
 }
