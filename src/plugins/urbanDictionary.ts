@@ -42,19 +42,16 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 try {
                     const query = encodeURIComponent(args[0].value);
-                    const { list } = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${query}`)).json();
+                    const { list: [definition] } = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${query}`)).json();
 
-                    if (!list?.length) {
+                    if (!definition)
                         return void sendBotMessage(ctx.channel.id, { content: "No results found." });
-                    }
 
-                    const linkify = text => text
+                    const linkify = (text: string) => text
                         .replaceAll("\r\n", "\n")
                         .replace(/([*>_`~\\])/gsi, "\\$1")
                         .replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)} "Define '${word}' on Urban Dictionary")`)
                         .trim();
-
-                    const [definition] = list;
 
                     return void sendBotMessage(ctx.channel.id, {
                         embeds: [
@@ -84,7 +81,7 @@ export default definePlugin({
                         ] as any,
                     });
                 } catch (error) {
-                    return void sendBotMessage(ctx.channel.id, {
+                    sendBotMessage(ctx.channel.id, {
                         content: `Something went wrong: \`${error}\``,
                     });
                 }
