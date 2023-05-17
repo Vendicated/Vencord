@@ -33,9 +33,8 @@
     margin: inherit;
 }
 
-.shc-lock-screen-heading-nsfw-icon > path {
-    fill: var(--text-normal);
-    fill-rule: evenodd;
+.shc-lock-screen-heading-nsfw-icon {
+    color: var(--text-normal);
 }
 
 .shc-lock-screen-topic-container {
@@ -97,6 +96,36 @@
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn {
+    all: unset;
+    margin-left: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn > svg {
+    color: var(--text-normal);
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn {
+    all: unset;
+    margin-right: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn > svg {
+    color: var(--text-normal);
 }
 
 .shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
