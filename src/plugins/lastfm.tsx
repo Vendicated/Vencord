@@ -72,7 +72,7 @@ enum ActivityFlag {
     INSTANCE = 1 << 0,
 }
 
-const applicationId = "1043533871037284423";
+const applicationId = "1108588077900898414";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
@@ -167,6 +167,7 @@ export default definePlugin({
     settings,
 
     start() {
+        this.updatePresence();
         this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
 
@@ -198,7 +199,7 @@ export default definePlugin({
 
             const trackData = json.recenttracks?.track[0];
 
-            if (!trackData || !trackData["@attr"]?.nowplaying)
+            if (!trackData?.["@attr"]?.nowplaying)
                 return null;
 
             // why does the json api have xml structure
