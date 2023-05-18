@@ -56,27 +56,22 @@ export default definePlugin({
         const { showingAllowed } = settings.use(["showingAllowed"]);
 
         return (
-            <div className="vc-betterblockedusers-main" id="---blocked-message-bar" role="separator">
-                <span className="vc-betterblockedusers-divider">
-                    <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
-                        <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
+            <div className="vc-betterblockedmessages-main" id="---blocked-message-bar" role="separator">
+                <span className="vc-betterblockedmessages-divider">
+                    <svg className="vc-betterblockedmessages-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
+                        <path className="vc-betterblockedmessages-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
                     </svg>
                     {
                         showingAllowed ?
-                            // if showing is allowed show a button and tooltip
                             <Tooltip text={props.expanded ? "Hide Blocked Message" : "Show Blocked Message"}>
                                 {(tooltipProps: any) => (
-                                    <button {...tooltipProps} className="vc-betterblockedusers-button" onClick={onClick}>
-                                        <svg className="vc-betterblockedusers-svg" aria-hidden="true" role="img" width="8" height="13" viewBox="0 0 8 13">
-                                            <path className="vc-betterblockedusers-color" stroke="currentColor" fill="transparent" d="M8.16639 0.5H9C10.933 0.5 12.5 2.067 12.5 4V9C12.5 10.933 10.933 12.5 9 12.5H8.16639C7.23921 12.5 6.34992 12.1321 5.69373 11.4771L0.707739 6.5L5.69373 1.52292C6.34992 0.86789 7.23921 0.5 8.16639 0.5Z"></path>
-                                        </svg>
+                                    <button {...tooltipProps} className="vc-betterblockedmessages-button" onClick={onClick}>
                                         Blocked Message
                                     </button>
                                 )}
                             </Tooltip>
                             :
-                            // if showing isn't allowed just show a span
-                            <span className="vc-betterblockedusers-span">Blocked Message</span>
+                            <span className="vc-betterblockedmessages-span">Blocked Message</span>
                     }
                 </span>
             </div>

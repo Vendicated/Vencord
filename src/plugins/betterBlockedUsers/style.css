@@ -1,4 +1,4 @@
-.vc-betterblockedusers-main {
+.vc-betterblockedmessages-main {
     margin: -2.6px -2px 0 -56px;
     height: 0;
     border-top: thin solid var(--background-modifier-accent);
@@ -14,7 +14,7 @@
     border-color: var(--divider-color);
 }
 
-.vc-betterblockedusers-divider {
+.vc-betterblockedmessages-divider {
     background-color: var(--divider-color);
     position: absolute;
     display: flex;
@@ -34,7 +34,7 @@
     border-left: none;
 }
 
-.vc-betterblockedusers-svg {
+.vc-betterblockedmessages-svg {
     display: block;
     position: absolute;
     left: -8px;
@@ -42,21 +42,21 @@
     height: 13px;
 }
 
-.vc-betterblockedusers-color {
+.vc-betterblockedmessages-color {
     color: var(--divider-color);
     fill: var(--divider-color);
 }
 
-.vc-betterblockedusers-button {
+.vc-betterblockedmessages-button {
     all: unset;
     cursor: pointer;
     user-select: none;
 }
 
-.vc-betterblockedusers-span {
+.vc-betterblockedmessages-span {
     user-select: none;
 }
 
-[class*="wrapper"]:has(.vc-betterblockedusers-main) {
+[class*="wrapper"]:has(.vc-betterblockedmessages-main) {
     min-height: unset;
 }
