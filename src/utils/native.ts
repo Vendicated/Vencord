@@ -20,12 +20,12 @@ export function relaunch() {
     if (IS_DISCORD_DESKTOP)
         window.DiscordNative.app.relaunch();
     else
-        window.VencordDesktop.app.relaunch();
+        window.VencordDesktopNative.app.relaunch();
 }
 
 export function showItemInFolder(path: string) {
     if (IS_DISCORD_DESKTOP)
         window.DiscordNative.fileManager.showItemInFolder(path);
     else
-        window.VencordDesktop.fileManager.showItemInFolder(path);
+        window.VencordDesktopNative.fileManager.showItemInFolder(path);
 }

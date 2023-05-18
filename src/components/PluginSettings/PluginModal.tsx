@@ -17,12 +17,14 @@
 */
 
 import { generateId } from "@api/Commands";
-import { useSettings } from "@api/settings";
+import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { LazyComponent } from "@utils/misc";
+import { proxyLazy } from "@utils/lazy";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { proxyLazy } from "@utils/proxyLazy";
+import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
@@ -127,6 +129,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
+                if (setting.hidden) return null;
+
                 function onChange(newValue: any) {
                     setTempSettings(s => ({ ...s, [key]: newValue }));
                 }
@@ -149,7 +153,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 );
             });
 
-            return <Flex flexDirection="column" style={{ gap: 12 }}>{options}</Flex>;
+            return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
         }
     }
 
@@ -174,12 +178,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
+        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
-            <ModalContent style={{ marginBottom: 8, marginTop: 8 }}>
+            <ModalContent>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
                     <Forms.FormText>{plugin.description}</Forms.FormText>
@@ -198,7 +202,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 </Forms.FormSection>
                 {!!plugin.settingsAboutComponent && (
-                    <div style={{ marginBottom: 8 }}>
+                    <div className={classes(Margins.bottom8, "vc-text-selectable")}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
                                 <plugin.settingsAboutComponent tempSettings={tempSettings} />

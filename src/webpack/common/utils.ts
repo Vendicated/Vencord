@@ -23,6 +23,7 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapM
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
+export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
@@ -113,3 +114,5 @@ waitFor("parseTopic", m => Parser = m);
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+
+export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");

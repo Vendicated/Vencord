@@ -16,28 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createHash } from "crypto";
-import { createReadStream } from "fs";
-import { join } from "path";
 
-export async function calculateHashes() {
-    const hashes = {} as Record<string, string>;
-
-    await Promise.all(
-        [IS_DISCORD_DESKTOP ? "patcher.js" : "main.js", "preload.js", "renderer.js", "renderer.css"].map(file => new Promise<void>(r => {
-            const fis = createReadStream(join(__dirname, file));
-            const hash = createHash("sha1", { encoding: "hex" });
-            fis.once("end", () => {
-                hash.end();
-                hashes[file] = hash.read();
-                r();
-            });
-            fis.pipe(hash);
-        }))
-    );
-
-    return hashes;
-}
+export const VENCORD_FILES = [
+    IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
+    "preload.js",
+    IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
+    "renderer.css"
+];
 
 export function serializeErrors(func: (...args: any[]) => any) {
     return async function () {

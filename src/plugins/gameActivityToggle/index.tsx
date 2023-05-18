@@ -48,7 +48,7 @@ function GameActivityToggleButton() {
 
     return (
         <Button
-            tooltipText="Toggle Game Activity"
+            tooltipText={showCurrentGame ? "Disable Game Activity" : "Enable Game Activity"}
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}

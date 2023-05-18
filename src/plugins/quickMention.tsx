@@ -18,11 +18,9 @@
 
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
-
-const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export default definePlugin({
     name: "QuickMention",
@@ -37,7 +35,7 @@ export default definePlugin({
                 icon: this.Icon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { rawText: `<@${msg.author.id}> ` })
+                onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         });
     },

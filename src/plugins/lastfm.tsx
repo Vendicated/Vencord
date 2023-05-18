@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, Forms } from "@webpack/common";
@@ -72,7 +72,7 @@ enum ActivityFlag {
     INSTANCE = 1 << 0,
 }
 
-const applicationId = "1043533871037284423";
+const applicationId = "1108588077900898414";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
@@ -167,6 +167,7 @@ export default definePlugin({
     settings,
 
     start() {
+        this.updatePresence();
         this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
 
@@ -198,7 +199,7 @@ export default definePlugin({
 
             const trackData = json.recenttracks?.track[0];
 
-            if (!trackData || !trackData["@attr"]?.nowplaying)
+            if (!trackData?.["@attr"]?.nowplaying)
                 return null;
 
             // why does the json api have xml structure

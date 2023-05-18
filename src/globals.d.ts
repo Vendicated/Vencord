@@ -57,6 +57,7 @@ declare global {
      */
     export var DiscordNative: any;
     export var VencordDesktop: any;
+    export var VencordDesktopNative: any;
 
     interface Window {
         webpackChunkdiscord_app: {

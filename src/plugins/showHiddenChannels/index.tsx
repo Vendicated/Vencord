@@ -18,14 +18,14 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionStore, Tooltip } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import type { Channel, Role } from "discord-types/general";
 
 import HiddenChannelLockScreen, { setChannelBeginHeaderComponent } from "./components/HiddenChannelLockScreen";
 
@@ -39,7 +39,7 @@ enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hideUnreads: {
         description: "Hide Unreads",
         type: OptionType.BOOLEAN,
@@ -54,6 +54,11 @@ const settings = definePluginSettings({
             { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
+    },
+    defaultAllowedUsersAndRolesDropdownState: {
+        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -253,11 +258,23 @@ export default definePlugin({
                     replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
+                    // Include the @everyone role in the allowed roles list for Hidden Channels
+                    match: /sortBy.{0,100}?return (?<=var (\i)=\i\.channel.+?)(?=\i\.id)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?true:`
+                },
+                {
+                    // If the @everyone role has the required permissions, make the array only contain it
+                    match: /computePermissionsForRoles.+?.value\(\)(?<=var (\i)=\i\.channel.+?)/,
+                    replace: (m, channel) => `${m}.reduce(...$self.makeAllowedRolesReduce(${channel}.guild_id))`
+                },
+                {
                     // Patch the header to only return allowed users and roles if it's a hidden channel or locked channel (Like when it's used on the HiddenChannelLockScreen)
                     match: /MANAGE_ROLES.{0,60}?return(?=\(.+?(\(0,\i\.jsxs\)\("div",{className:\i\(\)\.members.+?guildId:(\i)\.guild_id.+?roleColor.+?]}\)))/,
                     replace: (m, component, channel) => {
                         // Export the channel for the users allowed component patch
                         component = component.replace(canonicalizeMatch(/(?<=users:\i)/), `,channel:${channel}`);
+                        // Always render the component for multiple allowed users
+                        component = component.replace(canonicalizeMatch(/1!==\i\.length/), "true");
 
                         return `${m} $self.isHiddenChannel(${channel},true)?${component}:`;
                     }
@@ -298,6 +315,11 @@ export default definePlugin({
                     replace: (m, props) => `${m}!${props}.inCall&&$self.isHiddenChannel(${props}.channel,true)){}else if(`
                 },
                 {
+                    // Remove invite users button for the HiddenChannelLockScreen
+                    match: /"popup".{0,100}?if\((?<=(\i)\.channel.+?)/,
+                    replace: (m, props) => `${m}(${props}.inCall||!$self.isHiddenChannel(${props}.channel,true))&&`
+                },
+                {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
                     match: /this\.renderVoiceChannelEffects.+?children:(?<=renderContent=function.+?)/,
                     replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?$self.HiddenChannelLockScreen(this.props.channel):"
@@ -311,6 +333,11 @@ export default definePlugin({
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
                     match: /(?:{|,)render(?!Header|ExternalHeader).{0,30}?:(?<=renderContent=function.+?)(?!void)/g,
                     replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?null:"
+                },
+                {
+                    // Disable bad CSS class which mess up hidden voice channels styling
+                    match: /callContainer,(?<=\(\)\.callContainer,)/,
+                    replace: '$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?"":'
                 }
             ]
         },
@@ -349,7 +376,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.{0,120}?channelId:(\i)\.id)/,
+                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
@@ -424,6 +451,20 @@ export default definePlugin({
         }
 
         return res;
+    },
+
+    makeAllowedRolesReduce(guildId: string) {
+        return [
+            (prev: Array<Role>, _: Role, index: number, originalArray: Array<Role>) => {
+                if (index !== 0) return prev;
+
+                const everyoneRole = originalArray.find(role => role.id === guildId);
+
+                if (everyoneRole) return [everyoneRole];
+                return originalArray;
+            },
+            [] as Array<Role>
+        ];
     },
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,

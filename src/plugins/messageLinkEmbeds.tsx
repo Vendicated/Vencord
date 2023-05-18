@@ -17,11 +17,12 @@
 */
 
 import { addAccessory } from "@api/MessageAccessories";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findByCode, findByPropsLazy } from "@webpack";
 import {
@@ -51,7 +52,7 @@ const SearchResultClasses = findByPropsLazy("message", "searchResult");
 let AutoModEmbed: React.ComponentType<any> = () => null;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
-const tenorRegex = /https:\/\/(?:www.)?tenor\.com/;
+const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
 interface Attachment {
     height: number;

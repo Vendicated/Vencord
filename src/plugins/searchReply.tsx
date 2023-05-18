@@ -18,7 +18,7 @@
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode, findByCodeLazy } from "@webpack";
 import { ChannelStore, i18n, Menu, SelectedChannelStore } from "@webpack/common";
@@ -28,7 +28,7 @@ const ReplyIcon = LazyComponent(() => findByCode("M10 8.26667V4L3 11.4667L10 18.
 
 const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => () => {
     // make sure the message is in the selected channel
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
 
@@ -38,7 +38,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     // dms and group chats
     const dmGroup = findGroupChildrenByChildId("pin", children);
     if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
-        const pinIndex = dmGroup.findIndex(c => c.props.id === "pin");
+        const pinIndex = dmGroup.findIndex(c => c?.props.id === "pin");
         return dmGroup.splice(pinIndex + 1, 0, (
             <Menu.MenuItem
                 id="reply"
@@ -61,7 +61,6 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
             />
         ));
     }
-
 };
 
 
