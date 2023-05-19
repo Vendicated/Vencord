@@ -41,7 +41,7 @@ let GxModCrx: import("@zip.js/zip.js").ZipReader<unknown> | null = null;
 
 
 type SfxCollection = { sounds: Blob[]; idx: number; };
-const pluginDef: PluginDef & {
+const pluginDef: Partial<PluginDef> & {
     manifestJson?: GxModManifest;
     sfx: {
         click: SfxCollection;
@@ -49,10 +49,6 @@ const pluginDef: PluginDef & {
         tab: Record<string, SfxCollection>;
     };
 } & Record<string, any> = {
-    name: "GxMod",
-    description: "Integrates OperaGX Mods into discord.",
-    authors: [Devs.Arjix],
-
     patches: [{
         find: ".Messages.AGE_GATE_UNDERAGE_EXISTING_BODY_DELETION_WITH_DAYS.format",
         replacement: {
@@ -382,4 +378,9 @@ const pluginDef: PluginDef & {
 };
 
 
-export default definePlugin({ ...pluginDef });
+export default definePlugin({
+    name: "GxMod",
+    description: "Integrates OperaGX Mods into discord.",
+    authors: [Devs.Arjix],
+    ...pluginDef
+});
