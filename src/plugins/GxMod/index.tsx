@@ -382,4 +382,4 @@ const pluginDef: PluginDef & {
 };
 
 
-export default definePlugin(pluginDef);
+export default definePlugin({ ...pluginDef });
