@@ -21,12 +21,11 @@ import "./style.css";
 import { Flex } from "@components/Flex";
 import { classes } from "@utils/misc";
 import { LazyComponent, useForceUpdater } from "@utils/react";
-import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu,
     ReadStateStore, Text, TypingStore, useEffect, useRef, UserStore, useState, useStateFromStores
 } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
@@ -40,11 +39,6 @@ enum ChannelTypes {
     DM = 1,
     GROUP_DM = 3
 }
-const ChannelEmojisStore = findStoreLazy("ChannelEmojisStore") as FluxStore & {
-    // from what i can tell the unknown is supposed to be the background color for the emoji but it's just null atm
-    // also it looks like they'll allow custom emojis in the future ([0] as emoji id instead of unicode char) so probably handle that
-    getChannelEmoji(channelId: string): [string, unknown] | undefined;
-};
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
@@ -167,13 +161,14 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
 
+    // TODO: discord fucked channel emojis again
     const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
-        [ReadStateStore, TypingStore, ChannelEmojisStore],
+        [ReadStateStore, TypingStore],
         () => [
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            ChannelEmojisStore.getChannelEmoji(channelId)?.[0]
+            undefined // ChannelEmojisStore.getChannelEmoji(channelId)?.[0]
         ],
         null,
         // is this necessary?
