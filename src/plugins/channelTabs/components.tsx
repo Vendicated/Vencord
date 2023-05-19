@@ -52,7 +52,7 @@ const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 
-const useChannelEmojiBgColor: (emoji: string, channel: Channel) => any = findByCodeLazy('"#607D8B");');
+const useEmojiBackgroundColor: (emoji: string, channelId: string) => any = findByCodeLazy('"#607D8B");');
 const useDrag = findByCodeLazy(".disconnectDragSource(");
 const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
@@ -105,12 +105,24 @@ const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, m
         </div> : null;
 };
 
-function ChannelEmoji({ channel, emoji }: { channel: Channel, emoji: string | undefined; }) {
-    if (!emoji || !channelTabsSettings.store.channelNameEmojis) return null;
-    const backgroundColor = useChannelEmojiBgColor(emoji, channel);
+function ChannelEmoji({ channel }: {
+    channel: Channel & {
+        // see comments in ChannelTabContent
+        iconEmoji: {
+            id?: string,
+            name?: string;
+        },
+        themeColor?: number;
+    };
+}) {
+    if (!channel.iconEmoji.name || !channelTabsSettings.store.channelNameEmojis) return null;
+    const backgroundColor = useEmojiBackgroundColor(channel.iconEmoji.name, channel.id);
 
     return <div className={cl("emoji-container")} style={{ backgroundColor }}>
-        <Emoji emojiName={emoji} className={cl("emoji")} />
+        {channel.iconEmoji.id
+            ? <img src={`https://${window.GLOBAL_ENV.CDN_HOST}/emojis/${channel.iconEmoji.id}.png`} className={cl("emoji")} />
+            : <Emoji emojiName={channel.iconEmoji.name} className={cl("emoji")} />
+        }
     </div>;
 }
 
@@ -156,19 +168,28 @@ function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     </Menu.Menu>;
 }
 
-function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: Channel; }) {
+function ChannelTabContent(props: ChannelTabsProps &
+{
+    guild?: Guild,
+    channel?: Channel & {
+        iconEmoji: {
+            id?: string,
+            name?: string; // unicode emoji if it's not a custom one
+        },
+        // *i think* background color for the emoji once they un-hardcode them, undefined for now
+        themeColor?: number;
+    };
+}) {
     const { guild, guildId, channel, channelId } = props;
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
 
-    // TODO: discord fucked channel emojis again
-    const [unreadCount, mentionCount, isTyping, channelEmoji] = useStateFromStores(
+    const [unreadCount, mentionCount, isTyping] = useStateFromStores(
         [ReadStateStore, TypingStore],
         () => [
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            undefined // ChannelEmojisStore.getChannelEmoji(channelId)?.[0]
         ],
         null,
         // is this necessary?
@@ -178,7 +199,7 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
     if (guildId === "@favorites")
         return <>
             <Emoji emojiName={"⭐"} className={cl("icon")} />
-            <ChannelEmoji emoji={channelEmoji} channel={channel!} />
+            <ChannelEmoji channel={channel!} />
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
@@ -188,8 +209,8 @@ function ChannelTabContent(props: ChannelTabsProps & { guild?: Guild, channel?: 
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
-                <ChannelEmoji emoji={channelEmoji} channel={channel!} />
-                <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
+                <ChannelEmoji channel={channel} />
+                <Text className={cl("channel-name-text")}>#{channel.name}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -274,7 +295,7 @@ function ChannelTab(props: ChannelTabsProps & { index: number; }) {
     drag(drop(ref));
 
     const tab = <div className={cl("tab-base")} ref={ref}>
-        <ChannelTabContent {...props} guild={guild} channel={channel} />
+        <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
     return tab;
 }
@@ -365,7 +386,7 @@ const PreviewTab = (props: ChannelTabsProps) => {
     const channel = ChannelStore.getChannel(props.channelId);
 
     return <div className={cl("preview-tab")}>
-        <ChannelTabContent {...props} guild={guild} channel={channel} />
+        <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
 };
 export function ChannelTabsPreivew(p) {
