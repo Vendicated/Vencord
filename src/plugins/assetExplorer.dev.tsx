@@ -17,10 +17,14 @@
 */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { wreq } from "@webpack";
 import { Text, Toasts } from "@webpack/common";
 
+
+const logger = new Logger("AssetExplorer");
 
 const pluginName = "AssetExplorer" as const;
 export default definePlugin({
@@ -29,12 +33,45 @@ export default definePlugin({
     authors: [Devs.Arjix],
     dependencies: ["VencordToolbox"],
 
-    assets: [],
+    loadedAllChucks: false,
+    async start() {
+        if (this.loadedAllChucks) return;
+
+        logger.info("Loading all chucks");
+        const ids = Function("return" + wreq.u.toString().match(/\{.+\}/s)![0])();
+
+        const modulesCount = Object.keys(ids).length;
+        let modulesLoaded = 0;
+        let count = 0;
+
+        for (const id in ids) {
+            count += 1;
+            const res = await fetch(wreq.p + wreq.u(id)).then(r => r.text());
+
+            const hasSVG = res.includes('"svg"');
+            const isWasm = res.includes(".module.wasm");
+
+
+            if (hasSVG && !isWasm) {
+                await wreq.e(id as any);
+                modulesLoaded++;
+                logger.debug(`Loaded module ${id} (${count}/${modulesCount})`);
+            }
+
+            await new Promise(r => setTimeout(r, 50));
+        }
+
+        logger.info(`Loaded ${modulesLoaded} modules!`);
+
+        this.loadedAllChucks = true;
+    },
+
+    assets: new Set(),
     patches: [{
         find: "?\"currentColor\":",
         replacement: {
-            match: /function (\w)\(\w\){.{1,100}void 0===\w\?"currentColor":.{1,200}"svg"/gs,
-            replace: "$self.assets.push($1);$&"
+            match: /function (\w)\(\w\){.{1,150}void 0===\w\?"currentColor":.{1,250}"svg"/gs,
+            replace: "$self.assets.add($1);$&"
         },
         all: true
     }],
@@ -44,7 +81,7 @@ export default definePlugin({
             const key = openModal(modalProps => (
                 <AssetExplorerModal
                     modalProps={modalProps}
-                    assets={(Vencord.Plugins.plugins[pluginName] as any).assets}
+                    assets={Array.from(((Vencord.Plugins.plugins[pluginName] as any).assets as Set<React.FC<AssetProps>>))}
                 />
             ));
         }
