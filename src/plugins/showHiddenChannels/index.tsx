@@ -195,7 +195,7 @@ export default definePlugin({
                     replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression}break;}`
                 },
                 {
-                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:if\(!\i\){)(?=.+?;(.+?{channel:(\i)},"notifications"\)\)))/,
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:.+?if\(!\i\){)(?=.+?;(.+?{channel:(\i)},"notifications"\)\)))/,
                     replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
