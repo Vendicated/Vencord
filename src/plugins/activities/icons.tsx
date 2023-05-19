@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { React } from "@webpack/common";
 
