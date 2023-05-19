@@ -115,7 +115,7 @@ function ChannelEmoji({ channel }: {
         themeColor?: number;
     };
 }) {
-    if (!channel.iconEmoji.name || !channelTabsSettings.store.channelNameEmojis) return null;
+    if (!channel.iconEmoji.name) return null;
     const backgroundColor = useEmojiBackgroundColor(channel.iconEmoji.name, channel.id);
 
     return <div className={cl("emoji-container")} style={{ backgroundColor }}>
