@@ -20,8 +20,8 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { find, findByPropsLazy } from "@webpack";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
@@ -94,7 +94,6 @@ const TagComponent = LazyComponent(() => find(m => {
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
 
-const EmojiStore = findStoreLazy("EmojiStore");
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
 
@@ -209,7 +208,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
                     <Text variant="text-lg/normal">
                         You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                        {channel.isForumChannel() && topic && topic.length > 0 && "However you may see its guidelines:"}
+                        {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
                     </Text >
                 )}
 
