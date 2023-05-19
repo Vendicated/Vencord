@@ -17,7 +17,6 @@
 */
 
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findStoreLazy } from "@webpack";
 import { React, Tooltip, useStateFromStores } from "@webpack/common";
@@ -32,7 +31,9 @@ const ActivityView = LazyComponent(() => findByCode("onOpenGameProfile:"));
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
+import { LazyComponent } from "@utils/react";
+
 
 const settings = definePluginSettings({
     moreActivityIcons: {
