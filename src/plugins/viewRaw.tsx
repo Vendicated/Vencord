@@ -106,7 +106,10 @@ function openViewRawModal(msg: Message) {
                         <Button onClick={() => copyWithToast(msgJson, "Message data copied to clipboard!")}>
                             Copy Message JSON
                         </Button>
-                        <Button onClick={() => copyWithToast(msg.content, "Content copied to clipboard!")}>
+                        <Button onClick={() => copyWithToast([
+                            msg?.content,
+                            msg.attachments?.map(a => a.url).join("\n")
+                        ].filter(Boolean).join("\n\n"), "Content copied to clipboard!")}>
                             Copy Raw Content
                         </Button>
                     </Flex>
@@ -133,7 +136,10 @@ export default definePlugin({
                 onContextMenu: e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    copyWithToast(msg.content);
+                    copyWithToast([
+                        msg?.content,
+                        msg.attachments?.map(a => a.url).join("\n")
+                    ].filter(Boolean).join("\n\n"));
                 }
             };
         });
