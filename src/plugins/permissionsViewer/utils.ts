@@ -18,11 +18,12 @@
 
 import { classNameFactory } from "@api/Styles";
 import { wordsToTitle } from "@utils/text";
-import { i18n, Parser } from "@webpack/common";
+import { GuildStore, i18n, Parser } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from ".";
+import { PermissionType } from "./components/RolesAndUsersPermissions";
 
 export const cl = classNameFactory("vc-permviewer-");
 
@@ -81,4 +82,17 @@ export function sortUserRoles(roles: Role[]) {
         default:
             return roles;
     }
+}
+
+export function sortPermissionOverwrites<T extends { id: string; type: number; }>(overwrites: T[], guildId: string) {
+    const guild = GuildStore.getGuild(guildId);
+
+    return overwrites.sort((a, b) => {
+        if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
+
+        const roleA = guild.roles[a.id];
+        const roleB = guild.roles[b.id];
+
+        return roleB.position - roleA.position;
+    });
 }

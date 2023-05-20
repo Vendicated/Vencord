@@ -27,7 +27,7 @@ import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles } from "./utils";
+import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -94,12 +94,12 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     case MenuItemParentType.Channel: {
                         const channel = ChannelStore.getChannel(id!);
 
-                        permissions = Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                        permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
                             type: type as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
-                        }));
+                        })), guildId);
 
                         header = channel.name;
 
