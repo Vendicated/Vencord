@@ -115,10 +115,10 @@ function ChannelEmoji({ channel }: {
         themeColor?: number;
     };
 }) {
-    if (!channel.iconEmoji.name) return null;
+    if (!channel.iconEmoji?.name) return null;
     const backgroundColor = useEmojiBackgroundColor(channel.iconEmoji.name, channel.id);
 
-    return <div className={cl("emoji-container")} style={{ backgroundColor }}>
+    return <div className={classes("channelEmoji-soSnippetsHideIt", cl("emoji-container"))} style={{ backgroundColor }}>
         {channel.iconEmoji.id
             ? <img src={`https://${window.GLOBAL_ENV.CDN_HOST}/emojis/${channel.iconEmoji.id}.png`} className={cl("emoji")} />
             : <Emoji emojiName={channel.iconEmoji.name} className={cl("emoji")} />
