@@ -18,6 +18,7 @@
 
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { proxyLazy } from "@utils/lazy";
@@ -40,6 +41,7 @@ import {
     SettingSliderComponent,
     SettingTextComponent
 } from "./components";
+import hideBotTagStyle from "./userPopoutHideBotTag.css?managed";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
@@ -90,6 +92,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const hasSettings = Boolean(pluginSettings && plugin.options);
 
     React.useEffect(() => {
+        enableStyle(hideBotTagStyle);
+
         let originalUser: User;
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
@@ -105,6 +109,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         })();
 
         return () => {
+            disableStyle(hideBotTagStyle);
             if (originalUser)
                 FluxDispatcher.dispatch({ type: "USER_UPDATE", user: originalUser });
         };
