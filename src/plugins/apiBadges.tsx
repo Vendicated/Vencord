@@ -43,7 +43,13 @@ const ContributorBadge: ProfileBadge = {
             transform: "scale(0.9)" // The image is a bit too big compared to default badges
         }
     },
-    shouldShow: ({ user }) => contributorIds.includes(user.id),
+    shouldShow: ({ user }) => {
+        const id = BigInt(user.id);
+        const dev = Object.values(Devs).find(d => d.id === id);
+        if (!dev) return false;
+
+        return ((dev as { badge: boolean; }).badge ?? true);
+    },
     link: "https://github.com/Vendicated/Vencord"
 };
 
