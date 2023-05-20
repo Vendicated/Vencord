@@ -75,7 +75,12 @@ export default definePlugin({
             description: "ReviewDB website",
             component: () => (
                 <Button onClick={() => {
-                    window.open("https://reviewdb.mantikafasi.dev");
+                    if (Settings.plugins.ReviewDB.token) {
+                        window.open("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token));
+                        return;
+                    } else {
+                        window.open("https://reviewdb.mantikafasi.dev/");
+                    }
                 }}>
                     ReviewDB website
                 </Button>
@@ -116,9 +121,12 @@ export default definePlugin({
                             <p>
                                 You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
                             </p>
-                            <p>
-                                Offending Review: {user.banInfo.reviewContent}
-                            </p>
+                            {
+                                user.banInfo.reviewContent &&
+                                (<p>
+                                    Offending Review: {user.banInfo.reviewContent}
+                                </p>)
+                            }
                             <p>
                                 Continued offenses will result in a permanent ban.
                             </p>
@@ -126,7 +134,7 @@ export default definePlugin({
                         cancelText: "Appeal",
                         confirmText: "Ok",
                         onCancel: () => {
-                            window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
+                            window.open("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token) + "&page=dashboard/appeal");
                         }
                     });
                 }
