@@ -93,6 +93,8 @@ export const NavigationRouter = mapMangledModuleLazy("transitionToGuild - ", {
     goForward: filters.byCode("goForward()"),
 });
 
+export const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
+
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
     const cb = () => {

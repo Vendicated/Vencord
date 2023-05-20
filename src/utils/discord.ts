@@ -16,11 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, GuildStore, PreloadedUserSettings, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
 import { Guild } from "discord-types/general";
-
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());

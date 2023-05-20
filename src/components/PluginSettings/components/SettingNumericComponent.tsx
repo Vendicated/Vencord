@@ -48,6 +48,7 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
             onChange(serialize(newValue));
         } else {
             setState(newValue);
+            setError(null);
             onChange(serialize(newValue));
         }
     }

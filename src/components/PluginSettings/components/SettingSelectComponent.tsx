@@ -38,6 +38,7 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
         else {
             setError(null);
             setState(newValue);
+            setError(null);
             onChange(newValue);
         }
     }

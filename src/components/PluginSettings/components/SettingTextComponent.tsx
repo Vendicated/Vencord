@@ -36,6 +36,7 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
         else {
             setError(null);
             setState(newValue);
+            setError(null);
             onChange(newValue);
         }
     }
