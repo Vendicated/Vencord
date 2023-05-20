@@ -29,6 +29,12 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
+export interface Dev {
+    name: string;
+    id: bigint;
+    badge?: boolean;
+}
+
 /**
  * If you made a plugin or substantial contribution, add yourself here.
  * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
@@ -301,4 +307,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "outfoxxed",
         id: 837425748435796060n
     },
-} satisfies Record<string, { name: string, id: bigint, badge?: boolean; }>);
+} satisfies Record<string, Dev>);
+
+// iife so #__PURE__ works correctly
+export const DevsById = /* #__PURE__*/ (() =>
+    Object.freeze(Object.fromEntries(Object.entries(Devs).map(([_, v]) => [v.id, v])))
+)() as Record<string, Dev>;
