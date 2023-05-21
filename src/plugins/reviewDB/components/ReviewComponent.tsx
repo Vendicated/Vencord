@@ -22,7 +22,7 @@ import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
 import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
-import { Review } from "../entities/Review";
+import { Review, ReviewType } from "../entities/Review";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
@@ -36,11 +36,13 @@ export default LazyComponent(() => {
         { container, isHeader },
         { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
+        botTag
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
+        p("botTag")
     );
 
     const dateFormat = new Intl.DateTimeFormat();
@@ -82,18 +84,18 @@ export default LazyComponent(() => {
             <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
                 {
                     marginLeft: "0px",
-                    paddingLeft: "52px",
+                    paddingLeft: "52px", // wth is this
                     paddingRight: "16px"
                 }
             }>
 
-                <div>
-                    <img
-                        className={classes(avatar, clickable)}
-                        onClick={openModal}
-                        src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                        style={{ left: "0px" }}
-                    />
+                <img
+                    className={classes(avatar, clickable)}
+                    onClick={openModal}
+                    src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                    style={{ left: "0px" }}
+                />
+                <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
                     <span
                         className={classes(clickable, username)}
                         style={{ color: "var(--channels-default)", fontSize: "14px" }}
@@ -101,30 +103,39 @@ export default LazyComponent(() => {
                     >
                         {review.sender.username}
                     </span>
+
+                    {review.type === ReviewType.System && (
+                        <span
+                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                            style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", marginLeft: "4px" }}>
+                            System
+                        </span>
+                    )}
+
                     {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
                     {
-                        !Settings.plugins.ReviewDB.hideTimestamps && (
+                        !Settings.plugins.ReviewDB.hideTimestamps && review.type !== ReviewType.System && (
                             <Timestamp timestamp={moment(review.timestamp * 1000)} >
                                 {dateFormat.format(review.timestamp * 1000)}
                             </Timestamp>)
                     }
+                </div>
 
-                    <p
-                        className={classes(messageContent)}
-                        style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
-                    >
-                        {review.comment}
-                    </p>
-                    <div className={classes(container, isHeader, buttons)} style={{
-                        padding: "0px",
-                    }}>
-                        <div className={buttonClasses.wrapper} >
-                            <MessageButton type="report" callback={reportRev} />
-                            {canDeleteReview(review, UserStore.getCurrentUser().id) && (
-                                <MessageButton type="delete" callback={delReview} />
-                            )}
-                        </div>
+                <p
+                    className={classes(messageContent)}
+                    style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
+                >
+                    {review.comment}
+                </p>
+                <div className={classes(container, isHeader, buttons)} style={{
+                    padding: "0px",
+                }}>
+                    <div className={buttonClasses.wrapper} >
+                        <MessageButton type="report" callback={reportRev} />
+                        {canDeleteReview(review, UserStore.getCurrentUser().id) && (
+                            <MessageButton type="delete" callback={delReview} />
+                        )}
                     </div>
                 </div>
             </div>

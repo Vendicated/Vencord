@@ -18,6 +18,13 @@
 
 import { Badge } from "./Badge";
 
+export const enum ReviewType {
+    User = 0,
+    Server = 1,
+    Support = 2,
+    System = 3
+}
+
 export interface Sender {
     id : number,
     discordID: string,
@@ -32,4 +39,5 @@ export interface Review {
     star: number,
     sender: Sender,
     timestamp: number
+    type: ReviewType
 }
