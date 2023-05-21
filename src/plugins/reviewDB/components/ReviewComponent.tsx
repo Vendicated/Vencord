@@ -108,7 +108,9 @@ export default LazyComponent(() => {
                         <span
                             className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
                             style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", marginLeft: "4px" }}>
-                            System
+                            <span className={botTag.botText}>
+                                System
+                            </span>
                         </span>
                     )}
 
