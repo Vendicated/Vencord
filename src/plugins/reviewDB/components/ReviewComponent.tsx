@@ -113,16 +113,15 @@ export default LazyComponent(() => {
                             </span>
                         </span>
                     )}
-
-                    {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
-
-                    {
-                        !Settings.plugins.ReviewDB.hideTimestamps && review.type !== ReviewType.System && (
-                            <Timestamp timestamp={moment(review.timestamp * 1000)} >
-                                {dateFormat.format(review.timestamp * 1000)}
-                            </Timestamp>)
-                    }
                 </div>
+                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+
+                {
+                    !Settings.plugins.ReviewDB.hideTimestamps && review.type !== ReviewType.System && (
+                        <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                            {dateFormat.format(review.timestamp * 1000)}
+                        </Timestamp>)
+                }
 
                 <p
                     className={classes(messageContent)}
