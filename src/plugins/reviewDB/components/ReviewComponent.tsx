@@ -128,16 +128,18 @@ export default LazyComponent(() => {
                 >
                     {review.comment}
                 </p>
-                <div className={classes(container, isHeader, buttons)} style={{
-                    padding: "0px",
-                }}>
-                    <div className={buttonClasses.wrapper} >
-                        <MessageButton type="report" callback={reportRev} />
-                        {canDeleteReview(review, UserStore.getCurrentUser().id) && (
-                            <MessageButton type="delete" callback={delReview} />
-                        )}
+                {review.id !== 0 && (
+                    <div className={classes(container, isHeader, buttons)} style={{
+                        padding: "0px",
+                    }}>
+                        <div className={buttonClasses.wrapper} >
+                            <MessageButton type="report" callback={reportRev} />
+                            {canDeleteReview(review, UserStore.getCurrentUser().id) && (
+                                <MessageButton type="delete" callback={delReview} />
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         );
     };
