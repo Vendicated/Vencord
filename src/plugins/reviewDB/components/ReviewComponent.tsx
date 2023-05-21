@@ -107,7 +107,7 @@ export default LazyComponent(() => {
                     {review.type === ReviewType.System && (
                         <span
                             className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
-                            style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", marginLeft: "4px" }}>
+                            style={{ marginLeft: "4px" }}>
                             <span className={botTag.botText}>
                                 System
                             </span>
