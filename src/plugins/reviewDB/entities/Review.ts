@@ -26,11 +26,11 @@ export const enum ReviewType {
 }
 
 export interface Sender {
-    id : number,
+    id: number,
     discordID: string,
     username: string,
     profilePhoto: string,
-    badges: Badge[]
+    badges: Badge[];
 }
 
 export interface Review {
@@ -38,6 +38,6 @@ export interface Review {
     id: number,
     star: number,
     sender: Sender,
-    timestamp: number
-    type: ReviewType
+    timestamp: number;
+    type?: ReviewType;
 }
