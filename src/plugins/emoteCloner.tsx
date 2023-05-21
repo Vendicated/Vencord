@@ -24,12 +24,11 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildStore, Menu, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
-const GuildEmojiStore = findStoreLazy("EmojiStore");
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS(");
 
@@ -129,7 +128,7 @@ function getGuildCandidates(data: Data) {
         const { isAnimated } = data as Emoji;
 
         const emojiSlots = g.getMaxEmojiSlots();
-        const { emojis } = GuildEmojiStore.getGuilds()[g.id];
+        const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
         for (const emoji of emojis)
@@ -194,7 +193,8 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                     setName(v);
                 }}
                 validate={v =>
-                    (v.length > 1 && v.length < 32 && nameValidator.test(v))
+                    (data.t === "Emoji" && v.length > 2 && v.length < 32 && nameValidator.test(v))
+                    || (data.t === "Sticker" && v.length > 2 && v.length < 30)
                     || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
                 }
             />
