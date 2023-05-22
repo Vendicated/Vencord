@@ -18,6 +18,8 @@
 
 import { Clipboard, Toasts } from "@webpack/common";
 
+import { DevsById } from "./constants";
+
 /**
  * Recursively merges defaults into an object and returns the same object
  * @param obj Object
@@ -100,3 +102,5 @@ export function identity<T>(value: T): T {
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
+
+export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);

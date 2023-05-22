@@ -18,6 +18,7 @@
 
 import { DataStore } from "@api/index";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { isPluginDev } from "@utils/misc";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { isOutdated } from "@utils/updater";
@@ -74,8 +75,7 @@ ${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).joi
         async CHANNEL_SELECT({ channelId }) {
             if (channelId !== SUPPORT_CHANNEL_ID) return;
 
-            const myId = BigInt(UserStore.getCurrentUser().id);
-            if (Object.values(Devs).some(d => d.id === myId)) return;
+            if (isPluginDev(UserStore.getCurrentUser().id)) return;
 
             if (isOutdated && gitHash !== await DataStore.get(REMEMBER_DISMISS_KEY)) {
                 const rememberDismiss = () => DataStore.set(REMEMBER_DISMISS_KEY, gitHash);
