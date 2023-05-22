@@ -26,6 +26,7 @@ import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
+import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
 import { settings, VIEW_CHANNEL } from "..";
 
 enum SortOrderTypes {
@@ -169,12 +170,12 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         }
 
         if (Settings.plugins.PermissionsViewer.enabled) {
-            setPermissions(Object.values(permissionOverwrites).map(overwrite => ({
+            setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
                 overwriteAllow: overwrite.allow,
                 overwriteDeny: overwrite.deny
-            })));
+            })), guild_id));
         }
     }, [channelId]);
 
