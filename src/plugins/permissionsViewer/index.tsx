@@ -27,7 +27,7 @@ import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles } from "./utils";
+import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -57,6 +57,8 @@ export const settings = definePluginSettings({
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
+    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id!)) return null;
+
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
@@ -92,12 +94,12 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     case MenuItemParentType.Channel: {
                         const channel = ChannelStore.getChannel(id!);
 
-                        permissions = Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                        permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
                             type: type as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
-                        }));
+                        })), guildId);
 
                         header = channel.name;
 
@@ -122,25 +124,32 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     );
 }
 
-function makeContextMenuPatch(childId: string, type?: MenuItemParentType): NavContextMenuPatchCallback {
+function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => () => {
         if (!props) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
-        if (group) {
+        const item = (() => {
             switch (type) {
                 case MenuItemParentType.User:
-                    group.push(MenuItem(props.guildId, props.user.id, type));
-                    break;
+                    return MenuItem(props.guildId, props.user.id, type);
                 case MenuItemParentType.Channel:
-                    group.push(MenuItem(props.guild.id, props.channel.id, type));
-                    break;
+                    return MenuItem(props.guild.id, props.channel.id, type);
                 case MenuItemParentType.Guild:
-                    group.push(MenuItem(props.guild.id));
-                    break;
+                    return MenuItem(props.guild.id);
+                default:
+                    return null;
             }
-        }
+        })();
+
+        if (item == null) return;
+
+        if (group)
+            group.push(item);
+        else if (childId === "roles" && props.guildId)
+            // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+            children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
     };
 }
 
@@ -160,10 +169,10 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember) => <UserPermissions guild={guild} guildMember={guildMember} />,
+    UserPermissions: (guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} />,
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
-    channelContextMenuPatch: makeContextMenuPatch("mute-channel", MenuItemParentType.Channel),
+    channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
     guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
 
     start() {

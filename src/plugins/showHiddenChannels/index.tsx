@@ -39,7 +39,7 @@ enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hideUnreads: {
         description: "Hide Unreads",
         type: OptionType.BOOLEAN,
@@ -54,6 +54,11 @@ const settings = definePluginSettings({
             { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
+    },
+    defaultAllowedUsersAndRolesDropdownState: {
+        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -102,13 +107,13 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden channels
-                    match: /(?=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\))/,
-                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
+                    match: /if\(!\i&&!\i(?=.{0,50}?selectVoiceChannel\((\i)\.id\))/,
+                    replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
-                    match: /(?<=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\);!__OVERLAY__&&\()/,
-                    replace: (_, channel) => `$self.isHiddenChannel(${channel},true)||`
+                    match: /!__OVERLAY__&&\((?<=selectVoiceChannel\((\i)\.id\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel},true)||`
                 }
             ]
         },
@@ -190,7 +195,7 @@ export default definePlugin({
                     replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression}break;}`
                 },
                 {
-                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:if\(!\i\){)(?=.+?;(.+?{channel:(\i)},"notifications"\)\)))/,
+                    match: /(?<=renderHeaderToolbar=function.+?case \i\.\i\.GUILD_FORUM:.+?if\(!\i\){)(?=.+?;(.+?{channel:(\i)},"notifications"\)\)))/,
                     replace: (_, pushNotificationButtonExpression, channel) => `if($self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
