@@ -28,7 +28,7 @@ import {
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "./util.js";
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
@@ -236,10 +236,14 @@ function ChannelTabContent(props: ChannelTabsProps &
 
     if (channel && recipients?.length) {
         if (channel.type === ChannelTypes.DM) {
-            const user = UserStore.getUser(recipients[0]);
+            const user = UserStore.getUser(recipients[0]) as User & { globalName: string, isPomelo(): boolean; };
+            const username = settings.store.noPomeloNames
+                ? user.globalName ?? user.username
+                : user.isPomelo() ? `@${user.username}` : user.tag;
+
             return <>
                 <UserAvatar user={user} />
-                <Text className={cl("channel-name-text")}>@{user?.username}</Text>
+                <Text className={cl("channel-name-text")}>{username}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -394,7 +398,7 @@ export function ChannelTabsPreivew(p) {
     if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
 
     const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
-    const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = channelTabsSettings.use(["tabSet"]);
+    const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = settings.use(["tabSet"]);
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
 

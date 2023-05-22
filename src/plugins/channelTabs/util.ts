@@ -62,6 +62,11 @@ export const channelTabsSettings = definePluginSettings({
         description: "Select which tabs to open at startup",
         type: OptionType.COMPONENT,
         default: {}
+    },
+    noPomeloNames: {
+        description: "Use display names instead of usernames for DM's",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
