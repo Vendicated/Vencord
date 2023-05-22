@@ -20,7 +20,7 @@ import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React, Text, UserStore } from "@webpack/common";
+import { Forms, React, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
@@ -29,14 +29,13 @@ import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");
 
-export default function ReviewsView({ userId }: { userId: string; }) {
+export default function ReviewsView({ discordId, name }: { discordId: string; name: string; }) {
     const { token } = Settings.plugins.ReviewDB;
     const [refetchCount, setRefetchCount] = React.useState(0);
-    const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
+    const [reviews, _, isLoading] = useAwaiter(() => getReviews(discordId), {
         fallbackValue: [],
         deps: [refetchCount],
     });
-    const username = UserStore.getUser(userId)?.username ?? "";
 
     const dirtyRefetch = () => setRefetchCount(refetchCount + 1);
 
@@ -45,7 +44,7 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
         if (key === "Enter") {
             addReview({
-                userid: userId,
+                userid: discordId,
                 comment: (target as HTMLInputElement).value,
                 star: -1
             }).then(res => {
@@ -61,16 +60,6 @@ export default function ReviewsView({ userId }: { userId: string; }) {
 
     return (
         <div className="vc-reviewdb-view">
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{
-                    marginBottom: "8px",
-                    color: "var(--header-primary)"
-                }}
-            >
-                User Reviews
-            </Text>
             {reviews?.map(review =>
                 <ReviewComponent
                     key={review.id}
@@ -93,8 +82,8 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                 placeholder={
                     token
                         ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
-                            ? `Update review for @${username}`
-                            : `Review @${username}`)
+                            ? `Update review for @${name}`
+                            : `Review @${name}`)
                         : "You need to authorize to review users!"
                 }
                 onKeyDown={onKeyPress}

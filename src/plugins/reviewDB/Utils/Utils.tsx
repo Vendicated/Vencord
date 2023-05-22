@@ -17,11 +17,13 @@
 */
 
 import { Settings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
+import { FluxDispatcher, React, SelectedChannelStore, Text, Toasts, UserUtils } from "@webpack/common";
 
+import ReviewsView from "../components/ReviewsView";
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
 
@@ -86,4 +88,23 @@ export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
     if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user?.type === UserType.Admin) return true;
+}
+
+export function openReviewsModal(discordId: string, name: string) {
+    openModal(props =>
+        <ErrorBoundary>
+            <ModalRoot {...props} >
+                <ModalHeader>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{name + "'s Reviews"}</Text>
+                    <ModalCloseButton onClick={() => props.onClose()} />
+                </ModalHeader>
+                <ModalContent>
+                    <div style={{ padding: "16px 0" }}>
+                        <ReviewsView discordId={discordId} name={name} />
+                    </div>
+                </ModalContent >
+            </ModalRoot >
+        </ErrorBoundary >
+
+    );
 }
