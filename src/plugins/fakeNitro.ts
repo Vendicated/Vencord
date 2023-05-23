@@ -656,7 +656,8 @@ export default definePlugin({
                 if ("pack_id" in sticker)
                     break stickerBypass;
 
-                if (sticker.available !== false && ((this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId)) || (sticker as GuildSticker)?.guild_id === guildId))
+                const canUseStickers = this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId);
+                if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
                 const link = this.getStickerLink(sticker.id);
