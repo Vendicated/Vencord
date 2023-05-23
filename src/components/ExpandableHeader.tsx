@@ -22,8 +22,8 @@ export const cl = classNameFactory("vc-expandableheader-");
 import "./ExpandableHeader.css";
 
 export interface ExpandableHeaderProps {
-    onMeatBallMenuClick?: () => void;
-    meatBallMenuTooltipText?: string;
+    onMeatballClick?: () => void;
+    meatballTooltipText?: string;
     onDropDownClick?: (state: boolean) => void;
     defaultState?: boolean;
     headerText: string;
@@ -31,7 +31,7 @@ export interface ExpandableHeaderProps {
     buttons?: React.ReactNode[];
 }
 
-export default function ExpandableHeader({ children, onMeatBallMenuClick, buttons, meatBallMenuTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
+export default function ExpandableHeader({ children, onMeatballClick, buttons, meatballTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
     const [showContent, setShowContent] = useState(defaultState);
 
     return (
@@ -61,13 +61,13 @@ export default function ExpandableHeader({ children, onMeatBallMenuClick, button
                     }
 
                     {
-                        onMeatBallMenuClick && // only show meatball menu if callback is provided
-                        <Tooltip text={meatBallMenuTooltipText}>
+                        onMeatballClick && // only show meatball menu if callback is provided
+                        <Tooltip text={meatballTooltipText}>
                             {tooltipProps => (
                                 <button
                                     {...tooltipProps}
                                     className={cl("btn")}
-                                    onClick={onMeatBallMenuClick}>
+                                    onClick={onMeatballClick}>
                                     <svg
                                         width="24"
                                         height="24"

@@ -168,12 +168,12 @@ export default definePlugin({
             <ErrorBoundary message="Failed to render Reviews">
                 <ExpandableHeader
                     headerText="User Reviews"
-                    onMeatBallMenuClick={
+                    onMeatballClick={
                         () => {
                             openReviewsModal(user.id, user.username);
                         }
                     }
-                    meatBallMenuTooltipText="Open Review Modal"
+                    meatballTooltipText="Open Review Modal"
                     onDropDownClick={
                         state => {
                             Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
