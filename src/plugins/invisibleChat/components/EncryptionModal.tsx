@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendMessage } from "@utils/discord";
 import {
     ModalContent,
     ModalFooter,
@@ -24,7 +25,6 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { findByProps } from "@webpack";
 import { Button, Forms, React, SelectedChannelStore, Switch, TextInput } from "@webpack/common";
 
 import { encrypt, settings } from "../index";
@@ -85,7 +85,7 @@ function EncModal(props: ModalProps) {
                         const toSend = noCover ? encrypted.replaceAll("d", "") : encrypted;
                         if (!toSend) return;
 
-                        findByProps("editMessage").sendMessage(SelectedChannelStore.getChannelId(), { content: toSend });
+                        sendMessage(SelectedChannelStore.getChannelId(), { content: toSend });
 
                         props.onClose();
                     }}
