@@ -396,22 +396,19 @@ export default definePlugin({
     trimContent(content: Array<any>) {
         const firstContent = content[0];
         if (typeof firstContent === "string") content[0] = firstContent.trimStart();
-        if (content[0] === "") content.splice(0, 1);
+        if (content[0] === "") content.shift();
 
         const lastIndex = content.length - 1;
         const lastContent = content[lastIndex];
         if (typeof lastContent === "string") content[lastIndex] = lastContent.trimEnd();
-        if (content[lastIndex] === "") content.length -= 1;
+        if (content[lastIndex] === "") content.pop();
     },
 
     clearEmptyArrayItems(array: Array<any>) {
-        const newArray: Array<any> = [];
-        for (const item of array) if (item != null) newArray.push(item);
-
-        return newArray;
+        return array.filter(item => item != null);
     },
 
-    makeChildrenArray(child: ReactElement) {
+    ensureChildrenIsArray(child: ReactElement) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -474,7 +471,7 @@ export default definePlugin({
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
-                this.makeChildrenArray(newChild);
+                this.ensureChildrenIsArray(newChild);
                 if (newChild.props.children.length === 0) return null;
 
                 let listHasAnItem = false;
@@ -484,7 +481,7 @@ export default definePlugin({
                         continue;
                     }
 
-                    this.makeChildrenArray(child);
+                    this.ensureChildrenIsArray(child);
                     if (child.props.children.length > 0) listHasAnItem = true;
                     else delete newChild.props.children[index];
                 }
