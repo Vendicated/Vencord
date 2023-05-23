@@ -275,6 +275,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "pylix",
         id: 492949202121261067n
     },
+    Nebula: {
+        name: "Nebula",
+        id: 574669003755356162n
+    },
     Tyler: {
         name: "\\\\GGTyler\\\\",
         id: 143117463788191746n
