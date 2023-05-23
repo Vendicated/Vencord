@@ -25,7 +25,7 @@ import * as t from "./types/stores";
 
 export const Flux: t.Flux = findByPropsLazy("connectStores");
 
-type GenericStore = t.FluxStore & Record<string, any>;
+export type GenericStore = t.FluxStore & Record<string, any>;
 
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
@@ -37,6 +37,7 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
+export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: Stores.GuildStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
