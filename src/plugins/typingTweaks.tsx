@@ -89,7 +89,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                         src={user.getAvatarURL(guildId, 128)} />
                 </div>
             )}
-            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
+            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.globalName || user.username}
         </strong>
     );
 }, { noop: true });
