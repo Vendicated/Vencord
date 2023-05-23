@@ -413,6 +413,7 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
+        // If content has more than one child or it's a single ReactElement like a header or list
         if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
         let nextIndex = content.length;
