@@ -175,6 +175,7 @@ export default definePlugin({
                             openReviewsModal(user.id, user.username);
                         }
                     }
+                    meatBallMenuTooltipText="Open Review Modal"
                     onDropDownClick={
                         state => {
                             Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
