@@ -114,7 +114,6 @@ export default definePlugin({
     },
 
     async start() {
-
         const settings = Settings.plugins.ReviewDB;
         if (!settings.notifyReviews || !settings.token) return;
 
@@ -165,11 +164,10 @@ export default definePlugin({
     },
 
     getReviewsComponent: (user: User) => {
-
         return (
             <ErrorBoundary message="Failed to render Reviews">
                 <ExpandableHeader
-                    headerText={"User Reviews"}
+                    headerText="User Reviews"
                     onMeatBallMenuClick={
                         () => {
                             openReviewsModal(user.id, user.username);
@@ -183,7 +181,7 @@ export default definePlugin({
                     }
                     defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
                 >
-                    <ReviewsView discordId={user.id} name="User Reviews" />
+                    <ReviewsView discordId={user.id} name={user.username} />
                 </ExpandableHeader>
             </ErrorBoundary >
         );
