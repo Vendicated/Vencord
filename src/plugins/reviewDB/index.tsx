@@ -21,13 +21,13 @@ import "./style.css";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, Menu, useState } from "@webpack/common";
+import { Alerts, Button, Menu } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
-import ExpandableHeader from "../../components/ExpandableHeader";
 import ReviewsView from "./components/ReviewsView";
 import { UserType } from "./entities/User";
 import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
