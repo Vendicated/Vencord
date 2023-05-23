@@ -24,10 +24,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, Menu, Text, Tooltip, useState } from "@webpack/common";
+import { Alerts, Button, Menu, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
-import { cl } from "plugins/permissionsViewer/utils";
 
+import ExpandableHeader from "../../components/ExpandableHeader";
 import ReviewsView from "./components/ReviewsView";
 import { UserType } from "./entities/User";
 import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
@@ -165,74 +165,26 @@ export default definePlugin({
     },
 
     getReviewsComponent: (user: User) => {
-        const [viewReviews, setViewReviews] = useState(Vencord.Settings.plugins.ReviewDB.reviewsDropdownState);
 
         return (
             <ErrorBoundary message="Failed to render Reviews">
-                <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}>
-                    <Text
-                        tag="h2"
-                        variant="eyebrow"
-                        style={{
-                            marginBottom: "8px",
-                            color: "var(--header-primary)",
-                            display: "inline"
-                        }}
-                    >
-                        User Reviews
-                    </Text>
-
-                    <div>
-                        <Tooltip text="Open Review Modal">
-                            {tooltipProps => (
-                                <button
-                                    {...tooltipProps}
-                                    className={cl("userperms-permdetails-btn")}
-                                    onClick={() =>
-                                        openReviewsModal(user.id, user.username)
-                                    }
-                                >
-                                    <svg
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
-                                    </svg>
-                                </button>
-                            )}
-                        </Tooltip>
-
-                        <Tooltip text={viewReviews ? "Hide Reviews" : "Show Reviews"}>
-                            {tooltipProps => (
-                                <button
-                                    {...tooltipProps}
-                                    className={cl("userperms-toggleperms-btn")}
-                                    onClick={() => {
-                                        setViewReviews(v => !v);
-                                        Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !viewReviews;
-                                    }}
-                                >
-                                    <svg
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        transform={viewReviews ? "scale(1 -1)" : "scale(1 1)"}
-                                    >
-                                        <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
-                                    </svg>
-                                </button>
-                            )}
-                        </Tooltip>
-
-                    </div>
-                </div>
-                {viewReviews && <ReviewsView discordId={user.id} name={user.username} />}
-            </ErrorBoundary>
+                <ExpandableHeader
+                    headerText={"User Reviews"}
+                    onMeatBallMenuClick={
+                        () => {
+                            openReviewsModal(user.id, user.username);
+                        }
+                    }
+                    onDropDownClick={
+                        state => {
+                            Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
+                        }
+                    }
+                    defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
+                >
+                    <ReviewsView discordId={user.id} name="User Reviews" />
+                </ExpandableHeader>
+            </ErrorBoundary >
         );
     }
 });
