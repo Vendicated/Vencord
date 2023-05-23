@@ -542,7 +542,7 @@ export default definePlugin({
         }
     },
 
-    hasPermissionToUseExternalEmojis(channelId: string) {
+    hasPermissionToUseExternalEmojis(channelId: string): boolean {
         const channel = ChannelStore.getChannel(channelId);
 
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
@@ -666,9 +666,12 @@ export default definePlugin({
                 }
             }
 
-            if ((!this.canUseEmotes || !this.hasPermissionToUseExternalEmojis(channelId)) && settings.enableEmojiBypass) {
+            if (settings.enableEmojiBypass) {
+                const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
+
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
+                    if (emoji.available && canUseEmotes) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
