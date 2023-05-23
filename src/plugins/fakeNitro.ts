@@ -55,7 +55,7 @@ const ClientThemeSettingsProto = proxyLazy(() => searchProtoClass("clientThemeSe
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
 
-enum EmojiIntentions {
+const enum EmojiIntentions {
     REACTION = 0,
     STATUS = 1,
     COMMUNITY_CONTENT = 2,
@@ -64,6 +64,14 @@ enum EmojiIntentions {
     GUILD_ROLE_BENEFIT_EMOJI = 5,
     COMMUNITY_CONTENT_ONLY = 6,
     SOUNDBOARD = 7
+}
+
+const enum StickerType {
+    PNG = 1,
+    APNG = 2,
+    LOTTIE = 3,
+    // don't think you can even have gif stickers but the docs have it
+    GIF = 4
 }
 
 interface BaseSticker {
@@ -171,6 +179,10 @@ export default definePlugin({
                 {
                     match: /(&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
                     replace: (_, rest, canUseExternal) => `${rest}(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
+                },
+                {
+                    match: /if\(!\i\.available/,
+                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
                 }
             ]
         },
@@ -542,7 +554,7 @@ export default definePlugin({
         }
     },
 
-    hasPermissionToUseExternalEmojis(channelId: string) {
+    hasPermissionToUseExternalEmojis(channelId: string): boolean {
         const channel = ChannelStore.getChannel(channelId);
 
         if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
@@ -623,8 +635,9 @@ export default definePlugin({
     },
 
     start() {
-        const settings = Settings.plugins.FakeNitro;
-        if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
+        const s = settings.store;
+
+        if (!s.enableEmojiBypass && !s.enableStickerBypass) {
             return;
         }
 
@@ -636,39 +649,37 @@ export default definePlugin({
             const { guildId } = this;
 
             stickerBypass: {
-                if (!settings.enableStickerBypass)
+                if (!s.enableStickerBypass)
                     break stickerBypass;
 
                 const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
-                if (sticker.available !== false && ((this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId)) || (sticker as GuildSticker)?.guild_id === guildId))
+                // Discord Stickers are now free yayyy!! :D
+                if ("pack_id" in sticker)
                     break stickerBypass;
 
-                let link = this.getStickerLink(sticker.id);
-                if (sticker.format_type === 2) {
+                const canUseStickers = this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId);
+                if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
+                    break stickerBypass;
+
+                const link = this.getStickerLink(sticker.id);
+                if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
                     return { cancel: true };
                 } else {
-                    if ("pack_id" in sticker) {
-                        const packId = sticker.pack_id === "847199849233514549"
-                            // Discord moved these stickers into a different pack at some point, but
-                            // Distok still uses the old id
-                            ? "749043879713701898"
-                            : sticker.pack_id;
-
-                        link = `https://distok.top/stickers/${packId}/${sticker.id}.gif`;
-                    }
-
                     extra.stickers!.length = 0;
-                    messageObj.content += " " + link + `&name=${encodeURIComponent(sticker.name)}`;
+                    messageObj.content += ` ${link}&name=${encodeURIComponent(sticker.name)}`;
                 }
             }
 
-            if ((!this.canUseEmotes || !this.hasPermissionToUseExternalEmojis(channelId)) && settings.enableEmojiBypass) {
+            if (s.enableEmojiBypass) {
+                const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
+
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
+                    if (emoji.available !== false && canUseEmotes) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
@@ -686,23 +697,25 @@ export default definePlugin({
         });
 
         this.preEdit = addPreEditListener((channelId, __, messageObj) => {
-            if (this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId)) return;
+            if (!s.enableEmojiBypass) return;
+
+            const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
 
             const { guildId } = this;
 
-            for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
+            messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
-                if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
-                if (!emoji.require_colons) continue;
+                if (emoji == null) return emojiStr;
+                if (!emoji.require_colons) return emojiStr;
+                if (emoji.available !== false && canUseEmotes) return emojiStr;
+                if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
 
                 const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
                     size: Settings.plugins.FakeNitro.emojiSize,
                     name: encodeURIComponent(emoji.name)
                 }));
-                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
-                });
-            }
+                return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+            });
         });
     },
 
