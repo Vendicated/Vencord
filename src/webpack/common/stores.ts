@@ -50,6 +50,7 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     getSince(userId: string): string;
 };
 
+export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
@@ -88,3 +89,4 @@ waitForStore("ReadStateStore", m => ReadStateStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
+waitForStore("EmojiStore", m => EmojiStore = m);
