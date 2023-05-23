@@ -32,7 +32,7 @@ const enum Intensity {
 
 const settings = definePluginSettings({
     superIntensePartyMode: {
-        description: "Party intensity (disable and re-enable plugin to apply changes)",
+        description: "Party intensity",
         type: OptionType.SELECT,
         options: [
             { label: "Normal", value: Intensity.Normal, default: true },
