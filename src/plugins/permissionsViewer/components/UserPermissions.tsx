@@ -108,9 +108,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                                 {...tooltipProps}
                                 className={cl("userperms-sortorder-btn")}
                                 onClick={() => {
-                                    if (stns.permissionsSortOrder === PermissionsSortOrder.HighestRole)
-                                        stns.permissionsSortOrder = PermissionsSortOrder.LowestRole;
-                                    else stns.permissionsSortOrder = PermissionsSortOrder.HighestRole;
+                                    stns.permissionsSortOrder = stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? PermissionsSortOrder.LowestRole : PermissionsSortOrder.HighestRole;
                                 }}
                             >
                                 <svg
