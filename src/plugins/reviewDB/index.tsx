@@ -18,7 +18,7 @@
 
 import "./style.css";
 
-import { addContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { OpenExternalIcon } from "@components/Icons";
@@ -32,6 +32,17 @@ import ReviewsView from "./components/ReviewsView";
 import { UserType } from "./entities/User";
 import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
 import { authorize, openReviewsModal, showToast } from "./Utils/Utils";
+
+const guildHeaderPopoutContextMenuPatch = (children, props: { guild: Guild, onClose(): void; }) => () => {
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-server-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(props.guild.id, props.guild.name)}
+        />
+    );
+};
 
 export default definePlugin({
     name: "ReviewDB",
@@ -79,10 +90,10 @@ export default definePlugin({
             component: () => (
                 <Button onClick={() => {
                     if (Settings.plugins.ReviewDB.token) {
-                        window.open("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token));
+                        VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token));
                         return;
                     } else {
-                        window.open("https://reviewdb.mantikafasi.dev/");
+                        VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/");
                     }
                 }}>
                     ReviewDB website
@@ -94,7 +105,7 @@ export default definePlugin({
             description: "ReviewDB Support Server",
             component: () => (
                 <Button onClick={() => {
-                    window.open("https://discord.gg/eWPBSbvznt");
+                    VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
                 }}>
                     ReviewDB Support Server
                 </Button>
@@ -115,16 +126,7 @@ export default definePlugin({
                     showToast("You have new reviews on your profile!");
             }
 
-            addContextMenuPatch("guild-header-popout", (children, props: { guild: Guild, onClose(): void; }) => () => {
-                children.push(
-                    <Menu.MenuItem
-                        label="View Reviews"
-                        id="vc-rdb-server-reviews"
-                        icon={OpenExternalIcon}
-                        action={() => openReviewsModal(props.guild.id, props.guild.name)}
-                    />
-                );
-            });
+            addContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
 
             if (user.banInfo) {
                 const endDate = new Date(user.banInfo.banEndDate);
@@ -158,6 +160,9 @@ export default definePlugin({
             settings.user = user;
         }, 4000);
     },
+    stop() {
+        removeContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
+    },
 
     getReviewsComponent: (user: User) => {
         const [viewReviews, setViewReviews] = useState(Vencord.Settings.plugins.ReviewDB.reviewsDropdownState);
@@ -182,7 +187,7 @@ export default definePlugin({
                     </Text>
 
                     <div>
-                        <Tooltip text="Open Reviews Modal">
+                        <Tooltip text="Open Review Modal">
                             {tooltipProps => (
                                 <button
                                     {...tooltipProps}
