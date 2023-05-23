@@ -19,6 +19,7 @@
 import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join } from "path";
+import { isSatisfiesExpression } from "typescript";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 interface Dev {
@@ -66,9 +67,9 @@ function parseDevs() {
 
         const value = devsDeclaration.initializer.arguments[0];
 
-        if (!isObjectLiteralExpression(value)) return;
+        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
 
-        for (const prop of value.properties) {
+        for (const prop of value.expression.properties) {
             const name = (prop.name as Identifier).text;
             const value = isPropertyAssignment(prop) ? prop.initializer : prop;
 
