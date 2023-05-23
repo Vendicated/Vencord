@@ -22,11 +22,12 @@ import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
@@ -392,70 +393,137 @@ export default definePlugin({
         });
     },
 
-    patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        if (content.length > 1 && !settings.store.transformCompoundSentence) return content;
+    trimContent(content: Array<any>) {
+        const firstContent = content[0];
+        if (typeof firstContent === "string") content[0] = firstContent.trimStart();
+        if (content[0] === "") content.shift();
 
-        const newContent: Array<any> = [];
+        const lastIndex = content.length - 1;
+        const lastContent = content[lastIndex];
+        if (typeof lastContent === "string") content[lastIndex] = lastContent.trimEnd();
+        if (content[lastIndex] === "") content.pop();
+    },
+
+    clearEmptyArrayItems(array: Array<any>) {
+        return array.filter(item => item != null);
+    },
+
+    ensureChildrenIsArray(child: ReactElement) {
+        if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
+    },
+
+    patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
+        // If content has more than one child or it's a single ReactElement like a header or list
+        if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
         let nextIndex = content.length;
 
-        for (const element of content) {
-            if (element.props?.trusted == null) {
-                newContent.push(element);
-                continue;
-            }
-
+        const transformLinkChild = (child: ReactElement) => {
             if (settings.store.transformEmojis) {
-                const fakeNitroMatch = element.props.href.match(fakeNitroEmojiRegex);
+                const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
                     let url: URL | null = null;
                     try {
-                        url = new URL(element.props.href);
+                        url = new URL(child.props.href);
                     } catch { }
 
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
-                    newContent.push(Parser.defaultRules.customEmoji.react({
-                        jumboable: !inline && content.length === 1,
+                    return Parser.defaultRules.customEmoji.react({
+                        jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
                         animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
                         fake: true
-                    }, void 0, { key: String(nextIndex++) }));
-
-                    continue;
+                    }, void 0, { key: String(nextIndex++) });
                 }
             }
 
             if (settings.store.transformStickers) {
-                if (fakeNitroStickerRegex.test(element.props.href)) continue;
+                if (fakeNitroStickerRegex.test(child.props.href)) return null;
 
-                const gifMatch = element.props.href.match(fakeNitroGifStickerRegex);
+                const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
                     // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                    if (StickerStore.getStickerById(gifMatch[1])) continue;
+                    if (StickerStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
-            newContent.push(element);
+            return child;
+        };
+
+        const transformChild = (child: ReactElement) => {
+            if (child?.props?.trusted != null) return transformLinkChild(child);
+            if (child?.props?.children != null) {
+                if (!Array.isArray(child.props.children)) {
+                    child.props.children = modifyChild(child.props.children);
+                    return child;
+                }
+
+                child.props.children = modifyChildren(child.props.children);
+                if (child.props.children.length === 0) return null;
+                return child;
+            }
+
+            return child;
+        };
+
+        const modifyChild = (child: ReactElement) => {
+            const newChild = transformChild(child);
+
+            if (newChild?.type === "ul" || newChild?.type === "ol") {
+                this.ensureChildrenIsArray(newChild);
+                if (newChild.props.children.length === 0) return null;
+
+                let listHasAnItem = false;
+                for (const [index, child] of newChild.props.children.entries()) {
+                    if (child == null) {
+                        delete newChild.props.children[index];
+                        continue;
+                    }
+
+                    this.ensureChildrenIsArray(child);
+                    if (child.props.children.length > 0) listHasAnItem = true;
+                    else delete newChild.props.children[index];
+                }
+
+                if (!listHasAnItem) return null;
+
+                newChild.props.children = this.clearEmptyArrayItems(newChild.props.children);
+            }
+
+            return newChild;
+        };
+
+        const modifyChildren = (children: Array<ReactElement>) => {
+            for (const [index, child] of children.entries()) children[index] = modifyChild(child);
+
+            children = this.clearEmptyArrayItems(children);
+            this.trimContent(children);
+
+            return children;
+        };
+
+        try {
+            return modifyChildren(window._.cloneDeep(content));
+        } catch (err) {
+            new Logger("FakeNitro").error(err);
+            return content;
         }
-
-        const firstContent = newContent[0];
-        if (typeof firstContent === "string") newContent[0] = firstContent.trimStart();
-
-        return newContent;
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
         const itemsToMaybePush: Array<string> = [];
 
         const contentItems = message.content.split(/\s/);
-        if (contentItems.length === 1 && !settings.store.transformCompoundSentence) itemsToMaybePush.push(contentItems[0]);
-        else itemsToMaybePush.push(...contentItems);
+        if (settings.store.transformCompoundSentence) itemsToMaybePush.push(...contentItems);
+        else if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]);
 
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
+            if (!settings.store.transformCompoundSentence && !item.startsWith("http")) continue;
+
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
                 let url: URL | null = null;
@@ -492,10 +560,13 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        if (message.content.split(/\s/).length > 1 && !settings.store.transformCompoundSentence) return false;
+        const contentItems = message.content.split(/\s/);
+        if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
         switch (embed.type) {
             case "image": {
+                if (!settings.store.transformCompoundSentence && !contentItems.includes(embed.url!) && !contentItems.includes(embed.image!.proxyURL)) return false;
+
                 if (settings.store.transformEmojis) {
                     if (fakeNitroEmojiRegex.test(embed.url!)) return true;
                 }
