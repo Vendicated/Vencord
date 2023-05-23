@@ -28,9 +28,10 @@ export interface ExpandableHeaderProps {
     defaultState?: boolean;
     headerText: string;
     children: React.ReactNode;
+    buttons?: React.ReactNode[];
 }
 
-export default function ExpandableHeader({ children, onMeatBallMenuClick, meatBallMenuTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
+export default function ExpandableHeader({ children, onMeatBallMenuClick, buttons, meatBallMenuTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
     const [showContent, setShowContent] = useState(defaultState);
 
     return (
@@ -39,12 +40,12 @@ export default function ExpandableHeader({ children, onMeatBallMenuClick, meatBa
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                marginBottom: "8px"
             }}>
                 <Text
                     tag="h2"
                     variant="eyebrow"
                     style={{
-                        marginBottom: "8px",
                         color: "var(--header-primary)",
                         display: "inline"
                     }}
@@ -52,14 +53,20 @@ export default function ExpandableHeader({ children, onMeatBallMenuClick, meatBa
                     {headerText}
                 </Text>
 
-                <div>
+                <div className={cl("center-flex")}>
+                    {
+                        buttons?.map((button, i) => (
+                            button
+                        ))
+                    }
+
                     {
                         onMeatBallMenuClick && // only show meatball menu if callback is provided
                         <Tooltip text={meatBallMenuTooltipText}>
                             {tooltipProps => (
                                 <button
                                     {...tooltipProps}
-                                    className={cl("meatball-menu-btn")}
+                                    className={cl("btn")}
                                     onClick={onMeatBallMenuClick}>
                                     <svg
                                         width="24"
@@ -78,7 +85,7 @@ export default function ExpandableHeader({ children, onMeatBallMenuClick, meatBa
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
-                                className={cl("toggle-content-btn")}
+                                className={cl("btn")}
                                 onClick={() => {
                                     setShowContent(v => !v);
                                     onDropDownClick?.(showContent);
