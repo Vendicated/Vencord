@@ -631,8 +631,9 @@ export default definePlugin({
     },
 
     start() {
-        const settings = Settings.plugins.FakeNitro;
-        if (!settings.enableEmojiBypass && !settings.enableStickerBypass) {
+        const s = settings.store;
+
+        if (!s.enableEmojiBypass && !s.enableStickerBypass) {
             return;
         }
 
@@ -644,7 +645,7 @@ export default definePlugin({
             const { guildId } = this;
 
             stickerBypass: {
-                if (!settings.enableStickerBypass)
+                if (!s.enableStickerBypass)
                     break stickerBypass;
 
                 const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
@@ -668,7 +669,7 @@ export default definePlugin({
                 }
             }
 
-            if (settings.enableEmojiBypass) {
+            if (s.enableEmojiBypass) {
                 const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
 
                 for (const emoji of messageObj.validNonShortcutEmojis) {
@@ -691,23 +692,25 @@ export default definePlugin({
         });
 
         this.preEdit = addPreEditListener((channelId, __, messageObj) => {
-            if (this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId)) return;
+            if (!s.enableEmojiBypass) return;
+
+            const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
 
             const { guildId } = this;
 
-            for (const [emojiStr, _, emojiId] of messageObj.content.matchAll(/(?<!\\)<a?:(\w+):(\d+)>/ig)) {
+            messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
-                if (emoji == null || (emoji.guildId === guildId && !emoji.animated)) continue;
-                if (!emoji.require_colons) continue;
+                if (emoji == null) return emojiStr;
+                if (!emoji.require_colons) return emojiStr;
+                if (emoji.available !== false && canUseEmotes) return emojiStr;
+                if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
 
                 const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
                     size: Settings.plugins.FakeNitro.emojiSize,
                     name: encodeURIComponent(emoji.name)
                 }));
-                messageObj.content = messageObj.content.replace(emojiStr, (match, offset, origStr) => {
-                    return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
-                });
-            }
+                return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+            });
         });
     },
 
