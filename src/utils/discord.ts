@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findLazy } from "@webpack";
+import { MessageObject } from "@api/MessageEvents";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { Guild, Message } from "discord-types/general";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
+const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
@@ -48,4 +50,30 @@ export function insertTextIntoChatInputBox(text: string) {
         rawText: text,
         plainText: text
     });
+}
+
+interface MessageExtra {
+    messageReference: Message["messageReference"];
+    allowedMentions: {
+        parse: string[];
+        replied_user: boolean;
+    };
+    stickerIds: string[];
+}
+
+export function sendMessage(
+    channelId: string,
+    data: Partial<MessageObject>,
+    waitForChannelReady?: boolean,
+    extra?: Partial<MessageExtra>
+) {
+    const messageData = {
+        content: "",
+        invalidEmojis: [],
+        tts: false,
+        validNonShortcutEmojis: [],
+        ...data
+    };
+
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
