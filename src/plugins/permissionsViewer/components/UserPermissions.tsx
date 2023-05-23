@@ -99,8 +99,8 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
     return (
         <ExpandableHeader
             headerText="Permissions"
-            meatballTooltipText="Role Details"
-            onMeatballClick={() =>
+            moreTooltipText="Role Details"
+            onMoreClick={() =>
                 openRolesAndUsersPermissionsModal(
                     rolePermissions,
                     guild,
