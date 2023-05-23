@@ -55,9 +55,7 @@ export default function ExpandableHeader({ children, onMeatballClick, buttons, m
 
                 <div className={cl("center-flex")}>
                     {
-                        buttons?.map((button, i) => (
-                            button
-                        ))
+                        buttons ?? null
                     }
 
                     {
