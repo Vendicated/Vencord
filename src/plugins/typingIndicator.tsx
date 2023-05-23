@@ -89,7 +89,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             <Tooltip text={tooltipText!}>
                 {({ onMouseLeave, onMouseEnter }) => (
                     <div
-                        style={{ marginLeft: 6, zIndex: 0, cursor: "pointer" }}
+                        style={{ marginLeft: 6, height: 16, display: "flex", alignItems: "center", zIndex: 0, cursor: "pointer" }}
                         onMouseLeave={onMouseLeave}
                         onMouseEnter={onMouseEnter}
                     >

@@ -23,7 +23,7 @@ import { filters, findBulk } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
-import { settings } from "..";
+import { PermissionsSortOrder, settings } from "..";
 import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
@@ -46,6 +46,7 @@ const Classes = proxyLazy(() => {
 }) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
+    const stns = settings.use(["permissionsSortOrder"]);
     const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -91,7 +92,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         userPermissions.sort((a, b) => b.rolePosition - a.rolePosition);
 
         return [rolePermissions, userPermissions];
-    }, []);
+    }, [stns.permissionsSortOrder]);
 
     const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
 
@@ -100,7 +101,28 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             <div className={cl("userperms-title-container")}>
                 <Text className={cl("userperms-title")} variant="eyebrow">Permissions</Text>
 
-                <div>
+                <div className={cl("userperms-btns-container")}>
+                    <Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
+                        {tooltipProps => (
+                            <button
+                                {...tooltipProps}
+                                className={cl("userperms-sortorder-btn")}
+                                onClick={() => {
+                                    stns.permissionsSortOrder = stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? PermissionsSortOrder.LowestRole : PermissionsSortOrder.HighestRole;
+                                }}
+                            >
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 96 960 960"
+                                    transform={stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "scale(1 1)" : "scale(1 -1)"}
+                                >
+                                    <path fill="var(--text-normal)" d="M440 896V409L216 633l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                </svg>
+                            </button>
+                        )}
+                    </Tooltip>
+
                     <Tooltip text="Role Details">
                         {tooltipProps => (
                             <button
