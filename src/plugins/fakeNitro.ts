@@ -521,7 +521,7 @@ export default definePlugin({
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
-            if (!settings.store.transformCompoundSentence && !item.startsWith("https")) continue;
+            if (!settings.store.transformCompoundSentence && !item.startsWith("http")) continue;
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
