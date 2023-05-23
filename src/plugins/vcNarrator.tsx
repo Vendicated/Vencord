@@ -165,7 +165,7 @@ export default definePlugin({
                 if (!type) continue;
 
                 const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe ? "" : UserStore.getUser(userId).username;
+                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel));
@@ -229,6 +229,11 @@ export default definePlugin({
                 default: 1,
                 markers: [0.1, 0.5, 1, 2, 5, 10],
                 stickToMarkers: false
+            },
+            sayOwnName: {
+                description: "Say own name",
+                type: OptionType.BOOLEAN,
+                default: false
             },
             joinMessage: {
                 type: OptionType.STRING,

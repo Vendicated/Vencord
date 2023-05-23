@@ -290,5 +290,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     PandaNinjas: {
         name: "PandaNinjas",
         id: 455128749071925248n
-    }
+    },
+    CatNoir: {
+        name: "CatNoir",
+        id: 260371016348336128n
+    },
+    outfoxxed: {
+        name: "outfoxxed",
+        id: 837425748435796060n
+    },
 });
