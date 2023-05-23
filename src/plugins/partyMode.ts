@@ -22,10 +22,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { GenericStore } from "@webpack/common";
 
-
 const PoggerModeSettingsStore: GenericStore = findStoreLazy("PoggermodeSettingsStore");
 
-enum Intensity {
+const enum Intensity {
     Normal,
     Better,
     ProjectX,
@@ -41,15 +40,13 @@ const settings = definePluginSettings({
             { label: "Project X", value: Intensity.ProjectX },
         ],
         restartNeeded: false,
-        onChange: (value: Intensity) => {
-            setSettings(value);
-        },
+        onChange: setSettings
     },
 });
 
 export default definePlugin({
     name: "Party mode 🎉",
-    description: "Allows you to use party mode cause party never ends ✨",
+    description: "Allows you to use party mode cause the party never ends ✨",
     authors: [Devs.UwUDev],
     settings,
 
@@ -57,6 +54,7 @@ export default definePlugin({
         setPoggerState(true);
         setSettings(settings.store.superIntensePartyMode);
     },
+
     stop() {
         setPoggerState(false);
     },
