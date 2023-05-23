@@ -27,7 +27,7 @@ import { copyWithToast } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Text, Tooltip } from "@webpack/common";
+import { i18n, Text, Tooltip } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
@@ -99,7 +99,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
                 variant="eyebrow"
                 style={{ color: "var(--header-primary)" }}
             >
-                Connections
+                {i18n.Messages.CONNECTIONS}
             </Text>
             <Flex style={{
                 marginTop: "8px",
@@ -181,6 +181,13 @@ export default definePlugin({
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:/,
                 replace: "$self.profilePanelComponent(arguments[0]),$&"
+            }
+        },
+        {
+            find: ".CONNECTIONS_ROLE_POPOUT_VIEW_ALL",
+            replacement: {
+                match: /\i.length>0/,
+                replace: "false&&$&"
             }
         }
     ],
