@@ -18,8 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
-import { useAwaiter } from "@utils/react";
-import { useForceUpdater } from "@utils/react";
+import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
@@ -38,6 +37,7 @@ interface UserProps {
 
 export default function ReviewsView({ discordId, name }: UserProps) {
     const [signal, refetch] = useForceUpdater(true);
+
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(discordId), {
         fallbackValue: [],
         deps: [signal],
@@ -84,11 +84,13 @@ export function ReviewList({ discordId, name, refetch, reviews }: UserProps & { 
                     refetch={refetch}
                 />
             )}
+
             {reviews?.length === 0 && (
                 <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
+
             <textarea
                 className={classes(Classes.inputDefault, "enter-comment")}
                 onKeyDownCapture={e => {
