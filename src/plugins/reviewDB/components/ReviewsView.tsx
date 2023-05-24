@@ -19,27 +19,44 @@
 import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
+import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
+import { Review } from "../entities/Review";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");
 
-export default function ReviewsView({ discordId, name }: { discordId: string; name: string; }) {
-    const { token } = Settings.plugins.ReviewDB;
-    const [refetchCount, setRefetchCount] = React.useState(0);
+interface UserProps {
+    discordId: string;
+    name: string;
+}
+
+export default function ReviewsView({ discordId, name }: UserProps) {
+    const [signal, refetch] = useForceUpdater(true);
     const [reviews, _, isLoading] = useAwaiter(() => getReviews(discordId), {
         fallbackValue: [],
-        deps: [refetchCount],
+        deps: [signal],
     });
 
-    const dirtyRefetch = () => setRefetchCount(refetchCount + 1);
-
     if (isLoading) return null;
+
+    return (
+        <ReviewList
+            discordId={discordId}
+            name={name}
+            refetch={refetch}
+            reviews={reviews}
+        />
+    );
+}
+
+export function ReviewList({ discordId, name, refetch, reviews }: UserProps & { refetch(): void; reviews: Review[]; }) {
+    const { token } = Settings.plugins.ReviewDB;
 
     function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
         if (key === "Enter") {
@@ -50,7 +67,7 @@ export default function ReviewsView({ discordId, name }: { discordId: string; na
             }).then(res => {
                 if (res?.success) {
                     (target as HTMLInputElement).value = ""; // clear the input
-                    dirtyRefetch();
+                    refetch();
                 } else if (res?.message) {
                     showToast(res.message);
                 }
@@ -64,7 +81,7 @@ export default function ReviewsView({ discordId, name }: { discordId: string; na
                 <ReviewComponent
                     key={review.id}
                     review={review}
-                    refetch={dirtyRefetch}
+                    refetch={refetch}
                 />
             )}
             {reviews?.length === 0 && (
