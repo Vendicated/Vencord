@@ -20,12 +20,12 @@ import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React, UserStore } from "@webpack/common";
+import { Forms, Paginator, React, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
-import { authorize, showToast } from "../Utils/Utils";
+import { authorize, REVIEWS_PER_PAGE, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");
@@ -35,23 +35,36 @@ interface UserProps {
     name: string;
 }
 
-export default function ReviewsView({ discordId, name }: UserProps) {
+export default function ReviewsView({ discordId, name, paginate = false }: UserProps & { paginate?: boolean; }) {
     const [signal, refetch] = useForceUpdater(true);
+    const [page, setPage] = React.useState(1);
 
-    const [reviews, _, isLoading] = useAwaiter(() => getReviews(discordId), {
-        fallbackValue: [],
-        deps: [signal],
+    const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+        fallbackValue: null,
+        deps: [signal, page],
     });
 
-    if (isLoading) return null;
+    if (isLoading || !reviewData) return null;
 
     return (
-        <ReviewList
-            discordId={discordId}
-            name={name}
-            refetch={refetch}
-            reviews={reviews}
-        />
+        <>
+            <ReviewList
+                discordId={discordId}
+                name={name}
+                refetch={refetch}
+                reviews={reviewData!.reviews}
+            />
+
+            {paginate && (
+                <Paginator
+                    currentPage={page}
+                    maxVisiblePages={5}
+                    pageSize={REVIEWS_PER_PAGE}
+                    totalCount={reviewData.reviewCount}
+                    onPageChange={setPage}
+                />
+            )}
+        </>
     );
 }
 

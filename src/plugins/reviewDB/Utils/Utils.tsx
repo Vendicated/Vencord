@@ -27,6 +27,8 @@ import ReviewsView from "../components/ReviewsView";
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
 
+export const REVIEWS_PER_PAGE = 50;
+
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
 
@@ -100,7 +102,11 @@ export function openReviewsModal(discordId: string, name: string) {
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
-                        <ReviewsView discordId={discordId} name={name} />
+                        <ReviewsView
+                            discordId={discordId}
+                            name={name}
+                            paginate
+                        />
                     </div>
                 </ModalContent >
             </ModalRoot >
