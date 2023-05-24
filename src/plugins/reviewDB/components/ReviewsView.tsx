@@ -20,7 +20,7 @@ import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { Forms, React, UserStore } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
@@ -54,10 +54,21 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
     if (!reviewData) return null;
 
     return (
-        <ReviewList
-            refetch={refetch}
-            reviews={reviewData!.reviews}
-        />
+        <>
+            <ReviewList
+                refetch={refetch}
+                reviews={reviewData!.reviews}
+            />
+
+            {showInput && (
+                <ReviewsInputComponent
+                    name={name}
+                    discordId={discordId}
+                    refetch={refetch}
+                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
+                />
+            )}
+        </>
     );
 }
 
