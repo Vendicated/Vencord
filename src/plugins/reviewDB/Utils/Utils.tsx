@@ -21,8 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, Forms, React, SelectedChannelStore, Text, Toasts, UserUtils } from "@webpack/common";
-import { useState } from "react";
+import { FluxDispatcher, Forms, React, SelectedChannelStore, Text, Toasts, UserUtils, useState } from "@webpack/common";
 
 import ReviewsView from "../components/ReviewsView";
 import { Review } from "../entities/Review";
