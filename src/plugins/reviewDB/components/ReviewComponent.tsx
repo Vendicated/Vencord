@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
 import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities/Review";
+import { settings } from "../settings";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
 import MessageButton from "./MessageButton";
@@ -117,7 +117,7 @@ export default LazyComponent(() => {
                 {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
                 {
-                    !Settings.plugins.ReviewDB.hideTimestamps && review.type !== ReviewType.System && (
+                    !settings.store.hideTimestamps && review.type !== ReviewType.System && (
                         <Timestamp timestamp={moment(review.timestamp * 1000)} >
                             {dateFormat.format(review.timestamp * 1000)}
                         </Timestamp>)

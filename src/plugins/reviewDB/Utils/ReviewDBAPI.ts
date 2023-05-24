@@ -16,15 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 
 import { Review } from "../entities/Review";
 import { ReviewDBUser } from "../entities/User";
+import { settings } from "../settings";
 import { authorize, showToast } from "./Utils";
 
 const API_URL = "https://manti.vendicated.dev";
-
-const getToken = () => Settings.plugins.ReviewDB.token;
 
 export const REVIEWS_PER_PAGE = 50;
 
@@ -41,7 +39,7 @@ const WarningFlag = 0b00000010;
 
 export async function getReviews(id: string, offset = 0): Promise<Response> {
     let flags = 0;
-    if (!Settings.plugins.ReviewDB.showWarning) flags |= WarningFlag;
+    if (!settings.store.showWarning) flags |= WarningFlag;
 
     const params = new URLSearchParams({
         flags: String(flags),
@@ -86,7 +84,7 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
 }
 
 export async function addReview(review: any): Promise<Response | null> {
-    review.token = getToken();
+    review.token = settings.store.token;
 
     if (!review.token) {
         showToast("Please authorize to add a review.");
@@ -116,7 +114,7 @@ export function deleteReview(id: number): Promise<Response> {
             Accept: "application/json",
         }),
         body: JSON.stringify({
-            token: getToken(),
+            token: settings.store.token,
             reviewid: id
         })
     }).then(r => r.json());
@@ -131,16 +129,16 @@ export async function reportReview(id: number) {
         }),
         body: JSON.stringify({
             reviewid: id,
-            token: getToken()
+            token: settings.store.token
         })
     }).then(r => r.json()) as Response;
-    showToast(await res.message);
+
+    showToast(res.message);
 }
 
 export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
     return fetch(API_URL + "/api/reviewdb/users", {
         body: JSON.stringify({ token }),
         method: "POST",
-    })
-        .then(r => r.json());
+    }).then(r => r.json());
 }

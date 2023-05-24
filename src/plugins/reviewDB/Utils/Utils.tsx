@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
@@ -28,6 +27,7 @@ import { FluxDispatcher, Paginator, React, SelectedChannelStore, Text, Toasts, U
 import ReviewsView, { ReviewsInputComponent } from "../components/ReviewsView";
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
+import { settings } from "../settings";
 import { Response, REVIEWS_PER_PAGE } from "./ReviewDBAPI";
 
 export const cl = classNameFactory("vc-rdb-");
@@ -64,7 +64,7 @@ export function authorize(callback?: any) {
                     });
                     const { token, success } = await res.json();
                     if (success) {
-                        Settings.plugins.ReviewDB.token = token;
+                        settings.store.token = token;
                         showToast("Successfully logged in!");
                         callback?.();
                     } else if (res.status === 1) {
@@ -92,7 +92,7 @@ export function showToast(text: string) {
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user?.type === UserType.Admin) return true;
+    if (review.sender.discordID === userId || settings.store.user?.type === UserType.Admin) return true;
 }
 
 function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
@@ -101,7 +101,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
     const [page, setPage] = useState(1);
 
     const reviewCount = data?.reviewCount;
-    const isReviewed = data?.reviews.some(r => r.sender.discordID === Settings.plugins.ReviewDB.user?.discordID);
+    const isReviewed = data?.reviews.some(r => r.sender.discordID === settings.store.user?.discordID);
 
     return (
         <ErrorBoundary>

@@ -27,18 +27,18 @@ export interface BanInfo {
     discordID: string;
     reviewID: number;
     reviewContent: string;
-    banEndDate: string;
+    banEndDate: number;
 }
 
 export interface ReviewDBUser {
-    ID: number
-    discordID: string
-    username: string
-    profilePhoto: string
-    clientMod: string
-    warningCount: number
-    badges: any[]
-    banInfo: BanInfo | null
-    lastReviewID: number
-    type: UserType
+    ID: number;
+    discordID: string;
+    username: string;
+    profilePhoto: string;
+    clientMod: string;
+    warningCount: number;
+    badges: any[];
+    banInfo: BanInfo | null;
+    lastReviewID: number;
+    type: UserType;
 }

@@ -24,14 +24,15 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, Menu, useState } from "@webpack/common";
+import definePlugin from "@utils/types";
+import { Alerts, Menu, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import ReviewsView from "./components/ReviewsView";
 import { UserType } from "./entities/User";
+import { settings } from "./settings";
 import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
-import { authorize, openReviewsModal, showToast } from "./Utils/Utils";
+import { openReviewsModal, showToast } from "./Utils/Utils";
 
 const guildHeaderPopoutContextMenuPatch = (children, props: { guild: Guild, onClose(): void; }) => () => {
     children.push(
@@ -49,6 +50,8 @@ export default definePlugin({
     description: "Review other users (Adds a new settings to profiles)",
     authors: [Devs.mantikafasi, Devs.Ven],
 
+    settings,
+
     patches: [
         {
             find: "disableBorderColor:!0",
@@ -59,68 +62,16 @@ export default definePlugin({
         }
     ],
 
-    options: {
-        authorize: {
-            type: OptionType.COMPONENT,
-            description: "Authorize with ReviewDB",
-            component: () => (
-                <Button onClick={authorize}>
-                    Authorize with ReviewDB
-                </Button>
-            )
-        },
-        notifyReviews: {
-            type: OptionType.BOOLEAN,
-            description: "Notify about new reviews on startup",
-            default: true,
-        },
-        showWarning: {
-            type: OptionType.BOOLEAN,
-            description: "Display warning to be respectful at the top of the reviews list",
-            default: true,
-        },
-        hideTimestamps: {
-            type: OptionType.BOOLEAN,
-            description: "Hide timestamps on reviews",
-            default: false,
-        },
-        website: {
-            type: OptionType.COMPONENT,
-            description: "ReviewDB website",
-            component: () => (
-                <Button onClick={() => {
-                    if (Settings.plugins.ReviewDB.token) {
-                        VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token));
-                        return;
-                    } else {
-                        VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/");
-                    }
-                }}>
-                    ReviewDB website
-                </Button>
-            )
-        },
-        supportServer: {
-            type: OptionType.COMPONENT,
-            description: "ReviewDB Support Server",
-            component: () => (
-                <Button onClick={() => {
-                    VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
-                }}>
-                    ReviewDB Support Server
-                </Button>
-            )
-        },
-    },
-
     async start() {
-        const settings = Settings.plugins.ReviewDB;
-        if (!settings.notifyReviews || !settings.token) return;
+        const s = settings.store;
+
+        const { token, lastReviewId, notifyReviews } = s;
+        if (!notifyReviews || !token) return;
 
         setTimeout(async () => {
-            const user = await getCurrentUserInfo(settings.token);
-            if (settings.lastReviewId < user.lastReviewID) {
-                settings.lastReviewId = user.lastReviewID;
+            const user = await getCurrentUserInfo(token);
+            if (lastReviewId && lastReviewId < user.lastReviewID) {
+                s.lastReviewId = user.lastReviewID;
                 if (user.lastReviewID !== 0)
                     showToast("You have new reviews on your profile!");
             }
@@ -128,9 +79,8 @@ export default definePlugin({
             addContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
 
             if (user.banInfo) {
-                const endDate = new Date(user.banInfo.banEndDate);
-                if (endDate > new Date() && (settings.user?.banInfo?.banEndDate ?? 0) < endDate) {
-
+                const endDate = new Date(user.banInfo.banEndDate).getTime();
+                if (endDate > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate) {
                     Alerts.show({
                         title: "You have been banned from ReviewDB",
                         body: <>
@@ -150,13 +100,13 @@ export default definePlugin({
                         cancelText: "Appeal",
                         confirmText: "Ok",
                         onCancel: () => {
-                            window.open("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token) + "&page=dashboard/appeal");
+                            VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token) + "&page=dashboard/appeal");
                         }
                     });
                 }
             }
 
-            settings.user = user;
+            s.user = user;
         }, 4000);
     },
     stop() {
@@ -174,12 +124,8 @@ export default definePlugin({
                     }
                 }
                 moreTooltipText={`View all ${reviewCount ?? ""} reviews`}
-                onDropDownClick={
-                    state => {
-                        Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
-                    }
-                }
-                defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
+                onDropDownClick={state => settings.store.reviewsDropdownState = !state}
+                defaultState={settings.store.reviewsDropdownState}
             >
                 <ReviewsView
                     discordId={user.id}

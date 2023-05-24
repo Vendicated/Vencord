@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
@@ -24,6 +23,7 @@ import { Forms, React, UserStore } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
+import { settings } from "../settings";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../Utils/ReviewDBAPI";
 import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
@@ -98,7 +98,7 @@ export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Rev
 }
 
 export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
-    const { token } = Settings.plugins.ReviewDB;
+    const { token } = settings.store;
 
     function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
         if (key === "Enter") {
