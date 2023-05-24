@@ -185,6 +185,7 @@ export default definePlugin({
                     discordId={user.id}
                     name={user.username}
                     onFetchReviews={r => setReviewCount(r.reviewCount)}
+                    showInput
                 />
             </ExpandableHeader>
         );

@@ -26,6 +26,8 @@ const API_URL = "https://manti.vendicated.dev";
 
 const getToken = () => Settings.plugins.ReviewDB.token;
 
+export const REVIEWS_PER_PAGE = 50;
+
 export interface Response {
     success: boolean,
     message: string;

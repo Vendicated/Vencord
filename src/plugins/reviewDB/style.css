@@ -1,3 +1,7 @@
 [class|="section"]:not([class|="lastSection"]) + .vc-reviewdb-view {
     margin-top: 12px;
 }
+
+.vc-rdb-modal-footer {
+    padding: 0;
+}

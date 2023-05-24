@@ -20,12 +20,12 @@ import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, Paginator, React, UserStore, useState } from "@webpack/common";
+import { Forms, React } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
-import { addReview, getReviews, Response } from "../Utils/ReviewDBAPI";
-import { authorize, REVIEWS_PER_PAGE, showToast } from "../Utils/Utils";
+import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../Utils/ReviewDBAPI";
+import { authorize, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");
@@ -36,13 +36,13 @@ interface UserProps {
 }
 
 interface Props extends UserProps {
-    paginate?: boolean;
     onFetchReviews(data: Response): void;
     refetchSignal?: unknown;
+    showInput?: boolean;
+    page?: number;
 }
 
-export default function ReviewsView({ discordId, name, paginate = false, onFetchReviews, refetchSignal }: Props) {
-    const [page, setPage] = useState(1);
+export default function ReviewsView({ discordId, name, onFetchReviews, refetchSignal, page = 1, showInput = false }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
@@ -54,31 +54,10 @@ export default function ReviewsView({ discordId, name, paginate = false, onFetch
     if (isLoading || !reviewData) return null;
 
     return (
-        <>
-            <ReviewList
-                refetch={refetch}
-                reviews={reviewData!.reviews}
-            />
-
-            {!paginate && (
-                <ReviewsInputComponent
-                    name={name}
-                    discordId={discordId}
-                    refetch={refetch}
-                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
-                />
-            )}
-
-            {paginate && (
-                <Paginator
-                    currentPage={page}
-                    maxVisiblePages={5}
-                    pageSize={REVIEWS_PER_PAGE}
-                    totalCount={reviewData.reviewCount}
-                    onPageChange={setPage}
-                />
-            )}
-        </>
+        <ReviewList
+            refetch={refetch}
+            reviews={reviewData!.reviews}
+        />
     );
 }
 

@@ -17,18 +17,20 @@
 */
 
 import { Settings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Text, Toasts, UserStore, UserUtils, useState } from "@webpack/common";
+import { FluxDispatcher, Paginator, React, SelectedChannelStore, Text, Toasts, UserUtils, useState } from "@webpack/common";
 
 import ReviewsView, { ReviewsInputComponent } from "../components/ReviewsView";
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
+import { Response, REVIEWS_PER_PAGE } from "./ReviewDBAPI";
 
-export const REVIEWS_PER_PAGE = 50;
+export const cl = classNameFactory("vc-rdb-");
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -94,13 +96,16 @@ export function canDeleteReview(review: Review, userId: string) {
 }
 
 function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
-    const [reviewCount, setReviewCount] = useState<number>();
-    const [isReviewed, setIsReviewed] = useState<boolean>(false);
+    const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
+    const [page, setPage] = useState(1);
+
+    const reviewCount = data?.reviewCount;
+    const isReviewed = data?.reviews.some(r => r.sender.discordID === Settings.plugins.ReviewDB.user?.discordID);
 
     return (
         <ErrorBoundary>
-            <ModalRoot {...modalProps} >
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
                     <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
                         {name + "'s Reviews"}
@@ -113,21 +118,33 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         <ReviewsView
-                            refetchSignal={signal}
                             discordId={discordId}
                             name={name}
-                            paginate
-                            onFetchReviews={data => {
-                                setReviewCount(data.reviewCount);
-                                setIsReviewed(data.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id));
-                            }}
+                            page={page}
+                            refetchSignal={signal}
+                            onFetchReviews={setData}
                         />
                     </div>
                 </ModalContent>
 
-                <ModalFooter>
+                <ModalFooter className={cl("modal-footer")}>
                     <div style={{ width: "100%" }}>
-                        <ReviewsInputComponent isAuthor={isReviewed!} discordId={discordId} name={name} refetch={refetch} />
+                        <ReviewsInputComponent
+                            isAuthor={isReviewed ?? false}
+                            discordId={discordId}
+                            name={name}
+                            refetch={refetch}
+                        />
+
+                        {!!reviewCount && (
+                            <Paginator
+                                currentPage={page}
+                                maxVisiblePages={5}
+                                pageSize={REVIEWS_PER_PAGE}
+                                totalCount={reviewCount}
+                                onPageChange={setPage}
+                            />
+                        )}
                     </div>
                 </ModalFooter>
             </ModalRoot>
