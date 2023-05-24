@@ -19,7 +19,7 @@
 import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join } from "path";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 interface Dev {
     name: string;
@@ -66,9 +66,9 @@ function parseDevs() {
 
         const value = devsDeclaration.initializer.arguments[0];
 
-        if (!isObjectLiteralExpression(value)) return;
+        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
 
-        for (const prop of value.properties) {
+        for (const prop of value.expression.properties) {
             const name = (prop.name as Identifier).text;
             const value = isPropertyAssignment(prop) ? prop.initializer : prop;
 
@@ -130,7 +130,9 @@ async function parseFile(fileName: string) {
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
-                        return devs[getName(e)!];
+                        const d = devs[getName(e)!];
+                        if (!d) throw fail(`couldn't look up author ${getName(e)}`);
+                        return d;
                     });
                     break;
                 case "tags":
