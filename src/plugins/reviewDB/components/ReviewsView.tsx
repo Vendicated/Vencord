@@ -45,13 +45,13 @@ interface Props extends UserProps {
 export default function ReviewsView({ discordId, name, onFetchReviews, refetchSignal, page = 1, showInput = false }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
-    const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+    const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => onFetchReviews(data!)
     });
 
-    if (isLoading || !reviewData) return null;
+    if (!reviewData) return null;
 
     return (
         <ReviewList
