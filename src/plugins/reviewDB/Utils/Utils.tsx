@@ -19,9 +19,10 @@
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Text, Toasts, UserUtils } from "@webpack/common";
+import { FluxDispatcher, Forms, React, SelectedChannelStore, Text, Toasts, UserUtils } from "@webpack/common";
+import { useState } from "react";
 
 import ReviewsView from "../components/ReviewsView";
 import { Review } from "../entities/Review";
@@ -92,25 +93,36 @@ export function canDeleteReview(review: Review, userId: string) {
     if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user?.type === UserType.Admin) return true;
 }
 
-export function openReviewsModal(discordId: string, name: string) {
-    openModal(props =>
+function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
+    const [reviewCount, setReviewCount] = useState<number>();
+
+    return (
         <ErrorBoundary>
-            <ModalRoot {...props} >
+            <ModalRoot {...modalProps} >
                 <ModalHeader>
                     <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{name + "'s Reviews"}</Text>
-                    <ModalCloseButton onClick={() => props.onClose()} />
+                    <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
+
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         <ReviewsView
                             discordId={discordId}
                             name={name}
                             paginate
+                            onFetchReviewCount={setReviewCount}
                         />
                     </div>
-                </ModalContent >
-            </ModalRoot >
-        </ErrorBoundary >
+                </ModalContent>
 
+                <ModalFooter>
+                    {reviewCount !== void 0 && <Forms.FormText>{reviewCount} Reviews</Forms.FormText>}
+                </ModalFooter>
+            </ModalRoot>
+        </ErrorBoundary>
     );
+}
+
+export function openReviewsModal(discordId: string, name: string) {
+    openModal(props => <Modal modalProps={props} discordId={discordId} name={name} />);
 }

@@ -20,8 +20,8 @@ import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, Paginator, React, UserStore } from "@webpack/common";
-import type { KeyboardEvent } from "react";
+import { Forms, Paginator, React, UserStore, useState } from "@webpack/common";
+import { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
 import { addReview, getReviews } from "../Utils/ReviewDBAPI";
@@ -35,13 +35,19 @@ interface UserProps {
     name: string;
 }
 
-export default function ReviewsView({ discordId, name, paginate = false }: UserProps & { paginate?: boolean; }) {
+interface Props extends UserProps {
+    paginate?: boolean;
+    onFetchReviewCount(count: number): void;
+}
+
+export default function ReviewsView({ discordId, name, paginate = false, onFetchReviewCount }: Props) {
     const [signal, refetch] = useForceUpdater(true);
-    const [page, setPage] = React.useState(1);
+    const [page, setPage] = useState(1);
 
     const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
         fallbackValue: null,
         deps: [signal, page],
+        onSuccess: data => onFetchReviewCount(data!.reviewCount)
     });
 
     if (isLoading || !reviewData) return null;

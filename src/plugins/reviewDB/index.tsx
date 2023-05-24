@@ -27,6 +27,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, Menu } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
+import { useState } from "react";
 
 import ReviewsView from "./components/ReviewsView";
 import { UserType } from "./entities/User";
@@ -163,27 +164,31 @@ export default definePlugin({
         removeContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
     },
 
-    getReviewsComponent: (user: User) => {
+    getReviewsComponent: ErrorBoundary.wrap((user: User) => {
+        const [reviewCount, setReviewCount] = useState<number>();
+
         return (
-            <ErrorBoundary message="Failed to render Reviews">
-                <ExpandableHeader
-                    headerText="User Reviews"
-                    onMoreClick={
-                        () => {
-                            openReviewsModal(user.id, user.username);
-                        }
+            <ExpandableHeader
+                headerText="User Reviews"
+                onMoreClick={
+                    () => {
+                        openReviewsModal(user.id, user.username);
                     }
-                    moreTooltipText="Open Review Modal"
-                    onDropDownClick={
-                        state => {
-                            Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
-                        }
+                }
+                moreTooltipText={`View all ${reviewCount ?? ""} reviews}`}
+                onDropDownClick={
+                    state => {
+                        Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
                     }
-                    defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
-                >
-                    <ReviewsView discordId={user.id} name={user.username} />
-                </ExpandableHeader>
-            </ErrorBoundary >
+                }
+                defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
+            >
+                <ReviewsView
+                    discordId={user.id}
+                    name={user.username}
+                    onFetchReviewCount={setReviewCount}
+                />
+            </ExpandableHeader>
         );
-    }
+    }, { message: "Failed to render Reviews" })
 });
