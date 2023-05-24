@@ -18,7 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
-import { useAwaiter } from "@utils/react";
+import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Forms, Paginator, React, UserStore, useState } from "@webpack/common";
 import { KeyboardEvent } from "react";
@@ -38,16 +38,16 @@ interface UserProps {
 interface Props extends UserProps {
     paginate?: boolean;
     onFetchReviews(data: Response): void;
-    refetch(): void;
-    signal;
+    refetchSignal?: unknown;
 }
 
-export default function ReviewsView({ discordId, name, paginate = false, refetch, onFetchReviews, signal }: Props) {
+export default function ReviewsView({ discordId, name, paginate = false, onFetchReviews, refetchSignal }: Props) {
     const [page, setPage] = useState(1);
+    const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
         fallbackValue: null,
-        deps: [signal, page],
+        deps: [refetchSignal, signal, page],
         onSuccess: data => onFetchReviews(data!)
     });
 
@@ -61,7 +61,12 @@ export default function ReviewsView({ discordId, name, paginate = false, refetch
             />
 
             {!paginate && (
-                <ReviewsInputComponent name={name} discordId={discordId} refetch={refetch} isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)} />
+                <ReviewsInputComponent
+                    name={name}
+                    discordId={discordId}
+                    refetch={refetch}
+                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
+                />
             )}
 
             {paginate && (
@@ -78,7 +83,6 @@ export default function ReviewsView({ discordId, name, paginate = false, refetch
 }
 
 export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
-
     return (
         <div className="vc-reviewdb-view">
             {reviews?.map(review =>
@@ -90,11 +94,15 @@ export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Rev
             )}
 
             {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+                <Forms.FormText style={{
+                    paddingRight: 12,
+                    paddingBottom: 4,
+                    fontWeight: "bold",
+                    fontStyle: "italic"
+                }}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
-
         </div>
     );
 }
@@ -119,37 +127,37 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
         }
     }
 
-    return (<textarea
-        className={classes(Classes.inputDefault, "enter-comment")}
-        onKeyDownCapture={e => {
-            if (e.key === "Enter") {
-                e.preventDefault(); // prevent newlines
+    return (
+        <textarea
+            className={classes(Classes.inputDefault, "enter-comment")}
+            onKeyDownCapture={e => {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // prevent newlines
+                }
+            }}
+            placeholder={
+                !token
+                    ? "You need to authorize to review users!"
+                    : isAuthor
+                        ? `Update review for @${name}`
+                        : `Review @${name}`
             }
-        }}
-        placeholder={
-            token
-                ? (isAuthor
-                    ? `Update review for @${name}`
-                    : `Review @${name}`)
-                : "You need to authorize to review users!"
-        }
-
-        onKeyDown={onKeyPress}
-        onClick={() => {
-            if (!token) {
-                showToast("Opening authorization window...");
-                authorize();
-            }
-        }}
-
-        style={{
-            marginTop: "6px",
-            resize: "none",
-            marginBottom: "12px",
-            overflow: "hidden",
-            background: "transparent",
-            border: "1px solid var(--profile-message-input-border-color)",
-            fontSize: "14px",
-        }}
-    />);
+            onKeyDown={onKeyPress}
+            onClick={() => {
+                if (!token) {
+                    showToast("Opening authorization window...");
+                    authorize();
+                }
+            }}
+            style={{
+                marginTop: "6px",
+                marginBottom: "12px",
+                resize: "none",
+                overflow: "hidden",
+                background: "transparent",
+                border: "1px solid var(--profile-message-input-border-color)",
+                fontSize: "14px",
+            }}
+        />
+    );
 }

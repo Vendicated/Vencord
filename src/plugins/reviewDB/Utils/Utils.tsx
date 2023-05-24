@@ -113,8 +113,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         <ReviewsView
-                            refetch={refetch}
-                            signal={signal}
+                            refetchSignal={signal}
                             discordId={discordId}
                             name={name}
                             paginate
