@@ -186,7 +186,7 @@ export default definePlugin({
         {
             find: ".CONNECTIONS_ROLE_POPOUT_VIEW_ALL",
             replacement: {
-                match: /\i.length>0/,
+                match: /\(0,\i\.jsxs\)\(\i\.Fragment,{children:\[\(0,\i.jsx\)\(\i.Heading,{variant:"eyebrow",className:\i\(\)\.title,children:\i\.\i\.Messages\.CONNECTIONS/,
                 replace: "false&&$&"
             }
         }
