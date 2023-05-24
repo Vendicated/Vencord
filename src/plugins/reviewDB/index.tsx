@@ -24,6 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, Menu, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
@@ -165,6 +166,7 @@ export default definePlugin({
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {
         const [reviewCount, setReviewCount] = useState<number>();
+        const [signal, refetch] = useForceUpdater(true);
 
         return (
             <ExpandableHeader
@@ -183,9 +185,11 @@ export default definePlugin({
                 defaultState={Vencord.Settings.plugins.ReviewDB.reviewsDropdownState}
             >
                 <ReviewsView
+                    refetch={refetch}
+                    signal={signal}
                     discordId={user.id}
                     name={user.username}
-                    onFetchReviewCount={setReviewCount}
+                    onFetchReviews={response => setReviewCount(response.reviewCount)}
                 />
             </ExpandableHeader>
         );

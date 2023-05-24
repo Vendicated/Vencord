@@ -18,13 +18,13 @@
 
 import { Settings } from "@api/Settings";
 import { classes } from "@utils/misc";
-import { useAwaiter, useForceUpdater } from "@utils/react";
+import { useAwaiter } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Forms, Paginator, React, UserStore, useState } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 import { Review } from "../entities/Review";
-import { addReview, getReviews } from "../Utils/ReviewDBAPI";
+import { addReview, getReviews, Response } from "../Utils/ReviewDBAPI";
 import { authorize, REVIEWS_PER_PAGE, showToast } from "../Utils/Utils";
 import ReviewComponent from "./ReviewComponent";
 
@@ -37,17 +37,18 @@ interface UserProps {
 
 interface Props extends UserProps {
     paginate?: boolean;
-    onFetchReviewCount(count: number): void;
+    onFetchReviews(data: Response): void;
+    refetch(): void;
+    signal;
 }
 
-export default function ReviewsView({ discordId, name, paginate = false, onFetchReviewCount }: Props) {
-    const [signal, refetch] = useForceUpdater(true);
+export default function ReviewsView({ discordId, name, paginate = false, refetch, onFetchReviews, signal }: Props) {
     const [page, setPage] = useState(1);
 
     const [reviewData, _, isLoading] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
         fallbackValue: null,
         deps: [signal, page],
-        onSuccess: data => onFetchReviewCount(data!.reviewCount)
+        onSuccess: data => onFetchReviews(data!)
     });
 
     if (isLoading || !reviewData) return null;
@@ -55,11 +56,13 @@ export default function ReviewsView({ discordId, name, paginate = false, onFetch
     return (
         <>
             <ReviewList
-                discordId={discordId}
-                name={name}
                 refetch={refetch}
                 reviews={reviewData!.reviews}
             />
+
+            {!paginate && (
+                <ReviewsInputComponent name={name} discordId={discordId} refetch={refetch} isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)} />
+            )}
 
             {paginate && (
                 <Paginator
@@ -74,7 +77,29 @@ export default function ReviewsView({ discordId, name, paginate = false, onFetch
     );
 }
 
-export function ReviewList({ discordId, name, refetch, reviews }: UserProps & { refetch(): void; reviews: Review[]; }) {
+export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
+
+    return (
+        <div className="vc-reviewdb-view">
+            {reviews?.map(review =>
+                <ReviewComponent
+                    key={review.id}
+                    review={review}
+                    refetch={refetch}
+                />
+            )}
+
+            {reviews?.length === 0 && (
+                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+                    Looks like nobody reviewed this user yet. You could be the first!
+                </Forms.FormText>
+            )}
+
+        </div>
+    );
+}
+
+export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
     const { token } = Settings.plugins.ReviewDB;
 
     function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
@@ -94,54 +119,37 @@ export function ReviewList({ discordId, name, refetch, reviews }: UserProps & { 
         }
     }
 
-    return (
-        <div className="vc-reviewdb-view">
-            {reviews?.map(review =>
-                <ReviewComponent
-                    key={review.id}
-                    review={review}
-                    refetch={refetch}
-                />
-            )}
+    return (<textarea
+        className={classes(Classes.inputDefault, "enter-comment")}
+        onKeyDownCapture={e => {
+            if (e.key === "Enter") {
+                e.preventDefault(); // prevent newlines
+            }
+        }}
+        placeholder={
+            token
+                ? (isAuthor
+                    ? `Update review for @${name}`
+                    : `Review @${name}`)
+                : "You need to authorize to review users!"
+        }
 
-            {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
-                    Looks like nobody reviewed this user yet. You could be the first!
-                </Forms.FormText>
-            )}
+        onKeyDown={onKeyPress}
+        onClick={() => {
+            if (!token) {
+                showToast("Opening authorization window...");
+                authorize();
+            }
+        }}
 
-            <textarea
-                className={classes(Classes.inputDefault, "enter-comment")}
-                onKeyDownCapture={e => {
-                    if (e.key === "Enter") {
-                        e.preventDefault(); // prevent newlines
-                    }
-                }}
-                placeholder={
-                    token
-                        ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
-                            ? `Update review for @${name}`
-                            : `Review @${name}`)
-                        : "You need to authorize to review users!"
-                }
-                onKeyDown={onKeyPress}
-                onClick={() => {
-                    if (!token) {
-                        showToast("Opening authorization window...");
-                        authorize();
-                    }
-                }}
-
-                style={{
-                    marginTop: "6px",
-                    resize: "none",
-                    marginBottom: "12px",
-                    overflow: "hidden",
-                    background: "transparent",
-                    border: "1px solid var(--profile-message-input-border-color)",
-                    fontSize: "14px",
-                }}
-            />
-        </div>
-    );
+        style={{
+            marginTop: "6px",
+            resize: "none",
+            marginBottom: "12px",
+            overflow: "hidden",
+            background: "transparent",
+            border: "1px solid var(--profile-message-input-border-color)",
+            fontSize: "14px",
+        }}
+    />);
 }

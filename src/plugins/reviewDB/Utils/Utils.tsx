@@ -20,10 +20,11 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { useForceUpdater } from "@utils/react";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, Forms, React, SelectedChannelStore, Text, Toasts, UserUtils, useState } from "@webpack/common";
+import { FluxDispatcher, React, SelectedChannelStore, Text, Toasts, UserStore, UserUtils, useState } from "@webpack/common";
 
-import ReviewsView from "../components/ReviewsView";
+import ReviewsView, { ReviewsInputComponent } from "../components/ReviewsView";
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
 
@@ -94,28 +95,41 @@ export function canDeleteReview(review: Review, userId: string) {
 
 function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
     const [reviewCount, setReviewCount] = useState<number>();
+    const [isReviewed, setIsReviewed] = useState<boolean>(false);
+    const [signal, refetch] = useForceUpdater(true);
 
     return (
         <ErrorBoundary>
             <ModalRoot {...modalProps} >
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{name + "'s Reviews"}</Text>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
+                        {name + "'s Reviews"}
+                        {reviewCount !== void 0 && " (" + reviewCount + " Reviews)"}
+
+                    </Text>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         <ReviewsView
+                            refetch={refetch}
+                            signal={signal}
                             discordId={discordId}
                             name={name}
                             paginate
-                            onFetchReviewCount={setReviewCount}
+                            onFetchReviews={data => {
+                                setReviewCount(data.reviewCount);
+                                setIsReviewed(data.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id));
+                            }}
                         />
                     </div>
                 </ModalContent>
 
                 <ModalFooter>
-                    {reviewCount !== void 0 && <Forms.FormText>{reviewCount} Reviews</Forms.FormText>}
+                    <div style={{ width: "100%" }}>
+                        <ReviewsInputComponent isAuthor={isReviewed!} discordId={discordId} name={name} refetch={refetch} />
+                    </div>
                 </ModalFooter>
             </ModalRoot>
         </ErrorBoundary>

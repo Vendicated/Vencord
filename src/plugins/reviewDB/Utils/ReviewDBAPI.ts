@@ -26,7 +26,7 @@ const API_URL = "https://manti.vendicated.dev";
 
 const getToken = () => Settings.plugins.ReviewDB.token;
 
-interface Response {
+export interface Response {
     success: boolean,
     message: string;
     reviews: Review[];
