@@ -160,9 +160,10 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
 }
 
 function shouldMention(message) {
-    const ping = !Settings.plugins.NoReplyMention.enabled
-    const isListed = Settings.plugins.NoReplyMention.userList.includes(message.author.id)
-    const pingListed = Settings.plugins.NoReplyMention.shouldPingListed
+    var ping = !Settings.plugins.NoReplyMention.enabled
+    var isListed = Settings.plugins.NoReplyMention.userList.includes(message.author.id)
+    var pingListed = Settings.plugins.NoReplyMention.shouldPingListed
+    if (!ping && !isListed && !pingListed) { ping = true } // how NoReplyMention has it set up
     switch (settings.store.shouldMention) {
         case MentionOptions.NO_REPLY_MENTION_PLUGIN: return ping || ( isListed && pingListed);
         case MentionOptions.DISABLED: return false;
