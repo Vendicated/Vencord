@@ -174,7 +174,7 @@ export default definePlugin({
                         openReviewsModal(user.id, user.username);
                     }
                 }
-                moreTooltipText={`View all ${reviewCount ?? ""} reviews}`}
+                moreTooltipText={`View all ${reviewCount ?? ""} reviews`}
                 onDropDownClick={
                     state => {
                         Vencord.Settings.plugins.ReviewDB.reviewsDropdownState = !state;
