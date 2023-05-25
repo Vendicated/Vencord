@@ -2,22 +2,6 @@
     margin-top: 12px;
 }
 
-.vc-rdb-modal-footer {
-    padding: 0;
-}
-
-.vc-rdb-modal-footer > div {
-    width: 100%;
-}
-
-.vc-rdb-modal-header {
-    flex-grow: 1;
-}
-
-.vc-rdb-modal-reviews {
-    margin-top: 16px;
-}
-
 .vc-rdb-badge {
     vertical-align: middle;
     margin-left: 4px;
@@ -38,4 +22,28 @@
     font-weight: bold;
     font-style: italic;
     color: var(--text-muted);
+}
+
+.vc-rdb-modal-footer {
+    padding: 0;
+}
+
+.vc-rdb-modal-footer > div {
+    width: 100%;
+}
+
+.vc-rdb-modal-footer .vc-rdb-input {
+    margin-bottom: 0;
+}
+
+.vc-rdb-modal-footer [class|="pageControlContainer"] {
+    margin-top: 0;
+}
+
+.vc-rdb-modal-header {
+    flex-grow: 1;
+}
+
+.vc-rdb-modal-reviews {
+    margin-top: 16px;
 }
