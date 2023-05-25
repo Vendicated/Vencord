@@ -20,30 +20,30 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-	name: "NoProfileThemes",
-	description: "Completely removes Nitro profile themes",
-	authors: [Devs.TheKodeToad],
-	patches: [
-		{
-			find: ".NITRO_BANNER,",
-			replacement: {
-				match: /\i\.\i\.isPremiumAtLeast\(null==(\i)/,
-				replace: "$1?.banner&&$&"
-			}
-		},
-		{
-			find: "().avatarPositionPremiumNoBanner,default:",
-			replacement: {
-				match: /avatarPositionPremiumNoBanner,default:(\i\(\)\.(\i))/,
-				replace: "$2,default:$1"
-			}
-		},
-		{
-			find: ".hasThemeColors=function(){",
-			replacement: {
-				match: /key:"canUsePremiumProfileCustomization",get:function\(\){return/,
-				replace: "$& false&&"
-			}
-		}
-	]
+    name: "NoProfileThemes",
+    description: "Completely removes Nitro profile themes",
+    authors: [Devs.TheKodeToad],
+    patches: [
+        {
+            find: ".NITRO_BANNER,",
+            replacement: {
+                match: /\i\.\i\.isPremiumAtLeast\(null==(\i)/,
+                replace: "$1?.banner&&$&"
+            }
+        },
+        {
+            find: "().avatarPositionPremiumNoBanner,default:",
+            replacement: {
+                match: /avatarPositionPremiumNoBanner,default:(\i\(\)\.(\i))/,
+                replace: "$2,default:$1"
+            }
+        },
+        {
+            find: ".hasThemeColors=function(){",
+            replacement: {
+                match: /key:"canUsePremiumProfileCustomization",get:function\(\){return/,
+                replace: "$& false&&"
+            }
+        }
+    ]
 });
