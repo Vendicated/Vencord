@@ -82,10 +82,10 @@ export default definePlugin({
         },
         // ctrl click to open in new tab in inbox
         {
-            find: ".messageContainer,onKeyDown",
+            find: ".messageGroupWrapper,children",
             replacement: {
-                match: /onJump:function\(\i\){(return \i\((\i),(\i).id)/,
-                replace: "onJump:function($2){if($2.ctrlKey) return $self.open($3);$1"
+                match: /,\(function\(\i\){(?=return \i\((\i),(\i)\))/,
+                replace: ",(function($2){if ($2.ctrlKey) return $self.open($1);"
             }
         },
         // ctrl click to open in new tab in search results
