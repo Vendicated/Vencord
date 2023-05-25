@@ -122,11 +122,16 @@ export default definePlugin({
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {
         const [reviewCount, setReviewCount] = useState<number>();
+
         return (
             <ExpandableHeader
                 headerText="User Reviews"
                 onMoreClick={() => openReviewsModal(user.id, user.username)}
-                moreTooltipText={`View all ${reviewCount ?? ""} reviews`}
+                moreTooltipText={
+                    reviewCount && reviewCount > 50
+                        ? `View all ${reviewCount} reviews`
+                        : "Open Review Modal"
+                }
                 onDropDownClick={state => settings.store.reviewsDropdownState = !state}
                 defaultState={settings.store.reviewsDropdownState}
             >

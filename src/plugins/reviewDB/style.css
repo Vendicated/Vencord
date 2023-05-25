@@ -15,7 +15,7 @@
 }
 
 .vc-rdb-modal-reviews {
-    padding-inline: 16px;
+    margin-top: 16px;
 }
 
 .vc-rdb-badge {
@@ -35,5 +35,7 @@
 
 .vc-rdb-placeholder {
     margin-bottom: 4px;
-    font: bold italic;
+    font-weight: bold;
+    font-style: italic;
+    color: var(--text-muted);
 }
