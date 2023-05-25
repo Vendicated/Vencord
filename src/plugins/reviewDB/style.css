@@ -30,10 +30,13 @@
 
 .vc-rdb-modal-footer > div {
     width: 100%;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 .vc-rdb-modal-footer .vc-rdb-input {
     margin-bottom: 0;
+    background: var(--input-background);
 }
 
 .vc-rdb-modal-footer [class|="pageControlContainer"] {
