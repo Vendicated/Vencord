@@ -42,7 +42,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                 <ModalHeader>
                     <Text variant="heading-lg/semibold" className={cl("modal-header")}>
                         {name}'s Reviews
-                        {!!reviewCount && <span> ({reviewCount} Reviews</span>}
+                        {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
                     </Text>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
