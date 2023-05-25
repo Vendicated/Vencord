@@ -20,7 +20,7 @@ import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React, UserStore } from "@webpack/common";
-import { KeyboardEvent } from "react";
+import type { KeyboardEvent } from "react";
 
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
@@ -40,15 +40,19 @@ interface Props extends UserProps {
     refetchSignal?: unknown;
     showInput?: boolean;
     page?: number;
+    scrollToTop?(): void;
 }
 
-export default function ReviewsView({ discordId, name, onFetchReviews, refetchSignal, page = 1, showInput = false }: Props) {
+export default function ReviewsView({ discordId, name, onFetchReviews, refetchSignal, page = 1, showInput = false, scrollToTop }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
-        onSuccess: data => onFetchReviews(data!)
+        onSuccess: data => {
+            scrollToTop?.();
+            onFetchReviews(data!);
+        }
     });
 
     if (!reviewData) return null;
@@ -72,9 +76,9 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
     );
 }
 
-export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
+function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }, ref?: React.Ref<HTMLDivElement>) {
     return (
-        <div className={cl("view")}>
+        <div className={cl("view")} ref={ref}>
             {reviews?.map(review =>
                 <ReviewComponent
                     key={review.id}

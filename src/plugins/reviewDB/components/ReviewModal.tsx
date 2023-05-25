@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import { Paginator, Text, useState } from "@webpack/common";
+import { Paginator, Text, useRef, useState } from "@webpack/common";
 
 import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
@@ -30,6 +30,8 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
     const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
+
+    const ref = useRef<HTMLDivElement>(null);
 
     const reviewCount = data?.reviewCount;
     const isReviewed = data?.reviews.some(r => r.sender.discordID === settings.store.user?.discordID);
@@ -46,7 +48,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 
-                <ModalContent>
+                <ModalContent scrollerRef={ref}>
                     <div className={cl("modal-reviews")}>
                         <ReviewsView
                             discordId={discordId}
@@ -54,6 +56,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             page={page}
                             refetchSignal={signal}
                             onFetchReviews={setData}
+                            scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
                         />
                     </div>
                 </ModalContent>
