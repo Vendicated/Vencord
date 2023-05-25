@@ -44,6 +44,9 @@ const dotStyles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
+const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy('"#607D8B");');
+const useDrag = findByCodeLazy(".disconnectDragSource(");
+const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
@@ -51,10 +54,6 @@ const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
 const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
-
-const useEmojiBackgroundColor: (emoji: string, channelId: string) => any = findByCodeLazy('"#607D8B");');
-const useDrag = findByCodeLazy(".disconnectDragSource(");
-const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
@@ -110,12 +109,11 @@ function ChannelEmoji({ channel }: {
         // see comments in ChannelTabContent
         iconEmoji: {
             id?: string,
-            name?: string;
+            name: string;
         },
         themeColor?: number;
     };
 }) {
-    if (!channel.iconEmoji?.name) return null;
     const backgroundColor = useEmojiBackgroundColor(channel.iconEmoji.name, channel.id);
 
     return <div className={classes("channelEmoji-soSnippetsHideIt", cl("emoji-container"))} style={{ backgroundColor }}>
@@ -172,11 +170,12 @@ function ChannelTabContent(props: ChannelTabsProps &
 {
     guild?: Guild,
     channel?: Channel & {
-        iconEmoji: {
+        iconEmoji?: {
             id?: string,
-            name?: string; // unicode emoji if it's not a custom one
+            name: string; // unicode emoji if it's not a custom one
         },
-        // *i think* background color for the emoji once they un-hardcode them, undefined for now
+        // background color for channel emoji, undefined if it's from an auto generated emoji
+        // and not explicitly set
         themeColor?: number;
     };
 }) {
@@ -199,7 +198,8 @@ function ChannelTabContent(props: ChannelTabsProps &
     if (guildId === "@favorites")
         return <>
             <Emoji emojiName={"⭐"} className={cl("icon")} />
-            <ChannelEmoji channel={channel!} />
+            {/* @ts-ignore */}
+            {channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
             <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
@@ -209,7 +209,8 @@ function ChannelTabContent(props: ChannelTabsProps &
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
-                <ChannelEmoji channel={channel} />
+                {/* @ts-ignore */}
+                {channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
                 <Text className={cl("channel-name-text")}>#{channel.name}</Text>
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
