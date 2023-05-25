@@ -24,6 +24,7 @@ import { Paginator, Text, useRef, useState } from "@webpack/common";
 import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
 import { cl } from "../utils";
+import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
 function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
@@ -34,7 +35,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
     const ref = useRef<HTMLDivElement>(null);
 
     const reviewCount = data?.reviewCount;
-    const isReviewed = data?.reviews.some(r => r.sender.discordID === settings.store.user?.discordID);
+    const ownReview = data?.reviews.find(r => r.sender.discordID === settings.store.user?.discordID);
 
     return (
         <ErrorBoundary>
@@ -56,14 +57,21 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             refetchSignal={signal}
                             onFetchReviews={setData}
                             scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                            hideOwnReview
                         />
                     </div>
                 </ModalContent>
 
                 <ModalFooter className={cl("modal-footer")}>
                     <div>
+                        {ownReview && (
+                            <ReviewComponent
+                                refetch={refetch}
+                                review={ownReview}
+                            />
+                        )}
                         <ReviewsInputComponent
-                            isAuthor={isReviewed ?? false}
+                            isAuthor={ownReview != null}
                             discordId={discordId}
                             name={name}
                             refetch={refetch}

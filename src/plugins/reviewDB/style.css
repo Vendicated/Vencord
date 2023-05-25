@@ -30,8 +30,7 @@
 
 .vc-rdb-modal-footer > div {
     width: 100%;
-    margin-left: 6px;
-    margin-right: 6px;
+    margin: 6px 16px;
 }
 
 .vc-rdb-modal-footer .vc-rdb-input {

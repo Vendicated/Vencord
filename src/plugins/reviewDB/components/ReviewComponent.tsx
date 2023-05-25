@@ -24,7 +24,7 @@ import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, openUserProfileModal, showToast } from "../utils";
+import { canDeleteReview, cl, openUserProfileModal, showToast } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
@@ -81,7 +81,7 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
+            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, cl("review"))} style={
                 {
                     marginLeft: "0px",
                     paddingLeft: "52px", // wth is this

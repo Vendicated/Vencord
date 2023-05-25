@@ -41,9 +41,19 @@ interface Props extends UserProps {
     showInput?: boolean;
     page?: number;
     scrollToTop?(): void;
+    hideOwnReview?: boolean;
 }
 
-export default function ReviewsView({ discordId, name, onFetchReviews, refetchSignal, page = 1, showInput = false, scrollToTop }: Props) {
+export default function ReviewsView({
+    discordId,
+    name,
+    onFetchReviews,
+    refetchSignal,
+    scrollToTop,
+    page = 1,
+    showInput = false,
+    hideOwnReview = false,
+}: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
@@ -62,6 +72,7 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
             <ReviewList
                 refetch={refetch}
                 reviews={reviewData!.reviews}
+                hideOwnReview={hideOwnReview}
             />
 
             {showInput && (
@@ -76,10 +87,13 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
     );
 }
 
-function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
+function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; }) {
+    const myId = UserStore.getCurrentUser().id;
+
     return (
         <div className={cl("view")}>
             {reviews?.map(review =>
+                (review.sender.discordID !== myId || !hideOwnReview) &&
                 <ReviewComponent
                     key={review.id}
                     review={review}
