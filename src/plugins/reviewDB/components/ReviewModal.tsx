@@ -38,7 +38,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
         <ErrorBoundary>
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
+                    <Text variant="heading-lg/semibold" className={cl("modal-header")}>
                         {name + "'s Reviews"}
                         {reviewCount !== void 0 && " (" + reviewCount + " Reviews)"}
 
@@ -47,7 +47,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                 </ModalHeader>
 
                 <ModalContent>
-                    <div style={{ padding: "16px 0" }}>
+                    <div className={cl("modal-reviews")}>
                         <ReviewsView
                             discordId={discordId}
                             name={name}
@@ -59,7 +59,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                 </ModalContent>
 
                 <ModalFooter className={cl("modal-footer")}>
-                    <div style={{ width: "100%" }}>
+                    <div>
                         <ReviewsInputComponent
                             isAuthor={isReviewed ?? false}
                             discordId={discordId}

@@ -25,7 +25,7 @@ import { KeyboardEvent } from "react";
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { authorize, showToast } from "../utils";
+import { authorize, cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");
@@ -74,7 +74,7 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
 
 export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
     return (
-        <div className="vc-reviewdb-view">
+        <div className={cl("view")}>
             {reviews?.map(review =>
                 <ReviewComponent
                     key={review.id}
@@ -84,12 +84,7 @@ export function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Rev
             )}
 
             {reviews?.length === 0 && (
-                <Forms.FormText style={{
-                    paddingRight: 12,
-                    paddingBottom: 4,
-                    fontWeight: "bold",
-                    fontStyle: "italic"
-                }}>
+                <Forms.FormText className={cl("placeholder")}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
@@ -119,7 +114,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
 
     return (
         <textarea
-            className={classes(Classes.inputDefault, "enter-comment")}
+            className={classes(Classes.inputDefault, "enter-comment", cl("input"))}
             onKeyDownCapture={e => {
                 if (e.key === "Enter") {
                     e.preventDefault(); // prevent newlines
@@ -138,15 +133,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     showToast("Opening authorization window...");
                     authorize();
                 }
-            }}
-            style={{
-                marginTop: "6px",
-                marginBottom: "12px",
-                resize: "none",
-                overflow: "hidden",
-                background: "transparent",
-                border: "1px solid var(--profile-message-input-border-color)",
-                fontSize: "14px",
             }}
         />
     );

@@ -1,7 +1,39 @@
-[class|="section"]:not([class|="lastSection"]) + .vc-reviewdb-view {
+[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
     margin-top: 12px;
 }
 
 .vc-rdb-modal-footer {
     padding: 0;
+}
+
+.vc-rdb-modal-footer > div {
+    width: 100%;
+}
+
+.vc-rdb-modal-header {
+    flex-grow: 1;
+}
+
+.vc-rdb-modal-reviews {
+    padding-inline: 16px;
+}
+
+.vc-rdb-badge {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.vc-rdb-input {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    resize: none;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid var(--profile-message-input-border-color);
+    font-size: 14px;
+}
+
+.vc-rdb-placeholder {
+    margin-bottom: 4px;
+    font: bold italic;
 }
