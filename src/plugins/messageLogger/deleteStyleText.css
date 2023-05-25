@@ -1,4 +1,17 @@
-.messagelogger-deleted > .message-2CShn3 :is(div, h1, h2, h3, p):not(.newMemberBadge-3PdStX) {
+/* Message content highlighting */
+.messagelogger-deleted
+    > .message-2CShn3
+    > .contents-2MsGLg
+    > :is(div, h1, h2, h3, p) {
+    color: #f04747 !important;
+}
+
+/* Embed highlighting */
+.messagelogger-deleted
+    > .message-2CShn3
+    > .container-2sjPya
+    > article
+    :is(div, span, h1, h2, h3, p) {
     color: #f04747 !important;
 }
 
