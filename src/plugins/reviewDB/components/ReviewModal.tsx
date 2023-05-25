@@ -41,9 +41,8 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
                     <Text variant="heading-lg/semibold" className={cl("modal-header")}>
-                        {name + "'s Reviews"}
-                        {reviewCount !== void 0 && " (" + reviewCount + " Reviews)"}
-
+                        {name}'s Reviews
+                        {!!reviewCount && <span> ({reviewCount} Reviews</span>}
                     </Text>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
@@ -94,5 +93,4 @@ export function openReviewsModal(discordId: string, name: string) {
             name={name}
         />
     ));
-
 }
