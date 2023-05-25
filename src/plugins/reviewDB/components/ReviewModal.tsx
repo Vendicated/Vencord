@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,84 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Logger } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import { findByProps } from "@webpack";
-import { FluxDispatcher, Paginator, React, SelectedChannelStore, Text, Toasts, UserUtils, useState } from "@webpack/common";
+import { Paginator, Text, useState } from "@webpack/common";
 
-import ReviewsView, { ReviewsInputComponent } from "../components/ReviewsView";
-import { Review } from "../entities/Review";
-import { UserType } from "../entities/User";
+import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { Response, REVIEWS_PER_PAGE } from "./ReviewDBAPI";
-
-export const cl = classNameFactory("vc-rdb-");
-
-export async function openUserProfileModal(userId: string) {
-    await UserUtils.fetchUser(userId);
-
-    await FluxDispatcher.dispatch({
-        type: "USER_PROFILE_MODAL_OPEN",
-        userId,
-        channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: "Explosive Hotel"
-    });
-}
-
-export function authorize(callback?: any) {
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
-    openModal((props: any) =>
-        <OAuth2AuthorizeModal
-            {...props}
-            scopes={["identify"]}
-            responseType="code"
-            redirectUri="https://manti.vendicated.dev/api/reviewdb/auth"
-            permissions={0n}
-            clientId="915703782174752809"
-            cancelCompletesFlow={false}
-            callback={async (u: string) => {
-                try {
-                    const url = new URL(u);
-                    url.searchParams.append("clientMod", "vencord");
-                    const res = await fetch(url, {
-                        headers: new Headers({ Accept: "application/json" })
-                    });
-                    const { token, success } = await res.json();
-                    if (success) {
-                        settings.store.token = token;
-                        showToast("Successfully logged in!");
-                        callback?.();
-                    } else if (res.status === 1) {
-                        showToast("An Error occurred while logging in.");
-                    }
-                } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorize", e);
-                }
-            }}
-        />
-    );
-}
-
-export function showToast(text: string) {
-    Toasts.show({
-        type: Toasts.Type.MESSAGE,
-        message: text,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        },
-    });
-}
-
-export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
-export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || settings.store.user?.type === UserType.Admin) return true;
-}
+import { cl } from "../utils";
+import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
 function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
     const [data, setData] = useState<Response>();
@@ -153,5 +84,12 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
 }
 
 export function openReviewsModal(discordId: string, name: string) {
-    openModal(props => <Modal modalProps={props} discordId={discordId} name={name} />);
+    openModal(props => (
+        <Modal
+            modalProps={props}
+            discordId={discordId}
+            name={name}
+        />
+    ));
+
 }

@@ -17,10 +17,9 @@
 */
 
 
-import { Review } from "../entities/Review";
-import { ReviewDBUser } from "../entities/User";
-import { settings } from "../settings";
-import { authorize, showToast } from "./Utils";
+import { Review, ReviewDBUser } from "./entities";
+import { settings } from "./settings";
+import { authorize, showToast } from "./utils";
 
 const API_URL = "https://manti.vendicated.dev";
 

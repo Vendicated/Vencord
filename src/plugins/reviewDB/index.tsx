@@ -18,8 +18,7 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/Settings";
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
@@ -28,13 +27,14 @@ import definePlugin from "@utils/types";
 import { Alerts, Menu, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
+import { openReviewsModal } from "./components/ReviewModal";
 import ReviewsView from "./components/ReviewsView";
-import { UserType } from "./entities/User";
+import { UserType } from "./entities";
+import { getCurrentUserInfo } from "./reviewDbApi";
 import { settings } from "./settings";
-import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
-import { openReviewsModal, showToast } from "./Utils/Utils";
+import { showToast } from "./utils";
 
-const guildHeaderPopoutContextMenuPatch = (children, props: { guild: Guild, onClose(): void; }) => () => {
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
     children.push(
         <Menu.MenuItem
             label="View Reviews"
@@ -64,8 +64,8 @@ export default definePlugin({
 
     async start() {
         const s = settings.store;
-
         const { token, lastReviewId, notifyReviews } = s;
+
         if (!notifyReviews || !token) return;
 
         setTimeout(async () => {
@@ -76,32 +76,38 @@ export default definePlugin({
                     showToast("You have new reviews on your profile!");
             }
 
-            addContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
+            addContextMenuPatch("guild-header-popout", guildPopoutPatch);
 
             if (user.banInfo) {
                 const endDate = new Date(user.banInfo.banEndDate).getTime();
                 if (endDate > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate) {
                     Alerts.show({
                         title: "You have been banned from ReviewDB",
-                        body: <>
-                            <p>
-                                You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
-                            </p>
-                            {
-                                user.banInfo.reviewContent &&
-                                (<p>
-                                    Offending Review: {user.banInfo.reviewContent}
-                                </p>)
-                            }
-                            <p>
-                                Continued offenses will result in a permanent ban.
-                            </p>
-                        </>,
+                        body: (
+                            <>
+                                <p>
+                                    You are banned from ReviewDB {
+                                        user.type === UserType.Banned
+                                            ? "permanently"
+                                            : "until " + endDate.toLocaleString()
+                                    }
+                                </p>
+                                {user.banInfo.reviewContent && (
+                                    <p>Offending Review: {user.banInfo.reviewContent}</p>
+                                )}
+                                <p>Continued offenses will result in a permanent ban.</p>
+                            </>
+                        ),
                         cancelText: "Appeal",
                         confirmText: "Ok",
-                        onCancel: () => {
-                            VencordNative.native.openExternal("https://reviewdb.mantikafasi.dev/api/redirect?token=" + encodeURIComponent(Settings.plugins.ReviewDB.token) + "&page=dashboard/appeal");
-                        }
+                        onCancel: () =>
+                            VencordNative.native.openExternal(
+                                "https://reviewdb.mantikafasi.dev/api/redirect?"
+                                + new URLSearchParams({
+                                    token: settings.store.token!,
+                                    page: "dashboard/appeal"
+                                })
+                            )
                     });
                 }
             }
@@ -109,8 +115,9 @@ export default definePlugin({
             s.user = user;
         }, 4000);
     },
+
     stop() {
-        removeContextMenuPatch("guild-header-popout", guildHeaderPopoutContextMenuPatch);
+        removeContextMenuPatch("guild-header-popout", guildPopoutPatch);
     },
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {
@@ -118,11 +125,7 @@ export default definePlugin({
         return (
             <ExpandableHeader
                 headerText="User Reviews"
-                onMoreClick={
-                    () => {
-                        openReviewsModal(user.id, user.username);
-                    }
-                }
+                onMoreClick={() => openReviewsModal(user.id, user.username)}
                 moreTooltipText={`View all ${reviewCount ?? ""} reviews`}
                 onDropDownClick={state => settings.store.reviewsDropdownState = !state}
                 defaultState={settings.store.reviewsDropdownState}

@@ -21,11 +21,11 @@ import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
 import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
-import { Review, ReviewType } from "../entities/Review";
+import { Review, ReviewType } from "../entities";
+import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
-import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
-import MessageButton from "./MessageButton";
+import { canDeleteReview, openUserProfileModal, showToast } from "../utils";
+import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
@@ -134,9 +134,10 @@ export default LazyComponent(() => {
                         padding: "0px",
                     }}>
                         <div className={buttonClasses.wrapper} >
-                            <MessageButton type="report" callback={reportRev} />
+                            <ReportButton onClick={reportRev} />
+
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (
-                                <MessageButton type="delete" callback={delReview} />
+                                <DeleteButton onClick={delReview} />
                             )}
                         </div>
                     </div>

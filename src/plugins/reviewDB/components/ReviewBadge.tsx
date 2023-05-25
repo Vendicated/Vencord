@@ -18,7 +18,7 @@
 
 import { MaskedLinkStore, Tooltip } from "@webpack/common";
 
-import { Badge } from "../entities/Badge";
+import { Badge } from "../entities";
 
 export default function ReviewBadge(badge: Badge) {
     return (

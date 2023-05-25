@@ -22,10 +22,10 @@ import { findByPropsLazy } from "@webpack";
 import { Forms, React, UserStore } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
-import { Review } from "../entities/Review";
+import { Review } from "../entities";
+import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../Utils/ReviewDBAPI";
-import { authorize, showToast } from "../Utils/Utils";
+import { authorize, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Classes = findByPropsLazy("inputDefault", "editable");

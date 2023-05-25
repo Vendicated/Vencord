@@ -20,8 +20,8 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
-import { ReviewDBUser } from "./entities/User";
-import { authorize } from "./Utils/Utils";
+import { ReviewDBUser } from "./entities";
+import { authorize } from "./utils";
 
 export const settings = definePluginSettings({
     authorize: {
