@@ -76,9 +76,9 @@ export default function ReviewsView({ discordId, name, onFetchReviews, refetchSi
     );
 }
 
-function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }, ref?: React.Ref<HTMLDivElement>) {
+function ReviewList({ refetch, reviews }: { refetch(): void; reviews: Review[]; }) {
     return (
-        <div className={cl("view")} ref={ref}>
+        <div className={cl("view")}>
             {reviews?.map(review =>
                 <ReviewComponent
                     key={review.id}
