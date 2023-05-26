@@ -283,6 +283,13 @@ export default definePlugin({
                             style={{
                                 colorScheme: getTheme() === Theme.Light ? "light" : "dark",
                             }}
+                            onKeyDown={e => {
+                                if (e.key === "Enter")
+                                    if (!searching) {
+                                        page = 1;
+                                        FetchEmotes(value, handleRefresh);
+                                    }
+                            }}
                         />
                         <div className="seventv-searchbutton" style={{
                             boxSizing: "border-box"
