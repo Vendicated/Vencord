@@ -46,14 +46,15 @@ export default definePlugin({
 
     actionBarComponent(props: {
         onClick: () => void;
-        expanded: boolean;
+        expanded: number; // actually a boolean, but fuck TS
         count: number;
         compact: boolean;
         collapsedReason: unknown;
     }) {
-        const { onClick } = props;
+        const { onClick, count: msgCount } = props;
 
         const { showingAllowed } = settings.use(["showingAllowed"]);
+        const text = msgCount === 1 ? "Blocked Message" : `${msgCount} Blocked Messages`;
 
         return (
             <div className="vc-betterblockedmessages-main" id="---blocked-message-bar" role="separator">
@@ -63,15 +64,21 @@ export default definePlugin({
                     </svg>
                     {
                         showingAllowed ?
-                            <Tooltip text={props.expanded ? "Hide Blocked Message" : "Show Blocked Message"}>
+                            <Tooltip
+                                text={
+                                    ["Show", "Hide"][props.expanded + 0] +
+                                    " Blocked Message" +
+                                    (msgCount > 1 && "s" || "")
+                                }
+                            >
                                 {(tooltipProps: any) => (
                                     <button {...tooltipProps} className="vc-betterblockedmessages-button" onClick={onClick}>
-                                        Blocked Message
+                                        {text}
                                     </button>
                                 )}
                             </Tooltip>
                             :
-                            <span className="vc-betterblockedmessages-span">Blocked Message</span>
+                            <span className="vc-betterblockedmessages-span">{text}</span>
                     }
                 </span>
             </div>
