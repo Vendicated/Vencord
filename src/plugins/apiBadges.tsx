@@ -24,14 +24,12 @@ import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
+import { isPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
-
-/** List of vencord contributor IDs */
-const contributorIds: string[] = Object.values(Devs).map(d => d.id.toString());
 
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
@@ -43,7 +41,7 @@ const ContributorBadge: ProfileBadge = {
             transform: "scale(0.9)" // The image is a bit too big compared to default badges
         }
     },
-    shouldShow: ({ user }) => contributorIds.includes(user.id),
+    shouldShow: ({ user }) => isPluginDev(user.id),
     link: "https://github.com/Vendicated/Vencord"
 };
 
