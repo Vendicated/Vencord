@@ -29,18 +29,15 @@ import { ControlPanel } from "./components";
 import { GxModManifest } from "./types";
 import { fetchCrxFile } from "./utils";
 
-const logger = new Logger("GxMod", "#FA1E4E");
-
 const classes = findByPropsLazy("listItem", "serverEmoji");
-
+const logger = new Logger("GxMod", "#FA1E4E");
 
 // TODO: Make this a setting.
 const modId = "605a8f04-f91b-4f94-8e33-94f4c56e3b05";
 
 let GxModCrx: import("@zip.js/zip.js").ZipReader<unknown> | null = null;
-
-
 type SfxCollection = { sounds: Blob[]; idx: number; };
+
 const pluginDef: Partial<PluginDef> & {
     manifestJson?: GxModManifest;
     sfx: {
@@ -58,10 +55,9 @@ const pluginDef: Partial<PluginDef> & {
     }],
 
     ControlPanel,
-
     bgmMuted: {
-        value: false,
-        mode: "auto"
+        value: true,
+        mode: "manual"
     },
 
     onBgmToggle() {
@@ -128,6 +124,7 @@ const pluginDef: Partial<PluginDef> & {
             volume: 0.1
         });
 
+        this.player.muted = this.bgmMuted.value;
         this.player.className = "vc-gx-mod-audio-source";
 
         document.body.appendChild(this.player);
