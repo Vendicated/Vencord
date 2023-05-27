@@ -67,7 +67,7 @@ export default definePlugin({
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg, channel, event) => {
+        this.onClick = addClickListener((msg: any, channel, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
@@ -92,6 +92,15 @@ export default definePlugin({
             } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, channel))) {
                 MessageActions.deleteMessage(channel.id, msg.id);
                 event.preventDefault();
+
+                if (msg.deleted) {
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_DELETE",
+                        channelId: channel.id,
+                        id: msg.id,
+                        mlDeleted: true
+                    });
+                }
             }
         });
     },
