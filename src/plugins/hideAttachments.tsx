@@ -20,7 +20,7 @@ import { get, set } from "@api/DataStore";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { ChannelStore } from "@webpack/common";
 
 let style: HTMLStyleElement;
 
@@ -101,11 +101,5 @@ export default definePlugin({
 
         await saveHiddenMessages(ids);
         await this.buildCss();
-
-        // update is necessary to rerender the PopOver
-        FluxDispatcher.dispatch({
-            type: "MESSAGE_UPDATE",
-            message: { id }
-        });
     }
 });
