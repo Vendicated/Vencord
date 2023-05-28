@@ -17,10 +17,11 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import ExpandableHeader from "@components/ExpandableHeader";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
-import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
+import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
@@ -47,7 +48,6 @@ const Classes = proxyLazy(() => {
 
 function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
     const stns = settings.use(["permissionsSortOrder"]);
-    const [viewPermissions, setViewPermissions] = useState(settings.store.defaultPermissionsDropdownState);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
         const userPermissions: UserPermissions = [];
@@ -97,78 +97,40 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
     const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
 
     return (
-        <div>
-            <div className={cl("userperms-title-container")}>
-                <Text className={cl("userperms-title")} variant="eyebrow">Permissions</Text>
-
-                <div className={cl("userperms-btns-container")}>
-                    <Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
-                        {tooltipProps => (
-                            <button
-                                {...tooltipProps}
-                                className={cl("userperms-sortorder-btn")}
-                                onClick={() => {
-                                    stns.permissionsSortOrder = stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? PermissionsSortOrder.LowestRole : PermissionsSortOrder.HighestRole;
-                                }}
+        <ExpandableHeader
+            headerText="Permissions"
+            moreTooltipText="Role Details"
+            onMoreClick={() =>
+                openRolesAndUsersPermissionsModal(
+                    rolePermissions,
+                    guild,
+                    guildMember.nick || UserStore.getUser(guildMember.userId).username
+                )
+            }
+            defaultState={settings.store.defaultPermissionsDropdownState}
+            buttons={[
+                (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
+                    {tooltipProps => (
+                        <button
+                            {...tooltipProps}
+                            className={cl("userperms-sortorder-btn")}
+                            onClick={() => {
+                                stns.permissionsSortOrder = stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? PermissionsSortOrder.LowestRole : PermissionsSortOrder.HighestRole;
+                            }}
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 96 960 960"
+                                transform={stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "scale(1 1)" : "scale(1 -1)"}
                             >
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 96 960 960"
-                                    transform={stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "scale(1 1)" : "scale(1 -1)"}
-                                >
-                                    <path fill="var(--text-normal)" d="M440 896V409L216 633l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
-                                </svg>
-                            </button>
-                        )}
-                    </Tooltip>
-
-                    <Tooltip text="Role Details">
-                        {tooltipProps => (
-                            <button
-                                {...tooltipProps}
-                                className={cl("userperms-permdetails-btn")}
-                                onClick={() =>
-                                    openRolesAndUsersPermissionsModal(
-                                        rolePermissions,
-                                        guild,
-                                        guildMember.nick || UserStore.getUser(guildMember.userId).username
-                                    )
-                                }
-                            >
-                                <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
-                                </svg>
-                            </button>
-                        )}
-                    </Tooltip>
-
-                    <Tooltip text={viewPermissions ? "Hide Permissions" : "View Permissions"}>
-                        {tooltipProps => (
-                            <button
-                                {...tooltipProps}
-                                className={cl("userperms-toggleperms-btn")}
-                                onClick={() => setViewPermissions(v => !v)}
-                            >
-                                <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    transform={viewPermissions ? "scale(1 -1)" : "scale(1 1)"}
-                                >
-                                    <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
-                                </svg>
-                            </button>
-                        )}
-                    </Tooltip>
-                </div>
-            </div>
-
-            {viewPermissions && userPermissions.length > 0 && (
+                                <path fill="var(--text-normal)" d="M440 896V409L216 633l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                            </svg>
+                        </button>
+                    )}
+                </Tooltip>)
+            ]}>
+            {userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
                     {userPermissions.map(({ permission, roleColor }) => (
                         <div className={classes(role, rolePill, rolePillBorder)}>
@@ -190,7 +152,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                     ))}
                 </div>
             )}
-        </div>
+        </ExpandableHeader>
     );
 }
 

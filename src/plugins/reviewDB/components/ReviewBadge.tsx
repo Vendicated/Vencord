@@ -18,7 +18,8 @@
 
 import { MaskedLinkStore, Tooltip } from "@webpack/common";
 
-import { Badge } from "../entities/Badge";
+import { Badge } from "../entities";
+import { cl } from "../utils";
 
 export default function ReviewBadge(badge: Badge) {
     return (
@@ -26,13 +27,13 @@ export default function ReviewBadge(badge: Badge) {
             text={badge.name}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <img
+                    className={cl("badge")}
                     width="24px"
                     height="24px"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     src={badge.icon}
                     alt={badge.description}
-                    style={{ verticalAlign: "middle", marginLeft: "4px" }}
                     onClick={() =>
                         MaskedLinkStore.openUntrustedLink({
                             href: badge.redirectURL,

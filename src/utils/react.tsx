@@ -67,6 +67,7 @@ interface AwaiterOpts<T> {
     fallbackValue: T;
     deps?: unknown[];
     onError?(e: any): void;
+    onSuccess?(value: T): void;
 }
 /**
  * Await a promise
@@ -94,8 +95,16 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
         if (!state.pending) setState({ ...state, pending: true });
 
         factory()
-            .then(value => isAlive && setState({ value, error: null, pending: false }))
-            .catch(error => isAlive && (setState({ value: null, error, pending: false }), opts.onError?.(error)));
+            .then(value => {
+                if (!isAlive) return;
+                setState({ value, error: null, pending: false });
+                opts.onSuccess?.(value);
+            })
+            .catch(error => {
+                if (!isAlive) return;
+                setState({ value: null, error, pending: false });
+                opts.onError?.(error);
+            });
 
         return () => void (isAlive = false);
     }, opts.deps);
