@@ -37,6 +37,12 @@ export const settings = definePluginSettings({
         default: true,
     },
 
+    showMagnifierCircle: {
+        type: OptionType.BOOLEAN,
+        description: "Whether tos how magnifier circle, or zoom whole image (Enabled shows the magnifier and limits the zoom to inside it, Disabled zooms the whole image",
+        default: true,
+    },
+
     preventCarouselFromClosingOnClick: {
         type: OptionType.BOOLEAN,
         // Thanks chat gpt
@@ -191,7 +197,12 @@ export default definePlugin({
     renderMagnifier(instance) {
         if (instance.props.id === ELEMENT_ID) {
             if (!this.currentMagnifierElement) {
+                if(settings.store.showMagnifierCircle) {
                 this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                }
+            else {
+                this.currentMagnifierElement = <Magnifier size={10000} zoom={settings.store.zoom} instance={instance} />;
+            }
                 this.root = ReactDOM.createRoot(this.element!);
                 this.root.render(this.currentMagnifierElement);
             }
