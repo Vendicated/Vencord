@@ -31,6 +31,12 @@ import settings from "./settings";
 
 const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 
+const AllowedChannelIds = [
+    SUPPORT_CHANNEL_ID,
+    "1024286218801926184", // Vencord > #bot-spam
+    "1033680203433660458", // Vencord > #v
+];
+
 export default definePlugin({
     name: "SupportHelper",
     required: true,
@@ -41,7 +47,7 @@ export default definePlugin({
     commands: [{
         name: "vencord-debug",
         description: "Send Vencord Debug info",
-        predicate: ctx => ctx.channel.id === SUPPORT_CHANNEL_ID,
+        predicate: ctx => AllowedChannelIds.includes(ctx.channel.id),
         execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
@@ -52,21 +58,26 @@ export default definePlugin({
                 return `Web (${navigator.userAgent})`;
             })();
 
+            const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
+
+            const enabledPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
+            const enabledApiPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && isApiPlugin(p));
+
             const debugInfo = `
 **Vencord Debug Info**
+>>> Discord Branch: ${RELEASE_CHANNEL}
+Client: ${client}
+Platform: ${window.navigator.platform}
+Vencord: ${gitHash}${settings.additionalInfo}
+Outdated: ${isOutdated}
+OpenAsar: ${"openasar" in window}
 
-> Discord Branch: ${RELEASE_CHANNEL}
-> Client: ${client}
-> Platform: ${window.navigator.platform}
-> Vencord Version: ${gitHash}${settings.additionalInfo}
-> OpenAsar: ${"openasar" in window}
-> Outdated: ${isOutdated}
-> Enabled Plugins:
-${makeCodeblock(Object.keys(plugins).filter(Vencord.Plugins.isPluginEnabled).join(", "))}
+Enabled Plugins (${enabledPlugins.length + enabledApiPlugins.length}):
+${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "))}
 `;
 
             return {
-                content: debugInfo.trim()
+                content: debugInfo.trim().replaceAll("```\n", "```")
             };
         }
     }],
