@@ -90,9 +90,6 @@ export default definePlugin({
                     });
                 }
             } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, channel))) {
-                MessageActions.deleteMessage(channel.id, msg.id);
-                event.preventDefault();
-
                 if (msg.deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
@@ -100,7 +97,10 @@ export default definePlugin({
                         id: msg.id,
                         mlDeleted: true
                     });
+                } else {
+                    MessageActions.deleteMessage(channel.id, msg.id);
                 }
+                event.preventDefault();
             }
         });
     },
