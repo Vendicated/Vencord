@@ -198,11 +198,11 @@ export default definePlugin({
         if (instance.props.id === ELEMENT_ID) {
             if (!this.currentMagnifierElement) {
                 if(settings.store.showMagnifierCircle) {
-                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
                 }
-            else {
-                this.currentMagnifierElement = <Magnifier size={10000} zoom={settings.store.zoom} instance={instance} />;
-            }
+                else {
+                    this.currentMagnifierElement = <Magnifier size={10000} zoom={settings.store.zoom} instance={instance} />;
+                }
                 this.root = ReactDOM.createRoot(this.element!);
                 this.root.render(this.currentMagnifierElement);
             }
