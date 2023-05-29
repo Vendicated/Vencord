@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "../checkNodeVersion.js";
+
 import { exec, execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { readdir, readFile } from "fs/promises";
