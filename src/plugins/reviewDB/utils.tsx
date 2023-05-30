@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
 
-import { Review } from "../entities/Review";
-import { UserType } from "../entities/User";
+import { Review, UserType } from "./entities";
+import { settings } from "./settings";
+
+export const cl = classNameFactory("vc-rdb-");
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -57,7 +59,7 @@ export function authorize(callback?: any) {
                     });
                     const { token, success } = await res.json();
                     if (success) {
-                        Settings.plugins.ReviewDB.token = token;
+                        settings.store.token = token;
                         showToast("Successfully logged in!");
                         callback?.();
                     } else if (res.status === 1) {
@@ -82,8 +84,9 @@ export function showToast(text: string) {
     });
 }
 
-export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user?.type === UserType.Admin) return true;
+    return (
+        review.sender.discordID === userId
+        || settings.store.user?.type === UserType.Admin
+    );
 }
