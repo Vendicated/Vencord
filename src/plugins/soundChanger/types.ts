@@ -27,3 +27,11 @@ export type SoundsChanged = Sound[];
 
 export type SoundIDs = Record<string, number>;
 export type Def = PluginDef & { soundModules: SoundIDs; };
+
+export interface Props {
+    value: SoundsChanged;
+    sounds: SoundIDs;
+
+    setValue: (value: SoundsChanged) => void;
+    setError: (error: string) => void;
+}

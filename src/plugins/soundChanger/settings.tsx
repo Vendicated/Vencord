@@ -18,17 +18,12 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
+import { useMemo } from "@webpack/common";
 
-import type { Def, SoundIDs, SoundsChanged } from "./types";
+import { SettingsComponent } from "./components";
+import type { Def, Props, SoundIDs, SoundsChanged } from "./types";
 
-interface Props {
-    value: SoundsChanged;
-    sounds: SoundIDs;
 
-    setValue: (value: SoundsChanged) => void;
-    setError: (error: string) => void;
-}
 
 export const settings = definePluginSettings({
     sounds: {
@@ -36,8 +31,6 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
 
         component: (({ setValue, setError }: Props) => {
-            const { useMemo } = React;
-
             const customSounds = useMemo<SoundsChanged>(() => (settings.store.sounds ?? []), []);
             const sounds = useMemo<SoundIDs>(() => {
                 const plugin = Vencord.Plugins.plugins[settings.pluginName] as any as Def;
@@ -55,8 +48,3 @@ export const settings = definePluginSettings({
         }) as any,
     }
 });
-
-
-const SettingsComponent = ({ value, sounds, setValue, setError }: Props) => {
-    return <></>;
-};
