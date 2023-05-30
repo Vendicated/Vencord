@@ -25,4 +25,5 @@ export interface Sound {
 
 export type SoundsChanged = Sound[];
 
-export type Def = PluginDef & { soundModules: Record<string, number>; };
+export type SoundIDs = Record<string, number>;
+export type Def = PluginDef & { soundModules: SoundIDs; };

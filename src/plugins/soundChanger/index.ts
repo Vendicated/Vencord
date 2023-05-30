@@ -20,7 +20,6 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { settings } from "./settings";
-import type { Def } from "./types";
 
 export default definePlugin({
     name: "SoundChanger",

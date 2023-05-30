@@ -18,11 +18,14 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
-import { Forms, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
-import type { Def, SoundsChanged } from "./types";
+import type { Def, SoundIDs, SoundsChanged } from "./types";
 
 interface Props {
+    value: SoundsChanged;
+    sounds: SoundIDs;
+
     setValue: (value: SoundsChanged) => void;
     setError: (error: string) => void;
 }
@@ -33,19 +36,27 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
 
         component: (({ setValue, setError }: Props) => {
-            const [customSounds, setCustomSounds] = React.useState<SoundsChanged>(() => settings.store.sounds ?? []);
-            const [sounds, setSounds] = React.useState<Record<string, number>>({});
+            const { useMemo } = React;
 
-            React.useEffect(() => {
-                if (customSounds.length) return;
-
+            const customSounds = useMemo<SoundsChanged>(() => (settings.store.sounds ?? []), []);
+            const sounds = useMemo<SoundIDs>(() => {
                 const plugin = Vencord.Plugins.plugins[settings.pluginName] as any as Def;
-                setSounds(plugin.soundModules);
+                return plugin.soundModules;
             }, []);
 
-            return <div>
-                <Forms.FormText>{Object.keys(sounds).join(", ")}</Forms.FormText>
-            </div>;
+            return (
+                <SettingsComponent
+                    value={customSounds}
+                    sounds={sounds}
+                    setValue={setValue}
+                    setError={setError}
+                />
+            );
         }) as any,
     }
 });
+
+
+const SettingsComponent = ({ value, sounds, setValue, setError }: Props) => {
+    return <></>;
+};
