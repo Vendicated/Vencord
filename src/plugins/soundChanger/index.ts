@@ -43,4 +43,4 @@ export default definePlugin({
                 "{return __sound__.link;}" + o)
         }
     }],
-} as Def);
+});
