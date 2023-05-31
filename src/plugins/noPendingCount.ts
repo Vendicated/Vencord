@@ -59,8 +59,8 @@ export default definePlugin({
             find: ".getPendingCount=",
             predicate: () => settings.store.hideFriendRequestsCount,
             replacement: {
-                match: /(\i)\.getPendingCount=function\(\){return\s\i};/,
-                replace: "$1.getPendingCount=function(){return 0};"
+                match: /(?<=\.getPendingCount=function\(\)\{)/,
+                replace: "return 0;"
             }
         },
         {
@@ -77,8 +77,8 @@ export default definePlugin({
             find: ".getSpamChannelsCount(),",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(,\i=\i\.getSpamChannelsCount\(\)),(\i)=\i\.getMessageRequestsCount\(\),(\i=\i>0\|\|\i>0;return\s*?\i}})/,
-                replace: "$1,$2=$self.getRealMessageRequestCount(),$3"
+                match: /(?<=getSpamChannelsCount\(\),\i=)\i\.getMessageRequestsCount\(\)/,
+                replace: "$self.getRealMessageRequestCount()"
             }
         },
         {
