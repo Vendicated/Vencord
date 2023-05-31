@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { SelectedChannelStore } from "@webpack/common";
 
 interface SearchFilter {
     componentType: "FILTER";
@@ -42,7 +43,6 @@ interface SearchAnswer {
 const makeOptions = (...options: string[]) => options.map(text => ({ text }));
 
 const SearchOperators: Record<string, SearchFilter> = {
-    /* returns 500 Internal Server Error
     FILTER_EMBED_TYPE: {
         componentType: "FILTER",
         regex: /embedType:/i,
@@ -51,7 +51,6 @@ const SearchOperators: Record<string, SearchFilter> = {
         _title: "Embed type",
         _options: "type"
     },
-    */
     FILTER_FILE_NAME: {
         componentType: "FILTER",
         regex: /fileName:/i,
@@ -71,7 +70,6 @@ const SearchOperators: Record<string, SearchFilter> = {
 };
 
 const SearchAnswers: Record<string, SearchAnswer> = {
-    /*
     ANSWER_EMBED_TYPE: {
         componentType: "ANSWER",
         regex: /\s*([^\s]+)/i,
@@ -84,7 +82,6 @@ const SearchAnswers: Record<string, SearchAnswer> = {
         mutable: true,
         _dataKey: "embedType"
     },
-    */
     ANSWER_FILE_NAME: {
         componentType: "ANSWER",
         regex: /(?:\s*([^\s]+))/,
@@ -129,6 +126,14 @@ function setHeaderText(originalOperators: Record<string, { titleText(): string; 
     }
 }
 
+function getSearchType(searchQuery: { query: any, searchId: string; }): [id: string, type: "CHANNEL" | "GUILD"] {
+    const { query, searchId } = searchQuery;
+    if (searchId === "@favorites" || "embed_type" in query) {
+        return [query.channel_id?.[0] ?? SelectedChannelStore.getChannelId(), "CHANNEL"];
+    }
+    return [searchId, "GUILD"];
+}
+
 export default definePlugin({
     name: "MoreSearchOperators",
     description: "Adds experimental search operators.",
@@ -171,6 +176,13 @@ export default definePlugin({
                 match: /\i\((\i),\i\.\i\.FILTER_PINNED,!0\),/,
                 replace: "$self.setAsVisible($1),$&"
             }
+        },
+        {
+            find: "displayName=\"SearchStore\"",
+            replacement: {
+                match: /(?<=SEARCH_START:function\((\i)\).{100,200})var (\i)=\i,(\i)=\i\.searchType;if\(\i===\i\.\i\)\{.{50,100}\}/,
+                replace: "var [$2,$3]=$self.getSearchType($1);"
+            }
         }
     ],
 
@@ -178,5 +190,6 @@ export default definePlugin({
     searchAnswers: SearchAnswers,
     registerSearchOperators,
     setAsVisible,
-    setHeaderText
+    setHeaderText,
+    getSearchType
 });
