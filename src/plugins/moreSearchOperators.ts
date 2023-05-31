@@ -39,31 +39,19 @@ interface SearchAnswer {
     _dataKey: string | number;
 }
 
-const searchOperators: { [name: string]: SearchFilter; } = {
-    FILTER_SORT_ORDER: {
-        componentType: "FILTER",
-        regex: /sortOrder:/i,
-        key: "sortOrder:",
-        getAutocompletions: () => [{ text: "descending" }, { text: "ascending" }],
-        _title: "Sort order",
-        _options: "descending, ascending"
-    },
-    FILTER_SORT_BY: {
-        componentType: "FILTER",
-        regex: /sortBy:/i,
-        key: "sortBy:",
-        getAutocompletions: () => [{ text: "relevance" }, { text: "timestamp" }],
-        _title: "Sort by",
-        _options: "relevance, timestamp"
-    },
+const makeOptions = (...options: string[]) => options.map(text => ({ text }));
+
+const SearchOperators: Record<string, SearchFilter> = {
+    /* returns 500 Internal Server Error
     FILTER_EMBED_TYPE: {
         componentType: "FILTER",
         regex: /embedType:/i,
         key: "embedType:",
-        getAutocompletions: () => [{ text: "image" }, { text: "video" }, { text: "gifv" }, { text: "article" }],
+        getAutocompletions: () => makeOptions("image", "video", "gifv", "article"),
         _title: "Embed type",
         _options: "type"
     },
+    */
     FILTER_FILE_NAME: {
         componentType: "FILTER",
         regex: /fileName:/i,
@@ -76,79 +64,14 @@ const searchOperators: { [name: string]: SearchFilter; } = {
         componentType: "FILTER",
         regex: /fileType:/i,
         key: "fileType:",
-        getAutocompletions: () => [{ text: "png" }, { text: "jpg" }, { text: "webp" }, { text: "gif" }, { text: "mp4" }, { text: "txt" }, { text: "js" }, { text: "css" }, { text: "zip" }],
+        getAutocompletions: () => makeOptions("png", "jpg", "webp", "gif", "mp4", "txt", "js", "css", "zip"),
         _title: "File type",
         _options: "extension"
     },
 };
 
-const searchAnswers: { [name: string]: SearchAnswer; } = {
-    ANSWER_SORT_ORDER: {
-        componentType: "ANSWER",
-        regex: /\s*(asc|desc)(?:ending)?/i,
-        validator: function (match) {
-            const value = match.getMatch(1);
-            switch (value) {
-                case "asc":
-                    match.setData("sortOrder", "asc");
-                    return true;
-                case "desc":
-                    match.setData("sortOrder", "desc");
-                    return true;
-                default:
-                    return false;
-            }
-        },
-        follows: ["FILTER_SORT_ORDER"],
-        queryKey: "sort_order",
-        mutable: true,
-        _dataKey: "sortOrder"
-    },
-    ANSWER_SORT_BY: {
-        componentType: "ANSWER",
-        regex: /\s*(relevance|timestamp)/i,
-        validator: function (match) {
-            const value = match.getMatch(1);
-            switch (value) {
-                case "relevance":
-                    match.setData("sortBy", "relevance");
-                    return true;
-                case "timestamp":
-                    match.setData("sortBy", "timestamp");
-                    return true;
-                default:
-                    return false;
-            }
-        },
-        follows: ["FILTER_SORT_BY"],
-        queryKey: "sort_by",
-        mutable: true,
-        _dataKey: "sortBy"
-    },
-    ANSWER_FILE_NAME: {
-        componentType: "ANSWER",
-        regex: /(?:\s*([^\s]+))/,
-        validator: function (match) {
-            match.setData("fileName", match.getMatch(1));
-            return true;
-        },
-        follows: ["FILTER_FILE_NAME"],
-        queryKey: "attachment_filename",
-        mutable: true,
-        _dataKey: "fileName"
-    },
-    ANSWER_FILE_TYPE: {
-        componentType: "ANSWER",
-        regex: /(?:\s*([^\s]+))/,
-        validator: function (match) {
-            match.setData("fileType", match.getMatch(1));
-            return true;
-        },
-        follows: ["FILTER_FILE_TYPE"],
-        queryKey: "attachment_extension",
-        mutable: true,
-        _dataKey: "fileType"
-    },
+const SearchAnswers: Record<string, SearchAnswer> = {
+    /*
     ANSWER_EMBED_TYPE: {
         componentType: "ANSWER",
         regex: /\s*([^\s]+)/i,
@@ -161,27 +84,47 @@ const searchAnswers: { [name: string]: SearchAnswer; } = {
         mutable: true,
         _dataKey: "embedType"
     },
+    */
+    ANSWER_FILE_NAME: {
+        componentType: "ANSWER",
+        regex: /(?:\s*([^\s]+))/,
+        validator(match) {
+            match.setData("fileName", match.getMatch(1));
+            return true;
+        },
+        follows: ["FILTER_FILE_NAME"],
+        queryKey: "attachment_filename",
+        mutable: true,
+        _dataKey: "fileName"
+    },
+    ANSWER_FILE_TYPE: {
+        componentType: "ANSWER",
+        regex: /(?:\s*([^\s]+))/,
+        validator(match) {
+            match.setData("fileType", match.getMatch(1));
+            return true;
+        },
+        follows: ["FILTER_FILE_TYPE"],
+        queryKey: "attachment_extension",
+        mutable: true,
+        _dataKey: "fileType"
+    },
 };
 
-function registerSearchOperators(originalOperators: { [name: string]: SearchFilter | SearchAnswer; }) {
-    for (const [name, operator] of Object.entries(searchOperators)) {
-        originalOperators[name] = operator;
-    }
-    for (const [name, operator] of Object.entries(searchAnswers)) {
-        originalOperators[name] = operator;
-    }
+function registerSearchOperators(originalOperators: Record<string, SearchFilter | SearchAnswer>) {
+    Object.assign(originalOperators, SearchOperators, SearchAnswers);
 }
 
 // Makes all of the custom operators visible by default
-function setAsVisible(originalOperators: { [name: string]: boolean; }) {
-    for (const name in searchOperators) {
+function setAsVisible(originalOperators: Record<string, boolean>) {
+    for (const name in SearchOperators) {
         originalOperators[name] = true; // null for hidden
     }
 }
 
 // Defines the text displayed above the list of autocompletions
-function setHeaderText(originalOperators: { [name: string]: { titleText: () => string; }; }) {
-    for (const [name, operator] of Object.entries(searchOperators)) {
+function setHeaderText(originalOperators: Record<string, { titleText(): string; }>) {
+    for (const [name, operator] of Object.entries(SearchOperators)) {
         originalOperators[name] = { titleText: () => operator._title };
     }
 }
@@ -204,7 +147,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<=\i\.forEach\(\(function\((\i)\).{300,500})var (\i)=\i\[\i\];switch\(\i\)\{/,
                 // Adds query parameters to the search url
-                replace: "$&" + Object.entries(searchAnswers).map(([k, v]) => `case "${k}":$2.add($1.getData("${v._dataKey}"));break;`).join("")
+                replace: "$&" + Object.entries(SearchAnswers).map(([k, v]) => `case "${k}":$2.add($1.getData("${v._dataKey}"));break;`).join("")
             }
         },
         {
@@ -212,7 +155,7 @@ export default definePlugin({
             replacement: {
                 match: /function \i\(\i\)\{switch\(\i\)\{/,
                 // Defines the example text next to the initial list of autocompletions
-                replace: "$&" + Object.entries(searchOperators).map(([k, v]) => `case "${k}":return "${v._options}";`).join("")
+                replace: "$&" + Object.entries(SearchOperators).map(([k, v]) => `case "${k}":return "${v._options}";`).join("")
             }
         },
         {
@@ -231,8 +174,8 @@ export default definePlugin({
         }
     ],
 
-    searchOperators,
-    searchAnswers,
+    searchOperators: SearchOperators,
+    searchAnswers: SearchAnswers,
     registerSearchOperators,
     setAsVisible,
     setHeaderText
