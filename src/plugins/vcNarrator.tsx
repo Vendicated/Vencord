@@ -71,7 +71,7 @@ function clean(str: string) {
 
 function formatText(str: string, user: string, channel: string) {
     return str
-        .replaceAll("{{USER}}", clean(user) || user ? "Someone" : "")
+        .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
         .replaceAll("{{CHANNEL}}", clean(channel) || "channel");
 }
 
