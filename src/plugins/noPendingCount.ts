@@ -67,8 +67,8 @@ export default definePlugin({
             find: ".getMessageRequestsCount=",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(\i)\.getMessageRequestsCount=function\(\){return \i\.size};/,
-                replace: "$1.getMessageRequestsCount=function(){return 0};"
+                match: /(?<=\.getMessageRequestsCount=function\(\)\{)/,
+                replace: "return 0;"
             }
         },
         // This prevents the Message Requests tab from always hiding due to the previous patch (and is compatible with spam requests)
