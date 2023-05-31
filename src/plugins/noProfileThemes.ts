@@ -27,22 +27,26 @@ export default definePlugin({
         {
             find: ".NITRO_BANNER,",
             replacement: {
-                match: /\i\.\i\.isPremiumAtLeast\(null==(\i)/,
-                replace: "$1?.banner&&$&"
+                // = isPremiumAtLeast(user.premiumType, TIER_2)
+                match: /=(?=\i\.\i\.isPremiumAtLeast\(null==(\i))/,
+                // = user.banner && isPremiumAtLeast(user.premiumType, TIER_2)
+                replace: "=$1?.banner&&"
             }
         },
         {
             find: "().avatarPositionPremiumNoBanner,default:",
             replacement: {
-                match: /avatarPositionPremiumNoBanner,default:(\i\(\)\.(\i))/,
-                replace: "$2,default:$1"
+                // premiumUserWithoutBanner: foo().avatarPositionPremiumNoBanner, default: foo().avatarPositionNormal
+                match: /avatarPositionPremiumNoBanner(?=,default:\i\(\)\.(\i))/,
+                // premiumUserWithoutBanner: foo().avatarPositionNormal...
+                replace: "$1"
             }
         },
         {
             find: ".hasThemeColors=function(){",
             replacement: {
-                match: /key:"canUsePremiumProfileCustomization",get:function\(\){return/,
-                replace: "$& false&&"
+                match: /(?<=key:"canUsePremiumProfileCustomization",get:function\(\){return)/,
+                replace: " false;"
             }
         }
     ]
