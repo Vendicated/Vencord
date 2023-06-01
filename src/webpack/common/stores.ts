@@ -52,6 +52,8 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 
 export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
+export let ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
@@ -90,3 +92,5 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("ApplicationStreamPreviewStore", m => ApplicationStreamPreviewStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);

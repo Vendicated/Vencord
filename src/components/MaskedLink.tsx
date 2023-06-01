@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./classes";
-export * from "./components";
-export * from "./menu";
-export * from "./react";
-export * from "./stores";
-export * as ComponentTypes from "./types/components.d";
-export * as MenuTypes from "./types/menu.d";
-export * as UtilTypes from "./types/utils.d";
-export * from "./utils";
+import { LazyComponent } from "@utils/react";
+import { find } from "@webpack";
 
+
+export type MaskedLink = React.ComponentType<{
+    onClick(): void;
+    trusted: boolean;
+}>;
+
+export const MaskedLink = LazyComponent(() => find(m => m?.type?.toString()?.includes("MASKED_LINK")) as MaskedLink);
