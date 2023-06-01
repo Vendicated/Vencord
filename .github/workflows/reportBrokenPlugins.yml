@@ -2,8 +2,8 @@ name: Test Patches
 on:
     workflow_dispatch:
     schedule:
-      # Every day at midnight
-      - cron: 0 0 * * *
+        # Every day at midnight
+        - cron: 0 0 * * *
 
 jobs:
     TestPlugins:
@@ -22,10 +22,10 @@ jobs:
 
             - name: Install dependencies
               run: |
-                pnpm install --frozen-lockfile
-                pnpm add puppeteer
+                  pnpm install --frozen-lockfile
+                  pnpm add puppeteer
 
-                sudo apt-get install -y chromium-browser
+                  sudo apt-get install -y chromium-browser
 
             - name: Build web
               run: pnpm buildWeb --standalone
@@ -33,25 +33,25 @@ jobs:
             - name: Create Report
               timeout-minutes: 10
               run: |
-                export PATH="$PWD/node_modules/.bin:$PATH"
-                export CHROMIUM_BIN=$(which chromium-browser)
+                  export PATH="$PWD/node_modules/.bin:$PATH"
+                  export CHROMIUM_BIN=$(which chromium-browser)
 
-                esbuild scripts/generateReport.ts > dist/report.mjs
-                node dist/report.mjs >> $GITHUB_STEP_SUMMARY
+                  esbuild scripts/generateReport.ts > dist/report.mjs
+                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
               env:
-                DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-                DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
             - name: Create Report (Canary)
               timeout-minutes: 10
               if: success() || failure() # even run if previous one failed
               run: |
-                export PATH="$PWD/node_modules/.bin:$PATH"
-                export CHROMIUM_BIN=$(which chromium-browser)
-                export USE_CANARY=true
+                  export PATH="$PWD/node_modules/.bin:$PATH"
+                  export CHROMIUM_BIN=$(which chromium-browser)
+                  export USE_CANARY=true
 
-                esbuild scripts/generateReport.ts > dist/report.mjs
-                node dist/report.mjs >> $GITHUB_STEP_SUMMARY
+                  esbuild scripts/generateReport.ts > dist/report.mjs
+                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
               env:
-                DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-                DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
