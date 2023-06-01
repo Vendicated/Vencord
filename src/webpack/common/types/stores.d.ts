@@ -184,10 +184,10 @@ export interface ApplicationStreamingStore extends FluxStore {
     getActiveStreamForStreamKey: (streamKey: string) => Stream | null;
     getActiveStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
     getAllActiveStreams: () => Stream[];
-    getAllApplicationStreams: () => Stream[];
-    getAllApplicationStreamsForChannel: (channelId: string | bigint) => Stream[];
+    getAllApplicationStreams: () => ApplicationStream[];
+    getAllApplicationStreamsForChannel: (channelId: string | bigint) => ApplicationStream[];
     getAllActiveStreamsForChannel: (channelId: string | bigint) => Stream[];
-    getAnyStreamForUser: (userId: string | bigint) => Stream | null;
+    getAnyStreamForUser: (userId: string | bigint) => Stream | ApplicationStream | null;
     getStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
     getCurrentUserActiveStream: () => Stream | null;
     getLastActiveStream: () => Stream | null;

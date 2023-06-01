@@ -18,11 +18,10 @@
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { ScreenshareIcon } from "@components/Icons";
-import { MaskedLink } from "@components/MaskedLink";
 import { Devs } from "@utils/constants";
 import { ImageModal, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ApplicationStreamingStore, ApplicationStreamPreviewStore, Menu, ModalImageClasses } from "@webpack/common";
+import { ApplicationStreamingStore, ApplicationStreamPreviewStore, MaskedLink, Menu, ModalImageClasses } from "@webpack/common";
 import { ApplicationStream, Stream } from "@webpack/types";
 import { Channel, User } from "discord-types/general";
 
@@ -68,7 +67,7 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
                     placeholder={previewUrl}
                     src={previewUrl}
                     shouldAnimate={true}
-                    renderLinkComponent={MaskedLink}
+                    renderLinkComponent={props => <MaskedLink {...props} />}
                 />
             </ModalRoot>
         );

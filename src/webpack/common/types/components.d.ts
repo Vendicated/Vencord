@@ -397,3 +397,10 @@ export type Paginator = ComponentType<{
     onPageChange?(page: number): void;
     hideMaxPage?: boolean;
 }>;
+
+export type MaskedLink = ComponentType<{
+    onClick(): void;
+    trusted: boolean;
+    title: string,
+    href: string;
+}>;
