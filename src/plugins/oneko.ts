@@ -29,7 +29,8 @@ export default definePlugin({
         fetch("https://raw.githubusercontent.com/adryd325/oneko.js/5977144dce83e4d71af1de005d16e38eebeb7b72/oneko.js")
             .then(x => x.text())
             .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
-            .then(eval);
+            .then(eval)
+            .then(document.getElementById("oneko").style.zIndex = 10000);
     },
 
     stop() {
