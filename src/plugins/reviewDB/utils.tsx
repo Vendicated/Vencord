@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import Logger from "@utils/Logger";
+import { classNameFactory } from "@api/Styles";
+import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
 
-import { Review } from "../entities/Review";
-import { UserType } from "../entities/User";
+import { Review, UserType } from "./entities";
+import { settings } from "./settings";
+
+export const cl = classNameFactory("vc-rdb-");
 
 export async function openUserProfileModal(userId: string) {
     await UserUtils.fetchUser(userId);
@@ -44,28 +46,27 @@ export function authorize(callback?: any) {
             {...props}
             scopes={["identify"]}
             responseType="code"
-            redirectUri="https://manti.vendicated.dev/URauth"
+            redirectUri="https://manti.vendicated.dev/api/reviewdb/auth"
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
             callback={async (u: string) => {
                 try {
                     const url = new URL(u);
-                    url.searchParams.append("returnType", "json");
                     url.searchParams.append("clientMod", "vencord");
                     const res = await fetch(url, {
                         headers: new Headers({ Accept: "application/json" })
                     });
-                    const { token, status } = await res.json();
-                    if (status === 0) {
-                        Settings.plugins.ReviewDB.token = token;
+                    const { token, success } = await res.json();
+                    if (success) {
+                        settings.store.token = token;
                         showToast("Successfully logged in!");
                         callback?.();
                     } else if (res.status === 1) {
                         showToast("An Error occurred while logging in.");
                     }
                 } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorise", e);
+                    new Logger("ReviewDB").error("Failed to authorize", e);
                 }
             }}
         />
@@ -83,8 +84,9 @@ export function showToast(text: string) {
     });
 }
 
-export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
 export function canDeleteReview(review: Review, userId: string) {
-    if (review.sender.discordID === userId || Settings.plugins.ReviewDB.userType === UserType.Admin) return true;
+    return (
+        review.sender.discordID === userId
+        || settings.store.user?.type === UserType.Admin
+    );
 }

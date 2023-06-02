@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export function onlyOnce<F extends Function>(f: F): F {
+    let called = false;
+    let result: any;
+    return function onlyOnceWrapper(this: unknown) {
+        if (called) return result;
 
-export interface Badge {
-    name: string;
-    description: string;
-    icon: string;
-    redirectURL : string;
-    type: number;
+        called = true;
+
+        return (result = f.apply(this, arguments));
+    } as unknown as F;
 }

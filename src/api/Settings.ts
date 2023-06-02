@@ -18,7 +18,7 @@
 
 import { debounce } from "@utils/debounce";
 import { localStorage } from "@utils/localStorage";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
@@ -266,7 +266,12 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
         def,
         checks: checks ?? {},
         pluginName: "",
+
+        withPrivateSettings<T>() {
+            return this as DefinedSettings<D, C> & { store: T; };
+        }
     };
+
     return definedSettings;
 }
 

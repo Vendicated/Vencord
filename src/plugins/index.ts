@@ -17,8 +17,8 @@
 */
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
-import { Settings } from "@api/settings";
-import Logger from "@utils/Logger";
+import { Settings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
 import { Patch, Plugin } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";

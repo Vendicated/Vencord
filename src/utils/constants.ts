@@ -19,12 +19,28 @@
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
+export {
+    gitHash,
+    gitRemote
+};
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
-// Add yourself here if you made a plugin
+export interface Dev {
+    name: string;
+    id: bigint;
+    badge?: boolean;
+}
+
+/**
+ * If you made a plugin or substantial contribution, add yourself here.
+ * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
+ * If you wish to stay fully anonymous, feel free to set ID to 0n.
+ * If you are fine with attribution but don't want the badge, add badge: false
+ */
 export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -196,7 +212,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     nick: {
         name: "nick",
-        id: 347884694408265729n
+        id: 347884694408265729n,
+        badge: false
     },
     whqwert: {
         name: "whqwert",
@@ -285,5 +302,34 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     crwn: {
         name: "crwn",
         id: 241507339876827146n
-    }
-});
+    },
+    PandaNinjas: {
+        name: "PandaNinjas",
+        id: 455128749071925248n
+    },
+    CatNoir: {
+        name: "CatNoir",
+        id: 260371016348336128n
+    },
+    outfoxxed: {
+        name: "outfoxxed",
+        id: 837425748435796060n
+    },
+    UwUDev: {
+        name: "UwU",
+        id: 691413039156690994n,
+    },
+    amia: {
+        name: "amia",
+        id: 142007603549962240n
+    },
+} satisfies Record<string, Dev>);
+
+// iife so #__PURE__ works correctly
+export const DevsById = /* #__PURE__*/ (() =>
+    Object.freeze(Object.fromEntries(
+        Object.entries(Devs)
+            .filter(d => d[1].id !== 0n)
+            .map(([_, v]) => [v.id, v] as const)
+    ))
+)() as Record<string, Dev>;

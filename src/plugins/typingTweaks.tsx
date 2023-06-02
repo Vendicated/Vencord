@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -89,7 +89,11 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                         src={user.getAvatarURL(guildId, 128)} />
                 </div>
             )}
-            {GuildMemberStore.getNick(guildId!, user.id) || !guildId && RelationshipStore.getNickname(user.id) || user.username}
+            {GuildMemberStore.getNick(guildId!, user.id)
+                || (!guildId && RelationshipStore.getNickname(user.id))
+                || (user as any).globalName
+                || user.username
+            }
         </strong>
     );
 }, { noop: true });

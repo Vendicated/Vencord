@@ -16,15 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
 import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 
-import { Review } from "../entities/Review";
-import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
-import { canDeleteReview, openUserProfileModal, showToast } from "../Utils/Utils";
-import MessageButton from "./MessageButton";
+import { Review, ReviewType } from "../entities";
+import { deleteReview, reportReview } from "../reviewDbApi";
+import { settings } from "../settings";
+import { canDeleteReview, cl, openUserProfileModal, showToast } from "../utils";
+import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
@@ -33,18 +34,18 @@ export default LazyComponent(() => {
     const [
         { cozyMessage, buttons, message, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy, timestampInline, timestamp },
-        { contents },
+        { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
-        { defaultColor }
+        botTag
     ] = findBulk(
         p("cozyMessage"),
         p("container", "isHeader"),
         p("avatar", "zalgo"),
-        p("contents"),
         p("button", "wrapper", "selected"),
-        p("defaultColor")
+        p("botTag")
     );
+
+    const dateFormat = new Intl.DateTimeFormat();
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
@@ -80,21 +81,21 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
+            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, cl("review"))} style={
                 {
                     marginLeft: "0px",
-                    paddingLeft: "52px",
+                    paddingLeft: "52px", // wth is this
                     paddingRight: "16px"
                 }
             }>
 
-                <div className={contents} style={{ paddingLeft: "0px" }}>
-                    <img
-                        className={classes(avatar, clickable)}
-                        onClick={openModal}
-                        src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                        style={{ left: "0px" }}
-                    />
+                <img
+                    className={classes(avatar, clickable)}
+                    onClick={openModal}
+                    src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                    style={{ left: "0px" }}
+                />
+                <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
                     <span
                         className={classes(clickable, username)}
                         style={{ color: "var(--channels-default)", fontSize: "14px" }}
@@ -102,34 +103,45 @@ export default LazyComponent(() => {
                     >
                         {review.sender.username}
                     </span>
-                    {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
-                    {
-                        !Settings.plugins.ReviewDB.hideTimestamps && (
-                            <Timestamp
-                                timestamp={moment(review.timestamp * 1000)}
-                                compact={true}
-                            />
-                        )
-                    }
+                    {review.type === ReviewType.System && (
+                        <span
+                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                            style={{ marginLeft: "4px" }}>
+                            <span className={botTag.botText}>
+                                System
+                            </span>
+                        </span>
+                    )}
+                </div>
+                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
-                    <p
-                        className={classes(messageContent, defaultColor)}
-                        style={{ fontSize: 15, marginTop: 4 }}
-                    >
-                        {review.comment}
-                    </p>
+                {
+                    !settings.store.hideTimestamps && review.type !== ReviewType.System && (
+                        <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                            {dateFormat.format(review.timestamp * 1000)}
+                        </Timestamp>)
+                }
+
+                <p
+                    className={classes(messageContent)}
+                    style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
+                >
+                    {review.comment}
+                </p>
+                {review.id !== 0 && (
                     <div className={classes(container, isHeader, buttons)} style={{
                         padding: "0px",
                     }}>
                         <div className={buttonClasses.wrapper} >
-                            <MessageButton type="report" callback={reportRev} />
+                            <ReportButton onClick={reportRev} />
+
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (
-                                <MessageButton type="delete" callback={delReview} />
+                                <DeleteButton onClick={delReview} />
                             )}
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         );
     };
