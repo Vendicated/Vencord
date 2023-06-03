@@ -77,14 +77,14 @@ export async function authorizeCloud() {
         permissions={0n}
         clientId={clientId}
         cancelCompletesFlow={false}
-        callback={async (callbackUrl: string) => {
-            if (!callbackUrl) {
+        callback={async ({ location }: any) => {
+            if (!location) {
                 Settings.cloud.authenticated = false;
                 return;
             }
 
             try {
-                const res = await fetch(callbackUrl, {
+                const res = await fetch(location, {
                     headers: new Headers({ Accept: "application/json" })
                 });
                 const { secret } = await res.json();
