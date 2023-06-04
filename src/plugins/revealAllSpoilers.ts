@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-const SpoilerClasses = findByPropsLazy("spoilerText");
+const SpoilerClasses = findByPropsLazy("spoilerContent");
 const MessagesClasses = findByPropsLazy("messagesWrapper", "messages");
 
 export default definePlugin({
@@ -43,14 +43,14 @@ export default definePlugin({
 
         if (!ctrlKey) { return; }
 
-        const { spoilerText, hidden } = SpoilerClasses;
+        const { spoilerContent, hidden } = SpoilerClasses;
         const { messagesWrapper } = MessagesClasses;
 
         const parent = shiftKey
             ? document.querySelector(`div.${messagesWrapper}`)
             : (target as HTMLSpanElement).parentElement;
 
-        for (const spoiler of parent!.querySelectorAll(`span.${spoilerText}.${hidden}`)) {
+        for (const spoiler of parent!.querySelectorAll(`span.${spoilerContent}.${hidden}`)) {
             (spoiler as HTMLSpanElement).click();
         }
     }
