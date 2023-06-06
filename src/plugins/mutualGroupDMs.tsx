@@ -55,11 +55,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=(\i)\.isClyde\(\)\?null:(\(0,\i\.\i\).+?id:)\i\.\i\.MUTUAL_GUILDS(,children:)\i\.\i\.Messages\.MUTUAL_GUILDS}\))/,
-                    replace: `,!$1.bot?$2"MUTUAL_GDMS"$3"Mutual GDMs"}):null` // The label is "Mutual GDMs" because otherwise it's too long when Activity tab is present
+                    replace: ",!$1.bot?$2\"MUTUAL_GDMS\"$3\"Mutual GDMs\"}):null" // The label is "Mutual GDMs" because otherwise it's too long when Activity tab is present
                 },
                 {
                     match: /({user:(\i),onClose:(\i)}\);)(case \i\.\i\.MUTUAL_FRIENDS)/,
-                    replace: `$1case "MUTUAL_GDMS":return $self.renderMutualGDMs($2,$3);$4`
+                    replace: "$1case \"MUTUAL_GDMS\":return $self.renderMutualGDMs($2,$3);$4"
                 }
             ]
         }
