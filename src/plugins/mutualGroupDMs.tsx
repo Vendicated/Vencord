@@ -31,11 +31,11 @@ const UserUtils = findByPropsLazy("getGlobalName");
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
-//@ts-ignore
+// @ts-ignore
 const ScrollerThin = LazyComponent(() => Menu.ScrollerThin);
-//@ts-ignore
+// @ts-ignore
 const Clickable = LazyComponent(() => Menu.Clickable);
-//@ts-ignore
+// @ts-ignore
 const Avatar = LazyComponent(() => Menu.Avatar);
 
 function GetGroupDMName(channel: Channel) {
