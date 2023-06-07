@@ -65,7 +65,7 @@
         "type-fest": "^3.9.0",
         "typescript": "^5.0.4"
     },
-    "packageManager": "pnpm@8.1.1",
+    "packageManager": "pnpm@8.6.0",
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
