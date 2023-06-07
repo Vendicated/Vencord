@@ -8,7 +8,7 @@ function removeFirst(arr, predicate) {
     if (idx !== -1) arr.splice(idx, 1);
 }
 
-chrome.webRequest.onHeadersReceived.addListener(
+chrome?.webRequest?.onHeadersReceived?.addListener(
     ({ responseHeaders, type, url }) => {
         if (!responseHeaders) return;
 
@@ -30,3 +30,16 @@ chrome.webRequest.onHeadersReceived.addListener(
     { urls: ["https://raw.githubusercontent.com/*", "*://*.discord.com/*"], types: ["main_frame", "stylesheet"] },
     ["blocking", "responseHeaders"]
 );
+
+
+const rules = chrome?.runtime?.getURL("modifyResponseHeaders.json");
+if (rules) {
+    fetch(rules)
+        .then(r => r.json())
+        .then(rules => {
+            chrome?.declarativeNetRequest?.updateDynamicRules({
+                removeRuleIds: rules?.map(r => r.id) || [],
+                addRules: rules
+            });
+        });
+}

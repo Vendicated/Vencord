@@ -1,7 +1,6 @@
 {
     "manifest_version": 3,
     "minimum_chrome_version": "91",
-
     "name": "Vencord Web",
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
@@ -9,30 +8,37 @@
     "icons": {
         "128": "icon.png"
     },
-
     "host_permissions": [
         "*://*.discord.com/*",
         "https://raw.githubusercontent.com/*"
     ],
-
-    "permissions": ["declarativeNetRequest"],
-
+    "permissions": [
+        "declarativeNetRequest"
+    ],
     "content_scripts": [
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["content.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
             "all_frames": true
         }
     ],
-
     "web_accessible_resources": [
         {
-            "resources": ["dist/Vencord.js", "dist/Vencord.css"],
-            "matches": ["*://*.discord.com/*"]
+            "resources": [
+                "dist/Vencord.js",
+                "dist/Vencord.css",
+                "modifyResponseHeaders.json"
+            ],
+            "matches": [
+                "*://*.discord.com/*"
+            ]
         }
     ],
-
     "declarative_net_request": {
         "rule_resources": [
             {
@@ -42,7 +48,6 @@
             }
         ]
     },
-
     "browser_specific_settings": {
         "gecko": {
             "id": "vencord-firefox@vendicated.dev",
