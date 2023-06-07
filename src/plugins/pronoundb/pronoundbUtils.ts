@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022-2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { Settings } from "@api/Settings";
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
@@ -30,6 +31,8 @@ export const enum PronounsFormat {
     Capitalized = "CAPITALIZED"
 }
 
+// A map of local overrides that have been accessed.
+const overrideCache: Record<string, PronounCode | null> = {};
 // A map of cached pronouns so the same request isn't sent twice
 const cache: Record<string, PronounCode> = {};
 // A map of ids and callbacks that should be triggered on fetch
@@ -46,8 +49,39 @@ const bulkFetch = debounce(async () => {
     }
 });
 
+function pronounOverrideKey(id: string): string {
+    return `pronoundb-local-override-${id}`;
+}
+
+const pronounOverrideListKey = "pronoundb-local-override-list";
+
+export async function clearAllLocalPronounOverrides(): Promise<number> {
+    const items = await DataStore.get(pronounOverrideListKey) || [];
+    await DataStore.delMany(items.map(pronounOverrideKey));
+    await DataStore.del(pronounOverrideListKey);
+    return items.length;
+}
+
+export async function setLocalPronounOverride(id: string, code: PronounCode | null): Promise<void> {
+    delete cache[id];
+    overrideCache[id] = code;
+    await DataStore.update(pronounOverrideListKey, old => {
+        const s = old || [];
+        return s.includes(id) ? s : [...s, id];
+    });
+    await DataStore.set(pronounOverrideKey(id), code);
+}
+
+export async function getLocalPronounOverride(id: string): Promise<PronounCode | null> {
+    return overrideCache[id] = ((await DataStore.get(pronounOverrideKey(id))) ?? null);
+}
+
+export function getLocalPronounOverrideNow(id: string): PronounCode | null {
+    return (overrideCache[id]) ?? null;
+}
+
 export function useFormattedPronouns(id: string): string | null {
-    const [result] = useAwaiter(() => fetchPronouns(id), {
+    const [result] = useAwaiter(() => findPronouns(id), {
         fallbackValue: getCachedPronouns(id),
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
@@ -72,6 +106,11 @@ export function useProfilePronouns(id: string) {
 // Gets the cached pronouns, if you're too impatient for a promise!
 export function getCachedPronouns(id: string): PronounCode | null {
     return cache[id] ?? null;
+}
+
+// Find the pronouns for one id, checking for local overrides first
+export async function findPronouns(id: string): Promise<PronounCode> {
+    return await getLocalPronounOverride(id) ?? await fetchPronouns(id);
 }
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed

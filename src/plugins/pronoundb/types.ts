@@ -54,3 +54,5 @@ export const PronounMapping = {
     avoid: "Avoid pronouns, use my name",
     unspecified: "Unspecified"
 } as const;
+
+export const PronounCodes = Object.keys(PronounMapping) as PronounCode[];

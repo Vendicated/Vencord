@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { Button } from "@webpack/common";
 
-import { PronounsFormat } from "./pronoundbUtils";
+import { clearAllLocalPronounOverrides, PronounsFormat } from "./pronoundbUtils";
 
 export const settings = definePluginSettings({
     pronounsFormat: {
@@ -51,5 +53,16 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show in profile",
         default: true
+    },
+    clearAll: {
+        type: OptionType.COMPONENT,
+        description: "Local overrides",
+        component: () => <Button onClick={() => clearAllLocalPronounOverrides().then(count => showNotification({
+            title: "Cleared all local pronoun overrides!",
+            body: `Deleted ${count} overrides`,
+            permanent: false,
+        }))}>
+            Clear all local overrides
+        </Button>
     }
 });

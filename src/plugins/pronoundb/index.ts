@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2022-2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,19 @@
 
 import "./styles.css";
 
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./components/PronounsChatComponent";
+import { PronounOverrideContextMenu } from "./contextmenu";
 import { useProfilePronouns } from "./pronoundbUtils";
 import { settings } from "./settings";
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven],
+    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.nea],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
         // Add next to username (compact mode)
@@ -72,5 +74,12 @@ export default definePlugin({
     // Re-export the components on the plugin object so it is easily accessible in patches
     PronounsChatComponentWrapper,
     CompactPronounsChatComponentWrapper,
-    useProfilePronouns
+    useProfilePronouns,
+
+    start() {
+        addContextMenuPatch("user-context", PronounOverrideContextMenu);
+    },
+    stop() {
+        removeContextMenuPatch("user-context", PronounOverrideContextMenu);
+    }
 });
