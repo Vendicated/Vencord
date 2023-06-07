@@ -42,6 +42,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    memberListBackground: {
+        description: "Show USRBG banners in the members list",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -77,6 +83,16 @@ export default definePlugin({
                     replace: "$self.voiceBackgroundHook($1),"
                 }
             ]
+        },
+        {
+            find: "[\"aria-selected\"])",
+            predicate: () => settings.store.memberListBackground,
+            replacement: [
+                {
+                    match: /(forwardRef\(\(function\((\i)(.+?"listitem",))(innerRef)/,
+                    replace: "$1style:$self.memberListBannerHook($2),$4"
+                }
+            ]
         }
     ],
 
@@ -84,6 +100,15 @@ export default definePlugin({
         return (
             <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
+    },
+
+    memberListBannerHook(props: any) {
+        const userId = props.avatar.props.children[0].props.src.split("/")[4];
+        if (!data[userId]) return;
+        console.log(userId);
+        return {
+            "--mlbg": "url(" + data[userId] + ")"
+        };
     },
 
     voiceBackgroundHook({ className, participantUserId }: any) {
