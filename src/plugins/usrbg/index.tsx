@@ -27,6 +27,7 @@ import style from "./index.css?managed";
 const BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
 
 let data = {} as Record<string, string>;
+const nitroData = {} as Record<string, string>;
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -54,7 +55,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad],
+    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.ImLvna],
     settings,
     patches: [
         {
@@ -101,31 +102,31 @@ export default definePlugin({
             <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
     },
-
     memberListBannerHook(props: any) {
-        const userId = props.avatar.props.children[0].props.src.split("/")[4];
-        if (!data[userId]) return;
-        console.log(userId);
+        const userId = props.avatar._owner.pendingProps.user.id;
+        const url = this.getBanner(userId);
+        if (url === "") return;
         return {
-            "--mlbg": "url(" + data[userId] + ")"
+            "--mlbg": `url("${url}")`
         };
     },
 
     voiceBackgroundHook({ className, participantUserId }: any) {
-        if (className.includes("tile-")) {
-            if (data[participantUserId]) {
-                return {
-                    backgroundImage: `url(${data[participantUserId]})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat"
-                };
-            }
-        }
+        const url = this.getBanner(participantUserId);
+        if (url === "" || !className.includes("tile-")) return;
+        return {
+            backgroundImage: `url(${url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+        };
     },
 
     useBannerHook({ displayProfile, user }: any) {
-        if (displayProfile?.banner && settings.store.nitroFirst) return;
+        if (displayProfile?.banner) {
+            nitroData[user.id] = displayProfile.getBannerURL({ "canAnimate": true });
+            if (settings.store.nitroFirst) return;
+        }
         if (data[user.id]) return data[user.id];
     },
 
@@ -135,6 +136,18 @@ export default definePlugin({
 
     shouldShowBadge({ displayProfile, user }: any) {
         return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
+    },
+
+    getBanner(userId: string) {
+        let url = "";
+        if (settings.store.nitroFirst) {
+            if (nitroData[userId]) url = nitroData[userId];
+            else if (data[userId]) url = data[userId];
+        } else {
+            if (data[userId]) url = data[userId];
+            else if (nitroData[userId]) url = nitroData[userId];
+        }
+        return url;
     },
 
     async start() {
