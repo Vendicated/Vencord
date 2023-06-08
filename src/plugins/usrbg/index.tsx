@@ -55,7 +55,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.ImLvna],
+    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.ImLvna, Devs.AkiraSimplex],
     settings,
     patches: [
         {
