@@ -387,3 +387,13 @@ export type useToken = (color: {
     css: string;
     resolve: Resolve;
 }) => ReturnType<Resolve>;
+
+export type Paginator = ComponentType<{
+    currentPage: number;
+    maxVisiblePages: number;
+    pageSize: number;
+    totalCount: number;
+
+    onPageChange?(page: number): void;
+    hideMaxPage?: boolean;
+}>;
