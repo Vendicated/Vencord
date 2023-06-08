@@ -44,7 +44,7 @@ const dotStyles = findByPropsLazy("numberBadge");
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
-const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy('"#607D8B");');
+const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy("themeColor:null==");
 const useDrag = findByCodeLazy(".disconnectDragSource(");
 const useDrop = findByCodeLazy(".disconnectDropTarget(");
 

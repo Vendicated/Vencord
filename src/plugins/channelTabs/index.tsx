@@ -133,26 +133,26 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         // @ts-ignore
-        const { KeyCombo } = Forms;
+        const { FormTitle, FormSection, FormText, KeyCombo } = Forms;
         return <>
-            <Forms.FormTitle tag="h3">Keybinds</Forms.FormTitle>
+            <FormTitle tag="h3">Keybinds</FormTitle>
             <Flex flexDirection="row">
-                <Forms.FormSection>
-                    <Forms.FormTitle>Switch between tabs</Forms.FormTitle>
+                <FormSection>
+                    <FormTitle>Switch between tabs</FormTitle>
                     <KeyCombo shortcut="mod+tab" />
                     <KeyCombo shortcut="mod+shift+tab" />
-                </Forms.FormSection>
-                <Forms.FormSection>
-                    <Forms.FormTitle>Open and close tabs</Forms.FormTitle>
+                </FormSection>
+                <FormSection>
+                    <FormTitle>Open and close tabs</FormTitle>
                     <KeyCombo shortcut="mod+n" />
                     <KeyCombo shortcut="mod+w" />
-                </Forms.FormSection>
-                <Forms.FormSection>
+                </FormSection>
+                <FormSection>
                     <Forms.FormTitle>Reopen a recently closed tab</Forms.FormTitle>
                     <KeyCombo shortcut="mod+shift+t" />
-                </Forms.FormSection>
+                </FormSection>
             </Flex>
-            <Forms.FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</Forms.FormText>
+            <FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</FormText>
         </>;
     },
 
