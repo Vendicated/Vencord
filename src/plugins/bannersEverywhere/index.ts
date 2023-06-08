@@ -149,9 +149,6 @@ export default definePlugin({
     authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.ImLvna],
     settings,
     dependencies: ["USRBG"],
-    toolboxActions: {
-        "Load Visible Avatars": refreshVisibleMembers
-    },
     patches: [
         {
             find: "\"data-selenium-video-tile\":",
