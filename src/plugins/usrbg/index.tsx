@@ -103,25 +103,21 @@ export default definePlugin({
     },
 
     memberListBannerHook(props: any) {
-        const userId = props.avatar.props.children[0].props.src.split("/")[4];
+        const userId = props.avatar._owner.pendingProps.user.id;
         if (!data[userId]) return;
-        console.log(userId);
         return {
-            "--mlbg": "url(" + data[userId] + ")"
+            "--mlbg": `url("${data[userId]}")`
         };
     },
 
     voiceBackgroundHook({ className, participantUserId }: any) {
-        if (className.includes("tile-")) {
-            if (data[participantUserId]) {
-                return {
-                    backgroundImage: `url(${data[participantUserId]})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat"
-                };
-            }
-        }
+        if (!data[participantUserId] || !className.includes("tile-")) return;
+        return {
+            backgroundImage: `url(${data[participantUserId]})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+        };
     },
 
     useBannerHook({ displayProfile, user }: any) {
