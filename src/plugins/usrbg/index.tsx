@@ -26,8 +26,6 @@ import style from "./index.css?managed";
 
 const BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
 
-let data = {} as Record<string, string>;
-const nitroData = {} as Record<string, string>;
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -37,18 +35,6 @@ const settings = definePluginSettings({
             { label: "Nitro banner", value: true, default: true },
             { label: "USRBG banner", value: false },
         ]
-    },
-    voiceBackground: {
-        description: "Use USRBG banners as voice chat backgrounds",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    },
-    memberListBackground: {
-        description: "Show USRBG banners in the members list",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
     }
 });
 
@@ -74,80 +60,34 @@ export default definePlugin({
                     replace: "&&$self.shouldShowBadge(arguments[0])$&"
                 }
             ]
-        },
-        {
-            find: "\"data-selenium-video-tile\":",
-            predicate: () => settings.store.voiceBackground,
-            replacement: [
-                {
-                    match: /(\i)\.style,/,
-                    replace: "$self.voiceBackgroundHook($1),"
-                }
-            ]
-        },
-        {
-            find: "[\"aria-selected\"])",
-            predicate: () => settings.store.memberListBackground,
-            replacement: [
-                {
-                    match: /(forwardRef\(\(function\((\i)(.+?"listitem",))(innerRef)/,
-                    replace: "$1style:$self.memberListBannerHook($2),$4"
-                }
-            ]
         }
     ],
+
+
+    data: {} as Record<string, string>,
+    nitroData: {} as Record<string, string>,
 
     settingsAboutComponent: () => {
         return (
             <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
     },
-    memberListBannerHook(props: any) {
-        const userId = props.avatar._owner.pendingProps.user.id;
-        const url = this.getBanner(userId);
-        if (url === "") return;
-        return {
-            "--mlbg": `url("${url}")`
-        };
-    },
-
-    voiceBackgroundHook({ className, participantUserId }: any) {
-        const url = this.getBanner(participantUserId);
-        if (url === "" || !className.includes("tile-")) return;
-        return {
-            backgroundImage: `url(${url})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat"
-        };
-    },
 
     useBannerHook({ displayProfile, user }: any) {
         if (displayProfile?.banner) {
-            nitroData[user.id] = displayProfile.getBannerURL({ "canAnimate": true });
+            // Usrbg stores this instead of memberBanners so they arent overwriting the same thing
+            this.nitroData[user.id] = displayProfile.getBannerURL({ "canAnimate": true });
             if (settings.store.nitroFirst) return;
         }
-        if (data[user.id]) return data[user.id];
+        if (this.data[user.id]) return this.data[user.id];
     },
 
     premiumHook({ userId }: any) {
-        if (data[userId]) return 2;
+        if (this.data[userId]) return 2;
     },
 
     shouldShowBadge({ displayProfile, user }: any) {
-        return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
-    },
-
-    getBanner(userId: string) {
-        let url = "";
-        if (settings.store.nitroFirst) {
-            if (nitroData[userId]) url = nitroData[userId];
-            else if (data[userId]) url = data[userId];
-        } else {
-            if (data[userId]) url = data[userId];
-            else if (nitroData[userId]) url = nitroData[userId];
-        }
-        return url;
+        return displayProfile?.banner && (!this.data[user.id] || settings.store.nitroFirst);
     },
 
     async start() {
@@ -155,6 +95,6 @@ export default definePlugin({
 
         const res = await fetch(BASE_URL);
         if (res.ok)
-            data = await res.json();
+            this.data = await res.json();
     }
 });
