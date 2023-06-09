@@ -63,6 +63,7 @@ export default definePlugin({
     settings,
 
     renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
+        if (message.interaction) return author?.nick;
         try {
             const { username } = message.author;
             const { nick } = author;
