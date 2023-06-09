@@ -319,6 +319,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "amia",
         id: 142007603549962240n
     },
+    ImLvna: {
+        name: "Luna <3",
+        id: 174200708818665472n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
