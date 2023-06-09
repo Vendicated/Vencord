@@ -1,4 +1,4 @@
-:is([class*="userProfile"], [class*="userPopout"]) [class*="bannerPremium"] {
+:is([class^="userProfile"], [class^="userPopout"]) [class*="bannerPremium"] {
     background: center / cover no-repeat;
 }
 
@@ -7,11 +7,11 @@
     top: 76px;
 }
 
-[style*="background-image"] [class*="background-"] {
+[style^="background-image"] [class^="background-"] {
     background-color: transparent !important;
 }
 
-[style*="--mlbg"]::before {
+[style^="--mlbg"]::before {
     opacity: 0.8;
     -webkit-mask-image: linear-gradient(to right, transparent 20%, #fff);
     mask-image: linear-gradient(to right, transparent 20%, #fff);
