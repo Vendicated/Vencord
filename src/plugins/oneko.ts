@@ -30,7 +30,7 @@ export default definePlugin({
             .then(x => x.text())
             .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
             .then(eval)
-            .then(function () { (document.getElementById("oneko")!.style!.zIndex = '10000'); });
+            .then(function () { (document.getElementById("oneko")!.style!.zIndex = "10000"); });
     },
 
     stop() {
