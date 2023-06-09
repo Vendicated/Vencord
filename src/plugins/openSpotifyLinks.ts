@@ -19,29 +19,29 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+const spotifyRegex = /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)(\?.*)?$/;
+
 export default definePlugin({
     name: "OpenSpotifyLinks",
-    description: "Opens Spotify links in the Spotify client.",
+    description: "Opens Spotify links in the native client.",
     authors: [Devs.crwn],
-    patches: [],
+
+    onClick(event: MouseEvent) {
+        const target = event.target as HTMLElement;
+        if (!(target instanceof HTMLAnchorElement)) return;
+
+        const match = target.href.match(spotifyRegex);
+        if (!match) return;
+
+        VencordNative.native.openExternal(`spotify://${match[1]}/${match[2]}`);
+        event.preventDefault();
+    },
 
     start() {
-        this.clickListener = (event: MouseEvent) => {
-            const target = event.target as HTMLElement;
-            if (!(target instanceof HTMLAnchorElement)) return;
-
-            const spotifyLinkRegex = /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)(\?.*)?$/;
-            const match = target.href.match(spotifyLinkRegex);
-            if (!match) return;
-
-            VencordNative.native.openExternal(`spotify://${match[1]}/${match[2]}`);
-            event.preventDefault();
-        };
-
-        window.addEventListener("click", this.clickListener, { capture: true });
+        window.addEventListener("click", this.onClick, { capture: true });
     },
 
     stop() {
-        window.removeEventListener("click", this.clickListener);
+        window.removeEventListener("click", this.onClick);
     },
 });
