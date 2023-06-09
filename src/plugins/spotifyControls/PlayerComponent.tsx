@@ -20,6 +20,7 @@ import "./spotifyStyles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
 import { classes, copyWithToast } from "@utils/misc";
@@ -88,12 +89,14 @@ function CopyContextMenu({ name, path }: { name: string; path: string; }) {
                 id={copyId}
                 label={`Copy ${name} Link`}
                 action={() => copyWithToast("https://open.spotify.com" + path)}
+                icon={LinkIcon}
             />
             <Menu.MenuItem
                 key={openId}
                 id={openId}
                 label={`Open ${name} in Spotify`}
                 action={() => SpotifyStore.openExternal(path)}
+                icon={OpenExternalIcon}
             />
         </Menu.Menu>
     );
@@ -221,6 +224,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="open-album"
                 label="Open Album"
                 action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+                icon={OpenExternalIcon}
             />
             <Menu.MenuItem
                 key="view-cover"
@@ -228,6 +232,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 label="View Album Cover"
                 // trolley
                 action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
+                icon={ImageIcon}
             />
             <Menu.MenuControlItem
                 id="spotify-volume"
