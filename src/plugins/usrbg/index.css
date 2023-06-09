@@ -24,3 +24,8 @@
     border-radius: 4px;
     background-image: var(--mlbg);
 }
+
+[class^="memberInner-"] {
+    z-index: 1;
+    position: relative;
+}
