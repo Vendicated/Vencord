@@ -49,7 +49,7 @@ let savedvalue = "";
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
 
-    return "https:" + emote.host.url + "/" + settings.store.imagesize + "." + extension;
+    return "https:" + emote.host.url + "/" + settings.store.imagesize + "." + extension + "?name=" + emote.name;
 }
 
 async function FetchEmotes(value, handleRefresh) {
