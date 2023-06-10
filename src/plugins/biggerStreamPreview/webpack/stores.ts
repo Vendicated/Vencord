@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./classes";
-export * from "./components";
-export * from "./internal";
-export * from "./menu";
-export * from "./react";
-export * from "./stores";
-export * as ComponentTypes from "./types/components.d";
-export * as MenuTypes from "./types/menu.d";
-export * as UtilTypes from "./types/utils.d";
-export * from "./utils";
+import { waitForStore } from "@webpack/common";
+
+import * as t from "./types/stores";
+
+export let ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
+
+waitForStore("ApplicationStreamPreviewStore", m => ApplicationStreamPreviewStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);

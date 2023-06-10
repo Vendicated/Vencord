@@ -116,11 +116,12 @@ export type ImageModal = ComponentType<{
     height?: number;
     animated?: boolean;
     responsive?: boolean;
-    renderLinkComponent: (props: any) => React.ReactElement;
+    renderLinkComponent(props: any): ReactNode;
     maxWidth?: number;
     maxHeight?: number;
     shouldAnimate?: boolean;
     onClose?(): void;
+    shouldHideMediaOptions?: boolean;
 }>;
 
 export const ImageModal = LazyComponent(() => findByCode(".renderLinkComponent", ".responsive") as ImageModal);

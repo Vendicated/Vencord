@@ -19,11 +19,13 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { ScreenshareIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { ImageModal, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
+import { openImageModal } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ApplicationStreamingStore, ApplicationStreamPreviewStore, MaskedLink, Menu, ModalImageClasses } from "@webpack/common";
-import { ApplicationStream, Stream } from "@webpack/types";
+import { Menu } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
+
+import { ApplicationStreamingStore, ApplicationStreamPreviewStore } from "./webpack/stores";
+import { ApplicationStream, Stream } from "./webpack/types/stores";
 
 export interface UserContextProps {
     channel: Channel,
@@ -55,36 +57,17 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     const previewUrl = await ApplicationStreamPreviewStore.getPreviewURL(guildId, channelId, ownerId);
     if (!previewUrl) return;
 
-    openModalLazy(async () => {
-        return props => (
-            <ModalRoot
-                {...props}
-                className={ModalImageClasses.modal}
-                size={ModalSize.DYNAMIC}>
-                <ImageModal
-                    className={ModalImageClasses.image}
-                    original={previewUrl}
-                    placeholder={previewUrl}
-                    src={previewUrl}
-                    shouldAnimate={true}
-                    renderLinkComponent={props => <MaskedLink {...props} />}
-                />
-            </ModalRoot>
-        );
-    }
-    );
+    openImageModal(previewUrl);
 };
 
-export const addViewStreamContext = (children, { userId }: { userId: string | bigint; }) => {
+export const addViewStreamContext = (children, { userId }: { userId: string | bigint; }) => () => {
     const streamPreviewItemIdentifier = "view-stream-preview";
-    if (children.some(child => child?.props?.id === streamPreviewItemIdentifier)) return;
 
     const stream = ApplicationStreamingStore.getAnyStreamForUser(userId);
 
     const streamPreviewItem = (
         <Menu.MenuItem
             label="View Stream Preview"
-            key={streamPreviewItemIdentifier}
             id={streamPreviewItemIdentifier}
             icon={ScreenshareIcon}
             action={() => stream && handleViewPreview(stream)}
@@ -96,11 +79,11 @@ export const addViewStreamContext = (children, { userId }: { userId: string | bi
 };
 
 export const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: StreamContextProps) => {
-    addViewStreamContext(children, { userId: stream.ownerId });
+    return addViewStreamContext(children, { userId: stream.ownerId });
 };
 
 export const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
-    addViewStreamContext(children, { userId: user.id });
+    return addViewStreamContext(children, { userId: user.id });
 };
 
 export default definePlugin({
