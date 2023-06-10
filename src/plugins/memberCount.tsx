@@ -52,11 +52,11 @@ function MemberCount() {
     return (
         <Flex id="vc-membercount" style={{
             marginTop: "1em",
-            marginBottom: "-.5em",
             paddingInline: "1em",
             justifyContent: "center",
             alignContent: "center",
-            gap: 0
+            gap: 0,
+            zIndex: 100,
         }}>
             <Tooltip text={`${online} Online in this Channel`} position="bottom">
                 {props => (
