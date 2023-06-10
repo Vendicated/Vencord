@@ -112,6 +112,8 @@ export default definePlugin({
         const implicitRelationships = nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id));
         const { relationships } = RelationshipStore.__getLocalVars();
         implicitRelationships.forEach(user => relationships[user.id] = 5);
+        
+        RelationshipStore.emitChange();
     },
 
     start() {
