@@ -83,11 +83,9 @@ export default definePlugin({
         // extendable if more of these cases show up
         if(extIdx !== -1){
             const fname_without_ext = file.slice(0, extIdx)
-            console.log("fname >", fname_without_ext)
             const second_ext_idx = fname_without_ext.lastIndexOf(".")
             if(second_ext_idx !== -1){
                 const second_ext = fname_without_ext.slice(second_ext_idx+1)
-                console.log(second_ext)
                 if(COMPOUND_EXTENSIONS.some(e => second_ext === e)){
                     extIdx = second_ext_idx;
                 }
