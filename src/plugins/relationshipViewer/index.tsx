@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Margins } from "@utils/margins";
 import { ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Card, FluxDispatcher, GuildMemberStore, Menu, React, RelationshipStore, Text, UserStore } from "@webpack/common";
+import { Card, ChannelStore, FluxDispatcher, GuildMemberStore, Menu, React, RelationshipStore, Text, UserStore } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { createCollapsableForm, createFormItem, createFormMember } from "./elements";
@@ -34,6 +34,12 @@ const settings = definePluginSettings({
     "Show Friends": {
         type: OptionType.BOOLEAN,
         description: "Show friends in the list",
+        default: true
+    },
+
+    "Show Groups": {
+        type: OptionType.BOOLEAN,
+        description: "Show users from group dms in the list",
         default: true
     },
 
@@ -73,6 +79,7 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
 
     const friendIds = RelationshipStore.getFriendIDs();
     const blockedIds: Array<string> = [];
+    const mutualGroupIds: Array<string> = [];
 
     const friendsInServer = friendIds
         .map(id => GuildMemberStore.getMember(guildId, id) && UserStore.getUser(id));
@@ -90,8 +97,24 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
         blockedInServer.push(user);
     }
 
+    const mutualGroupInServer: Array<User> = [];
+    for (const recipients of ChannelStore.getSortedPrivateChannels().filter(x => x.type === 3).map(x => x.recipients)) {
+        for (const id of recipients) {
+            if (mutualGroupIds.includes(id)) continue;
+            if (friendIds.includes(id) || blockedIds.includes(id)) continue;
+
+            mutualGroupIds.push(id);
+
+            const user = GuildMemberStore.getMember(guildId, id) && UserStore.getUser(id);
+            if (!user) continue;
+
+            mutualGroupInServer.push(user);
+        }
+    }
+
     const friendsElementArray: Array<React.ReactElement> = [];
     const blockedElementArray: Array<React.ReactElement> = [];
+    const mutualGroupsElementArray: Array<React.ReactElement> = [];
 
     for (const user of friendsInServer) {
         if (!user) {
@@ -105,8 +128,13 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
         blockedElementArray.push(createFormMember(user, guildId, true));
     }
 
+    for (const user of mutualGroupInServer) {
+        mutualGroupsElementArray.push(createFormMember(user, guildId, true));
+    }
+
     const friendsCount = friendsElementArray.length;
     const blockedCount = blockedElementArray.length;
+    const mutualGroupsCount = mutualGroupsElementArray.length;
 
     React.useEffect(() => {
         FluxDispatcher.dispatch({
@@ -135,6 +163,7 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
                 ])}
 
                 {settings.store["Show Friends"] && createCollapsableForm("Friends", friendsCount > 0 ? friendsElementArray : [createFormItem("No friends in this server.")], friendsCount)}
+                {settings.store["Show Groups"] && mutualGroupsCount > 0 && createCollapsableForm("Mutual Groups (Non-Friends & Non-Blocked)", mutualGroupsElementArray, mutualGroupsCount)}
                 {settings.store["Show Blocked"] && blockedCount > 0 && createCollapsableForm("Blocked", blockedElementArray, blockedCount)}
             </Card>
         </ModalRoot>
@@ -174,6 +203,11 @@ export default definePlugin({
             id: 734367577563987969n,
             name: "Magik Manz",
         },
+
+        {
+            id: 142007603549962240n,
+            name: "aamia"
+        }
     ],
 
     settings,

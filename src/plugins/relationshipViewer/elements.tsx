@@ -87,7 +87,22 @@ const openProfileModal = (user: User, guildId?: string) => {
 
 export const createFormMember = (user: User | string, guildId?: string, isMember?: boolean) => {
     const loadedUser = typeof user === "object";
-    const name = loadedUser ? user.tag : user;
+
+    let name = user as string;
+    let displayName = "";
+    if (loadedUser) {
+        if (user.discriminator === "0") {
+            displayName = user.username;
+            // someone somehow managed to have "" as their displayname HOW THE FUCK?
+            displayName = displayName !== "" ? displayName : user.username;
+
+            name = (user as User & { globalName: string; }).globalName;
+        } else {
+            name = user.username;
+            displayName = user.tag;
+        }
+    }
+
     return (
         <Flex style={{ flexDirection: "row" }} className={`${isMember && Margins.bottom8} ${isMember && Margins.left8} ${isMember && Margins.top8} ${isMember && Margins.right8} relation-nogap`}>
             <Flex className="relation-nogap">
@@ -105,7 +120,7 @@ export const createFormMember = (user: User | string, guildId?: string, isMember
                     (
                         <Button className="relation-form-container" onClick={() => openProfileModal(user)} style={{ all: "unset", cursor: "pointer" }}>
                             <Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>
-                                {name}
+                                {name} <span style={{ color: "#6e7277" }}>{displayName}</span>
                             </Text>
                         </Button>
                     ) || (<Text tag="span" variant={isMember ? "text-md/normal" : "text-sm/normal"}>Loading user...</Text>)}
