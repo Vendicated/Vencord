@@ -17,13 +17,14 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, Forms, Parser, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -119,22 +120,53 @@ function openViewRawModal(msg: Message) {
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message.",
-    authors: [Devs.KingFish, Devs.Ven],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad],
     dependencies: ["MessagePopoverAPI"],
+
+    options: {
+        clickMethod: {
+            description: "Click method",
+            type: OptionType.SELECT,
+            options: [
+                { label: "Right Click", value: "Right", default: true },
+                { label: "Left Click", value: "Left" },
+            ],
+        },
+    },
 
     start() {
         addButton("ViewRaw", msg => {
-            return {
-                label: "View Raw (Left Click) / Copy Raw (Right Click)",
-                icon: CopyIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => openViewRawModal(msg),
-                onContextMenu: e => {
+            const handleClick = () => {
+                if (Settings.plugins.ViewRaw.clickMethod === "Left") {
+                    copyWithToast(msg.content);
+                } else {
+                    openViewRawModal(msg);
+                }
+            };
+
+            const handleContextMenu = e => {
+                if (Settings.plugins.ViewRaw.clickMethod === "Right") {
                     e.preventDefault();
                     e.stopPropagation();
                     copyWithToast(msg.content);
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openViewRawModal(msg);
                 }
+            };
+
+            const label = Settings.plugins.ViewRaw.clickMethod === "Left"
+                ? "Copy Raw (Left Click) / View Raw (Right Click)"
+                : "View Raw (Left Click) / Copy Raw (Right Click)";
+
+            return {
+                label: label,
+                icon: CopyIcon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: handleClick,
+                onContextMenu: handleContextMenu
             };
         });
     },
