@@ -20,6 +20,16 @@ import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+
+//
+// These file extensions typically come before another extension, and
+// so if found, will be treated as part of the extension
+//
+const COMPOUND_EXTENSIONS = [
+    "tar"
+]
+
+
 enum Methods {
     Random,
     Consistent,
@@ -67,7 +77,23 @@ export default definePlugin({
 
     anonymise(file: string) {
         let name = "image";
-        const extIdx = file.lastIndexOf(".");
+        let extIdx = file.lastIndexOf(".");
+
+        // edge case scenario for .tar.?? files mentioned in issue #1230
+        // extendable if more of these cases show up
+        if(extIdx !== -1){
+            const fname_without_ext = file.slice(0, extIdx)
+            console.log("fname >", fname_without_ext)
+            const second_ext_idx = fname_without_ext.lastIndexOf(".")
+            if(second_ext_idx !== -1){
+                const second_ext = fname_without_ext.slice(second_ext_idx+1)
+                console.log(second_ext)
+                if(COMPOUND_EXTENSIONS.some(e => second_ext === e)){
+                    extIdx = second_ext_idx;
+                }
+            }
+        }
+
         const ext = extIdx !== -1 ? file.slice(extIdx) : "";
 
         switch (Settings.plugins.AnonymiseFileNames.method) {
