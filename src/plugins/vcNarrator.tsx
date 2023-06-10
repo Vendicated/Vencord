@@ -59,17 +59,20 @@ function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
     speechSynthesis.speak(speech);
 }
 
-function clean(str: string, fallback: string) {
+function clean(str: string) {
+    const replacer = Settings.plugins.VcNarrator.latinOnly
+        ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
+        : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
+
     return str.normalize("NFKC")
-        .replace(/[^\w ]/g, "")
-        .trim()
-        || fallback;
+        .replace(replacer, "")
+        .trim();
 }
 
 function formatText(str: string, user: string, channel: string) {
     return str
-        .replaceAll("{{USER}}", clean(user, user ? "Someone" : ""))
-        .replaceAll("{{CHANNEL}}", clean(channel, "channel"));
+        .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
+        .replaceAll("{{CHANNEL}}", clean(channel) || "channel");
 }
 
 /*
@@ -165,7 +168,7 @@ export default definePlugin({
                 if (!type) continue;
 
                 const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe ? "" : UserStore.getUser(userId).username;
+                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel));
@@ -229,6 +232,16 @@ export default definePlugin({
                 default: 1,
                 markers: [0.1, 0.5, 1, 2, 5, 10],
                 stickToMarkers: false
+            },
+            sayOwnName: {
+                description: "Say own name",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            latinOnly: {
+                description: "Strip non latin characters from names before saying them",
+                type: OptionType.BOOLEAN,
+                default: false
             },
             joinMessage: {
                 type: OptionType.STRING,
