@@ -17,7 +17,7 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -117,22 +117,23 @@ function openViewRawModal(msg: Message) {
     ));
 }
 
+const settings = definePluginSettings({
+    clickMethod: {
+        description: "Click method",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Right Click", value: "Right", default: true },
+            { label: "Left Click", value: "Left" }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message.",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad],
     dependencies: ["MessagePopoverAPI"],
-
-    options: {
-        clickMethod: {
-            description: "Click method",
-            type: OptionType.SELECT,
-            options: [
-                { label: "Right Click", value: "Right", default: true },
-                { label: "Left Click", value: "Left" },
-            ],
-        },
-    },
+    settings,
 
     start() {
         addButton("ViewRaw", msg => {
