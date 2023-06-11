@@ -84,19 +84,95 @@ function selectRandomElement(arr) {
     return arr[randomIndex];
 }
 
+function is_whitespace(s : string) : bool{
+    return s.trim() === ""
+}
+
+function is_nonreplace(w : any) : bool{
+    return w.text.startsWith("https://") || w.text.startsWith("http://")
+}
+
+function uwuify_word(w : any) : any{
+    if(is_nonreplace(w)){
+        return w;
+    }
+
+    // Nyaify
+    if( w.text.startsWith("n") ){
+        w.text = "ny"+w.text.slice(1)
+    }
+    else if(w.text.startsWith("N")){
+        w.text = "Ny" + w.text.slice(1)
+    }
+
+    // replace lr's with w's
+    w.text = w.text.replaceAll(/[lr]/g, "w")
+
+
+    // stutter (50% chance)
+    if(Math.random() < 0.5){
+        w.text = w.text[0]+"-"+w.text
+    }
+
+    if(/[.,!?]$/.test(w.text)){
+        w.text += ` ${selectRandomElement(endings)}`
+    }
+    return w
+}
 
 function uwuify(message: string): string {
-    message = message.toLowerCase();
-    // words
-    for (const pair of replacements) {
-        message = message.replaceAll(pair[0], pair[1]);
+
+    // split message into a sequence of words
+    // each word remembers its preceding whitespace to
+    // make final reconstruction easier
+
+    let words = []
+
+    let current_whitespace : string = "";
+    let current_word : string = "";
+
+    for(let char of message){
+        if(current_word === "" && is_whitespace(char)){
+            current_whitespace += char;
+        }
+        else if(is_whitespace(char)){
+            words.push({
+                text: current_word,
+                prespace: current_whitespace
+            })
+            current_word = ""
+            current_whitespace = char
+        }
+        else{
+            current_word += char
+        }
     }
-    message = message
-        .replaceAll(/([ \t\n])n/g, "$1ny") // nyaify
-        .replaceAll(/[lr]/g, "w") // [lr] > w
-        .replaceAll(/([ \t\n])([a-z])/g, (_, p1, p2) => Math.random() < .5 ? `${p1}${p2}-${p2}` : `${p1}${p2}`) // stutter
-        .replaceAll(/([^.,!][.,!])([ \t\n])/g, (_, p1, p2) => `${p1} ${selectRandomElement(endings)}${p2}`); // endings
-    return message;
+
+    if(!is_whitespace(current_word)){
+        words.push({
+        text: current_word,
+        prespace: current_whitespace})
+    }
+
+    let new_words = []
+    for(let word of words){
+        // Granular replacement rules so that URLS don't get destroyed
+        // we are banking on the fact that most urls dont contain spaces
+        // and those that do are breaking the standard anyway so screw them
+        if(is_nonreplace(word)){
+            new_words.push(word)
+            continue;
+        }
+        for (const pair of replacements) {
+            word.text = word.text.replaceAll(pair[0], pair[1])
+        }
+        new_words.push(word)
+    }
+    words = new_words
+
+    words = words.map( word => uwuify_word(word) )
+
+    return words.reduce((s, word) =>  s += word.prespace + word.text, "")
 }
 
 
