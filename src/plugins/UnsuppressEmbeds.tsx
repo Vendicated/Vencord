@@ -19,19 +19,19 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, PermissionStore, RestAPI } from "@webpack/common";
+import { Menu, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
 const EMBED_SUPPRESSED = 1 << 2;
 const MANAGE_MESSAGES = 1n << 13n;
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    const { message: { embeds, flags } } = props;
+    const { message: { author, embeds, flags } } = props;
 
     const canManageMessages = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & MANAGE_MESSAGES);
+    const isOwnDM = author.id === UserStore.getCurrentUser().id && (props.channel.isDM() || props.channel.isGroupDM());
+    if (!canManageMessages && !isOwnDM) return;
+
     const isEmbedSuppressed = !!(flags & EMBED_SUPPRESSED);
-
-    if (!canManageMessages) return;
-
     const menuItem = (() => {
         if (isEmbedSuppressed) return (
             <Menu.MenuItem
