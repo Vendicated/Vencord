@@ -119,7 +119,7 @@ function openViewRawModal(msg: Message) {
 
 const settings = definePluginSettings({
     clickMethod: {
-        description: "Change the button to copy the raw content/data of any message.",
+        description: "Change the button to view the raw content/data of any message.",
         type: OptionType.SELECT,
         options: [
             { label: "Left Click to view the raw content.", value: "Left", default: true },
