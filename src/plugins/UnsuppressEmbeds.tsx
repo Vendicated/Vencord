@@ -16,53 +16,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
 const EMBED_SUPPRESSED = 1 << 2;
-const MANAGE_MESSAGES = 1n << 13n;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { message: { author, embeds, flags } } = props;
 
-    const canManageMessages = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & MANAGE_MESSAGES);
+    const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
+    const canManageMessages = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & PermissionsBits.MANAGE_MESSAGES);
     const isOwnDM = author.id === UserStore.getCurrentUser().id && (props.channel.isDM() || props.channel.isGroupDM());
     if (!canManageMessages && !isOwnDM) return;
 
-    const isEmbedSuppressed = !!(flags & EMBED_SUPPRESSED);
-    const menuItem = (() => {
-        if (isEmbedSuppressed) return (
+    return () => {
+        if (!isEmbedSuppressed && !embeds.length) return;
+        const menuGroup = findGroupChildrenByChildId("delete", children) || children;
+        console.log(menuGroup);
+        const deleteItem = menuGroup.findIndex(i => i?.props?.id === "delete") || menuGroup.length - 1;
+        menuGroup.splice(deleteItem - 1, 0, (
             <Menu.MenuItem
-                id="unsupress-embeds"
-                key="unsupress-embeds"
-                label={"Unsuppress Embeds"}
+                id="unsuppress-embeds"
+                key="unsuppress-embeds"
+                label={isEmbedSuppressed ? "Unsuppress Embeds" : "Suppress Embeds"}
+                color={isEmbedSuppressed ? undefined : "danger"}
                 action={() => {
                     RestAPI.patch({
                         url: `/channels/${props.channel.id}/messages/${props.message.id}`,
-                        body: { flags: flags & ~EMBED_SUPPRESSED }
+                        body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
                     });
                 }}
             />
-        );
-        else if (embeds.length) return (
-            <Menu.MenuItem
-                id="supress-embeds"
-                key="supress-embeds"
-                label={"Suppress Embeds"}
-                action={() => {
-                    RestAPI.patch({
-                        url: `/channels/${props.channel.id}/messages/${props.message.id}`,
-                        body: { flags: flags | EMBED_SUPPRESSED }
-                    });
-                }}
-            />
-        );
-    })();
-
-    if (!menuItem) return;
-    children.push(menuItem);
+        ));
+    };
 };
 
 export default definePlugin({
