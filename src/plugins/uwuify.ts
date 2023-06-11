@@ -76,6 +76,12 @@ const settings = definePluginSettings({
     }
 });
 
+
+interface Word{
+    text : string;
+    prespace: string;
+}
+
 function selectRandomElement(arr) {
     // generate a random index based on the length of the array
     const randomIndex = Math.floor(Math.random() * arr.length);
@@ -84,15 +90,16 @@ function selectRandomElement(arr) {
     return arr[randomIndex];
 }
 
-function isWhitespace(s : string) : bool{
+function isWhitespace(s : string) : boolean{
     return s.trim() === "";
 }
 
-function isNonreplace(w : any) : bool{
+
+function isNonreplace(w : Word) : boolean{
     return w.text.startsWith("https://") || w.text.startsWith("http://");
 }
 
-function uwufifyWord(w : any) : any{
+function uwufifyWord(w : Word) : Word{
     if(isNonreplace(w)){
         return w;
     }
@@ -126,7 +133,7 @@ function uwuify(message: string): string {
     // each word remembers its preceding whitespace to
     // make final reconstruction easier
 
-    let words = [];
+    let words :Word[] = [];
 
     let current_whitespace : string = "";
     let current_word : string = "";
@@ -154,7 +161,7 @@ function uwuify(message: string): string {
             prespace: current_whitespace });
     }
 
-    const new_words = [];
+    const new_words : Word[] = [];
     for(const word of words){
         // Granular replacement rules so that URLS don't get destroyed
         // we are banking on the fact that most urls dont contain spaces
