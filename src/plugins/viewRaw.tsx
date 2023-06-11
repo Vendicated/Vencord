@@ -119,11 +119,11 @@ function openViewRawModal(msg: Message) {
 
 const settings = definePluginSettings({
     clickMethod: {
-        description: "Click method",
+        description: "Change the button to copy the raw content/data of any message.",
         type: OptionType.SELECT,
         options: [
-            { label: "Right Click", value: "Right", default: true },
-            { label: "Left Click", value: "Left" }
+            { label: "Left Click to view the raw content.", value: "Left", default: true },
+            { label: "Right click to view the raw content.", value: "Right" }
         ]
     }
 });
@@ -138,7 +138,7 @@ export default definePlugin({
     start() {
         addButton("ViewRaw", msg => {
             const handleClick = () => {
-                if (Settings.plugins.ViewRaw.clickMethod === "Left") {
+                if (settings.store.clickMethod === "Right") {
                     copyWithToast(msg.content);
                 } else {
                     openViewRawModal(msg);
@@ -146,7 +146,7 @@ export default definePlugin({
             };
 
             const handleContextMenu = e => {
-                if (Settings.plugins.ViewRaw.clickMethod === "Right") {
+                if (settings.store.clickMethod === "Left") {
                     e.preventDefault();
                     e.stopPropagation();
                     copyWithToast(msg.content);
@@ -157,7 +157,7 @@ export default definePlugin({
                 }
             };
 
-            const label = Settings.plugins.ViewRaw.clickMethod === "Left"
+            const label = settings.store.clickMethod === "Right"
                 ? "Copy Raw (Left Click) / View Raw (Right Click)"
                 : "View Raw (Left Click) / Copy Raw (Right Click)";
 
