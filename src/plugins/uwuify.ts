@@ -84,40 +84,40 @@ function selectRandomElement(arr) {
     return arr[randomIndex];
 }
 
-function is_whitespace(s : string) : bool{
-    return s.trim() === ""
+function isWhitespace(s : string) : bool{
+    return s.trim() === "";
 }
 
-function is_nonreplace(w : any) : bool{
-    return w.text.startsWith("https://") || w.text.startsWith("http://")
+function isNonreplace(w : any) : bool{
+    return w.text.startsWith("https://") || w.text.startsWith("http://");
 }
 
-function uwuify_word(w : any) : any{
-    if(is_nonreplace(w)){
+function uwufifyWord(w : any) : any{
+    if(isNonreplace(w)){
         return w;
     }
 
     // Nyaify
-    if( w.text.startsWith("n") ){
-        w.text = "ny"+w.text.slice(1)
+    if(w.text.startsWith("n")){
+        w.text = "ny"+w.text.slice(1);
     }
     else if(w.text.startsWith("N")){
-        w.text = "Ny" + w.text.slice(1)
+        w.text = "Ny" + w.text.slice(1);
     }
 
     // replace lr's with w's
-    w.text = w.text.replaceAll(/[lr]/g, "w")
+    w.text = w.text.replaceAll(/[lr]/g, "w");
 
 
     // stutter (50% chance)
     if(Math.random() < 0.5){
-        w.text = w.text[0]+"-"+w.text
+        w.text = w.text[0]+"-"+w.text;
     }
 
     if(/[.,!?]$/.test(w.text)){
-        w.text += ` ${selectRandomElement(endings)}`
+        w.text += ` ${selectRandomElement(endings)}`;
     }
-    return w
+    return w;
 }
 
 function uwuify(message: string): string {
@@ -126,53 +126,53 @@ function uwuify(message: string): string {
     // each word remembers its preceding whitespace to
     // make final reconstruction easier
 
-    let words = []
+    let words = [];
 
     let current_whitespace : string = "";
     let current_word : string = "";
 
-    for(let char of message){
-        if(current_word === "" && is_whitespace(char)){
+    for(const char of message){
+        if(current_word === "" && isWhitespace(char)){
             current_whitespace += char;
         }
-        else if(is_whitespace(char)){
+        else if(isWhitespace(char)){
             words.push({
                 text: current_word,
                 prespace: current_whitespace
-            })
-            current_word = ""
-            current_whitespace = char
+            });
+            current_word = "";
+            current_whitespace = char;
         }
         else{
-            current_word += char
+            current_word += char;
         }
     }
 
-    if(!is_whitespace(current_word)){
+    if(!isWhitespace(current_word)){
         words.push({
-        text: current_word,
-        prespace: current_whitespace})
+            text: current_word,
+            prespace: current_whitespace });
     }
 
-    let new_words = []
-    for(let word of words){
+    const new_words = [];
+    for(const word of words){
         // Granular replacement rules so that URLS don't get destroyed
         // we are banking on the fact that most urls dont contain spaces
         // and those that do are breaking the standard anyway so screw them
-        if(is_nonreplace(word)){
-            new_words.push(word)
+        if(isNonreplace(word)){
+            new_words.push(word);
             continue;
         }
         for (const pair of replacements) {
-            word.text = word.text.replaceAll(pair[0], pair[1])
+            word.text = word.text.replaceAll(pair[0], pair[1]);
         }
-        new_words.push(word)
+        new_words.push(word);
     }
-    words = new_words
+    words = new_words;
 
-    words = words.map( word => uwuify_word(word) )
+    words = words.map(word => uwufifyWord(word));
 
-    return words.reduce((s, word) =>  s += word.prespace + word.text, "")
+    return words.reduce((s, word) => s += word.prespace + word.text, "");
 }
 
 

@@ -27,7 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 //
 const COMPOUND_EXTENSIONS = [
     "tar"
-]
+];
 
 
 enum Methods {
@@ -82,12 +82,12 @@ export default definePlugin({
         // edge case scenario for .tar.?? files mentioned in issue #1230
         // extendable if more of these cases show up
         if(extIdx !== -1){
-            const fname_without_ext = file.slice(0, extIdx)
-            const second_ext_idx = fname_without_ext.lastIndexOf(".")
-            if(second_ext_idx !== -1){
-                const second_ext = fname_without_ext.slice(second_ext_idx+1)
+            const fname = file.slice(0, extIdx);
+            const secondExtIdx = fname.lastIndexOf(".");
+            if(secondExtIdx !== -1){
+                const second_ext = fname.slice(secondExtIdx+1);
                 if(COMPOUND_EXTENSIONS.some(e => second_ext === e)){
-                    extIdx = second_ext_idx;
+                    extIdx = secondExtIdx;
                 }
             }
         }
