@@ -21,7 +21,7 @@ import { definePluginSettings, PlainSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
-import { CustomSettingsModal, regCmd } from "./Components/CustomTextInput";
+import { CustomSettingsModal, regCmd,sendMessage } from "./Components/CustomTextInput";
 
 const settings = definePluginSettings({
     menu: {
@@ -31,6 +31,19 @@ const settings = definePluginSettings({
             <CustomSettingsModal/>
     },
 });
+
+const cmds: Array<object> = Object.values(PlainSettings.plugins.CustomSlashCommands.commands).map(v => ({
+    name: v.name,
+    description: v.description,
+    inputType: ApplicationCommandInputType.BUILT_IN,
+    execute: (_, ctx) => {
+        if (v.sendToChat) {
+            sendMessage(ctx.channel.id, { content: v.returnMessage });
+        } else {
+            sendBotMessage(ctx.channel.id, { content: v.returnMessage });
+        }
+    }
+}));
 
 export default definePlugin({
     name: "CustomSlashCommands",
@@ -54,9 +67,13 @@ export default definePlugin({
     settings,
 
     start() {
-        if (Object.keys(PlainSettings.plugins.CustomSlashCommands.commands).length > 0) {
-            Object.entries(PlainSettings.plugins.CustomSlashCommands.commands).forEach(([k, v]) => {
-                regCmd(v.name, v.description, v.returnMessage, v.sendToChat);
+        if (Object.keys(PlainSettings.plugins.CustomSlashCommands.commands).length !== 0) {
+            Object.values(PlainSettings.plugins.CustomSlashCommands.commands).forEach(v => {
+                try {
+                    regCmd(v.name, v.description, v.returnMessage, v.sendToChat);
+                } catch (e) {
+                    console.log(e);
+                }
             });
         }
     }
