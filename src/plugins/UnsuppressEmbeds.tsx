@@ -17,6 +17,7 @@
 */
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
@@ -41,6 +42,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 key="unsuppress-embeds"
                 label={isEmbedSuppressed ? "Unsuppress Embeds" : "Suppress Embeds"}
                 color={isEmbedSuppressed ? undefined : "danger"}
+                icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
                 action={() => {
                     RestAPI.patch({
                         url: `/channels/${props.channel.id}/messages/${props.message.id}`,
