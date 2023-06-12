@@ -19,12 +19,12 @@
 import { ApplicationCommandInputType, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import { PlainSettings,Settings } from "@api/Settings";
 import { findByPropsLazy } from "@webpack";
-import { Button,FluxDispatcher,Forms, React, Select,Switch,TextInput } from "@webpack/common";
+import { Button,Card,FluxDispatcher,Forms, React, Select,Switch,TextInput } from "@webpack/common";
 
 const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 
-function sendMessage(channelId, message) {
+export function sendMessage(channelId, message) {
     message = {
         invalidEmojis: [],
         tts: false,
@@ -40,7 +40,7 @@ function sendMessage(channelId, message) {
         });
 }
 
-const spotify = "https://spotify.com/";
+const spotify = "https://open.spotify.com/user/j33rqy9ststwiqcowkfe4pv9g?si=d2551eb677724978";
 
 function replaceVariablePlaceholders(inputString: string): string {
     return inputString.replace(/&(\w+)/g, (match, variableName) => {
@@ -93,66 +93,71 @@ export function CustomSettingsModal() {
 
     return (
         <>
-            <Forms.FormSection>
-                <Forms.FormTitle>Saved Commands</Forms.FormTitle>
-                <Select
-                    options={c.map(m => ({
-                        label: m,
-                        value: m
-                    }))}
-                    isSelected={v => v === selcmd}
-                    select={v => setSelCmd(v)}
-                    serialize={v => v}
-                    isDisabled={c.length === 0}
-                />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Button
-                    onClick={() => {
-                        unregisterCommand(selcmd);
-                        const { [selcmd]: v, ...rest } = Settings.plugins.CustomSlashCommands.commands;
-                        Settings.plugins.CustomSlashCommands.commands = rest;
-                    }}
-                    color={Button.Colors.RED}
-                    size={Button.Sizes.SMALL}
-                >Delete Command</Button>
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Command Name</Forms.FormTitle>
-                <TextInput
-                    onChange={(v: string) => {
-                        setName(v);
-                    }}
-                />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Command Description</Forms.FormTitle>
-                <TextInput
-                    onChange={(v: string) => {
-                        setDescription(v);
-                    }}
-                />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Command Response</Forms.FormTitle>
-                <TextInput
-                    onChange={(v: string) => {
-                        setResponse(v);
-                    }}
-                />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Forms.FormTitle>Send to the chat</Forms.FormTitle>
-                <Switch
-                    value={csend}
-                    onChange={(v: boolean) => {
-                        setSend(v);
-                    }}
-                />
-            </Forms.FormSection>
-            <Forms.FormSection>
-                <Button onClick={() => regCmd(cname, cdescription, cresponse, csend)}>Save and register command</Button>
-            </Forms.FormSection>
+            <Card style={{ padding: "1em 1em", flexDirection: "column", display: "flex", gap: "10px" }}>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Saved Commands</Forms.FormTitle>
+                    <Select
+                        options={c.map(m => ({
+                            label: m,
+                            value: m
+                        }))}
+                        isSelected={v => v === selcmd}
+                        select={v => setSelCmd(v)}
+                        serialize={v => v}
+                        isDisabled={c.length === 0}
+                    />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Button
+                        onClick={() => {
+                            unregisterCommand(selcmd);
+                            const { [selcmd]: v, ...rest } = Settings.plugins.CustomSlashCommands.commands;
+                            Settings.plugins.CustomSlashCommands.commands = rest;
+                        }}
+                        color={Button.Colors.RED}
+                        size={Button.Sizes.SMALL}
+                    >Delete Command</Button>
+                </Forms.FormSection>
+            </Card>
+            <Card style={{ padding: "1em 1em", flexDirection: "column", display: "flex", gap: "10px" }}>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Command Name</Forms.FormTitle>
+                    <TextInput
+                        onChange={(v: string) => {
+                            setName(v);
+                        }}
+                    />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Command Description</Forms.FormTitle>
+                    <TextInput
+                        onChange={(v: string) => {
+                            setDescription(v);
+                        }}
+                    />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Forms.FormTitle>Command Response</Forms.FormTitle>
+                    <TextInput
+                        onChange={(v: string) => {
+                            setResponse(v);
+                        }}
+                    />
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Switch
+                        value={csend}
+                        onChange={(v: boolean) => {
+                            setSend(v);
+                        }}
+                        hideBorder
+                        style={{ marginBottom: "3px" }}
+                    >Send to the chat</Switch>
+                </Forms.FormSection>
+                <Forms.FormSection>
+                    <Button onClick={() => regCmd(cname, cdescription, cresponse, csend)}>Save and register command</Button>
+                </Forms.FormSection>
+            </Card>
         </>
     );
 }
