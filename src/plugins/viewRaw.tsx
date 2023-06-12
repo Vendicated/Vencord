@@ -17,7 +17,7 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -162,7 +162,7 @@ export default definePlugin({
                 : "View Raw (Left Click) / Copy Raw (Right Click)";
 
             return {
-                label: label,
+                label,
                 icon: CopyIcon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
