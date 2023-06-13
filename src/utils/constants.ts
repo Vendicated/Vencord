@@ -326,6 +326,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     ImLvna: {
         name: "Luna <3",
         id: 174200708818665472n
+    },
+    rad: {
+        name: "rad",
+        id: 113027285765885952n
     }
 } satisfies Record<string, Dev>);
 
