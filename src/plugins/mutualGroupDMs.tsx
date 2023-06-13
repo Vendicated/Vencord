@@ -18,10 +18,9 @@
 
 
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Menu, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, RelationshipStore, UserStore, ScrollerThin, Clickable, Avatar } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -30,13 +29,6 @@ const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
-
-// @ts-ignore
-const ScrollerThin = LazyComponent(() => Menu.ScrollerThin);
-// @ts-ignore
-const Clickable = LazyComponent(() => Menu.Clickable);
-// @ts-ignore
-const Avatar = LazyComponent(() => Menu.Avatar);
 
 function GetGroupDMName(channel: Channel) {
     return channel.name || channel.recipients.map(UserStore.getUser).filter(x => x != null).map(x => {
@@ -65,7 +57,7 @@ export default definePlugin({
         }
     ],
 
-    renderMutualGDMs(user: User, onClose: Function) {
+    renderMutualGDMs(user: User, onClose: () => void) {
         const entries = ChannelStore.getSortedPrivateChannels().filter(x => x.type === 3 && x.recipients.includes(user.id)).map(x => {
             return <Clickable className={ProfileListClasses.listRow} onClick={() => {
                 onClose();
