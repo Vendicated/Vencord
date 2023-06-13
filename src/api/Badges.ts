@@ -22,7 +22,7 @@ import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
 
-export enum BadgePosition {
+export const enum BadgePosition {
     START,
     END
 }
