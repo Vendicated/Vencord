@@ -24,7 +24,7 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Tooltip } from "webpack/common";
 
-enum ActivitiesTypes {
+const enum ActivitiesTypes {
     Game,
     Embedded
 }
