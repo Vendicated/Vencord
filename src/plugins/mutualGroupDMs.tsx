@@ -20,7 +20,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, RelationshipStore, UserStore, ScrollerThin, Clickable, Avatar } from "@webpack/common";
+import { Avatar,ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
