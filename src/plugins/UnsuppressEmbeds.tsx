@@ -28,14 +28,14 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const { message: { author, embeds, flags } } = props;
 
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
-    const canManageMessages = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & PermissionsBits.MANAGE_MESSAGES);
-    const isOwnDM = author.id === UserStore.getCurrentUser().id && (props.channel.isDM() || props.channel.isGroupDM());
-    if (!canManageMessages && !isOwnDM) return;
+    const hasEmbedPerms = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & PermissionsBits.EMBED_LINKS);
 
     return () => {
         if (!isEmbedSuppressed && !embeds.length) return;
-        const menuGroup = findGroupChildrenByChildId("delete", children) || children;
-        const deleteItem = menuGroup.findIndex(i => i?.props?.id === "delete") || menuGroup.length - 1;
+        if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
+        const menuGroup = findGroupChildrenByChildId("delete", children);
+        const deleteItem = menuGroup?.findIndex(i => i?.props?.id === "delete");
+        if (!deleteItem || !menuGroup) return;
         menuGroup.splice(deleteItem - 1, 0, (
             <Menu.MenuItem
                 id="unsuppress-embeds"
