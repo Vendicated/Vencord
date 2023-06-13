@@ -26,14 +26,15 @@ import type { Channel } from "discord-types/general";
 import type { ComponentType } from "react";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
+import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
 import { settings, VIEW_CHANNEL } from "..";
 
-enum SortOrderTypes {
+const enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
     CREATION_DATE = 1
 }
 
-enum ForumLayoutTypes {
+const enum ForumLayoutTypes {
     DEFAULT = 0,
     LIST = 1,
     GRID = 2
@@ -60,7 +61,7 @@ interface ExtendedChannel extends Channel {
     availableTags?: Array<Tag>;
 }
 
-enum ChannelTypes {
+const enum ChannelTypes {
     GUILD_TEXT = 0,
     GUILD_VOICE = 2,
     GUILD_ANNOUNCEMENT = 5,
@@ -68,12 +69,12 @@ enum ChannelTypes {
     GUILD_FORUM = 15
 }
 
-enum VideoQualityModes {
+const enum VideoQualityModes {
     AUTO = 1,
     FULL = 2
 }
 
-enum ChannelFlags {
+const enum ChannelFlags {
     PINNED = 1 << 1,
     REQUIRE_TAG = 1 << 4
 }
@@ -169,12 +170,12 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         }
 
         if (Settings.plugins.PermissionsViewer.enabled) {
-            setPermissions(Object.values(permissionOverwrites).map(overwrite => ({
+            setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
                 overwriteAllow: overwrite.allow,
                 overwriteDeny: overwrite.deny
-            })));
+            })), guild_id));
         }
     }, [channelId]);
 

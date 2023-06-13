@@ -144,7 +144,7 @@ export interface PluginDef {
     tags?: string[];
 }
 
-export enum OptionType {
+export const enum OptionType {
     STRING,
     NUMBER,
     BIGINT,
@@ -304,6 +304,8 @@ export interface DefinedSettings<D extends SettingsDefinition = SettingsDefiniti
      * will be an empty string until plugin is initialized
      */
     pluginName: string;
+
+    withPrivateSettings<T>(): this & { store: T; };
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
