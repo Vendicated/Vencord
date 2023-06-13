@@ -171,7 +171,7 @@ export default definePlugin({
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
                     ignoreBots && msg.author?.bot ||
                     ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.split(",").map((s: string) => s.trim()).includes(msg.author?.id);
+                    ignoreUsers.includes(msg.author?.id);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
