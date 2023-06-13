@@ -37,7 +37,7 @@ export const importApngJs = makeLazy(async () => {
 });
 
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
-export enum ApngDisposeOp {
+export const enum ApngDisposeOp {
     /**
      * no disposal is done on this frame before rendering the next; the contents of the output buffer are left as is.
      */
@@ -53,7 +53,7 @@ export enum ApngDisposeOp {
 }
 
 // TODO: Might need to somehow implement this
-export enum ApngBlendOp {
+export const enum ApngBlendOp {
     SOURCE,
     OVER
 }

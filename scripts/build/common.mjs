@@ -64,7 +64,7 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
             let code = "";
             let plugins = "\n";
             let i = 0;
@@ -72,8 +72,9 @@ export const globPlugins = kind => ({
                 if (!existsSync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
-                    if (file.startsWith(".")) continue;
+                    if (file.startsWith("_") || file.startsWith(".")) continue;
                     if (file === "index.ts") continue;
+
                     const fileBits = file.split(".");
                     if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1))) {
                         const mod = fileBits.at(-2);

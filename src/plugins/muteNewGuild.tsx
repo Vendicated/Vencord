@@ -18,37 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { ModalContent, ModalFooter, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStoreLazy } from "@webpack";
-import { Button, Text } from "@webpack/common";
-
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
-
-function NoDMNotificationsModal({ modalProps }: { modalProps: ModalProps; }) {
-    return (
-        <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-            <ModalContent>
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", "alignItems": "center", textAlign: "center", height: "100%", padding: "8px 0", gap: "16px" }}>
-                    <Text variant="text-lg/semibold">You seem to have been affected by a bug that caused DM notifications to be muted and break if you used the MuteNewGuild plugin.</Text>
-                    <Text variant="text-lg/semibold">If you haven't received any notifications for private messages, this is why. This issue is now fixed, so they should work again. Please verify, and in case they are still broken, ask for help in the Vencord support channel!</Text>
-                    <Text variant="text-lg/semibold">We're very sorry for any inconvenience caused by this issue :(</Text>
-                </div>
-            </ModalContent>
-            <ModalFooter>
-                <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                    <Button
-                        onClick={modalProps.onClose}
-                        size={Button.Sizes.MEDIUM}
-                        color={Button.Colors.BRAND}
-                    >
-                        Understood!
-                    </Button>
-                </div>
-            </ModalFooter>
-        </ModalRoot>
-    );
-}
+import { findByProps } from "@webpack";
 
 const settings = definePluginSettings({
     guild: {
@@ -92,15 +63,5 @@ export default definePlugin({
                 suppress_roles: settings.store.role
             }
         );
-    },
-
-    start() {
-        const [isMuted, isEveryoneSupressed, isRolesSupressed] = [UserGuildSettingsStore.isMuted(null), UserGuildSettingsStore.isSuppressEveryoneEnabled(null), UserGuildSettingsStore.isSuppressRolesEnabled(null)];
-
-        if (isMuted || isEveryoneSupressed || isRolesSupressed) {
-            findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(null, { muted: false, suppress_everyone: false, suppress_roles: false });
-
-            openModal(modalProps => <NoDMNotificationsModal modalProps={modalProps} />);
-        }
     }
 });

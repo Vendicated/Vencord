@@ -63,12 +63,12 @@ interface TrackData {
 }
 
 // only relevant enum values
-enum ActivityType {
+const enum ActivityType {
     PLAYING = 0,
     LISTENING = 2,
 }
 
-enum ActivityFlag {
+const enum ActivityFlag {
     INSTANCE = 1 << 0,
 }
 

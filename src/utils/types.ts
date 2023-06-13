@@ -117,7 +117,7 @@ export interface PluginDef {
     tags?: string[];
 }
 
-export enum OptionType {
+export const enum OptionType {
     STRING,
     NUMBER,
     BIGINT,

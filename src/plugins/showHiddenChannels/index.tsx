@@ -34,7 +34,7 @@ const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted
 export const VIEW_CHANNEL = 1n << 10n;
 const CONNECT = 1n << 20n;
 
-enum ShowMode {
+const enum ShowMode {
     LockIcon,
     HiddenIconWithMutedStyle
 }

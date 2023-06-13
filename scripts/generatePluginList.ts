@@ -171,8 +171,8 @@ async function parseFile(fileName: string) {
     throw fail("no default export called 'definePlugin' found");
 }
 
-async function getEntryPoint(dirent: Dirent) {
-    const base = join("./src/plugins", dirent.name);
+async function getEntryPoint(dir: string, dirent: Dirent) {
+    const base = join(dir, dirent.name);
     if (!dirent.isDirectory()) return base;
 
     for (const name of ["index.ts", "index.tsx"]) {
@@ -186,13 +186,23 @@ async function getEntryPoint(dirent: Dirent) {
     throw new Error(`${dirent.name}: Couldn't find entry point`);
 }
 
+function isPluginFile({ name }: { name: string; }) {
+    if (name === "index.ts") return false;
+    return !name.startsWith("_") && !name.startsWith(".");
+}
+
 (async () => {
     parseDevs();
-    const plugins = readdirSync("./src/plugins", { withFileTypes: true }).filter(d => d.name !== "index.ts");
 
-    const promises = plugins.map(async dirent => parseFile(await getEntryPoint(dirent)));
+    const plugins = ["src/plugins", "src/plugins/_core"].flatMap(dir =>
+        readdirSync(dir, { withFileTypes: true })
+            .filter(isPluginFile)
+            .map(async dirent =>
+                parseFile(await getEntryPoint(dir, dirent))
+            )
+    );
 
-    const data = JSON.stringify(await Promise.all(promises));
+    const data = JSON.stringify(await Promise.all(plugins));
 
     if (process.argv.length > 2) {
         writeFileSync(process.argv[2], data);

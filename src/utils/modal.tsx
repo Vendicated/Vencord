@@ -21,14 +21,14 @@ import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
 
-export enum ModalSize {
+export const enum ModalSize {
     SMALL = "small",
     MEDIUM = "medium",
     LARGE = "large",
     DYNAMIC = "dynamic",
 }
 
-enum ModalTransitionState {
+const enum ModalTransitionState {
     ENTERING,
     ENTERED,
     EXITING,

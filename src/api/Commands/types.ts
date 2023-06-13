@@ -24,7 +24,7 @@ export interface CommandContext {
     guild?: Guild;
 }
 
-export enum ApplicationCommandOptionType {
+export const enum ApplicationCommandOptionType {
     SUB_COMMAND = 1,
     SUB_COMMAND_GROUP = 2,
     STRING = 3,
@@ -38,7 +38,7 @@ export enum ApplicationCommandOptionType {
     ATTACHMENT = 11,
 }
 
-export enum ApplicationCommandInputType {
+export const enum ApplicationCommandInputType {
     BUILT_IN = 0,
     BUILT_IN_TEXT = 1,
     BUILT_IN_INTEGRATION = 2,
@@ -64,7 +64,7 @@ export interface ChoicesOption {
     displayName?: string;
 }
 
-export enum ApplicationCommandType {
+export const enum ApplicationCommandType {
     CHAT_INPUT = 1,
     USER = 2,
     MESSAGE = 3,

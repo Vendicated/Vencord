@@ -24,7 +24,7 @@ import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildStore, PresenceStore, RelationshipStore } from "@webpack/common";
 
-enum IndicatorType {
+const enum IndicatorType {
     SERVER = 1 << 0,
     FRIEND = 1 << 1,
     BOTH = SERVER | FRIEND,

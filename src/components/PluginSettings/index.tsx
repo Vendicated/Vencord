@@ -173,7 +173,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     );
 }
 
-enum SearchStatus {
+const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED
