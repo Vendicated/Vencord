@@ -30,10 +30,10 @@ const UserUtils = findByPropsLazy("getGlobalName");
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
-function GetGroupDMName(channel: Channel) {
-    return channel.name || channel.recipients.map(UserStore.getUser).filter(x => x != null).map(x => {
-        return RelationshipStore.getNickname(x.id) || UserUtils.getName(x);
-    }).join(", ");
+function getGroupDMName(channel: Channel) {
+    return channel.name || channel.recipients.map(UserStore.getUser).filter(x => x != null).map(x =>
+        RelationshipStore.getNickname(x.id) || UserUtils.getName(x)
+    ).join(", ");
 }
 
 export default definePlugin({
@@ -58,8 +58,8 @@ export default definePlugin({
     ],
 
     renderMutualGDMs(user: User, onClose: () => void) {
-        const entries = ChannelStore.getSortedPrivateChannels().filter(x => x.isGroupDM() && x.recipients.includes(user.id)).map(x => {
-            return <Clickable className={ProfileListClasses.listRow} onClick={() => {
+        const entries = ChannelStore.getSortedPrivateChannels().filter(x => x.isGroupDM() && x.recipients.includes(user.id)).map(x => (
+            <Clickable className={ProfileListClasses.listRow} onClick={() => {
                 onClose();
                 SelectedChannelActionCreators.selectPrivateChannel(x.id);
             }}>
@@ -70,11 +70,11 @@ export default definePlugin({
                 >
                 </Avatar>
                 <div className={ProfileListClasses.listRowContent}>
-                    <div className={ProfileListClasses.listName}>{GetGroupDMName(x)}</div>
+                    <div className={ProfileListClasses.listName}>{getGroupDMName(x)}</div>
                     <div className={GuildLabelClasses.guildNick}>{x.recipients.length} Members</div>
                 </div>
-            </Clickable>;
-        });
+            </Clickable>
+        ));
 
         return <ScrollerThin className={ProfileListClasses.listScroller} fade={true} onClose={onClose}>
             {entries.length > 0 ? entries :
