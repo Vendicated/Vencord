@@ -27,7 +27,7 @@ import { Alerts, Forms, UserStore } from "@webpack/common";
 import gitHash from "~git-hash";
 import plugins from "~plugins";
 
-import settings from "./settings";
+import settings from "./_core/settings";
 
 const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 
