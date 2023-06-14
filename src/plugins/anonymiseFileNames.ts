@@ -20,7 +20,6 @@ import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-
 //
 // These file extensions typically come before another extension, and
 // so if found, will be treated as part of the extension
@@ -30,7 +29,7 @@ const COMPOUND_EXTENSIONS = [
 ];
 
 
-enum Methods {
+const enum Methods {
     Random,
     Consistent,
     Timestamp,
