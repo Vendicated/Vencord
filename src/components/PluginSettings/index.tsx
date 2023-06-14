@@ -138,11 +138,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-        const action = wasEnabled ? "stop" : "start";
 
         if (!result) {
-            logger.error(`Failed to ${action} plugin ${plugin.name}`);
-            showErrorToast(`Failed to ${action} plugin: ${plugin.name}`);
+            settings.enabled = false;
+
+            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            logger.error(msg);
+            showErrorToast(msg);
             return;
         }
 
@@ -171,7 +173,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     );
 }
 
-enum SearchStatus {
+const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED
