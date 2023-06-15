@@ -196,7 +196,7 @@ export interface PluginSettingSelectDef {
     options: readonly PluginSettingSelectOption[];
 }
 export interface PluginSettingSelectOption {
-    label: string | number;
+    label: string;
     value: string | number | boolean;
     default?: boolean;
 }
