@@ -44,6 +44,9 @@ export let Popout: t.Popout;
 export let Dialog: t.Dialog;
 export let TabBar: any;
 export let Paginator: t.Paginator;
+export let ScrollerThin: t.ScrollerThin;
+export let Clickable: t.Clickable;
+export let Avatar: t.Avatar;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
@@ -54,6 +57,6 @@ export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"
 export const ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent") as Record<string, string>;
 
 waitFor("FormItem", m => {
-    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator } = m);
+    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
     Forms = m;
 });
