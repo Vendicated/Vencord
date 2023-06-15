@@ -74,7 +74,7 @@ interface Activity {
     flags: number;
 }
 
-enum ActivityType {
+const enum ActivityType {
     PLAYING = 0,
     LISTENING = 2,
     WATCHING = 3,
