@@ -21,7 +21,7 @@ import { findByPropsLazy, findLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
 import { Guild, Message } from "discord-types/general";
 
-import { ImageModal, ModalRoot, ModalSize, openModalLazy } from "./modal";
+import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
@@ -80,10 +80,10 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): Promise<string> {
-    return openModalLazy(async () => _props => (
+export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+    return openModal(modalProps => (
         <ModalRoot
-            {..._props}
+            {...modalProps}
             className={ModalImageClasses.modal}
             size={ModalSize.DYNAMIC}>
             <ImageModal

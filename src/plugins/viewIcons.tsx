@@ -61,32 +61,14 @@ const settings = definePluginSettings({
     imgSize: {
         type: OptionType.SELECT,
         description: "The image size to use",
-        options: [
-            {
-                label: "512",
-                value: "512",
-            },
-            {
-                label: "1024",
-                value: "1024",
-            },
-            {
-                label: "2048",
-                value: "2048",
-            },
-            {
-                label: "4096",
-                value: "4096",
-                default: true
-            }
-        ]
+        options: [128, 256, 512, 1024, 2048, 4096].map(n => ({ label: n, value: n, default: n === 1024 }))
     }
 });
 
 function openImage(url: string) {
     const format = url.startsWith("/") ? "png" : settings.store.format;
     const u = new URL(url, window.location.href);
-    u.searchParams.set("size", settings.store.imgsize);
+    u.searchParams.set("size", `${settings.store.imgSize}`);
     u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
     u.searchParams.set("size", "4096");
