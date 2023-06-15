@@ -55,7 +55,7 @@ export interface StreamingStoreState {
 }
 
 /**
- * Here is a example how an stream key could look like `call(type of connection):1116549917987192913(channelId):305238513941667851(ownerId)`
+ * example how a stream key could look like: `call(type of connection):1116549917987192913(channelId):305238513941667851(ownerId)`
  */
 export interface ApplicationStreamingStore extends FluxStore {
     getActiveStreamForApplicationStream: (stream: ApplicationStream) => Stream | null;

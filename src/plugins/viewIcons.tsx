@@ -58,7 +58,7 @@ const settings = definePluginSettings({
             }
         ]
     },
-    imgsize: {
+    imgSize: {
         type: OptionType.SELECT,
         description: "Choose the default image size to use, reducing this value will decrease load time and bandwidth.",
         options: [
