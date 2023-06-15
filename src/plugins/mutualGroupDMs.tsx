@@ -18,9 +18,10 @@
 
 
 import { Devs } from "@utils/constants";
+import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar,ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -31,14 +32,17 @@ const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds"
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
-    return channel.name || channel.recipients.map(UserStore.getUser).filter(x => x != null).map(x =>
-        RelationshipStore.getNickname(x.id) || UserUtils.getName(x)
-    ).join(", ");
+    return channel.name ||
+        channel.recipients
+            .map(UserStore.getUser)
+            .filter(isNonNullish)
+            .map(c => RelationshipStore.getNickname(c.id) || UserUtils.getName(c))
+            .join(", ");
 }
 
 export default definePlugin({
     name: "MutualGroupDMs",
-    description: "Shows mutual group dms on profile.",
+    description: "Shows mutual group dms in profiles",
     authors: [Devs.amia],
 
     patches: [
@@ -46,43 +50,55 @@ export default definePlugin({
             find: ".Messages.USER_PROFILE_MODAL", // Note: the module is lazy-loaded
             replacement: [
                 {
-                    match: /(?<=(\i)\.isClyde\(\)\?null:(\(0,\i\.\i\).+?id:)\i\.\i\.MUTUAL_GUILDS(,children:)\i\.\i\.Messages\.MUTUAL_GUILDS}\))/,
-                    replace: ",!$1.bot?$2\"MUTUAL_GDMS\"$3\"Mutual Groups\"}):null"
+                    match: /(?<=\.MUTUAL_GUILDS\}\),)(?=(\i\.bot).{0,20}(\(0,\i\.jsx\)\(.{0,100}id:))/,
+                    replace: '$1?null:$2"MUTUAL_GDMS",children:"Mutual Groups"}),'
                 },
                 {
-                    match: /({user:(\i),onClose:(\i)}\);)(case \i\.\i\.MUTUAL_FRIENDS)/,
-                    replace: "$1case \"MUTUAL_GDMS\":return $self.renderMutualGDMs($2,$3);$4"
+                    match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
+                    replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs($1,$2);"
                 }
             ]
         }
     ],
 
     renderMutualGDMs(user: User, onClose: () => void) {
-        const entries = ChannelStore.getSortedPrivateChannels().filter(x => x.isGroupDM() && x.recipients.includes(user.id)).map(x => (
-            <Clickable className={ProfileListClasses.listRow} onClick={() => {
-                onClose();
-                SelectedChannelActionCreators.selectPrivateChannel(x.id);
-            }}>
+        const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
+            <Clickable
+                className={ProfileListClasses.listRow}
+                onClick={() => {
+                    onClose();
+                    SelectedChannelActionCreators.selectPrivateChannel(c.id);
+                }}
+            >
                 <Avatar
-                    src={AvatarUtils.getChannelIconURL({ id: x.id, icon: x.icon, size: 32 })}
+                    src={AvatarUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                     size="SIZE_40"
                     className={ProfileListClasses.listAvatar}
                 >
                 </Avatar>
                 <div className={ProfileListClasses.listRowContent}>
-                    <div className={ProfileListClasses.listName}>{getGroupDMName(x)}</div>
-                    <div className={GuildLabelClasses.guildNick}>{x.recipients.length} Members</div>
+                    <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
+                    <div className={GuildLabelClasses.guildNick}>{c.recipients.length} Members</div>
                 </div>
             </Clickable>
         ));
 
-        return <ScrollerThin className={ProfileListClasses.listScroller} fade={true} onClose={onClose}>
-            {entries.length > 0 ? entries :
-                <div className={ProfileListClasses.empty}>
-                    <div className={ProfileListClasses.emptyIconFriends}></div>
-                    <div className={ProfileListClasses.emptyText}>No group dms in common</div>
-                </div>
-            }
-        </ScrollerThin>;
+        return (
+            <ScrollerThin
+                className={ProfileListClasses.listScroller}
+                fade={true}
+                onClose={onClose}
+            >
+                {entries.length > 0
+                    ? entries
+                    : (
+                        <div className={ProfileListClasses.empty}>
+                            <div className={ProfileListClasses.emptyIconFriends}></div>
+                            <div className={ProfileListClasses.emptyText}>No group dms in common</div>
+                        </div>
+                    )
+                }
+            </ScrollerThin>
+        );
     }
 });
