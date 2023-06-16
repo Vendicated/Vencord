@@ -23,8 +23,13 @@ import { classes } from "@utils/misc";
 import { LazyComponent, useForceUpdater } from "@utils/react";
 import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import {
-    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore, i18n, Menu,
-    ReadStateStore, Text, TypingStore, useEffect, useRef, UserStore, useState, useStateFromStores
+    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore,
+    i18n,
+    Menu,
+    ReadStateStore, Text, TypingStore,
+    useEffect, useRef,
+    UserStore,
+    useState, useStateFromStores
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
@@ -32,7 +37,8 @@ import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as setting
 
 const {
     closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
-    moveDraggedTabs, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction
+    moveDraggedTabs, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction,
+    toggleCompactTab
 } = ChannelTabsUtils;
 
 enum ChannelTypes {
@@ -127,12 +133,23 @@ function ChannelEmoji({ channel }: {
 function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
     const { openTabs } = ChannelTabsUtils;
+    const [compact, setCompact] = useState(tab.compact);
 
     return <Menu.Menu
         navId="channeltabs-channel-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="Channel Tab Context Menu"
     >
+        <Menu.MenuCheckboxItem
+            checked={compact}
+            key="toggle-compact-tab"
+            id="toggle-compact-tab"
+            label="Compact"
+            action={() => {
+                setCompact(compact => !compact);
+                toggleCompactTab(tab.id);
+            }}
+        />
         {channel && <Menu.MenuGroup>
             <Menu.MenuItem
                 key="mark-as-read"
@@ -179,7 +196,7 @@ function ChannelTabContent(props: ChannelTabsProps &
         themeColor?: number;
     };
 }) {
-    const { guild, guildId, channel, channelId } = props;
+    const { guild, guildId, channel, channelId, compact } = props;
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
 
@@ -199,8 +216,8 @@ function ChannelTabContent(props: ChannelTabsProps &
         return <>
             <Emoji emojiName={"⭐"} className={cl("icon")} />
             {/* @ts-ignore */}
-            {channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
-            <Text className={cl("channel-name-text")}>#{channel?.name}</Text>
+            {!compact && channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
+            {!compact && <Text className={cl("channel-name-text")}>#{channel?.name}</Text>}
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
         </>;
@@ -210,8 +227,8 @@ function ChannelTabContent(props: ChannelTabsProps &
             return <>
                 <GuildIcon guild={guild} />
                 {/* @ts-ignore */}
-                {channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
-                <Text className={cl("channel-name-text")}>#{channel.name}</Text>
+                {!compact && channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
+                {!compact && <Text className={cl("channel-name-text")}>#{channel.name}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -230,7 +247,7 @@ function ChannelTabContent(props: ChannelTabsProps &
             }
             return <>
                 <GuildIcon guild={guild} />
-                <Text className={cl("channel-name-text")}>{name}</Text>
+                {!compact && <Text className={cl("channel-name-text")}>{name}</Text>}
             </>;
         }
     }
@@ -244,14 +261,14 @@ function ChannelTabContent(props: ChannelTabsProps &
 
             return <>
                 <UserAvatar user={user} />
-                <Text className={cl("channel-name-text")}>{username}</Text>
+                {!compact && <Text className={cl("channel-name-text")}>{username}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
         } else { // Group DM
             return <>
                 <ChannelIcon channel={channel} />
-                <Text className={cl("channel-name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>
+                {!compact && <Text className={cl("channel-name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -261,12 +278,12 @@ function ChannelTabContent(props: ChannelTabsProps &
     if (guildId === "@me" || guildId === undefined)
         return <>
             <FriendsIcon height={24} width={24} />
-            <Text className={cl("channel-name-text")}>{i18n.Messages.FRIENDS}</Text>
+            {!compact && <Text className={cl("channel-name-text")}>{i18n.Messages.FRIENDS}</Text>}
         </>;
 
     return <>
         <QuestionIcon height={24} width={24} />
-        <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>
+        {!compact && <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
     </>;
 }
 function ChannelTab(props: ChannelTabsProps & { index: number; }) {
@@ -355,7 +372,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
 
     return <div className={cl("container")}>
         {openTabs.map((ch, i) => <div
-            className={classes(cl("tab"), isTabSelected(ch.id) ? cl("tab-selected") : null)}
+            className={classes(cl("tab"), ch.compact ? cl("tab-compact") : null, isTabSelected(ch.id) ? cl("tab-selected") : null)}
             key={i}
             onAuxClick={e => {
                 if (e.button === 1 /* middle click */) {
@@ -370,13 +387,14 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
             >
                 <ChannelTab {...ch} index={i} />
             </button>
-            {openTabs.length > 1 && <button
-                className={classes(cl("button"), cl("close-button"))}
+            {openTabs.length > 1 && (ch.compact ? isTabSelected(ch.id) : true) && <button
+                className={classes(cl("button"), cl("close-button"), ch.compact ? cl("close-button-compact") : null)}
                 onClick={() => closeTab(ch.id)}
             >
                 <XIcon width={16} height={16} />
             </button>}
-        </div>)}
+        </div>)
+        }
 
         <button
             onClick={() => createTab(props, true)}
@@ -390,11 +408,11 @@ const PreviewTab = (props: ChannelTabsProps) => {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
-    return <div className={cl("preview-tab")}>
+    return <div className={classes(cl("preview-tab"), props.compact ? cl("preview-tab-compact") : null)}>
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
 };
-export function ChannelTabsPreivew(p) {
+export function ChannelTabsPreview(p) {
     const id = UserStore.getCurrentUser()?.id;
     if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
 

@@ -22,13 +22,14 @@ import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
 
-import { ChannelTabsPreivew } from "./components.jsx";
+import { ChannelTabsPreview } from "./components.jsx";
 
 export type BasicChannelTabsProps = {
     guildId: string;
     channelId: string;
 };
 export interface ChannelTabsProps extends BasicChannelTabsProps {
+    compact: boolean;
     messageId?: string;
     id: number;
 }
@@ -58,7 +59,7 @@ export const channelTabsSettings = definePluginSettings({
         }],
     },
     tabSet: {
-        component: ChannelTabsPreivew,
+        component: ChannelTabsPreview,
         description: "Select which tabs to open at startup",
         type: OptionType.COMPONENT,
         default: {}
@@ -91,9 +92,10 @@ let update = () => {
     logger.warn("Update function not set");
 };
 
-function createTab(props: BasicChannelTabsProps, switchToTab?: boolean, messageId?: string) {
+// Takes BasicChannelTabsProps on creation but ChannelTabsProps when restoring existing tabs
+function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string) {
     const id = genId();
-    openTabs.push({ ...props, id, messageId });
+    openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : false });
     if (switchToTab) moveToTab(id);
     update();
 }
@@ -164,7 +166,7 @@ function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab)!;
     if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
 
-    if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, ...ch };
+    if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
 }
 
 function isTabSelected(id: number) {
@@ -293,7 +295,18 @@ function setUpdaterFunction(fn: () => void) {
     update = fn;
 }
 
+function toggleCompactTab(id: number) {
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
+    openTabs[i] = {
+        ...openTabs[i],
+        compact: !openTabs[i].compact
+    };
+    update();
+}
+
 export const ChannelTabsUtils = {
     closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected, moveDraggedTabs,
-    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction
+    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction, toggleCompactTab
 };

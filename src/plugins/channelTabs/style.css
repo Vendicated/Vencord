@@ -62,6 +62,10 @@
     margin-right: 4px;
 }
 
+.vc-channeltabs-tab-compact {
+    width: unset;
+}
+
 .vc-channeltabs-tab-selected {
     background-color: var(--background-modifier-selected);
 }
@@ -85,6 +89,27 @@
     height: 16px;
     padding: 0;
     margin-right: 8px;
+}
+
+.vc-channeltabs-close-button:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-channeltabs-close-button-compact {
+    position: absolute;
+    opacity: 0;
+    width: 2rem;
+    height: 2rem;
+    margin-left: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.vc-channeltabs-close-button-compact:hover {
+    background-color: black;
+    opacity: 0.5;
 }
 
 .vc-channeltabs-emoji-container {
@@ -115,6 +140,10 @@
     min-width: 0;
     border-radius: 4px;
     border: 1px solid var(--background-modifier-accent);
+}
+
+.vc-channeltabs-preview-tab-compact {
+    width: unset;
 }
 
 .vc-channeltabs-preview-tab > :is(
