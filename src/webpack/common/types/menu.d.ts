@@ -44,6 +44,7 @@ export interface Menu {
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
+        disabled?: boolean;
     }>;
     MenuCheckboxItem: RC<{
         id: string;

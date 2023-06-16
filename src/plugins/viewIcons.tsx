@@ -20,15 +20,12 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { LazyComponent } from "@utils/react";
+import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { GuildMemberStore, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
 
-const ImageModal = LazyComponent(() => findByCode(".MEDIA_MODAL_CLOSE,"));
-const MaskedLink = LazyComponent(() => find(m => m.type?.toString().includes("MASKED_LINK)")));
 const BannerStore = findByPropsLazy("getGuildBannerURL");
 
 interface UserContextProps {
@@ -60,26 +57,29 @@ const settings = definePluginSettings({
                 value: "jpg",
             }
         ]
+    },
+    imgSize: {
+        type: OptionType.SELECT,
+        description: "The image size to use",
+        options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "1024" }))
     }
 });
 
 function openImage(url: string) {
     const format = url.startsWith("/") ? "png" : settings.store.format;
+
     const u = new URL(url, window.location.href);
-    u.searchParams.set("size", "512");
+    u.searchParams.set("size", settings.store.imgSize);
     u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
 
-    openModal(modalProps => (
-        <ModalRoot size={ModalSize.DYNAMIC} {...modalProps}>
-            <ImageModal
-                shouldAnimate={true}
-                original={url}
-                src={url}
-                renderLinkComponent={MaskedLink}
-            />
-        </ModalRoot>
-    ));
+    u.searchParams.set("size", "4096");
+    const originalUrl = u.toString();
+
+    openImageModal(url, {
+        original: originalUrl,
+        height: 256
+    });
 }
 
 const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
@@ -90,7 +90,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
             <Menu.MenuItem
                 id="view-avatar"
                 label="View Avatar"
-                action={() => openImage(BannerStore.getUserAvatarURL(user, true, 512))}
+                action={() => openImage(BannerStore.getUserAvatarURL(user, true))}
                 icon={ImageIcon}
             />
             {memberAvatar && (
@@ -122,7 +122,6 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon
                         openImage(BannerStore.getGuildIconURL({
                             id,
                             icon,
-                            size: 512,
                             canAnimate: true
                         }))
                     }
