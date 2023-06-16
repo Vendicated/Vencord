@@ -26,8 +26,7 @@ import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore,
     i18n,
     Menu,
-    PresenceStore,
-    ReadStateStore, Text, TypingStore,
+    PresenceStore, ReadStateStore, Text, TypingStore,
     useEffect, useRef,
     UserStore,
     useState, useStateFromStores
@@ -55,6 +54,7 @@ const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = fi
 const useDrag = findByCodeLazy(".disconnectDragSource(");
 const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
+const Avatar = LazyComponent(() => findByCode(".typingIndicatorRef", "svg"));
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
@@ -72,9 +72,6 @@ const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
     : <div className={cl("guild-acronym-icon")}>
         <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
     </div>;
-
-
-const Avatar = findByCodeLazy(".typingIndicatorRef", "svg");
 
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
@@ -135,25 +132,28 @@ function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="Channel Tab Context Menu"
     >
-        <Menu.MenuCheckboxItem
-            checked={compact}
-            key="toggle-compact-tab"
-            id="toggle-compact-tab"
-            label="Compact"
-            action={() => {
-                setCompact(compact => !compact);
-                toggleCompactTab(tab.id);
-            }}
-        />
-        {channel && <Menu.MenuGroup>
-            <Menu.MenuItem
-                key="mark-as-read"
-                id="mark-as-read"
-                label={i18n.Messages.MARK_AS_READ}
-                disabled={!ReadStateStore.hasUnread(channel.id)}
-                action={() => ReadStateUtils.markAsRead(channel)}
+        <Menu.MenuGroup>
+            {channel &&
+                <Menu.MenuItem
+                    key="mark-as-read"
+                    id="mark-as-read"
+                    label={i18n.Messages.MARK_AS_READ}
+                    disabled={!ReadStateStore.hasUnread(channel.id)}
+                    action={() => ReadStateUtils.markAsRead(channel)}
+                />
+            }
+            <Menu.MenuCheckboxItem
+                checked={compact}
+                key="toggle-compact-tab"
+                id="toggle-compact-tab"
+                label="Compact"
+                action={() => {
+                    setCompact(compact => !compact);
+                    toggleCompactTab(tab.id);
+                    FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
+                }}
             />
-        </Menu.MenuGroup>}
+        </Menu.MenuGroup>
         {openTabs.length !== 1 && <Menu.MenuGroup>
             <Menu.MenuItem
                 key="close-tab"
@@ -201,8 +201,8 @@ function ChannelTabContent(props: ChannelTabsProps &
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            PresenceStore.getStatus(recipients?.[0]),
-            PresenceStore.isMobileOnline(recipients?.[0])
+            PresenceStore.getStatus(recipients?.[0]) as string,
+            PresenceStore.isMobileOnline(recipients?.[0]) as boolean
         ],
         null,
         // is this necessary?
@@ -213,7 +213,7 @@ function ChannelTabContent(props: ChannelTabsProps &
         return <>
             <Emoji emojiName={"⭐"} className={cl("icon")} />
             {/* @ts-ignore */}
-            {!compact && channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
+            {!compact && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
             {!compact && <Text className={cl("channel-name-text")}>#{channel?.name}</Text>}
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
@@ -224,7 +224,7 @@ function ChannelTabContent(props: ChannelTabsProps &
             return <>
                 <GuildIcon guild={guild} />
                 {/* @ts-ignore */}
-                {!compact && channel?.iconEmoji ? <ChannelEmoji channel={channel} /> : null}
+                {!compact && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
                 {!compact && <Text className={cl("channel-name-text")}>#{channel.name}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />

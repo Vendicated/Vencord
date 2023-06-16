@@ -14,6 +14,12 @@
     overflow: hidden;
 }
 
+/* user avatars in dm's */
+.vc-channeltabs-tab [class^="wrapper-"] {
+    min-width: 24px;
+}
+
+
 .vc-channeltabs-notification-dot {
     height: 16px;
     padding-left: 4px;
@@ -64,6 +70,7 @@
 
 .vc-channeltabs-tab-compact {
     width: unset;
+    min-width: unset;
 }
 
 .vc-channeltabs-tab-selected {
@@ -144,6 +151,7 @@
 
 .vc-channeltabs-preview-tab-compact {
     width: unset;
+    min-width: unset;
 }
 
 .vc-channeltabs-preview-tab > :is(
