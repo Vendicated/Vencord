@@ -254,7 +254,7 @@ function ChannelTabContent(props: ChannelTabsProps &
             const user = UserStore.getUser(recipients[0]) as User & { globalName: string, isPomelo(): boolean; };
             const username = settings.store.noPomeloNames
                 ? user.globalName ?? user.username
-                : user.isPomelo() ? `@${user.username}` : user.tag;
+                : user.isPomelo() ? user.username : user.tag;
 
             return <>
                 <Avatar
@@ -264,7 +264,9 @@ function ChannelTabContent(props: ChannelTabsProps &
                     isTyping={isTyping}
                     isMobile={isMobile}
                 />
-                {!compact && <Text className={cl("channel-name-text")}>{username}</Text>}
+                {!compact && <Text className={cl("channel-name-text")} data-pomelo={user.isPomelo()}>
+                    {username}
+                </Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 {!settings.store.showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
             </>;
@@ -319,7 +321,7 @@ function ChannelTab(props: ChannelTabsProps & { index: number; }) {
     }), []);
     drag(drop(ref));
 
-    const tab = <div className={cl("tab-base")} ref={ref}>
+    const tab = <div className={cl("tab-base")} data-compact={props.compact} ref={ref}>
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
     return tab;
