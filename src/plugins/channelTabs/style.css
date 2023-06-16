@@ -34,6 +34,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    margin-left: 0.3rem;
 }
 
 .vc-channeltabs-tab-base {

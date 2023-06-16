@@ -73,6 +73,11 @@ export const channelTabsSettings = definePluginSettings({
         description: "Show status indicators for DM's",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    showChannelEmojis: {
+        description: "Show channel emojis",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 

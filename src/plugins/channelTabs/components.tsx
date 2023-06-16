@@ -213,7 +213,7 @@ function ChannelTabContent(props: ChannelTabsProps &
         return <>
             <Emoji emojiName={"⭐"} className={cl("icon")} />
             {/* @ts-ignore */}
-            {!compact && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
+            {!compact && settings.store.showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
             {!compact && <Text className={cl("channel-name-text")}>#{channel?.name}</Text>}
             <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
             <TypingIndicator isTyping={isTyping} />
@@ -224,7 +224,7 @@ function ChannelTabContent(props: ChannelTabsProps &
             return <>
                 <GuildIcon guild={guild} />
                 {/* @ts-ignore */}
-                {!compact && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
+                {!compact && settings.store.showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
                 {!compact && <Text className={cl("channel-name-text")}>#{channel.name}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
