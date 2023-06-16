@@ -24,34 +24,32 @@ import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@web
 
 const EMBED_SUPPRESSED = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { message: { author, embeds, flags } } = props;
-
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => () => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
-    const hasEmbedPerms = !!(PermissionStore.getChannelPermissions({ id: props.channel.id }) & PermissionsBits.EMBED_LINKS);
+    if (!isEmbedSuppressed && !embeds.length) return;
 
-    return () => {
-        if (!isEmbedSuppressed && !embeds.length) return;
-        if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
-        const menuGroup = findGroupChildrenByChildId("delete", children);
-        const deleteItem = menuGroup?.findIndex(i => i?.props?.id === "delete");
-        if (!deleteItem || !menuGroup) return;
-        menuGroup.splice(deleteItem - 1, 0, (
-            <Menu.MenuItem
-                id="unsuppress-embeds"
-                key="unsuppress-embeds"
-                label={isEmbedSuppressed ? "Unsuppress Embeds" : "Suppress Embeds"}
-                color={isEmbedSuppressed ? undefined : "danger"}
-                icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
-                action={() => {
-                    RestAPI.patch({
-                        url: `/channels/${props.channel.id}/messages/${props.message.id}`,
-                        body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
-                    });
-                }}
-            />
-        ));
-    };
+    const hasEmbedPerms = channel.isPrivate() || !!(PermissionStore.getChannelPermissions({ id: channel.id }) & PermissionsBits.EMBED_LINKS);
+    if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
+
+    const menuGroup = findGroupChildrenByChildId("delete", children);
+    const deleteIndex = menuGroup?.findIndex(i => i?.props?.id === "delete");
+    if (!deleteIndex || !menuGroup) return;
+
+    menuGroup.splice(deleteIndex - 1, 0, (
+        <Menu.MenuItem
+            id="unsuppress-embeds"
+            key="unsuppress-embeds"
+            label={isEmbedSuppressed ? "Unsuppress Embeds" : "Suppress Embeds"}
+            color={isEmbedSuppressed ? undefined : "danger"}
+            icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
+            action={() =>
+                RestAPI.patch({
+                    url: `/channels/${channel.id}/messages/${messageId}`,
+                    body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
+                })
+            }
+        />
+    ));
 };
 
 export default definePlugin({
