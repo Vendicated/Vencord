@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
@@ -24,6 +25,11 @@ import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
+// wtf is this assert syntax
+import PackageJSON from "../../package.json" assert { type: "json" };
+
+export const VERSION = PackageJSON.version;
+export const BUILD_TIMESTAMP = Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
