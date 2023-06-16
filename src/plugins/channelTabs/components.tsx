@@ -26,6 +26,7 @@ import {
     Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore,
     i18n,
     Menu,
+    PresenceStore,
     ReadStateStore, Text, TypingStore,
     useEffect, useRef,
     UserStore,
@@ -72,14 +73,8 @@ const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
         <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
     </div>;
 
-const UserAvatar = ({ user }: { user: User; }) =>
-    <img
-        src={user.avatar
-            ? `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${user?.id}/${user?.avatar}.png`
-            : `https://${window.GLOBAL_ENV.CDN_HOST}/embed/avatars/${parseInt(user.discriminator, 10) % 5}.png`
-        }
-        className={cl("icon")}
-    />;
+
+const Avatar = findByCodeLazy(".typingIndicatorRef", "svg");
 
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
@@ -200,12 +195,14 @@ function ChannelTabContent(props: ChannelTabsProps &
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
 
-    const [unreadCount, mentionCount, isTyping] = useStateFromStores(
-        [ReadStateStore, TypingStore],
+    const [unreadCount, mentionCount, isTyping, status, isMobile] = useStateFromStores(
+        [ReadStateStore, TypingStore, PresenceStore],
         () => [
             ReadStateStore.getUnreadCount(channelId) as number,
             ReadStateStore.getMentionCount(channelId) as number,
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
+            PresenceStore.getStatus(recipients?.[0]),
+            PresenceStore.isMobileOnline(recipients?.[0])
         ],
         null,
         // is this necessary?
@@ -260,10 +257,16 @@ function ChannelTabContent(props: ChannelTabsProps &
                 : user.isPomelo() ? `@${user.username}` : user.tag;
 
             return <>
-                <UserAvatar user={user} />
+                <Avatar
+                    size="SIZE_24"
+                    src={user.getAvatarURL(guildId, 128)}
+                    status={settings.store.showStatusIndicators ? status : null}
+                    isTyping={isTyping}
+                    isMobile={isMobile}
+                />
                 {!compact && <Text className={cl("channel-name-text")}>{username}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-                <TypingIndicator isTyping={isTyping} />
+                {!settings.store.showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
             </>;
         } else { // Group DM
             return <>

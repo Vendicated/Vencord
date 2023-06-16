@@ -157,5 +157,5 @@ export default definePlugin({
         </>;
     },
 
-    util: ChannelTabsUtils
+    util: ChannelTabsUtils,
 });
