@@ -61,14 +61,13 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
 };
 
 export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => () => {
-    const streamPreviewItemIdentifier = "view-stream-preview";
-
     const stream = ApplicationStreamingStore.getAnyStreamForUser(userId);
+    if (!stream) return;
 
     const streamPreviewItem = (
         <Menu.MenuItem
             label="View Stream Preview"
-            id={streamPreviewItemIdentifier}
+            id="view-stream-preview"
             icon={ScreenshareIcon}
             action={() => stream && handleViewPreview(stream)}
             disabled={!stream}
