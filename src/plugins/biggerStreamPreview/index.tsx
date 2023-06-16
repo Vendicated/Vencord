@@ -60,7 +60,7 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     openImageModal(previewUrl);
 };
 
-export const addViewStreamContext = (children, { userId }: { userId: string | bigint; }) => () => {
+export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => () => {
     const streamPreviewItemIdentifier = "view-stream-preview";
 
     const stream = ApplicationStreamingStore.getAnyStreamForUser(userId);

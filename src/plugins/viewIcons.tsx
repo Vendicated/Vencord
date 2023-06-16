@@ -67,10 +67,12 @@ const settings = definePluginSettings({
 
 function openImage(url: string) {
     const format = url.startsWith("/") ? "png" : settings.store.format;
+
     const u = new URL(url, window.location.href);
-    u.searchParams.set("size", `${settings.store.imgSize}`);
+    u.searchParams.set("size", settings.store.imgSize);
     u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
+
     u.searchParams.set("size", "4096");
     const originalUrl = u.toString();
 
