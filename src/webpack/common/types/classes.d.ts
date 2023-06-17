@@ -16,12 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./classes";
-export * from "./components";
-export * from "./menu";
-export * from "./react";
-export * from "./stores";
-export * as ComponentTypes from "./types/components.d";
-export * as MenuTypes from "./types/menu.d";
-export * as UtilTypes from "./types/utils.d";
-export * from "./utils";
+export interface ImageModalClasses {
+    image: string,
+    modal: string,
+    responsiveWidthMobile: string;
+}
+
+export interface ButtonWrapperClasses {
+    hoverScale: string;
+    buttonWrapper: string;
+    button: string;
+    iconMask: string;
+    buttonContent: string;
+    icon: string;
+    pulseIcon: string;
+    pulseButton: string;
+    notificationDot: string;
+    sparkleContainer: string;
+    sparkleStar: string;
+    sparklePlus: string;
+    sparkle: string;
+    active: string;
+}
