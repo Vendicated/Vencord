@@ -52,7 +52,7 @@ export default definePlugin({
             find: ".userTagNoNickname",
             replacement: {
                 match: /=(\i)\.pronouns/,
-                replace: "=$self.useProfilePronouns($1.user.id)"
+                replace: "=$self.useProfilePronouns($1.user.id,$1.pronouns)"
             }
         },
         // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
@@ -60,7 +60,7 @@ export default definePlugin({
             find: ".USER_PROFILE_ACTIVITY",
             replacement: {
                 match: /\).showPronouns/,
-                replace: ").showPronouns||true;const vcPronounce=$self.useProfilePronouns(arguments[0].user.id);if(arguments[0].displayProfile)arguments[0].displayProfile.pronouns=vcPronounce"
+                replace: ").showPronouns||true;const vcPronounce=$self.useProfilePronouns(arguments[0].user.id,arguments[0].displayProfile?.pronouns);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce"
             }
         }
     ],
