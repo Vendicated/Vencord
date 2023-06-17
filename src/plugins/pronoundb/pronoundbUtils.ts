@@ -56,9 +56,10 @@ const bulkFetch = debounce(async () => {
 });
 
 function getDiscordPronouns(id: string) {
-    const profile =
-        UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.guild_id) ?? UserProfileStore.getUserProfile(id);
-    return profile?.pronouns;
+    return (
+        UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.guild_id)?.pronouns
+        || UserProfileStore.getUserProfile(id)?.pronouns
+    );
 }
 
 export function useFormattedPronouns(id: string, discordPronouns: string = getDiscordPronouns(id)): string | null {
