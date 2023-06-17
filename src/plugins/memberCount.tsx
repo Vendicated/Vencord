@@ -55,8 +55,7 @@ function MemberCount() {
             paddingInline: "1em",
             justifyContent: "center",
             alignContent: "center",
-            gap: 0,
-            zIndex: 100,
+            gap: 0
         }}>
             <Tooltip text={`${online} Online in this Channel`} position="bottom">
                 {props => (
