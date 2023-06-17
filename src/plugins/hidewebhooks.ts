@@ -103,8 +103,9 @@ async function blockWebhooks(message, channelId) {
     var whitelist = Vencord.Settings.plugins.HideWebhooks.source.split(",");
 
 
-    if (message.author.bot && message.webhook_id !== null && !whitelist.includes(message.webhook_id)) {
+    if (message.author.bot && message.webhook_id !== null && message.webhook_id !== undefined && !whitelist.includes(message.webhook_id)) {
 
+        console.log("WID - " + message.webhook_id);
 
         await delay(50); // Rate limiting, so that the client does not autoscroll too fast.
         const messageElement = document.querySelector(`div[data-list-item-id="chat-messages___chat-messages-${channelId}-${message.id}"]`);
