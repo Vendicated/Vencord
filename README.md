@@ -50,7 +50,7 @@ As an alternative to the Discord Desktop app, Vencord also has its own standalon
 
 ## Join our Support/Community Server
 
-[![Vencord Discord Server](https://invidget.switchblade.xyz/D9uwnFnqmd?theme=dark)](https://discord.gg/D9uwnFnqmd)
+https://discord.gg/D9uwnFnqmd
 
 ## Disclaimer
 
