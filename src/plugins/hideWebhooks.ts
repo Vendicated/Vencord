@@ -49,6 +49,7 @@ class Message {
     nonce: string | undefined;
     webhookId: string | undefined;
     webhook_id: string | undefined;
+    type: number | undefined;
 }
 
 
@@ -103,7 +104,7 @@ async function blockWebhooks(message, channelId) {
     var whitelist = Vencord.Settings.plugins.HideWebhooks.source.split(",");
 
 
-    if (message.author.bot && message.webhook_id !== null && message.webhook_id !== undefined && !whitelist.includes(message.webhook_id)) {
+    if (message.author.bot && message.webhook_id !== null && message.webhook_id !== undefined && !whitelist.includes(message.webhook_id) && message.type === 0) {
 
         console.log("WID - " + message.webhook_id);
 
