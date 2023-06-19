@@ -150,9 +150,9 @@ export default definePlugin({
                 color={Button.Colors.LINK}
                 size={Button.Sizes.NONE}
                 style={{
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                    top: -2
+                    paddingTop: "0px",
+                    paddingBottom: "0px",
+                    top: "-2px"
                 }}
                 onClick={() => {
                     const [name, setName] = state;
@@ -167,6 +167,7 @@ export default definePlugin({
                             <ModalContent>
                                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
                                 <TextInput
+                                    style={{ marginBottom: "10px" }}
                                     defaultValue={savedNotesCache[session.id_hash] ?? ""}
                                     onChange={(e: string) => {
                                         savedNotesCache[session.id_hash] = e;
