@@ -19,15 +19,13 @@
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { React, TextArea, Tooltip } from "@webpack/common";
-import type { KeyboardEvent } from "react";
-import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./elements";
+import { findByPropsLazy } from "@webpack";
+import { Button, Forms, React, TextInput, Tooltip } from "@webpack/common";
+import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./icons";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, closeModal, openModal } from "@utils/modal";
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
-const TextAreaClasses = findLazy(m => typeof m.textarea === "string");
-const NoteClasses = findLazy(m => typeof m.note === "string" && Object.keys(m).length === 1);
 
 let savedNotesCache: Record<string, string>;
 
@@ -101,12 +99,16 @@ export default definePlugin({
         {
             find: "Messages.AUTH_SESSIONS_SESSION_LOG_OUT",
             replacement: [
+                // Replace children with a single label with state
                 {
-                    match: /({variant:"text-sm\/medium",className:\i\(\)\.sessionInfoRow,children:.{70,110}{children:"·"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}\)\]}\)\]}\)/,
-                    replace: "$1$self.renderTimestamp(arguments[0], $2)})]})]}),$self.renderNote(arguments[0])"
+                    match: /({variant:"eyebrow",className:\i\(\)\.sessionInfoRow,children:).{70,110}{children:"·"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
+                    replace: "$1$self.renderName(arguments[0])"
                 },
-
-                // Remove the existing icon child and re-create it
+                {
+                    match: /({variant:"text-sm\/medium",className:\i\(\)\.sessionInfoRow,children:.{70,110}{children:"·"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
+                    replace: "$1$self.renderTimestamp(arguments[0], $2)}"
+                },
+                // Replace the icon
                 {
                     match: /(currentSession:null\),children:\[)\(0,\w+\.\w+\)\("div",{className:\w+\(\)\.sessionIcon,children:\(0,\w+\.\w+\)\(\w+,{width:"32",height:"32"}\)}\),/,
                     replace: "$1$self.renderIcon(arguments[0]),"
@@ -115,45 +117,93 @@ export default definePlugin({
         }
     ],
 
-    renderTimestamp({ session }: SessionInfo, timeLabel: string) {
-        return <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
-            {props => (
-                <span {...props} className={TimestampClasses.timestamp}>
-                    {timeLabel}
-                </span>
-            )}
-        </Tooltip>;
+    getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {
+        return `${clientInfo.os} · ${clientInfo.platform}`;
     },
 
-    renderNote({ session }: SessionInfo) {
-        const [noteText, setNoteText] = React.useState(savedNotesCache[session.id_hash] ?? "");
+    renderName({ session }: SessionInfo) {
+        const state = React.useState(savedNotesCache[session.id_hash] ?? this.getDefaultName(session.client_info));
+        const [name, setName] = state;
 
+        return [
+            <span>{name}</span>,
+            this.renderRenameButton({ session }, state)
+        ];
+    },
+
+    renderTimestamp({ session }: SessionInfo, timeLabel: string) {
         return (
-            <div className={NoteClasses.note}>
-                <TextArea
-                    className={TextAreaClasses.textarea}
-                    disabled={false}
-                    placeholder="Click to add a note"
-                    rows={1}
-                    onChange={text => {
-                        setNoteText(text);
+            <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
+                {props => (
+                    <span {...props} className={TimestampClasses.timestamp}>
+                        {timeLabel}
+                    </span>
+                )}
+            </Tooltip>
+        );
+    },
 
-                        if (text !== "") {
-                            savedNotesCache[session.id_hash] = text;
-                        } else {
-                            delete savedNotesCache[session.id_hash];
-                        }
-                        DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
-                    }}
-                    onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                        }
-                    }}
-                    value={noteText}
-                />
-            </div>
+    renderRenameButton({ session }: SessionInfo, state: [string, React.Dispatch<React.SetStateAction<string>>]) {
+        return (
+            <Button
+                look={Button.Looks.LINK}
+                color={Button.Colors.LINK}
+                size={Button.Sizes.NONE}
+                style={{
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    top: -2
+                }}
+                onClick={() => {
+                    const [name, setName] = state;
+
+                    const key = openModal(props => (
+                        <ModalRoot {...props}>
+                            <ModalHeader>
+                                <Forms.FormTitle tag="h4">Rename</Forms.FormTitle>
+                                <ModalCloseButton onClick={() => closeModal(key)} />
+                            </ModalHeader>
+
+                            <ModalContent>
+                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
+                                <TextInput
+                                    defaultValue={savedNotesCache[session.id_hash] ?? ""}
+                                    onChange={(e: string) => {
+                                        savedNotesCache[session.id_hash] = e;
+                                    }}
+                                ></TextInput>
+                            </ModalContent>
+
+                            <ModalFooter>
+                                <Button
+                                    color={Button.Colors.BRAND}
+                                    onClick={() => {
+                                        setName(savedNotesCache[session.id_hash]);
+                                        DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
+
+                                        props.onClose();
+                                    }}
+                                >Save</Button>
+                                <Button
+                                    color={Button.Colors.TRANSPARENT}
+                                    look={Button.Looks.LINK}
+                                    onClick={() => {
+                                        delete savedNotesCache[session.id_hash];
+                                        setName(this.getDefaultName(session.client_info));
+                                        DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
+
+                                        props.onClose();
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                            </ModalFooter>
+                        </ModalRoot>
+                    ));
+                }}
+            >
+                Rename
+            </Button>
         );
     },
 
