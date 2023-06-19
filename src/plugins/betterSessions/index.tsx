@@ -179,7 +179,12 @@ export default definePlugin({
                                 <Button
                                     color={Button.Colors.BRAND}
                                     onClick={() => {
-                                        setName(savedNotesCache[session.id_hash]);
+                                        if (savedNotesCache[session.id_hash]) {
+                                            setName(savedNotesCache[session.id_hash]);
+                                        } else {
+                                            delete savedNotesCache[session.id_hash];
+                                            setName(this.getDefaultName(session.client_info));
+                                        }
                                         DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
 
                                         props.onClose();
