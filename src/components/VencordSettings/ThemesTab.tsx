@@ -39,7 +39,6 @@ type FileInput = React.ComponentType<{
 
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
-
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
@@ -152,7 +151,7 @@ enum ThemeTab {
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks"]);
+    const settings = useSettings(["themeLinks", "enabledThemes"]);
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = React.useState(ThemeTab.LOCAL);
@@ -269,7 +268,7 @@ function ThemesTab() {
                             />
                         ))}
                     </div>
-                </Forms.FormSection >
+                </Forms.FormSection>
             </>
         );
     }
