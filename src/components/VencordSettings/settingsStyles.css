@@ -1,6 +1,6 @@
 .vc-settings-tab-bar {
     margin-top: 20px;
-    margin-bottom: -2px;
+    margin-bottom: 10px;
     border-bottom: 2px solid var(--background-modifier-accent);
 }
 
