@@ -65,6 +65,7 @@ const replacements = [
     ["stupid", "baka"],
     ["what", "nani"],
     ["meow", "nya~"],
+    ["hello", "hewwo"],
 ];
 
 const settings = definePluginSettings({
