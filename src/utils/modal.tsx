@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, mapMangledModuleLazy } from "@webpack";
+import { filters, findByCode, mapMangledModuleLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
 
-export enum ModalSize {
+export const enum ModalSize {
     SMALL = "small",
     MEDIUM = "medium",
     LARGE = "large",
     DYNAMIC = "dynamic",
 }
 
-enum ModalTransitionState {
+const enum ModalTransitionState {
     ENTERING,
     ENTERED,
     EXITING,
@@ -106,6 +106,25 @@ export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
         className?: string;
     }>;
 };
+
+export type ImageModal = ComponentType<{
+    className?: string;
+    src: string;
+    placeholder: string;
+    original: string;
+    width?: number;
+    height?: number;
+    animated?: boolean;
+    responsive?: boolean;
+    renderLinkComponent(props: any): ReactNode;
+    maxWidth?: number;
+    maxHeight?: number;
+    shouldAnimate?: boolean;
+    onClose?(): void;
+    shouldHideMediaOptions?: boolean;
+}>;
+
+export const ImageModal = LazyComponent(() => findByCode(".renderLinkComponent", ".responsive") as ImageModal);
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);

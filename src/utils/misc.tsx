@@ -18,6 +18,8 @@
 
 import { Clipboard, Toasts } from "@webpack/common";
 
+import { DevsById } from "./constants";
+
 /**
  * Recursively merges defaults into an object and returns the same object
  * @param obj Object
@@ -104,3 +106,4 @@ export const isMobile = navigator.userAgent.includes("Mobi");
 export function intersperse<T, S>(array: T[], separator: S): (T | S)[] {
     return array.flatMap((a, i) => i > 0 ? [separator, a] : [a]);
 }
+export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);

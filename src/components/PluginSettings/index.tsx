@@ -20,20 +20,18 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { Switch } from "@components/Switch";
+import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
-import { onlyOnce } from "@utils/onlyOnce";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
@@ -96,7 +94,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings([`plugins.${plugin.name}.enabled`]).plugins[plugin.name];
+    const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => settings.enabled ?? false;
 
@@ -140,11 +138,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-        const action = wasEnabled ? "stop" : "start";
 
         if (!result) {
-            logger.error(`Failed to ${action} plugin ${plugin.name}`);
-            showErrorToast(`Failed to ${action} plugin: ${plugin.name}`);
+            settings.enabled = false;
+
+            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            logger.error(msg);
+            showErrorToast(msg);
             return;
         }
 
@@ -173,13 +173,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     );
 }
 
-enum SearchStatus {
+const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED
 }
 
-export default ErrorBoundary.wrap(function PluginSettings() {
+export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -230,9 +230,12 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
         if (!searchValue.value.length) return true;
+
+        const v = searchValue.value.toLowerCase();
         return (
-            plugin.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-            plugin.description.toLowerCase().includes(searchValue.value.toLowerCase())
+            plugin.name.toLowerCase().includes(v) ||
+            plugin.description.toLowerCase().includes(v) ||
+            plugin.tags?.some(t => t.toLowerCase().includes(v))
         );
     };
 
@@ -260,6 +263,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         requiredPlugins = [];
 
         for (const p of sortedPlugins) {
+            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+                continue;
+
             if (!pluginFilter(p)) continue;
 
             const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
@@ -300,7 +306,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection className={Margins.top16}>
+        <SettingsTab title="Plugins">
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
@@ -339,12 +345,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
             <div className={cl("grid")}>
                 {requiredPlugins}
             </div>
-        </Forms.FormSection >
+        </SettingsTab >
     );
-}, {
-    message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
-    onError: onlyOnce(handleComponentFailed),
-});
+}
 
 function makeDependencyList(deps: string[]) {
     return (

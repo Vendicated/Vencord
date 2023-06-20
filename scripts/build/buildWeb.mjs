@@ -24,9 +24,7 @@ import { readFileSync } from "fs";
 import { appendFile, mkdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
-// wtf is this assert syntax
-import PackageJSON from "../../package.json" assert { type: "json" };
-import { commonOpts, globPlugins, watch } from "./common.mjs";
+import { commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -47,7 +45,9 @@ const commonOptions = {
         IS_STANDALONE: "true",
         IS_DEV: JSON.stringify(watch),
         IS_DISCORD_DESKTOP: "false",
-        IS_VENCORD_DESKTOP: "false"
+        IS_VENCORD_DESKTOP: "false",
+        VERSION: JSON.stringify(VERSION),
+        BUILD_TIMESTAMP: Date.now(),
     }
 };
 
@@ -67,7 +67,7 @@ await Promise.all(
             },
             outfile: "dist/Vencord.user.js",
             banner: {
-                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${PackageJSON.version}.${new Date().getTime()}`)
+                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
             },
             footer: {
                 // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
@@ -88,7 +88,7 @@ async function buildPluginZip(target, files, shouldZip) {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
-                json.version = PackageJSON.version;
+                json.version = VERSION;
                 content = new TextEncoder().encode(JSON.stringify(json));
             }
 

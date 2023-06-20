@@ -268,7 +268,12 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
         def,
         checks: checks ?? {},
         pluginName: "",
+
+        withPrivateSettings<T>() {
+            return this as DefinedSettings<D, C> & { store: T; };
+        }
     };
+
     return definedSettings;
 }
 

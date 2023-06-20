@@ -18,7 +18,6 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
@@ -29,6 +28,8 @@ import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
 
+import { SettingsTab, wrapTab } from "./shared";
+
 type FileInput = React.ComponentType<{
     ref: React.Ref<HTMLInputElement>;
     onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;
@@ -38,6 +39,7 @@ type FileInput = React.ComponentType<{
 
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
+
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
@@ -149,8 +151,8 @@ enum ThemeTab {
     ONLINE
 }
 
-export default ErrorBoundary.wrap(function () {
-    const settings = useSettings();
+function ThemesTab() {
+    const settings = useSettings(["themeLinks"]);
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = React.useState(ThemeTab.LOCAL);
@@ -328,7 +330,7 @@ export default ErrorBoundary.wrap(function () {
     }
 
     return (
-        <>
+        <SettingsTab title="Themes">
             <TabBar
                 type="top"
                 look="brand"
@@ -352,6 +354,8 @@ export default ErrorBoundary.wrap(function () {
 
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
-        </>
+        </SettingsTab>
     );
-});
+}
+
+export default wrapTab(ThemesTab, "Themes");

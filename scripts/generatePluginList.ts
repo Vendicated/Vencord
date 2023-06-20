@@ -19,7 +19,7 @@
 import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join } from "path";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 interface Dev {
     name: string;
@@ -29,6 +29,7 @@ interface Dev {
 interface PluginData {
     name: string;
     description: string;
+    tags: string[];
     authors: Dev[];
     dependencies: string[];
     hasPatches: boolean;
@@ -65,9 +66,9 @@ function parseDevs() {
 
         const value = devsDeclaration.initializer.arguments[0];
 
-        if (!isObjectLiteralExpression(value)) return;
+        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
 
-        for (const prop of value.properties) {
+        for (const prop of value.expression.properties) {
             const name = (prop.name as Identifier).text;
             const value = isPropertyAssignment(prop) ? prop.initializer : prop;
 
@@ -106,6 +107,7 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
+            tags: [] as string[]
         } as PluginData;
 
         for (const prop of pluginObj.properties) {
@@ -128,7 +130,16 @@ async function parseFile(fileName: string) {
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
-                        return devs[getName(e)!];
+                        const d = devs[getName(e)!];
+                        if (!d) throw fail(`couldn't look up author ${getName(e)}`);
+                        return d;
+                    });
+                    break;
+                case "tags":
+                    if (!isArrayLiteralExpression(value)) throw fail("tags is not an array literal");
+                    data.tags = value.elements.map(e => {
+                        if (!isStringLiteral(e)) throw fail("tags array contains non-string literals");
+                        return e.text;
                     });
                     break;
                 case "dependencies":
@@ -160,8 +171,8 @@ async function parseFile(fileName: string) {
     throw fail("no default export called 'definePlugin' found");
 }
 
-async function getEntryPoint(dirent: Dirent) {
-    const base = join("./src/plugins", dirent.name);
+async function getEntryPoint(dir: string, dirent: Dirent) {
+    const base = join(dir, dirent.name);
     if (!dirent.isDirectory()) return base;
 
     for (const name of ["index.ts", "index.tsx"]) {
@@ -175,13 +186,23 @@ async function getEntryPoint(dirent: Dirent) {
     throw new Error(`${dirent.name}: Couldn't find entry point`);
 }
 
+function isPluginFile({ name }: { name: string; }) {
+    if (name === "index.ts") return false;
+    return !name.startsWith("_") && !name.startsWith(".");
+}
+
 (async () => {
     parseDevs();
-    const plugins = readdirSync("./src/plugins", { withFileTypes: true }).filter(d => d.name !== "index.ts");
 
-    const promises = plugins.map(async dirent => parseFile(await getEntryPoint(dirent)));
+    const plugins = ["src/plugins", "src/plugins/_core"].flatMap(dir =>
+        readdirSync(dir, { withFileTypes: true })
+            .filter(isPluginFile)
+            .map(async dirent =>
+                parseFile(await getEntryPoint(dir, dirent))
+            )
+    );
 
-    const data = JSON.stringify(await Promise.all(promises));
+    const data = JSON.stringify(await Promise.all(plugins));
 
     if (process.argv.length > 2) {
         writeFileSync(process.argv[2], data);
