@@ -63,6 +63,7 @@
     grid-area: list;
     display: flex;
     flex-direction: column;
+    gap: 2px;
     border-right: 2px solid var(--background-modifier-active);
 }
 
@@ -77,17 +78,21 @@
     padding: 8px 5px;
     cursor: pointer;
     width: 230px;
+    border-radius: 5px;
+}
+
+.vc-permviewer-perms-list-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-permviewer-perms-list-item-active {
+    background-color: var(--background-modifier-selected);
 }
 
 .vc-permviewer-perms-list-item > div {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-}
-
-.vc-permviewer-perms-list-item-active {
-    background-color: var(--background-modifier-selected);
-    border-radius: 5px;
 }
 
 .vc-permviewer-perms-role-circle {
