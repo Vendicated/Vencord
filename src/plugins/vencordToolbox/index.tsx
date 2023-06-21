@@ -52,10 +52,6 @@ function settingsSwitch(description: string, key: string, note: string, disabled
         )
     };
 }
-enum GreetMode {
-    Greet = "Greet",
-    NormalMessage = "Message"
-}
 
 const settings = definePluginSettings({
     // for enabling and disabling Vencord-wide quick actions
@@ -65,7 +61,7 @@ const settings = definePluginSettings({
     toggleQuickCss: settingsSwitch("Toggle QuickCss", "toggleQuickCss", "Enable/Disable QuickCss from toolbox"),
     updater: settingsSwitch("UpdaterTab", "updater", "Open UpdaterTab from toolbox", IS_WEB),
 
-    // for enabling and disabling misc plugin quick actions (can't be camelcase because they're used as variables)
+    // for enabling and disabling misc plugin quick actions
     BadgeAPI: settingsSwitch("BadgeAPI", "BadgeAPI", "Refetch Badges from toolbox"),
     DevCompanion: settingsSwitch("DevCompanion", "DevCompanion", "Reconnect Dev Companion from toolbox"),
 
@@ -76,14 +72,12 @@ const settings = definePluginSettings({
 }>();
 
 function VencordPopout({ onClose }: { onClose: () => void; }) {
-    // keeps track of added plugin settings entries
+    // keeps track of added plugin settings entries ex) textreplace, quickreply
     const ps = settings.use(["includedPlugins"]);
     const { includedPlugins = [] } = ps;
 
-    // keeps track of vencord-wide added quick actions
+    // for Vencord-wide quick actions ex) toggle quickCss, updater tab, notification log
     const pluginEnabledEntries = [] as string[];
-
-    // for Vencord-wide quick actions ex) quickCss, updater, notification log
     for (const [settingsName, enabled] of Object.entries(settings.store)) {
         if (enabled) {
             pluginEnabledEntries.push(settingsName);
