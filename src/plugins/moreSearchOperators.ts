@@ -51,14 +51,6 @@ const SearchOperators: Record<string, SearchFilter> = {
         _title: "Embed type",
         _options: "type"
     },
-    FILTER_FILE_NAME: {
-        componentType: "FILTER",
-        regex: /fileName:/i,
-        key: "fileName:",
-        getAutocompletions: () => [],
-        _title: "File name",
-        _options: "file name"
-    },
     FILTER_FILE_TYPE: {
         componentType: "FILTER",
         regex: /fileType:/i,
@@ -81,18 +73,6 @@ const SearchAnswers: Record<string, SearchAnswer> = {
         queryKey: "embed_type",
         mutable: true,
         _dataKey: "embedType"
-    },
-    ANSWER_FILE_NAME: {
-        componentType: "ANSWER",
-        regex: /(?:\s*([^\s]+))/,
-        validator(match) {
-            match.setData("fileName", match.getMatch(1));
-            return true;
-        },
-        follows: ["FILTER_FILE_NAME"],
-        queryKey: "attachment_filename",
-        mutable: true,
-        _dataKey: "fileName"
     },
     ANSWER_FILE_TYPE: {
         componentType: "ANSWER",
