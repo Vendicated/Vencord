@@ -32,5 +32,4 @@ export * from "./onlyOnce";
 export * from "./patches";
 export * from "./Queue";
 export * from "./react";
-export * from "./settingsSync";
 export * from "./text";
