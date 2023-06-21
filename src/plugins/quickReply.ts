@@ -159,9 +159,12 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     return i === - 1 ? undefined : messages[messages.length - i - 1];
 }
 
-function shouldMention() {
+function shouldMention(message) {
+    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention;
+    const shouldPing = !enabled || (shouldPingListed === userList.includes(message.author.id));
+
     switch (settings.store.shouldMention) {
-        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return !Settings.plugins.NoReplyMention.enabled;
+        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return shouldPing;
         case MentionOptions.DISABLED: return false;
         default: return true;
     }
@@ -184,7 +187,7 @@ function nextReply(isUp: boolean) {
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
-        shouldMention: shouldMention(),
+        shouldMention: shouldMention(message),
         showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
         _isQuickReply: true
     });

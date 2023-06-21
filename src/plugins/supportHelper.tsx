@@ -27,7 +27,7 @@ import { Alerts, Forms, UserStore } from "@webpack/common";
 import gitHash from "~git-hash";
 import plugins from "~plugins";
 
-import settings from "./settings";
+import settings from "./_core/settings";
 
 const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 
@@ -55,7 +55,10 @@ export default definePlugin({
                 if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
                 if (IS_VENCORD_DESKTOP) return `Vencord Desktop v${VencordDesktopNative.app.getVersion()}`;
                 if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
-                return `Web (${navigator.userAgent})`;
+
+                // @ts-expect-error
+                const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
+                return `${name} (${navigator.userAgent})`;
             })();
 
             const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
@@ -63,14 +66,18 @@ export default definePlugin({
             const enabledPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
             const enabledApiPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && isApiPlugin(p));
 
+            const info = {
+                Vencord: `v${VERSION} • ${gitHash}${settings.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
+                "Discord Branch": RELEASE_CHANNEL,
+                Client: client,
+                Platform: window.navigator.platform,
+                Outdated: isOutdated,
+                OpenAsar: "openasar" in window,
+            };
+
             const debugInfo = `
 **Vencord Debug Info**
->>> Discord Branch: ${RELEASE_CHANNEL}
-Client: ${client}
-Platform: ${window.navigator.platform}
-Vencord: ${gitHash}${settings.additionalInfo}
-Outdated: ${isOutdated}
-OpenAsar: ${"openasar" in window}
+>>> ${Object.entries(info).map(([k, v]) => `${k}: ${v}`).join("\n")}
 
 Enabled Plugins (${enabledPlugins.length + enabledApiPlugins.length}):
 ${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "))}
