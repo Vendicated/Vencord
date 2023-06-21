@@ -27,7 +27,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, cl
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
-let savedNotesCache: Record<string, string>;
+let savedNamesCache: Record<string, string>;
 
 interface SessionInfo {
     session: {
@@ -122,7 +122,7 @@ export default definePlugin({
     },
 
     renderName({ session }: SessionInfo) {
-        const state = React.useState(savedNotesCache[session.id_hash] ?? this.getDefaultName(session.client_info));
+        const state = React.useState(savedNamesCache[session.id_hash] ? `${savedNamesCache[session.id_hash]}*` : this.getDefaultName(session.client_info));
         const [name, setName] = state;
 
         return [
@@ -168,9 +168,9 @@ export default definePlugin({
                                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
                                 <TextInput
                                     style={{ marginBottom: "10px" }}
-                                    defaultValue={savedNotesCache[session.id_hash] ?? ""}
+                                    defaultValue={savedNamesCache[session.id_hash] ?? ""}
                                     onChange={(e: string) => {
-                                        savedNotesCache[session.id_hash] = e;
+                                        savedNamesCache[session.id_hash] = e;
                                     }}
                                 ></TextInput>
                             </ModalContent>
@@ -179,13 +179,13 @@ export default definePlugin({
                                 <Button
                                     color={Button.Colors.BRAND}
                                     onClick={() => {
-                                        if (savedNotesCache[session.id_hash]) {
-                                            setName(savedNotesCache[session.id_hash]);
+                                        if (savedNamesCache[session.id_hash]) {
+                                            setName(`${savedNamesCache[session.id_hash]}*`);
                                         } else {
-                                            delete savedNotesCache[session.id_hash];
+                                            delete savedNamesCache[session.id_hash];
                                             setName(this.getDefaultName(session.client_info));
                                         }
-                                        DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
+                                        DataStore.set("BetterSessions_savedNamesCache", savedNamesCache);
 
                                         props.onClose();
                                     }}
@@ -194,9 +194,9 @@ export default definePlugin({
                                     color={Button.Colors.TRANSPARENT}
                                     look={Button.Looks.LINK}
                                     onClick={() => {
-                                        delete savedNotesCache[session.id_hash];
+                                        delete savedNamesCache[session.id_hash];
                                         setName(this.getDefaultName(session.client_info));
-                                        DataStore.set("BetterSessions_savedNotesCache", savedNotesCache);
+                                        DataStore.set("BetterSessions_savedNamesCache", savedNamesCache);
 
                                         props.onClose();
                                     }}
@@ -227,6 +227,6 @@ export default definePlugin({
     },
 
     async start() {
-        savedNotesCache = await DataStore.get<Record<string, string>>("BetterSessions_savedNotesCache") ?? {};
+        savedNamesCache = await DataStore.get<Record<string, string>>("BetterSessions_savedNamesCache") ?? {};
     }
 });
