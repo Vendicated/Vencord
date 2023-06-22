@@ -17,13 +17,14 @@
 */
 
 import { Devs } from "@utils/constants";
+import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, FluxDispatcher, React, Tooltip } from "@webpack/common";
-import { openModal } from "@utils/modal";
+
 import { RenameModal } from "./components/RenameModal";
-import { GetOsColor, GetPlatformIcon, fetchNamesFromDataStore, getDefaultName, saveNamesToDataStore, savedNamesCache } from "./utils";
 import { SessionInfo } from "./types";
+import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedNamesCache,saveNamesToDataStore } from "./utils";
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
