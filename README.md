@@ -39,10 +39,9 @@ Or use the [UserScript](https://raw.githubusercontent.com/Vencord/builds/main/Ve
 ## Vencord Desktop
 
 > **Warning**
-> This is an alternative app. It currently doesn't support screensharing or keybinds. If you just want to install to the normal Discord Desktop app, scroll up
+> This is an alternative app. It currently doesn't support keybinds and possibly some more features. If you just want to install to the normal Discord Desktop app, scroll up
 
-
-As an alternative to the Discord Desktop app, Vencord also has its own standalone Desktop app that is snappier and lighter than Discord's official Desktop app. It is currently in beta and we have yet to implement some features like screensharing, but you can try the beta nonetheless
+As an alternative to the Discord Desktop app, Vencord also has its own standalone Desktop app that is snappier and lighter than Discord's official Desktop app
 
 [![Download Vencord Desktop](https://img.shields.io/github/v/release/Vencord/Desktop?label=Download%20Vencord%20Desktop&style=for-the-badge)](https://github.com/Vencord/Desktop#vencord-desktop)
 
@@ -50,7 +49,7 @@ As an alternative to the Discord Desktop app, Vencord also has its own standalon
 
 ## Join our Support/Community Server
 
-[![Vencord Discord Server](https://invidget.switchblade.xyz/D9uwnFnqmd?theme=dark)](https://discord.gg/D9uwnFnqmd)
+https://discord.gg/D9uwnFnqmd
 
 ## Disclaimer
 
