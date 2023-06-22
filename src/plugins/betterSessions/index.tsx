@@ -140,16 +140,15 @@ export default definePlugin({
                     paddingBottom: "0px",
                     top: "-2px"
                 }}
-                onClick={() => {
-                    const key = openModal(props => (
+                onClick={() =>
+                    openModal(props => (
                         <RenameModal
                             props={props}
                             session={session}
                             state={state}
-                            close={() => closeModal(key)}
                         />
-                    ));
-                }}
+                    ))
+                }
             >
                 Rename
             </Button>
