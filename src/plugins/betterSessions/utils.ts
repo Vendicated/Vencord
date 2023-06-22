@@ -47,7 +47,7 @@ export function GetOsColor(os: string) {
         case "Windows":
             return "#55a6ef"; // Light blue
         case "Linux":
-            return "#ffff6b"; // Yellow
+            return "#cdcd31"; // Yellow
         case "Android":
             return "#7bc958"; // Green
         case "Mac OS X":
