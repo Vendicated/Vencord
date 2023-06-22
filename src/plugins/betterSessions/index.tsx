@@ -20,27 +20,15 @@ import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Forms, React, TextInput, Tooltip } from "@webpack/common";
-import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./icons";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, closeModal, openModal } from "@utils/modal";
+import { Button, React, Tooltip } from "@webpack/common";
+import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./components/icons";
+import { closeModal, openModal } from "@utils/modal";
+import { RenameModal } from "./components/RenameModal";
+import { fetchNamesFromDataStore, getDefaultName, savedNamesCache } from "./utils";
+import { SessionInfo } from "./types";
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
-
-let savedNamesCache: Record<string, string>;
-
-interface SessionInfo {
-    session: {
-        id_hash: string;
-        approx_last_used_time: Date;
-        client_info: {
-            os: string;
-            platform: string;
-            location: string;
-        };
-    },
-    current?: boolean;
-}
 
 function GetOsColor(os: string) {
     switch (os) {
@@ -117,12 +105,10 @@ export default definePlugin({
         }
     ],
 
-    getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {
-        return `${clientInfo.os} · ${clientInfo.platform}`;
-    },
-
     renderName({ session }: SessionInfo) {
-        const state = React.useState(savedNamesCache[session.id_hash] ? `${savedNamesCache[session.id_hash]}*` : this.getDefaultName(session.client_info));
+        const savedName = savedNamesCache.get(session.id_hash);
+
+        const state = React.useState(savedName ? `${savedName}*` : getDefaultName(session.client_info));
         const [name, setName] = state;
 
         return [
@@ -155,56 +141,13 @@ export default definePlugin({
                     top: "-2px"
                 }}
                 onClick={() => {
-                    const [name, setName] = state;
-
                     const key = openModal(props => (
-                        <ModalRoot {...props}>
-                            <ModalHeader>
-                                <Forms.FormTitle tag="h4">Rename</Forms.FormTitle>
-                                <ModalCloseButton onClick={() => closeModal(key)} />
-                            </ModalHeader>
-
-                            <ModalContent>
-                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
-                                <TextInput
-                                    style={{ marginBottom: "10px" }}
-                                    defaultValue={savedNamesCache[session.id_hash] ?? ""}
-                                    onChange={(e: string) => {
-                                        savedNamesCache[session.id_hash] = e;
-                                    }}
-                                ></TextInput>
-                            </ModalContent>
-
-                            <ModalFooter>
-                                <Button
-                                    color={Button.Colors.BRAND}
-                                    onClick={() => {
-                                        if (savedNamesCache[session.id_hash]) {
-                                            setName(`${savedNamesCache[session.id_hash]}*`);
-                                        } else {
-                                            delete savedNamesCache[session.id_hash];
-                                            setName(this.getDefaultName(session.client_info));
-                                        }
-                                        DataStore.set("BetterSessions_savedNamesCache", savedNamesCache);
-
-                                        props.onClose();
-                                    }}
-                                >Save</Button>
-                                <Button
-                                    color={Button.Colors.TRANSPARENT}
-                                    look={Button.Looks.LINK}
-                                    onClick={() => {
-                                        delete savedNamesCache[session.id_hash];
-                                        setName(this.getDefaultName(session.client_info));
-                                        DataStore.set("BetterSessions_savedNamesCache", savedNamesCache);
-
-                                        props.onClose();
-                                    }}
-                                >
-                                    Reset
-                                </Button>
-                            </ModalFooter>
-                        </ModalRoot>
+                        <RenameModal
+                            props={props}
+                            session={session}
+                            state={state}
+                            close={() => closeModal(key)}
+                        />
                     ));
                 }}
             >
@@ -227,6 +170,6 @@ export default definePlugin({
     },
 
     async start() {
-        savedNamesCache = await DataStore.get<Record<string, string>>("BetterSessions_savedNamesCache") ?? {};
+        fetchNamesFromDataStore();
     }
 });
