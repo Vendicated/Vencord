@@ -11,15 +11,14 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
     let newName = savedNamesCache.get(session.id_hash) ?? "";
 
     function onSaveClick() {
+        savedNamesCache.set(session.id_hash, newName);
         if (newName !== "") {
-            savedNamesCache.set(session.id_hash, newName);
             setName(`${newName}*`);
         } else {
-            savedNamesCache.delete(session.id_hash);
             setName(getDefaultName(session.client_info));
         }
-        saveNamesToDataStore();
 
+        saveNamesToDataStore();
         props.onClose();
     }
 

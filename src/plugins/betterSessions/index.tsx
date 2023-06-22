@@ -16,15 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, React, Tooltip } from "@webpack/common";
+import { Button, FluxDispatcher, React, Tooltip } from "@webpack/common";
 import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./components/icons";
-import { closeModal, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { RenameModal } from "./components/RenameModal";
-import { fetchNamesFromDataStore, getDefaultName, savedNamesCache } from "./utils";
+import { fetchNamesFromDataStore, getDefaultName, saveNamesToDataStore, savedNamesCache } from "./utils";
 import { SessionInfo } from "./types";
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
@@ -111,10 +110,27 @@ export default definePlugin({
         const state = React.useState(savedName ? `${savedName}*` : getDefaultName(session.client_info));
         const [name, setName] = state;
 
-        return [
+        const children = [
             <span>{name}</span>,
             this.renderRenameButton({ session }, state)
         ];
+
+        // Show a "NEW" badge if the session is seen for the first time
+        if (savedName == null) {
+            children.splice(1, 0,
+                <div
+                    className="vc-plugins-badge"
+                    style={{
+                        backgroundColor: "#ED4245",
+                        marginLeft: "2px"
+                    }}
+                >
+                    NEW
+                </div>
+            );
+        }
+
+        return children;
     },
 
     renderTimestamp({ session }: SessionInfo, timeLabel: string) {
@@ -170,5 +186,23 @@ export default definePlugin({
 
     async start() {
         fetchNamesFromDataStore();
+
+        let lastFetchedHashes: string[] = [];
+        FluxDispatcher.subscribe("FETCH_AUTH_SESSIONS_SUCCESS", ({ sessions }: { sessions: SessionInfo["session"][]; }) => {
+            lastFetchedHashes = sessions.map(session => session.id_hash);
+        });
+
+        // Save all known sessions when settings are closed, in order to dismiss the "NEW" badge
+        FluxDispatcher.subscribe("USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM", () => {
+            lastFetchedHashes.forEach(idHash => {
+                if (!savedNamesCache.has(idHash)) savedNamesCache.set(idHash, "");
+            });
+
+            // Remove names of sessions that were removed
+            savedNamesCache.forEach((_, idHash) => {
+                if (!lastFetchedHashes.includes(idHash)) savedNamesCache.delete(idHash);
+            });
+            saveNamesToDataStore();
+        });
     }
 });
