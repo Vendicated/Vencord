@@ -188,6 +188,7 @@ export default definePlugin({
         fetchNamesFromDataStore();
 
         let lastFetchedHashes: string[] = [];
+        // Note: for some reason this is dispatched with a blank array when settings are closed, hence the length check later on
         FluxDispatcher.subscribe("FETCH_AUTH_SESSIONS_SUCCESS", ({ sessions }: { sessions: SessionInfo["session"][]; }) => {
             lastFetchedHashes = sessions.map(session => session.id_hash);
         });
@@ -199,9 +200,12 @@ export default definePlugin({
             });
 
             // Remove names of sessions that were removed
-            savedNamesCache.forEach((_, idHash) => {
-                if (!lastFetchedHashes.includes(idHash)) savedNamesCache.delete(idHash);
-            });
+            if (lastFetchedHashes.length > 0) {
+                savedNamesCache.forEach((_, idHash) => {
+                    if (!lastFetchedHashes.includes(idHash)) savedNamesCache.delete(idHash);
+                });
+                lastFetchedHashes = [];
+            }
             saveNamesToDataStore();
         });
     }
