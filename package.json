@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.2.8",
+    "version": "1.2.9",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
