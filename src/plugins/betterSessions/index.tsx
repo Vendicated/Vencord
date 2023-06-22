@@ -24,14 +24,14 @@ import { Button, FluxDispatcher, React, Tooltip } from "@webpack/common";
 
 import { RenameModal } from "./components/RenameModal";
 import { SessionInfo } from "./types";
-import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedNamesCache,saveNamesToDataStore } from "./utils";
+import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedNamesCache, saveNamesToDataStore } from "./utils";
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
 export default definePlugin({
     name: "BetterSessions",
-    description: "Enhances the sessions menu. Allows you to view exact timestamps and add notes.",
+    description: "Enhances the sessions (devices) menu. Allows you to view exact timestamps and give each session a custom name.",
     authors: [Devs.amia],
 
     patches: [
