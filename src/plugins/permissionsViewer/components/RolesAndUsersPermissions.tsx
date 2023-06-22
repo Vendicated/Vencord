@@ -23,6 +23,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
+import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
 
@@ -108,7 +109,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         <div
                                             className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
-                                                if (permission.type === PermissionType.Role)
+                                                if ((settings.store as any).unsafeViewAsRole && permission.type === PermissionType.Role)
                                                     ContextMenu.open(e, () => (
                                                         <RoleContextMenu
                                                             guild={guild}

@@ -319,13 +319,25 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "amia",
         id: 142007603549962240n
     },
+    AkiraSimplex: {
+        name: "AkiraSimplex",
+        id: 1038809506899042445n
+    },
+    phil: {
+        name: "phil",
+        id: 305288513941667851n
+    },
     ImLvna: {
         name: "Luna <3",
         id: 174200708818665472n
     },
-    AkiraSimplex: {
-        name: "AkiraSimplex",
-        id: 1038809506899042445n
+    rad: {
+        name: "rad",
+        id: 113027285765885952n
+    },
+    HypedDomi: {
+        name: "HypedDomi",
+        id: 354191516979429376n
     }
 } satisfies Record<string, Dev>);
 
