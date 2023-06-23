@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { FluxDispatcher, i18n, Menu, MessageStore, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -89,18 +89,59 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     ));
 };
 
+const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+    const { channel } = props;
+
+    const messages: Array<any> = MessageStore.getMessages(channel.id)?._array;
+
+    const toDelete: Array<any> = [];
+    const toClearEditHistory: Array<any> = [];
+    for (const message of messages) {
+        if (message.deleted) toDelete.push(message);
+        else if (message.editHistory?.length) toClearEditHistory.push(message);
+    }
+
+    if (!toDelete.length) return;
+
+    const group = findGroupChildrenByChildId("mark-channel-read", children);
+    group?.push(
+        (<Menu.MenuItem
+            id="ml-clear-channel"
+            key="ml-clear-channel"
+            label="Clear Message Log History"
+            color="danger"
+            action={
+                () => {
+                    toDelete.forEach(message => {
+                        FluxDispatcher.dispatch({
+                            type: "MESSAGE_DELETE",
+                            channelId: channel.id,
+                            id: message.id,
+                            mlDeleted: true
+                        });
+                    });
+                    toClearEditHistory.forEach(message => {
+                        message.editHistory = [];
+                    });
+                }
+            }
+        />));
+};
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven],
+    authors: [Devs.rushii, Devs.Ven, Devs.Nickyux],
 
     start() {
         addDeleteStyle();
         addContextMenuPatch("message", patchMessageContextMenu);
+        addContextMenuPatch("channel-context", patchChannelContextMenu);
     },
 
     stop() {
         removeContextMenuPatch("message", patchMessageContextMenu);
+        removeContextMenuPatch("channel-context", patchChannelContextMenu);
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
