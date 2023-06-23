@@ -16,23 +16,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, React, Tooltip } from "@webpack/common";
+import { Button, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameModal } from "./components/RenameModal";
 import { SessionInfo } from "./types";
-import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedNamesCache, saveNamesToDataStore } from "./utils";
+import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+
+const UserSettingsAccountActionCreators = findByPropsLazy("saveAccountChanges", "open");
+const UserSettingsSections = findByPropsLazy("ACCOUNT_BACKUP_CODES");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
+const settings = definePluginSettings({
+    backgroundCheck: {
+        type: OptionType.BOOLEAN,
+        description: "Check for new sessions in the background, and display notifications when they are detected",
+        default: false,
+        restartNeeded: false
+    },
+    checkInterval: {
+        description: "How often to check for new sessions in the background (if enabled), in minutes",
+        type: OptionType.NUMBER,
+        default: 20,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "BetterSessions",
-    description: "Enhances the sessions (devices) menu. Allows you to view exact timestamps and give each session a custom name.",
+    description: "Enhances the sessions (devices) menu. Allows you to view exact timestamps, give each session a custom name, and receive notifications about new sessions.",
     authors: [Devs.amia],
+
+    settings: settings,
 
     patches: [
         {
@@ -57,9 +79,9 @@ export default definePlugin({
     ],
 
     renderName({ session }: SessionInfo) {
-        const savedName = savedNamesCache.get(session.id_hash);
+        const savedSession = savedSessionsCache.get(session.id_hash);
 
-        const state = React.useState(savedName ? `${savedName}*` : getDefaultName(session.client_info));
+        const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
         const [name, setName] = state;
 
         const children = [
@@ -68,7 +90,7 @@ export default definePlugin({
         ];
 
         // Show a "NEW" badge if the session is seen for the first time
-        if (savedName == null) {
+        if (savedSession == null || savedSession.isNew) {
             children.splice(1, 0,
                 <div
                     className="vc-plugins-badge"
@@ -136,8 +158,28 @@ export default definePlugin({
         );
     },
 
+    async checkNewSessions() {
+        if (!settings.store.backgroundCheck) return;
+
+        const data = await RestAPI.get({
+            url: "/auth/sessions"
+        });
+
+        const newSessions = data.body.user_sessions.filter((session: SessionInfo["session"]) => !savedSessionsCache.has(session.id_hash));
+        for (const session of newSessions) {
+            savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
+
+            showNotification({
+                title: "BetterSessions",
+                body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
+                permanent: true,
+                onClick: () => UserSettingsAccountActionCreators.open(UserSettingsSections.SESSIONS)
+            });
+        }
+    },
+
     async start() {
-        fetchNamesFromDataStore();
+        await fetchNamesFromDataStore();
 
         let lastFetchedHashes: string[] = [];
         // Note: for some reason this is dispatched with a blank array when settings are closed, hence the length check later on
@@ -145,20 +187,30 @@ export default definePlugin({
             lastFetchedHashes = sessions.map(session => session.id_hash);
         });
 
-        // Save all known sessions when settings are closed, in order to dismiss the "NEW" badge
+        // Save all known sessions when settings are closed and dismiss the "NEW" badge
         FluxDispatcher.subscribe("USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM", () => {
             lastFetchedHashes.forEach(idHash => {
-                if (!savedNamesCache.has(idHash)) savedNamesCache.set(idHash, "");
+                if (!savedSessionsCache.has(idHash)) savedSessionsCache.set(idHash, { name: "", isNew: false });
+            });
+            savedSessionsCache.forEach(data => {
+                data.isNew = false;
             });
 
             // Remove names of sessions that were removed
             if (lastFetchedHashes.length > 0) {
-                savedNamesCache.forEach((_, idHash) => {
-                    if (!lastFetchedHashes.includes(idHash)) savedNamesCache.delete(idHash);
+                savedSessionsCache.forEach((_, idHash) => {
+                    if (!lastFetchedHashes.includes(idHash)) savedSessionsCache.delete(idHash);
                 });
                 lastFetchedHashes = [];
             }
-            saveNamesToDataStore();
+            saveSessionsToDataStore();
         });
+
+        this.checkNewSessions();
+        this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
+    },
+
+    stop() {
+        clearInterval(this.checkInterval);
     }
 });

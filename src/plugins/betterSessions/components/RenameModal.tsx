@@ -21,23 +21,23 @@ import { Button, Forms, React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 import { SessionInfo } from "../types";
-import { getDefaultName, savedNamesCache, saveNamesToDataStore } from "../utils";
+import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
 export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     const [name, setName] = state;
     const ref = React.useRef<HTMLInputElement>(null);
 
-    let newName = savedNamesCache.get(session.id_hash) ?? "";
+    let newName = savedSessionsCache.get(session.id_hash)?.name ?? "";
 
     function onSaveClick() {
-        savedNamesCache.set(session.id_hash, newName);
+        savedSessionsCache.set(session.id_hash, { name: newName, isNew: false });
         if (newName !== "") {
             setName(`${newName}*`);
         } else {
             setName(getDefaultName(session.client_info));
         }
 
-        saveNamesToDataStore();
+        saveSessionsToDataStore();
         props.onClose();
     }
 

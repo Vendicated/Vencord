@@ -22,22 +22,22 @@ import { UserStore } from "@webpack/common";
 import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./components/icons";
 import { SessionInfo } from "./types";
 
-const getDataKey = () => `BetterSessions_savedNames_${UserStore.getCurrentUser().id}`;
+const getDataKey = () => `BetterSessions_savedSessions_${UserStore.getCurrentUser().id}`;
 
-export const savedNamesCache: Map<string, string> = new Map();
+export const savedSessionsCache: Map<string, { name: string, isNew: boolean; }> = new Map();
 
 export function getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {
     return `${clientInfo.os} · ${clientInfo.platform}`;
 }
 
-export function saveNamesToDataStore() {
-    return DataStore.set(getDataKey(), savedNamesCache);
+export function saveSessionsToDataStore() {
+    return DataStore.set(getDataKey(), savedSessionsCache);
 }
 
 export async function fetchNamesFromDataStore() {
-    const savedNames = await DataStore.get<Map<string, string>>(getDataKey()) || new Map();
-    savedNames.forEach((name, idHash) => {
-        savedNamesCache.set(idHash, name);
+    const savedSessions = await DataStore.get<Map<string, { name: string, isNew: boolean; }>>(getDataKey()) || new Map();
+    savedSessions.forEach((data, idHash) => {
+        savedSessionsCache.set(idHash, data);
     });
 }
 
