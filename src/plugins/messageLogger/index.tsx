@@ -89,9 +89,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     ));
 };
 
-const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
-    const { channel } = props;
-
+const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => () => {
     const messages: Array<any> = MessageStore.getMessages(channel.id)?._array;
 
     const toDelete: Array<any> = [];
