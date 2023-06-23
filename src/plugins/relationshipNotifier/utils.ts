@@ -18,6 +18,7 @@
 
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
+import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
@@ -69,7 +70,11 @@ export async function syncAndRunChecks() {
 
                 const user = await UserUtils.fetchUser(id).catch(() => void 0);
                 if (user)
-                    notify(`You are no longer friends with ${user.tag}.`, user.getAvatarURL(undefined, undefined, false));
+                    notify(
+                        `You are no longer friends with ${getUniqueUsername(user)}.`,
+                        user.getAvatarURL(undefined, undefined, false),
+                        () => openUserProfile(user.id)
+                    );
             }
         }
 
@@ -79,20 +84,25 @@ export async function syncAndRunChecks() {
 
                 const user = await UserUtils.fetchUser(id).catch(() => void 0);
                 if (user)
-                    notify(`Friend request from ${user.tag} has been revoked.`, user.getAvatarURL(undefined, undefined, false));
+                    notify(
+                        `Friend request from ${getUniqueUsername(user)} has been revoked.`,
+                        user.getAvatarURL(undefined, undefined, false),
+                        () => openUserProfile(user.id)
+                    );
             }
         }
     }
 }
 
-export function notify(text: string, icon?: string) {
+export function notify(text: string, icon?: string, onClick?: () => void) {
     if (settings.store.notices)
         Notices.showNotice(text, "OK", () => Notices.popNotice());
 
     showNotification({
         title: "Relationship Notifier",
         body: text,
-        icon
+        icon,
+        onClick
     });
 }
 
