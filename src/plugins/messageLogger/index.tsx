@@ -101,7 +101,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) =
         else if (message.editHistory?.length) toClearEditHistory.push(message);
     }
 
-    if (!toDelete.length) return;
+    if (!toDelete.length && !toClearEditHistory.length) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children);
     group?.push(
