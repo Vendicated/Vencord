@@ -137,11 +137,15 @@ export default definePlugin({
         addDeleteStyle();
         addContextMenuPatch("message", patchMessageContextMenu);
         addContextMenuPatch("channel-context", patchChannelContextMenu);
+        addContextMenuPatch("user-context", patchChannelContextMenu);
+        addContextMenuPatch("gdm-context", patchChannelContextMenu);
     },
 
     stop() {
         removeContextMenuPatch("message", patchMessageContextMenu);
         removeContextMenuPatch("channel-context", patchChannelContextMenu);
+        removeContextMenuPatch("user-context", patchChannelContextMenu);
+        removeContextMenuPatch("gdm-context", patchChannelContextMenu);
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
