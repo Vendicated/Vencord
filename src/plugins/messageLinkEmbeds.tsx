@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { updateMessageComponent } from "@api/ComponentUpdater";
 import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -28,7 +29,6 @@ import { find, findByCode, findByPropsLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
-    FluxDispatcher,
     GuildStore,
     MessageStore,
     Parser,
@@ -228,10 +228,7 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
                 delete msg.interaction;
 
                 messageFetchQueue.push(() => fetchMessage(channelID, messageID)
-                    .then(m => m && FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message: msg
-                    }))
+                    .then(m => m && updateMessageComponent(message.id))
                 );
                 continue;
             }
