@@ -18,6 +18,7 @@
 
 import "./messageLogger.css";
 
+import { updateMessageComponent } from "@api/ComponentUpdater";
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
@@ -120,6 +121,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                     });
                     toClearEditHistory.forEach(message => {
                         message.editHistory = [];
+                        updateMessageComponent(message.id);
                     });
                 }
             }
