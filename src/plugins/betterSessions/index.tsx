@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { Button, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameModal } from "./components/RenameModal";
 import { SessionInfo } from "./types";
@@ -33,6 +33,8 @@ const UserSettingsSections = findByPropsLazy("ACCOUNT_BACKUP_CODES");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
+
+let lastFetchedHashes: string[] = [];
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -178,17 +180,14 @@ export default definePlugin({
         }
     },
 
-    async start() {
-        await fetchNamesFromDataStore();
-
-        let lastFetchedHashes: string[] = [];
+    flux: {
         // Note: for some reason this is dispatched with a blank array when settings are closed, hence the length check later on
-        FluxDispatcher.subscribe("FETCH_AUTH_SESSIONS_SUCCESS", ({ sessions }: { sessions: SessionInfo["session"][]; }) => {
+        FETCH_AUTH_SESSIONS_SUCCESS({ sessions }: { sessions: SessionInfo["session"][]; }) {
             lastFetchedHashes = sessions.map(session => session.id_hash);
-        });
+        },
 
         // Save all known sessions when settings are closed and dismiss the "NEW" badge
-        FluxDispatcher.subscribe("USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM", () => {
+        USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM() {
             lastFetchedHashes.forEach(idHash => {
                 if (!savedSessionsCache.has(idHash)) savedSessionsCache.set(idHash, { name: "", isNew: false });
             });
@@ -204,7 +203,11 @@ export default definePlugin({
                 lastFetchedHashes = [];
             }
             saveSessionsToDataStore();
-        });
+        }
+    },
+
+    async start() {
+        await fetchNamesFromDataStore();
 
         this.checkNewSessions();
         this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
