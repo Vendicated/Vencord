@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
@@ -24,7 +25,7 @@ import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, cl, openUserProfileModal, showToast } from "../utils";
+import { canDeleteReview, cl, showToast } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
@@ -49,7 +50,7 @@ export default LazyComponent(() => {
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
-            openUserProfileModal(review.sender.discordID);
+            openUserProfile(review.sender.discordID);
         }
 
         function delReview() {
