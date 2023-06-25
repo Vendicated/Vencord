@@ -29,6 +29,7 @@ import { join } from "path";
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
+import { send } from "./utils/dgramHelper";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
@@ -51,6 +52,8 @@ export function getSettings(): typeof import("@api/Settings").Settings {
         return {} as any;
     }
 }
+
+ipcMain.handle(IpcEvents.DGRAM_SEND, (_, hostname, port, data) => send(hostname, port, data));
 
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
 

@@ -29,6 +29,10 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
 }
 
 export default {
+    dgramHelper: {
+        send: (hostname: string, port: number, data: string) => invoke<void>(IpcEvents.DGRAM_SEND, hostname, port, data)
+    },
+
     updater: {
         getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
         update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
