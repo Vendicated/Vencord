@@ -151,7 +151,6 @@ async function parseFile(fileName: string) {
                 case "required":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
-                    if (!data[key] && value.kind !== SyntaxKind.FalseKeyword) throw fail(`${key} is not a boolean literal`);
                     break;
             }
         }
