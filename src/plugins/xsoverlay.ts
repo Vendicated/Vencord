@@ -94,13 +94,13 @@ export default definePlugin({
                 finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#8a2be2><b>@${mention.username}</color></b>`);
             }
 
-            // if (message.mention_roles.length > 0) {
-            //     const { roles } = GuildStore.getGuild(message.guild_id);
-            //     for (const roleId of message.mention_roles) {
-            //         const role = roles[roleId];
-            //         finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${parseInt(role.color).toString(16)}>@${role.name}</color></b>`);
-            //     }
-            // }
+            if (message.mention_roles.length > 0) {
+                const { roles } = GuildStore.getGuild(message.guild_id);
+                for (const roleId of message.mention_roles) {
+                    const role = roles[roleId];
+                    finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
+                }
+            }
 
             let matches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
             if (matches) {
