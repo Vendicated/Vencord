@@ -21,7 +21,7 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { SelectedChannelStore, UserStore } from "@webpack/common";
+import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, ReactionEmoji } from "discord-types/general";
 
 interface IMessageCreate {
@@ -37,6 +37,7 @@ interface IReactionAdd {
     optimistic: boolean;
     channelId: string;
     messageId: string;
+    messageAuthorId: string;
     userId: "195136840355807232";
     emoji: ReactionEmoji;
 }
@@ -71,6 +72,11 @@ const settings = definePluginSettings({
         description: "Ignore bots",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    ignoreBlocked: {
+        description: "Ignore blocked users",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -85,6 +91,7 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (settings.store.ignoreBots && message.author?.bot) return;
+            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author?.id)) return;
             if (!message.content) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -96,9 +103,10 @@ export default definePlugin({
             }
         },
 
-        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, emoji }: IReactionAdd) {
+        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
             if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
             if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
+            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(messageAuthorId)) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
             const name = emoji.name.toLowerCase();
