@@ -20,23 +20,12 @@ import { classNameFactory } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
+import { React, Toasts } from "@webpack/common";
 
 import { Review, UserType } from "./entities";
 import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-rdb-");
-
-export async function openUserProfileModal(userId: string) {
-    await UserUtils.fetchUser(userId);
-
-    await FluxDispatcher.dispatch({
-        type: "USER_PROFILE_MODAL_OPEN",
-        userId,
-        channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: "Explosive Hotel"
-    });
-}
 
 export function authorize(callback?: any) {
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
@@ -50,9 +39,9 @@ export function authorize(callback?: any) {
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
-            callback={async (u: string) => {
+            callback={async (response: any) => {
                 try {
-                    const url = new URL(u);
+                    const url = new URL(response.location);
                     url.searchParams.append("clientMod", "vencord");
                     const res = await fetch(url, {
                         headers: new Headers({ Accept: "application/json" })

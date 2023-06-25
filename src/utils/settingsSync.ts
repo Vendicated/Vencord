@@ -149,12 +149,6 @@ export async function putCloudSettings() {
         VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
-        showNotification({
-            title: "Cloud Settings",
-            body: "Synchronized your settings to the cloud!",
-            color: "var(--green-360)",
-            noPersist: true
-        });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
