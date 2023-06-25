@@ -86,8 +86,13 @@ export function useProfilePronouns(id: string, discordPronouns: string) {
 }
 
 
+const NewLineRe = /\n+/g;
+
 // Gets the cached pronouns, if you're too impatient for a promise!
 export function getCachedPronouns(id: string, discordPronouns: string): string | null {
+    // Discord is so stupid you can put tons of newlines in pronouns
+    discordPronouns = discordPronouns?.trim().replace(NewLineRe, " ");
+
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
         return discordPronouns;
 
