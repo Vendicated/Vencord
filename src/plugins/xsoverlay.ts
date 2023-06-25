@@ -19,6 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import { Buffer } from "buffer";
 import { Webpack } from "Vencord";
 
 const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
@@ -117,22 +118,23 @@ export default definePlugin({
                 }
             }
 
-            const data = JSON.stringify({
-                messageType: 1,
-                index: 0,
-                timeout: 5,
-                height: calculateHeight(clearMessage(finalMsg)),
-                opacity: 0.9,
-                volume: 0,
-                audioPath: "",
-                title: authorString,
-                content: finalMsg,
-                useBase64Icon: false,
-                // useBase64Icon: true,
-                // icon: Buffer.from(result).toString("base64"),
-                sourceApp: "Discord"
+            fetch(`https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
+                const data = JSON.stringify({
+                    messageType: 1,
+                    index: 0,
+                    timeout: 5,
+                    height: calculateHeight(clearMessage(finalMsg)),
+                    opacity: 0.9,
+                    volume: 0,
+                    audioPath: "",
+                    title: authorString,
+                    content: finalMsg,
+                    useBase64Icon: true,
+                    icon: Buffer.from(result).toString("base64"),
+                    sourceApp: "Discord"
+                });
+                VencordNative.dgramHelper.send("127.0.0.1", 42069, data);
             });
-            VencordNative.dgramHelper.send("127.0.0.1", 42069, data);
             console.log("Message sent to XSOverlay");
         }
     }
