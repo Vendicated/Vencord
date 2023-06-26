@@ -116,27 +116,23 @@ export default definePlugin({
                 }
             }
 
-            fetch(`https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png?size=128`)
-                .then(response => response.arrayBuffer())
-                .then(async result => {
-                    const byteArray = new Uint8Array(result);
-                    const base64String = btoa(String.fromCharCode.apply(null, byteArray));
-                    const data = JSON.stringify({
-                        messageType: 1,
-                        index: 0,
-                        timeout: 5,
-                        height: calculateHeight(clearMessage(finalMsg)),
-                        opacity: 0.9,
-                        volume: 0,
-                        audioPath: "",
-                        title: authorString,
-                        content: finalMsg,
-                        useBase64Icon: true,
-                        icon: base64String,
-                        sourceApp: "Discord"
-                    });
-                    await VencordNative.pluginHelpers.dgramSend(data);
-                });
+            fetch(`https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
+                const data = {
+                    messageType: 1,
+                    index: 0,
+                    timeout: 5,
+                    height: calculateHeight(clearMessage(finalMsg)),
+                    opacity: 0.9,
+                    volume: 0,
+                    audioPath: "",
+                    title: authorString,
+                    content: finalMsg,
+                    useBase64Icon: true,
+                    icon: result,
+                    sourceApp: "Discord"
+                };
+                VencordNative.pluginHelpers.dgramSend(data);
+            });
         }
     }
 });

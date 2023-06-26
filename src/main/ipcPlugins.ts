@@ -17,8 +17,17 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
+import dgram from "dgram";
 import { ipcMain } from "electron";
 
-import { dgramSend } from "./utils/dgramHelper";
-
 ipcMain.handle(IpcEvents.DGRAM_SEND, (_, data) => dgramSend(data));
+
+export function dgramSend(data) {
+    data.icon = Buffer.from(data.icon).toString("base64");
+    data = JSON.stringify(data);
+    const client = dgram.createSocket("udp4");
+    client.send(data, 42069, "127.0.0.1", () => {
+        console.log("Message sent to XSOverlay");
+        client.close();
+    });
+}

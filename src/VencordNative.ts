@@ -30,7 +30,7 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
 
 export default {
     pluginHelpers: {
-        dgramSend: (data: string) => invoke<void>(IpcEvents.DGRAM_SEND, data)
+        dgramSend: data => invoke<void>(IpcEvents.DGRAM_SEND, data)
     },
 
     updater: {
