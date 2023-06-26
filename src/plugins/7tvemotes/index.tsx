@@ -25,6 +25,7 @@ import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, Forms, React, TextInput, Tooltip, useState } from "@webpack/common";
 import { Channel } from "discord-types/general";
+import { SevenTVBadges } from "./badges";
 
 const cl = classNameFactory("vc-seventv-");
 
@@ -36,6 +37,12 @@ interface SevenTVEmote {
 interface SevenTVHost {
     url: string;
 }
+interface BadgesDictionary {
+    [key: string]: BadgesUsersDictionary;
+}
+interface BadgesUsersDictionary {
+    [key: string]: boolean;
+}
 
 let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
@@ -43,8 +50,10 @@ let page: number = 1;
 let lastApiCall = 0;
 let lastError = "";
 const MINIMUM_API_DELAY = 500;
-const API_URL = "https://7tv.io/v3/gql";
+const API_URL = "https://7tv.io/v3";
 let savedvalue = "";
+
+const cachedBadges = {};
 
 function GetEmoteURL(emote: SevenTVEmote) {
     const extension = emote.animated ? "gif" : "webp";
@@ -111,7 +120,7 @@ async function FetchEmotes(value, handleRefresh) {
             }
         };
 
-    fetch(API_URL, {
+    fetch(API_URL + "/gql", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ query, variables })
@@ -127,8 +136,104 @@ async function FetchEmotes(value, handleRefresh) {
         .catch(error => { console.error("[7TVEmotes] " + error); searching = false; });
 }
 
+async function getSevenTVDiscord(id) {
+    try {
+        const response = await fetch(API_URL + "/users/DISCORD/" + id, {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+        });
+        const data = await response.json();
+
+        if (data.user?.id != null) {
+            return data.user.id;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("[7TVEmotes] " + error);
+    }
+    return null;
+}
+
+export function hasBadge(id, name) {
+    checkBadge(id, name);
+
+    if (cachedBadges[name] == null)
+        return false;
+
+    if (cachedBadges[name][id] == true)
+        return true;
+    else
+        return false;
+}
+
+async function checkBadge(id, name) {
+    let sevenTvId = await getSevenTVDiscord(id);
+    if (sevenTvId == null)
+        return false;
+
+    const query = `query GetUserCurrentCosmetics($id: ObjectID!) {
+        user(id: $id) {
+            id
+            username
+            display_name
+            style {
+                paint{
+                    id
+                    kind
+                    name
+                }
+                badge {
+                    id
+                    kind
+                    name
+                    host {
+                        url
+                        files{
+                            name
+                        }
+                    }
+                }
+            }
+
+        }
+    }`;
+    let variables = {
+        "id": sevenTvId
+    };
+
+    try {
+        const response = await fetch(API_URL + "/gql", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ query, variables }),
+        });
+        const data = await response.json();
+
+        if (data.data?.user.style.badge?.name == name) {
+            if (!cachedBadges[name])
+                cachedBadges[name] = {};
+
+            cachedBadges[name][id] = true;
+            return true;
+        }
+    } catch (error) {
+        console.error("[7TVEmotes] " + error);
+    }
+
+    if (!cachedBadges[name])
+        cachedBadges[name] = {};
+    cachedBadges[name][id] = false;
+    return false;
+}
 
 const settings = definePluginSettings({
+    show_badges: {
+        type: OptionType.BOOLEAN,
+        description: "Display 7TV Badges",
+        default: true,
+        restartNeeded: true
+    },
     exact_match: {
         type: OptionType.BOOLEAN,
         description: "Search only for emotes that have EXACTLY the same name as provided",
@@ -196,7 +301,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "7TV Emotes",
+    name: "7TV",
     description: "Search for 7TV Emotes in your Discord Client!",
     authors: [Devs.Xslash, Devs.Arjix],
 
@@ -416,5 +521,10 @@ export default definePlugin({
                 }
             </Tooltip >
         );
+    },
+
+    start() {
+        if (settings.store.show_badges)
+            SevenTVBadges.forEach(badge => Vencord.Api.Badges.addBadge(badge));
     },
 });
