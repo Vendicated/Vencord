@@ -26,6 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, Forms, React, TextInput, Tooltip, useState } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { SevenTVBadges } from "./badges";
+import { Logger } from "@utils/Logger";
 
 const cl = classNameFactory("vc-seventv-");
 
@@ -52,6 +53,8 @@ let lastError = "";
 const MINIMUM_API_DELAY = 500;
 const API_URL = "https://7tv.io/v3";
 let savedvalue = "";
+
+const SevenTVLogger = new Logger("7TV");
 
 const cachedBadges = {};
 
@@ -133,7 +136,7 @@ async function FetchEmotes(value, handleRefresh) {
             searching = false;
             handleRefresh();
         })
-        .catch(error => { console.error("[7TVEmotes] " + error); searching = false; });
+        .catch(error => { SevenTVLogger.error("[7TVEmotes] " + error); searching = false; });
 }
 
 async function getSevenTVDiscord(id) {
@@ -150,7 +153,8 @@ async function getSevenTVDiscord(id) {
             return null;
         }
     } catch (error) {
-        console.error("[7TVEmotes] " + error);
+        Logger;
+        SevenTVLogger.error("[7TVEmotes] " + error);
     }
     return null;
 }
@@ -218,7 +222,7 @@ async function checkBadge(id, name) {
             return true;
         }
     } catch (error) {
-        console.error("[7TVEmotes] " + error);
+        SevenTVLogger.error("[7TVEmotes] " + error);
     }
 
     if (!cachedBadges[name])
