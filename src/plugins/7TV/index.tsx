@@ -382,8 +382,8 @@ export default definePlugin({
         return (
             <div className={cl("picker")}>
                 <div className={cl("picker-content")}>
-                    <div className="seventv-navigation">
-                        <TextInput className="seventv-searchinput"
+                    <div className={cl("navigation")}>
+                        <TextInput className={cl("searchinput")}
                             type="string"
                             value={value}
                             onChange={e => setValue(e)}
@@ -400,7 +400,7 @@ export default definePlugin({
                                     }
                             }}
                         />
-                        <div className="seventv-searchbutton" style={{
+                        <div className={cl("searchbutton")} style={{
                             boxSizing: "border-box"
                         }} onClick={() => {
                             if (!searching) {
@@ -418,11 +418,11 @@ export default definePlugin({
 
                     <Forms.FormDivider></Forms.FormDivider>
 
-                    <div className="seventv-emotes">
+                    <div className={cl("emotes")}>
                         {emotes.map(emote => (
                             <Tooltip text={emote.name}>
                                 {({ onMouseEnter, onMouseLeave }) => (
-                                    <Button className="seventv-emotebutton"
+                                    <Button className={cl("emotebutton")}
                                         look="BLANK"
                                         size="ICON"
                                         aria-haspopup="dialog"
@@ -442,8 +442,8 @@ export default definePlugin({
                     <Forms.FormDivider></Forms.FormDivider>
                     <br></br>
 
-                    <div className="seventv-navigation">
-                        <Button className="seventv-pagebutton"
+                    <div className={cl("navigation")}>
+                        <Button className={cl("pagebutton")}
                             look={Button.Looks.BLANK}
                             onClick={() => {
                                 if (!searching) {
@@ -457,7 +457,7 @@ export default definePlugin({
                                     <polygon fill="#b5bac1" points="242.227,481.919 314.593,407.95 194.882,290.855 490,290.855 490,183.86 210.504,183.86 314.593,82.051 242.227,8.081 0,244.996" />
                                 </g>
                             </svg></Button>
-                        <Button className="seventv-pagebutton"
+                        <Button className={cl("pagebutton")}
                             look={Button.Looks.BLANK}
                             onClick={() => {
                                 if (!searching) {
@@ -478,7 +478,7 @@ export default definePlugin({
                 </div>
 
                 <div className={cl("footer")}>
-                    <Forms.FormText className="seventv-pagetext">{lastError === "" ? (<>Page {page}</>) : (<>{lastError}</>)}</Forms.FormText>
+                    <Forms.FormText className={cl("pagetext")}>{lastError === "" ? (<>Page {page}</>) : (<>{lastError}</>)}</Forms.FormText>
                 </div>
             </div >
         );
