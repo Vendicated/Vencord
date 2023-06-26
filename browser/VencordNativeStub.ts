@@ -36,10 +36,6 @@ const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css
 
 // probably should make this less cursed at some point
 window.VencordNative = {
-    dgramHelper: {
-        send: async () => undefined,
-    },
-
     native: {
         getVersions: () => ({}),
         openExternal: async (url) => void open(url, "_blank")
