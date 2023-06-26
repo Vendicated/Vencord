@@ -26,7 +26,7 @@ const regex = /https:\/\/twitter\.com\/\w+\/status\/\d+/;
 
 export default definePlugin({
     name: "FxTwitter",
-    description: "Uses fxtwitter for embedding",
+    description: "Uses fxtwitter for embedding tweets",
     authors: [Devs.thedefaultbox],
 
     onSend(msg: MessageObject) {
