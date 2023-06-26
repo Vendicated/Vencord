@@ -100,7 +100,8 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                     action={() => openImage(BannerStore.getGuildMemberAvatarURLSimple({
                         userId: user.id,
                         avatar: memberAvatar,
-                        guildId
+                        guildId,
+                        canAnimate: true
                     }, true))}
                     icon={ImageIcon}
                 />
