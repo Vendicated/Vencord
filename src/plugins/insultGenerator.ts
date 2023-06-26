@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType } from "@api/Commands";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -44,7 +44,7 @@ function sendMessage(channelId, message) {
 
 export default definePlugin({
     name: "Insult Generator",
-    description: "Makes a random insult",
+    description: "Makes a random insult < can have bad words :( >. Use '/insult' command to send an insult",
     authors: [
         {
             id: 668276075260018698n,
@@ -68,7 +68,7 @@ export default definePlugin({
                     })
                     .then(() => {
                         sendMessage(ctx.channel.id, {
-                            content: `test: ${insult}`
+                            content: `${insult}`
                         });
                     })
             }
