@@ -41,7 +41,7 @@ const {
     toggleCompactTab
 } = ChannelTabsUtils;
 
-enum ChannelTypes {
+const enum ChannelTypes {
     DM = 1,
     GROUP_DM = 3
 }
@@ -329,8 +329,7 @@ function ChannelTab(props: ChannelTabsProps & { index: number; }) {
 
 export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { openTabs } = ChannelTabsUtils;
-    let userId: string;
-    userId ??= props.userId;
+    const [userId, setUserId] = useState(props.userId);
 
     const _update = useForceUpdater();
     function update() {
@@ -340,8 +339,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     useEffect(() => {
         setUpdaterFunction(update);
         const initialRender = () => {
-            userId = UserStore.getCurrentUser().id;
-            _update();
+            setUserId(UserStore.getCurrentUser().id);
             FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
         };
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
