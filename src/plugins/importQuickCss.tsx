@@ -29,31 +29,31 @@ const enum AddStrategy {
 	Prepend
 }
 
-function importCssSnippet(snippet: string, strategy: AddStrategy) {
-    VencordNative.quickCss.get().then(quickCss => {
-        switch (strategy) {
-            case AddStrategy.Replace:
-                quickCss = snippet;
-                break;
-            case AddStrategy.Append:
-                quickCss = quickCss + "\n\n" + snippet;
-                break;
-            case AddStrategy.Prepend:
-                quickCss = snippet + "\n\n" + quickCss;
-                break;
-        }
+async function importCssSnippet(snippet: string, strategy: AddStrategy) {
+    let quickCss = await VencordNative.quickCss.get();
 
-        VencordNative.quickCss.set(quickCss).then(() => {
-            Toasts.show({
-                message: "Imported QuickCSS snippet!",
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId(),
-                options: {
-                    duration: 2000,
-                    position: Toasts.Position.BOTTOM,
-                },
-            });
-        });
+    switch (strategy) {
+        case AddStrategy.Replace:
+            quickCss = snippet;
+            break;
+        case AddStrategy.Append:
+            quickCss = quickCss + "\n\n" + snippet;
+            break;
+        case AddStrategy.Prepend:
+            quickCss = snippet + "\n\n" + quickCss;
+            break;
+    }
+
+    await VencordNative.quickCss.set(quickCss);
+
+    Toasts.show({
+        message: "Imported QuickCSS snippet!",
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            duration: 2000,
+            position: Toasts.Position.BOTTOM,
+        },
     });
 }
 
@@ -86,7 +86,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
             id={`vc-import-snippet-${i++}`}
             label={`Import Snippet ${i}`}
             icon={CSSFileIcon}
-            action={() => importCssSnippet(snippet, strategy)}
+            action={async () => await importCssSnippet(snippet, strategy)}
         />);
 
     }
@@ -99,7 +99,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 id={"vc-import-snippet"}
                 label={"Import Snippet"}
                 icon={CSSFileIcon}
-                action={() => importCssSnippet(snippets[0], strategy)}
+                action={async () => await importCssSnippet(snippets[0], strategy)}
             />);
     }
 
