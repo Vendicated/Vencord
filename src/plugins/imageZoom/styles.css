@@ -11,6 +11,10 @@
     pointer-events: none;
 }
 
+.vc-imgzoom-lens.nearest-neighbor > img {
+    image-rendering: pixelated; /* https://googlechrome.github.io/samples/image-rendering-pixelated/index.html */
+}
+
 /* make the carousel take up less space so we can click the backdrop and exit out of it */
 [class|="carouselModal"] {
     height: fit-content;

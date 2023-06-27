@@ -50,6 +50,12 @@ export const settings = definePluginSettings({
         default: true,
     },
 
+    nearestNeighbour: {
+        type: OptionType.BOOLEAN,
+        description: "Use Nearest Neighbour Interpolation when scaling images",
+        default: false,
+    },
+
     zoom: {
         description: "Zoom of the lens",
         type: OptionType.SLIDER,
