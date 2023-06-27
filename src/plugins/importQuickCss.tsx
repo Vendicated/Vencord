@@ -59,22 +59,58 @@ function importCssSnippet(snippet: string, strategy: AddStrategy) {
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
-    const { content } = message;
+    const { content, timestamp } = message;
 
     const hasCSSCodeblock = content.includes("```css\n") && content.includes("\n```");
     if (!hasCSSCodeblock) return;
 
-    const snippet = content.split("```css\n")[1].split("\n```")[0];
     const strategy = Settings.plugins.ImportQuickCSS.addStrategy;
 
-    children.splice(-1, 0, (
-        <Menu.MenuItem
-            id="import-quickcss"
-            key="import-quickcss"
-            label="Import QuickCSS"
+    const items: any[] = [];
+    const snippets: string[] = [];
+
+    const re = /```css\n(.+?)```/gs;
+    let match: string[] | null;
+    let i = 0;
+
+
+    // eslint-disable-next-line no-cond-assign
+    while (match = re.exec(content)) {
+        const header = `/*\nsnippet ${message.id}-${i} by ${message.author.username}, posted at ${new Date(timestamp).toLocaleString()}\n*/\n`;
+        const footer = `/* end snippet ${message.id}-${i} */`;
+
+        const snippet = header + match[1] + footer;
+        snippets.push(snippet);
+
+        items.push(<Menu.MenuItem
+            id={`vc-import-snippet-${i++}`}
+            label={`Import Snippet ${i}`}
             icon={CSSFileIcon}
             action={() => importCssSnippet(snippet, strategy)}
-        />));
+        />);
+
+    }
+
+    if (items.length === 0) return;
+
+    if (items.length === 1) {
+        children.splice(-1, 0,
+            <Menu.MenuItem
+                id={"vc-import-snippet"}
+                label={"Import Snippet"}
+                icon={CSSFileIcon}
+                action={() => importCssSnippet(snippets[0], strategy)}
+            />);
+    }
+
+    else {
+        children.splice(-1, 0,
+            <Menu.MenuGroup
+                id="vc-import-snippet-group"
+                label="Import QuickCSS">
+                {items}
+            </Menu.MenuGroup>);
+    }
 };
 
 const settings = definePluginSettings({
@@ -101,7 +137,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ImportQuickCSS",
-    authors: [Devs.castdrian],
+    authors: [Devs.castdrian, Devs.Ven],
     description: "Allows you to import QuickCSS snippets from messages",
     settings,
 
