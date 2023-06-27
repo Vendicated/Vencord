@@ -20,23 +20,12 @@ import { classNameFactory } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, Toasts, UserUtils } from "@webpack/common";
+import { React, Toasts } from "@webpack/common";
 
 import { Review, UserType } from "./entities";
 import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-rdb-");
-
-export async function openUserProfileModal(userId: string) {
-    await UserUtils.fetchUser(userId);
-
-    await FluxDispatcher.dispatch({
-        type: "USER_PROFILE_MODAL_OPEN",
-        userId,
-        channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: "Explosive Hotel"
-    });
-}
 
 export function authorize(callback?: any) {
     const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
