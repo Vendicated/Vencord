@@ -110,7 +110,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     ));
 };
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } }: GuildContextProps) => () => {
+const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } = {} }: GuildContextProps) => () => {
     if (!banner && !icon) return;
 
     children.splice(-1, 0, (
