@@ -95,6 +95,14 @@ export default definePlugin({
                 match: /;(?=null!=(\i)&&\i\(\i\))/,
                 replace: ";if (arguments[0].ctrlKey) return $self.open($1);"
             }
+        },
+        // prevent issues with the pins/inbox popouts being too tall
+        {
+            find: ".messagesPopoutWrap",
+            replacement: {
+                match: /\i&&\((\i).maxHeight-=\d{1,3}\)/,
+                replace: "$&;$1.maxHeight-=$self.containerHeight"
+            }
         }
     ],
 
@@ -109,6 +117,8 @@ export default definePlugin({
         removeContextMenuPatch("channel-mention-context", channelContextMenuPatch);
         removeContextMenuPatch("channel-context", channelContextMenuPatch);
     },
+
+    containerHeight: 0,
 
     render({ currentChannel, children }: {
         currentChannel: BasicChannelTabsProps,

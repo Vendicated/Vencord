@@ -331,6 +331,10 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState(props.userId);
 
+    const ref = useRef<HTMLDivElement>(null);
+    if (ref.current)
+        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
+
     const _update = useForceUpdater();
     function update() {
         _update();
@@ -340,9 +344,13 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         setUpdaterFunction(update);
         const initialRender = () => {
             setUserId(UserStore.getCurrentUser().id);
+            if (ref.current)
+                (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
             FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
         };
+
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
+        return () => FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
     }, []);
     openStartupTabs(props);
 
@@ -373,7 +381,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     handleChannelSwitch(props);
     saveTabs(userId);
 
-    return <div className={cl("container")}>
+    return <div className={cl("container")} ref={ref}>
         {openTabs.map((ch, i) => <div
             className={classes(cl("tab"), ch.compact ? cl("tab-compact") : null, isTabSelected(ch.id) ? cl("tab-selected") : null)}
             key={i}
