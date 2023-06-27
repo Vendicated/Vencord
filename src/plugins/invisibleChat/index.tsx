@@ -200,8 +200,11 @@ export default definePlugin({
             },
         });
 
-        if (urlCheck?.length)
-            message.embeds.push(await this.getEmbed(new URL(urlCheck[0])));
+        if (urlCheck?.length) {
+            const embed = await this.getEmbed(new URL(urlCheck[0]));
+            if (embed)
+                message.embeds.push(embed);
+        }
 
         this.updateMessage(message);
     },
