@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { Webpack } from "Vencord";
 
@@ -28,10 +29,25 @@ const enum ChannelTypes {
     GROUP_DM = 3
 }
 
+const settings = definePluginSettings({
+    timeout: {
+        type: OptionType.NUMBER,
+        description: "Time in seconds the notifcation will be displayed",
+        default: 5
+    },
+    opacity: {
+        type: OptionType.SLIDER,
+        description: "Opacity of the notifcation displayed",
+        default: 1,
+        markers: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    },
+});
+
 export default definePlugin({
     name: "XSOverlay",
     description: "Sends notifications to XSOverlay to be easier to see in VR",
     authors: [Devs.Penny],
+    settings,
     flux: {
         MESSAGE_CREATE({ message }) {
             var finalMsg = message.content;
@@ -120,16 +136,16 @@ export default definePlugin({
                 const data = {
                     messageType: 1,
                     index: 0,
-                    timeout: 5,
+                    timeout: Settings.plugins.XSOverlay.timeout,
                     height: calculateHeight(clearMessage(finalMsg)),
-                    opacity: 0.9,
+                    opacity: Settings.plugins.XSOverlay.opacity,
                     volume: 0,
                     audioPath: "",
                     title: authorString,
                     content: finalMsg,
                     useBase64Icon: true,
                     icon: result,
-                    sourceApp: "Discord"
+                    sourceApp: "Vencord"
                 };
                 VencordNative.pluginHelpers.dgramSend(data);
             });
