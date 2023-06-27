@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
@@ -39,7 +40,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: "Opacity of the notifcation displayed",
         default: 1,
-        markers: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        markers: makeRange(0, 1, 0.1)
     },
 });
 
@@ -52,7 +53,6 @@ export default definePlugin({
         MESSAGE_CREATE({ message }) {
             var finalMsg = message.content;
 
-            const author = UserStore.getUser(message.author.id);
             const channel = ChannelStore.getChannel(message.channel_id);
             const images = message.attachments.filter(
                 e =>
@@ -60,24 +60,24 @@ export default definePlugin({
                     e?.content_type.startsWith("image")
             );
 
-            if (!supposedToNotify(message, channel)) return;
+            if (!shouldNotify(message, channel)) return;
 
             var authorString = "";
 
             if (channel.guild_id) {
                 const guild = GuildStore.getGuild(channel.guild_id);
-                authorString = `${author.username} (${guild.name}, #${channel.name})`;
+                authorString = `${message.author.username} (${guild.name}, #${channel.name})`;
             }
 
             if (channel.type === ChannelTypes.GROUP_DM) {
-                authorString = `${author.username} (${channel.name})`;
+                authorString = `${message.author.username} (${channel.name})`;
                 if (!channel.name || channel.name === " " || channel.name === "") {
-                    authorString = `${author.username} (${channel.rawRecipients.map(e => e.username).join(", ")})`;
+                    authorString = `${message.author.username} (${channel.rawRecipients.map(e => e.username).join(", ")})`;
                 }
             }
 
             if (channel.type === ChannelTypes.DM) {
-                authorString = `${author.username}`;
+                authorString = `${message.author.username}`;
             }
 
             if (message.call) {
@@ -132,7 +132,7 @@ export default definePlugin({
                 }
             }
 
-            fetch(`https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
+            fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
                 const data = {
                     messageType: 1,
                     index: 0,
@@ -153,7 +153,7 @@ export default definePlugin({
     }
 });
 
-function supposedToNotify(message, channel) {
+function shouldNotify(message, channel) {
     if (message.author.id === UserStore.getCurrentUser().id) return false;
     if (MuteStore.allowAllMessages(channel)) return true;
 
@@ -161,13 +161,9 @@ function supposedToNotify(message, channel) {
 }
 
 function calculateHeight(content) {
-    if (content.length <= 100) {
-        return 100;
-    } else if (content.length <= 200) {
-        return 150;
-    } else if (content.length <= 300) {
-        return 200;
-    }
+    if (content.length <= 100) return 100;
+    if (content.length <= 200) return 150;
+    if (content.length <= 300) return 200;
     return 250;
 }
 
