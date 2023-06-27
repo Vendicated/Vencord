@@ -26,7 +26,7 @@ const settings = definePluginSettings({
         default: 0,
         type: OptionType.NUMBER,
         restartNeeded: true,
-    }
+    },
 });
 
 export default definePlugin({
@@ -39,8 +39,9 @@ export default definePlugin({
             find: "switch-accounts-modal",
             replacement: {
                 match: /var (.{1,2})=\d+,(.{1,2})="switch-accounts-modal"/,
-                replace: 'var $1=Vencord.Settings.plugins.UnlimitedAccounts.maxAccounts===0?Infinity:Vencord.Settings.plugins.UnlimitedAccounts.maxAccounts,$2="switch-accounts-modal"',
+                replace: 'var $1=$self.getMaxAccounts(),$2="switch-accounts-modal"',
             },
         },
     ],
+    getMaxAccounts() { return settings.store.maxAccounts === 0 ? Infinity : settings.store.maxAccounts; },
 });
