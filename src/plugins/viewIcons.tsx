@@ -35,7 +35,7 @@ interface UserContextProps {
 }
 
 interface GuildContextProps {
-    guild: Guild;
+    guild?: Guild;
 }
 
 const settings = definePluginSettings({
@@ -110,7 +110,10 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     ));
 };
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild: { id, icon, banner } = {} }: GuildContextProps) => () => {
+const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => () => {
+    if(!guild) return;
+
+    const { id, icon, banner } = guild;
     if (!banner && !icon) return;
 
     children.splice(-1, 0, (
@@ -182,8 +185,8 @@ export default definePlugin({
                 // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
                 match: /style:\{(?=backgroundImage:(\i&&\i)\?"url\("\.concat\((\i),)/,
                 replace:
-                    // onClick: () => shouldShowBanner && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
-                    'onClick:()=>$1&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
+                    // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
+                    'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
         },
         {
