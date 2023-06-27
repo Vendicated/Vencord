@@ -62,22 +62,26 @@ function getDiscordPronouns(id: string) {
     );
 }
 
-export function useFormattedPronouns(id: string, discordPronouns: string = getDiscordPronouns(id)): string | null {
-    const [result] = useAwaiter(() => fetchPronouns(id, discordPronouns), {
-        fallbackValue: getCachedPronouns(id, discordPronouns),
+export function useFormattedPronouns(id: string): string | null {
+    // Discord is so stupid you can put tons of newlines in pronouns
+    const discordPronouns = getDiscordPronouns(id)?.trim().replace(NewLineRe, " ");
+
+    if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
+        return discordPronouns;
+
+    const [result] = useAwaiter(() => fetchPronouns(id), {
+        fallbackValue: getCachedPronouns(id),
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
 
     if (result && result !== "unspecified")
-        return Object.hasOwn(PronounMapping, result)
-            ? formatPronouns(result) // PronounDB
-            : result; // Discord
+        return formatPronouns(result);
 
-    return null;
+    return discordPronouns;
 }
 
-export function useProfilePronouns(id: string, discordPronouns: string) {
-    const pronouns = useFormattedPronouns(id, discordPronouns);
+export function useProfilePronouns(id: string) {
+    const pronouns = useFormattedPronouns(id);
 
     if (!settings.store.showInProfile) return null;
     if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
@@ -89,23 +93,17 @@ export function useProfilePronouns(id: string, discordPronouns: string) {
 const NewLineRe = /\n+/g;
 
 // Gets the cached pronouns, if you're too impatient for a promise!
-export function getCachedPronouns(id: string, discordPronouns: string): string | null {
-    // Discord is so stupid you can put tons of newlines in pronouns
-    discordPronouns = discordPronouns?.trim().replace(NewLineRe, " ");
-
-    if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
-        return discordPronouns;
-
+export function getCachedPronouns(id: string): string | null {
     const cached = cache[id];
     if (cached && cached !== "unspecified") return cached;
 
-    return discordPronouns || cached || null;
+    return cached || null;
 }
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
-export function fetchPronouns(id: string, discordPronouns: string): Promise<string> {
+export function fetchPronouns(id: string): Promise<string> {
     return new Promise(res => {
-        const cached = getCachedPronouns(id, discordPronouns);
+        const cached = getCachedPronouns(id);
         if (cached) return res(cached);
 
         // If there is already a request added, then just add this callback to it
