@@ -23,7 +23,7 @@ import definePlugin, { OptionType } from "@utils/types";
 const settings = definePluginSettings({
     maxAccounts: {
         description: "Number of accounts that can be added, or 0 for no limit",
-        default: Number.POSITIVE_INFINITY,
+        default: 0,
         type: OptionType.NUMBER,
         restartNeeded: true,
     }
