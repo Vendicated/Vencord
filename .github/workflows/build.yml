@@ -43,12 +43,10 @@ jobs:
             - name: Clean up obsolete files
               run: |
                   rm -rf dist/*-unpacked Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
-
             - name: Get some values needed for the release
               id: release_values
               run: |
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
             - name: Upload DevBuild as release
               if: github.repository == 'Vendicated/Vencord'
               run: |
@@ -63,14 +61,11 @@ jobs:
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
-
                   git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
                   cd upload
-
                   GLOBIGNORE=.git:.gitignore:README.md:LICENSE
                   rm -rf *
                   cp -r ../dist/* .
-
                   git add -A
                   git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
                   git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
