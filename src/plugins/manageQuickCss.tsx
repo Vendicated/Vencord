@@ -58,7 +58,6 @@ async function removeCssSnippet(snippetId: string, snippet: string) {
     });
 }
 
-
 async function importCssSnippet(snippetId: string, snippet: string, strategy: AddStrategy) {
     let quickCss = await VencordNative.quickCss.get();
 
@@ -95,7 +94,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const hasCSSCodeblock = content.includes("```css\n") && content.includes("\n```");
     if (!hasCSSCodeblock) return;
 
-    const strategy = Settings.plugins.ImportQuickCSS.addStrategy;
+    const strategy = Settings.plugins.ManageQuickCSS.addStrategy;
 
     const items: any[] = [];
     const snippets: string[] = [];
@@ -187,7 +186,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
 const settings = definePluginSettings({
     addStrategy: {
-        description: "How to add the QuickCSS snippet",
+        description: "How to add the QuickCSS snippets",
         type: OptionType.SELECT,
         options: [
             {
@@ -208,9 +207,9 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "ImportQuickCSS",
+    name: "ManageQuickCSS",
     authors: [Devs.castdrian, Devs.Ven],
-    description: "Allows you to import QuickCSS snippets from messages",
+    description: "Allows you to import and remove QuickCSS snippets contained within messages",
     settings,
 
     start() {
