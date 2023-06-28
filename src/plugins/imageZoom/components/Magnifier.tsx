@@ -156,7 +156,7 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
 
     return (
         <div
-            className="vc-imgzoom-lens"
+            className={`vc-imgzoom-lens ${settings.store.nearestNeighbour ? "nearest-neighbor" : ""}`}
             style={{
                 opacity,
                 width: size.current + "px",
