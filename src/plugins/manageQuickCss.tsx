@@ -164,8 +164,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const importableSnippets: { snippetId: string; snippet: string; }[] = [];
     const removableSnippets: { snippetId: string; snippet: string; }[] = [];
 
-    // eslint-disable-next-line no-cond-assign
-    while (match = re.exec(content)) {
+    while ((match = re.exec(content)) != null) {
         const snippetId = generateSnippetId(message.id, match[1]);
         const header = `/*\nsnippet ${snippetId} by ${message.author.username}, posted at ${new Date(timestamp).toLocaleString()}\n*/\n`;
         const footer = `/* end snippet ${snippetId} */`;
