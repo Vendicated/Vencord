@@ -31,45 +31,27 @@ interface GuildContextProps {
 }
 
 const settings = definePluginSettings({
-    "Show Friends": {
+    showFriends: {
         type: OptionType.BOOLEAN,
         description: "Show friends in the list",
         default: true
     },
 
-    "Show Groups": {
+    showGroups: {
         type: OptionType.BOOLEAN,
         description: "Show users from group dms in the list",
         default: true
     },
 
-    "Show Blocked": {
+    showBlocked: {
         type: OptionType.BOOLEAN,
         description: "Show blocked users in the list",
         default: true
     }
 });
 
-const updateColorsBasedOnTheme = () => {
-    const currentTheme = document.querySelector(".theme-dark") ? "dark" : "light";
-    if (currentTheme === "dark") {
-        document.documentElement.style.setProperty("--expandable", "#ffffff79");
-        document.documentElement.style.setProperty("--scrollbar-track", "#ebebeb4b");
-        document.documentElement.style.setProperty("--scrollbar-thumb", "#ffffff79");
-    } else {
-        document.documentElement.style.setProperty("--expandable", "#6d6d6d");
-        document.documentElement.style.setProperty("--scrollbar-track", "#ebebeb");
-        document.documentElement.style.setProperty("--scrollbar-thumb", "#6d6d6d");
-    }
-};
-
 const getUnloadedIds = (ids: Array<string>, guildId: string) => {
-    const unloadedIds: Array<string> = [];
-    for (const id of ids) {
-        if (!GuildMemberStore.getMember(guildId, id)) unloadedIds.push(id);
-    }
-
-    return unloadedIds;
+    return ids.filter(id => !GuildMemberStore.isMember(guildId, id));
 };
 
 const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildId: string, ownerId: string, guildName: string, modalProps: ModalProps; }) => {
@@ -143,8 +125,6 @@ const OpenRelationships = ({ guildId, ownerId, guildName, modalProps }: { guildI
             userIds: [!ownerUser && ownerId, ...getUnloadedIds(friendIds, guildId), ...getUnloadedIds(blockedIds, guildId)]
         });
     });
-
-    updateColorsBasedOnTheme();
 
     return (
         <ModalRoot
