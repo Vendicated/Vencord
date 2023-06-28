@@ -82,9 +82,15 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         const snippet = header + match[1] + footer;
         snippets.push(snippet);
 
+        let label = `Import Snippet "${match[1].substring(0, 5)}`;
+        if (match[1].length > 5) {
+            label += "...";
+        }
+        label += '"';
+
         items.push(<Menu.MenuItem
             id={`vc-import-snippet-${i++}`}
-            label={`Import Snippet ${i}`}
+            label={label}
             icon={CSSFileIcon}
             action={async () => await importCssSnippet(snippet, strategy)}
         />);
@@ -97,7 +103,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         children.splice(-1, 0,
             <Menu.MenuItem
                 id={"vc-import-snippet"}
-                label={"Import Snippet"}
+                label={"Import QuickCSS Snippet"}
                 icon={CSSFileIcon}
                 action={async () => await importCssSnippet(snippets[0], strategy)}
             />);
@@ -105,11 +111,11 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
     else {
         children.splice(-1, 0,
-            <Menu.MenuGroup
+            <Menu.MenuItem
                 id="vc-import-snippet-group"
-                label="Import QuickCSS">
+                label="Import QuickCSS Snippets">
                 {items}
-            </Menu.MenuGroup>);
+            </Menu.MenuItem>);
     }
 };
 
