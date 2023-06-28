@@ -18,11 +18,11 @@
 
 
 import { Devs } from "@utils/constants";
-import { isNonNullish } from "@utils/guards";
 import { getDisplayName } from "@utils/discord";
+import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");

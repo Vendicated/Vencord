@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { openUserProfile, getDisplayName } from "@utils/discord";
+import { getDisplayName, openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { GuildMemberStore, React } from "@webpack/common";
