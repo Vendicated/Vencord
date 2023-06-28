@@ -146,3 +146,47 @@ export function OwnerCrownIcon(props: IconProps) {
         </Icon>
     );
 }
+
+/**
+ * Discord's screenshare icon, as seen in the connection panel
+ */
+export function ScreenshareIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-screenshare-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M2 4.5C2 3.397 2.897 2.5 4 2.5H20C21.103 2.5 22 3.397 22 4.5V15.5C22 16.604 21.103 17.5 20 17.5H13V19.5H17V21.5H7V19.5H11V17.5H4C2.897 17.5 2 16.604 2 15.5V4.5ZM13.2 14.3375V11.6C9.864 11.6 7.668 12.6625 6 15C6.672 11.6625 8.532 8.3375 13.2 7.6625V5L18 9.6625L13.2 14.3375Z"
+            />
+        </Icon>
+    );
+}
+
+export function ImageVisible(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-image-visible")}
+            viewBox="0 0 24 24"
+        >
+            <path fill="currentColor" d="M5 21q-.825 0-1.413-.587Q3 19.825 3 19V5q0-.825.587-1.413Q4.175 3 5 3h14q.825 0 1.413.587Q21 4.175 21 5v14q0 .825-.587 1.413Q19.825 21 19 21Zm0-2h14V5H5v14Zm1-2h12l-3.75-5-3 4L9 13Zm-1 2V5v14Z" />
+        </Icon>
+    );
+}
+
+export function ImageInvisible(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-image-invisible")}
+            viewBox="0 0 24 24"
+        >
+            <path fill="currentColor" d="m21 18.15-2-2V5H7.85l-2-2H19q.825 0 1.413.587Q21 4.175 21 5Zm-1.2 4.45L18.2 21H5q-.825 0-1.413-.587Q3 19.825 3 19V5.8L1.4 4.2l1.4-1.4 18.4 18.4ZM6 17l3-4 2.25 3 .825-1.1L5 7.825V19h11.175l-2-2Zm7.425-6.425ZM10.6 13.4Z" />
+        </Icon>
+    );
+}

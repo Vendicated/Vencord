@@ -1,4 +1,7 @@
 name: Sync to Codeberg
+concurrency:
+    group: ${{ github.ref }}
+    cancel-in-progress: true
 on:
     push:
     workflow_dispatch:

@@ -16,12 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "./classes";
-export * from "./components";
-export * from "./menu";
-export * from "./react";
-export * from "./stores";
-export * as ComponentTypes from "./types/components.d";
-export * as MenuTypes from "./types/menu.d";
-export * as UtilTypes from "./types/utils.d";
-export * from "./utils";
+
+import { findStoreLazy } from "@webpack";
+
+import * as t from "./types/stores";
+
+export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
+export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
