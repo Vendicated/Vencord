@@ -18,6 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
+import { getUniqueUsername } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { filters, findBulk } from "@webpack";
@@ -104,7 +105,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                 openRolesAndUsersPermissionsModal(
                     rolePermissions,
                     guild,
-                    guildMember.nick || UserStore.getUser(guildMember.userId).username
+                    getUniqueUsername(UserStore.getUser(guildMember.userId))
                 )
             }
             defaultState={settings.store.defaultPermissionsDropdownState}
