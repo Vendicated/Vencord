@@ -22,8 +22,9 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Button, Card, FluxDispatcher, Text } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Text, useState } from "@webpack/common";
 import { User } from "discord-types/general";
+import { SetStateAction } from "react";
 
 // omg spotifyControls my beloved
 const Svg = (path: string, label: string) => {
@@ -45,24 +46,25 @@ const Svg = (path: string, label: string) => {
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const Expand = Svg("M15.88 9.29L12 13.17 8.12 9.29c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.59 4.59c.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41-.39-.38-1.03-.39-1.42 0z", "Expand");
 
-const collapsedElements = {};
+const OpenExpandClass = "relation-expand-opened";
+const ClosedExpandClass = "relation-expand-closed";
 
-const handleContainerButton = (title: string) => {
-    const container = document.getElementById(`collapsechildren-${title}`);
-    const expansionButton = document.getElementById(`expansionbtn-${title}`);
-    if (!(container && expansionButton)) return;
+const OpenRelationClass = "relation-opened";
+const ClosedRelationClass = "relation-closed";
 
-    if (!collapsedElements[title]) {
-        collapsedElements[title] = true;
+const openProfileModal = (user: User, guildId?: string) => {
+    FluxDispatcher.dispatch({
+        type: "USER_PROFILE_MODAL_OPEN",
+        userId: user.id,
+        guildId: guildId
+    });
+};
 
-        container.classList.replace("relation-opened", "relation-closed");
-        expansionButton.classList.replace("relation-expand-opened", "relation-expand-closed");
-    } else {
-        collapsedElements[title] = false;
-
-        container.classList.replace("relation-closed", "relation-opened");
-        expansionButton.classList.replace("relation-expand-closed", "relation-expand-opened");
-    }
+const onCollapsableFormClick = (isOpen: string[], setOpen: { (value: SetStateAction<string[]>): void; (arg0: string[]): void; }) => {
+    setOpen([
+        isOpen[0] === ClosedExpandClass ? OpenExpandClass : ClosedExpandClass,
+        isOpen[1] === ClosedRelationClass ? OpenRelationClass : ClosedRelationClass
+    ]);
 };
 
 export const createFormItem = (title: string, text?: string, element?: React.ReactElement) => {
@@ -77,13 +79,6 @@ export const createFormItem = (title: string, text?: string, element?: React.Rea
     );
 };
 
-const openProfileModal = (user: User, guildId?: string) => {
-    FluxDispatcher.dispatch({
-        type: "USER_PROFILE_MODAL_OPEN",
-        userId: user.id,
-        guildId: guildId
-    });
-};
 
 export const createFormMember = (user: User | string, guildId?: string, isMember?: boolean) => {
     const loadedUser = typeof user === "object";
@@ -129,22 +124,28 @@ export const createFormMember = (user: User | string, guildId?: string, isMember
     );
 };
 
+
 export const createCollapsableForm = (title: string, children: Array<React.ReactElement>, count?: number) => {
+    const [isOpen, setOpen] = useState(["relation-expand-opened", "relation-opened"]);
+
     return (
         <Card className={`${Margins.top8} ${Margins.bottom16} ${Margins.left16} ${Margins.right16}`}>
-            <div id="scrollstylerelatiowon" style={{ overflowY: "auto" }} className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`}>
+            <div id="scrollstylerelatiowon" className={`${Margins.top16} ${Margins.bottom16} ${Margins.left8} ${Margins.right8}`}>
+
                 <Flex style={{ justifyContent: "space-between" }}>
                     <Text variant="heading-sm/semibold">{title} {count && `(${count})`}</Text>
-                    <Button className="relation-avatar" onClick={() => handleContainerButton(title)}>
-                        <div id={`expansionbtn-${title}`} className="relation-expand-opened">
+
+                    <Button className="relation-avatar" onClick={() => onCollapsableFormClick(isOpen, setOpen)}>
+                        <div id={`expansionbtn-${title}`} className={isOpen[0]}>
                             <Expand />
                         </div>
                     </Button>
                 </Flex>
 
-                <Flex id={`collapsechildren-${title}`} className="relation-form-container relation-opened">
-                    {children}
+                <Flex className={"relation-form-container " + isOpen[1]}>
+                    {isOpen[1] === "relation-opened" && children}
                 </Flex>
+
             </div>
         </Card>
     );
