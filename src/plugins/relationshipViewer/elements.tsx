@@ -126,7 +126,7 @@ export const createFormMember = (user: User | string, guildId?: string, isMember
 
 
 export const createCollapsableForm = (title: string, children: Array<React.ReactElement>, count?: number) => {
-    const [isOpen, setOpen] = useState(["relation-expand-opened", "relation-opened"]);
+    const [isOpen, setOpen] = useState([OpenExpandClass, OpenRelationClass]);
 
     return (
         <Card className={`${Margins.top8} ${Margins.bottom16} ${Margins.left16} ${Margins.right16}`}>
