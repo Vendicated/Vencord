@@ -17,9 +17,11 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, GuildStore, PrivateChannelsStore, SelectedChannelStore } from "@webpack/common";
-import { Guild, Message } from "discord-types/general";
+import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { ChannelStore, ComponentDispatch, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, SelectedChannelStore, SelectedGuildStore, UserUtils } from "@webpack/common";
+import { Guild, Message, User } from "discord-types/general";
+
+import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
@@ -76,4 +78,49 @@ export function sendMessage(
     };
 
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+}
+
+export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+    return openModal(modalProps => (
+        <ModalRoot
+            {...modalProps}
+            className={ModalImageClasses.modal}
+            size={ModalSize.DYNAMIC}>
+            <ImageModal
+                className={ModalImageClasses.image}
+                original={url}
+                placeholder={url}
+                src={url}
+                renderLinkComponent={props => <MaskedLink {...props} />}
+                shouldHideMediaOptions={false}
+                shouldAnimate
+                {...props}
+            />
+        </ModalRoot>
+    ));
+}
+
+const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
+
+export async function openUserProfile(id: string) {
+    const user = await UserUtils.fetchUser(id);
+    if (!user) throw new Error("No such user: " + id);
+
+    const guildId = SelectedGuildStore.getGuildId();
+    openProfile({
+        userId: id,
+        guildId,
+        channelId: SelectedChannelStore.getChannelId(),
+        analyticsLocation: {
+            page: guildId ? "Guild Channel" : "DM Channel",
+            section: "Profile Popout"
+        }
+    });
+}
+
+/**
+ * Get the unique username for a user. Returns user.username for pomelo people, user.tag otherwise
+ */
+export function getUniqueUsername(user: User) {
+    return user.discriminator === "0" ? user.username : user.tag;
 }
