@@ -23,7 +23,6 @@ import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Menu, Toasts } from "@webpack/common";
-import React from "react";
 
 const enum AddStrategy {
 	Replace,
