@@ -123,7 +123,7 @@ export async function openUserProfile(id: string) {
  * Get the unique username for a user. Returns user.username for pomelo people, user.tag otherwise
  */
 export function getUniqueUsername(user: User) {
-    return user.discriminator === "0" ? user.username : user.tag;
+    return DiscordUserUtils.getUserTag(user);
 }
 
 /**
