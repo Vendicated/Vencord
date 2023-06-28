@@ -71,14 +71,13 @@ const removeFromSnippetIdCache = (snippetId: string) => {
     cachedSnippetIds = cachedSnippetIds.filter(id => id !== snippetId);
 };
 
-const importAllSnippets = async (snowflake: string, snippets: string[], strategy: AddStrategy) => {
-    for (const snippet of snippets) {
-        const snippetId = generateSnippetId(snowflake, snippet);
+const importAllSnippets = async (snowflake: string, snippets: { snippetId: string; snippet: string; }[], strategy: AddStrategy) => {
+    for (const { snippetId, snippet } of snippets) {
         await importCssSnippet(snippetId, snippet, strategy);
     }
 };
 
-const removeSnippets = async (snippetIds: string[]) => {
+const removeAllSnippets = async (snippetIds: string[]) => {
     for (const snippetId of snippetIds) {
         await removeCssSnippet(snippetId);
     }
@@ -163,6 +162,8 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     let match: string[] | null;
 
     const snippetIds = cachedSnippetIds;
+    const importableSnippets: { snippetId: string; snippet: string; }[] = [];
+    const removableSnippets: { snippetId: string; snippet: string; }[] = [];
 
     // eslint-disable-next-line no-cond-assign
     while (match = re.exec(content)) {
@@ -184,6 +185,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         let menuItem: React.ReactNode;
 
         if (isSnippetPresent) {
+            removableSnippets.push({ snippetId, snippet });
             menuItem = (
                 <Menu.MenuItem
                     id={`vc-remove-snippet-${snippetId}`}
@@ -194,6 +196,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 />
             );
         } else {
+            importableSnippets.push({ snippetId, snippet });
             menuItem = (
                 <Menu.MenuItem
                     id={`vc-import-snippet-${snippetId}`}
@@ -233,6 +236,27 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     }
 
     else {
+        const allImportable = importableSnippets.length === snippets.length;
+        const allRemovable = removableSnippets.length === snippets.length;
+
+        if (snippets.length > 1 && (allImportable || allRemovable)) {
+            const label = allImportable ? "Import All" : "Remove All";
+            const action = allImportable
+                ? async () => await importAllSnippets(message.id, importableSnippets, strategy)
+                : async () => await removeAllSnippets(removableSnippets.map(s => s.snippetId));
+
+            items.unshift(
+                <Menu.MenuItem
+                    id={`vc-${allImportable ? "import" : "remove"}-all-snippets`}
+                    label={label}
+                    icon={CSSFileIcon}
+                    color={allImportable ? undefined : "danger"}
+                    action={action}
+                />,
+                <Menu.MenuSeparator />
+            );
+        }
+
         children.splice(-1, 0,
             <Menu.MenuItem
                 id="vc-css-snippets"
