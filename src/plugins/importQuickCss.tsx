@@ -17,11 +17,13 @@
 */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import * as DataStore from "@api/DataStore";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, Toasts } from "@webpack/common";
+import React from "react";
 
 const enum AddStrategy {
 	Replace,
@@ -29,7 +31,35 @@ const enum AddStrategy {
 	Prepend
 }
 
-async function importCssSnippet(snippet: string, strategy: AddStrategy) {
+const STORE_KEY = "quickCssSnippets";
+
+async function removeCssSnippet(snippetId: string, snippet: string) {
+    let quickCss = await VencordNative.quickCss.get();
+
+    const regex = new RegExp(
+        `\\/\\*\\nsnippet ${snippetId}[^]*?\\/\\* end snippet ${snippetId} \\*\\/`,
+        "gs"
+    );
+
+    quickCss = quickCss.replace(regex, "");
+    await VencordNative.quickCss.set(quickCss);
+
+    const snippets = await DataStore.get(STORE_KEY);
+    await DataStore.set(STORE_KEY, snippets.filter((s: string) => s !== snippetId));
+
+    Toasts.show({
+        message: "Removed QuickCSS snippet!",
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            duration: 2000,
+            position: Toasts.Position.BOTTOM,
+        },
+    });
+}
+
+
+async function importCssSnippet(snippetId: string, snippet: string, strategy: AddStrategy) {
     let quickCss = await VencordNative.quickCss.get();
 
     switch (strategy) {
@@ -45,6 +75,7 @@ async function importCssSnippet(snippet: string, strategy: AddStrategy) {
     }
 
     await VencordNative.quickCss.set(quickCss);
+    await DataStore.set(STORE_KEY, [...(await DataStore.get(STORE_KEY) || []), snippetId]);
 
     Toasts.show({
         message: "Imported QuickCSS snippet!",
@@ -57,7 +88,7 @@ async function importCssSnippet(snippet: string, strategy: AddStrategy) {
     });
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => async () => {
     const { message } = props;
     const { content, timestamp } = message;
 
@@ -73,47 +104,82 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     let match: string[] | null;
     let i = 0;
 
+    const snippetIds = await DataStore.get(STORE_KEY);
 
     // eslint-disable-next-line no-cond-assign
     while (match = re.exec(content)) {
-        const header = `/*\nsnippet ${message.id}-${i} by ${message.author.username}, posted at ${new Date(timestamp).toLocaleString()}\n*/\n`;
-        const footer = `/* end snippet ${message.id}-${i} */`;
+        const snippetId = `${message.id}-${i}`;
+        const header = `/*\nsnippet ${snippetId} by ${message.author.username}, posted at ${new Date(timestamp).toLocaleString()}\n*/\n`;
+        const footer = `/* end snippet ${snippetId} */`;
 
         const snippet = header + match[1] + footer;
         snippets.push(snippet);
 
-        let label = `Import Snippet "${match[1].substring(0, 5)}`;
+        const isSnippetPresent = snippetIds?.includes(snippetId) ?? false;
+
+        let label = isSnippetPresent ? `Remove Snippet "${match[1].substring(0, 5)}` : `Import Snippet "${match[1].substring(0, 5)}`;
         if (match[1].length > 5) {
             label += "...";
         }
         label += '"';
 
-        items.push(<Menu.MenuItem
-            id={`vc-import-snippet-${i++}`}
-            label={label}
-            icon={CSSFileIcon}
-            action={async () => await importCssSnippet(snippet, strategy)}
-        />);
+        let menuItem: React.ReactNode;
 
+        if (isSnippetPresent) {
+            menuItem = (
+                <Menu.MenuItem
+                    id={`vc-remove-snippet-${i++}`}
+                    label={label}
+                    icon={CSSFileIcon}
+                    color="danger"
+                    action={async () => await removeCssSnippet(snippetId, snippet)}
+                />
+            );
+        } else {
+            menuItem = (
+                <Menu.MenuItem
+                    id={`vc-import-snippet-${i++}`}
+                    label={label}
+                    icon={CSSFileIcon}
+                    action={async () => await importCssSnippet(snippetId, snippet, strategy)}
+                />
+            );
+        }
+
+        items.push(menuItem);
     }
 
     if (items.length === 0) return;
 
     if (items.length === 1) {
-        children.splice(-1, 0,
-            <Menu.MenuItem
-                id={"vc-import-snippet"}
-                label={"Import QuickCSS Snippet"}
-                icon={CSSFileIcon}
-                action={async () => await importCssSnippet(snippets[0], strategy)}
-            />);
+        const snippetId = `${message.id}-${0}`;
+        const isSnippetPresent = snippetIds?.includes(snippetId) ?? false;
+
+        if (isSnippetPresent) {
+            children.splice(-1, 0,
+                <Menu.MenuItem
+                    id={"vc-remove-snippet"}
+                    label={"Remove QuickCSS Snippet"}
+                    icon={CSSFileIcon}
+                    color="danger"
+                    action={async () => await removeCssSnippet(snippetId, snippets[0])}
+                />);
+        } else {
+            children.splice(-1, 0,
+                <Menu.MenuItem
+                    id={"vc-import-snippet"}
+                    label={"Import QuickCSS Snippet"}
+                    icon={CSSFileIcon}
+                    action={async () => await importCssSnippet(snippetId, snippets[0], strategy)}
+                />);
+        }
     }
 
     else {
         children.splice(-1, 0,
             <Menu.MenuItem
-                id="vc-import-snippet-group"
-                label="Import QuickCSS Snippets">
+                id="vc-css-snippets"
+                label="QuickCSS Snippets">
                 {items}
             </Menu.MenuItem>);
     }
