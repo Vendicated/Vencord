@@ -18,13 +18,14 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, SelectedChannelStore, SelectedGuildStore, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, GuildMemberStore, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
 const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+const DiscordUserUtils = findByPropsLazy("getGlobalName");
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
@@ -123,4 +124,19 @@ export async function openUserProfile(id: string) {
  */
 export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
+}
+
+/**
+ * Returns user's display name applicable for all contexts:
+ * - guild nickname (if guildId is provided)
+ * - friend nickname (only if guildId is not provided)
+ * - globalName
+ * - username (pomelo)
+ * - username#1234
+ */
+export function getDisplayName(guildId: string | null, userId: string): string {
+    return (guildId && GuildMemberStore.getNick(guildId, userId))
+        || (!guildId && RelationshipStore.getNickname(userId))
+        || DiscordUserUtils.getName(UserStore.getUser(userId));
+
 }

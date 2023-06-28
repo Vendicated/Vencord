@@ -19,6 +19,7 @@
 
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
+import { getDisplayName } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
@@ -26,7 +27,6 @@ import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const AvatarUtils = findByPropsLazy("getChannelIconURL");
-const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
@@ -36,7 +36,7 @@ function getGroupDMName(channel: Channel) {
         channel.recipients
             .map(UserStore.getUser)
             .filter(isNonNullish)
-            .map(c => RelationshipStore.getNickname(c.id) || UserUtils.getName(c))
+            .map(u => getDisplayName(null, u.id))
             .join(", ");
 }
 

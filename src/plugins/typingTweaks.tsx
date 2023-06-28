@@ -19,10 +19,10 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { openUserProfile } from "@utils/discord";
+import { openUserProfile, getDisplayName } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { GuildMemberStore, React } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const Avatar = findByCodeLazy(".typingIndicatorRef", "svg");
@@ -81,11 +81,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                         src={user.getAvatarURL(guildId, 128)} />
                 </div>
             )}
-            {GuildMemberStore.getNick(guildId!, user.id)
-                || (!guildId && RelationshipStore.getNickname(user.id))
-                || (user as any).globalName
-                || user.username
-            }
+            {getDisplayName(guildId, user.id)}
         </strong>
     );
 }, { noop: true });
