@@ -33,6 +33,26 @@ const enum AddStrategy {
 
 const STORE_KEY = "quickCssSnippets";
 
+let cachedSnippetIds: string[] = [];
+
+const fetchSnippetIds = async () => {
+    cachedSnippetIds = await DataStore.get(STORE_KEY) || [];
+};
+
+const saveSnippetIds = async () => {
+    await DataStore.set(STORE_KEY, cachedSnippetIds);
+};
+
+const addToSnippetIdCache = (snippetId: string) => {
+    if (!cachedSnippetIds.includes(snippetId)) {
+        cachedSnippetIds.push(snippetId);
+    }
+};
+
+const removeFromSnippetIdCache = (snippetId: string) => {
+    cachedSnippetIds = cachedSnippetIds.filter(id => id !== snippetId);
+};
+
 async function removeCssSnippet(snippetId: string) {
     let quickCss = await VencordNative.quickCss.get();
 
@@ -46,6 +66,8 @@ async function removeCssSnippet(snippetId: string) {
 
     const snippets = await DataStore.get(STORE_KEY);
     await DataStore.set(STORE_KEY, snippets.filter((s: string) => s !== snippetId));
+
+    removeFromSnippetIdCache(snippetId);
 
     Toasts.show({
         message: "Removed QuickCSS snippet!",
@@ -76,6 +98,8 @@ async function importCssSnippet(snippetId: string, snippet: string, strategy: Ad
     await VencordNative.quickCss.set(quickCss);
     await DataStore.set(STORE_KEY, [...(await DataStore.get(STORE_KEY) || []), snippetId]);
 
+    addToSnippetIdCache(snippetId);
+
     Toasts.show({
         message: "Imported QuickCSS snippet!",
         type: Toasts.Type.SUCCESS,
@@ -87,7 +111,7 @@ async function importCssSnippet(snippetId: string, snippet: string, strategy: Ad
     });
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => async () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
     const { content, timestamp } = message;
 
@@ -103,7 +127,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     let match: string[] | null;
     let i = 0;
 
-    const snippetIds = await DataStore.get(STORE_KEY);
+    const snippetIds = cachedSnippetIds;
 
     // eslint-disable-next-line no-cond-assign
     while (match = re.exec(content)) {
@@ -212,11 +236,13 @@ export default definePlugin({
     description: "Allows you to import and remove QuickCSS snippets contained within messages",
     settings,
 
-    start() {
+    async start() {
+        await fetchSnippetIds();
         addContextMenuPatch("message", messageContextMenuPatch);
     },
 
-    stop() {
+    async stop() {
+        await saveSnippetIds();
         removeContextMenuPatch("message", messageContextMenuPatch);
     },
 });
