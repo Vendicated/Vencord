@@ -342,32 +342,27 @@ export default definePlugin({
             ]
         },
         {
-            find: "Guild voice channel without guild id.",
+            find: "useNotificationSettingsItem: channel cannot be undefined",
             replacement: [
                 {
                     // Render our HiddenChannelLockScreen component instead of the main stage channel component
-                    match: /Guild voice channel without guild id.+?children:(?<=(\i)\.getGuildId\(\).+?)(?=.{0,20}?}\)}function)/,
+                    match: /"124px".+?children:(?<=var (\i)=\i\.channel.+?)(?=.{0,20}?}\)}function)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?$self.HiddenChannelLockScreen(${channel}):`
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of stage channels
-                    match: /render(?!Header).{0,30}?:(?<=(\i)\.getGuildId\(\).+?Guild voice channel without guild id.+?)/g,
+                    match: /render(?:BottomLeft|BottomCenter|BottomRight|ChatToasts):(?<=var (\i)=\i\.channel.+?)/g,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?null:`
-                },
-                // Prevent Discord from replacing our route if we aren't connected to the stage channel
-                {
-                    match: /(?=!\i&&!\i&&!\i.{0,80}?(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
+                    match: /"124px".+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})||`
                 },
                 {
                     // Disable strange styles applied to the header for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?style:(?<=(\i)\.getGuildId\(\).+?)/,
-                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?undefined:`
+                    match: /"124px".+?style:(?<=(\i)\.getGuildId\(\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?void 0:`
                 },
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
@@ -376,7 +371,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
+                    match: /"recents".+?&&(?=\(.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
