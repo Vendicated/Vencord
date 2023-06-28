@@ -10,7 +10,7 @@ on:
 
 jobs:
     codeberg:
-        if: github.repository == 'Vendicated/Vencord'
+        if: github.repository == 'Snupai/Vencord'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
