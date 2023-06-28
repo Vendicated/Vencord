@@ -33,7 +33,7 @@ const enum AddStrategy {
 
 const STORE_KEY = "quickCssSnippets";
 
-async function removeCssSnippet(snippetId: string, snippet: string) {
+async function removeCssSnippet(snippetId: string) {
     let quickCss = await VencordNative.quickCss.get();
 
     const regex = new RegExp(
@@ -131,7 +131,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     label={label}
                     icon={CSSFileIcon}
                     color="danger"
-                    action={async () => await removeCssSnippet(snippetId, snippet)}
+                    action={async () => await removeCssSnippet(snippetId)}
                 />
             );
         } else {
@@ -161,7 +161,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     label={"Remove QuickCSS Snippet"}
                     icon={CSSFileIcon}
                     color="danger"
-                    action={async () => await removeCssSnippet(snippetId, snippets[0])}
+                    action={async () => await removeCssSnippet(snippetId)}
                 />);
         } else {
             children.splice(-1, 0,
