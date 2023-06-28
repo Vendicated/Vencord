@@ -40,7 +40,11 @@ const fetchSnippetIds = async () => {
 };
 
 const saveSnippetIds = async () => {
-    await DataStore.set(STORE_KEY, cachedSnippetIds);
+    const storedSnippetIds = await DataStore.get(STORE_KEY) || [];
+    const newSnippetIds = cachedSnippetIds.filter(id => !storedSnippetIds.includes(id));
+    const updatedSnippetIds = [...storedSnippetIds, ...newSnippetIds];
+
+    await DataStore.set(STORE_KEY, updatedSnippetIds);
 };
 
 const addToSnippetIdCache = (snippetId: string) => {
@@ -81,22 +85,27 @@ async function removeCssSnippet(snippetId: string) {
 }
 
 async function importCssSnippet(snippetId: string, snippet: string, strategy: AddStrategy) {
-    let quickCss = await VencordNative.quickCss.get();
+    const quickCss = await VencordNative.quickCss.get();
+
+    const existingCss = quickCss.trim();
+    const cleanedSnippet = snippet.trim();
+
+    let updatedCss: string;
 
     switch (strategy) {
         case AddStrategy.Replace:
-            quickCss = snippet;
+            updatedCss = cleanedSnippet;
             break;
         case AddStrategy.Append:
-            quickCss = quickCss + "\n\n" + snippet;
+            updatedCss = `${existingCss}\n\n${cleanedSnippet}`;
             break;
         case AddStrategy.Prepend:
-            quickCss = snippet + "\n\n" + quickCss;
+            updatedCss = `${cleanedSnippet}\n\n${existingCss}`;
             break;
     }
 
-    await VencordNative.quickCss.set(quickCss);
-    await DataStore.set(STORE_KEY, [...(await DataStore.get(STORE_KEY) || []), snippetId]);
+    await VencordNative.quickCss.set(updatedCss);
+    await DataStore.set(STORE_KEY, [...cachedSnippetIds, snippetId]);
 
     addToSnippetIdCache(snippetId);
 
