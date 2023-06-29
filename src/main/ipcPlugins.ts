@@ -19,7 +19,9 @@
 import { IpcEvents } from "@utils/IpcEvents";
 import { createSocket } from "dgram";
 import { ipcMain } from "electron";
+import { request } from "https";
 
+// #region XSOverlay
 ipcMain.handle(IpcEvents.DGRAM_SEND, (_, data) => {
     data.icon = Buffer.from(data.icon).toString("base64");
     data = JSON.stringify(data);
@@ -28,3 +30,29 @@ ipcMain.handle(IpcEvents.DGRAM_SEND, (_, data) => {
         client.close();
     });
 });
+// #endregion
+
+// #region OpenInApp
+// These links don't support CORS, so this has to be native
+const validRedirectUrls = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
+
+function getRedirect(url: string) {
+    return new Promise<string>((resolve, reject) => {
+        const req = request(new URL(url), { method: "HEAD" }, res => {
+            resolve(
+                res.headers.location
+                    ? getRedirect(res.headers.location)
+                    : url
+            );
+        });
+        req.on("error", reject);
+        req.end();
+    });
+}
+
+ipcMain.handle(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, async (_, url: string) => {
+    if (!validRedirectUrls.test(url)) return url;
+
+    return getRedirect(url);
+});
+// #endregion
