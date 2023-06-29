@@ -23,6 +23,7 @@ import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
+import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
@@ -231,7 +232,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
+                action={() => openImageModal(track.album.image.url)}
                 icon={ImageIcon}
             />
             <Menu.MenuControlItem

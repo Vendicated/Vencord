@@ -89,7 +89,7 @@ export const SpotifyStore = proxyLazy(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris
+            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
