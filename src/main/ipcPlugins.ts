@@ -17,18 +17,18 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { createSocket } from "dgram";
+import { createSocket, Socket } from "dgram";
 import { ipcMain } from "electron";
 import { request } from "https";
 
 // #region XSOverlay
+let xsoSocket: Socket;
+
 ipcMain.handle(IpcEvents.XSOVERLAY_SEND, (_, data) => {
     data.icon = Buffer.from(data.icon).toString("base64");
     data = JSON.stringify(data);
-    const client = createSocket("udp4");
-    client.send(data, 42069, "127.0.0.1", () => {
-        client.close();
-    });
+    xsoSocket ??= createSocket("udp4");
+    xsoSocket.send(data, 42069, "127.0.0.1");
 });
 // #endregion
 
