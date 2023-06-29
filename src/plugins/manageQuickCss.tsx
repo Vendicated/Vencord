@@ -243,15 +243,15 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 ? async () => await importAllSnippets(message.id, importableSnippets, strategy)
                 : async () => await removeAllSnippets(removableSnippets.map(s => s.snippetId));
 
-            items.unshift(
+            items.push(
+                <Menu.MenuSeparator />,
                 <Menu.MenuItem
                     id={`vc-${allImportable ? "import" : "remove"}-all-snippets`}
                     label={label}
                     icon={CSSFileIcon}
                     color={allImportable ? undefined : "danger"}
                     action={action}
-                />,
-                <Menu.MenuSeparator />
+                />
             );
         }
 
