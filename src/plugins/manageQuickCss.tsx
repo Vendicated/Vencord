@@ -82,7 +82,30 @@ const removeAllSnippets = async (snippetIds: string[]) => {
     }
 };
 
-async function removeCssSnippet(snippetId: string) {
+const syncSnippetIds = async () => {
+    const quickCSS = await VencordNative.quickCss.get();
+    const snippetIds = await DataStore.get(STORE_KEY) || [];
+
+    const snippetIdsToRemove = snippetIds.filter((id: string) => !quickCSS.includes(id));
+
+    if (snippetIdsToRemove.length > 0) {
+        await DataStore.set(STORE_KEY, snippetIds.filter((id: string) => !snippetIdsToRemove.includes(id)));
+    }
+
+    await fetchSnippetIds();
+
+    Toasts.show({
+        message: "Synchronized saved QuickCSS snippet IDs!",
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            duration: 2000,
+            position: Toasts.Position.BOTTOM,
+        },
+    });
+};
+
+const removeCssSnippet = async (snippetId: string) => {
     let quickCss = await VencordNative.quickCss.get();
 
     const regex = new RegExp(
@@ -107,9 +130,9 @@ async function removeCssSnippet(snippetId: string) {
             position: Toasts.Position.BOTTOM,
         },
     });
-}
+};
 
-async function importCssSnippet(snippetId: string, snippet: string, strategy: AddStrategy) {
+const importCssSnippet = async (snippetId: string, snippet: string, strategy: AddStrategy) => {
     const quickCss = await VencordNative.quickCss.get();
 
     const existingCss = quickCss.trim();
@@ -143,7 +166,7 @@ async function importCssSnippet(snippetId: string, snippet: string, strategy: Ad
             position: Toasts.Position.BOTTOM,
         },
     });
-}
+};
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
@@ -293,19 +316,8 @@ export default definePlugin({
     settings,
 
     toolboxActions: {
-        async "Clear Saved Snippet IDs"() {
-            await DataStore.set(STORE_KEY, []);
-            await fetchSnippetIds();
-
-            Toasts.show({
-                message: "Cleared all saved QuickCSS snippet IDs!",
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId(),
-                options: {
-                    duration: 2000,
-                    position: Toasts.Position.BOTTOM,
-                },
-            });
+        async "Synchronize Snippet IDs"() {
+            await syncSnippetIds();
         }
     },
 
