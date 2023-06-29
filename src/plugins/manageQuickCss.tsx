@@ -22,7 +22,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Menu, Toasts } from "@webpack/common";
+import { Menu, Toasts } from "@webpack/common";
 
 const enum AddStrategy {
 	Replace,
@@ -283,30 +283,6 @@ const settings = definePluginSettings({
                 value: AddStrategy.Prepend
             }
         ]
-    },
-    clearSnippetIds: {
-        description: "Clears all stored QuickCSS snippet IDs",
-        type: OptionType.COMPONENT,
-        component: () => (
-            <Button
-                color={Button.Colors.RED}
-                onClick={async () => {
-                    await DataStore.set(STORE_KEY, []);
-                    await fetchSnippetIds();
-
-                    Toasts.show({
-                        message: "Cleared all QuickCSS snippet IDs!",
-                        type: Toasts.Type.SUCCESS,
-                        id: Toasts.genId(),
-                        options: {
-                            duration: 2000,
-                            position: Toasts.Position.BOTTOM,
-                        },
-                    });
-                }} >
-				Clear Snippet IDs
-            </Button>
-        )
     }
 });
 
@@ -315,6 +291,23 @@ export default definePlugin({
     authors: [Devs.castdrian, Devs.Ven],
     description: "Allows you to import and remove QuickCSS snippets contained within messages",
     settings,
+
+    toolboxActions: {
+        async "Clear Saved Snippet IDs"() {
+            await DataStore.set(STORE_KEY, []);
+            await fetchSnippetIds();
+
+            Toasts.show({
+                message: "Cleared all saved QuickCSS snippet IDs!",
+                type: Toasts.Type.SUCCESS,
+                id: Toasts.genId(),
+                options: {
+                    duration: 2000,
+                    position: Toasts.Position.BOTTOM,
+                },
+            });
+        }
+    },
 
     async start() {
         await fetchSnippetIds();
