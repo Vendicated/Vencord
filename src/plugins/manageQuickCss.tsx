@@ -90,19 +90,8 @@ const syncSnippetIds = async () => {
 
     if (snippetIdsToRemove.length > 0) {
         await DataStore.set(STORE_KEY, snippetIds.filter((id: string) => !snippetIdsToRemove.includes(id)));
+        await fetchSnippetIds();
     }
-
-    await fetchSnippetIds();
-
-    Toasts.show({
-        message: "Synchronized saved QuickCSS snippet IDs!",
-        type: Toasts.Type.SUCCESS,
-        id: Toasts.genId(),
-        options: {
-            duration: 2000,
-            position: Toasts.Position.BOTTOM,
-        },
-    });
 };
 
 const removeCssSnippet = async (snippetId: string) => {
@@ -314,20 +303,23 @@ export default definePlugin({
     authors: [Devs.castdrian, Devs.Ven],
     description: "Allows you to import and remove QuickCSS snippets contained within messages",
     settings,
-
-    toolboxActions: {
-        async "Synchronize Snippet IDs"() {
-            await syncSnippetIds();
-        }
-    },
+    cssListener: undefined as ReturnType<typeof VencordNative.quickCss.addChangeListener> | undefined,
 
     async start() {
         await fetchSnippetIds();
         addContextMenuPatch("message", messageContextMenuPatch);
+
+        this.cssListener = VencordNative.quickCss.addChangeListener(async () => {
+            await syncSnippetIds();
+        });
     },
 
     async stop() {
         await saveSnippetIds();
         removeContextMenuPatch("message", messageContextMenuPatch);
+
+        if (this.cssListener) {
+            VencordNative.quickCss.removeChangeListener(this.cssListener);
+        }
     },
 });
