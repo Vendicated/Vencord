@@ -22,7 +22,7 @@ import { ipcMain } from "electron";
 import { request } from "https";
 
 // #region XSOverlay
-ipcMain.handle(IpcEvents.DGRAM_SEND, (_, data) => {
+ipcMain.handle(IpcEvents.XSOVERLAY_SEND, (_, data) => {
     data.icon = Buffer.from(data.icon).toString("base64");
     data = JSON.stringify(data);
     const client = createSocket("udp4");
