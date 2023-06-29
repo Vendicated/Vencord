@@ -319,7 +319,7 @@ export default definePlugin({
         removeContextMenuPatch("message", messageContextMenuPatch);
 
         if (this.cssListener) {
-            VencordNative.quickCss.removeChangeListener(this.cssListener);
+            this.cssListener.remove();
         }
     },
 });
