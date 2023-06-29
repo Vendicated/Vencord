@@ -29,10 +29,6 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
 }
 
 export default {
-    pluginHelpers: {
-        dgramSend: data => invoke<void>(IpcEvents.DGRAM_SEND, data)
-    },
-
     updater: {
         getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
         update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
@@ -67,5 +63,8 @@ export default {
         OpenInApp: {
             resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
         },
+        XSOverlay: {
+            send: (data: any) => invoke<void>(IpcEvents.XSOVERLAY_SEND, data),
+        }
     }
 };

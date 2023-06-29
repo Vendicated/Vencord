@@ -147,7 +147,8 @@ export default definePlugin({
                     icon: result,
                     sourceApp: "Vencord"
                 };
-                VencordNative.pluginHelpers.dgramSend(data);
+
+                VencordNative.pluginHelpers.XSOverlay.send(data);
             });
         }
     }

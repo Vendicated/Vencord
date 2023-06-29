@@ -32,6 +32,7 @@ ipcMain.handle(IpcEvents.XSOVERLAY_SEND, (_, data) => {
 });
 // #endregion
 
+
 // #region OpenInApp
 // These links don't support CORS, so this has to be native
 const validRedirectUrls = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
