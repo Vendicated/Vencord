@@ -29,6 +29,9 @@ import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
 const UserProfileStore = findStoreLazy("UserProfileStore");
 
+type PronounsWithSource = [string | null, string];
+const EmptyPronouns: PronounsWithSource = [null, ""];
+
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
     Capitalized = "CAPITALIZED"
@@ -62,7 +65,7 @@ function getDiscordPronouns(id: string) {
     );
 }
 
-export function useFormattedPronouns(id: string): [string | null, string] {
+export function useFormattedPronouns(id: string): PronounsWithSource {
     // Discord is so stupid you can put tons of newlines in pronouns
     const discordPronouns = getDiscordPronouns(id)?.trim().replace(NewLineRe, " ");
 
@@ -80,11 +83,11 @@ export function useFormattedPronouns(id: string): [string | null, string] {
     return [discordPronouns, "Discord"];
 }
 
-export function useProfilePronouns(id: string) {
+export function useProfilePronouns(id: string): PronounsWithSource {
     const pronouns = useFormattedPronouns(id);
 
-    if (!settings.store.showInProfile) return null;
-    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
+    if (!settings.store.showInProfile) return EmptyPronouns;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return EmptyPronouns;
 
     return pronouns;
 }
