@@ -62,7 +62,7 @@ function getDiscordPronouns(id: string) {
     );
 }
 
-export function useFormattedPronouns(id: string): string | null {
+export function useFormattedPronouns(id: string): [string | null, string] {
     // Discord is so stupid you can put tons of newlines in pronouns
     const discordPronouns = getDiscordPronouns(id)?.trim().replace(NewLineRe, " ");
 
@@ -72,12 +72,12 @@ export function useFormattedPronouns(id: string): string | null {
     });
 
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
-        return discordPronouns;
+        return [discordPronouns, "Discord"];
 
     if (result && result !== "unspecified")
-        return formatPronouns(result);
+        return [formatPronouns(result), "PronounDB"];
 
-    return discordPronouns;
+    return [discordPronouns, "Discord"];
 }
 
 export function useProfilePronouns(id: string) {

@@ -52,7 +52,7 @@ export function CompactPronounsChatComponentWrapper({ message }: { message: Mess
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (
@@ -64,7 +64,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
 }
 
 export function CompactPronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (
