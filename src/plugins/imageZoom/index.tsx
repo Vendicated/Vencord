@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, React, ReactDOM } from "@webpack/common";
+import { ContextMenu, Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -56,6 +56,12 @@ export const settings = definePluginSettings({
         default: false,
     },
 
+    square: {
+        type: OptionType.BOOLEAN,
+        description: "Make the lens square",
+        default: false,
+    },
+
     zoom: {
         description: "Zoom of the lens",
         type: OptionType.SLIDER,
@@ -84,9 +90,17 @@ export const settings = definePluginSettings({
 const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
     children.push(
         <Menu.MenuGroup id="image-zoom">
-            {/* thanks SpotifyControls */}
+            <Menu.MenuCheckboxItem
+                id="vc-square"
+                label="Square Lens"
+                checked={settings.store.square}
+                action={() => {
+                    settings.store.square = !settings.store.square;
+                    ContextMenu.close();
+                }}
+            />
             <Menu.MenuControlItem
-                id="zoom"
+                id="vc-zoom"
                 label="Zoom"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -100,7 +114,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="size"
+                id="vc-size"
                 label="Lens Size"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -114,7 +128,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="zoom-speed"
+                id="vc-zoom-speed"
                 label="Zoom Speed"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl

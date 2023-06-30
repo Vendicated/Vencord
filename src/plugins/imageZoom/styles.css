@@ -11,7 +11,11 @@
     pointer-events: none;
 }
 
-.vc-imgzoom-lens.nearest-neighbor > img {
+.vc-imgzoom-square {
+    border-radius: 0;
+}
+
+.vc-imgzoom-nearest-neighbor > img {
     image-rendering: pixelated; /* https://googlechrome.github.io/samples/image-rendering-pixelated/index.html */
 }
 
