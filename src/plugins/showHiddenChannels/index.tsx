@@ -34,7 +34,7 @@ const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted
 export const VIEW_CHANNEL = 1n << 10n;
 const CONNECT = 1n << 20n;
 
-enum ShowMode {
+const enum ShowMode {
     LockIcon,
     HiddenIconWithMutedStyle
 }
@@ -107,8 +107,8 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden channels
-                    match: /if\(!\i&&!\i(?=.{0,50}?selectVoiceChannel\((\i)\.id\))/,
-                    replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
+                    match: /(?=\|\|\i\.default\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
@@ -342,32 +342,27 @@ export default definePlugin({
             ]
         },
         {
-            find: "Guild voice channel without guild id.",
+            find: "useNotificationSettingsItem: channel cannot be undefined",
             replacement: [
                 {
                     // Render our HiddenChannelLockScreen component instead of the main stage channel component
-                    match: /Guild voice channel without guild id.+?children:(?<=(\i)\.getGuildId\(\).+?)(?=.{0,20}?}\)}function)/,
+                    match: /"124px".+?children:(?<=var (\i)=\i\.channel.+?)(?=.{0,20}?}\)}function)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?$self.HiddenChannelLockScreen(${channel}):`
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of stage channels
-                    match: /render(?!Header).{0,30}?:(?<=(\i)\.getGuildId\(\).+?Guild voice channel without guild id.+?)/g,
+                    match: /render(?:BottomLeft|BottomCenter|BottomRight|ChatToasts):(?<=var (\i)=\i\.channel.+?)/g,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?null:`
-                },
-                // Prevent Discord from replacing our route if we aren't connected to the stage channel
-                {
-                    match: /(?=!\i&&!\i&&!\i.{0,80}?(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
+                    match: /"124px".+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})||`
                 },
                 {
                     // Disable strange styles applied to the header for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?style:(?<=(\i)\.getGuildId\(\).+?)/,
-                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?undefined:`
+                    match: /"124px".+?style:(?<=(\i)\.getGuildId\(\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?void 0:`
                 },
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
@@ -376,7 +371,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
+                    match: /"recents".+?&&(?=\(.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
@@ -418,6 +413,14 @@ export default definePlugin({
                 // Make GuildChannelStore.getChannels return hidden channels
                 match: /(?<=getChannels\(\i)(?=\))/,
                 replace: ",true"
+            }
+        },
+        {
+            find: '.displayName="NowPlayingViewStore"',
+            replacement: {
+                // Make active now voice states on hiddenl channels
+                match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
+                replace: "$1"
             }
         }
     ],

@@ -132,7 +132,7 @@ export default definePlugin({
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /var .,.,.=(.)\.className,.=.\.message,.=.\.children,.=.\.content,.=.\.onUpdate/gm,
-                replace: "try {$1 && $self.INV_REGEX.test($1.content[0]) ? $1.content.push($self.indicator()) : null } catch {};$&"
+                replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
             }
         },
         {
@@ -200,8 +200,11 @@ export default definePlugin({
             },
         });
 
-        if (urlCheck?.length)
-            message.embeds.push(await this.getEmbed(new URL(urlCheck[0])));
+        if (urlCheck?.length) {
+            const embed = await this.getEmbed(new URL(urlCheck[0]));
+            if (embed)
+                message.embeds.push(embed);
+        }
 
         this.updateMessage(message);
     },
