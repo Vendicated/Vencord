@@ -50,7 +50,7 @@ jobs:
             - name: Upload DevBuild as release
               if: github.repository == 'Snupai/Vencord'
               run: |
-                  gh release upload devbuild --clobber dist/*
+                  # gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
