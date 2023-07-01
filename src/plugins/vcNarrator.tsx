@@ -156,6 +156,8 @@ export default definePlugin({
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
 
+            if (ChannelStore.getChannel(myChanId!)?.type === 13 /* Stage Channel */) return;
+
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
                 const isMe = userId === myId;

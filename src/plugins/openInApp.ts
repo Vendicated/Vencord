@@ -16,28 +16,53 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
+import { MouseEvent } from "react";
 
-const SpotifyMatcher = /https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/([^S]+)/;
+const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
+const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/(.+)(?:\?.+?)?$/;
+const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
+const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
+
+const settings = definePluginSettings({
+    spotify: {
+        type: OptionType.BOOLEAN,
+        description: "Open Spotify links in the Spotify app",
+        default: true,
+    },
+    steam: {
+        type: OptionType.BOOLEAN,
+        description: "Open Steam links in the Steam app",
+        default: true,
+    },
+    epic: {
+        type: OptionType.BOOLEAN,
+        description: "Open Epic Games links in the Epic Games Launcher",
+        default: true,
+    }
+});
 
 export default definePlugin({
     name: "OpenInApp",
-    description: "Open spotify URLs in app",
+    description: "Open Spotify, Steam and Epic Games URLs in their respective apps instead of your browser",
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
             find: '"MaskedLinkStore"',
             replacement: {
                 match: /return ((\i)\.apply\(this,arguments\))(?=\}function \i.{0,200}\.trusted)/,
-                replace: "return $self.handleLink(...arguments)||$1"
+                replace: "return $self.handleLink(...arguments).then(handled => handled || $1)"
             }
         },
         // Make Spotify profile activity links open in app on web
         {
             find: "WEB_OPEN(",
-            predicate: () => !IS_DISCORD_DESKTOP,
+            predicate: () => !IS_DISCORD_DESKTOP && settings.store.spotify,
             replacement: {
                 match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
                 replace: "true$1VencordNative.native.openExternal"
@@ -52,23 +77,71 @@ export default definePlugin({
         }
     ],
 
-    handleLink(data: { href: string; }, event: MouseEvent) {
-        if (!data) return;
+    async handleLink(data: { href: string; }, event: MouseEvent) {
+        if (!data) return false;
 
-        const match = SpotifyMatcher.exec(data.href);
-        if (!match) return;
+        let url = data.href;
+        if (!IS_WEB && ShortUrlMatcher.test(url)) {
+            event.preventDefault();
+            // CORS jumpscare
+            url = await VencordNative.pluginHelpers.OpenInApp.resolveRedirect(url);
+        }
 
-        const [, type, id] = match;
-        VencordNative.native.openExternal(`spotify:${type}:${id}`);
-        event.preventDefault();
+        spotify: {
+            if (!settings.store.spotify) break spotify;
 
-        return Promise.resolve();
+            const match = SpotifyMatcher.exec(url);
+            if (!match) break spotify;
+
+            const [, type, id] = match;
+            VencordNative.native.openExternal(`spotify:${type}:${id}`);
+
+            event.preventDefault();
+            return true;
+        }
+
+        steam: {
+            if (!settings.store.steam) break steam;
+
+            if (!SteamMatcher.test(url)) break steam;
+
+            VencordNative.native.openExternal(`steam://openurl/${url}`);
+            event.preventDefault();
+
+            // Steam does not focus itself so show a toast so it's slightly less confusing
+            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
+            return true;
+        }
+
+        epic: {
+            if (!settings.store.epic) break epic;
+
+            const match = EpicMatcher.exec(url);
+            if (!match) break epic;
+
+            VencordNative.native.openExternal(`com.epicgames.launcher://store/${match[1]}`);
+            event.preventDefault();
+
+            return true;
+        }
+
+        // in case short url didn't end up being something we can handle
+        if (event.defaultPrevented) {
+            window.open(url, "_blank");
+            return true;
+        }
+
+        return false;
     },
 
-    handleAccountView(event: MouseEvent, platformType: string, otherUserId: string) {
-        if (platformType !== "spotify") return;
-
-        VencordNative.native.openExternal(`spotify:user:${otherUserId}`);
-        event.preventDefault();
+    handleAccountView(event: { preventDefault(): void; }, platformType: string, userId: string) {
+        if (platformType === "spotify" && settings.store.spotify) {
+            VencordNative.native.openExternal(`spotify:user:${userId}`);
+            event.preventDefault();
+        } else if (platformType === "steam" && settings.store.steam) {
+            VencordNative.native.openExternal(`steam://openurl/https://steamcommunity.com/profiles/${userId}`);
+            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
+            event.preventDefault();
+        }
     }
 });
