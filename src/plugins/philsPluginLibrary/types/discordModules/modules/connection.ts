@@ -87,7 +87,7 @@ export type Connection = TypedEmitter<ConnectionEvents> &
     Connection__ &
     Connection_ & {
         streamUserId: string,
-        desktopSourceId?: string;
+        goLiveSourceIdentifier?: string;
         emitter: TypedEmitter<ConnectionEvents>;
         mediaEngineConnectionId: string;
         destroyed: boolean;

@@ -34,7 +34,7 @@ export function getDefaultVideoTransportationOptions(connection: types.Connectio
 }
 
 export function getDefaultVideoDesktopSourceOptions(connection: types.Connection) {
-    const [type, sourceId] = connection.desktopSourceId?.split(":") ?? ["screen", 0];
+    const [type, sourceId] = connection.goLiveSourceIdentifier?.split(":") ?? ["screen", 0];
 
     return {
         hdrCaptureMode: "never",
