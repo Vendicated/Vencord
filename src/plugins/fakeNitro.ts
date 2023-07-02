@@ -153,6 +153,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    enableSoundboardBypass: {
+        description: "Allow the use of soundboard everywhere (others can't hear them)",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    enableSoundboardGuildLimitBypass: {
+        description: "Allow the use of all sounds in the guild's soundboard no matter what the guild boost level is",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -315,6 +327,30 @@ export default definePlugin({
             replacement: {
                 match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
                 replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
+            }
+        },
+        {
+            find: "canUseSoundboardEverywhere:function",
+            predicate: () => settings.store.enableSoundboardBypass,
+            replacement: {
+                match: /canUseSoundboardEverywhere:function\(\i\){/,
+                replace: "$&return true;"
+            },
+        },
+        {
+            find: "unavailableTooltip:\"unavailableTooltip-CuQXIg\"",
+            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
+            replacement: {
+                match: /unavailableTooltip-CuQXIg/,
+                replace: ""
+            }
+        },
+        {
+            find: "premiumDisabled:\"premiumDisabled-20lb_D\"",
+            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
+            replacement: {
+                match: /premiumDisabled-20lb_D/,
+                replace: ""
             }
         }
     ],
