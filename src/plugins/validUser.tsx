@@ -75,7 +75,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                     const mention = children?.[0]?.props?.children;
                     if (typeof mention !== "string") return;
 
-                    const id = mention.match(/<@(\d+)>/)?.[1];
+                    const id = mention.match(/<@!?(\d+)>/)?.[1];
                     if (!id) return;
 
                     if (fetching.has(id))

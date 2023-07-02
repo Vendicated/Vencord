@@ -80,8 +80,8 @@ export default definePlugin({
             find: "Messages.PROFILE_USER_BADGES,role:",
             replacement: [
                 {
-                    match: /(?<=(\i)\.isTryItOutFlow,)(.{0,300})null==\i\?void 0:(\i)\.getBadges\(\)/,
-                    replace: (_, props, restCode, badgesMod) => `vencordProps=${props},${restCode}Vencord.Api.Badges._getBadges(vencordProps).concat(${badgesMod}?.getBadges()??[])`,
+                    match: /&&(\i)\.push\(\{id:"premium".+?\}\);/,
+                    replace: "$&$1.unshift(...Vencord.Api.Badges._getBadges(arguments[0]));",
                 },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
