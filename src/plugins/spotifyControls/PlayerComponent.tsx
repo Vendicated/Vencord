@@ -306,7 +306,9 @@ function Info({ track }: { track: Track; }) {
                                 <Link
                                     className={cl("artist")}
                                     disabled={!a.id}
-                                    href={`https://open.spotify.com/artist/${a.id}`}
+                                    onClick={a.id ? () => {
+                                        SpotifyStore.openExternal(`/artist/${a.id}`)
+                                    } : void 0}
                                     style={{ fontSize: "inherit" }}
                                     title={a.name}
                                     onContextMenu={makeContextMenu("Artist", `/artist/${a.id}`)}
@@ -322,7 +324,9 @@ function Info({ track }: { track: Track; }) {
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                         on&nbsp;
                         <Link id={cl("album-title")}
-                            href={`https://open.spotify.com/album/${track.album.id}`}
+                            onClick={track.album.id ? () => {
+                                SpotifyStore.openExternal(`/album/${track.album.id}`)
+                            } : void 0}
                             target="_blank"
                             className={cl("album")}
                             disabled={!track.album.id}
