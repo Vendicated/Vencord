@@ -41,10 +41,10 @@ export async function importSettings(data: string) {
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
-export async function exportSettings() {
+export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
     const settings = JSON.parse(VencordNative.settings.get());
     const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ settings, quickCss }, null, 4);
+    return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
 }
 
 export async function downloadSettingsBackup() {
@@ -122,7 +122,7 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
 export async function putCloudSettings(manual?: boolean) {
-    const settings = await exportSettings();
+    const settings = await exportSettings({ minify: true });
 
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
