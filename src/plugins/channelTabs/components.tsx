@@ -36,9 +36,8 @@ import { Channel, Guild, User } from "discord-types/general";
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "./util.js";
 
 const {
-    closeCurrentTab, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected,
-    moveDraggedTabs, moveToTab, moveToTabRelative, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction,
-    toggleCompactTab
+    closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, handleKeybinds,
+    isTabSelected, moveDraggedTabs, moveToTab, saveTabs, openStartupTabs, setUpdaterFunction, toggleCompactTab
 } = ChannelTabsUtils;
 
 const enum ChannelTypes {
@@ -336,6 +335,7 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         _update();
         saveTabs(userId);
     }
+    openStartupTabs(props);
 
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -347,26 +347,8 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
         };
 
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
-        return () => FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
+        return () => FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
     }, []);
-    openStartupTabs(props);
-
-    function handleKeybinds(e: KeyboardEvent) {
-        if (e.key === "Tab" && e.ctrlKey) {
-            const direction = e.shiftKey ? -1 : 1;
-            moveToTabRelative(direction, true);
-        }
-        // Ctrl+T is taken by discord
-        else if (["N", "n"].includes(e.key) && e.ctrlKey) {
-            createTab(props);
-        }
-        else if (["W", "w"].includes(e.key) && e.ctrlKey) {
-            closeCurrentTab();
-        }
-        else if (["T", "t"].includes(e.key) && e.ctrlKey && e.shiftKey) {
-            reopenClosedTab();
-        }
-    }
     useEffect(() => {
         document.addEventListener("keydown", handleKeybinds);
         return () => {

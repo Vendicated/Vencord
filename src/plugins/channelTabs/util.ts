@@ -140,10 +140,6 @@ function closeTab(id: number) {
     update();
 }
 
-function closeCurrentTab() {
-    closeTab(currentlyOpenTab);
-}
-
 function closeOtherTabs(id: number) {
     const tab = openTabs.find(v => v.id === id);
     if (tab === undefined) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
@@ -179,6 +175,35 @@ function handleChannelSwitch(ch: BasicChannelTabsProps) {
     if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
 }
 
+function handleKeybinds(e: KeyboardEvent) {
+    if (e.key === "Tab" && e.ctrlKey) {
+        const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
+        const direction = e.shiftKey ? -1 : 1;
+        const maybeNewTab = currentIndex + direction;
+
+        const newTab = maybeNewTab < 0
+            ? openTabs.length + direction
+            : maybeNewTab > openTabs.length - 1
+                ? maybeNewTab - openTabs.length
+                : maybeNewTab;
+        if (!openTabs[newTab]) return logger.error("Cannot move to nonexistent tab with index " + newTab, openTabs);
+
+        moveToTab(openTabs[newTab].id);
+    }
+    // Ctrl+T is taken by discord
+    else if (["N", "n"].includes(e.key) && e.ctrlKey) {
+        createTab(openTabs.find(t => t.id === currentlyOpenTab)!);
+    }
+    else if (["W", "w"].includes(e.key) && e.ctrlKey) {
+        closeTab(currentlyOpenTab);
+    }
+    else if (["T", "t"].includes(e.key) && e.ctrlKey && e.shiftKey) {
+        if (!closedTabs.length) return;
+        const tab = closedTabs.pop()!;
+        createTab(tab, true);
+    }
+}
+
 function isTabSelected(id: number) {
     return id === currentlyOpenTab;
 }
@@ -204,24 +229,6 @@ function moveToTab(id: number) {
     else if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
     else update();
-}
-
-function moveToTabRelative(offset: number, wrapAround?: boolean) {
-    const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
-    const maybeNewTab = currentIndex + offset;
-
-    if (!wrapAround) {
-        if (maybeNewTab < 0 || maybeNewTab >= openTabs.length) return;
-        return moveToTab(openTabs[maybeNewTab].id);
-    }
-
-    const newTab = maybeNewTab < 0
-        ? openTabs.length + offset
-        : maybeNewTab > openTabs.length - 1
-            ? maybeNewTab - openTabs.length
-            : maybeNewTab;
-    if (!openTabs[newTab]) return logger.error("Cannot move to nonexistent tab with index " + newTab, openTabs);
-    moveToTab(openTabs[newTab].id);
 }
 
 const saveTabs = async (userId: string) => {
@@ -295,12 +302,6 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     update();
 }
 
-function reopenClosedTab() {
-    if (!closedTabs.length) return;
-    const tab = closedTabs.pop()!;
-    createTab(tab, true);
-}
-
 function setUpdaterFunction(fn: () => void) {
     update = fn;
 }
@@ -317,6 +318,7 @@ function toggleCompactTab(id: number) {
 }
 
 export const ChannelTabsUtils = {
-    closeOtherTabs, closeTab, closeCurrentTab, closeTabsToTheRight, createTab, handleChannelSwitch, isTabSelected, moveDraggedTabs,
-    moveToTab, moveToTabRelative, openTabHistory, openTabs, saveTabs, openStartupTabs, reopenClosedTab, setUpdaterFunction, toggleCompactTab
+    closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
+    handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory,
+    openTabs, saveTabs, openStartupTabs, setUpdaterFunction, toggleCompactTab
 };
