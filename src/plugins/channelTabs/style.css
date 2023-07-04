@@ -1,53 +1,42 @@
 .vc-channeltabs-icon {
-    height: 24px;
-    width: 24px;
+    height: 1.5rem;
+    width: 1.5rem;
     border-radius: 50%;
 }
 
 .vc-channeltabs-guild-acronym-icon {
-    height: 20px;
-    width: 24px;
-    min-width: 24px;
+    height: 1.25rem;
+    width: 1.5rem;
+    min-width: 1.5rem;
     border-radius: 50%;
-    padding-top: 4px;
+    padding-top: 0.25rem;
     background-color: var(--background-primary);
     overflow: hidden;
 }
 
 /* user avatars in dm's */
 .vc-channeltabs-tab [class^="wrapper-"] {
-    min-width: 24px;
-}
-
-
-.vc-channeltabs-notification-dot {
-    height: 16px;
-    padding-left: 4px;
-    padding-right: 4px;
-    min-width: 8px;
-    border-radius: 16px;
-    text-align: center;
-    background-color: var(--brand-experiment);
+    min-width: 1.5rem;
 }
 
 .vc-channeltabs-channel-name-text {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-left: 0.3rem;
+    margin-left: 0.125rem;
 }
 
 .vc-channeltabs-tab-base {
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 0.25rem;
 }
 
 .vc-channeltabs-container {
-    padding: 6px;
+    padding: 0.35rem;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -63,10 +52,10 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     width: 12rem;
     min-width: 0;
-    margin-right: 4px;
+    margin-right: 0.25rem;
 }
 
 .vc-channeltabs-tab-compact {
@@ -88,15 +77,15 @@
 }
 
 .vc-channeltabs-new-button {
-    height: 18px;
+    height: 1rem;
     margin-top: auto;
     margin-bottom: auto;
 }
 
 .vc-channeltabs-close-button {
-    height: 16px;
+    height: 1rem;
     padding: 0;
-    margin-right: 8px;
+    margin-right: 0.5rem;
 }
 
 .vc-channeltabs-close-button:hover {
@@ -124,19 +113,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 20px;
-    width: 20px;
-    min-width: 20px;
+    height: 1.25rem;
+    width: 1.25rem;
+    min-width: 1.25rem;
     border-radius: 50%;
 }
 
 .vc-channeltabs-emoji {
-    height: 12px;
-    width: 12px;
-}
-
-.vc-channeltabs-typing-indicator {
-    margin-left: 2px;
+    height: 0.75rem;
+    width: 0.75rem;
 }
 
 .vc-channeltabs-preview-tab {
@@ -144,9 +129,9 @@
     flex-direction: row;
     align-items: center;
     width: 12rem;
-    padding: 2px 0;
+    padding: 0.125rem 0;
     min-width: 0;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     border: 1px solid var(--background-modifier-accent);
 }
 
