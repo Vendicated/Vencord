@@ -121,7 +121,7 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 // Cloud settings
 const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
-export async function putCloudSettings() {
+export async function putCloudSettings(manual?: boolean) {
     const settings = await exportSettings({ minify: true });
 
     try {
@@ -149,6 +149,14 @@ export async function putCloudSettings() {
         VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
+
+        if (manual) {
+            showNotification({
+                title: "Cloud Settings",
+                body: "Synchronized settings to the cloud!",
+                noPersist: true,
+            });
+        }
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
