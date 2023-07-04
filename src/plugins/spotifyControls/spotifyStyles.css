@@ -131,8 +131,8 @@
     color: var(--header-secondary);
 }
 
-.vc-spotify-artist:hover,
-#vc-spotify-album-title:hover,
+.vc-spotify-artist[role="link"]:hover,
+#vc-spotify-album-title[role="link"]:hover,
 #vc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
     cursor: pointer;

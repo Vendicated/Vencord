@@ -21,7 +21,6 @@ import "./spotifyStyles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
-import { Link } from "@components/Link";
 import { debounce } from "@utils/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
@@ -254,6 +253,16 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     );
 }
 
+function makeLinkProps(name: string, condition: unknown, path: string) {
+    if (!condition) return {};
+
+    return {
+        role: "link",
+        onClick: () => SpotifyStore.openExternal(path),
+        onContextMenu: makeContextMenu(name, path)
+    } satisfies React.HTMLAttributes<HTMLElement>;
+}
+
 function Info({ track }: { track: Track; }) {
     const img = track?.album?.image;
 
@@ -289,12 +298,8 @@ function Info({ track }: { track: Track; }) {
                     variant="text-sm/semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
-                    role={track.id ? "link" : undefined}
                     title={track.name}
-                    onClick={track.id ? () => {
-                        SpotifyStore.openExternal(`/track/${track.id}`);
-                    } : void 0}
-                    onContextMenu={track.id ? makeContextMenu("Song", `/track/${track.id}`) : void 0}
+                    {...makeLinkProps("Song", track.id, `/track/${track.id}`)}
                 >
                     {track.name}
                 </Forms.FormText>
@@ -303,16 +308,14 @@ function Info({ track }: { track: Track; }) {
                         by&nbsp;
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
-                                <Link
+                                <span
                                     className={cl("artist")}
-                                    disabled={!a.id}
-                                    href={`https://open.spotify.com/artist/${a.id}`}
                                     style={{ fontSize: "inherit" }}
                                     title={a.name}
-                                    onContextMenu={makeContextMenu("Artist", `/artist/${a.id}`)}
+                                    {...makeLinkProps("Artist", a.id, `/artist/${a.id}`)}
                                 >
                                     {a.name}
-                                </Link>
+                                </span>
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                             </React.Fragment>
                         ))}
@@ -321,17 +324,15 @@ function Info({ track }: { track: Track; }) {
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                         on&nbsp;
-                        <Link id={cl("album-title")}
-                            href={`https://open.spotify.com/album/${track.album.id}`}
-                            target="_blank"
+                        <span
+                            id={cl("album-title")}
                             className={cl("album")}
-                            disabled={!track.album.id}
                             style={{ fontSize: "inherit" }}
                             title={track.album.name}
-                            onContextMenu={makeContextMenu("Album", `/album/${track.album.id}`)}
+                            {...makeLinkProps("Album", track.album.id, `/album/${track.album.id}`)}
                         >
                             {track.album.name}
-                        </Link>
+                        </span>
                     </Forms.FormText>
                 )}
             </div>
