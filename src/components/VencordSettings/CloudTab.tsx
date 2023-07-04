@@ -86,7 +86,7 @@ function SettingsSyncSection() {
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
-                    onClick={() => putCloudSettings()}
+                    onClick={() => putCloudSettings(true)}
                 >Sync to Cloud</Button>
                 <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
                     {({ onMouseLeave, onMouseEnter }) => (
