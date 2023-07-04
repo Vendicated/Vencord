@@ -331,21 +331,18 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState(props.userId);
 
-    const ref = useRef<HTMLDivElement>(null);
-    if (ref.current)
-        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
-
     const _update = useForceUpdater();
     function update() {
         _update();
         saveTabs(userId);
     }
+
+    const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
         setUpdaterFunction(update);
         const initialRender = () => {
             setUserId(UserStore.getCurrentUser().id);
-            if (ref.current)
-                (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
+            (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current!.clientHeight;
             FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
         };
 
