@@ -20,7 +20,7 @@ import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Link } from "@components/Link";
-import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
+import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, cloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
@@ -37,7 +37,7 @@ function validateUrl(url: string) {
 }
 
 async function eraseAllData() {
-    const res = await fetch(new URL("/v1/", getCloudUrl()), {
+    const res = await fetch(new URL("/v1/", cloudUrl()), {
         method: "DELETE",
         headers: new Headers({
             Authorization: await getCloudAuth()
