@@ -22,6 +22,7 @@ import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { chooseFile } from "@utils/web";
 import { findLazy } from "@webpack";
 import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, SnowflakeUtils, useEffect, useRef, useState } from "@webpack/common";
 
@@ -62,14 +63,31 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
     upload.upload();
 }
 
+function useObjectUrl() {
+    const [url, setUrl] = useState<string>();
+    const setWithFree = (blob: Blob) => {
+        if (url) {
+            URL.revokeObjectURL(url);
+        }
+        setUrl(URL.createObjectURL(blob));
+    };
+
+    return [url, setWithFree] as const;
+}
+
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [blob, setBlob] = useState<Blob>();
-    const [url, setUrl] = useState<string>();
+    const [url, setUrl] = useObjectUrl();
     const [chunks, setChunks] = useState<Blob[]>([]);
     const audioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => () => {
+        if (url)
+            URL.revokeObjectURL(url);
+    }, [url]);
 
     useEffect(() => {
         if (recording) {
@@ -89,7 +107,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 recorder.addEventListener("stop", () => {
                     const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
                     setBlob(blob);
-                    setUrl(URL.createObjectURL(blob));
+                    setUrl(blob);
                 });
                 recorder.stop();
             }
@@ -116,6 +134,17 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                         }}
                     >
                         {paused ? "Resume" : "Pause"} recording
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            const file = await chooseFile("audio/ogg");
+                            if (file) {
+                                setBlob(file);
+                                setUrl(file);
+                            }
+                        }}
+                    >
+                        Upload File
                     </Button>
                 </Flex>
 

@@ -28,3 +28,26 @@ export function saveFile(file: File) {
         document.body.removeChild(a);
     });
 }
+
+export function chooseFile(mimeTypes: string) {
+    return new Promise<File | null>(resolve => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.style.display = "none";
+        input.accept = mimeTypes;
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return resolve(null);
+
+            const reader = new FileReader();
+            reader.onload = async () => {
+                resolve(file);
+            };
+            reader.readAsText(file);
+        };
+
+        document.body.appendChild(input);
+        input.click();
+        setImmediate(() => document.body.removeChild(input));
+    });
+}
