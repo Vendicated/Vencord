@@ -29,7 +29,11 @@ export const cloudLogger = new Logger("Cloud", "#39b7e0");
 export const getCloudUrl = () => new URL(Settings.cloud.url);
 
 const cloudUrlOrigin = () => getCloudUrl().origin;
-const getUserId = () => UserStore.getCurrentUser().id;
+const getUserId = () => {
+    const { id } = UserStore.getCurrentUser();
+    if (!id) throw new Error("User not yet logged in");
+    return id;
+};
 
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
@@ -48,13 +52,13 @@ export async function getAuthorization() {
         return secrets[cloudUrlOrigin()];
     }
 
-    return secrets[`${cloudUrlOrigin() }:${getUserId()}`];
+    return secrets[`${cloudUrlOrigin()}:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[`${cloudUrlOrigin() }:${getUserId()}`] = secret;
+        secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -62,7 +66,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[`${cloudUrlOrigin() }:${getUserId()}`];
+        delete secrets[`${cloudUrlOrigin()}:${getUserId()}`];
         return secrets;
     });
 }
