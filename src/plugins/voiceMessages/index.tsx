@@ -158,6 +158,9 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Button
                     disabled={!blob}
                     onClick={() => {
+                        const audio = audioRef.current;
+                        if (!audio || isNaN(audio.duration)) return;
+
                         sendAudio(audioRef.current!, blob!);
                         modalProps.onClose();
                         showToast("Now sending voice message... Please be patient");
