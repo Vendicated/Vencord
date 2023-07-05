@@ -196,10 +196,6 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     );
 }
 
-function openRecordModal() {
-    openModal(modalProps => <Modal modalProps={modalProps} />);
-}
-
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     if (props.channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel)) return;
 
@@ -214,14 +210,14 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
                     </Flex>
                 </>
             }
-            action={() => openRecordModal()}
+            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />
     );
 };
 
 export default definePlugin({
     name: "VoiceMessages",
-    description: "Send voice messages",
+    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     authors: [Devs.Ven],
 
     start() {
