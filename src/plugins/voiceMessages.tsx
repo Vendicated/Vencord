@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { Flex } from "@components/Flex";
+import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, RestAPI, SelectedChannelStore, SnowflakeUtils, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, SnowflakeUtils, useEffect, useRef, useState } from "@webpack/common";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
@@ -60,7 +62,7 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
     upload.upload();
 }
 
-function Modal() {
+function Modal({ modalProps }: { modalProps: ModalProps; }) {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
@@ -95,35 +97,67 @@ function Modal() {
     }, [recording]);
 
     return (
-        <div>
-            <Button onClick={() => setRecording(!recording)}>
-                {recording ? "Stop" : "Start"} recording
-            </Button>
-            <Button onClick={() => {
-                setPaused(!paused);
-                if (paused) recorder?.resume();
-                else recorder?.pause();
-            }}>
-                {paused ? "Resume" : "Pause"} recording
-            </Button>
+        <ModalRoot {...modalProps}>
+            <ModalHeader>
+                <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
+            </ModalHeader>
 
-            {url && (
-                <>
-                    <audio ref={audioRef} src={url} controls />
-                    <Button onClick={() => sendAudio(audioRef.current!, blob!)}>Send</Button>
-                </>
-            )}
-        </div>
+            <ModalContent>
+                <Flex>
+                    <Button onClick={() => setRecording(!recording)}>
+                        {recording ? "Stop" : "Start"} recording
+                    </Button>
+                    <Button
+                        disabled={!recording}
+                        onClick={() => {
+                            setPaused(!paused);
+                            if (paused) recorder?.resume();
+                            else recorder?.pause();
+                        }}
+                    >
+                        {paused ? "Resume" : "Pause"} recording
+                    </Button>
+                </Flex>
+
+                <Forms.FormTitle>Preview</Forms.FormTitle>
+                <audio ref={audioRef} src={url} controls />
+
+            </ModalContent>
+
+            <ModalFooter>
+                <Button
+                    disabled={!blob}
+                    onClick={() => sendAudio(audioRef.current!, blob!)}
+                >
+                    Send
+                </Button>
+            </ModalFooter>
+        </ModalRoot>
     );
 }
 
 function openRecordModal() {
-    openModal(modalProps => (
-        <ModalRoot {...modalProps}>
-            <Modal />
-        </ModalRoot>
-    ));
+    openModal(modalProps => <Modal modalProps={modalProps} />);
 }
+
+const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (!PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel)) return;
+
+    children.push(
+        <Menu.MenuItem
+            id="vc-send-vmsg"
+            label={
+                <>
+                    <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
+                        <Microphone height={24} width={24} />
+                        Send voice message
+                    </Flex>
+                </>
+            }
+            action={() => openRecordModal()}
+        />
+    );
+};
 
 export default definePlugin({
     name: "VoiceMessages",
@@ -131,6 +165,10 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     start() {
-        addAccessory("explod", () => <Button onClick={openRecordModal}>Record</Button>);
+        addContextMenuPatch("channel-attach", ctxMenuPatch);
     },
+
+    stop() {
+        removeContextMenuPatch("channel-attach", ctxMenuPatch);
+    }
 });
