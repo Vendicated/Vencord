@@ -28,15 +28,29 @@ import { openModal } from "./modal";
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
 export const getCloudUrl = () => new URL(Settings.cloud.url);
 
+const getUserId = () => UserStore.getCurrentUser().id;
+
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
-    return secrets[getCloudUrl().origin];
+
+    // we need to migrate from the old format here
+    if (secrets[getCloudUrl().origin]) {
+        await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+            secrets ??= {};
+            // use the current user ID
+            secrets[`${getCloudUrl().origin}:${getUserId()}`] = secrets[getCloudUrl().origin];
+            delete secrets[getCloudUrl().origin];
+            return secrets;
+        });
+    }
+
+    return secrets[`${getCloudUrl().origin}:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[getCloudUrl().origin] = secret;
+        secrets[`${getCloudUrl().origin}:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -44,7 +58,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[getCloudUrl().origin];
+        delete secrets[`${getCloudUrl().origin}:${getUserId()}`];
         return secrets;
     });
 }
@@ -117,8 +131,7 @@ export async function authorizeCloud() {
 }
 
 export async function getCloudAuth() {
-    const userId = UserStore.getCurrentUser().id;
     const secret = await getAuthorization();
 
-    return window.btoa(`${secret}:${userId}`);
+    return window.btoa(`${secret}:${getUserId()}`);
 }
