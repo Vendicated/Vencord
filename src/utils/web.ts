@@ -36,14 +36,7 @@ export function chooseFile(mimeTypes: string) {
         input.style.display = "none";
         input.accept = mimeTypes;
         input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return resolve(null);
-
-            const reader = new FileReader();
-            reader.onload = async () => {
-                resolve(file);
-            };
-            reader.readAsText(file);
+            resolve(input.files?.[0] ?? null);
         };
 
         document.body.appendChild(input);
