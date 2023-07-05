@@ -42,6 +42,9 @@ export async function getAuthorization() {
             delete secrets[getCloudUrl().origin];
             return secrets;
         });
+
+        // since this doesn't update the original object, we'll early return the existing authorization
+        return secrets[getCloudUrl().origin];
     }
 
     return secrets[`${getCloudUrl().origin}:${getUserId()}`];
