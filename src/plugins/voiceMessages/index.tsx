@@ -22,11 +22,19 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findLazy } from "@webpack";
 import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
+
+// Recording currently does not work on Discord Desktop, because it does
+// not support navigator.mediaDevices.getUserMedia
+//
+// Apparently they manually stripped this api from their Electron binary,
+// so there is likely nothing we can do. Possibly use discord_voice, but
+// at the time of writing, I (V) am too lazy to figure that out
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
@@ -122,20 +130,35 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             </ModalHeader>
 
             <ModalContent className="vc-vmsg-modal">
+                {IS_DISCORD_DESKTOP && (
+                    <Forms.FormText className={Margins.bottom8}>
+                        Recording from microphone is only supported on Discord Web and Vencord Desktop.
+                    </Forms.FormText>
+                )}
+
                 <div className="vc-vmsg-buttons">
-                    <Button onClick={() => setRecording(!recording)}>
-                        {recording ? "Stop" : "Start"} recording
-                    </Button>
-                    <Button
-                        disabled={!recording}
-                        onClick={() => {
-                            setPaused(!paused);
-                            if (paused) recorder?.resume();
-                            else recorder?.pause();
-                        }}
-                    >
-                        {paused ? "Resume" : "Pause"} recording
-                    </Button>
+                    {!IS_DISCORD_DESKTOP && (
+                        <>
+                            <Button
+                                onClick={() => setRecording(!recording)}
+                                disabled={IS_DISCORD_DESKTOP}
+                                title={IS_DISCORD_DESKTOP ? "" : undefined}
+                            >
+                                {recording ? "Stop" : "Start"} recording
+                            </Button>
+                            <Button
+                                disabled={!recording}
+                                onClick={() => {
+                                    setPaused(!paused);
+                                    if (paused) recorder?.resume();
+                                    else recorder?.pause();
+                                }}
+                            >
+                                {paused ? "Resume" : "Pause"} recording
+                            </Button>
+                        </>
+                    )}
+
                     <Button
                         onClick={async () => {
                             const file = await chooseFile("audio/*");
@@ -159,7 +182,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     disabled={!blob}
                     onClick={() => {
                         const audio = audioRef.current;
-                        if (!audio || isNaN(audio.duration)) return;
+                        if (!audio || isNaN(audio.duration)) return showToast("No valid audio file selected", Toasts.Type.FAILURE);
 
                         sendAudio(audioRef.current!, blob!);
                         modalProps.onClose();
