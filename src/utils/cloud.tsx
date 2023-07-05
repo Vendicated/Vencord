@@ -22,17 +22,13 @@ import { Settings } from "@api/Settings";
 import { findByProps } from "@webpack";
 import { UserStore } from "@webpack/common";
 
-import { proxyLazy } from "./lazy";
 import { Logger } from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const cloudUrl = proxyLazy(() => new URL(Settings.cloud.url));
+export const getCloudUrl = () => new URL(Settings.cloud.url);
 
-const cloudUrlOrigin = proxyLazy(() => cloudUrl.origin);
-
-// can't make this lazy as this may change at runtime (user switches accounts), therefore using a cached value is
-// incorrect
+const cloudUrlOrigin = () => getCloudUrl().origin;
 const getUserId = () => {
     const { id } = UserStore.getCurrentUser();
     if (!id) throw new Error("User not yet logged in");
@@ -43,26 +39,26 @@ export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
 
     // we need to migrate from the old format here
-    if (secrets[cloudUrlOrigin]) {
+    if (secrets[cloudUrlOrigin()]) {
         await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
             secrets ??= {};
             // use the current user ID
-            secrets[`${cloudUrlOrigin}:${getUserId()}`] = secrets[cloudUrlOrigin];
-            delete secrets[cloudUrlOrigin];
+            secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secrets[cloudUrlOrigin()];
+            delete secrets[cloudUrlOrigin()];
             return secrets;
         });
 
         // since this doesn't update the original object, we'll early return the existing authorization
-        return secrets[cloudUrlOrigin];
+        return secrets[cloudUrlOrigin()];
     }
 
-    return secrets[`${cloudUrlOrigin}:${getUserId()}`];
+    return secrets[`${cloudUrlOrigin()}:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[`${cloudUrlOrigin}:${getUserId()}`] = secret;
+        secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -70,7 +66,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[`${cloudUrlOrigin}:${getUserId()}`];
+        delete secrets[`${cloudUrlOrigin()}:${getUserId()}`];
         return secrets;
     });
 }
@@ -82,7 +78,7 @@ export async function authorizeCloud() {
     }
 
     try {
-        const oauthConfiguration = await fetch(new URL("/v1/oauth/settings", cloudUrl));
+        const oauthConfiguration = await fetch(new URL("/v1/oauth/settings", getCloudUrl()));
         var { clientId, redirectUri } = await oauthConfiguration.json();
     } catch {
         showNotification({
