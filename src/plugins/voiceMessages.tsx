@@ -141,7 +141,7 @@ function openRecordModal() {
 }
 
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (!PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel)) return;
+    if (props.channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel)) return;
 
     children.push(
         <Menu.MenuItem
