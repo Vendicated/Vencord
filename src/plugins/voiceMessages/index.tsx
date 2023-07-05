@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
@@ -24,7 +26,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, SnowflakeUtils, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
@@ -32,14 +34,13 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
     const channelId = SelectedChannelStore.getChannelId();
 
     const upload = new CloudUpload({
-        file: new File([blob], "audio.ogg", { type: "audio/ogg; codecs=opus" }),
+        file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isClip: false,
         isThumbnail: false,
         platform: 1,
     }, channelId, false, 0);
 
     upload.on("complete", () => {
-        console.log("Uploaded audio");
         RestAPI.post({
             url: `/channels/${channelId}/messages`,
             body: {
@@ -59,6 +60,7 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
             }
         });
     });
+    upload.on("error", () => showToast("Failed to upload voice message", Toasts.Type.FAILURE));
 
     upload.upload();
 }
@@ -66,9 +68,8 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
 function useObjectUrl() {
     const [url, setUrl] = useState<string>();
     const setWithFree = (blob: Blob) => {
-        if (url) {
+        if (url)
             URL.revokeObjectURL(url);
-        }
         setUrl(URL.createObjectURL(blob));
     };
 
@@ -80,14 +81,14 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [blob, setBlob] = useState<Blob>();
-    const [url, setUrl] = useObjectUrl();
+    const [blobUrl, setBlobUrl] = useObjectUrl();
     const [chunks, setChunks] = useState<Blob[]>([]);
     const audioRef = useRef<HTMLAudioElement>(null);
 
     useEffect(() => () => {
-        if (url)
-            URL.revokeObjectURL(url);
-    }, [url]);
+        if (blobUrl)
+            URL.revokeObjectURL(blobUrl);
+    }, [blobUrl]);
 
     useEffect(() => {
         if (recording) {
@@ -107,7 +108,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 recorder.addEventListener("stop", () => {
                     const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
                     setBlob(blob);
-                    setUrl(blob);
+                    setBlobUrl(blob);
                 });
                 recorder.stop();
             }
@@ -120,8 +121,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
             </ModalHeader>
 
-            <ModalContent>
-                <Flex>
+            <ModalContent className="vc-vmsg-modal">
+                <div className="vc-vmsg-buttons">
                     <Button onClick={() => setRecording(!recording)}>
                         {recording ? "Stop" : "Start"} recording
                     </Button>
@@ -137,26 +138,30 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     </Button>
                     <Button
                         onClick={async () => {
-                            const file = await chooseFile("audio/ogg");
+                            const file = await chooseFile("audio/*");
                             if (file) {
                                 setBlob(file);
-                                setUrl(file);
+                                setBlobUrl(file);
                             }
                         }}
                     >
                         Upload File
                     </Button>
-                </Flex>
+                </div>
 
                 <Forms.FormTitle>Preview</Forms.FormTitle>
-                <audio ref={audioRef} src={url} controls />
+                <audio ref={audioRef} src={blobUrl} controls />
 
             </ModalContent>
 
             <ModalFooter>
                 <Button
                     disabled={!blob}
-                    onClick={() => sendAudio(audioRef.current!, blob!)}
+                    onClick={() => {
+                        sendAudio(audioRef.current!, blob!);
+                        modalProps.onClose();
+                        showToast("Now sending voice message... Please be patient");
+                    }}
                 >
                     Send
                 </Button>

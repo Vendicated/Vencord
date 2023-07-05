@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/**
+ * Prompts the user to save a file to their system
+ * @param file The file to save
+ */
 export function saveFile(file: File) {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(file);
@@ -29,6 +33,11 @@ export function saveFile(file: File) {
     });
 }
 
+/**
+ * Prompts the user to choose a file from their system
+ * @param mimeTypes A comma separated list of mime types to accept, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
+ * @returns A promise that resolves to the chosen file or null if the user cancels
+ */
 export function chooseFile(mimeTypes: string) {
     return new Promise<File | null>(resolve => {
         const input = document.createElement("input");

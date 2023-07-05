@@ -1,0 +1,14 @@
+.vc-vmsg-modal {
+    padding: 1em;
+}
+
+.vc-vmsg-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5em;
+    margin-bottom: 1em;
+}
+
+.vc-vmsg-modal audio {
+    width: 100%;
+}
