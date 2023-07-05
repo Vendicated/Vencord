@@ -28,32 +28,33 @@ import { openModal } from "./modal";
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
 export const getCloudUrl = () => new URL(Settings.cloud.url);
 
+const cloudUrlOrigin = () => getCloudUrl().origin;
 const getUserId = () => UserStore.getCurrentUser().id;
 
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
 
     // we need to migrate from the old format here
-    if (secrets[getCloudUrl().origin]) {
+    if (secrets[cloudUrlOrigin()]) {
         await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
             secrets ??= {};
             // use the current user ID
-            secrets[`${getCloudUrl().origin}:${getUserId()}`] = secrets[getCloudUrl().origin];
-            delete secrets[getCloudUrl().origin];
+            secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secrets[cloudUrlOrigin()];
+            delete secrets[cloudUrlOrigin()];
             return secrets;
         });
 
         // since this doesn't update the original object, we'll early return the existing authorization
-        return secrets[getCloudUrl().origin];
+        return secrets[cloudUrlOrigin()];
     }
 
-    return secrets[`${getCloudUrl().origin}:${getUserId()}`];
+    return secrets[`${cloudUrlOrigin() }:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[`${getCloudUrl().origin}:${getUserId()}`] = secret;
+        secrets[`${cloudUrlOrigin() }:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -61,7 +62,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[`${getCloudUrl().origin}:${getUserId()}`];
+        delete secrets[`${cloudUrlOrigin() }:${getUserId()}`];
         return secrets;
     });
 }
