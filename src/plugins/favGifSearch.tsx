@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
@@ -23,10 +24,6 @@ import { useCallback, useState } from "@webpack/common";
 
 
 type Sizes = Record<"SMALL" | "MEDIUM" | "LARGE", string>;
-    SMALL: string;
-    MEDIUM: string;
-    LARGE: string;
-}
 
 interface Gif {
     format: number;
