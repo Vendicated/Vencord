@@ -80,7 +80,10 @@ export async function syncAndRunChecks() {
 
         if (settings.store.friendRequestCancels && oldFriends?.requests?.length) {
             for (const id of oldFriends.requests) {
-                if (friends.requests.includes(id) || [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.OUTGOING_REQUEST].includes(RelationshipStore.getRelationshipType(id))) continue;
+                if (
+                    friends.requests.includes(id) ||
+                    [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.OUTGOING_REQUEST].includes(RelationshipStore.getRelationshipType(id))
+                ) continue;
 
                 const user = await UserUtils.fetchUser(id).catch(() => void 0);
                 if (user)
