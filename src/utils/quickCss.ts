@@ -28,7 +28,11 @@ export async function toggle(isEnabled: boolean) {
             style = document.createElement("style");
             style.id = "vencord-custom-css";
             document.head.appendChild(style);
-            VencordNative.quickCss.addChangeListener(css => style.textContent = css);
+            VencordNative.quickCss.addChangeListener(css => {
+                if (Settings.useQuickCss) {
+                    style.textContent = css;
+                };
+            });
             style.textContent = await VencordNative.quickCss.get();
         }
     } else
