@@ -76,7 +76,7 @@ export default definePlugin({
     ],
 
 
-    renderSearchBar: (instance: Instance) => instance.state?.resultType === "Favorites" ? <SearchBar instance={instance} /> : null
+    renderSearchBar: ErrorBoundary.wrap((instance: Instance) => instance?.state?.resultType === "Favorites" ? <SearchBar instance={instance} /> : null, { noop: true })
 });
 
 
