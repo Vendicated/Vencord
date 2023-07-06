@@ -19,12 +19,20 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { useCallback, useState } from "@webpack/common";
 
+interface SearchBarComponentProps {
+    className: string;
+    size: string;
+    onChange: (query: string) => void;
+    onClear: () => void;
+    query: string;
+    placeholder: string;
+}
 
-type Sizes = Record<"SMALL" | "MEDIUM" | "LARGE", string>;
-
+type TSearchBarComponent =
+    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
 interface Gif {
     format: number;
     src: string;
@@ -47,15 +55,6 @@ interface Instance {
 
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
-interface SearchBarComponentProps {
-    className: string;
-    size: string;
-    onChange: (query: string) => void;
-    onClear: () => void;
-    query: string;
-    placeholder: string;
-}
-const SearchBarComponent: ((props: SearchBarComponentProps) => JSX.Element) & { Sizes: Sizes; } = findLazy(m => m.prototype?.render?.toString()?.includes('["query","autoFocus",'));
 
 export default definePlugin({
     name: "FavoriteGifSearch",
@@ -66,18 +65,24 @@ export default definePlugin({
         {
             find: "renderCategoryExtras",
             replacement: {
-                match: /(renderHeader=function.{1,500}return)(.{1,100}renderHeaderContent.{1,50})}/,
-                replace: "$1[$self.renderSearchBar(this), $2]}"
+                // https://regex101.com/r/4uHtTE/1
+                match: /(renderHeaderContent=function.{1,150}FAVORITES:return)(.{1,150};)(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\.\i))/,
+                replace: "$1 this.state.resultType === \"Favorites\" ? $self.renderSearchBar(this, $<searchComp>) : $2; $3"
             }
         }
     ],
 
 
-    renderSearchBar: ErrorBoundary.wrap((instance: Instance) => instance?.state?.resultType === "Favorites" ? <SearchBar instance={instance} /> : null, { noop: true })
+    renderSearchBar:
+        (instance: Instance, SearchBarComponent: TSearchBarComponent) => (
+            <ErrorBoundary noop={true}>
+                <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
+            </ErrorBoundary>
+        )
 });
 
 
-function SearchBar({ instance }: { instance: Instance; }) {
+function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
 
     const onChange = useCallback((quwery: string) => {
