@@ -90,7 +90,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         const { props } = instance;
         props.originalFav ||= props.favorites;
 
-        props.favorites = props.originalFav.filter(gif => (gif.url ?? gif.src).includes(quwery));
+        props.favorites = props.originalFav.filter(gif => (gif.url ?? gif.src).includes(quwery.toLowerCase()));
 
         instance.forceUpdate();
     }, [instance]);
