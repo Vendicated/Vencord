@@ -22,7 +22,7 @@ import { findByPropsLazy, findLazy } from "@webpack";
 import { useCallback, useState } from "@webpack/common";
 
 
-interface Sizes {
+type Sizes = Record<"SMALL" | "MEDIUM" | "LARGE", string>;
     SMALL: string;
     MEDIUM: string;
     LARGE: string;
