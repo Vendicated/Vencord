@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { useCallback, useState } from "@webpack/common";
 
@@ -55,6 +56,28 @@ interface Instance {
 
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
+export const settings = definePluginSettings({
+    searchOption: {
+        type: OptionType.SELECT,
+        description: "How you want to search the url",
+        default: "both",
+        options: [
+            {
+                label: "Both",
+                value: "both"
+            },
+            {
+                label: "Path Only (/somegif.gif)",
+                value: "path"
+            },
+            {
+                label: "Origin Only (https://cdn.discord.com)",
+                value: "origin"
+            }
+        ]
+
+    }
+});
 
 export default definePlugin({
     name: "FavoriteGifSearch",
@@ -72,7 +95,7 @@ export default definePlugin({
         }
     ],
 
-
+    settings,
     renderSearchBar:
         (instance: Instance, SearchBarComponent: TSearchBarComponent) => (
             <ErrorBoundary noop={true}>
@@ -90,10 +113,20 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         const { props } = instance;
         props.originalFav ||= props.favorites;
 
-        props.favorites = props.originalFav.filter(gif => (gif.url ?? gif.src).toLowerCase().includes(quwery.toLowerCase()));
+        props.favorites = props.originalFav.filter(gif => {
+            const url = new URL(gif.url ?? gif.src);
+            switch (settings.store.searchOption) {
+                case "both":
+                    return url.href.toLowerCase().includes(quwery.toLowerCase());
+                case "path":
+                    return url.pathname.toLowerCase().includes(quwery.toLowerCase());
+                case "origin":
+                    return url.origin.toLowerCase().includes(quwery.toLowerCase());
+            }
+        });
 
         instance.forceUpdate();
-    }, [instance]);
+    }, [instance.state]);
 
 
     return (
