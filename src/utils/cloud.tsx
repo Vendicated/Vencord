@@ -30,7 +30,7 @@ export const getCloudUrl = () => new URL(Settings.cloud.url);
 
 const cloudUrlOrigin = () => getCloudUrl().origin;
 const getUserId = () => {
-    const { id } = UserStore.getCurrentUser();
+    const id = UserStore.getCurrentUser()?.id;
     if (!id) throw new Error("User not yet logged in");
     return id;
 };
