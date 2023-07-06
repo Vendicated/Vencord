@@ -86,7 +86,7 @@ function SearchBar({ instance }: { instance: Instance; }) {
     const onChange = useCallback((quwery: string) => {
         setQuery(quwery);
         const { props } = instance;
-        if (!props.originalFav) props.originalFav = props.favorites;
+        props.originalFav ||= props.favorites;
 
         props.favorites = props.originalFav.filter(gif => (gif.url ?? gif.src).includes(quwery));
 
