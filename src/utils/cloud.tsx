@@ -38,21 +38,23 @@ const getUserId = () => {
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
 
+    const origin = cloudUrlOrigin();
+
     // we need to migrate from the old format here
-    if (secrets[cloudUrlOrigin()]) {
+    if (secrets[origin]) {
         await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
             secrets ??= {};
             // use the current user ID
-            secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secrets[cloudUrlOrigin()];
-            delete secrets[cloudUrlOrigin()];
+            secrets[`${origin}:${getUserId()}`] = secrets[origin];
+            delete secrets[origin];
             return secrets;
         });
 
         // since this doesn't update the original object, we'll early return the existing authorization
-        return secrets[cloudUrlOrigin()];
+        return secrets[origin];
     }
 
-    return secrets[`${cloudUrlOrigin()}:${getUserId()}`];
+    return secrets[`${origin}:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
