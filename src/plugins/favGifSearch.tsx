@@ -34,6 +34,7 @@ interface SearchBarComponentProps {
 
 type TSearchBarComponent =
     React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+
 interface Gif {
     format: number;
     src: string;
@@ -59,8 +60,8 @@ const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "s
 export const settings = definePluginSettings({
     searchOption: {
         type: OptionType.SELECT,
-        description: "How you want to search the url",
-        default: "both",
+        description: "The part of the url you want to search",
+        default: "path",
         options: [
             {
                 label: "Both",
@@ -71,9 +72,9 @@ export const settings = definePluginSettings({
                 value: "path"
             },
             {
-                label: "Origin Only (https://cdn.discord.com)",
-                value: "origin"
-            }
+                label: "Host Only (tenor.com)",
+                value: "host"
+            },
         ]
 
     }
@@ -108,20 +109,34 @@ export default definePlugin({
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
 
-    const onChange = useCallback((quwery: string) => {
-        setQuery(quwery);
+    const onChange = useCallback((searchQuery: string) => {
+        setQuery(searchQuery);
         const { props } = instance;
         props.originalFav ||= props.favorites;
+
+        // return early
+        if (searchQuery === "") {
+            if (props.favorites.length !== props.originalFav.length) {
+                props.favorites = props.originalFav;
+                instance.forceUpdate();
+            }
+            return;
+        }
+
 
         props.favorites = props.originalFav.filter(gif => {
             const url = new URL(gif.url ?? gif.src);
             switch (settings.store.searchOption) {
                 case "both":
-                    return url.href.toLowerCase().includes(quwery.toLowerCase());
+                    return fuzzySearch(searchQuery, url.href);
                 case "path":
-                    return url.pathname.toLowerCase().includes(quwery.toLowerCase());
-                case "origin":
-                    return url.origin.toLowerCase().includes(quwery.toLowerCase());
+                    if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                        // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
+                        // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
+                        return fuzzySearch(searchQuery, url.pathname.split("/").at(-1)!);
+                    return fuzzySearch(searchQuery, url.pathname);
+                case "host":
+                    return fuzzySearch(searchQuery, url.host);
             }
         });
 
@@ -143,4 +158,23 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             placeholder="Search Favorite Gifs"
         />
     );
+}
+
+
+
+function fuzzySearch(searchQuery: string, searchString: string): boolean {
+    searchQuery = searchQuery.toLowerCase();
+    searchString = searchString.replace(/(%20|[_-])/g, " ").toLowerCase();
+
+
+    let searchIndex = 0;
+    for (let i = 0; i < searchString.length; i++) {
+        if (searchString[i] === searchQuery[searchIndex]) {
+            searchIndex++;
+        }
+        if (searchIndex === searchQuery.length) {
+            return true;
+        }
+    }
+    return false;
 }
