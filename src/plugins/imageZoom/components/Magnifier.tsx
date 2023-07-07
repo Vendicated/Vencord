@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
 import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
@@ -32,6 +33,8 @@ export interface MagnifierProps {
     size: number,
     instance: any;
 }
+
+const cl = classNameFactory("vc-imgzoom-");
 
 export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
     const [ready, setReady] = useState(false);
@@ -156,7 +159,7 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
 
     return (
         <div
-            className="vc-imgzoom-lens"
+            className={cl("lens", { "nearest-neighbor": settings.store.nearestNeighbour, square: settings.store.square })}
             style={{
                 opacity,
                 width: size.current + "px",
