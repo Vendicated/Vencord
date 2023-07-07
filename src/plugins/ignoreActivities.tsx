@@ -45,7 +45,7 @@ function ToggleIconOff() {
             className={RegisteredGamesClasses.overlayToggleIconOff}
             height="24"
             width="24"
-            viewBox="0 0 32 26"
+            viewBox="0 2.2 32 26"
             aria-hidden={true}
             role="img"
         >
@@ -77,7 +77,7 @@ function ToggleIconOn({ forceWhite }: { forceWhite?: boolean; }) {
             className={RegisteredGamesClasses.overlayToggleIconOn}
             height="24"
             width="24"
-            viewBox="0 0 32 26"
+            viewBox="0 2.2 32 26"
         >
             <path
                 className={forceWhite ? "" : RegisteredGamesClasses.fill}
@@ -119,7 +119,7 @@ function ToggleActivityComponentWithBackground({ activity }: { activity: Ignored
     return (
         <div
             className={`${TryItOutClasses.tryItOutBadge} ${BaseShapeRoundClasses.baseShapeRound}`}
-            style={{ padding: "0px 2px" }}
+            style={{ padding: "0px 2px", height: 28 }}
         >
             <ToggleActivityComponent activity={activity} forceWhite={true} />
         </div>
@@ -157,10 +157,16 @@ export default definePlugin({
         },
         {
             find: ".overlayBadge",
-            replacement: {
-                match: /(?<=\(\)\.badgeContainer.+?(\i)\.name}\):null)/,
-                replace: (_, props) => `,$self.renderToggleActivityButton(${props})`
-            }
+            replacement: [
+                {
+                    match: /(?<=\(\)\.badgeContainer,children:).{0,50}?name:(\i)\.name.+?null/,
+                    replace: (m, props) => `[${m},$self.renderToggleActivityButton(${props})]`
+                },
+                {
+                    match: /(?<=\(\)\.badgeContainer,children:).{0,50}?name:(\i\.application)\.name.+?null/,
+                    replace: (m, props) => `${m},$self.renderToggleActivityButton(${props})`
+                }
+            ]
         },
         {
             find: '.displayName="LocalActivityStore"',
