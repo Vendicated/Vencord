@@ -24,6 +24,7 @@ import { findByPropsLazy } from "@webpack";
 import { useCallback, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
+    autoFocus: boolean;
     className: string;
     size: string;
     onChange: (query: string) => void;
@@ -152,6 +153,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
     return (
         <SearchBarComponent
+            autoFocus={true}
             className={containerClasses.searchBar}
             size={SearchBarComponent.Sizes.MEDIUM}
             onChange={onChange}
