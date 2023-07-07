@@ -61,7 +61,7 @@ export const settings = definePluginSettings({
     searchOption: {
         type: OptionType.SELECT,
         description: "The part of the url you want to search",
-        default: "path",
+        default: "both",
         options: [
             {
                 label: "Entire Url",
