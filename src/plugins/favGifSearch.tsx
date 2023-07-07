@@ -64,8 +64,8 @@ export const settings = definePluginSettings({
         default: "path",
         options: [
             {
-                label: "Both",
-                value: "both"
+                label: "Entire Url",
+                value: "url"
             },
             {
                 label: "Path Only (/somegif.gif)",
@@ -75,6 +75,10 @@ export const settings = definePluginSettings({
                 label: "Host Only (tenor.com)",
                 value: "host"
             },
+            {
+                label: "Both (tenor.com somgif.gif)",
+                value: "both",
+            }
         ]
 
     }
@@ -127,16 +131,18 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         props.favorites = props.originalFav.filter(gif => {
             const url = new URL(gif.url ?? gif.src);
             switch (settings.store.searchOption) {
-                case "both":
+                case "url":
                     return fuzzySearch(searchQuery, url.href);
+                case "host":
+                    return fuzzySearch(searchQuery, url.host);
                 case "path":
                     if (url.host === "media.discordapp.net" || url.host === "tenor.com")
                         // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
                         // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
-                        return fuzzySearch(searchQuery, url.pathname.split("/").at(-1)!);
+                        return fuzzySearch(searchQuery, url.pathname.split("/").at(-1) ?? url.pathname);
                     return fuzzySearch(searchQuery, url.pathname);
-                case "host":
-                    return fuzzySearch(searchQuery, url.host);
+                case "both":
+                    return fuzzySearch(searchQuery, `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`);
             }
         });
 
@@ -173,6 +179,7 @@ function fuzzySearch(searchQuery: string, searchString: string): boolean {
             searchIndex++;
         }
         if (searchIndex === searchQuery.length) {
+            // console.log("searchQuery = ", searchQuery, "\nsearchString = ", searchString);
             return true;
         }
     }
