@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { useCallback, useState } from "@webpack/common";
+import { useCallback, useEffect, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
     autoFocus: boolean;
@@ -46,11 +46,13 @@ interface Gif {
 }
 
 interface Instance {
+    dead?: boolean;
     state: {
         resultType?: string;
     };
     props: {
-        originalFav?: Gif[],
+        favCopy: Gif[],
+
         favorites: Gif[],
     },
     forceUpdate: () => void;
@@ -93,21 +95,42 @@ export default definePlugin({
     patches: [
         {
             find: "renderCategoryExtras",
-            replacement: {
-                // https://regex101.com/r/4uHtTE/1
-                match: /(renderHeaderContent=function.{1,150}FAVORITES:return)(.{1,150};)(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\.\i))/,
-                replace: "$1 this.state.resultType === \"Favorites\" ? $self.renderSearchBar(this, $<searchComp>) : $2; $3"
-            }
+            replacement: [
+                {
+                    // https://regex101.com/r/4uHtTE/1
+                    match: /(renderHeaderContent=function.{1,150}FAVORITES:return)(.{1,150};)(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\.\i))/,
+                    replace: "$1 this.state.resultType === \"Favorites\" ? $self.renderSearchBar(this, $<searchComp>) : $2; $3"
+                },
+                {
+                    // to persist filtered favorites when component re-renders.
+                    // when resizing the window the component rerenders and we loose the filtered favorites and have to type in the search bar to get them again
+                    match: /(,suggestions:\i,favorites:)(\i),/,
+                    replace: "$1$self.getFav($2),favCopy:$2,"
+                }
+
+            ]
         }
     ],
 
     settings,
-    renderSearchBar:
-        (instance: Instance, SearchBarComponent: TSearchBarComponent) => (
+
+    instance: null as Instance | null,
+    renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
+        this.instance = instance;
+        return (
             <ErrorBoundary noop={true}>
                 <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
             </ErrorBoundary>
-        )
+        );
+    },
+
+    getFav(favorites: Gif[]) {
+        if (!this.instance || this.instance.dead) return favorites;
+        const { favorites: filteredFavorites } = this.instance.props;
+
+        return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
+
+    }
 });
 
 
@@ -117,19 +140,18 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
         const { props } = instance;
-        props.originalFav ||= props.favorites;
 
         // return early
         if (searchQuery === "") {
-            if (props.favorites.length !== props.originalFav.length) {
-                props.favorites = props.originalFav;
+            if (props.favorites.length !== props.favCopy.length) {
+                props.favorites = props.favCopy;
                 instance.forceUpdate();
             }
             return;
         }
 
 
-        props.favorites = props.originalFav.filter(gif => {
+        props.favorites = props.favCopy.filter(gif => {
             const url = new URL(gif.url ?? gif.src);
             switch (settings.store.searchOption) {
                 case "url":
@@ -150,6 +172,11 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         instance.forceUpdate();
     }, [instance.state]);
 
+    useEffect(() => {
+        return () => {
+            instance.dead = true;
+        };
+    }, []);
 
     return (
         <SearchBarComponent
@@ -159,8 +186,10 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             onChange={onChange}
             onClear={() => {
                 setQuery("");
-                instance.props.favorites = instance.props.originalFav!;
-                instance.forceUpdate();
+                if (instance.props.favCopy != null) {
+                    instance.props.favorites = instance.props.favCopy;
+                    instance.forceUpdate();
+                }
             }}
             query={query}
             placeholder="Search Favorite Gifs"
