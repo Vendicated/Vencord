@@ -60,30 +60,28 @@ interface Instance {
 
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
+// for type safety
+const options = [
+    {
+        label: "Entire Url",
+        value: "url"
+    },
+    {
+        label: "Path Only (/somegif.gif)",
+        value: "path"
+    },
+    {
+        label: "Host & Path (tenor.com somgif.gif)",
+        value: "hostandpath",
+    }
+] as const;
+
 export const settings = definePluginSettings({
     searchOption: {
         type: OptionType.SELECT,
         description: "The part of the url you want to search",
-        default: "both",
-        options: [
-            {
-                label: "Entire Url",
-                value: "url"
-            },
-            {
-                label: "Path Only (/somegif.gif)",
-                value: "path"
-            },
-            {
-                label: "Host Only (tenor.com)",
-                value: "host"
-            },
-            {
-                label: "Both (tenor.com somgif.gif)",
-                value: "both",
-            }
-        ]
-
+        default: "hostandpath",
+        options
     }
 });
 
@@ -156,15 +154,13 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             switch (settings.store.searchOption) {
                 case "url":
                     return fuzzySearch(searchQuery, url.href);
-                case "host":
-                    return fuzzySearch(searchQuery, url.host);
                 case "path":
                     if (url.host === "media.discordapp.net" || url.host === "tenor.com")
                         // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
                         // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
                         return fuzzySearch(searchQuery, url.pathname.split("/").at(-1) ?? url.pathname);
                     return fuzzySearch(searchQuery, url.pathname);
-                case "both":
+                case "hostandpath":
                     return fuzzySearch(searchQuery, `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`);
             }
         });
