@@ -17,35 +17,35 @@ const Month1Badge: ProfileBadge = {
     link: STORE_URL
 };
 const Month2Badge: ProfileBadge = {
-    description: "7TV Subscriber - 2 Month",
+    description: "7TV Subscriber - 2 Months",
     image: "https://cdn.7tv.app/badge/62f97db2e46eb00e438a696b/3x",
     position: BadgePosition.START,
     props: BADGE_PROPS,
-    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Month"),
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Months"),
     link: STORE_URL
 };
 const Month3Badge: ProfileBadge = {
-    description: "7TV Subscriber - 3 Month",
+    description: "7TV Subscriber - 3 Months",
     image: "https://cdn.7tv.app/badge/62f97e19e46eb00e438a696c/3x",
     position: BadgePosition.START,
     props: BADGE_PROPS,
-    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 3 Month"),
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 3 Months"),
     link: STORE_URL
 };
 const Month6Badge: ProfileBadge = {
-    description: "7TV Subscriber - 6 Month",
+    description: "7TV Subscriber - 6 Months",
     image: "https://cdn.7tv.app/badge/62f97e71e46eb00e438a696d/3x",
     position: BadgePosition.START,
     props: BADGE_PROPS,
-    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 6 Month"),
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 6 Months"),
     link: STORE_URL
 };
 const Month9Badge: ProfileBadge = {
-    description: "7TV Subscriber - 9 Month",
+    description: "7TV Subscriber - 9 Months",
     image: "https://cdn.7tv.app/badge/62f97ebee46eb00e438a696e/3x",
     position: BadgePosition.START,
     props: BADGE_PROPS,
-    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 9 Month"),
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 9 Months"),
     link: STORE_URL
 };
 const Year1Badge: ProfileBadge = {
