@@ -50,7 +50,7 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
                     () => openUserProfile(user.id)
                 );
             break;
-        case RelationshipType.FRIEND_REQUEST:
+        case RelationshipType.INCOMING_REQUEST:
             if (settings.store.friendRequestCancels)
                 notify(
                     `A friend request from ${getUniqueUsername(user)} has been removed.`,

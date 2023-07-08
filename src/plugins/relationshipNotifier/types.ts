@@ -58,5 +58,7 @@ export const enum ChannelType {
 
 export const enum RelationshipType {
     FRIEND = 1,
-    FRIEND_REQUEST = 3,
+    BLOCKED = 2,
+    INCOMING_REQUEST = 3,
+    OUTGOING_REQUEST = 4,
 }
