@@ -44,6 +44,9 @@ export function TranslationAccessory({ message }: { message: Message; }) {
     const [translation, setTranslation] = useState<TranslationValue>();
 
     useEffect(() => {
+        // Ignore MessageLinkEmbeds messages
+        if ((message as any).vencordEmbeddedBy) return;
+
         TranslationSetters.set(message.id, setTranslation);
 
         return () => void TranslationSetters.delete(message.id);
