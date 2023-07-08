@@ -16,13 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const enum UserType {
-    Banned = -1,
-    Normal = 0,
-    Admin = 1
+export interface ImageModalClasses {
+    image: string,
+    modal: string,
+    responsiveWidthMobile: string;
 }
 
-export interface ReviewDBUser {
-    lastReviewID: number,
-    type: UserType;
+export interface ButtonWrapperClasses {
+    hoverScale: string;
+    buttonWrapper: string;
+    button: string;
+    iconMask: string;
+    buttonContent: string;
+    icon: string;
+    pulseIcon: string;
+    pulseButton: string;
+    notificationDot: string;
+    sparkleContainer: string;
+    sparkleStar: string;
+    sparklePlus: string;
+    sparkle: string;
+    active: string;
 }

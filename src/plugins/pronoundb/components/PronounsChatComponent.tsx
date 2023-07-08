@@ -26,10 +26,12 @@ import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
+const AUTO_MODERATION_ACTION = 24;
+
 function shouldShow(message: Message): boolean {
     if (!settings.store.showInMessages)
         return false;
-    if (message.author.bot || message.author.system)
+    if (message.author.bot || message.author.system || message.type === AUTO_MODERATION_ACTION)
         return false;
     if (!settings.store.showSelf && message.author.id === UserStore.getCurrentUser().id)
         return false;
@@ -50,7 +52,7 @@ export function CompactPronounsChatComponentWrapper({ message }: { message: Mess
 }
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (
@@ -62,7 +64,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
 }
 
 export function CompactPronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (

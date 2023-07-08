@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Badge } from "./Badge";
 
-export interface Sender {
-    id : number,
-    discordID: string,
-    username: string,
-    profilePhoto: string,
-    badges: Badge[]
-}
+import { findStoreLazy } from "@webpack";
 
-export interface Review {
-    comment: string,
-    id: number,
-    star: number,
-    sender: Sender,
-    timestamp: number
-}
+import * as t from "./types/stores";
+
+export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
+export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");

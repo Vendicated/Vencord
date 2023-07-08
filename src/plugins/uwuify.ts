@@ -17,8 +17,10 @@
 */
 
 import { findOption, RequiredMessageOption } from "@api/Commands";
+import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 const endings = [
     "rawr x3",
@@ -63,7 +65,17 @@ const replacements = [
     ["stupid", "baka"],
     ["what", "nani"],
     ["meow", "nya~"],
+    ["hello", "hewwo"],
 ];
+
+const settings = definePluginSettings({
+    uwuEveryMessage: {
+        description: "Make every single message uwuified",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
+    }
+});
 
 function selectRandomElement(arr) {
     // generate a random index based on the length of the array
@@ -94,8 +106,9 @@ function uwuify(message: string): string {
 export default definePlugin({
     name: "UwUifier",
     description: "Simply uwuify commands",
-    authors: [Devs.echo, Devs.skyevg],
-    dependencies: ["CommandsAPI"],
+    authors: [Devs.echo, Devs.skyevg, Devs.PandaNinjas],
+    dependencies: ["CommandsAPI", "MessageEventsAPI"],
+    settings,
 
     commands: [
         {
@@ -108,4 +121,23 @@ export default definePlugin({
             }),
         },
     ],
+
+    onSend(msg: MessageObject) {
+        // Only run when it's enabled
+        if (settings.store.uwuEveryMessage) {
+            msg.content = uwuify(msg.content);
+        }
+    },
+
+    start() {
+        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
+        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
+            this.onSend(msg)
+        );
+    },
+
+    stop() {
+        removePreSendListener(this.preSend);
+        removePreEditListener(this.preEdit);
+    },
 });

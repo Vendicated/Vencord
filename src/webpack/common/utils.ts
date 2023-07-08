@@ -77,6 +77,17 @@ export const Toasts = {
     }
 };
 
+/**
+ * Show a simple toast. If you need more options, use Toasts.show manually
+ */
+export function showToast(message: string, type = ToastType.MESSAGE) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type
+    });
+}
+
 export const UserUtils = {
     fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
 };
@@ -114,3 +125,5 @@ waitFor("parseTopic", m => Parser = m);
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+
+export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");

@@ -20,7 +20,7 @@ import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-enum Methods {
+const enum Methods {
     Random,
     Consistent,
     Timestamp,
