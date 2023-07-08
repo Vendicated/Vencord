@@ -136,7 +136,7 @@ async function FetchEmotes(value, handleRefresh) {
             searching = false;
             handleRefresh();
         })
-        .catch(error => { SevenTVLogger.error("[7TVEmotes] " + error); searching = false; });
+        .catch(error => { SevenTVLogger.error(error); searching = false; });
 }
 
 async function getSevenTVDiscord(id) {
@@ -154,7 +154,7 @@ async function getSevenTVDiscord(id) {
         }
     } catch (error) {
         Logger;
-        SevenTVLogger.error("[7TVEmotes] " + error);
+        SevenTVLogger.error(error);
     }
     return null;
 }
@@ -165,16 +165,13 @@ export function hasBadge(id, name) {
     if (cachedBadges[name] == null)
         return false;
 
-    if (cachedBadges[name][id] == true)
-        return true;
-    else
-        return false;
+    return cachedBadges[name][id];
 }
 
 async function checkBadge(id, name) {
     let sevenTvId = await getSevenTVDiscord(id);
     if (sevenTvId == null)
-        return false;
+        return;
 
     const query = `query GetUserCurrentCosmetics($id: ObjectID!) {
         user(id: $id) {
@@ -214,21 +211,23 @@ async function checkBadge(id, name) {
         });
         const data = await response.json();
 
-        if (data.data?.user.style.badge?.name == name) {
+        if (!data.data)
+            return;
+
+        if (data.data.user.style.badge?.name == name) {
             if (!cachedBadges[name])
                 cachedBadges[name] = {};
 
             cachedBadges[name][id] = true;
-            return true;
+            return;
         }
     } catch (error) {
-        SevenTVLogger.error("[7TVEmotes] " + error);
+        SevenTVLogger.error(error);
     }
 
     if (!cachedBadges[name])
         cachedBadges[name] = {};
     cachedBadges[name][id] = false;
-    return false;
 }
 
 const settings = definePluginSettings({
