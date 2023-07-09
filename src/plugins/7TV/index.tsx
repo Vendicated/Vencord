@@ -381,39 +381,41 @@ export default definePlugin({
         return (
             <div className={cl("picker")}>
                 <div className={cl("picker-content")}>
-                    <div className={cl("navigation")}>
-                        <TextInput className={cl("searchinput")}
-                            type="string"
-                            value={value}
-                            onChange={e => setValue(e)}
-                            placeholder="Search 7TV Emotes"
-                            spellCheck="false"
-                            style={{
-                                colorScheme: getTheme() === Theme.Light ? "light" : "dark",
-                            }}
-                            onKeyDown={e => {
-                                if (e.key === "Enter")
-                                    if (!searching) {
-                                        page = 1;
-                                        FetchEmotes(value, handleRefresh);
-                                    }
-                            }}
-                        />
-                        <div className={cl("searchbutton")} style={{
-                            boxSizing: "border-box"
-                        }} onClick={() => {
-                            if (!searching) {
-                                page = 1;
-                                FetchEmotes(value, handleRefresh);
-                            }
-                        }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="24px" height="24px">
-                                <path fill="#b5bac1" d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z" />
-                            </svg>
+                    <div className={cl("navigation-shadow")}>
+                        <div className={cl("navigation")}>
+                            <TextInput className={cl("searchinput")}
+                                type="string"
+                                value={value}
+                                onChange={e => setValue(e)}
+                                placeholder="Search 7TV Emotes"
+                                spellCheck="false"
+                                style={{
+                                    colorScheme: getTheme() === Theme.Light ? "light" : "dark",
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === "Enter")
+                                        if (!searching) {
+                                            page = 1;
+                                            FetchEmotes(value, handleRefresh);
+                                        }
+                                }}
+                            />
+                            <div className={cl("searchbutton")} style={{
+                                boxSizing: "border-box"
+                            }} onClick={() => {
+                                if (!searching) {
+                                    page = 1;
+                                    FetchEmotes(value, handleRefresh);
+                                }
+                            }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="24px" height="24px">
+                                    <path fill="#b5bac1" d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
 
-                    <br></br>
+
 
                     <Forms.FormDivider></Forms.FormDivider>
 
@@ -438,46 +440,45 @@ export default definePlugin({
                         ))}
                     </div>
 
-                    <Forms.FormDivider></Forms.FormDivider>
-                    <br></br>
 
-                    <div className={cl("navigation")}>
-                        <Button className={cl("pagebutton")}
-                            look={Button.Looks.BLANK}
-                            onClick={() => {
-                                if (!searching) {
-                                    page--;
-                                    FetchEmotes(value, handleRefresh);
-                                }
-                            }}
-                        >
-                            <svg fill="#000000" height="24px" width="24px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
-                                <g>
-                                    <polygon fill="#b5bac1" points="242.227,481.919 314.593,407.95 194.882,290.855 490,290.855 490,183.86 210.504,183.86 314.593,82.051 242.227,8.081 0,244.996" />
-                                </g>
-                            </svg></Button>
-                        <Button className={cl("pagebutton")}
-                            look={Button.Looks.BLANK}
-                            onClick={() => {
-                                if (!searching) {
-                                    page++;
-                                    FetchEmotes(value, handleRefresh);
-                                }
-                            }}
-                        >
-                            <svg fill="#000000" height="24px" width="24px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 490 490">
-                                <g>
+                    <div className={cl("navigation-footer")}>
+                        <div className={cl("navigation-footer-arrows")}>
+                            <Button className={cl("pagebutton")}
+                                look={Button.Looks.BLANK}
+                                onClick={() => {
+                                    if (!searching) {
+                                        page--;
+                                        FetchEmotes(value, handleRefresh);
+                                    }
+                                }}
+                            >
+                                <svg fill="#000000" height="24px" width="24px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
                                     <g>
-                                        <polygon fill="#b5bac1" points="247.773,8.081 175.407,82.05 295.118,199.145 0,199.145 0,306.14 279.496,306.14 175.407,407.949 247.773,481.919 490,245.004" />
+                                        <polygon fill="#b5bac1" points="242.227,481.919 314.593,407.95 194.882,290.855 490,290.855 490,183.86 210.504,183.86 314.593,82.051 242.227,8.081 0,244.996" />
                                     </g>
-                                </g>
-                            </svg></Button>
+                                </svg></Button>
+                            <Button className={cl("pagebutton")}
+                                look={Button.Looks.BLANK}
+                                onClick={() => {
+                                    if (!searching) {
+                                        page++;
+                                        FetchEmotes(value, handleRefresh);
+                                    }
+                                }}
+                            >
+                                <svg fill="#000000" height="24px" width="24px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 490 490">
+                                    <g>
+                                        <g>
+                                            <polygon fill="#b5bac1" points="247.773,8.081 175.407,82.05 295.118,199.145 0,199.145 0,306.14 279.496,306.14 175.407,407.949 247.773,481.919 490,245.004" />
+                                        </g>
+                                    </g>
+                                </svg></Button>
+                        </div>
+                        <div className={cl("footer")}>
+                            <Forms.FormText className={cl("pagetext")}>{lastError === "" ? (<>Page {page}</>) : (<>{lastError}</>)}</Forms.FormText>
+                        </div>
                     </div>
-                </div>
-
-                <div className={cl("footer")}>
-                    <Forms.FormText className={cl("pagetext")}>{lastError === "" ? (<>Page {page}</>) : (<>{lastError}</>)}</Forms.FormText>
                 </div>
             </div >
         );

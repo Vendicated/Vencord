@@ -6,25 +6,21 @@
 .vc-seventv-emotes {
     width: 100%;
     max-width: 500px;
-    min-height: 310px;
-    max-height: 310px;
+    min-height: 332px;
+    max-height: 332px;
     text-align: center;
     overflow: scroll;
     overflow-x: hidden;
 }
 
 .vc-seventv-emotes::-webkit-scrollbar {
-    width: 12px;
+    width: 10px;
 }
 
 .vc-seventv-emotes::-webkit-scrollbar-thumb {
     background-color: #1a1b1e;
     border-radius: 6px;
     border: 3px solid #2b2d31;
-}
-
-.vc-seventv-emotes::-webkit-scrollbar-thumb:hover {
-    background-color: #7289da;
 }
 
 .vc-seventv-emotebutton {
@@ -42,6 +38,11 @@
     justify-content: center;
     margin: 0 auto;
     width: 95%;
+}
+
+.vc-seventv-navigation-shadow {
+    box-shadow: 0 1px 2px 0 black;
+    height: 50px;
 }
 
 .vc-seventv-searchinput {
@@ -68,6 +69,21 @@
 
 .vc-seventv-pagetext {
     text-align: center;
+}
+
+.vc-seventv-navigation-footer {
+    background-color: #232428;
+    height: 100%;
+    width: 100%;
+    padding: 5px;
+}
+
+.vc-seventv-navigation-footer-arrows {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 .vc-seventv-chat-icon {
