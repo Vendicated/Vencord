@@ -58,6 +58,8 @@ interface Instance {
     forceUpdate: () => void;
 }
 
+const bitFlagsCache = new Map<string, number>(); // (str, flags)
+
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
 export const settings = definePluginSettings({
@@ -110,7 +112,6 @@ export default definePlugin({
     settings,
     fuzzySearch,
 
-
     getTargetString,
 
     instance: null as Instance | null,
@@ -158,7 +159,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         result.sort((a, b) => b.score - a.score);
         props.favorites = result.map(e => e.gif);
 
-        // console.log(result);
+        // console.log("%courFuzzy: ", "color: blue", result,);
         // console.timeEnd(searchQuery);
 
         instance.forceUpdate();
@@ -213,15 +214,30 @@ export function getTargetString(urlStr: string) {
 }
 
 
-function fuzzySearch(searchQuery: string, searchString: string) {
+function fuzzySearch(searchQuery: string, targetString: string) {
+    // didnt cache this function because if you have like a thousand gifs you will make a thousnad caches each time you search something new
+
+    const searchFlags = getBitFlags(searchQuery);
+    const targetFlags = getBitFlags(targetString);
+
+    // https://github.com/farzher/fuzzysort/blob/c7f1d2674d7fa526015646bc02fd17e29662d30c/fuzzysort.js#L34
+    if ((searchFlags & targetFlags) !== searchFlags) {
+        return null; // return early if search flags are not a subset of target flags
+    }
+
     let searchIndex = 0;
     let score = 0;
 
-    for (let i = 0; i < searchString.length; i++) {
-        if (searchString[i] === searchQuery[searchIndex]) {
-            if (i > 0 && searchString[i - 1] === searchQuery[searchIndex - 1]) {
+    for (let i = 0; i < targetString.length; i++) {
+        if (targetString[i] === searchQuery[searchIndex]) {
+            if (i > 0 && targetString[i - 1] === searchQuery[searchIndex - 1]) {
                 score += 2; // reward consecutive chars
             }
+
+            if (searchIndex === 0 || targetString[i - 1] === " ") {
+                score *= 1.5; // bonus for matching at the beginning or after a space
+            }
+
             score++;
             searchIndex++;
         } else {
@@ -235,3 +251,36 @@ function fuzzySearch(searchQuery: string, searchString: string) {
 
     return null;
 }
+
+
+// https://github.com/farzher/fuzzysort/blob/c7f1d2674d7fa526015646bc02fd17e29662d30c/fuzzysort.js#L450
+const getBitFlags = (str: string) => {
+    if (bitFlagsCache.has(str)) {
+        return bitFlagsCache.get(str)!;
+    }
+
+    let bitflags = 0;
+    for (let i = 0; i < str.length; ++i) {
+        const lowerCode = str.charCodeAt(i);
+
+        if (lowerCode === 32) {
+            continue; // it's important that we don't set any bitflags for space
+        }
+
+        switch (true) {
+            case lowerCode >= 97 && lowerCode <= 122:
+                bitflags |= 1 << (lowerCode - 97); // alphabet
+                break;
+            case lowerCode >= 48 && lowerCode <= 57:
+                bitflags |= 1 << 26; // numbers
+                break;
+            case lowerCode <= 127:
+                bitflags |= 1 << 30; // other ascii
+                break;
+            default:
+                bitflags |= 1 << 31; // other utf8
+        }
+    }
+
+    return bitflags;
+};
