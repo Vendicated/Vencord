@@ -252,15 +252,10 @@ function setOpenTab(id: number) {
 
 function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     const { userId } = props;
-    if (lastUserId && lastUserId !== userId) {
-        replaceArray(openTabs);
-        replaceArray(openTabHistory);
-        i = 0;
-    }
     persistedTabs ??= DataStore.get("ChannelTabs_openChannels_v2");
-    if (!userId) return;
-    lastUserId = userId;
-    if (openTabs.length) return;
+    replaceArray(openTabs);
+    replaceArray(openTabHistory);
+    i = 0;
 
     if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
         return Toasts.show({

@@ -27,6 +27,7 @@ import {
     i18n,
     Menu,
     PresenceStore, ReadStateStore, Text, TypingStore,
+    useCallback,
     useEffect, useRef,
     UserStore,
     useState, useStateFromStores
@@ -331,30 +332,25 @@ export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: s
     const [userId, setUserId] = useState(props.userId);
 
     const _update = useForceUpdater();
-    function update() {
+    const update = useCallback(() => {
         _update();
         saveTabs(userId);
-    }
-    openStartupTabs(props);
+    }, [userId]);
 
     const ref = useRef<HTMLDivElement>(null);
     if (ref.current)
         (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
     useEffect(() => {
         setUpdaterFunction(update);
-        const initialRender = () => {
-            setUserId(UserStore.getCurrentUser().id);
-            if (ref.current)
-                (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
-            FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
+        const onLogin = () => {
+            const { id } = UserStore.getCurrentUser();
+            setUserId(id);
+            openStartupTabs({ ...props, userId: id });
         };
-
-        FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
-        return () => FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", initialRender);
-    }, []);
-    useEffect(() => {
+        FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
         document.addEventListener("keydown", handleKeybinds);
         return () => {
+            FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
             document.removeEventListener("keydown", handleKeybinds);
         };
     }, []);
