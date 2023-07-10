@@ -66,7 +66,6 @@ export const settings = definePluginSettings({
     searchOption: {
         type: OptionType.SELECT,
         description: "The part of the url you want to search",
-        default: "hostandpath",
         options: [
             {
                 label: "Entire Url",
@@ -79,6 +78,7 @@ export const settings = definePluginSettings({
             {
                 label: "Host & Path (tenor.com somgif.gif)",
                 value: "hostandpath",
+                default: true
             }
         ] as const
     }
