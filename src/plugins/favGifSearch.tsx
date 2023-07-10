@@ -21,9 +21,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { useCallback, useEffect, useState } from "@webpack/common";
+import { useCallback, useEffect, useRef, useState } from "@webpack/common";
+import fuzzysort from "fuzzysort";
 
 interface SearchBarComponentProps {
+    ref?: React.MutableRefObject<any>;
     autoFocus: boolean;
     className: string;
     size: string;
@@ -58,7 +60,6 @@ interface Instance {
     forceUpdate: () => void;
 }
 
-const bitFlagsCache = new Map<string, number>(); // (str, flags)
 
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
@@ -110,7 +111,6 @@ export default definePlugin({
     ],
 
     settings,
-    fuzzySearch,
 
     getTargetString,
 
@@ -136,6 +136,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
+    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -149,10 +150,16 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         }
 
 
+        // scroll back to top
+        ref.current?.containerRef?.current
+            .closest("#gif-picker-tab-panel")
+            ?.querySelector("[class|=\"content\"]")
+            ?.firstElementChild?.scrollTo(0, 0);
+
         // console.time(searchQuery);
 
         const result = props.favCopy.map(gif => ({
-            score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+            score: fuzzysort.single(searchQuery, getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " "))?.score,
             gif,
         })).filter(m => m.score != null) as { score: number; gif: Gif; }[];
 
@@ -173,6 +180,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
     return (
         <SearchBarComponent
+            ref={ref}
             autoFocus={true}
             className={containerClasses.searchBar}
             size={SearchBarComponent.Sizes.MEDIUM}
@@ -212,75 +220,3 @@ export function getTargetString(urlStr: string) {
             return "";
     }
 }
-
-
-function fuzzySearch(searchQuery: string, targetString: string) {
-    // didnt cache this function because if you have like a thousand gifs you will make a thousnad caches each time you search something new
-
-    const searchFlags = getBitFlags(searchQuery);
-    const targetFlags = getBitFlags(targetString);
-
-    // https://github.com/farzher/fuzzysort/blob/c7f1d2674d7fa526015646bc02fd17e29662d30c/fuzzysort.js#L34
-    if ((searchFlags & targetFlags) !== searchFlags) {
-        return null; // return early if search flags are not a subset of target flags
-    }
-
-    let searchIndex = 0;
-    let score = 0;
-
-    for (let i = 0; i < targetString.length; i++) {
-        if (targetString[i] === searchQuery[searchIndex]) {
-            if (i > 0 && targetString[i - 1] === searchQuery[searchIndex - 1]) {
-                score += 2; // reward consecutive chars
-            }
-
-            if (searchIndex === 0 || targetString[i - 1] === " ") {
-                score *= 1.5; // bonus for matching at the beginning or after a space
-            }
-
-            score++;
-            searchIndex++;
-        } else {
-            score--;
-        }
-
-        if (searchIndex === searchQuery.length) {
-            return score;
-        }
-    }
-
-    return null;
-}
-
-
-// https://github.com/farzher/fuzzysort/blob/c7f1d2674d7fa526015646bc02fd17e29662d30c/fuzzysort.js#L450
-const getBitFlags = (str: string) => {
-    if (bitFlagsCache.has(str)) {
-        return bitFlagsCache.get(str)!;
-    }
-
-    let bitflags = 0;
-    for (let i = 0; i < str.length; ++i) {
-        const lowerCode = str.charCodeAt(i);
-
-        if (lowerCode === 32) {
-            continue; // it's important that we don't set any bitflags for space
-        }
-
-        switch (true) {
-            case lowerCode >= 97 && lowerCode <= 122:
-                bitflags |= 1 << (lowerCode - 97); // alphabet
-                break;
-            case lowerCode >= 48 && lowerCode <= 57:
-                bitflags |= 1 << 26; // numbers
-                break;
-            case lowerCode <= 127:
-                bitflags |= 1 << 30; // other ascii
-                break;
-            default:
-                bitflags |= 1 << 31; // other utf8
-        }
-    }
-
-    return bitflags;
-};
