@@ -21,8 +21,10 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
-import type { Channel, Message } from "discord-types/general";
+import type { Channel } from "discord-types/general";
 import { Webpack } from "Vencord";
+
+import { Message } from "./whoReacted";
 
 const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
 
@@ -93,12 +95,12 @@ export default definePlugin({
                 }
             }
 
-            if (message.stickers) {
-                finalMsg += " [sticker] ";
-                if (message.content === "") {
-                    finalMsg = "[sticker]";
-                }
-            }
+            // if (message.stickers) {
+            //     finalMsg += " [sticker] ";
+            //     if (message.content === "") {
+            //         finalMsg = "[sticker]";
+            //     }
+            // }
 
             if (images[0]) {
                 finalMsg += " [image:" + message.attachments[0].filename + "] ";
@@ -107,16 +109,18 @@ export default definePlugin({
             }
 
             for (const mention of message.mentions) {
-                finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#8a2be2><b>@${mention.username}</color></b>`);
+                finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#7289DA><b>@${mention.username}</color></b>`);
                 console.log(mention);
             }
 
-            if (message.mentionRoles.length > 0) {
+            if (message.mentionRoles?.length > 0) {
                 const { roles } = GuildStore.getGuild(channel.guild_id);
                 for (const roleId of message.mentionRoles) {
                     const role = roles[roleId];
                     finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
                 }
+            } else {
+                finalMsg += "kill me now plz";
             }
 
             let matches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
