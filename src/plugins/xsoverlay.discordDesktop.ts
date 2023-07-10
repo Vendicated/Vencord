@@ -21,6 +21,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import type { Channel, Message } from "discord-types/general";
 import { Webpack } from "Vencord";
 
 const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
@@ -50,17 +51,18 @@ export default definePlugin({
     authors: [Devs.Penny],
     settings,
     flux: {
-        MESSAGE_CREATE({ message }) {
-            var finalMsg = message.content;
+        MESSAGE_CREATE({ message }: { message: Message; }) {
+            let finalMsg: string = message.content;
 
-            const channel = ChannelStore.getChannel(message.channel_id);
+            const channel: Channel = ChannelStore.getChannel(message.channel_id);
+
+            if (!shouldNotify(message, channel)) return;
+
             const images = message.attachments.filter(
                 e =>
                     typeof e?.content_type === "string" &&
                     e?.content_type.startsWith("image")
             );
-
-            if (!shouldNotify(message, channel)) return;
 
             var authorString = "";
 
@@ -81,7 +83,7 @@ export default definePlugin({
             }
 
             if (message.call) {
-                finalMsg = "Started a call";
+                finalMsg = "Started a call a call with you!";
             }
 
             if (message.embeds.length !== 0) {
@@ -106,11 +108,12 @@ export default definePlugin({
 
             for (const mention of message.mentions) {
                 finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#8a2be2><b>@${mention.username}</color></b>`);
+                console.log(mention);
             }
 
-            if (message.mention_roles.length > 0) {
-                const { roles } = GuildStore.getGuild(message.guild_id);
-                for (const roleId of message.mention_roles) {
+            if (message.mentionRoles.length > 0) {
+                const { roles } = GuildStore.getGuild(channel.guild_id);
+                for (const roleId of message.mentionRoles) {
                     const role = roles[roleId];
                     finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
                 }
@@ -154,20 +157,20 @@ export default definePlugin({
     }
 });
 
-function shouldNotify(message, channel) {
+function shouldNotify(message: Message, channel: Channel) {
     if (message.author.id === UserStore.getCurrentUser().id) return false;
     if (MuteStore.allowAllMessages(channel)) return true;
 
     return message.mentioned;
 }
 
-function calculateHeight(content) {
+function calculateHeight(content: string) {
     if (content.length <= 100) return 100;
     if (content.length <= 200) return 150;
     if (content.length <= 300) return 200;
     return 250;
 }
 
-function clearMessage(content) {
+function clearMessage(content: string) {
     return content.replace(new RegExp("<[^>]*>", "g"), "");
 }
