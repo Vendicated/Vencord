@@ -60,28 +60,25 @@ interface Instance {
 
 const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
 
-// for type safety
-const options = [
-    {
-        label: "Entire Url",
-        value: "url"
-    },
-    {
-        label: "Path Only (/somegif.gif)",
-        value: "path"
-    },
-    {
-        label: "Host & Path (tenor.com somgif.gif)",
-        value: "hostandpath",
-    }
-] as const;
-
 export const settings = definePluginSettings({
     searchOption: {
         type: OptionType.SELECT,
         description: "The part of the url you want to search",
         default: "hostandpath",
-        options
+        options: [
+            {
+                label: "Entire Url",
+                value: "url"
+            },
+            {
+                label: "Path Only (/somegif.gif)",
+                value: "path"
+            },
+            {
+                label: "Host & Path (tenor.com somgif.gif)",
+                value: "hostandpath",
+            }
+        ] as const
     }
 });
 
@@ -111,6 +108,10 @@ export default definePlugin({
     ],
 
     settings,
+    fuzzySearch,
+
+
+    getTargetString,
 
     instance: null as Instance | null,
     renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
@@ -141,29 +142,24 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
         // return early
         if (searchQuery === "") {
-            if (props.favorites.length !== props.favCopy.length) {
-                props.favorites = props.favCopy;
-                instance.forceUpdate();
-            }
+            props.favorites = props.favCopy;
+            instance.forceUpdate();
             return;
         }
 
 
-        props.favorites = props.favCopy.filter(gif => {
-            const url = new URL(gif.url ?? gif.src);
-            switch (settings.store.searchOption) {
-                case "url":
-                    return fuzzySearch(searchQuery, url.href);
-                case "path":
-                    if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-                        // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
-                        // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
-                        return fuzzySearch(searchQuery, url.pathname.split("/").at(-1) ?? url.pathname);
-                    return fuzzySearch(searchQuery, url.pathname);
-                case "hostandpath":
-                    return fuzzySearch(searchQuery, `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`);
-            }
-        });
+        // console.time(searchQuery);
+
+        const result = props.favCopy.map(gif => ({
+            score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+            gif,
+        })).filter(m => m.score != null) as { score: number; gif: Gif; }[];
+
+        result.sort((a, b) => b.score - a.score);
+        props.favorites = result.map(e => e.gif);
+
+        // console.log(result);
+        // console.timeEnd(searchQuery);
 
         instance.forceUpdate();
     }, [instance.state]);
@@ -195,20 +191,47 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
 
 
-function fuzzySearch(searchQuery: string, searchString: string): boolean {
-    searchQuery = searchQuery.toLowerCase();
-    searchString = searchString.replace(/(%20|[_-])/g, " ").toLowerCase();
+export function getTargetString(urlStr: string) {
+    const url = new URL(urlStr);
+    switch (settings.store.searchOption) {
+        case "url":
+            return url.href;
+        case "path":
+            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
+                // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
+                return url.pathname.split("/").at(-1) ?? url.pathname;
+            return url.pathname;
+        case "hostandpath":
+            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
+            return `${url.host} ${url.pathname}`;
+
+        default:
+            return "";
+    }
+}
 
 
+function fuzzySearch(searchQuery: string, searchString: string) {
     let searchIndex = 0;
+    let score = 0;
+
     for (let i = 0; i < searchString.length; i++) {
         if (searchString[i] === searchQuery[searchIndex]) {
+            if (i > 0 && searchString[i - 1] === searchQuery[searchIndex - 1]) {
+                score += 2; // reward consecutive chars
+            }
+            score++;
             searchIndex++;
+        } else {
+            score--;
         }
+
         if (searchIndex === searchQuery.length) {
-            // console.log("searchQuery = ", searchQuery, "\nsearchString = ", searchString);
-            return true;
+            return score;
         }
     }
-    return false;
+
+    return null;
 }
