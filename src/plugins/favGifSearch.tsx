@@ -22,7 +22,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
-import fuzzysort from "fuzzysort";
 
 interface SearchBarComponentProps {
     ref?: React.MutableRefObject<any>;
@@ -158,10 +157,13 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
         // console.time(searchQuery);
 
-        const result = props.favCopy.map(gif => ({
-            score: fuzzysort.single(searchQuery, getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " "))?.score,
-            gif,
-        })).filter(m => m.score != null) as { score: number; gif: Gif; }[];
+        const result =
+            props.favCopy
+                .map(gif => ({
+                    score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+                    gif,
+                }))
+                .filter(m => m.score != null) as { score: number; gif: Gif; }[];
 
         result.sort((a, b) => b.score - a.score);
         props.favorites = result.map(e => e.gif);
@@ -219,4 +221,24 @@ export function getTargetString(urlStr: string) {
         default:
             return "";
     }
+}
+
+function fuzzySearch(searchQuery: string, searchString: string) {
+    let searchIndex = 0;
+    let score = 0;
+
+    for (let i = 0; i < searchString.length; i++) {
+        if (searchString[i] === searchQuery[searchIndex]) {
+            score++;
+            searchIndex++;
+        } else {
+            score--;
+        }
+
+        if (searchIndex === searchQuery.length) {
+            return score;
+        }
+    }
+
+    return null;
 }
