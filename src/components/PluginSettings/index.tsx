@@ -230,7 +230,7 @@ export default function PluginSettings() {
         const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
-        if (!newPlugins?.includes(plugin.name) && searchValue.status === SearchStatus.NEW) return false;
+        if (searchValue.status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
         if (!searchValue.value.length) return true;
 
         const v = searchValue.value.toLowerCase();
