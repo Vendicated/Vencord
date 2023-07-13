@@ -54,40 +54,40 @@ export default definePlugin({
     settings,
     flux: {
         MESSAGE_CREATE({ message }: { message: Message; }) {
-            let finalMsg: string = message.content;
 
             const channel: Channel = ChannelStore.getChannel(message.channel_id);
 
             if (!shouldNotify(message, channel)) return;
 
-            const images = message.attachments.filter(
-                e =>
-                    typeof e?.content_type === "string" &&
-                    e?.content_type.startsWith("image")
-            );
+            // Make title bar (Author name and channel)
 
-            var authorString = "";
+            var titleString = "";
 
             if (channel.guild_id) {
                 const guild = GuildStore.getGuild(channel.guild_id);
-                authorString = `${message.author.username} (${guild.name}, #${channel.name})`;
+                titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
             }
 
             if (channel.type === ChannelTypes.GROUP_DM) {
-                authorString = `${message.author.username} (${channel.name})`;
+                titleString = `${message.author.username} (${channel.name})`;
                 if (!channel.name || channel.name === " " || channel.name === "") {
-                    authorString = `${message.author.username} (${channel.rawRecipients.map(e => e.username).join(", ")})`;
+                    titleString = `${message.author.username} (${channel.rawRecipients.map(e => e.username).join(", ")})`;
                 }
             }
 
             if (channel.type === ChannelTypes.DM) {
-                authorString = `${message.author.username}`;
+                titleString = `${message.author.username}`;
             }
+
+            // Make final message
+
+            let finalMsg: string = message.content;
 
             if (message.call) {
                 finalMsg = "Started a call a call with you!";
             }
 
+            // TODO: Test this
             if (message.embeds.length !== 0) {
                 finalMsg += " [embed] ";
                 if (message.content === "") {
@@ -95,6 +95,8 @@ export default definePlugin({
                 }
             }
 
+            // TODO: Fix this shit
+            //
             // if (message.stickers) {
             //     finalMsg += " [sticker] ";
             //     if (message.content === "") {
@@ -102,27 +104,35 @@ export default definePlugin({
             //     }
             // }
 
+            // Collect Images
+            const images = message.attachments.filter(
+                e =>
+                    typeof e?.content_type === "string" &&
+                    e?.content_type.startsWith("image")
+            );
+
+            // Add images and attachments to message
             if (images[0]) {
                 finalMsg += " [image:" + message.attachments[0].filename + "] ";
             } else if (message.attachments.length !== 0) {
                 finalMsg += " [attachment:" + message.attachments[0].filename + "] ";
             }
 
+            // Replace user and role mentions
             for (const mention of message.mentions) {
-                finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#7289DA><b>@${mention.username}</color></b>`);
-                console.log(mention);
+                finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#7289DA><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
+                // finalMsg = finalMsg.replace(new RegExp(`<@!?${mention.id}>`, "g"), `<color=#7289DA><b>@${mention.username}</color></b>`);
             }
-
             if (message.mentionRoles?.length > 0) {
                 const { roles } = GuildStore.getGuild(channel.guild_id);
                 for (const roleId of message.mentionRoles) {
                     const role = roles[roleId];
-                    finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
+                    finalMsg = finalMsg.replace(/<@&(\d{17,20})>/g, (_, role) => `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
+                    // finalMsg = finalMsg.replace(new RegExp(`<@&${roleId}>`, "g"), `<b><color=#${role.color.toString(16)}>@${role.name}</color></b>`);
                 }
-            } else {
-                finalMsg += "kill me now plz";
             }
 
+            // Format emotes
             let matches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
             if (matches) {
                 for (const match of matches) {
@@ -130,6 +140,7 @@ export default definePlugin({
                 }
             }
 
+            // Format Channels
             matches = finalMsg.match(new RegExp("<(#\\d+)>", "g"));
             if (matches) {
                 for (const match2 of matches) {
@@ -139,27 +150,31 @@ export default definePlugin({
                 }
             }
 
-            fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
-                const data = {
-                    messageType: 1,
-                    index: 0,
-                    timeout: Settings.plugins.XSOverlay.timeout,
-                    height: calculateHeight(clearMessage(finalMsg)),
-                    opacity: Settings.plugins.XSOverlay.opacity,
-                    volume: 0,
-                    audioPath: "",
-                    title: authorString,
-                    content: finalMsg,
-                    useBase64Icon: true,
-                    icon: result,
-                    sourceApp: "Vencord"
-                };
-
-                VencordNative.pluginHelpers.XSOverlay.send(data);
-            });
+            sendNotif(titleString, finalMsg, message);
         }
     }
 });
+
+function sendNotif(titleString: string, finalMsg: string, message: Message) {
+    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
+        const data = {
+            messageType: 1,
+            index: 0,
+            timeout: Settings.plugins.XSOverlay.timeout,
+            height: calculateHeight(clearMessage(finalMsg)),
+            opacity: Settings.plugins.XSOverlay.opacity,
+            volume: 0,
+            audioPath: "",
+            title: titleString,
+            content: finalMsg,
+            useBase64Icon: true,
+            icon: result,
+            sourceApp: "Vencord"
+        };
+
+        VencordNative.pluginHelpers.XSOverlay.send(data);
+    });
+}
 
 function shouldNotify(message: Message, channel: Channel) {
     if (message.author.id === UserStore.getCurrentUser().id) return false;
