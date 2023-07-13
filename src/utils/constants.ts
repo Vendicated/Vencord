@@ -265,7 +265,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Dziurwa: {
         name: "Dziurwa",
-        id: 787017887877169173n
+        id: 1034579679526526976n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -329,7 +329,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     rad: {
         name: "rad",
-        id: 113027285765885952n
+        id: 610945092504780823n
     },
     HypedDomi: {
         name: "HypedDomi",
