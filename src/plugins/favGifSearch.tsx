@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader");
+const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader", "gutterSize");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -95,6 +95,7 @@ export default definePlugin({
             replacement: [
                 {
                     // https://regex101.com/r/4uHtTE/1
+                    // ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default:return r.jsx(($<searchComp>), {...props}))
                     match: /(renderHeaderContent=function.{1,150}FAVORITES:return)(.{1,150};)(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\.\i))/,
                     replace: "$1 this.state.resultType === \"Favorites\" ? $self.renderSearchBar(this, $<searchComp>) : $2; $3"
                 },
@@ -155,7 +156,6 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ?.querySelector("[class|=\"content\"]")
             ?.firstElementChild?.scrollTo(0, 0);
 
-        // console.time(searchQuery);
 
         const result =
             props.favCopy
@@ -167,9 +167,6 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
         result.sort((a, b) => b.score - a.score);
         props.favorites = result.map(e => e.gif);
-
-        // console.log("%courFuzzy: ", "color: blue", result,);
-        // console.timeEnd(searchQuery);
 
         instance.forceUpdate();
     }, [instance.state]);
