@@ -18,7 +18,7 @@
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -165,7 +165,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const hasCSSCodeblock = content.includes("```css\n") && content.includes("\n```");
     if (!hasCSSCodeblock) return;
 
-    const strategy = Settings.plugins.ManageQuickCSS.addStrategy;
+    const { addStrategy } = settings.store;
 
     const items: ReactNode[] = [];
     const snippets: { snippetId: string; snippet: string; }[] = [];
@@ -213,7 +213,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     id={`vc-import-snippet-${snippetId}`}
                     label={label}
                     icon={CSSFileIcon}
-                    action={async () => await importCssSnippet(snippetId, snippet, strategy)}
+                    action={async () => await importCssSnippet(snippetId, snippet, addStrategy)}
                 />
             );
         }
@@ -241,7 +241,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     id={"vc-import-snippet"}
                     label={"Import QuickCSS Snippet"}
                     icon={CSSFileIcon}
-                    action={async () => await importCssSnippet(snippets[0].snippetId, snippets[0].snippet, strategy)}
+                    action={async () => await importCssSnippet(snippets[0].snippetId, snippets[0].snippet, addStrategy)}
                 />);
         }
     }
@@ -253,7 +253,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         if (snippets.length > 1 && (allImportable || allRemovable)) {
             const label = allImportable ? "Import All" : "Remove All";
             const action = allImportable
-                ? async () => await importAllSnippets(message.id, importableSnippets, strategy)
+                ? async () => await importAllSnippets(message.id, importableSnippets, addStrategy)
                 : async () => await removeAllSnippets(removableSnippets.map(s => s.snippetId));
 
             items.push(
