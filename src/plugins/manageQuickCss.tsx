@@ -318,7 +318,7 @@ export default definePlugin({
         await saveSnippetIds();
         removeContextMenuPatch("message", messageContextMenuPatch);
 
-        if (this.cssListener) {
+        this.cssListener?.remove();
             this.cssListener.remove();
         }
     },
