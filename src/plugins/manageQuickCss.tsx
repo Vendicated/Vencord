@@ -23,7 +23,7 @@ import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, Toasts } from "@webpack/common";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface Snippet { snippetId: string; snippet: string; }
 
@@ -35,7 +35,7 @@ const enum AddStrategy {
 
 const STORE_KEY = "quickCssSnippets";
 
-let cachedSnippetIds: string[] = [];
+let cachedSnippetIds = new Set<String>();
 
 const generateSnippetId = (messageSnowflake: string, snippet: string): string => {
     const uniqueKey = `${messageSnowflake}-${snippet}`;
@@ -52,28 +52,27 @@ const generateSnippetId = (messageSnowflake: string, snippet: string): string =>
 
 
 const fetchSnippetIds = async () => {
-    cachedSnippetIds = await DataStore.get(STORE_KEY) || [];
+    cachedSnippetIds = await DataStore.get(STORE_KEY) || new Set<String>();
 };
 
 const saveSnippetIds = async () => {
-    const storedSnippetIds = await DataStore.get(STORE_KEY) || [];
-    const newSnippetIds = cachedSnippetIds.filter(id => !storedSnippetIds.includes(id));
-    const updatedSnippetIds = [...storedSnippetIds, ...newSnippetIds];
+    const storedSnippetIds = await DataStore.get(STORE_KEY) || new Set<String>();
 
-    await DataStore.set(STORE_KEY, updatedSnippetIds);
+    // merge cached and stored snippet ids set
+    const mergedSnippetIds = new Set([...storedSnippetIds, ...cachedSnippetIds]);
+
+    await DataStore.set(STORE_KEY, mergedSnippetIds);
 };
 
 const addToSnippetIdCache = (snippetId: string) => {
-    if (!cachedSnippetIds.includes(snippetId)) {
-        cachedSnippetIds.push(snippetId);
-    }
+    cachedSnippetIds.add(snippetId);
 };
 
 const removeFromSnippetIdCache = (snippetId: string) => {
-    cachedSnippetIds = cachedSnippetIds.filter(id => id !== snippetId);
+    cachedSnippetIds.delete(snippetId);
 };
 
-const importAllSnippets = async (snowflake: string, snippets: Snippet[], strategy: AddStrategy) => {
+const importAllSnippets = async (snippets: Snippet[], strategy: AddStrategy) => {
     for (const { snippetId, snippet } of snippets) {
         await importCssSnippet(snippetId, snippet, strategy);
     }
@@ -187,7 +186,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         const snippet = header + match[1] + footer;
         snippets.push({ snippetId, snippet });
 
-        const isSnippetPresent = snippetIds?.includes(snippetId) ?? false;
+        const isSnippetPresent = snippetIds.has(snippetId);
 
         let label = isSnippetPresent ? `Remove Snippet "${match[1].substring(0, 5)}` : `Import Snippet "${match[1].substring(0, 5)}`;
         if (match[1].length > 5) {
@@ -226,7 +225,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     if (items.length === 0) return;
 
     if (items.length === 1) {
-        const isSnippetPresent = snippetIds?.includes(snippets[0].snippetId) ?? false;
+        const isSnippetPresent = snippetIds.has(snippets[0].snippetId);
 
         if (isSnippetPresent) {
             children.splice(-1, 0,
@@ -255,7 +254,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         if (snippets.length > 1 && (allImportable || allRemovable)) {
             const label = allImportable ? "Import All" : "Remove All";
             const action = allImportable
-                ? async () => await importAllSnippets(message.id, importableSnippets, addStrategy)
+                ? async () => await importAllSnippets(importableSnippets, addStrategy)
                 : async () => await removeAllSnippets(removableSnippets.map(s => s.snippetId));
 
             items.push(
