@@ -218,7 +218,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 }
 
 
-function MessageEmbedAccessory({ message, listMode, serverList }: { message: Message; listMode: string; serverList: string[]; }) {
+function MessageEmbedAccessory({ message }: { message: Message; }) {
     // @ts-ignore
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
@@ -236,8 +236,10 @@ function MessageEmbedAccessory({ message, listMode, serverList }: { message: Mes
             continue;
         }
 
-        if (listMode === "blacklist" && serverList.includes(guildID)) continue;
-        if (listMode === "whitelist" && !serverList.includes(guildID)) continue;
+        const { listMode, serverList } = settings.store;
+
+        if (listMode === "blacklist" && serverList && serverList.includes(guildID)) continue;
+        if (listMode === "whitelist" && serverList && !serverList.includes(guildID)) continue;
 
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
@@ -387,8 +389,6 @@ export default definePlugin({
                 <ErrorBoundary>
                     <MessageEmbedAccessory
                         message={props.message}
-                        listMode={this.settings.store.listMode}
-                        serverList={this.settings.store.serverList?.split(",").map(s => s.trim()) ?? []}
                     />
                 </ErrorBoundary>
             );
