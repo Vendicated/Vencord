@@ -166,7 +166,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
     const strategy = Settings.plugins.ManageQuickCSS.addStrategy;
 
-    const items: any[] = [];
+    const items: ReactNode[] = [];
     const snippets: { snippetId: string; snippet: string; }[] = [];
 
     const re = /```css\n(.+?)```/gs;
