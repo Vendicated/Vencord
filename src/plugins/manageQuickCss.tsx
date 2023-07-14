@@ -23,6 +23,7 @@ import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, Toasts } from "@webpack/common";
+import { Message } from "discord-types/general";
 import type { ReactNode } from "react";
 
 interface Snippet { snippetId: string; snippet: string; }
@@ -160,7 +161,6 @@ const importCssSnippet = async (snippetId: string, snippet: string, strategy: Ad
 };
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message }) => () => {
-    const { message } = props;
     const { content, timestamp } = message;
 
     const hasCSSCodeblock = /```css\n.+?```/s.test(content);
@@ -180,7 +180,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
 
     while ((match = re.exec(content)) != null) {
         const snippetId = generateSnippetId(message.id, match[1]);
-        const header = `/*\nsnippet ${snippetId} by ${message.author.username}, posted at ${new Date(timestamp).toLocaleString()}\n*/\n`;
+        const header = `/*\nsnippet ${snippetId} by ${message.author.username}, posted at ${new Date(timestamp as any).toLocaleString()}\n*/\n`;
         const footer = `/* end snippet ${snippetId} */`;
 
         const snippet = header + match[1] + footer;
