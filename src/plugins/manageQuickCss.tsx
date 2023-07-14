@@ -101,7 +101,7 @@ const removeCssSnippet = async (snippetId: string) => {
     let quickCss = await VencordNative.quickCss.get();
 
     const regex = new RegExp(
-        String.raw`/\*\nsnippet ${snippetId}[^]*?/\* end snippet ${snippetId} \*/`,
+        String.raw`/\*\nsnippet ${snippetId}.*?/\* end snippet ${snippetId} \*/`,
         "gs"
     );
 
@@ -323,5 +323,3 @@ export default definePlugin({
         this.cssListener?.remove();
     },
 });
-
-
