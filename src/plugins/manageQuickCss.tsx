@@ -90,7 +90,7 @@ const syncSnippetIds = async () => {
     const snippetIdsToRemove = snippetIds.filter((id: string) => !quickCSS.includes(id));
 
     if (snippetIdsToRemove.length > 0) {
-        await DataStore.set(STORE_KEY, snippetIds.filter((id: string) => !snippetIdsToRemove.includes(id)));
+        await DataStore.update(STORE_KEY, snippetIds.filter((id: string) => !snippetIdsToRemove.includes(id)));
         await fetchSnippetIds();
     }
 };
@@ -107,7 +107,7 @@ const removeCssSnippet = async (snippetId: string) => {
     await VencordNative.quickCss.set(quickCss);
 
     const snippets = await DataStore.get(STORE_KEY);
-    await DataStore.set(STORE_KEY, snippets.filter((s: string) => s !== snippetId));
+    await DataStore.update(STORE_KEY, snippets.filter((s: string) => s !== snippetId));
 
     removeFromSnippetIdCache(snippetId);
 
