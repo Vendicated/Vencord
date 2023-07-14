@@ -159,7 +159,7 @@ const importCssSnippet = async (snippetId: string, snippet: string, strategy: Ad
     });
 };
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message }) => () => {
     const { message } = props;
     const { content, timestamp } = message;
 
