@@ -23,6 +23,7 @@ import { CSSFileIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, Toasts } from "@webpack/common";
+import { ReactNode } from "react";
 
 const enum AddStrategy {
 	Replace,
@@ -319,7 +320,7 @@ export default definePlugin({
         removeContextMenuPatch("message", messageContextMenuPatch);
 
         this.cssListener?.remove();
-            this.cssListener.remove();
-        }
     },
 });
+
+

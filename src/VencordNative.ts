@@ -53,10 +53,6 @@ export default {
             };
         },
 
-        removeChangeListener(listener: { remove: () => void }) {
-            listener.remove();
-        },
-
         addThemeChangeListener(cb: () => void) {
             ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
         },
