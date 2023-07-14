@@ -163,7 +163,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const { message } = props;
     const { content, timestamp } = message;
 
-    const hasCSSCodeblock = content.includes("```css\n") && content.includes("\n```");
+    const hasCSSCodeblock = /```css\n.+?```/s.test(content);
     if (!hasCSSCodeblock) return;
 
     const { addStrategy } = settings.store;
