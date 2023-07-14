@@ -162,8 +162,9 @@ const importCssSnippet = async (snippetId: string, snippet: string, strategy: Ad
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message }) => () => {
     const { content, timestamp } = message;
+    const re = /```css\n(.+?)```/gs;
 
-    const hasCSSCodeblock = /```css\n.+?```/s.test(content);
+    const hasCSSCodeblock = re.test(content);
     if (!hasCSSCodeblock) return;
 
     const { addStrategy } = settings.store;
@@ -171,7 +172,6 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     const items: ReactNode[] = [];
     const snippets: Snippet[] = [];
 
-    const re = /```css\n(.+?)```/gs;
     let match: string[] | null;
 
     const snippetIds = cachedSnippetIds;
