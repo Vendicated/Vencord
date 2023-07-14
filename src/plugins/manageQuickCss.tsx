@@ -25,6 +25,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Menu, Toasts } from "@webpack/common";
 import { ReactNode } from "react";
 
+interface Snippet { snippetId: string; snippet: string; }
+
 const enum AddStrategy {
 	Replace,
 	Append,
@@ -71,7 +73,7 @@ const removeFromSnippetIdCache = (snippetId: string) => {
     cachedSnippetIds = cachedSnippetIds.filter(id => id !== snippetId);
 };
 
-const importAllSnippets = async (snowflake: string, snippets: { snippetId: string; snippet: string; }[], strategy: AddStrategy) => {
+const importAllSnippets = async (snowflake: string, snippets: Snippet[], strategy: AddStrategy) => {
     for (const { snippetId, snippet } of snippets) {
         await importCssSnippet(snippetId, snippet, strategy);
     }
@@ -168,14 +170,14 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const { addStrategy } = settings.store;
 
     const items: ReactNode[] = [];
-    const snippets: { snippetId: string; snippet: string; }[] = [];
+    const snippets: Snippet[] = [];
 
     const re = /```css\n(.+?)```/gs;
     let match: string[] | null;
 
     const snippetIds = cachedSnippetIds;
-    const importableSnippets: { snippetId: string; snippet: string; }[] = [];
-    const removableSnippets: { snippetId: string; snippet: string; }[] = [];
+    const importableSnippets: Snippet[] = [];
+    const removableSnippets: Snippet[] = [];
 
     while ((match = re.exec(content)) != null) {
         const snippetId = generateSnippetId(message.id, match[1]);
