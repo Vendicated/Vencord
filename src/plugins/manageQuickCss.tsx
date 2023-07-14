@@ -303,7 +303,7 @@ export default definePlugin({
     authors: [Devs.castdrian, Devs.Ven],
     description: "Allows you to import and remove QuickCSS snippets contained within messages",
     settings,
-    cssListener: undefined as ReturnType<typeof VencordNative.quickCss.addChangeListener> | undefined,
+    cssListener: null as ReturnType<typeof VencordNative.quickCss.addChangeListener> | null,
 
     async start() {
         await fetchSnippetIds();
