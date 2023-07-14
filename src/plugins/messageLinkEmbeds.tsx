@@ -94,7 +94,7 @@ const settings = definePluginSettings({
         ]
     },
     listMode: {
-        description: "Whether to use guild list as blacklist or whitelist",
+        description: "Whether to use ID list as blacklist or whitelist",
         type: OptionType.SELECT,
         options: [
             {
@@ -108,8 +108,8 @@ const settings = definePluginSettings({
             }
         ]
     },
-    serverList: {
-        description: "Guild IDs to embed/ignore message links in (separate with comma)",
+    idList: {
+        description: "Guild/channel/user IDs to embed/ignore message links in (separate with comma)",
         type: OptionType.STRING
     },
     clearMessageCache: {
@@ -236,10 +236,10 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             continue;
         }
 
-        const { listMode, serverList } = settings.store;
+        const { listMode, idList } = settings.store;
 
-        if (listMode === "blacklist" && serverList && serverList.includes(guildID)) continue;
-        if (listMode === "whitelist" && serverList && !serverList.includes(guildID)) continue;
+        if (listMode === "blacklist" && idList && (idList.includes(guildID) || idList.includes(channelID) || idList.includes(message.author.id))) continue;
+        if (listMode === "whitelist" && idList && !idList.includes(guildID) && !idList.includes(channelID) && !idList.includes(message.author.id)) continue;
 
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
