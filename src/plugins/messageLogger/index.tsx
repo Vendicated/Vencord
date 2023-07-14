@@ -152,14 +152,24 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Comma-separated list of user IDs to ignore",
             default: ""
-        }
+        },
+        ignoreChannels: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of channel IDs to ignore",
+            default: ""
+        },
+        ignoreGuilds: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of guild IDs to ignore",
+            default: ""
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf, ignoreUsers } = Settings.plugins.MessageLogger;
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
             const myId = UserStore.getCurrentUser().id;
 
             function mutate(id: string) {
@@ -171,7 +181,9 @@ export default definePlugin({
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
                     ignoreBots && msg.author?.bot ||
                     ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.includes(msg.author?.id);
+                    ignoreUsers.includes(msg.author?.id) ||
+                    ignoreChannels.includes(msg.channel_id) ||
+                    ignoreGuilds.includes(msg.guild_id);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
