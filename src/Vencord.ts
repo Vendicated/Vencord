@@ -22,6 +22,7 @@ export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
+export * as Components from "./components";
 export { PlainSettings, Settings };
 
 import "./utils/quickCss";

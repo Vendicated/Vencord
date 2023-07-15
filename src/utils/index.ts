@@ -19,6 +19,7 @@
 export * from "./ChangeList";
 export * from "./constants";
 export * from "./debounce";
+export * from "./dependencies";
 export * from "./discord";
 export * from "./guards";
 export * from "./lazy";
