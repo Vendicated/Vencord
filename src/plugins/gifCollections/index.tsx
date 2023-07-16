@@ -334,16 +334,18 @@ function CreateCollectionModal({ gif, onClose, modalProps }: CreateCollectionMod
                     <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Collection Name</Forms.FormTitle>
                     <TextInput onChange={(e: string) => setName(e)} />
                 </ModalContent>
-                <ModalFooter>
-                    <Button
-                        type="submit"
-                        color={Button.Colors.GREEN}
-                        disabled={!name.length}
-                        onClick={onSubmit}
-                    >
-                        Create
-                    </Button>
-                </ModalFooter>
+                <div style={{ marginTop: "1rem" }}>
+                    <ModalFooter>
+                        <Button
+                            type="submit"
+                            color={Button.Colors.GREEN}
+                            disabled={!name.length}
+                            onClick={onSubmit}
+                        >
+                            Create
+                        </Button>
+                    </ModalFooter>
+                </div>
             </form>
         </ModalRoot>
     );
