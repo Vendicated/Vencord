@@ -19,11 +19,11 @@
 // Plugin idea by brainfreeze (668137937333911553) 😎
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput } from "@webpack/common";
+import { Alerts, Button, ContextMenu, FluxDispatcher, Forms, Menu, React, TextInput, useCallback, useState } from "@webpack/common";
 
 import * as CollectionManager from "./CollectionManager";
 import { GIF_COLLECTION_PREFIX, GIF_ITEM_PREFIX } from "./constants";
@@ -82,7 +82,7 @@ const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, pr
     if (group && !group.some(child => child?.props?.id === "add-to-collection")) {
         group.push(
             // if i do it the normal way i get a invalid context menu thingy error -> Menu API only allows Items and groups of Items as children.
-            MenuThingy({ gif }) as any
+            MenuThingy({ gif })
         );
     }
 };
@@ -93,7 +93,6 @@ export default definePlugin({
     // need better description eh
     description: "Allows you to have collections of gifs",
     authors: [Devs.Aria],
-    dependencies: ["MenuItemDeobfuscatorAPI"],
     patches: [
         {
             find: "renderCategoryExtras",
@@ -200,9 +199,8 @@ export default definePlugin({
         if (query.startsWith(GIF_COLLECTION_PREFIX)) {
             const collection = this.collections.find(c => c.name === query);
             if (collection != null) return true;
-
-            return false;
         }
+        return false;
     },
 
     collectionContextMenu(e: React.UIEvent, instance) {
@@ -225,7 +223,7 @@ export default definePlugin({
         const { src, url, height, width } = item;
         if (src && url && height != null && width != null && !item.id?.startsWith(GIF_ITEM_PREFIX))
             return ContextMenu.open(e, () =>
-                <Menu.ContextMenu
+                <Menu.Menu
                     navId="gif-collection-id"
                     onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
                     aria-label="Gif Collections"
@@ -235,7 +233,7 @@ export default definePlugin({
                     {MenuThingy({ gif: { ...item, id: uuidv4() } })}
 
 
-                </Menu.ContextMenu>
+                </Menu.Menu>
             );
         return null;
     },
@@ -245,7 +243,7 @@ export default definePlugin({
 
 // stolen from spotify controls
 const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "collection", nameOrId: string, onConfirm: () => void; }) => (
-    <Menu.ContextMenu
+    <Menu.Menu
         navId="gif-collection-id"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label={type === "collection" ? "Delete Collection" : "Remove"}
@@ -270,7 +268,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, onConfirm }: { type: "gif" | "c
         >
 
         </Menu.MenuItem>
-    </Menu.ContextMenu>
+    </Menu.Menu>
 );
 
 
@@ -301,12 +299,7 @@ const MenuThingy: React.FC<{ gif: Gif; }> = ({ gif }) => {
                 label="Create Collection"
                 action={() => {
                     openModal(modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
-                                <Forms.FormText>Create Collection</Forms.FormText>
-                            </ModalHeader>
-                            <CreateCollectionModal onClose={modalProps.onClose} gif={gif} />
-                        </ModalRoot>
+                        <CreateCollectionModal onClose={modalProps.onClose} gif={gif} modalProps={modalProps} />
                     ));
                 }}
             />
@@ -317,34 +310,42 @@ const MenuThingy: React.FC<{ gif: Gif; }> = ({ gif }) => {
 interface CreateCollectionModalProps {
     gif: Gif;
     onClose: () => void,
+    modalProps: ModalProps;
 }
 
-function CreateCollectionModal({ gif, onClose }: CreateCollectionModalProps) {
+function CreateCollectionModal({ gif, onClose, modalProps }: CreateCollectionModalProps) {
 
-    const [name, setName] = React.useState("");
+    const [name, setName] = useState("");
+
+    const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        if (!name.length) return;
+        CollectionManager.createCollection(name, [gif]);
+        onClose();
+    }, [name]);
+
     return (
-        <>
-            <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Collection Name</Forms.FormTitle>
-                <TextInput
-                    onChange={(e: string) => setName(e)}
-                />
-
-            </ModalContent>
-            <ModalFooter>
-                <Button
-                    color={Button.Colors.GREEN}
-                    disabled={!name.length}
-                    onClick={() => {
-                        if (!name.length) return;
-                        CollectionManager.createCollection(name, [gif]);
-                        onClose();
-                    }}
-                >
-                    Create
-                </Button>
-            </ModalFooter>
-        </>
+        <ModalRoot {...modalProps}>
+            <form onSubmit={onSubmit}>
+                <ModalHeader>
+                    <Forms.FormText>Create Collection</Forms.FormText>
+                </ModalHeader>
+                <ModalContent>
+                    <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Collection Name</Forms.FormTitle>
+                    <TextInput onChange={(e: string) => setName(e)} />
+                </ModalContent>
+                <ModalFooter>
+                    <Button
+                        type="submit"
+                        color={Button.Colors.GREEN}
+                        disabled={!name.length}
+                        onClick={onSubmit}
+                    >
+                        Create
+                    </Button>
+                </ModalFooter>
+            </form>
+        </ModalRoot>
     );
 }
 
