@@ -1,3 +1,14 @@
-.messagelogger-deleted div {
-    color: #f04747;
+/* Message content highlighting */
+.messagelogger-deleted [class*="contents-"] > :is(div, h1, h2, h3, p) {
+    color: #f04747 !important;
+}
+
+/* Embed highlighting */
+.messagelogger-deleted article :is(div, span, h1, h2, h3, p) {
+    color: #f04747 !important;
+}
+
+.messagelogger-deleted a {
+    color: #be3535 !important;
+    text-decoration: underline;
 }

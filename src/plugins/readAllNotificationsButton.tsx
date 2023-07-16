@@ -62,10 +62,10 @@ export default definePlugin({
     renderReadAllButton: () => <ReadAllButton />,
 
     start() {
-        addServerListElement(ServerListRenderPosition.In, this.renderReadAllButton);
+        addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
     },
 
     stop() {
-        removeServerListElement(ServerListRenderPosition.In, this.renderReadAllButton);
+        removeServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
     }
 });

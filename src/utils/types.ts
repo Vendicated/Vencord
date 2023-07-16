@@ -17,6 +17,7 @@
 */
 
 import { Command } from "@api/Commands";
+import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -101,9 +102,22 @@ export interface PluginDef {
     settingsAboutComponent?: React.ComponentType<{
         tempSettings?: Record<string, any>;
     }>;
+    /**
+     * Allows you to subscribe to Flux events
+     */
+    flux?: {
+        [E in FluxEvents]?: (event: any) => void;
+    };
+    /**
+     * Allows you to add custom actions to the Vencord Toolbox.
+     * The key will be used as text for the button
+     */
+    toolboxActions?: Record<string, () => void>;
+
+    tags?: string[];
 }
 
-export enum OptionType {
+export const enum OptionType {
     STRING,
     NUMBER,
     BIGINT,
@@ -126,14 +140,22 @@ export type PluginSettingDef = (
     | PluginSettingSelectDef
     | PluginSettingSliderDef
     | PluginSettingComponentDef
+    | PluginSettingBigIntDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
     description: string;
     placeholder?: string;
     onChange?(newValue: any): void;
+    /**
+     * Whether changing this setting requires a restart
+     */
     restartNeeded?: boolean;
     componentProps?: Record<string, any>;
+    /**
+     * Hide this setting from the settings UI
+     */
+    hidden?: boolean;
     /**
      * Set this if the setting only works on Browser or Desktop, not both
      */
@@ -238,23 +260,29 @@ type SettingsStore<D extends SettingsDefinition> = {
 };
 
 /** An instance of defined plugin settings */
-export interface DefinedSettings<D extends SettingsDefinition = SettingsDefinition, C extends SettingsChecks<D> = {}> {
+export interface DefinedSettings<
+    Def extends SettingsDefinition = SettingsDefinition,
+    Checks extends SettingsChecks<Def> = {},
+    PrivateSettings extends object = {}
+> {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
-    store: SettingsStore<D>;
+    store: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelavent settings
      */
-    use<F extends Extract<keyof D, string>>(filter?: F[]): Pick<SettingsStore<D>, F>;
+    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
     /** Definitions of each setting */
-    def: D;
+    def: Def;
     /** Setting methods with return values that could rely on other settings */
-    checks: C;
+    checks: Checks;
     /**
      * Name of the plugin these settings belong to,
      * will be an empty string until plugin is initialized
      */
     pluginName: string;
+
+    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;

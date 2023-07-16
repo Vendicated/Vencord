@@ -17,7 +17,7 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -37,12 +37,18 @@ const settings = definePluginSettings({
     }
 });
 
-function SilentTypingToggle() {
+function SilentTypingToggle(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
     const { isEnabled } = settings.use(["isEnabled"]);
     const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
 
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
+
     return (
-        <Tooltip text={isEnabled ? "Disable silent typing" : "Enable silent typing"}>
+        <Tooltip text={isEnabled ? "Disable Silent Typing" : "Enable Silent Typing"}>
             {(tooltipProps: any) => (
                 <div style={{ display: "flex" }}>
                     <Button
@@ -51,7 +57,7 @@ function SilentTypingToggle() {
                         size=""
                         look={ButtonLooks.BLANK}
                         innerClassName={ButtonWrapperClasses.button}
-                        style={{ margin: "0 8px 0" }}
+                        style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
@@ -83,7 +89,7 @@ export default definePlugin({
             predicate: () => settings.store.showIcon,
             replacement: {
                 match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],

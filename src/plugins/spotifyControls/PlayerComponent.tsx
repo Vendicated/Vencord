@@ -20,10 +20,10 @@ import "./spotifyStyles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Link } from "@components/Link";
+import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@utils/debounce";
-import { classes, LazyComponent } from "@utils/misc";
-import { filters, find } from "@webpack";
+import { openImageModal } from "@utils/discord";
+import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenu, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SpotifyStore, Track } from "./SpotifyStore";
@@ -72,6 +72,39 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             {props.children}
         </button>
     );
+}
+
+function CopyContextMenu({ name, path }: { name: string; path: string; }) {
+    const copyId = `spotify-copy-${name}`;
+    const openId = `spotify-open-${name}`;
+
+    return (
+        <Menu.Menu
+            navId={`spotify-${name}-menu`}
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label={`Spotify ${name} Menu`}
+        >
+            <Menu.MenuItem
+                key={copyId}
+                id={copyId}
+                label={`Copy ${name} Link`}
+                action={() => copyWithToast("https://open.spotify.com" + path)}
+                icon={LinkIcon}
+            />
+            <Menu.MenuItem
+                key={openId}
+                id={openId}
+                label={`Open ${name} in Spotify`}
+                action={() => SpotifyStore.openExternal(path)}
+                icon={OpenExternalIcon}
+            />
+        </Menu.Menu>
+    );
+}
+
+function makeContextMenu(name: string, path: string) {
+    return (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+        ContextMenu.open(e, () => <CopyContextMenu name={name} path={path} />);
 }
 
 function Controls() {
@@ -123,11 +156,6 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-const Slider = LazyComponent(() => {
-    const filter = filters.byCode("sliderContainer");
-    return find(m => m.render && filter(m.render));
-});
-
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
@@ -159,7 +187,7 @@ function SeekBar() {
             >
                 {msToHuman(position)}
             </Forms.FormText>
-            <Slider
+            <Menu.MenuSliderControl
                 minValue={0}
                 maxValue={duration}
                 value={position}
@@ -186,7 +214,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
 
     return (
-        <Menu.ContextMenu
+        <Menu.Menu
             navId="spotify-album-menu"
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Spotify Album Menu"
@@ -196,20 +224,22 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="open-album"
                 label="Open Album"
                 action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+                icon={OpenExternalIcon}
             />
             <Menu.MenuItem
                 key="view-cover"
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => (Vencord.Plugins.plugins.ViewIcons as any).openImage(track.album.image.url)}
+                action={() => openImageModal(track.album.image.url)}
+                icon={ImageIcon}
             />
             <Menu.MenuControlItem
                 id="spotify-volume"
                 key="spotify-volume"
                 label="Volume"
                 control={(props, ref) => (
-                    <Slider
+                    <Menu.MenuSliderControl
                         {...props}
                         ref={ref}
                         value={volume}
@@ -219,8 +249,18 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                     />
                 )}
             />
-        </Menu.ContextMenu>
+        </Menu.Menu>
     );
+}
+
+function makeLinkProps(name: string, condition: unknown, path: string) {
+    if (!condition) return {};
+
+    return {
+        role: "link",
+        onClick: () => SpotifyStore.openExternal(path),
+        onContextMenu: makeContextMenu(name, path)
+    } satisfies React.HTMLAttributes<HTMLElement>;
 }
 
 function Info({ track }: { track: Track; }) {
@@ -258,11 +298,8 @@ function Info({ track }: { track: Track; }) {
                     variant="text-sm/semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
-                    role={track.id ? "link" : undefined}
                     title={track.name}
-                    onClick={track.id ? () => {
-                        SpotifyStore.openExternal(`/track/${track.id}`);
-                    } : void 0}
+                    {...makeLinkProps("Song", track.id, `/track/${track.id}`)}
                 >
                     {track.name}
                 </Forms.FormText>
@@ -271,15 +308,14 @@ function Info({ track }: { track: Track; }) {
                         by&nbsp;
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
-                                <Link
+                                <span
                                     className={cl("artist")}
-                                    disabled={!a.id}
-                                    href={`https://open.spotify.com/artist/${a.id}`}
                                     style={{ fontSize: "inherit" }}
                                     title={a.name}
+                                    {...makeLinkProps("Artist", a.id, `/artist/${a.id}`)}
                                 >
                                     {a.name}
-                                </Link>
+                                </span>
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                             </React.Fragment>
                         ))}
@@ -288,16 +324,15 @@ function Info({ track }: { track: Track; }) {
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
                         on&nbsp;
-                        <Link id={cl("album-title")}
-                            href={`https://open.spotify.com/album/${track.album.id}`}
-                            target="_blank"
+                        <span
+                            id={cl("album-title")}
                             className={cl("album")}
-                            disabled={!track.album.id}
                             style={{ fontSize: "inherit" }}
                             title={track.album.name}
+                            {...makeLinkProps("Album", track.album.id, `/album/${track.album.id}`)}
                         >
                             {track.album.name}
-                        </Link>
+                        </span>
                     </Forms.FormText>
                 )}
             </div>
@@ -338,10 +373,10 @@ export function Player() {
 
     return (
         <ErrorBoundary fallback={() => (
-            <>
-                <Forms.FormText>Failed to render Spotify Modal :(</Forms.FormText>
-                <Forms.FormText>Check the console for errors</Forms.FormText>
-            </>
+            <div className="vc-spotify-fallback">
+                <p>Failed to render Spotify Modal :(</p>
+                <p >Check the console for errors</p>
+            </div>
         )}>
             <div id={cl("player")}>
                 <Info track={track} />

@@ -32,10 +32,10 @@ export default definePlugin({
             }
         },
         {
-            find: "\"github.com\":new RegExp(\"\\\\/releases\\\\S*\\\\/download\"),",
+            find: '"7z","ade","adp"',
             replacement: {
-                match: /const o=JSON.parse\('\[.+?'\)/,
-                replace: "const o=[]"
+                match: /JSON\.parse\('\[.+?'\)/,
+                replace: "[]"
             }
         }
     ]

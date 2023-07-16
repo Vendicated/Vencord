@@ -19,15 +19,18 @@
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady,filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
+export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
+export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -74,6 +77,17 @@ export const Toasts = {
     }
 };
 
+/**
+ * Show a simple toast. If you need more options, use Toasts.show manually
+ */
+export function showToast(message: string, type = ToastType.MESSAGE) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type
+    });
+}
+
 export const UserUtils = {
     fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
 };
@@ -101,11 +115,15 @@ waitFor(["dispatch", "subscribe"], m => {
 
 
 // This is the same module but this is easier
-waitFor(filters.byCode("currentToast?"), m => Toasts.show = m);
-waitFor(filters.byCode("currentToast:null"), m => Toasts.pop = m);
+waitFor("showToast", m => {
+    Toasts.show = m.showToast;
+    Toasts.pop = m.popToast;
+});
 
 waitFor(["show", "close"], m => Alerts = m);
 waitFor("parseTopic", m => Parser = m);
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+
+export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");

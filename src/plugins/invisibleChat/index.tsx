@@ -17,12 +17,12 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, Tooltip } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
@@ -64,7 +64,13 @@ function Indicator() {
 
 }
 
-function ChatBarIcon() {
+function ChatBarIcon(chatBoxProps: {
+    type: {
+        analyticsName: string;
+    };
+}) {
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
+
     return (
         <Tooltip text="Encrypt Message">
             {({ onMouseEnter, onMouseLeave }) => (
@@ -85,7 +91,7 @@ function ChatBarIcon() {
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
                         onClick={() => buildEncModal()}
-                        style={{ marginRight: "2px" }}
+                        style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
                             <svg
@@ -117,22 +123,23 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "InvisibleChat",
-    description: "Encrypt your Messages in a non-suspicious way! This plugin makes requests to >>https://embed.sammcheese.net<< to provide embeds to decrypted links!",
+    description: "Encrypt your Messages in a non-suspicious way!",
     authors: [Devs.SammCheese],
+    dependencies: ["MessagePopoverAPI"],
     patches: [
         {
             // Indicator
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /var .,.,.=(.)\.className,.=.\.message,.=.\.children,.=.\.content,.=.\.onUpdate/gm,
-                replace: "try {$1 && $self.INV_REGEX.test($1.content[0]) ? $1.content.push($self.indicator()) : null } catch {};$&"
+                replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
             }
         },
         {
             find: ".activeCommandOption",
             replacement: {
                 match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
             }
         },
     ],
@@ -171,25 +178,13 @@ export default definePlugin({
 
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-
-        const options: RequestInit = {
-            signal: controller.signal,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                url,
-            }),
-        };
-
-        // AWS hosted url to discord embed object
-        const rawRes = await fetch(this.EMBED_API_URL, options);
-        clearTimeout(timeout);
-
-        return await rawRes.json();
+        const { body } = await RestAPI.post({
+            url: "/unfurler/embed-urls",
+            body: {
+                urls: [url]
+            }
+        });
+        return await body.embeds[0];
     },
 
     async buildEmbed(message: any, revealed: string): Promise<void> {
@@ -205,8 +200,11 @@ export default definePlugin({
             },
         });
 
-        if (urlCheck?.length)
-            message.embeds.push(await this.getEmbed(new URL(urlCheck[0])));
+        if (urlCheck?.length) {
+            const embed = await this.getEmbed(new URL(urlCheck[0]));
+            if (embed)
+                message.embeds.push(embed);
+        }
 
         this.updateMessage(message);
     },

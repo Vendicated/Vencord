@@ -17,7 +17,7 @@
 */
 
 import { WEBPACK_CHUNK } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
@@ -28,21 +28,27 @@ let webpackChunk: any[];
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
-Object.defineProperty(window, WEBPACK_CHUNK, {
-    get: () => webpackChunk,
-    set: v => {
-        if (v?.push !== Array.prototype.push) {
-            logger.info(`Patching ${WEBPACK_CHUNK}.push`);
-            _initWebpack(v);
-            patchPush();
-            // @ts-ignore
-            delete window[WEBPACK_CHUNK];
-            window[WEBPACK_CHUNK] = v;
-        }
-        webpackChunk = v;
-    },
-    configurable: true
-});
+if (window[WEBPACK_CHUNK]) {
+    logger.info(`Patching ${WEBPACK_CHUNK}.push (was already existant, likely from cache!)`);
+    _initWebpack(window[WEBPACK_CHUNK]);
+    patchPush();
+} else {
+    Object.defineProperty(window, WEBPACK_CHUNK, {
+        get: () => webpackChunk,
+        set: v => {
+            if (v?.push !== Array.prototype.push) {
+                logger.info(`Patching ${WEBPACK_CHUNK}.push`);
+                _initWebpack(v);
+                patchPush();
+                // @ts-ignore
+                delete window[WEBPACK_CHUNK];
+                window[WEBPACK_CHUNK] = v;
+            }
+            webpackChunk = v;
+        },
+        configurable: true
+    });
+}
 
 function patchPush() {
     function handlePush(chunk: any) {

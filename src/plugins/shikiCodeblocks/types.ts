@@ -46,18 +46,18 @@ export type ShikiSpec = {
     }) => Promise<IThemedToken[][]>;
 };
 
-export enum StyleSheets {
+export const enum StyleSheets {
     Main = "MAIN",
     DevIcons = "DEVICONS",
 }
 
-export enum HljsSetting {
+export const enum HljsSetting {
     Never = "NEVER",
     Secondary = "SECONDARY",
     Primary = "PRIMARY",
     Always = "ALWAYS",
 }
-export enum DeviconSetting {
+export const enum DeviconSetting {
     Disabled = "DISABLED",
     Greyscale = "GREYSCALE",
     Color = "COLOR"

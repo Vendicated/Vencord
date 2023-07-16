@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
-import { Menu } from "@webpack/common";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -65,6 +64,14 @@ interface FindData {
     args: Array<StringNode | FunctionNode>;
 }
 
+const settings = definePluginSettings({
+    notifyOnAutoConnect: {
+        description: "Whether to notify when Dev Companion has automatically connected.",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
+
 function parseNode(node: Node) {
     switch (node.type) {
         case "string":
@@ -91,9 +98,10 @@ function initWs(isManual = false) {
 
         logger.info("Connected to WebSocket");
 
-        showNotification({
+        (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
-            body: "Connected to WebSocket"
+            body: "Connected to WebSocket",
+            noPersist: true
         });
     });
 
@@ -107,7 +115,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Error",
             body: (e as ErrorEvent).message || "No Error Message",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -119,7 +128,8 @@ function initWs(isManual = false) {
         showNotification({
             title: "Dev Companion Disconnected",
             body: e.reason || "No Reason provided",
-            color: "var(--status-danger, red)"
+            color: "var(--status-danger, red)",
+            noPersist: true,
         });
     });
 
@@ -149,7 +159,12 @@ function initWs(isManual = false) {
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
-                let src = String(candidates[keys[0]]);
+                const mod = candidates[keys[0]];
+                let src = String(mod.original ?? mod).replaceAll("\n", "");
+
+                if (src.startsWith("function(")) {
+                    src = "0," + src;
+                }
 
                 let i = 0;
 
@@ -221,35 +236,25 @@ function initWs(isManual = false) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = kids => {
-    if (kids.some(k => k?.props?.id === NAV_ID)) return;
-
-    kids.unshift(
-        <Menu.MenuItem
-            id={NAV_ID}
-            label="Reconnect Dev Companion"
-            action={() => {
-                socket?.close(1000, "Reconnecting");
-                initWs(true);
-            }}
-        />
-    );
-};
-
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
-    dependencies: ["ContextMenuAPI"],
+    settings,
+
+    toolboxActions: {
+        "Reconnect"() {
+            socket?.close(1000, "Reconnecting");
+            initWs(true);
+        }
+    },
 
     start() {
         initWs();
-        addContextMenuPatch("user-settings-cog", contextMenuPatch);
     },
 
     stop() {
         socket?.close(1000, "Plugin Stopped");
         socket = void 0;
-        removeContextMenuPatch("user-settings-cog", contextMenuPatch);
     }
 });

@@ -5,6 +5,14 @@
     --vc-spotify-green: #1db954; /* so cusotm themes can easily change it */
 }
 
+.theme-light #vc-spotify-player {
+    background: var(--bg-overlay-3, var(--background-secondary-alt));
+}
+
+.theme-dark #vc-spotify-player {
+    background: var(--bg-overlay-1, var(--background-secondary-alt));
+}
+
 .vc-spotify-button {
     background: none;
     color: var(--interactive-normal);
@@ -123,8 +131,8 @@
     color: var(--header-secondary);
 }
 
-.vc-spotify-artist:hover,
-#vc-spotify-album-title:hover,
+.vc-spotify-artist[role="link"]:hover,
+#vc-spotify-album-title[role="link"]:hover,
 #vc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
     cursor: pointer;
@@ -132,6 +140,7 @@
 
 #vc-spotify-album-image {
     border-radius: 3px;
+    transition: filter 0.2s;
 }
 
 #vc-spotify-album-image:hover {
@@ -182,4 +191,9 @@
 
 .vc-spotify-time-right {
     right: 0;
+}
+
+.vc-spotify-fallback {
+    padding: 0.5em;
+    color: var(--text-normal);
 }
