@@ -32,4 +32,5 @@ export const enum IpcEvents {
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
 
     OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
+    XSOVERLAY_SEND = "VencordXSOSend",
 }

@@ -53,6 +53,7 @@ export function getSettings(): typeof import("@api/Settings").Settings {
     }
 }
 
+
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
 
 ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {

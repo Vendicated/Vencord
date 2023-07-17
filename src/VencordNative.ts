@@ -63,5 +63,8 @@ export default {
         OpenInApp: {
             resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
         },
+        XSOverlay: {
+            send: (data: any) => invoke<void>(IpcEvents.XSOVERLAY_SEND, data),
+        }
     }
 };
