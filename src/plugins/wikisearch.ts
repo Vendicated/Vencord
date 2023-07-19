@@ -29,7 +29,7 @@ export default definePlugin({
     dependencies: ["CommandsAPI"],
     options: {
         fancyEmbed: {
-            description: "Sends the wikipedia URL if disabled, else sends a fancy embed",
+            description: "Sends the wikipedia article URL if disabled, else sends a fancy embed",
             type: OptionType.BOOLEAN,
             default: true
         }
