@@ -20,7 +20,7 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components.jsx";
 
@@ -87,16 +87,14 @@ function replaceArray<T>(array: T[], ...values: T[]) {
     array.push(...values);
 }
 
-let i = 0;
-const genId = () => i++;
+let highestIdIndex = 0;
+const genId = () => highestIdIndex++;
 
 const openTabs: ChannelTabsProps[] = [];
 const closedTabs: ChannelTabsProps[] = [];
 let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
 let persistedTabs: Promise<PersistedTabs | undefined>;
-
-let lastUserId: string;
 
 let update = () => {
     logger.warn("Update function not set");
@@ -255,28 +253,23 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
     persistedTabs ??= DataStore.get("ChannelTabs_openChannels_v2");
     replaceArray(openTabs);
     replaceArray(openTabHistory);
-    i = 0;
+    highestIdIndex = 0;
 
-    if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel")) {
-        return Toasts.show({
-            id: Toasts.genId(),
-            message: "ChannelTabs - Not restoring tabs as KeepCurrentChannel is enabled",
-            type: Toasts.Type.FAILURE,
-            options: {
-                duration: 3000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    }
+    if (channelTabsSettings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel"))
+        return showToast("Not restoring tabs as KeepCurrentChannel is enabled", Toasts.Type.FAILURE);
 
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
             persistedTabs.then(tabs => {
                 const t = tabs?.[userId];
-                if (!t) return;
+                if (!t) {
+                    createTab({ channelId: props.channelId, guildId: props.guildId }, true);
+                    return showToast("Failed to restore tabs", Toasts.Type.FAILURE);
+                }
                 replaceArray(openTabs);
                 t.openTabs.forEach(tab => createTab(tab));
-                currentlyOpenTab = openTabs.find((_, i) => i === t.openTabIndex)!.id;
+                currentlyOpenTab = openTabs.find((_, i) => i === t.openTabIndex)?.id ?? 0;
+
                 moveToTab(currentlyOpenTab);
                 update();
             });
