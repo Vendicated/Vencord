@@ -71,25 +71,25 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     saveTabs(userId);
 
     return <div className={cl("container")} ref={ref}>
-        {openTabs.map((ch, i) => <div
-            className={classes(cl("tab"), ch.compact ? cl("tab-compact") : null, isTabSelected(ch.id) ? cl("tab-selected") : null)}
+        {openTabs.map((tab, i) => <div
+            className={classes(cl("tab"), tab.compact ? cl("tab-compact") : null, isTabSelected(tab.id) ? cl("tab-selected") : null)}
             key={i}
             onAuxClick={e => {
                 if (e.button === 1 /* middle click */) {
-                    closeTab(ch.id);
+                    closeTab(tab.id);
                 }
             }}
-            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu tab={ch} />)}
+            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu tab={tab} />)}
         >
             <button
                 className={classes(cl("button"), cl("channel-info"))}
-                onClick={() => moveToTab(ch.id)}
+                onClick={() => moveToTab(tab.id)}
             >
-                <ChannelTab {...ch} index={i} />
+                <ChannelTab {...tab} index={i} />
             </button>
-            {openTabs.length > 1 && (ch.compact ? isTabSelected(ch.id) : true) && <button
-                className={classes(cl("button"), cl("close-button"), ch.compact ? cl("close-button-compact") : null)}
-                onClick={() => closeTab(ch.id)}
+            {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
+                onClick={() => closeTab(tab.id)}
             >
                 <XIcon width={16} height={16} />
             </button>}

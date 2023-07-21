@@ -124,6 +124,12 @@
     width: 0.75rem;
 }
 
+.vc-channeltabs-favorites-star {
+    margin: 0 -0.25rem -1rem -0.75rem;
+    height: 0.75rem;
+    width: 0.75rem;
+}
+
 .vc-channeltabs-preview-tab {
     display: flex;
     flex-direction: row;

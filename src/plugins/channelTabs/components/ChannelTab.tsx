@@ -44,17 +44,19 @@ const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-const GuildIcon = ({ guild }: { guild: Guild; }) =>
-    guild.id === "@favorites"
-        ? <Emoji emojiName={"⭐"} className={cl("icon")} />
-        : guild.icon
+const GuildIcon = ({ guild, withStar = false }: { guild: Guild, withStar?: boolean; }) => {
+    return <>
+        {guild.icon
             ? <img
                 src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
                 className={cl("icon")}
             />
             : <div className={cl("guild-acronym-icon")}>
                 <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
-            </div>;
+            </div>}
+        {withStar && <Emoji emojiName={"⭐"} className={cl("favorites-star")} />}
+    </>;
+};
 
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
@@ -135,7 +137,6 @@ function ChannelTabContent(props: ChannelTabsProps &
         // is this necessary?
         (o, n) => o.every((v, i) => v === n[i])
     );
-
     if (guild) {
         if (channel)
             return <>
