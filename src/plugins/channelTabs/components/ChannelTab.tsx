@@ -16,30 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./style.css";
-
-import { Flex } from "@components/Flex";
 import { classes } from "@utils/misc";
-import { LazyComponent, useForceUpdater } from "@utils/react";
-import { filters, find, findByCode, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import {
-    Button, ChannelStore, ContextMenu, FluxDispatcher, Forms, GuildStore,
-    i18n,
-    Menu,
-    PresenceStore, ReadStateStore, Text, TypingStore,
-    useCallback,
-    useEffect, useRef,
-    UserStore,
-    useState, useStateFromStores
-} from "@webpack/common";
+import { LazyComponent } from "@utils/react.jsx";
+import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
+import { ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "./util.js";
+import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 
-const {
-    closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch, handleKeybinds,
-    isTabSelected, moveDraggedTabs, moveToTab, saveTabs, openStartupTabs, setUpdaterFunction, toggleCompactTab
-} = ChannelTabsUtils;
+const { moveDraggedTabs } = ChannelTabsUtils;
 
 const enum ChannelTypes {
     DM = 1,
@@ -47,9 +32,6 @@ const enum ChannelTypes {
 }
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
-const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
-    markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
-});
 const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy("themeColor:null==");
 const useDrag = findByCodeLazy(".disconnectDragSource(");
 const useDrop = findByCodeLazy(".disconnectDropTarget(");
@@ -57,21 +39,22 @@ const useDrop = findByCodeLazy(".disconnectDropTarget(");
 const Avatar = LazyComponent(() => findByCode(".typingIndicatorRef", "svg"));
 const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
-const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
-const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-const GuildIcon = ({ guild }: { guild: Guild; }) => guild.icon
-    ? <img
-        src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
-        className={cl("icon")}
-    />
-    : <div className={cl("guild-acronym-icon")}>
-        <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
-    </div>;
+const GuildIcon = ({ guild }: { guild: Guild; }) =>
+    guild.id === "@favorites"
+        ? <Emoji emojiName={"⭐"} className={cl("icon")} />
+        : guild.icon
+            ? <img
+                src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
+                className={cl("icon")}
+            />
+            : <div className={cl("guild-acronym-icon")}>
+                <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
+            </div>;
 
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
     <img
@@ -122,62 +105,6 @@ function ChannelEmoji({ channel }: {
     </div>;
 }
 
-function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
-    const channel = ChannelStore.getChannel(tab.channelId);
-    const { openTabs } = ChannelTabsUtils;
-    const [compact, setCompact] = useState(tab.compact);
-
-    return <Menu.Menu
-        navId="channeltabs-channel-context"
-        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="Channel Tab Context Menu"
-    >
-        <Menu.MenuGroup>
-            {channel &&
-                <Menu.MenuItem
-                    key="mark-as-read"
-                    id="mark-as-read"
-                    label={i18n.Messages.MARK_AS_READ}
-                    disabled={!ReadStateStore.hasUnread(channel.id)}
-                    action={() => ReadStateUtils.markAsRead(channel)}
-                />
-            }
-            <Menu.MenuCheckboxItem
-                checked={compact}
-                key="toggle-compact-tab"
-                id="toggle-compact-tab"
-                label="Compact"
-                action={() => {
-                    setCompact(compact => !compact);
-                    toggleCompactTab(tab.id);
-                    FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
-                }}
-            />
-        </Menu.MenuGroup>
-        {openTabs.length !== 1 && <Menu.MenuGroup>
-            <Menu.MenuItem
-                key="close-tab"
-                id="close-tab"
-                label="Close Tab"
-                action={() => closeTab(tab.id)}
-            />
-            <Menu.MenuItem
-                key="close-other-tabs"
-                id="close-other-tabs"
-                label="Close Other Tabs"
-                action={() => closeOtherTabs(tab.id)}
-            />
-            <Menu.MenuItem
-                key="close-right-tabs"
-                id="close-right-tabs"
-                label="Close Tabs to the Right"
-                disabled={openTabs.indexOf(tab) === openTabs.length - 1}
-                action={() => closeTabsToTheRight(tab.id)}
-            />
-        </Menu.MenuGroup>}
-    </Menu.Menu>;
-}
-
 function ChannelTabContent(props: ChannelTabsProps &
 {
     guild?: Guild,
@@ -208,16 +135,6 @@ function ChannelTabContent(props: ChannelTabsProps &
         // is this necessary?
         (o, n) => o.every((v, i) => v === n[i])
     );
-
-    if (guildId === "@favorites")
-        return <>
-            <Emoji emojiName={"⭐"} className={cl("icon")} />
-            {/* @ts-ignore */}
-            {!compact && settings.store.showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
-            {!compact && <Text className={cl("channel-name-text")}>#{channel?.name}</Text>}
-            <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
-            <TypingIndicator isTyping={isTyping} />
-        </>;
 
     if (guild) {
         if (channel)
@@ -291,7 +208,8 @@ function ChannelTabContent(props: ChannelTabsProps &
         {!compact && <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
     </>;
 }
-function ChannelTab(props: ChannelTabsProps & { index: number; }) {
+
+export default function ChannelTab(props: ChannelTabsProps & { index: number; }) {
     const { channelId, guildId, id, index } = props;
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
@@ -327,73 +245,7 @@ function ChannelTab(props: ChannelTabsProps & { index: number; }) {
     return tab;
 }
 
-export function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
-    const { openTabs } = ChannelTabsUtils;
-    const [userId, setUserId] = useState(props.userId);
-
-    const _update = useForceUpdater();
-    const update = useCallback(() => {
-        _update();
-        saveTabs(userId);
-    }, [userId]);
-
-    const ref = useRef<HTMLDivElement>(null);
-    if (ref.current)
-        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
-    useEffect(() => {
-        setUpdaterFunction(update);
-        const onLogin = () => {
-            const { id } = UserStore.getCurrentUser();
-            setUserId(id);
-            openStartupTabs({ ...props, userId: id });
-        };
-        FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
-        document.addEventListener("keydown", handleKeybinds);
-        return () => {
-            FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
-            document.removeEventListener("keydown", handleKeybinds);
-        };
-    }, []);
-
-    if (!userId) return null;
-    handleChannelSwitch(props);
-    saveTabs(userId);
-
-    return <div className={cl("container")} ref={ref}>
-        {openTabs.map((ch, i) => <div
-            className={classes(cl("tab"), ch.compact ? cl("tab-compact") : null, isTabSelected(ch.id) ? cl("tab-selected") : null)}
-            key={i}
-            onAuxClick={e => {
-                if (e.button === 1 /* middle click */) {
-                    closeTab(ch.id);
-                }
-            }}
-            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu tab={ch} />)}
-        >
-            <button
-                className={classes(cl("button"), cl("channel-info"))}
-                onClick={() => moveToTab(ch.id)}
-            >
-                <ChannelTab {...ch} index={i} />
-            </button>
-            {openTabs.length > 1 && (ch.compact ? isTabSelected(ch.id) : true) && <button
-                className={classes(cl("button"), cl("close-button"), ch.compact ? cl("close-button-compact") : null)}
-                onClick={() => closeTab(ch.id)}
-            >
-                <XIcon width={16} height={16} />
-            </button>}
-        </div>)
-        }
-
-        <button
-            onClick={() => createTab(props, true)}
-            className={classes(cl("button"), cl("new-button"))}
-        >
-            <PlusIcon />
-        </button>
-    </div >;
-}
-const PreviewTab = (props: ChannelTabsProps) => {
+export const PreviewTab = (props: ChannelTabsProps) => {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
@@ -401,29 +253,3 @@ const PreviewTab = (props: ChannelTabsProps) => {
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
 };
-export function ChannelTabsPreview(p) {
-    const id = UserStore.getCurrentUser()?.id;
-    if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
-
-    const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
-    const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = settings.use(["tabSet"]);
-    const placeholder = [{ guildId: "@me", channelId: undefined as any }];
-    const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
-
-    return <>
-        <Forms.FormTitle>Startup tabs</Forms.FormTitle>
-        <Flex flexDirection="row" style={{ gap: "2px" }}>
-            {currentTabs.map(t => <>
-                <PreviewTab {...t} />
-            </>)}
-        </Flex>
-        <Flex flexDirection="row-reverse">
-            <Button
-                onClick={() => {
-                    setCurrentTabs([...ChannelTabsUtils.openTabs]);
-                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openTabs] });
-                }}
-            >Set to currently open tabs</Button>
-        </Flex>
-    </>;
-}

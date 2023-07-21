@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -24,8 +26,8 @@ import definePlugin from "@utils/types";
 import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
-import { ChannelsTabsContainer } from "./components";
-import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util.js";
+import ChannelsTabsContainer from "./components/ChannelTabsContainer";
+import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util";
 
 const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
     () => {

@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts } from "@webpack/common";
 
-import { ChannelTabsPreview } from "./components.jsx";
+import { ChannelTabsPreview } from "./components/ChannelTabsContainer.jsx";
 
 export type BasicChannelTabsProps = {
     guildId: string;
