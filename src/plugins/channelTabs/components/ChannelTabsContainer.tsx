@@ -54,7 +54,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         setUpdaterFunction(update);
         const onLogin = () => {
             const { id } = UserStore.getCurrentUser();
-            if (id === userId) return;
+            if (id === userId && openTabs.length) return;
             setUserId(id);
             openStartupTabs({ ...props, userId: id });
         };
