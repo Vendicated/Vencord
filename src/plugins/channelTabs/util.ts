@@ -96,16 +96,16 @@ let currentlyOpenTab: number;
 const openTabHistory: number[] = [];
 let persistedTabs: Promise<PersistedTabs | undefined>;
 
-let update = () => {
+let update = (save = true) => {
     logger.warn("Update function not set");
 };
 
 // Takes BasicChannelTabsProps on creation but ChannelTabsProps when restoring existing tabs
-function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string) {
+function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true) {
     const id = genId();
     openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : false });
     if (switchToTab) moveToTab(id);
-    update();
+    update(save);
 }
 
 function closeTab(id: number) {
@@ -167,7 +167,7 @@ function closeTabsToTheRight(id: number) {
 }
 
 function handleChannelSwitch(ch: BasicChannelTabsProps) {
-    const tab = openTabs.find(c => c.id === currentlyOpenTab)!;
+    const tab = openTabs.find(c => c.id === currentlyOpenTab);
     if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
 
     if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
@@ -248,7 +248,7 @@ function setOpenTab(id: number) {
     openTabHistory.push(id);
 }
 
-function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
+function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, setWaiting: (v: boolean) => void) {
     const { userId } = props;
     persistedTabs ??= DataStore.get("ChannelTabs_openChannels_v2");
     replaceArray(openTabs);
@@ -260,6 +260,7 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
 
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
+            setWaiting(true);
             persistedTabs.then(tabs => {
                 const t = tabs?.[userId];
                 if (!t) {
@@ -268,8 +269,9 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
                 }
                 replaceArray(openTabs);
                 t.openTabs.forEach(tab => createTab(tab));
-                currentlyOpenTab = openTabs.find((_, i) => i === t.openTabIndex)?.id ?? 0;
+                currentlyOpenTab = openTabs[t.openTabIndex]?.id ?? 0;
 
+                setWaiting(false);
                 moveToTab(currentlyOpenTab);
                 update();
             });
@@ -284,10 +286,9 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }) {
         }
     }
 
-    if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true);
+    if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true, undefined, false);
     for (let i = 0; i < openTabHistory.length; i++) openTabHistory.pop();
     moveToTab(currentlyOpenTab);
-    update();
 }
 
 function setUpdaterFunction(fn: () => void) {

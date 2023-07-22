@@ -26,8 +26,8 @@ import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { ChannelContextMenu } from "./ContextMenus";
 
 const {
-    closeTab, createTab, handleChannelSwitch, handleKeybinds,
-    isTabSelected, moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
+    closeTab, createTab, handleChannelSwitch, handleKeybinds, isTabSelected,
+    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
 } = ChannelTabsUtils;
 
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
@@ -38,11 +38,12 @@ const cl = (name: string) => `vc-channeltabs-${name}`;
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState(props.userId);
+    const [waitingForDataStore, setWaiting] = useState(settings.store.onStartup === "remember");
 
     const _update = useForceUpdater();
-    const update = useCallback(() => {
+    const update = useCallback((save = true) => {
         _update();
-        saveTabs(userId);
+        if (save) saveTabs(userId);
     }, [userId]);
 
     const ref = useRef<HTMLDivElement>(null);
@@ -56,7 +57,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
             const { id } = UserStore.getCurrentUser();
             if (id === userId && openTabs.length) return;
             setUserId(id);
-            openStartupTabs({ ...props, userId: id });
+            openStartupTabs({ ...props, userId: id }, setWaiting);
         };
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
         document.addEventListener("keydown", handleKeybinds);
@@ -68,7 +69,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
 
     if (!userId) return null;
     handleChannelSwitch(props);
-    saveTabs(userId);
+    if (!waitingForDataStore) saveTabs(userId);
 
     return <div className={cl("container")} ref={ref}>
         {openTabs.map((tab, i) => <div
