@@ -18,18 +18,38 @@
 
 import "./styles.css";
 
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
+
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => () => {
+    if (!message.content) return;
+
+    const group = findGroupChildrenByChildId("copy-text", children);
+    if (!group) return;
+
+    group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, (
+        <Menu.MenuItem
+            id="vc-trans"
+            label="Translate"
+            icon={TranslateIcon}
+            action={async () => {
+                const trans = await translate("received", message.content);
+                handleTranslate(message.id, trans);
+            }}
+        />
+    ));
+};
 
 export default definePlugin({
     name: "Translate",
@@ -52,6 +72,8 @@ export default definePlugin({
 
     start() {
         addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+
+        addContextMenuPatch("message", messageCtxPatch);
 
         addButton("vc-translate", message => {
             if (!message.content) return null;
@@ -78,6 +100,7 @@ export default definePlugin({
 
     stop() {
         removePreSendListener(this.preSend);
+        removeContextMenuPatch("message", messageCtxPatch);
         removeButton("vc-translate");
         removeAccessory("vc-translation");
     },

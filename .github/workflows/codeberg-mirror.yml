@@ -1,4 +1,7 @@
 name: Sync to Codeberg
+concurrency:
+    group: ${{ github.ref }}
+    cancel-in-progress: true
 on:
     push:
     workflow_dispatch:
@@ -7,6 +10,7 @@ on:
 
 jobs:
     codeberg:
+        if: github.repository == 'Vendicated/Vencord'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3

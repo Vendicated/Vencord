@@ -41,10 +41,10 @@ export async function importSettings(data: string) {
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
-export async function exportSettings() {
+export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
     const settings = JSON.parse(VencordNative.settings.get());
     const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ settings, quickCss }, null, 4);
+    return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
 }
 
 export async function downloadSettingsBackup() {
@@ -121,8 +121,8 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 // Cloud settings
 const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
-export async function putCloudSettings() {
-    const settings = await exportSettings();
+export async function putCloudSettings(manual?: boolean) {
+    const settings = await exportSettings({ minify: true });
 
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
@@ -149,12 +149,14 @@ export async function putCloudSettings() {
         VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
-        showNotification({
-            title: "Cloud Settings",
-            body: "Synchronized your settings to the cloud!",
-            color: "var(--green-360)",
-            noPersist: true
-        });
+
+        if (manual) {
+            showNotification({
+                title: "Cloud Settings",
+                body: "Synchronized settings to the cloud!",
+                noPersist: true,
+            });
+        }
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({

@@ -82,6 +82,8 @@ export default definePlugin({
         }
     }],
 
+    customSections: [] as ((ID: Record<string, unknown>) => any)[],
+
     makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
         return [
             {
@@ -123,11 +125,13 @@ export default definePlugin({
                 label: "Patch Helper",
                 element: require("@components/VencordSettings/PatchHelperTab").default,
             },
+            // TODO: make this use customSections
             IS_VENCORD_DESKTOP && {
                 section: "VencordDesktop",
                 label: "Desktop Settings",
                 element: VencordDesktop.Components.Settings,
             },
+            ...this.customSections.map(func => func(ID)),
             {
                 section: ID.DIVIDER
             }

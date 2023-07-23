@@ -397,3 +397,53 @@ export type Paginator = ComponentType<{
     onPageChange?(page: number): void;
     hideMaxPage?: boolean;
 }>;
+
+export type MaskedLink = ComponentType<{
+    onClick(): void;
+    trusted: boolean;
+    title: string,
+    href: string;
+}>;
+
+export type ScrollerThin = ComponentType<PropsWithChildren<{
+    className?: string;
+    style?: CSSProperties;
+
+    dir?: "ltr";
+    orientation?: "horizontal" | "vertical";
+    paddingFix?: boolean;
+    fade?: boolean;
+
+    onClose?(): void;
+    onScroll?(): void;
+}>>;
+
+export type Clickable = ComponentType<PropsWithChildren<{
+    className?: string;
+
+    href?: string;
+    ignoreKeyPress?: boolean;
+
+    onClick?(): void;
+    onKeyPress?(): void;
+}>>;
+
+export type Avatar = ComponentType<PropsWithChildren<{
+    className?: string;
+
+    src?: string;
+    size?: "SIZE_16" | "SIZE_20" | "SIZE_24" | "SIZE_32" | "SIZE_40" | "SIZE_48" | "SIZE_56" | "SIZE_80" | "SIZE_120";
+
+    statusColor?: string;
+    statusTooltip?: string;
+    statusBackdropColor?: string;
+
+    isMobile?: boolean;
+    isTyping?: boolean;
+    isSpeaking?: boolean;
+
+    typingIndicatorRef?: unknown;
+
+    "aria-hidden"?: boolean;
+    "aria-label"?: string;
+}>>;
