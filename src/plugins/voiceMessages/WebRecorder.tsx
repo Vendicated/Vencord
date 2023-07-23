@@ -16,15 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, useState } from "@webpack/common";
+import { Button, useEffect, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 
-export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob }) => {
+export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+
+    useEffect(() => {
+        setIsRecording?.(recording);
+    }, [recording]);
+
 
     function toggleRecording() {
         const nowRecording = !recording;

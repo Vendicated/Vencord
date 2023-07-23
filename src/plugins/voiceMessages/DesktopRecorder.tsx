@@ -16,12 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, showToast, Toasts, useState } from "@webpack/common";
+import { Button, showToast, Toasts, useEffect, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob }) => {
+export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
     const [recording, setRecording] = useState(false);
+
+    useEffect(() => {
+        setIsRecording?.(recording);
+    }, [recording]);
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");

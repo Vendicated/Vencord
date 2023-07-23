@@ -26,16 +26,21 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findByCodeLazy, findLazy } from "@webpack";
+import { findLazy } from "@webpack";
 import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
+import { cl } from "./utils";
+import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
-export type VoiceRecorder = ComponentType<{ setAudioBlob(blob: Blob): void; }>;
+export type VoiceRecorder = ComponentType<{
+    setAudioBlob(blob: Blob): void;
+    setIsRecording?(recording: boolean): void;
+}>;
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
@@ -108,13 +113,8 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-type VoiceMessage = ComponentType<{
-    src: string;
-    waveform: string;
-}>;
-const VoiceMessage: VoiceMessage = findByCodeLazy('["onVolumeChange","volume","onMute"]');
-
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
+    const [isRecording, setIsRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
 
@@ -159,13 +159,14 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
             </ModalHeader>
 
-            <ModalContent className="vc-vmsg-modal">
-                <div className="vc-vmsg-buttons">
+            <ModalContent className={cl("modal")}>
+                <div className={cl("buttons")}>
                     <VoiceRecorder
                         setAudioBlob={blob => {
                             setBlob(blob);
                             setBlobUrl(blob);
                         }}
+                        setIsRecording={setIsRecording}
                     />
 
                     <Button
@@ -182,11 +183,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 </div>
 
                 <Forms.FormTitle>Preview</Forms.FormTitle>
-                {blobUrl && <VoiceMessage
-                    key={blobUrl}
+                <VoicePreview
                     src={blobUrl}
                     waveform={meta.waveform}
-                />}
+                    recording={isRecording}
+                />
 
             </ModalContent>
 
