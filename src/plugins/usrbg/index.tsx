@@ -85,7 +85,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "[\"aria-selected\"])",
+            find: "\"avatar\",\"name\"",
             predicate: () => settings.store.memberListBackground,
             replacement: [
                 {
@@ -103,11 +103,15 @@ export default definePlugin({
     },
 
     memberListBannerHook(props: any) {
-        const userId = props.avatar._owner.pendingProps.user.id;
-        if (!data[userId]) return;
-        return {
-            "--mlbg": `url("${data[userId]}")`
-        };
+        try {
+            const userId = props.avatar._owner.pendingProps.user.id;
+            if (!data[userId]) return;
+            return {
+                "--mlbg": `url("${data[userId]}")`
+            };
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     voiceBackgroundHook({ className, participantUserId }: any) {
