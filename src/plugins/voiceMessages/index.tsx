@@ -31,6 +31,7 @@ import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, Selecte
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
+import { settings } from "./settings";
 import { cl, clamp } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
@@ -48,6 +49,7 @@ export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     authors: [Devs.Ven],
+    settings,
 
     start() {
         addContextMenuPatch("channel-attach", ctxMenuPatch);

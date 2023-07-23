@@ -19,6 +19,7 @@
 import { Button, showToast, Toasts, useEffect, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
+import { settings } from "./settings";
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
     const [recording, setRecording] = useState(false);
@@ -34,9 +35,8 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecordi
         if (nowRecording) {
             discordVoice.startLocalAudioRecording(
                 {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    noiseCancellation: true
+                    echoCancellation: settings.store.echoCancellation,
+                    noiseCancellation: settings.store.noiseSuppression,
                 },
                 (success: boolean) => {
                     if (success)

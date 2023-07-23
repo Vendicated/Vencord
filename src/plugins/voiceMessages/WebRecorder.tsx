@@ -19,6 +19,7 @@
 import { Button, useEffect, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
+import { settings } from "./settings";
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
     const [recording, setRecording] = useState(false);
@@ -37,8 +38,8 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, setIsRecording }
         if (nowRecording) {
             navigator.mediaDevices.getUserMedia({
                 audio: {
-                    noiseSuppression: true,
-                    echoCancellation: true,
+                    echoCancellation: settings.store.echoCancellation,
+                    noiseSuppression: settings.store.noiseSuppression,
                 }
             }).then(stream => {
                 const chunks = [] as Blob[];
