@@ -29,14 +29,31 @@ import { findLazy } from "@webpack";
 import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
-// Recording currently does not work on Discord Desktop, because it does
-// not support navigator.mediaDevices.getUserMedia
-//
-// Apparently they manually stripped this api from their Electron binary,
-// so there is likely nothing we can do. Possibly use discord_voice, but
-// at the time of writing, I (V) am too lazy to figure that out
+import { VoiceRecorderDesktop } from "./DesktopRecorder";
+import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
+
+export type VoiceRecorder = ComponentType<{
+    setBlob: (blob: Blob) => void;
+    setBlobUrl: (blob: Blob) => void;
+}>;
+
+const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
+
+export default definePlugin({
+    name: "VoiceMessages",
+    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
+    authors: [Devs.Ven],
+
+    start() {
+        addContextMenuPatch("channel-attach", ctxMenuPatch);
+    },
+
+    stop() {
+        removeContextMenuPatch("channel-attach", ctxMenuPatch);
+    }
+});
 
 function sendAudio(audio: HTMLAudioElement, blob: Blob) {
     const channelId = SelectedChannelStore.getChannelId();
@@ -83,109 +100,6 @@ function useObjectUrl() {
 
     return [url, setWithFree] as const;
 }
-
-type VoiceRecorder = ComponentType<{
-    setBlob: (blob: Blob) => void;
-    setBlobUrl: (blob: Blob) => void;
-}>;
-
-const VoiceRecorderWeb: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
-    const [recording, setRecording] = useState(false);
-    const [paused, setPaused] = useState(false);
-    const [recorder, setRecorder] = useState<MediaRecorder>();
-    const [chunks, setChunks] = useState<Blob[]>([]);
-
-    function toggleRecording() {
-        const nowRecording = !recording;
-
-        if (nowRecording) {
-            navigator.mediaDevices.getUserMedia({
-                audio: {
-                    noiseSuppression: true,
-                    echoCancellation: true,
-                }
-            }).then(stream => {
-                const chunks = [] as Blob[];
-                setChunks(chunks);
-
-                const recorder = new MediaRecorder(stream);
-                setRecorder(recorder);
-                recorder.addEventListener("dataavailable", e => {
-                    chunks.push(e.data);
-                });
-                recorder.start();
-
-                setRecording(true);
-            });
-        } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-                    setBlob(blob);
-                    setBlobUrl(blob);
-
-                    setRecording(false);
-                });
-                recorder.stop();
-            }
-        }
-    }
-
-    return (
-        <>
-            <Button onClick={toggleRecording}>
-                {recording ? "Stop" : "Start"} recording
-            </Button>
-
-            <Button
-                disabled={!recording}
-                onClick={() => {
-                    setPaused(!paused);
-                    if (paused) recorder?.resume();
-                    else recorder?.pause();
-                }}
-            >
-                {paused ? "Resume" : "Pause"} recording
-            </Button>
-        </>
-    );
-};
-
-const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
-    const [recording, setRecording] = useState(false);
-
-    function toggleRecording() {
-        const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
-        const nowRecording = !recording;
-
-        if (nowRecording) {
-            discordVoice.startLocalAudioRecording({} /* likely options, no clue what to pass */, (success: boolean) => {
-                if (success) setRecording(true);
-                else showToast("Failed to start recording", Toasts.Type.FAILURE);
-            });
-        } else {
-            discordVoice.stopLocalAudioRecording(async (filePath: string) => {
-                if (filePath) {
-                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording();
-                    if (buf) {
-                        const blob = new Blob([buf], { type: "audio/ogg; codecs=opus" });
-                        setBlob(blob);
-                        setBlobUrl(blob);
-                    } else showToast("Failed to finish recording", Toasts.Type.FAILURE);
-                }
-                setRecording(false);
-            });
-        }
-    }
-
-    return (
-        <Button onClick={toggleRecording}>
-            {recording ? "Stop" : "Start"} recording
-        </Button>
-    );
-};
-
-const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
     const [blob, setBlob] = useState<Blob>();
@@ -263,16 +177,3 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     );
 };
 
-export default definePlugin({
-    name: "VoiceMessages",
-    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven],
-
-    start() {
-        addContextMenuPatch("channel-attach", ctxMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("channel-attach", ctxMenuPatch);
-    }
-});
