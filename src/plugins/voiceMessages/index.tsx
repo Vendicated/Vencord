@@ -22,12 +22,12 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findLazy } from "@webpack";
 import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
+import { ComponentType } from "react";
 
 // Recording currently does not work on Discord Desktop, because it does
 // not support navigator.mediaDevices.getUserMedia
@@ -84,22 +84,21 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function Modal({ modalProps }: { modalProps: ModalProps; }) {
+type VoiceRecorder = ComponentType<{
+    setBlob: (blob: Blob) => void;
+    setBlobUrl: (blob: Blob) => void;
+}>;
+
+const VoiceRecorderWeb: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
-    const [blob, setBlob] = useState<Blob>();
-    const [blobUrl, setBlobUrl] = useObjectUrl();
     const [chunks, setChunks] = useState<Blob[]>([]);
-    const audioRef = useRef<HTMLAudioElement>(null);
 
-    useEffect(() => () => {
-        if (blobUrl)
-            URL.revokeObjectURL(blobUrl);
-    }, [blobUrl]);
+    function toggleRecording() {
+        const nowRecording = !recording;
 
-    useEffect(() => {
-        if (recording) {
+        if (nowRecording) {
             navigator.mediaDevices.getUserMedia({
                 audio: {
                     noiseSuppression: true,
@@ -115,6 +114,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     chunks.push(e.data);
                 });
                 recorder.start();
+
+                setRecording(true);
             });
         } else {
             if (recorder) {
@@ -122,11 +123,78 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
                     setBlob(blob);
                     setBlobUrl(blob);
+
+                    setRecording(false);
                 });
                 recorder.stop();
             }
         }
-    }, [recording]);
+    }
+
+    return (
+        <>
+            <Button onClick={toggleRecording}>
+                {recording ? "Stop" : "Start"} recording
+            </Button>
+
+            <Button
+                disabled={!recording}
+                onClick={() => {
+                    setPaused(!paused);
+                    if (paused) recorder?.resume();
+                    else recorder?.pause();
+                }}
+            >
+                {paused ? "Resume" : "Pause"} recording
+            </Button>
+        </>
+    );
+};
+
+const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
+    const [recording, setRecording] = useState(false);
+
+    function toggleRecording() {
+        const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
+        const nowRecording = !recording;
+
+        if (nowRecording) {
+            discordVoice.startLocalAudioRecording({} /* likely options, no clue what to pass */, (success: boolean) => {
+                if (success) setRecording(true);
+            });
+        } else {
+            discordVoice.stopLocalAudioRecording(async (filePath: string) => {
+                if (filePath) {
+                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording();
+                    if (buf) {
+                        const blob = new Blob([buf], { type: "audio/ogg; codecs=opus" });
+                        setBlob(blob);
+                        setBlobUrl(blob);
+                    }
+                }
+                setRecording(false);
+            });
+        }
+    }
+
+    return (
+        <Button onClick={toggleRecording}>
+            {recording ? "Stop" : "Start"} recording
+        </Button>
+    );
+};
+
+const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
+
+function Modal({ modalProps }: { modalProps: ModalProps; }) {
+    const [blob, setBlob] = useState<Blob>();
+    const [blobUrl, setBlobUrl] = useObjectUrl();
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => () => {
+        if (blobUrl)
+            URL.revokeObjectURL(blobUrl);
+    }, [blobUrl]);
 
     return (
         <ModalRoot {...modalProps}>
@@ -135,34 +203,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             </ModalHeader>
 
             <ModalContent className="vc-vmsg-modal">
-                {IS_DISCORD_DESKTOP && (
-                    <Forms.FormText className={Margins.bottom8}>
-                        Recording from microphone is only supported on Discord Web and Vencord Desktop.
-                    </Forms.FormText>
-                )}
-
                 <div className="vc-vmsg-buttons">
-                    {!IS_DISCORD_DESKTOP && (
-                        <>
-                            <Button
-                                onClick={() => setRecording(!recording)}
-                                disabled={IS_DISCORD_DESKTOP}
-                                title={IS_DISCORD_DESKTOP ? "" : undefined}
-                            >
-                                {recording ? "Stop" : "Start"} recording
-                            </Button>
-                            <Button
-                                disabled={!recording}
-                                onClick={() => {
-                                    setPaused(!paused);
-                                    if (paused) recorder?.resume();
-                                    else recorder?.pause();
-                                }}
-                            >
-                                {paused ? "Resume" : "Pause"} recording
-                            </Button>
-                        </>
-                    )}
+                    <VoiceRecorder setBlob={setBlob} setBlobUrl={setBlobUrl} />
 
                     <Button
                         onClick={async () => {

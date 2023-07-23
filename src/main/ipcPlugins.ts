@@ -17,8 +17,10 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
+import { readFile } from "fs/promises";
 import { request } from "https";
+import { join } from "path";
 
 // #region OpenInApp
 // These links don't support CORS, so this has to be native
@@ -43,4 +45,18 @@ ipcMain.handle(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, async (_, url: string) =
 
     return getRedirect(url);
 });
+// #endregion
+
+
+// #region VoiceMessages
+ipcMain.handle(IpcEvents.VOICE_MESSAGES_READ_RECORDING, async () => {
+    const path = join(app.getPath("userData"), "module_data/discord_voice/recording.ogg");
+    try {
+        const buf = await readFile(path);
+        return new Uint8Array(buf.buffer);
+    } catch {
+        return null;
+    }
+});
+
 // #endregion
