@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, useEffect, useState } from "@webpack/common";
+import { Button, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 
-export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
+export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
 
-    useEffect(() => {
-        setIsRecording?.(recording);
-    }, [recording]);
-
+    const changeRecording = (recording: boolean) => {
+        setRecording(recording);
+        onRecordingChange?.(recording);
+    };
 
     function toggleRecording() {
         const nowRecording = !recording;
@@ -52,14 +52,14 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, setIsRecording }
                 });
                 recorder.start();
 
-                setRecording(true);
+                changeRecording(true);
             });
         } else {
             if (recorder) {
                 recorder.addEventListener("stop", () => {
                     setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
 
-                    setRecording(false);
+                    changeRecording(false);
                 });
                 recorder.stop();
             }

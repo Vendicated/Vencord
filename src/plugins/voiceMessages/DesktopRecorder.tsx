@@ -16,17 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, showToast, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecording }) => {
+export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
 
-    useEffect(() => {
-        setIsRecording?.(recording);
-    }, [recording]);
+    const changeRecording = (recording: boolean) => {
+        setRecording(recording);
+        onRecordingChange?.(recording);
+    };
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
@@ -40,7 +41,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecordi
                 },
                 (success: boolean) => {
                     if (success)
-                        setRecording(true);
+                        changeRecording(true);
                     else
                         showToast("Failed to start recording", Toasts.Type.FAILURE);
                 }
@@ -54,7 +55,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, setIsRecordi
                     else
                         showToast("Failed to finish recording", Toasts.Type.FAILURE);
                 }
-                setRecording(false);
+                changeRecording(false);
             });
         }
     }

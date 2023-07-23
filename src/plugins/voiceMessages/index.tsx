@@ -40,7 +40,7 @@ const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
-    setIsRecording?(recording: boolean): void;
+    onRecordingChange?(recording: boolean): void;
 }>;
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
@@ -93,7 +93,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     id: "0",
                     filename: upload.filename,
                     uploaded_filename: upload.uploadedFilename,
-                    waveform: meta.waveform, // TODO
+                    waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }]
             }
@@ -116,7 +116,7 @@ function useObjectUrl() {
 }
 
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
-    const [isRecording, setIsRecording] = useState(false);
+    const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
 
@@ -147,7 +147,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         }
 
         return {
-            waveform: btoa(String.fromCharCode(...bins)),
+            waveform: window.btoa(String.fromCharCode(...bins)),
             duration: audioBuffer.duration,
         };
     }, {
@@ -168,7 +168,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                             setBlob(blob);
                             setBlobUrl(blob);
                         }}
-                        setIsRecording={setIsRecording}
+                        onRecordingChange={setRecording}
                     />
 
                     <Button
