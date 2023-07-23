@@ -100,7 +100,12 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
     useEffect(() => {
         if (recording) {
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    noiseSuppression: true,
+                    echoCancellation: true,
+                }
+            }).then(stream => {
                 const chunks = [] as Blob[];
                 setChunks(chunks);
 
