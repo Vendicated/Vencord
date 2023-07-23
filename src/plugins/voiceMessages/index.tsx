@@ -161,6 +161,7 @@ const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
         if (nowRecording) {
             discordVoice.startLocalAudioRecording({} /* likely options, no clue what to pass */, (success: boolean) => {
                 if (success) setRecording(true);
+                else showToast("Failed to start recording", Toasts.Type.FAILURE);
             });
         } else {
             discordVoice.stopLocalAudioRecording(async (filePath: string) => {
@@ -170,7 +171,7 @@ const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
                         const blob = new Blob([buf], { type: "audio/ogg; codecs=opus" });
                         setBlob(blob);
                         setBlobUrl(blob);
-                    }
+                    } else showToast("Failed to finish recording", Toasts.Type.FAILURE);
                 }
                 setRecording(false);
             });
@@ -233,7 +234,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
                         sendAudio(audioRef.current!, blob!);
                         modalProps.onClose();
-                        showToast("Now sending voice message... Please be patient");
+                        showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
                     }}
                 >
                     Send
