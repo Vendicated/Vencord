@@ -20,7 +20,7 @@ import { Button, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
+export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob }) => {
     const [recording, setRecording] = useState(false);
 
     function toggleRecording() {
@@ -35,19 +35,20 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => 
                     noiseCancellation: true
                 },
                 (success: boolean) => {
-                    if (success) setRecording(true);
-                    else showToast("Failed to start recording", Toasts.Type.FAILURE);
+                    if (success)
+                        setRecording(true);
+                    else
+                        showToast("Failed to start recording", Toasts.Type.FAILURE);
                 }
             );
         } else {
             discordVoice.stopLocalAudioRecording(async (filePath: string) => {
                 if (filePath) {
                     const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording();
-                    if (buf) {
-                        const blob = new Blob([buf], { type: "audio/ogg; codecs=opus" });
-                        setBlob(blob);
-                        setBlobUrl(blob);
-                    } else showToast("Failed to finish recording", Toasts.Type.FAILURE);
+                    if (buf)
+                        setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
+                    else
+                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
                 }
                 setRecording(false);
             });

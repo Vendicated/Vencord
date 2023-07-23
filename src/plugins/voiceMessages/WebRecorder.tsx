@@ -20,7 +20,7 @@ import { Button, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 
-export const VoiceRecorderWeb: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
+export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
@@ -51,9 +51,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setBlob, setBlobUrl }) => {
         } else {
             if (recorder) {
                 recorder.addEventListener("stop", () => {
-                    const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-                    setBlob(blob);
-                    setBlobUrl(blob);
+                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
 
                     setRecording(false);
                 });

@@ -34,10 +34,7 @@ import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
-export type VoiceRecorder = ComponentType<{
-    setBlob: (blob: Blob) => void;
-    setBlobUrl: (blob: Blob) => void;
-}>;
+export type VoiceRecorder = ComponentType<{ setAudioBlob(blob: Blob): void; }>;
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
@@ -119,7 +116,12 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
             <ModalContent className="vc-vmsg-modal">
                 <div className="vc-vmsg-buttons">
-                    <VoiceRecorder setBlob={setBlob} setBlobUrl={setBlobUrl} />
+                    <VoiceRecorder
+                        setAudioBlob={blob => {
+                            setBlob(blob);
+                            setBlobUrl(blob);
+                        }}
+                    />
 
                     <Button
                         onClick={async () => {
