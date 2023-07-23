@@ -28,10 +28,17 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setBlob, setBlobUrl }) => 
         const nowRecording = !recording;
 
         if (nowRecording) {
-            discordVoice.startLocalAudioRecording({} /* likely options, no clue what to pass */, (success: boolean) => {
-                if (success) setRecording(true);
-                else showToast("Failed to start recording", Toasts.Type.FAILURE);
-            });
+            discordVoice.startLocalAudioRecording(
+                {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    noiseCancellation: true
+                },
+                (success: boolean) => {
+                    if (success) setRecording(true);
+                    else showToast("Failed to start recording", Toasts.Type.FAILURE);
+                }
+            );
         } else {
             discordVoice.stopLocalAudioRecording(async (filePath: string) => {
                 if (filePath) {
