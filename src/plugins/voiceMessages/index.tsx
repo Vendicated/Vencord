@@ -31,7 +31,7 @@ import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, Selecte
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
-import { cl } from "./utils";
+import { cl, clamp } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
@@ -130,8 +130,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         const audioBuffer = await audioContext.decodeAudioData(await blob.arrayBuffer());
         const channelData = audioBuffer.getChannelData(0);
 
-        // maximum of 10 bins (averaged samples) per second, maximum of 256 total bins
-        const bins = new Uint8Array(Math.min(256, Math.floor(audioBuffer.duration * 10)));
+        // average the samples into much lower resolution bins, maximum of 256 total bins
+        const bins = new Uint8Array(clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
         const samplesPerBin = Math.floor(channelData.length / bins.length);
 
         // Get root mean square of each bin
@@ -141,7 +141,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 const sampleIdx = binIdx * samplesPerBin + sampleOffset;
                 squares += channelData[sampleIdx] ** 2;
             }
-            bins[binIdx] = Math.floor(Math.sqrt(squares / samplesPerBin) * 0xFF);
+            bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
         }
 
         return {
