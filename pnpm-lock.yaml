@@ -10,7 +10,7 @@ patchedDependencies:
 
 dependencies:
   '@sapphi-red/web-noise-suppressor':
-    specifier: ^0.3.3
+    specifier: 0.3.3
     version: 0.3.3
   '@vap/core':
     specifier: 0.0.12
