@@ -128,13 +128,12 @@ export default definePlugin({
 
         // Cleanup
         const onEnded = () => {
-            stream.removeEventListener("inactive", onEnded);
             rnnoise.disconnect();
             source.disconnect();
             audioCtx.close();
             rnnoise.destroy();
         };
-        stream.addEventListener("inactive", onEnded);
+        stream.addEventListener("inactive", onEnded, { once: true });
 
         return dest.stream;
     },
