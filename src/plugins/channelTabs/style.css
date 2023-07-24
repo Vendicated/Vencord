@@ -15,11 +15,11 @@
 }
 
 /* user avatars in dm's */
-.vc-channeltabs-tab [class^="wrapper-"] {
+.vc-channeltabs-container [class^="wrapper-"] {
     min-width: 1.5rem;
 }
 
-.vc-channeltabs-channel-name-text {
+.vc-channeltabs-name-text {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -35,11 +35,51 @@
     gap: 0.25rem;
 }
 
-.vc-channeltabs-container {
-    padding: 0.35rem;
+.vc-channeltabs-inner-container {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+}
+
+.vc-channeltabs-container {
+    padding: 0.35rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-channeltabs-separator {
+    width: 98vw;
+    height: 0.075rem;
+    background: var(--bg-overlay-5);
+    background-color: var(--background-secondary);
+    margin: 0.25rem 1vw;
+}
+
+.vc-channeltabs-bookmark-placeholder-text {
+    color: var(--text-muted);
+    padding: 0.25rem 0 0 0.25rem;
+}
+
+.vc-channeltabs-bookmark-star {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 0.075rem;
+}
+
+.vc-channeltabs-bookmark-star-checked {
+    fill: var(--yellow-300);
+}
+
+.vc-channeltabs-bookmark {
+    display: flex;
+    flex-direction: row;
+    max-width: 8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+}
+
+.vc-channeltabs-bookmark:hover {
+    background: var(--bg-overlay-hover);
 }
 
 .vc-channeltabs-channel-info {

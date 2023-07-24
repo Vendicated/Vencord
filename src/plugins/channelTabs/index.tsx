@@ -37,7 +37,7 @@ const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, p
         if (group)
             group.push(
                 <Menu.MenuItem
-                    label="Open In New Tab"
+                    label="Open in New Tab"
                     id="open-link-in-tab"
                     key="open-link-in-tab"
                     action={() => ChannelTabsUtils.createTab({
@@ -56,7 +56,7 @@ const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         if (group)
             group.push(
                 <Menu.MenuItem
-                    label="Open In New Tab"
+                    label="Open in New Tab"
                     id="open-link-in-tab"
                     key="open-link-in-tab"
                     action={() => ChannelTabsUtils.createTab({

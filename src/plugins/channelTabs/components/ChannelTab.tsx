@@ -143,7 +143,7 @@ function ChannelTabContent(props: ChannelTabsProps &
                 <GuildIcon guild={guild} />
                 {/* @ts-ignore */}
                 {!compact && settings.store.showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
-                {!compact && <Text className={cl("channel-name-text")}>#{channel.name}</Text>}
+                {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -162,7 +162,7 @@ function ChannelTabContent(props: ChannelTabsProps &
             }
             return <>
                 <GuildIcon guild={guild} />
-                {!compact && <Text className={cl("channel-name-text")}>{name}</Text>}
+                {!compact && <Text className={cl("name-text")}>{name}</Text>}
             </>;
         }
     }
@@ -182,7 +182,7 @@ function ChannelTabContent(props: ChannelTabsProps &
                     isTyping={isTyping}
                     isMobile={isMobile}
                 />
-                {!compact && <Text className={cl("channel-name-text")} data-pomelo={user.isPomelo()}>
+                {!compact && <Text className={cl("name-text")} data-pomelo={user.isPomelo()}>
                     {username}
                 </Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
@@ -191,7 +191,7 @@ function ChannelTabContent(props: ChannelTabsProps &
         } else { // Group DM
             return <>
                 <ChannelIcon channel={channel} />
-                {!compact && <Text className={cl("channel-name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
+                {!compact && <Text className={cl("name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
                 <NotificationDot unreadCount={unreadCount} mentionCount={mentionCount} />
                 <TypingIndicator isTyping={isTyping} />
             </>;
@@ -201,12 +201,12 @@ function ChannelTabContent(props: ChannelTabsProps &
     if (guildId === "@me" || guildId === undefined)
         return <>
             <FriendsIcon height={24} width={24} />
-            {!compact && <Text className={cl("channel-name-text")}>{i18n.Messages.FRIENDS}</Text>}
+            {!compact && <Text className={cl("name-text")}>{i18n.Messages.FRIENDS}</Text>}
         </>;
 
     return <>
         <QuestionIcon height={24} width={24} />
-        {!compact && <Text className={cl("channel-name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
+        {!compact && <Text className={cl("name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
     </>;
 }
 

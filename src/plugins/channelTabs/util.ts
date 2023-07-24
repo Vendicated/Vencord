@@ -19,8 +19,9 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
+import { useAwaiter } from "@utils/react.jsx";
 import { OptionType } from "@utils/types";
-import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useState } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components/ChannelTabsContainer.jsx";
 
@@ -39,6 +40,21 @@ interface PersistedTabs {
         openTabIndex: number;
     };
 }
+
+interface Bookmark {
+    channelId: string;
+    guildId: string;
+    name?: string;
+}
+interface BookmarkFolder {
+    bookmarks: Bookmark[];
+    name?: string;
+}
+export type Bookmarks = (Bookmark | BookmarkFolder)[];
+export type UseBookmark = [Bookmarks | undefined, {
+    addBookmark: (bookmark: Bookmark, folderIndex?: number) => void;
+    deleteBookmark: (channelId: string) => void;
+}];
 
 const logger = new Logger("ChannelTabs");
 
@@ -74,8 +90,13 @@ export const channelTabsSettings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    showBookmarkBar: {
+        description: "",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     showChannelEmojis: {
-        description: "Show channel emojis",
+        description: "",
         type: OptionType.BOOLEAN,
         default: true
     }
@@ -295,6 +316,11 @@ function setUpdaterFunction(fn: () => void) {
     update = fn;
 }
 
+function switchChannel(ch: BasicChannelTabsProps) {
+    handleChannelSwitch(ch);
+    moveToTab(openTabs.find(t => t.id === currentlyOpenTab)!.id);
+}
+
 function toggleCompactTab(id: number) {
     const i = openTabs.findIndex(v => v.id === id);
     if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
@@ -306,8 +332,56 @@ function toggleCompactTab(id: number) {
     update();
 }
 
+function useBookmarks(userId: string): UseBookmark {
+    const [bookmarks, setBookmarks] = useState<{ [k: string]: Bookmarks; }>({});
+    useAwaiter(() => DataStore.get("ChannelTabs_bookmarks"), {
+        fallbackValue: undefined,
+        onSuccess(bookmarks: { [k: string]: Bookmarks; }) {
+            if (!bookmarks) DataStore.set("ChannelTabs_bookmarks", { [userId]: [] });
+            setBookmarks(bookmarks || { [userId]: [] });
+        },
+    });
+
+    const methods = {
+        addBookmark: (bookmark, folderIndex) => {
+            if (!bookmarks) return;
+            // TODO: folders
+            const newBookmarks = [...bookmarks[userId], bookmark];
+            setBookmarks({
+                ...bookmarks,
+                [userId]: newBookmarks
+            });
+            DataStore.update("ChannelTabs_bookmarks", old => ({
+                ...old,
+                [userId]: newBookmarks
+            }));
+        },
+        deleteBookmark(channelId) {
+            if (!bookmarks) return;
+            const bookmark = bookmarks[userId].findIndex(b =>
+                !("bookmarks" in b) && b.channelId === channelId
+            );
+            if (bookmark !== -1) {
+                bookmarks[userId].splice(bookmark, 1);
+                setBookmarks({
+                    ...bookmarks
+                });
+                DataStore.update("ChannelTabs_bookmarks", old => ({
+                    ...old,
+                    [userId]: bookmarks[userId]
+                }));
+                return;
+            }
+            // TODO: folders
+            return logger.warn("Cannot find bookmark with channel ID " + channelId, bookmarks);
+        }
+    } as UseBookmark[1];
+
+    return [bookmarks[userId], methods];
+}
+
 export const ChannelTabsUtils = {
     closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory,
-    openTabs, saveTabs, openStartupTabs, setUpdaterFunction, toggleCompactTab
+    handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
+    saveTabs, openStartupTabs, setUpdaterFunction, switchChannel, toggleCompactTab, useBookmarks
 };

@@ -17,9 +17,9 @@
 */
 
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, ReadStateStore, useState } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, ReadStateStore, showToast, useState } from "@webpack/common";
 
-import { ChannelTabsProps, ChannelTabsUtils } from "../util";
+import { Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 
 const { closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
 
@@ -27,15 +27,113 @@ const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
 
-export function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
+export function BasicContextMenu() {
+    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+
+    return <Menu.Menu
+        navId="channeltabs-context"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="ChannelTabs Context Menu"
+    >
+        <Menu.MenuGroup>
+            <Menu.MenuCheckboxItem
+                checked={showBookmarkBar}
+                key="show-bookmark-bar"
+                id="show-bookmark-bar"
+                label="Bookmark Bar"
+                action={() => {
+                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                }}
+            />
+        </Menu.MenuGroup>
+    </Menu.Menu>;
+}
+
+export function BookmarkBarContextMenu() {
+    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+
+    return <Menu.Menu
+        navId="channeltabs-bookmark-bar-context"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="ChannelTabs Bookmark Bar Context Menu"
+    >
+        <Menu.MenuGroup>
+            <Menu.MenuItem
+                key="create-folder"
+                id="create-folder"
+                label="Create Folder"
+                action={() => showToast("TODO")}
+            />
+        </Menu.MenuGroup>
+        <Menu.MenuGroup>
+            <Menu.MenuCheckboxItem
+                checked={showBookmarkBar}
+                key="show-bookmark-bar"
+                id="show-bookmark-bar"
+                label="Bookmark Bar"
+                action={() => {
+                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                }}
+            />
+        </Menu.MenuGroup>
+    </Menu.Menu>;
+}
+
+export function BookmarkContextMenu({ bookmark, methods }: { bookmark: Bookmarks[number], methods: UseBookmark[1]; }) {
+    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+
+    return <Menu.Menu
+        navId="channeltabs-bookmark-context"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="ChannelTabs Bookmark Context Menu"
+    >
+        {"bookmarks" in bookmark
+            ? <></> // TODO
+            : <Menu.MenuGroup>
+                <Menu.MenuItem
+                    key="edit-bookmark"
+                    id="edit-bookmark"
+                    label="Edit Bookmark"
+                    action={() => showToast("TODO")}
+                />
+                <Menu.MenuItem
+                    key="delete-bookmark"
+                    id="delete-bookmark"
+                    label="Delete Bookmark"
+                    action={() => methods.deleteBookmark(bookmark.channelId)}
+                />
+                <Menu.MenuItem
+                    key="add-to-folder"
+                    id="add-to-folder"
+                    label="Add Bookmark to Folder"
+                    action={() => showToast("TODO")}
+                />
+            </Menu.MenuGroup>
+        }
+        <Menu.MenuGroup>
+            <Menu.MenuCheckboxItem
+                checked={showBookmarkBar}
+                key="show-bookmark-bar"
+                id="show-bookmark-bar"
+                label="Bookmark Bar"
+                action={() => {
+                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                }}
+            />
+        </Menu.MenuGroup>
+    </Menu.Menu>;
+}
+
+export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
     const { openTabs } = ChannelTabsUtils;
     const [compact, setCompact] = useState(tab.compact);
+    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
     return <Menu.Menu
-        navId="channeltabs-channel-context"
+        navId="channeltabs-tab-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="Channel Tab Context Menu"
+        aria-label="ChannelTabs Tab Context Menu"
     >
         <Menu.MenuGroup>
             {channel &&
@@ -55,7 +153,7 @@ export function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                 action={() => {
                     setCompact(compact => !compact);
                     toggleCompactTab(tab.id);
-                    FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
+                    // FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
                 }}
             />
         </Menu.MenuGroup>
@@ -80,5 +178,16 @@ export function ChannelContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                 action={() => closeTabsToTheRight(tab.id)}
             />
         </Menu.MenuGroup>}
+        <Menu.MenuGroup>
+            <Menu.MenuCheckboxItem
+                checked={showBookmarkBar}
+                key="show-bookmark-bar"
+                id="show-bookmark-bar"
+                label="Bookmark Bar"
+                action={() => {
+                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                }}
+            />
+        </Menu.MenuGroup>
     </Menu.Menu>;
 }

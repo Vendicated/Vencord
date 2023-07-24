@@ -19,26 +19,66 @@
 import { classes } from "@utils/misc";
 import { LazyComponent, useForceUpdater } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Button, ContextMenu, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, ContextMenu, Flex, FluxDispatcher, Forms, Text, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import Bookmark from "./Bookmark";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
-import { ChannelContextMenu } from "./ContextMenus";
+import { BasicContextMenu, BookmarkBarContextMenu, TabContextMenu } from "./ContextMenus";
 
 const {
     closeTab, createTab, handleChannelSwitch, handleKeybinds, isTabSelected,
-    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
+    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction, useBookmarks
 } = ChannelTabsUtils;
 
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
 const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
+const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
+
+function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
+    const { guildId, channelId, userId } = props;
+    const channel = ChannelStore.getChannel(channelId);
+    const [bookmarks, methods] = useBookmarks(userId);
+    const isCurrentChannelBookmarked = bookmarks ? bookmarks.some(b =>
+        // TODO: folders
+        !("bookmarks" in b) && b.channelId === channelId
+    ) : false;
+
+    return <div className={cl("inner-container")}>
+        <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
+            ? methods.deleteBookmark(channelId)
+            : methods.addBookmark({
+                guildId,
+                channelId,
+                name: channel?.name ?? "idk"
+            })}
+        >
+            <Star
+                height={20}
+                width={20}
+                foreground={isCurrentChannelBookmarked ? cl("bookmark-star-checked") : cl("bookmark-star")}
+            />
+        </button>
+        {bookmarks
+            ? bookmarks.length
+                ? bookmarks.map(bookmark => <Bookmark bookmark={bookmark} methods={methods} />)
+                : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
+                    You have no bookmarks. You can add an open tab or hide this by right clicking it
+                </Text>
+            : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
+                Loading bookmarks...
+            </Text>
+        }
+    </div>;
+}
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState(props.userId);
     const [waitingForDataStore, setWaiting] = useState(settings.store.onStartup === "remember");
+    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
     const _update = useForceUpdater();
     const update = useCallback((save = true) => {
@@ -71,39 +111,49 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     handleChannelSwitch(props);
     if (!waitingForDataStore) saveTabs(userId);
 
-    return <div className={cl("container")} ref={ref}>
-        {openTabs.map((tab, i) => <div
-            className={classes(cl("tab"), tab.compact ? cl("tab-compact") : null, isTabSelected(tab.id) ? cl("tab-selected") : null)}
-            key={i}
-            onAuxClick={e => {
-                if (e.button === 1 /* middle click */) {
-                    closeTab(tab.id);
-                }
-            }}
-            onContextMenu={e => ContextMenu.open(e, () => <ChannelContextMenu tab={tab} />)}
-        >
-            <button
-                className={classes(cl("button"), cl("channel-info"))}
-                onClick={() => moveToTab(tab.id)}
+    return <div
+        className={cl("container")}
+        ref={ref}
+        onContextMenu={e => ContextMenu.open(e, () => <BasicContextMenu />)}
+    >
+        <div className={cl("inner-container")}>
+            {openTabs.map((tab, i) => <div
+                className={classes(cl("tab"), tab.compact ? cl("tab-compact") : null, isTabSelected(tab.id) ? cl("tab-selected") : null)}
+                key={i}
+                onAuxClick={e => {
+                    if (e.button === 1 /* middle click */) {
+                        closeTab(tab.id);
+                    }
+                }}
+                onContextMenu={e => ContextMenu.open(e, () => <TabContextMenu tab={tab} />)}
             >
-                <ChannelTab {...tab} index={i} />
-            </button>
-            {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
-                className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
-                onClick={() => closeTab(tab.id)}
-            >
-                <XIcon width={16} height={16} />
-            </button>}
-        </div>)
-        }
+                <button
+                    className={classes(cl("button"), cl("channel-info"))}
+                    onClick={() => moveToTab(tab.id)}
+                >
+                    <ChannelTab {...tab} index={i} />
+                </button>
+                {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                    className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
+                    onClick={() => closeTab(tab.id)}
+                >
+                    <XIcon width={16} height={16} />
+                </button>}
+            </div>)
+            }
 
-        <button
-            onClick={() => createTab(props, true)}
-            className={classes(cl("button"), cl("new-button"))}
-        >
-            <PlusIcon />
-        </button>
-    </div >;
+            <button
+                onClick={() => createTab(props, true)}
+                className={classes(cl("button"), cl("new-button"))}
+            >
+                <PlusIcon />
+            </button>
+        </div >
+        {showBookmarkBar && <div onContextMenu={e => ContextMenu.open(e, () => <BookmarkBarContextMenu />)}>
+            <div className={cl("separator")} />
+            <BookmarkContainer {...props} />
+        </div>}
+    </div>;
 }
 
 export function ChannelTabsPreview(p) {
