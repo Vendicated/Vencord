@@ -75,6 +75,7 @@ export default definePlugin({
     description: "Uses an open-source AI model (RNNoise) to remove background noise from your microphone",
     authors: [Devs.Vap],
     settings,
+    enabledByDefault: true,
 
     patches: [
         {
