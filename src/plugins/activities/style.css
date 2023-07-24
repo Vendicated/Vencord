@@ -1,0 +1,71 @@
+.vc-activities-caret-left,
+.vc-activities-caret-right {
+    color: #ddd;
+}
+
+.vc-activities-caret-left {
+    transform: rotate(90deg);
+}
+
+.vc-activities-caret-right {
+    transform: rotate(-90deg);
+}
+
+.vc-activities-controls {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    background: var(--background-secondary-alt);
+    border-radius: 3px;
+    flex: 1 0;
+    margin-top: 10px;
+}
+
+.vc-activities-controls [class^="vc-activities-caret-"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 3px;
+    background-color: #ffffff4d;
+}
+
+.vc-activities-controls [class^="vc-activities-caret-"].disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.vc-activities-controls [class^="vc-activities-caret-"]:hover:not(.disabled) {
+    background: var(--background-modifier-accent);
+}
+
+.vc-activities-controls .carousell {
+    display: flex;
+    align-items: center;
+}
+
+.vc-activities-controls .carousell .dot {
+    margin: 0 4px;
+    width: 10px;
+    cursor: pointer;
+    height: 10px;
+    border-radius: 100px;
+    background: var(--interactive-muted);
+    transition: background 0.3s;
+    opacity: 0.6;
+}
+
+.vc-activities-controls .carousell .dot:hover:not(.selected) {
+    opacity: 1;
+}
+
+.vc-activities-controls .carousell .dot.selected {
+    opacity: 1;
+    background: var(--dot-color, var(--brand-experiment));
+}
+
+.vc-activities-controls-tooltip {
+    --background-floating: var(--background-secondary);
+}
