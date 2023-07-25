@@ -23,21 +23,12 @@ import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import {
-    FluxDispatcher,
-    Forms,
-    GuildStore,
-    React,
-    SelectedChannelStore,
-    SelectedGuildStore,
-    UserStore
-} from "@webpack/common";
+import { FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
 
-// START yoinked from lastfm.tsx
 const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
@@ -82,18 +73,19 @@ const enum ActivityType {
     WATCHING = 3,
     COMPETING = 5
 }
-// END
 
 const strOpt = (description: string) => ({
     type: OptionType.STRING,
     description,
-    onChange: setRpc
+    onChange: setRpc,
+    restartNeeded: true
 }) as const;
 
 const numOpt = (description: string) => ({
     type: OptionType.NUMBER,
     description,
-    onChange: setRpc
+    onChange: setRpc,
+    restartNeeded: true
 }) as const;
 
 const choice = (label: string, value: any, _default?: boolean) => ({
@@ -106,33 +98,40 @@ const choiceOpt = <T,>(description: string, options: T) => ({
     type: OptionType.SELECT,
     description,
     onChange: setRpc,
+    restartNeeded: true,
     options
 }) as const;
 
 
 const settings = definePluginSettings({
-    appID: strOpt("The ID of the application for the rich presence."),
-    appName: strOpt("The name of the presence."),
-    details: strOpt("Line 1 of rich presence."),
-    state: strOpt("Line 2 of rich presence."),
-    type: choiceOpt("Type of presence", [
+    appID: strOpt("Application ID"),
+    appName: strOpt("Application Name"),
+    details: strOpt("Details (line 1)"),
+    state: strOpt("State (line 2)"),
+    type: choiceOpt("Activity type", [
         choice("Playing", ActivityType.PLAYING, true),
         choice("Streaming", ActivityType.STREAMING),
         choice("Listening", ActivityType.LISTENING),
         choice("Watching", ActivityType.WATCHING),
         choice("Competing", ActivityType.COMPETING)
     ]),
-    twitchUsername: strOpt("The twitch username for streaming activity type."),
-    startTime: numOpt("Unix Timestamp for beginning of activity."),
-    endTime: numOpt("Unix Timestamp for end of activity."),
-    imageBig: strOpt("Sets the big image to the specified image."),
-    imageBigTooltip: strOpt("Sets the tooltip text for the big image."),
-    imageSmall: strOpt("Sets the small image to the specified image."),
-    imageSmallTooltip: strOpt("Sets the tooltip text for the small image."),
-    buttonOneText: strOpt("The text for the first button"),
-    buttonOneURL: strOpt("The URL for the first button"),
-    buttonTwoText: strOpt("The text for the second button"),
-    buttonTwoURL: strOpt("The URL for the second button")
+    streamLink: strOpt("Twitch.tv or Youtube.com link (for Streaming activity type)"),
+    timestampMode: choiceOpt("Timestamp mode", [
+        choice("Off", "off", true),
+        choice("Since discord open", "now"),
+        choice("Same as your clock", "clock"),
+        choice("Custom", "custom")
+    ]),
+    startTime: numOpt("Start Timestamp (only for custom timestamp mode)"),
+    endTime: numOpt("End Timestamp (only for custom timestamp mode)"),
+    imageBig: strOpt("Big image key"),
+    imageBigTooltip: strOpt("Big image tooltip"),
+    imageSmall: strOpt("Small image key"),
+    imageSmallTooltip: strOpt("Small image tooltip"),
+    buttonOneText: strOpt("Button 1 text"),
+    buttonOneURL: strOpt("Button 1 URL"),
+    buttonTwoText: strOpt("Button 2 text"),
+    buttonTwoURL: strOpt("Button 2 URL")
 });
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -142,7 +141,7 @@ async function createActivity(): Promise<Activity | undefined> {
         details,
         state,
         type,
-        twitchUsername,
+        streamLink,
         startTime,
         endTime,
         imageBig,
@@ -159,24 +158,45 @@ async function createActivity(): Promise<Activity | undefined> {
 
     const activity: Activity = {
         application_id: appID || "0",
-        name: appName,
-        state,
-        details,
+        name: appName.slice(0, 128),
+        state: state?.slice(0, 128),
+        details: details?.slice(0, 128),
         type,
         flags: 1 << 0,
     };
 
     if (type === ActivityType.STREAMING) {
-        activity.url = "https://www.twitch.tv/" + (twitchUsername ? twitchUsername : ".");
+        if (streamLink && /(https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+)/.test(streamLink)) {
+            activity.url = streamLink;
+        } else {
+            activity.url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        }
     }
 
-    if (startTime) {
-        activity.timestamps = {
-            start: startTime,
-        };
-        if (endTime) {
-            activity.timestamps.end = endTime;
-        }
+    switch (settings.store.timestampMode) {
+        case "now":
+            activity.timestamps = {
+                start: Math.floor(Date.now() / 1000)
+            };
+            break;
+        case "clock":
+            activity.timestamps = {
+                start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
+            };
+            break;
+        case "custom":
+            if (startTime && startTime > 0) {
+                activity.timestamps = {
+                    start: startTime,
+                };
+                if (endTime && endTime > 0) {
+                    activity.timestamps.end = endTime;
+                }
+            }
+            break;
+        case "off":
+        default:
+            break;
     }
 
     if (buttonOneText) {
@@ -196,7 +216,7 @@ async function createActivity(): Promise<Activity | undefined> {
     if (imageBig) {
         activity.assets = {
             large_image: await getApplicationAsset(imageBig),
-            large_text: imageBigTooltip
+            large_text: imageBigTooltip?.slice(0, 128) || undefined
         };
     }
 
@@ -204,13 +224,13 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.assets = {
             ...activity.assets,
             small_image: await getApplicationAsset(imageSmall),
-            small_text: imageSmallTooltip
+            small_text: imageSmallTooltip?.slice(0, 128) || undefined
         };
     }
 
 
     for (const k in activity) {
-        if (k === "type") continue; // without type, the presence is considered invalid.
+        if (k === "type") continue;
         const v = activity[k];
         if (!v || v.length === 0)
             delete activity[k];
@@ -241,11 +261,15 @@ export default definePlugin({
         const activity = useAwaiter(createActivity);
         return (
             <>
-                <Forms.FormTitle tag="h2">NOTE:</Forms.FormTitle>
                 <Forms.FormText>
-                    You will need to <Link href="https://discord.com/developers/applications">create an
-                        application</Link> and
-                    get its ID to use this plugin.
+                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to create an application and
+                    get the application ID.
+                </Forms.FormText>
+                <Forms.FormText>
+                    Upload images in the Rich Presence tab to get the image keys.
+                </Forms.FormText>
+                <Forms.FormText>
+                    If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
