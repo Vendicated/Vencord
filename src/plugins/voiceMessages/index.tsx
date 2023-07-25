@@ -32,10 +32,11 @@ import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
-import { cl, clamp } from "./utils";
+import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
+const { clamp } = window._;
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
 export type VoiceRecorder = ComponentType<{
@@ -48,7 +49,7 @@ const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderW
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Vap],
     settings,
 
     start() {

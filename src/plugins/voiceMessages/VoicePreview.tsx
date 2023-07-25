@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/react";
+import { LazyComponent, useForceUpdater } from "@utils/react";
 import { findByCode } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
@@ -38,23 +38,28 @@ export const VoicePreview = ({
     waveform,
     recording,
 }: VoicePreviewOptions) => {
-    const [seconds, setSeconds] = useState(0);
+    const update = useForceUpdater();
+    const [recordingStart, setRecordingStart] = useState(0);
+
+    const now = Date.now();
+    const durationMs = now - (recording ? recordingStart : now);
+    const durationSeconds = Math.floor(durationMs / 1000);
+    const durationDisplay = Math.floor(durationSeconds / 60) + ":" + (durationSeconds % 60).toString().padStart(2, "0");
 
     useEffect(() => {
-        if (!recording) return setSeconds(0);
+        if (!recording) return;
 
-        const interval = setInterval(() => {
-            setSeconds(s => s + 1);
-        }, 1000);
+        setRecordingStart(now);
+        const interval = setInterval(update, 1000);
         return () => clearInterval(interval);
     }, [recording]);
 
-    const duration = Math.floor(seconds / 60) + ":" + (seconds % 60).toString().padStart(2, "0");
-
     if (src && !recording) return <VoiceMessage key={src} src={src} waveform={waveform} />;
-    return <div className={cl("preview", recording ? "preview-recording" : [])}>
-        <div className={cl("preview-indicator")}></div>
-        <div className={cl("preview-time")}>{duration}</div>
-        <div className={cl("preview-label")}>{recording ? "RECORDING" : "----"}</div>
-    </div>;
+    return (
+        <div className={cl("preview", recording ? "preview-recording" : [])}>
+            <div className={cl("preview-indicator")}></div>
+            <div className={cl("preview-time")}>{durationDisplay}</div>
+            <div className={cl("preview-label")}>{recording ? "RECORDING" : "----"}</div>
+        </div>
+    );
 };

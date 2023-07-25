@@ -19,4 +19,3 @@
 import { classNameFactory } from "@api/Styles";
 
 export const cl = classNameFactory("vc-vmsg-");
-export const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
