@@ -146,6 +146,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
         }
 
+        // Normalize bins with easing
+        const maxBin = Math.max(...bins);
+        const ratio = 1 + (0xFF / maxBin - 1) * Math.min(1, 100 * (maxBin / 0xFF) ** 3);
+        for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i] * ratio));
+
         return {
             waveform: window.btoa(String.fromCharCode(...bins)),
             duration: audioBuffer.duration,
