@@ -41,7 +41,7 @@ export const VoicePreview = ({
     const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
-        if (!recording) return;
+        if (!recording) return setSeconds(0);
 
         const interval = setInterval(() => {
             setSeconds(s => s + 1);
