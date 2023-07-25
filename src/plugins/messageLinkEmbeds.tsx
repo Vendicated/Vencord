@@ -110,7 +110,8 @@ const settings = definePluginSettings({
     },
     idList: {
         description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
-        type: OptionType.STRING
+        type: OptionType.STRING,
+        default: ""
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
@@ -238,8 +239,10 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
         const { listMode, idList } = settings.store;
 
-        if (listMode === "blacklist" && idList && (idList.includes(guildID) || idList.includes(channelID) || idList.includes(message.author.id))) continue;
-        if (listMode === "whitelist" && idList && !idList.includes(guildID) && !idList.includes(channelID) && !idList.includes(message.author.id)) continue;
+        const isListed = [guildID, channelID, message.author.id].some(id => id && idList.includes(id));
+
+        if (listMode === "blacklist" && isListed) continue;
+        if (listMode === "whitelist" && !isListed) continue;
 
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
