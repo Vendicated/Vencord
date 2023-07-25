@@ -74,16 +74,18 @@ const enum ActivityType {
     COMPETING = 5
 }
 
-const strOpt = (description: string) => ({
+const strOpt = (description: string, disabled: () => boolean = () => false) => ({
     type: OptionType.STRING,
     description,
+    disabled,
     onChange: setRpc,
     restartNeeded: true
 }) as const;
 
-const numOpt = (description: string) => ({
+const numOpt = (description: string, disabled: () => boolean = () => false) => ({
     type: OptionType.NUMBER,
     description,
+    disabled,
     onChange: setRpc,
     restartNeeded: true
 }) as const;
@@ -105,7 +107,7 @@ const choiceOpt = <T,>(description: string, options: T) => ({
 
 const settings = definePluginSettings({
     appID: strOpt("Application ID"),
-    appName: strOpt("Application Name"),
+    appName: strOpt("Application name"),
     details: strOpt("Details (line 1)"),
     state: strOpt("State (line 2)"),
     type: choiceOpt("Activity type", [
@@ -115,15 +117,15 @@ const settings = definePluginSettings({
         choice("Watching", ActivityType.WATCHING),
         choice("Competing", ActivityType.COMPETING)
     ]),
-    streamLink: strOpt("Twitch.tv or Youtube.com link (for Streaming activity type)"),
+    streamLink: strOpt("Twitch.tv or Youtube.com link (only for Streaming activity type)", isStreamLinkDisabled),
     timestampMode: choiceOpt("Timestamp mode", [
         choice("Off", "off", true),
         choice("Since discord open", "now"),
         choice("Same as your clock", "clock"),
         choice("Custom", "custom")
     ]),
-    startTime: numOpt("Start Timestamp (only for custom timestamp mode)"),
-    endTime: numOpt("End Timestamp (only for custom timestamp mode)"),
+    startTime: numOpt("Start timestamp (only for custom timestamp mode)", isTimestampDisabled),
+    endTime: numOpt("End timestamp (only for custom timestamp mode)", isTimestampDisabled),
     imageBig: strOpt("Big image key"),
     imageBigTooltip: strOpt("Big image tooltip"),
     imageSmall: strOpt("Small image key"),
@@ -133,6 +135,14 @@ const settings = definePluginSettings({
     buttonTwoText: strOpt("Button 2 text"),
     buttonTwoURL: strOpt("Button 2 URL")
 });
+
+function isStreamLinkDisabled(): boolean {
+    return settings.store.type !== ActivityType.STREAMING;
+}
+
+function isTimestampDisabled(): boolean {
+    return settings.store.timestampMode !== "custom";
+}
 
 async function createActivity(): Promise<Activity | undefined> {
     const {
