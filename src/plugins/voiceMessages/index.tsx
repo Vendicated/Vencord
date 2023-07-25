@@ -23,25 +23,33 @@ import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
+import { settings } from "./settings";
+import { cl } from "./utils";
+import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
-export type VoiceRecorder = ComponentType<{ setAudioBlob(blob: Blob): void; }>;
+export type VoiceRecorder = ComponentType<{
+    setAudioBlob(blob: Blob): void;
+    onRecordingChange?(recording: boolean): void;
+}>;
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Vap],
+    settings,
 
     start() {
         addContextMenuPatch("channel-attach", ctxMenuPatch);
@@ -52,7 +60,16 @@ export default definePlugin({
     }
 });
 
-function sendAudio(audio: HTMLAudioElement, blob: Blob) {
+type AudioMetadata = {
+    waveform: string,
+    duration: number,
+};
+const EMPTY_META: AudioMetadata = {
+    waveform: "AAAAAAAAAAAA",
+    duration: 1,
+};
+
+function sendAudio(blob: Blob, meta: AudioMetadata) {
     const channelId = SelectedChannelStore.getChannelId();
 
     const upload = new CloudUpload({
@@ -76,8 +93,8 @@ function sendAudio(audio: HTMLAudioElement, blob: Blob) {
                     id: "0",
                     filename: upload.filename,
                     uploaded_filename: upload.uploadedFilename,
-                    waveform: "AEtWPyUaGA4OEAcA", // TODO
-                    duration_secs: audio.duration || 1
+                    waveform: meta.waveform,
+                    duration_secs: meta.duration,
                 }]
             }
         });
@@ -99,14 +116,49 @@ function useObjectUrl() {
 }
 
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
+    const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
-    const audioRef = useRef<HTMLAudioElement>(null);
 
     useEffect(() => () => {
         if (blobUrl)
             URL.revokeObjectURL(blobUrl);
     }, [blobUrl]);
+
+    const [meta] = useAwaiter(async () => {
+        if (!blob) return EMPTY_META;
+
+        const audioContext = new AudioContext();
+        const audioBuffer = await audioContext.decodeAudioData(await blob.arrayBuffer());
+        const channelData = audioBuffer.getChannelData(0);
+
+        // average the samples into much lower resolution bins, maximum of 256 total bins
+        const bins = new Uint8Array(window._.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+        const samplesPerBin = Math.floor(channelData.length / bins.length);
+
+        // Get root mean square of each bin
+        for (let binIdx = 0; binIdx < bins.length; binIdx++) {
+            let squares = 0;
+            for (let sampleOffset = 0; sampleOffset < samplesPerBin; sampleOffset++) {
+                const sampleIdx = binIdx * samplesPerBin + sampleOffset;
+                squares += channelData[sampleIdx] ** 2;
+            }
+            bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
+        }
+
+        // Normalize bins with easing
+        const maxBin = Math.max(...bins);
+        const ratio = 1 + (0xFF / maxBin - 1) * Math.min(1, 100 * (maxBin / 0xFF) ** 3);
+        for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i] * ratio));
+
+        return {
+            waveform: window.btoa(String.fromCharCode(...bins)),
+            duration: audioBuffer.duration,
+        };
+    }, {
+        deps: [blob],
+        fallbackValue: EMPTY_META,
+    });
 
     return (
         <ModalRoot {...modalProps}>
@@ -114,13 +166,14 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
             </ModalHeader>
 
-            <ModalContent className="vc-vmsg-modal">
-                <div className="vc-vmsg-buttons">
+            <ModalContent className={cl("modal")}>
+                <div className={cl("buttons")}>
                     <VoiceRecorder
                         setAudioBlob={blob => {
                             setBlob(blob);
                             setBlobUrl(blob);
                         }}
+                        onRecordingChange={setRecording}
                     />
 
                     <Button
@@ -137,7 +190,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 </div>
 
                 <Forms.FormTitle>Preview</Forms.FormTitle>
-                <audio ref={audioRef} src={blobUrl} controls />
+                <VoicePreview
+                    src={blobUrl}
+                    waveform={meta.waveform}
+                    recording={isRecording}
+                />
 
             </ModalContent>
 
@@ -145,10 +202,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Button
                     disabled={!blob}
                     onClick={() => {
-                        const audio = audioRef.current;
-                        if (!audio || isNaN(audio.duration)) return showToast("No valid audio file selected", Toasts.Type.FAILURE);
-
-                        sendAudio(audioRef.current!, blob!);
+                        sendAudio(blob!, meta);
                         modalProps.onClose();
                         showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
                     }}

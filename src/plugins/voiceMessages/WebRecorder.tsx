@@ -19,12 +19,18 @@
 import { Button, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
+import { settings } from "./settings";
 
-export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob }) => {
+export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+
+    const changeRecording = (recording: boolean) => {
+        setRecording(recording);
+        onRecordingChange?.(recording);
+    };
 
     function toggleRecording() {
         const nowRecording = !recording;
@@ -32,8 +38,8 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob }) => {
         if (nowRecording) {
             navigator.mediaDevices.getUserMedia({
                 audio: {
-                    noiseSuppression: true,
-                    echoCancellation: true,
+                    echoCancellation: settings.store.echoCancellation,
+                    noiseSuppression: settings.store.noiseSuppression,
                 }
             }).then(stream => {
                 const chunks = [] as Blob[];
@@ -46,14 +52,14 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob }) => {
                 });
                 recorder.start();
 
-                setRecording(true);
+                changeRecording(true);
             });
         } else {
             if (recorder) {
                 recorder.addEventListener("stop", () => {
                     setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
 
-                    setRecording(false);
+                    changeRecording(false);
                 });
                 recorder.stop();
             }

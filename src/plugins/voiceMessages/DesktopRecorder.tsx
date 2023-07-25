@@ -19,9 +19,15 @@
 import { Button, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
+import { settings } from "./settings";
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob }) => {
+export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
+
+    const changeRecording = (recording: boolean) => {
+        setRecording(recording);
+        onRecordingChange?.(recording);
+    };
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
@@ -30,13 +36,12 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob }) => {
         if (nowRecording) {
             discordVoice.startLocalAudioRecording(
                 {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    noiseCancellation: true
+                    echoCancellation: settings.store.echoCancellation,
+                    noiseCancellation: settings.store.noiseSuppression,
                 },
                 (success: boolean) => {
                     if (success)
-                        setRecording(true);
+                        changeRecording(true);
                     else
                         showToast("Failed to start recording", Toasts.Type.FAILURE);
                 }
@@ -50,7 +55,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob }) => {
                     else
                         showToast("Failed to finish recording", Toasts.Type.FAILURE);
                 }
-                setRecording(false);
+                changeRecording(false);
             });
         }
     }
