@@ -69,7 +69,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /getGlobalName\(\i\);(?<=displayProfile.{0,200})/,
-                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
+                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
                 },
                 PRONOUN_TOOLTIP_PATCH
             ]
