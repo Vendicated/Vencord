@@ -93,6 +93,26 @@ const settings = definePluginSettings({
             }
         ]
     },
+    listMode: {
+        description: "Whether to use ID list as blacklist or whitelist",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Blacklist",
+                value: "blacklist",
+                default: true
+            },
+            {
+                label: "Whitelist",
+                value: "whitelist"
+            }
+        ]
+    },
+    idList: {
+        description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
+        type: OptionType.STRING,
+        default: ""
+    },
     clearMessageCache: {
         type: OptionType.COMPONENT,
         description: "Clear the linked message cache",
@@ -217,6 +237,13 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             continue;
         }
 
+        const { listMode, idList } = settings.store;
+
+        const isListed = [guildID, channelID, message.author.id].some(id => id && idList.includes(id));
+
+        if (listMode === "blacklist" && isListed) continue;
+        if (listMode === "whitelist" && !isListed) continue;
+
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
             linkedMessage ??= MessageStore.getMessage(channelID, messageID);
@@ -335,7 +362,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
-    authors: [Devs.TheSun, Devs.Ven],
+    authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
         {
@@ -363,7 +390,9 @@ export default definePlugin({
 
             return (
                 <ErrorBoundary>
-                    <MessageEmbedAccessory message={props.message} />
+                    <MessageEmbedAccessory
+                        message={props.message}
+                    />
                 </ErrorBoundary>
             );
         }, 4 /* just above rich embeds */);
