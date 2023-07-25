@@ -121,7 +121,7 @@ const settings = definePluginSettings({
     timestampMode: choiceOpt("Timestamp mode", [
         choice("Off", "off", true),
         choice("Since discord open", "now"),
-        choice("Same as your clock", "clock"),
+        choice("Same as your current time", "time"),
         choice("Custom", "custom")
     ]),
     startTime: numOpt("Start timestamp (only for custom timestamp mode)", isTimestampDisabled),
@@ -189,7 +189,7 @@ async function createActivity(): Promise<Activity | undefined> {
                 start: Math.floor(Date.now() / 1000)
             };
             break;
-        case "clock":
+        case "time":
             activity.timestamps = {
                 start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
             };
