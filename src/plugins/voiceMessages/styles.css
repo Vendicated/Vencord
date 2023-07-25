@@ -40,6 +40,9 @@
     opacity: 0.8;
     margin: 0 0.5em;
     font-size: 80%;
+
+    /* monospace so different digits have same size */
+    font-family: var(--font-code);
 }
 
 .vc-vmsg-preview-label {

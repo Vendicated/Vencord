@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent } from "@utils/react";
+import { LazyComponent, useTimer } from "@utils/react";
 import { findByCode } from "@webpack";
-import { useEffect, useMemo, useState } from "@webpack/common";
 
 import { cl } from "./utils";
 
@@ -38,21 +37,12 @@ export const VoicePreview = ({
     waveform,
     recording,
 }: VoicePreviewOptions) => {
-    const [durationMs, setDurationMs] = useState(0);
-    const recordingStart = useMemo(() => Date.now(), [recording]);
+    const durationMs = useTimer({
+        deps: [recording]
+    });
 
-    const durationSeconds = Math.floor(durationMs / 1000);
+    const durationSeconds = recording ? Math.floor(durationMs / 1000) : 0;
     const durationDisplay = Math.floor(durationSeconds / 60) + ":" + (durationSeconds % 60).toString().padStart(2, "0");
-
-    useEffect(() => {
-        if (!recording) return;
-
-        const interval = setInterval(() => setDurationMs(Date.now() - recordingStart), 1000);
-        return () => {
-            clearInterval(interval);
-            setDurationMs(0);
-        };
-    }, [recording]);
 
     if (src && !recording)
         return <VoiceMessage key={src} src={src} waveform={waveform} />;
