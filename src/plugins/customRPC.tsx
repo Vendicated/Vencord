@@ -189,7 +189,7 @@ async function createActivity(): Promise<Activity | undefined> {
                 activity.timestamps = {
                     start: startTime,
                 };
-                if (endTime && endTime > 0) {
+                if (endTime && endTime >= startTime) {
                     activity.timestamps.end = endTime;
                 }
             }
@@ -201,8 +201,8 @@ async function createActivity(): Promise<Activity | undefined> {
 
     if (buttonOneText) {
         activity.buttons = [
-            buttonOneText,
-            buttonTwoText
+            buttonOneText?.slice(0, 31),
+            buttonTwoText?.slice(0, 31)
         ].filter(isTruthy);
 
         activity.metadata = {
