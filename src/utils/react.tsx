@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, useEffect, useReducer, useState } from "@webpack/common";
+import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 
 import { makeLazy } from "./lazy";
 import { checkIntersecting } from "./misc";
@@ -134,4 +134,25 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         const Component = get();
         return <Component {...props} />;
     };
+}
+
+interface TimerOpts {
+    interval?: number;
+    deps?: unknown[];
+}
+
+export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
+    const [time, setTime] = useState(0);
+    const start = useMemo(() => Date.now(), deps);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => setTime(Date.now() - start), interval);
+
+        return () => {
+            setTime(0);
+            clearInterval(intervalId);
+        };
+    }, deps);
+
+    return time;
 }
