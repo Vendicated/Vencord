@@ -33,7 +33,7 @@
     "dependencies": {
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
-        "fflate": "^0.7.4",
+        "fflate": "^0.8.0",
         "nanoid": "^4.0.2",
         "virtual-merge": "^1.0.1"
     },
