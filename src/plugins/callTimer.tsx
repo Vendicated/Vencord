@@ -19,6 +19,7 @@
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { useTimer } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
@@ -85,17 +86,10 @@ export default definePlugin({
     },
 
     Timer({ channelId }: { channelId: string; }) {
-        const [time, setTime] = React.useState(0);
-        const startTime = React.useMemo(() => Date.now(), [channelId]);
+        const time = useTimer({
+            deps: [channelId]
+        });
 
-        React.useEffect(() => {
-            const interval = setInterval(() => setTime(Date.now() - startTime), 1000);
-            return () => {
-                clearInterval(interval);
-                setTime(0);
-            };
-        }, [channelId]);
-
-        return <p style={{ margin: 0 }}>Connected for {formatDuration(time)}</p>;
+        return <p style={{ margin: 0 }}>Connected for <span style={{ fontFamily: "var(--font-code)" }}>{formatDuration(time)}</span></p>;
     }
 });
