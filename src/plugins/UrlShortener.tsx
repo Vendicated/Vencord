@@ -23,7 +23,7 @@ export default definePlugin({
     description: "Add a command to shorten URLs and send them in the chat",
     dependencies: ["CommandsAPI"],
     commands: [{
-        name: "shortener",
+        name: "shorten",
         description: "Create shorter URLs",
         options: [
             {
