@@ -48,7 +48,10 @@ export const VoicePreview = ({
         if (!recording) return;
 
         const interval = setInterval(() => setDurationMs(Date.now() - recordingStart), 1000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            setDurationMs(0);
+        };
     }, [recording]);
 
     if (src && !recording)
