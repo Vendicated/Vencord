@@ -36,7 +36,6 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const { clamp } = window._;
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 
 export type VoiceRecorder = ComponentType<{
@@ -134,7 +133,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         const channelData = audioBuffer.getChannelData(0);
 
         // average the samples into much lower resolution bins, maximum of 256 total bins
-        const bins = new Uint8Array(clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+        const bins = new Uint8Array(window._.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
         const samplesPerBin = Math.floor(channelData.length / bins.length);
 
         // Get root mean square of each bin

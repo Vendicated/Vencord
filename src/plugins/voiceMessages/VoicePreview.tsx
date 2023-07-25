@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent, useForceUpdater } from "@utils/react";
+import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
-import { useEffect, useState } from "@webpack/common";
+import { useEffect, useMemo, useState } from "@webpack/common";
 
 import { cl } from "./utils";
 
@@ -38,26 +38,25 @@ export const VoicePreview = ({
     waveform,
     recording,
 }: VoicePreviewOptions) => {
-    const update = useForceUpdater();
-    const [recordingStart, setRecordingStart] = useState(0);
+    const [durationMs, setDurationMs] = useState(0);
+    const recordingStart = useMemo(() => Date.now(), [recording]);
 
-    const now = Date.now();
-    const durationMs = now - (recording ? recordingStart : now);
     const durationSeconds = Math.floor(durationMs / 1000);
     const durationDisplay = Math.floor(durationSeconds / 60) + ":" + (durationSeconds % 60).toString().padStart(2, "0");
 
     useEffect(() => {
         if (!recording) return;
 
-        setRecordingStart(now);
-        const interval = setInterval(update, 1000);
+        const interval = setInterval(() => setDurationMs(Date.now() - recordingStart), 1000);
         return () => clearInterval(interval);
     }, [recording]);
 
-    if (src && !recording) return <VoiceMessage key={src} src={src} waveform={waveform} />;
+    if (src && !recording)
+        return <VoiceMessage key={src} src={src} waveform={waveform} />;
+
     return (
         <div className={cl("preview", recording ? "preview-recording" : [])}>
-            <div className={cl("preview-indicator")}></div>
+            <div className={cl("preview-indicator")} />
             <div className={cl("preview-time")}>{durationDisplay}</div>
             <div className={cl("preview-label")}>{recording ? "RECORDING" : "----"}</div>
         </div>
