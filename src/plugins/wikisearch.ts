@@ -18,13 +18,22 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { RestAPI } from "@webpack/common";
+import { Settings } from "Vencord";
 
 export default definePlugin({
     name: "Wikisearch",
     description: "Searches Wikipedia for your requested query. (/wikisearch)",
-    authors: [Devs.Samu],
+    authors: [Devs.Samu, Devs.Lumap],
     dependencies: ["CommandsAPI"],
+    options: {
+        fancyEmbed: {
+            description: "Sends the wikipedia article URL if disabled, else sends a fancy embed",
+            type: OptionType.BOOLEAN,
+            default: true
+        }
+    },
     commands: [
         {
             name: "wikisearch",
@@ -47,63 +56,94 @@ export default definePlugin({
                     });
                 }
 
-                const dataSearchParams = new URLSearchParams({
-                    action: "query",
-                    format: "json",
-                    list: "search",
-                    formatversion: "2",
-                    origin: "*",
-                    srsearch: word
-                });
+                if (Settings.plugins.Wikisearch.fancyEmbed === false) {
+                    const data = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${word}&limit=1&namespace=0&format=json&origin=*`).then(response => response.json())
+                        .catch(err => {
+                            console.log(err);
+                            sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                            return null;
+                        });
 
-                const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
-                    });
+                    if (!data) {
+                        return;
+                    }
 
-                if (!data) return;
+                    const url = data[3][0];
 
-                if (!data.query?.search?.length) {
-                    console.log(data);
-                    return sendBotMessage(ctx.channel.id, { content: "No results given" });
-                }
+                    if (!url) {
+                        return sendBotMessage(ctx.channel.id, { content: "No result has been found." });
+                    }
 
-                const altData = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
-                    .then(res => res.json())
-                    .then(data => data.query.pages[0])
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
-                    });
-
-                if (!altData) return;
-
-                const thumbnailData = altData.thumbnail;
-
-                const thumbnail = thumbnailData && {
-                    url: thumbnailData.source.replace(/(50px-)/ig, "1000px-"),
-                    height: thumbnailData.height * 100,
-                    width: thumbnailData.width * 100
-                };
-
-                sendBotMessage(ctx.channel.id, {
-                    embeds: [
-                        {
-                            type: "rich",
-                            title: data.query.search[0].title,
-                            url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
-                            color: "0x8663BE",
-                            description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
-                            image: thumbnail,
-                            footer: {
-                                text: "Powered by the Wikimedia API",
-                            },
+                    const urlEmbed = await RestAPI.post({
+                        url: "/unfurler/embed-urls",
+                        body: {
+                            urls: [url]
                         }
-                    ] as any
-                });
+                    });
+
+                    sendBotMessage(ctx.channel.id, {
+                        content: url,
+                        embeds: [urlEmbed.body.embeds[0]] as any
+                    });
+                } else {
+                    const dataSearchParams = new URLSearchParams({
+                        action: "query",
+                        format: "json",
+                        list: "search",
+                        formatversion: "2",
+                        origin: "*",
+                        srsearch: word
+                    });
+
+                    const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
+                        .catch(err => {
+                            console.log(err);
+                            sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                            return null;
+                        });
+
+                    if (!data) return;
+
+                    if (!data.query?.search?.length) {
+                        console.log(data);
+                        return sendBotMessage(ctx.channel.id, { content: "No results given" });
+                    }
+
+                    const altData = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
+                        .then(res => res.json())
+                        .then(data => data.query.pages[0])
+                        .catch(err => {
+                            console.log(err);
+                            sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                            return null;
+                        });
+
+                    if (!altData) return;
+
+                    const thumbnailData = altData.thumbnail;
+
+                    const thumbnail = thumbnailData && {
+                        url: thumbnailData.source.replace(/(50px-)/ig, "1000px-"),
+                        height: thumbnailData.height * 100,
+                        width: thumbnailData.width * 100
+                    };
+
+                    sendBotMessage(ctx.channel.id, {
+                        embeds: [
+                            {
+                                type: "rich",
+                                title: data.query.search[0].title,
+                                url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
+                                color: "0x8663BE",
+                                description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
+                                image: thumbnail,
+                                footer: {
+                                    text: "Powered by the Wikimedia API",
+                                },
+                            }
+                        ] as any
+                    });
+                }
             }
         }
     ]
