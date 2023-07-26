@@ -205,7 +205,8 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Big image key",
         restartNeeded: true,
-        onChange: setRpc
+        onChange: setRpc,
+        isValid: isImageKeyValid
     },
     imageBigTooltip: {
         type: OptionType.STRING,
@@ -221,7 +222,8 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Small image key",
         restartNeeded: true,
-        onChange: setRpc
+        onChange: setRpc,
+        isValid: isImageKeyValid
     },
     imageSmallTooltip: {
         type: OptionType.STRING,
@@ -280,6 +282,13 @@ function isTimestampDisabled(): boolean {
     return settings.store.timestampMode !== "custom";
 }
 
+function isImageKeyValid(value: string) {
+    if (!/https?:\/\//.test(value)) return true;
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(value)) return "Discord CDN won't work, please use Imgur instead.";
+    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
+    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
+}
+
 async function createActivity(): Promise<Activity | undefined> {
     const {
         appID,
@@ -312,7 +321,7 @@ async function createActivity(): Promise<Activity | undefined> {
     };
 
     if (type === ActivityType.STREAMING) {
-        if (streamLink && /(https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+)/.test(streamLink)) {
+        if (streamLink && /https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(streamLink)) {
             activity.url = streamLink;
         } else {
             activity.url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
