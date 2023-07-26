@@ -74,70 +74,206 @@ const enum ActivityType {
     COMPETING = 5
 }
 
-const strOpt = (description: string, disabled: () => boolean = () => false) => ({
-    type: OptionType.STRING,
-    description,
-    disabled,
-    onChange: setRpc,
-    restartNeeded: true
-}) as const;
-
-const numOpt = (description: string, disabled: () => boolean = () => false) => ({
-    type: OptionType.NUMBER,
-    description,
-    disabled,
-    onChange: setRpc,
-    restartNeeded: true
-}) as const;
-
-const choice = (label: string, value: any, _default?: boolean) => ({
-    label,
-    value,
-    default: _default
-}) as const;
-
-const choiceOpt = <T,>(description: string, options: T) => ({
-    type: OptionType.SELECT,
-    description,
-    onChange: setRpc,
-    restartNeeded: true,
-    options
-}) as const;
-
-
 const settings = definePluginSettings({
-    appID: strOpt("Application ID"),
-    appName: strOpt("Application name"),
-    details: strOpt("Details (line 1)"),
-    state: strOpt("State (line 2)"),
-    type: choiceOpt("Activity type", [
-        choice("Playing", ActivityType.PLAYING, true),
-        choice("Streaming", ActivityType.STREAMING),
-        choice("Listening", ActivityType.LISTENING),
-        choice("Watching", ActivityType.WATCHING),
-        choice("Competing", ActivityType.COMPETING)
-    ]),
-    streamLink: strOpt("Twitch.tv or Youtube.com link (only for Streaming activity type)", isStreamLinkDisabled),
-    timestampMode: choiceOpt("Timestamp mode", [
-        choice("Off", "off", true),
-        choice("Since discord open", "now"),
-        choice("Same as your current time", "time"),
-        choice("Custom", "custom")
-    ]),
-    startTime: numOpt("Start timestamp (only for custom timestamp mode)", isTimestampDisabled),
-    endTime: numOpt("End timestamp (only for custom timestamp mode)", isTimestampDisabled),
-    imageBig: strOpt("Big image key"),
-    imageBigTooltip: strOpt("Big image tooltip"),
-    imageSmall: strOpt("Small image key"),
-    imageSmallTooltip: strOpt("Small image tooltip"),
-    buttonOneText: strOpt("Button 1 text"),
-    buttonOneURL: strOpt("Button 1 URL"),
-    buttonTwoText: strOpt("Button 2 text"),
-    buttonTwoURL: strOpt("Button 2 URL")
+    appID: {
+        type: OptionType.STRING,
+        description: "Application ID (required)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (!value) return "Application ID is required.";
+            if (value && !/^\d+$/.test(value)) return "Application ID must be a number.";
+            return true;
+        }
+    },
+    appName: {
+        type: OptionType.STRING,
+        description: "Application name (required)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (!value) return "Application name is required.";
+            if (value.length > 128) return "Application name must be less than 128 characters.";
+            return true;
+        }
+    },
+    details: {
+        type: OptionType.STRING,
+        description: "Details (line 1)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Details (line 1) must be less than 128 characters.";
+            return true;
+        }
+    },
+    state: {
+        type: OptionType.STRING,
+        description: "State (line 2)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "State (line 2) must be less than 128 characters.";
+            return true;
+        }
+    },
+    type: {
+        type: OptionType.SELECT,
+        description: "Activity type",
+        restartNeeded: true,
+        onChange: setRpc,
+        options: [
+            {
+                label: "Playing",
+                value: ActivityType.PLAYING,
+                default: true
+            },
+            {
+                label: "Streaming",
+                value: ActivityType.STREAMING
+            },
+            {
+                label: "Listening",
+                value: ActivityType.LISTENING
+            },
+            {
+                label: "Watching",
+                value: ActivityType.WATCHING
+            },
+            {
+                label: "Competing",
+                value: ActivityType.COMPETING
+            }
+        ]
+    },
+    streamLink: {
+        type: OptionType.STRING,
+        description: "Twitch.tv or Youtube.com link (only for Streaming activity type)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isDisabled: isStreamLinkDisabled,
+        isValid: isStreamLinkValid
+    },
+    timestampMode: {
+        type: OptionType.SELECT,
+        description: "Timestamp mode",
+        restartNeeded: true,
+        onChange: setRpc,
+        options: [
+            {
+                label: "Off",
+                value: "off",
+                default: true
+            },
+            {
+                label: "Since discord open",
+                value: "now"
+            },
+            {
+                label: "Same as your current time",
+                value: "time"
+            },
+            {
+                label: "Custom",
+                value: "custom"
+            }
+        ]
+    },
+    startTime: {
+        type: OptionType.NUMBER,
+        description: "Start timestamp (only for custom timestamp mode)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isDisabled: isTimestampDisabled,
+        isValid: (value: number) => {
+            if (value && value < 0) return "Start timestamp must be greater than 0.";
+            return true;
+        }
+    },
+    endTime: {
+        type: OptionType.NUMBER,
+        description: "End timestamp (only for custom timestamp mode)",
+        restartNeeded: true,
+        onChange: setRpc,
+        isDisabled: isTimestampDisabled,
+        isValid: (value: number) => {
+            if (value && value < 0) return "End timestamp must be greater than 0.";
+            return true;
+        }
+    },
+    imageBig: {
+        type: OptionType.STRING,
+        description: "Big image key",
+        restartNeeded: true,
+        onChange: setRpc
+    },
+    imageBigTooltip: {
+        type: OptionType.STRING,
+        description: "Big image tooltip",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Big image tooltip must be less than 128 characters.";
+            return true;
+        }
+    },
+    imageSmall: {
+        type: OptionType.STRING,
+        description: "Small image key",
+        restartNeeded: true,
+        onChange: setRpc
+    },
+    imageSmallTooltip: {
+        type: OptionType.STRING,
+        description: "Small image tooltip",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Small image tooltip must be less than 128 characters.";
+            return true;
+        }
+    },
+    buttonOneText: {
+        type: OptionType.STRING,
+        description: "Button 1 text",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 31) return "Button 1 text must be less than 31 characters.";
+            return true;
+        }
+    },
+    buttonOneURL: {
+        type: OptionType.STRING,
+        description: "Button 1 URL",
+        restartNeeded: true,
+        onChange: setRpc
+    },
+    buttonTwoText: {
+        type: OptionType.STRING,
+        description: "Button 2 text",
+        restartNeeded: true,
+        onChange: setRpc,
+        isValid: (value: string) => {
+            if (value && value.length > 31) return "Button 2 text must be less than 31 characters.";
+            return true;
+        }
+    },
+    buttonTwoURL: {
+        type: OptionType.STRING,
+        description: "Button 2 URL",
+        restartNeeded: true,
+        onChange: setRpc
+    }
 });
 
 function isStreamLinkDisabled(): boolean {
     return settings.store.type !== ActivityType.STREAMING;
+}
+
+function isStreamLinkValid(): boolean | string {
+    if (settings.store.type === ActivityType.STREAMING && settings.store.streamLink && !/(https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+)/.test(settings.store.streamLink)) return "Streaming link must be a valid URL.";
+    return true;
 }
 
 function isTimestampDisabled(): boolean {
@@ -168,9 +304,9 @@ async function createActivity(): Promise<Activity | undefined> {
 
     const activity: Activity = {
         application_id: appID || "0",
-        name: appName.slice(0, 128),
-        state: state?.slice(0, 128),
-        details: details?.slice(0, 128),
+        name: appName,
+        state,
+        details,
         type,
         flags: 1 << 0,
     };
@@ -211,8 +347,8 @@ async function createActivity(): Promise<Activity | undefined> {
 
     if (buttonOneText) {
         activity.buttons = [
-            buttonOneText?.slice(0, 31),
-            buttonTwoText?.slice(0, 31)
+            buttonOneText,
+            buttonTwoText
         ].filter(isTruthy);
 
         activity.metadata = {
@@ -226,7 +362,7 @@ async function createActivity(): Promise<Activity | undefined> {
     if (imageBig) {
         activity.assets = {
             large_image: await getApplicationAsset(imageBig),
-            large_text: imageBigTooltip?.slice(0, 128) || undefined
+            large_text: imageBigTooltip || undefined
         };
     }
 
@@ -234,7 +370,7 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.assets = {
             ...activity.assets,
             small_image: await getApplicationAsset(imageSmall),
-            small_text: imageSmallTooltip?.slice(0, 128) || undefined
+            small_text: imageSmallTooltip || undefined
         };
     }
 
