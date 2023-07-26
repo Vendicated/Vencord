@@ -49,7 +49,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
         } else {
             discordVoice.stopLocalAudioRecording(async (filePath: string) => {
                 if (filePath) {
-                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording();
+                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording(filePath);
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
