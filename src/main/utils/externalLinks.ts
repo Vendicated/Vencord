@@ -23,6 +23,8 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
         switch (url) {
             case "about:blank":
             case "https://discord.com/popout":
+            case "https://ptb.discord.com/popout":
+            case "https://canary.discord.com/popout":
                 return { action: "allow" };
         }
 
