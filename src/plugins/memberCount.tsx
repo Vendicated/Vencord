@@ -106,7 +106,7 @@ export default definePlugin({
         find: ".isSidebarVisible,",
         replacement: {
             match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: "$1:[$2.startsWith('members')?$self.render():null,$3"
+            replace: "$1:[$2?.startsWith('members')?$self.render():null,$3"
         }
     }],
 
