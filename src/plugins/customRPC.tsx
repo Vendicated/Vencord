@@ -37,6 +37,7 @@ const assetManager = mapMangledModuleLazy(
 );
 
 async function getApplicationAsset(key: string): Promise<string> {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
     return (await assetManager.getAsset(settings.store.appID, [key, undefined]))[0];
 }
 
@@ -284,7 +285,6 @@ function isTimestampDisabled(): boolean {
 
 function isImageKeyValid(value: string) {
     if (!/https?:\/\//.test(value)) return true;
-    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(value)) return "Discord CDN won't work, please use Imgur instead.";
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
     return true;
