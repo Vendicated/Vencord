@@ -58,16 +58,20 @@ const bulkFetch = debounce(async () => {
     }
 });
 
-function getDiscordPronouns(id: string) {
+function getDiscordPronouns(id: string, useGlobalProfile: boolean = false) {
+    const globalPronouns = UserProfileStore.getUserProfile(id)?.pronouns;
+
+    if (useGlobalProfile) return globalPronouns;
+
     return (
         UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.guild_id)?.pronouns
-        || UserProfileStore.getUserProfile(id)?.pronouns
+        || globalPronouns
     );
 }
 
-export function useFormattedPronouns(id: string): PronounsWithSource {
+export function useFormattedPronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
     // Discord is so stupid you can put tons of newlines in pronouns
-    const discordPronouns = getDiscordPronouns(id)?.trim().replace(NewLineRe, " ");
+    const discordPronouns = getDiscordPronouns(id, useGlobalProfile)?.trim().replace(NewLineRe, " ");
 
     const [result] = useAwaiter(() => fetchPronouns(id), {
         fallbackValue: getCachedPronouns(id),
@@ -83,8 +87,8 @@ export function useFormattedPronouns(id: string): PronounsWithSource {
     return [discordPronouns, "Discord"];
 }
 
-export function useProfilePronouns(id: string): PronounsWithSource {
-    const pronouns = useFormattedPronouns(id);
+export function useProfilePronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
+    const pronouns = useFormattedPronouns(id, useGlobalProfile);
 
     if (!settings.store.showInProfile) return EmptyPronouns;
     if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return EmptyPronouns;

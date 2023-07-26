@@ -601,7 +601,11 @@ export default definePlugin({
 
         switch (embed.type) {
             case "image": {
-                if (!settings.store.transformCompoundSentence && !contentItems.includes(embed.url!) && !contentItems.includes(embed.image!.proxyURL)) return false;
+                if (
+                    !settings.store.transformCompoundSentence
+                    && !contentItems.includes(embed.url!)
+                    && !contentItems.includes(embed.image?.proxyURL!)
+                ) return false;
 
                 if (settings.store.transformEmojis) {
                     if (fakeNitroEmojiRegex.test(embed.url!)) return true;
