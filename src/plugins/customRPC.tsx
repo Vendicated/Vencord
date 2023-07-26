@@ -320,14 +320,6 @@ async function createActivity(): Promise<Activity | undefined> {
         flags: 1 << 0,
     };
 
-    if (type === ActivityType.STREAMING) {
-        if (streamLink && /https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(streamLink)) {
-            activity.url = streamLink;
-        } else {
-            activity.url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-        }
-    }
-
     switch (settings.store.timestampMode) {
         case "now":
             activity.timestamps = {
@@ -340,11 +332,11 @@ async function createActivity(): Promise<Activity | undefined> {
             };
             break;
         case "custom":
-            if (startTime && startTime > 0) {
+            if (startTime) {
                 activity.timestamps = {
                     start: startTime,
                 };
-                if (endTime && endTime >= startTime) {
+                if (endTime) {
                     activity.timestamps.end = endTime;
                 }
             }
