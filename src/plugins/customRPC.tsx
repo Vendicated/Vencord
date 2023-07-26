@@ -287,6 +287,7 @@ function isImageKeyValid(value: string) {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(value)) return "Discord CDN won't work, please use Imgur instead.";
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
+    return true;
 }
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -319,6 +320,8 @@ async function createActivity(): Promise<Activity | undefined> {
         type,
         flags: 1 << 0,
     };
+
+    if (type === ActivityType.STREAMING) activity.url = streamLink;
 
     switch (settings.store.timestampMode) {
         case "now":
