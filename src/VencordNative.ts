@@ -64,7 +64,7 @@ export default {
             resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
         },
         VoiceMessages: {
-            readRecording: () => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING),
+            readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
         }
     }
 };
