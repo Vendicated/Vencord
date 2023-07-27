@@ -58,4 +58,13 @@ export default {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
+
+    pluginHelpers: {
+        OpenInApp: {
+            resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
+        },
+        VoiceMessages: {
+            readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
+        }
+    }
 };
