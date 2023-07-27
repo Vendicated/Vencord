@@ -29,6 +29,9 @@ import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
 const UserProfileStore = findStoreLazy("UserProfileStore");
 
+type PronounsWithSource = [string | null, string];
+const EmptyPronouns: PronounsWithSource = [null, ""];
+
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
     Capitalized = "CAPITALIZED"
@@ -55,16 +58,20 @@ const bulkFetch = debounce(async () => {
     }
 });
 
-function getDiscordPronouns(id: string) {
+function getDiscordPronouns(id: string, useGlobalProfile: boolean = false) {
+    const globalPronouns = UserProfileStore.getUserProfile(id)?.pronouns;
+
+    if (useGlobalProfile) return globalPronouns;
+
     return (
         UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.guild_id)?.pronouns
-        || UserProfileStore.getUserProfile(id)?.pronouns
+        || globalPronouns
     );
 }
 
-export function useFormattedPronouns(id: string): string | null {
+export function useFormattedPronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
     // Discord is so stupid you can put tons of newlines in pronouns
-    const discordPronouns = getDiscordPronouns(id)?.trim().replace(NewLineRe, " ");
+    const discordPronouns = getDiscordPronouns(id, useGlobalProfile)?.trim().replace(NewLineRe, " ");
 
     const [result] = useAwaiter(() => fetchPronouns(id), {
         fallbackValue: getCachedPronouns(id),
@@ -72,19 +79,19 @@ export function useFormattedPronouns(id: string): string | null {
     });
 
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
-        return discordPronouns;
+        return [discordPronouns, "Discord"];
 
     if (result && result !== "unspecified")
-        return formatPronouns(result);
+        return [formatPronouns(result), "PronounDB"];
 
-    return discordPronouns;
+    return [discordPronouns, "Discord"];
 }
 
-export function useProfilePronouns(id: string) {
-    const pronouns = useFormattedPronouns(id);
+export function useProfilePronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
+    const pronouns = useFormattedPronouns(id, useGlobalProfile);
 
-    if (!settings.store.showInProfile) return null;
-    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
+    if (!settings.store.showInProfile) return EmptyPronouns;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return EmptyPronouns;
 
     return pronouns;
 }
