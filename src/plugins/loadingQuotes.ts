@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,34 @@ const quotes = [
     "hd{b${",
     "<;vqkijbq33271:56<3799?24944:",
     "Thof$lu'ofdn,!qsefc'az*bnrcma+&Om{o+iu\"`khct$)bnrd\"bcdoi&",
-    "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno"
+    "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno",
+    
+    "Stonkkoio)zbxdnp$j`'xf}nr/,-",
+    "Sqkmjlh`(|z+tig#ldkt|lx+wigfhv()&",
+    "Lncgmka'i~oxolgmavu+(yfnarg#sdos&",
+    "Rdvjgpjf|`dl rromkct&'$",
+    "Bsgtmka'i)|bruwbh%vh|`ee./,",
+    "Sdlgmka'mdeair"wk%rom)ynrwgq*+(",
+    "W`pnmka'}y*hd"pawpbzz*gijg#e%dh{z+",
+    "Vdlwqwoio)cetn"wl`&cancam"bf|ut&'$",
+    "Lncgmka)&'*iebcvw`&pi`~bnf"aqljc{)icasc`p`t&",
+    "Hnngmka'{ykhe!cm`%rnel*ofgwl`t)&'",
+    "Ptvwmka'gg*j ekpgj&ag{*hd"amqu'ign+bxvfw+()",
+    "Thahhlh`(}bn bmga%oi|f*jcuklj+()",
+    "Sqpfeaoio)nbghvbh%usi{n~su,-*",
+    "Lncgmka'd`an hv$w%rom)Gjtsk{*+(",
+    "Psguakrnfn*bnugqj`r'|{kmfha#ndkt&'$",
+    "Rhfjjb&s`l*go`fjjb&ei{*gijg#e%thdeoy bmbwqcu&'$",
+    "Btdeawoio)k|ermnakct{'$%",
+    "Cnlumkenfn*hd"pawpbz)c'r"mkq&Jggnjy/,-",
+    "M`ijjb&s`l*xestfv%trf)ljsugq$qnff)_xahl#Fjjs&'$",
+    "Eovbjbjnfn*zu`lwqh&ea}y+fnp#bdusm{*go`fjjb()&",
+    "Cicpmka'lf}e ujf$igt|)zbxdn-*+",
+    "Bskmclh`(dofer"wk%jnnl$%.",
+    "Hnngmka'|ao+dnmq$ciu(eejdhld$utho{oxs/,-",
+    "Oog#whgkd)yeq"ekw&kghnbnf.#kkc'o`ket!nfeu&ag{*Oiralva(",
+    "nuvp$rgt(aoye>",
+    "Ynw$v`&T}yoyinp#>,"
 ];
 
 export default definePlugin({
