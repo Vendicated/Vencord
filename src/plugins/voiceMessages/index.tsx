@@ -215,7 +215,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 }
 
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (props.channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) || props.channel.guild.id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) return;
+    console.log(!(PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)));
+    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
 
     children.push(
         <Menu.MenuItem
