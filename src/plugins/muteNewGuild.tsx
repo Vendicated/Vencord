@@ -54,7 +54,7 @@ export default definePlugin({
         {
             find: "{joinGuild:function",
             replacement: {
-                match: /guildId:(\w+),lurker:(\w+),(.*)}\)}\)\);/,
+                match: /guildId:(\w+),lurker:(\w+).{0,20}\)}\)\);/,
                 replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
             }
         }
