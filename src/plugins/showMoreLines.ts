@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ShowMoreLines",
-    description: "Removes the 100 lines limit of the file preview",
+    description: "Removes the 100 lines limit of the file preview. May cause lag with very big files, be careful!",
     authors: [Devs.Lumap],
     patches: [
         {
