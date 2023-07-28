@@ -23,7 +23,7 @@ import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
-import { saveFile } from "./web";
+import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
     try {
@@ -91,30 +91,20 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
             }
         }
     } else {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.style.display = "none";
-        input.accept = "application/json";
-        input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return;
+        const file = await chooseFile("application/json");
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async () => {
-                try {
-                    await importSettings(reader.result as string);
-                    if (showToast) toastSuccess();
-                } catch (err) {
-                    new Logger("SettingsSync").error(err);
-                    if (showToast) toastFailure(err);
-                }
-            };
-            reader.readAsText(file);
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                await importSettings(reader.result as string);
+                if (showToast) toastSuccess();
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+                if (showToast) toastFailure(err);
+            }
         };
-
-        document.body.appendChild(input);
-        input.click();
-        setImmediate(() => document.body.removeChild(input));
+        reader.readAsText(file);
     }
 }
 
