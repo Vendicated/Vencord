@@ -51,15 +51,19 @@ const generateSnippetId = (messageSnowflake: string, snippet: string): string =>
     return hash.toString();
 };
 
-
 const fetchSnippetIds = async () => {
-    cachedSnippetIds = await DataStore.get(STORE_KEY) || new Set<String>();
+    const storedSnippetIds = await DataStore.get(STORE_KEY);
+
+    if (storedSnippetIds === null) {
+        cachedSnippetIds = new Set<String>();
+    } else {
+        cachedSnippetIds = storedSnippetIds;
+    }
 };
 
 const saveSnippetIds = async () => {
     const storedSnippetIds = await DataStore.get(STORE_KEY) || new Set<String>();
 
-    // merge cached and stored snippet ids set
     const mergedSnippetIds = new Set([...storedSnippetIds, ...cachedSnippetIds]);
 
     await DataStore.set(STORE_KEY, mergedSnippetIds);
@@ -87,12 +91,12 @@ const removeAllSnippets = async (snippetIds: string[]) => {
 
 const syncSnippetIds = async () => {
     const quickCSS = await VencordNative.quickCss.get();
-    const snippetIds = await DataStore.get(STORE_KEY) || [];
+    const snippetIds = await DataStore.get(STORE_KEY) as Set<string> || new Set<String>();
 
-    const snippetIdsToRemove = snippetIds.filter((id: string) => !quickCSS.includes(id));
+    const snippetIdsToRemove = [...snippetIds].filter((id: string) => !quickCSS.includes(id));
 
     if (snippetIdsToRemove.length > 0) {
-        await DataStore.update(STORE_KEY, snippetIds.filter((id: string) => !snippetIdsToRemove.includes(id)));
+        await DataStore.set(STORE_KEY, new Set([...snippetIds].filter((id: string) => !snippetIdsToRemove.includes(id))));
         await fetchSnippetIds();
     }
 };
