@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
@@ -183,7 +183,7 @@ function Newer(props: CommonProps) {
     );
 }
 
-function updaterBody() {
+function UpdaterBody() {
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
     React.useEffect(() => {
@@ -221,7 +221,6 @@ function updaterBody() {
 
 function Updater() {
     const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
-    const updaterContent = updaterBody();
 
     return (
         <SettingsTab title="Vencord Updater">
@@ -250,22 +249,22 @@ function Updater() {
                 Get notified when an automatic update completes
             </Switch>
 
-            {updaterContent}
+            <UpdaterBody />
+
         </SettingsTab>
     );
 }
 
-function UpdaterModal ({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
-    const updaterContent = updaterBody();
+function UpdaterModal({ modalProps }: { modalProps: ModalProps; }) {
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Vencord Updater</Text>
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent>
-                {updaterContent}
+                <UpdaterBody />;
             </ModalContent>
 
         </ModalRoot>
@@ -273,10 +272,9 @@ function UpdaterModal ({ modalProps, close }: { modalProps: ModalProps; close():
 }
 
 export function openUpdaterModal() {
-    const key = openModal(modalProps => (
+    openModal(modalProps => (
         <UpdaterModal
             modalProps={modalProps}
-            close={() => closeModal(key)}
         />
     ));
 }
