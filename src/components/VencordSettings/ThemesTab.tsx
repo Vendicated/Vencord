@@ -21,7 +21,7 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
-import { Card, Forms, React, TextArea } from "@webpack/common";
+import { Button, Card, Forms, React, TextArea } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -112,7 +112,16 @@ function ThemesTab() {
                         <li>• Click the fork button on the top right</li>
                         <li>• Edit the file</li>
                         <li>• Use the link to your own repository instead</li>
+                        <li>• Use the link to your own repository instead </li>
+                        <li>OR</li>
+                        <li>• Paste the contents of the edited theme file into the QuickCSS editor</li>
                     </ul>
+                    <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom16} />
+                    <Button
+                        onClick={() => VencordNative.quickCss.openEditor()}
+                        size={Button.Sizes.SMALL}>
+                        Open QuickCSS File
+                    </Button>
                 </Forms.FormText>
             </Card>
             <Forms.FormTitle tag="h5">Themes</Forms.FormTitle>
