@@ -54,8 +54,9 @@ const generateSnippetId = (messageSnowflake: string, snippet: string): string =>
 const fetchSnippetIds = async () => {
     const storedSnippetIds = await DataStore.get(STORE_KEY);
 
-    if (storedSnippetIds === null) {
+    if (!storedSnippetIds) {
         cachedSnippetIds = new Set<String>();
+        await DataStore.set(STORE_KEY, cachedSnippetIds);
     } else {
         cachedSnippetIds = storedSnippetIds;
     }
