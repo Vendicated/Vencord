@@ -46,7 +46,7 @@ function settingsBool(description: string, disabled = false): PluginSettingDef {
 }
 
 const settings = definePluginSettings({
-    // for enabling and disabling Vencord-wide quick actions
+    // for enabling and disabling Vencord-wide and Discord-wide quick actions
     relaunchDiscord: settingsBool("Quit and restart discord from toolbox", IS_WEB),
     notifs: settingsBool("View notifications log from toolbox"),
     quickCss: settingsBool("Edit QuickCss from toolbox"),
@@ -57,7 +57,7 @@ const settings = definePluginSettings({
     // for enabling and disabling misc plugin quick actions
     pluginActions: settingsBool("Pin plugin quick actions to toolbox"),
 
-    // for enabling and disabling individual plugin settings menus
+    // for enabling and disabling individual plugin settings
     pluginSettings: settingsBool("Pin plugin settings to toolbox"),
 }).withPrivateSettings<{
     pinnedSettings: string[];
@@ -184,7 +184,7 @@ function VencordPopout({ onClose }: { onClose: () => void; }) {
                 {...pinnedEnabledRNList}
             </Menu.MenuGroup>
 
-            <Menu.MenuGroup label="Discord Tools">
+            <Menu.MenuGroup label="App Tools">
                 {!IS_WEB && settings.store.relaunchDiscord &&
                     <Menu.MenuItem
                         id="vc-toolbox-relaunchdiscord"
@@ -199,9 +199,6 @@ function VencordPopout({ onClose }: { onClose: () => void; }) {
                         action={openNotificationLogModal}
                     />
                 }
-            </Menu.MenuGroup>
-
-            <Menu.MenuGroup label="Vencord Tools">
                 {settings.store.quickCss &&
                     <Menu.MenuItem
                         id="vc-toolbox-quickcss"
