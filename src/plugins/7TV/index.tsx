@@ -38,12 +38,6 @@ interface SevenTVEmote {
 interface SevenTVHost {
     url: string;
 }
-interface BadgesDictionary {
-    [key: string]: BadgesUsersDictionary;
-}
-interface BadgesUsersDictionary {
-    [key: string]: boolean;
-}
 
 let emotes: SevenTVEmote[] = [];
 let searching: boolean = false;
@@ -153,7 +147,6 @@ async function getSevenTVDiscord(id) {
             return null;
         }
     } catch (error) {
-        Logger;
         SevenTVLogger.error(error);
     }
     return null;
