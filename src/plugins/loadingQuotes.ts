@@ -18,7 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
 const quotes = [
