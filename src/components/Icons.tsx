@@ -191,6 +191,30 @@ export function ImageInvisible(props: IconProps) {
     );
 }
 
+export function MessageInvisible(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-message-invisible")}
+            viewBox="0 0 24 24"
+        >
+            <path fill="currentColor" d="m2.5038 2.649-1.4004 1.4004 2.625 2.1855v8.9199c0 0.86422 0.70218 1.5645 1.5664 1.5645h1.5645c0.21614 0 0.39062 0.17449 0.39062 0.39062v3.3242c0 0.33904 0.40279 0.51645 0.6543 0.28906l3.9844-3.5996c0.28753-0.25982 0.66122-0.4043 1.0488-0.4043h3.3809l5.3945 4.4922 1.4004-1.3984-20.609-17.164zm3.6328 0.66992 15.342 12.674c0.15432-0.24248 0.24609-0.52917 0.24609-0.83789v-10.271c0-0.86422-0.70023-1.5645-1.5645-1.5645h-14.023z" />
+        </Icon>
+    );
+}
+
+export function MessageVisible(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-message-visible")}
+            viewBox="0 0 24 24"
+        >
+            <path fill="currentColor" d="m4.571 3.2118c-0.86594 0-1.5679 0.70196-1.5679 1.5679v10.291c0 0.86594 0.70196 1.5679 1.5679 1.5679h1.5679c0.21657 0 0.39198 0.17541 0.39198 0.39198v3.3292c0 0.33971 0.40275 0.51871 0.65476 0.29088l3.9932-3.6076c0.2881-0.26034 0.66276-0.40439 1.0511-0.40439h7.236c0.86594 0 1.5679-0.70196 1.5679-1.5679v-10.291c0-0.86594-0.70196-1.5679-1.5679-1.5679z" />
+        </Icon>
+    );
+}
+
 export function Microphone(props: IconProps) {
     return (
         <Icon
