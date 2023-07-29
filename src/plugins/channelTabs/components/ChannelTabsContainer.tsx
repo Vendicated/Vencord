@@ -19,10 +19,10 @@
 import { classes } from "@utils/misc";
 import { LazyComponent, useForceUpdater } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Button, ChannelStore, ContextMenu, Flex, FluxDispatcher, Forms, Text, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Button, ContextMenu, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
-import Bookmark from "./Bookmark";
+import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, BookmarkBarContextMenu, TabContextMenu } from "./ContextMenus";
 
@@ -33,46 +33,8 @@ const {
 
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
 const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
-const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
-
-function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
-    const { guildId, channelId, userId } = props;
-    const channel = ChannelStore.getChannel(channelId);
-    const [bookmarks, methods] = useBookmarks(userId);
-    const isCurrentChannelBookmarked = bookmarks ? bookmarks.some(b =>
-        // TODO: folders
-        !("bookmarks" in b) && b.channelId === channelId
-    ) : false;
-
-    return <div className={cl("inner-container")}>
-        <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
-            ? methods.deleteBookmark(channelId)
-            : methods.addBookmark({
-                guildId,
-                channelId,
-                name: channel?.name ?? "idk"
-            })}
-        >
-            <Star
-                height={20}
-                width={20}
-                foreground={isCurrentChannelBookmarked ? cl("bookmark-star-checked") : cl("bookmark-star")}
-            />
-        </button>
-        {bookmarks
-            ? bookmarks.length
-                ? bookmarks.map(bookmark => <Bookmark bookmark={bookmark} methods={methods} />)
-                : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                    You have no bookmarks. You can add an open tab or hide this by right clicking it
-                </Text>
-            : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                Loading bookmarks...
-            </Text>
-        }
-    </div>;
-}
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { openTabs } = ChannelTabsUtils;

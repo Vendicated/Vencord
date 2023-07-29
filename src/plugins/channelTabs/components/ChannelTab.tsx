@@ -19,7 +19,7 @@
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react.jsx";
 import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
@@ -36,26 +36,22 @@ const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = fi
 const useDrag = findByCodeLazy(".disconnectDragSource(");
 const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
-const Avatar = LazyComponent(() => findByCode(".typingIndicatorRef", "svg"));
-const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
-const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
+const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
+export const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
+const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-const GuildIcon = ({ guild, withStar = false }: { guild: Guild, withStar?: boolean; }) => {
-    return <>
-        {guild.icon
-            ? <img
-                src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
-                className={cl("icon")}
-            />
-            : <div className={cl("guild-acronym-icon")}>
-                <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
-            </div>}
-        {withStar && <Emoji emojiName={"⭐"} className={cl("favorites-star")} />}
-    </>;
+const GuildIcon = ({ guild }: { guild: Guild; }) => {
+    return guild.icon
+        ? <img
+            src={`https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild?.id}/${guild?.icon}.png`}
+            className={cl("icon")}
+        />
+        : <div className={cl("guild-acronym-icon")}>
+            <Text variant="text-xs/semibold" tag="span">{guild.acronym}</Text>
+        </div>;
 };
 
 const ChannelIcon = ({ channel }: { channel: Channel; }) =>
@@ -178,7 +174,7 @@ function ChannelTabContent(props: ChannelTabsProps &
                 <Avatar
                     size="SIZE_24"
                     src={user.getAvatarURL(guildId, 128)}
-                    status={settings.store.showStatusIndicators ? status : null}
+                    status={settings.store.showStatusIndicators ? status : undefined}
                     isTyping={isTyping}
                     isMobile={isMobile}
                 />

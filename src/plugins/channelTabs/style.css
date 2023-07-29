@@ -83,6 +83,14 @@
     background-color: var(--background-modifier-hover);
 }
 
+.vc-channeltabs-bookmark-icon {
+    height: 1rem;
+    width: 1rem;
+    border-radius: 50%;
+    background-color: var(--background-primary);
+    text-align: center;
+}
+
 .vc-channeltabs-channel-info {
     flex-grow: 1;
     overflow: hidden;
