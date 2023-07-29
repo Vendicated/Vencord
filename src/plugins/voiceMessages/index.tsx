@@ -26,8 +26,8 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findLazy } from "@webpack";
-import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -37,6 +37,8 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
+const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
+const PendingReplyStore = findByPropsLazy("getPendingReply");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
@@ -71,6 +73,8 @@ const EMPTY_META: AudioMetadata = {
 
 function sendAudio(blob: Blob, meta: AudioMetadata) {
     const channelId = SelectedChannelStore.getChannelId();
+    const reply = PendingReplyStore.getPendingReply(channelId);
+    (reply && FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId }));
 
     const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
@@ -95,7 +99,8 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     uploaded_filename: upload.uploadedFilename,
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
-                }]
+                }],
+                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply).messageReference : null,
             }
         });
     });
@@ -232,4 +237,3 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
         />
     );
 };
-
