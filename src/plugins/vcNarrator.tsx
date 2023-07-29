@@ -71,7 +71,7 @@ function clean(str: string) {
 
 function formatText(str: string, user: string, channel: string) {
     return str
-        .replaceAll("{{USER}}", clean(user) || user ? "Someone" : "")
+        .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
         .replaceAll("{{CHANNEL}}", clean(channel) || "channel");
 }
 
@@ -155,6 +155,8 @@ export default definePlugin({
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
+
+            if (ChannelStore.getChannel(myChanId!)?.type === 13 /* Stage Channel */) return;
 
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;

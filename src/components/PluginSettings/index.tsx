@@ -138,11 +138,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-        const action = wasEnabled ? "stop" : "start";
 
         if (!result) {
-            logger.error(`Failed to ${action} plugin ${plugin.name}`);
-            showErrorToast(`Failed to ${action} plugin: ${plugin.name}`);
+            settings.enabled = false;
+
+            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            logger.error(msg);
+            showErrorToast(msg);
             return;
         }
 
@@ -171,10 +173,11 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     );
 }
 
-enum SearchStatus {
+const enum SearchStatus {
     ALL,
     ENABLED,
-    DISABLED
+    DISABLED,
+    NEW
 }
 
 export default function PluginSettings() {
@@ -227,6 +230,7 @@ export default function PluginSettings() {
         const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
+        if (searchValue.status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
         if (!searchValue.value.length) return true;
 
         const v = searchValue.value.toLowerCase();
@@ -319,7 +323,8 @@ export default function PluginSettings() {
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED }
+                            { label: "Show Disabled", value: SearchStatus.DISABLED },
+                            { label: "Show New", value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}

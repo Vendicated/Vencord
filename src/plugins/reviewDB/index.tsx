@@ -79,8 +79,8 @@ export default definePlugin({
             addContextMenuPatch("guild-header-popout", guildPopoutPatch);
 
             if (user.banInfo) {
-                const endDate = new Date(user.banInfo.banEndDate).getTime();
-                if (endDate > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate) {
+                const endDate = new Date(user.banInfo.banEndDate);
+                if (endDate.getTime() > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate.getTime()) {
                     Alerts.show({
                         title: "You have been banned from ReviewDB",
                         body: (

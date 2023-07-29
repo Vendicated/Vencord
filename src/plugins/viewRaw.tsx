@@ -17,13 +17,14 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, Forms, Parser, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -41,22 +42,12 @@ function sortObject<T extends object>(obj: T): T {
 
 function cleanMessage(msg: Message) {
     const clone = sortObject(JSON.parse(JSON.stringify(msg)));
-    for (const key in clone.author) {
-        switch (key) {
-            case "id":
-            case "username":
-            case "usernameNormalized":
-            case "discriminator":
-            case "avatar":
-            case "bot":
-            case "system":
-            case "publicFlags":
-                break;
-            default:
-                // phone number, email, etc
-                delete clone.author[key];
-        }
-    }
+    for (const key of [
+        "email",
+        "phone",
+        "mfaEnabled",
+        "personalConnectionId"
+    ]) delete clone.author[key];
 
     // message logger added properties
     const cloneAny = clone as any;
@@ -116,25 +107,57 @@ function openViewRawModal(msg: Message) {
     ));
 }
 
+const settings = definePluginSettings({
+    clickMethod: {
+        description: "Change the button to view the raw content/data of any message.",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Left Click to view the raw content.", value: "Left", default: true },
+            { label: "Right click to view the raw content.", value: "Right" }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message.",
-    authors: [Devs.KingFish, Devs.Ven],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad],
     dependencies: ["MessagePopoverAPI"],
+    settings,
 
     start() {
         addButton("ViewRaw", msg => {
-            return {
-                label: "View Raw (Left Click) / Copy Raw (Right Click)",
-                icon: CopyIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => openViewRawModal(msg),
-                onContextMenu: e => {
+            const handleClick = () => {
+                if (settings.store.clickMethod === "Right") {
+                    copyWithToast(msg.content);
+                } else {
+                    openViewRawModal(msg);
+                }
+            };
+
+            const handleContextMenu = e => {
+                if (settings.store.clickMethod === "Left") {
                     e.preventDefault();
                     e.stopPropagation();
                     copyWithToast(msg.content);
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openViewRawModal(msg);
                 }
+            };
+
+            const label = settings.store.clickMethod === "Right"
+                ? "Copy Raw (Left Click) / View Raw (Right Click)"
+                : "View Raw (Left Click) / Copy Raw (Right Click)";
+
+            return {
+                label,
+                icon: CopyIcon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: handleClick,
+                onContextMenu: handleContextMenu
             };
         });
     },
