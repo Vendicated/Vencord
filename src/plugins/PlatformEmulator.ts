@@ -30,9 +30,9 @@ const settings = definePluginSettings({
             win32: { label: "Windows (Desktop)", default: IS_DISCORD_DESKTOP },
             darwin: { label: "Mac OS (Desktop)" },
             linux: { label: "Linux (Desktop)" },
-            web: { label: "Web Client (Browser)", default: !IS_DISCORD_DESKTOP },
-            android: { label: "Android Client (Mobile)" },
-            ios: { label: "iOS Client (Mobile)" },
+            web: { label: "Web (Browser)", default: !IS_DISCORD_DESKTOP },
+            android: { label: "Android (Mobile)" },
+            ios: { label: "iOS (Mobile)" },
         }).map(e => ({ ...e[1], value: e[0] }))
     }
 });
