@@ -32,7 +32,7 @@ function mock(input: string): string {
 export default definePlugin({
     name: "MoreCommands",
     description: "echo, lenny, mock",
-    authors: [Devs.Arjix, Devs.echo, Devs.Samu],
+    authors: [Devs.Arjix, Devs.echo, Devs.Samu, Devs.isabelroses],
     dependencies: ["CommandsAPI"],
     commands: [
         {
@@ -52,6 +52,20 @@ export default definePlugin({
             options: [OptionalMessageOption],
             execute: opts => ({
                 content: findOption(opts, "message", "") + " ( ͡° ͜ʖ ͡°)"
+            }),
+        },
+        {
+            name: "skillissue",
+            description: "Sends 'skill issue' as ascii art",
+            options: [],
+            execute: () => ({
+                content: "```     _    _ _ _    _\n" +
+                    "    | |  (_) | |  (_)\n" +
+                    " ___| | ___| | |   _ ___ ___ _   _  ___ \n" +
+                    "/ __| |/ / | | |  | / __/ __| | | |/ _ \\\n" +
+                    "\\__ \\   <| | | |  | \\__ \\__ \\ |_| |  __/\n" +
+                    "|___/_|\\_\\_|_|_|  |_|___/___/\\__,_|\\___|\n" +
+                    "```\n"
             }),
         },
         {
