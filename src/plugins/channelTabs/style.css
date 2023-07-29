@@ -80,6 +80,7 @@
 
 .vc-channeltabs-bookmark:hover {
     background: var(--bg-overlay-hover);
+    background-color: var(--background-modifier-hover);
 }
 
 .vc-channeltabs-channel-info {
@@ -105,10 +106,12 @@
 
 .vc-channeltabs-tab-selected {
     background: var(--bg-overlay-selected);
+    background-color: var(--background-modifier-selected);
 }
 
 .vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
     background: var(--bg-overlay-hover);
+    background-color: var(--background-modifier-hover);
 }
 
 .vc-channeltabs-button {
