@@ -38,7 +38,7 @@ import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
-const PendingReplyStore = findByPropsLazy("getPendingReply");
+const PendingReplyStore = findStoreLazy("PendingReplyStore");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
