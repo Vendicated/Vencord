@@ -74,7 +74,7 @@ const EMPTY_META: AudioMetadata = {
 function sendAudio(blob: Blob, meta: AudioMetadata) {
     const channelId = SelectedChannelStore.getChannelId();
     const reply = PendingReplyStore.getPendingReply(channelId);
-    (reply && FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId }));
+    if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
     const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
