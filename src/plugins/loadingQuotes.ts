@@ -17,10 +17,10 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
-// don't worry about it :P
 const quotes = [
     "Eyrokac",
     "Rdcg$l`'k|~n",
@@ -57,7 +57,6 @@ const quotes = [
     "<;vqkijbq33271:56<3799?24944:",
     "Thof$lu'ofdn,!qsefc'az*bnrcma+&Om{o+iu\"`khct$)bnrd\"bcdoi&",
     "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno",
-
     "Stonkkoio)zbxdnp$j`'xf}nr/,-",
     'Sqkmjlh`(|z+tig#ldkt|lx+wigfhv()&',
     "Lncgmka'i~oxolgmavu+(yfnarg#sdos&",
@@ -86,10 +85,25 @@ const quotes = [
     'Ynw$v`&T}yoyinp#>,'
 ];
 
+const famous_quotes = [
+    '"Cg#}jsu{lfm;!guaw\x7Fhfl*nlrg#mv&fd{ojdx"wenci&+*& Nq`ew&Paenn"',
+    `"Ujf$jhkq)}jy!vl$ai'o{ojt!ulvn&n{)~d mmua%qoi}*rot"gk+$'%)Y\x7Fewg#Njdt`
+];
+
+const settings = definePluginSettings({
+    famousQuotesOnly: {
+        type: OptionType.BOOLEAN,
+        description: "Only shows you quotes of famous People",
+        default: false,
+    },
+});
+
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes with random quotes",
     authors: [Devs.Ven, Devs.KraXen72, Devs.notderpaul],
+    settings,
+
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
@@ -97,7 +111,7 @@ export default definePlugin({
                 match: /\._loadingText=.+?random\(.+?;/s,
                 replace: "._loadingText=$self.quote;",
             },
-        },
+        }
     ],
 
     xor(quote: string) {
@@ -107,6 +121,7 @@ export default definePlugin({
     },
 
     get quote() {
-        return this.xor(quotes[Math.floor(Math.random() * quotes.length)]);
+        const quotesArray = Vencord.Settings.plugins.LoadingQuotes.famousQuotesOnly ? famous_quotes : quotes;
+        return this.xor(quotesArray[Math.floor(Math.random() * quotesArray.length)]);
     }
 });
