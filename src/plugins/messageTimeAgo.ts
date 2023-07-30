@@ -31,7 +31,7 @@ export default definePlugin({
             find: "Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL",
             replacement: {
                 match: /.{13}"LT"\):\(.{8}(.{1})\)/,
-                replace: (match, moment) => `(${match})+' • '+$self.getRelativeTime(${moment})`
+                replace: (match, moment) => `${match}+' • '+$self.getRelativeTime(${moment})`
             }
         }
     ],
