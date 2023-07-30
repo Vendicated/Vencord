@@ -23,7 +23,7 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
+import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -307,7 +307,6 @@ function PickerModal({ rootProps, close, userID }: { rootProps: ModalProps, clos
                             setSelectedBadgeID(undefined);
                             restartResource();
                         }
-                        insertTextIntoChatInputBox(currentVal + " ");
                         close();
                     }}
                 >Execute</Button>
