@@ -76,10 +76,10 @@ const enum ActivityType {
 }
 
 const enum TimestampMode {
-    NONE = 0,
-    NOW = 1,
-    TIME = 2,
-    CUSTOM = 3
+    NONE,
+    NOW,
+    TIME,
+    CUSTOM,
 }
 
 const settings = definePluginSettings({
