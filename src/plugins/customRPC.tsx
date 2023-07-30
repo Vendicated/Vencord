@@ -75,6 +75,13 @@ const enum ActivityType {
     COMPETING = 5
 }
 
+const enum TimestampMode {
+    NONE = 0,
+    NOW = 1,
+    TIME = 2,
+    CUSTOM = 3
+}
+
 const settings = definePluginSettings({
     appID: {
         type: OptionType.STRING,
@@ -94,7 +101,7 @@ const settings = definePluginSettings({
         onChange: setRpc,
         isValid: (value: string) => {
             if (!value) return "Application name is required.";
-            if (value.length > 128) return "Application name must be less than 128 characters.";
+            if (value.length > 128) return "Application name must be not longer than 128 characters.";
             return true;
         }
     },
@@ -104,7 +111,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 128) return "Details (line 1) must be less than 128 characters.";
+            if (value && value.length > 128) return "Details (line 1) must be not longer than 128 characters.";
             return true;
         }
     },
@@ -114,7 +121,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 128) return "State (line 2) must be less than 128 characters.";
+            if (value && value.length > 128) return "State (line 2) must be not longer than 128 characters.";
             return true;
         }
     },
@@ -162,21 +169,21 @@ const settings = definePluginSettings({
         onChange: setRpc,
         options: [
             {
-                label: "Off",
-                value: "off",
+                label: "None",
+                value: TimestampMode.NONE,
                 default: true
             },
             {
                 label: "Since discord open",
-                value: "now"
+                value: TimestampMode.NOW
             },
             {
                 label: "Same as your current time",
-                value: "time"
+                value: TimestampMode.TIME
             },
             {
                 label: "Custom",
-                value: "custom"
+                value: TimestampMode.CUSTOM
             }
         ]
     },
@@ -215,7 +222,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 128) return "Big image tooltip must be less than 128 characters.";
+            if (value && value.length > 128) return "Big image tooltip must be not longer than 128 characters.";
             return true;
         }
     },
@@ -232,7 +239,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 128) return "Small image tooltip must be less than 128 characters.";
+            if (value && value.length > 128) return "Small image tooltip must be not longer than 128 characters.";
             return true;
         }
     },
@@ -242,7 +249,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 31) return "Button 1 text must be less than 31 characters.";
+            if (value && value.length > 31) return "Button 1 text must be not longer than 31 characters.";
             return true;
         }
     },
@@ -258,7 +265,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         onChange: setRpc,
         isValid: (value: string) => {
-            if (value && value.length > 31) return "Button 2 text must be less than 31 characters.";
+            if (value && value.length > 31) return "Button 2 text must be not longer than 31 characters.";
             return true;
         }
     },
@@ -280,7 +287,7 @@ function isStreamLinkValid(): boolean | string {
 }
 
 function isTimestampDisabled(): boolean {
-    return settings.store.timestampMode !== "custom";
+    return settings.store.timestampMode !== TimestampMode.CUSTOM;
 }
 
 function isImageKeyValid(value: string) {
@@ -324,17 +331,17 @@ async function createActivity(): Promise<Activity | undefined> {
     if (type === ActivityType.STREAMING) activity.url = streamLink;
 
     switch (settings.store.timestampMode) {
-        case "now":
+        case TimestampMode.NOW:
             activity.timestamps = {
                 start: Math.floor(Date.now() / 1000)
             };
             break;
-        case "time":
+        case TimestampMode.TIME:
             activity.timestamps = {
                 start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
             };
             break;
-        case "custom":
+        case TimestampMode.CUSTOM:
             if (startTime) {
                 activity.timestamps = {
                     start: startTime,
@@ -344,7 +351,7 @@ async function createActivity(): Promise<Activity | undefined> {
                 }
             }
             break;
-        case "off":
+        case TimestampMode.NONE:
         default:
             break;
     }
