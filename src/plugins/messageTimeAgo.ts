@@ -43,6 +43,6 @@ export default definePlugin({
         const divisor = unitIndex ? cutoffs[unitIndex - 1] : 1;
 
         const rtf = new Intl.RelativeTimeFormat(navigator.language, { numeric: "auto" });
-        return rtf.format(Math.round(deltaSeconds / divisor), units[unitIndex]);
+        return rtf.format(Math.min(0, Math.round(deltaSeconds / divisor)), units[unitIndex]);
     }
 });
