@@ -74,7 +74,7 @@ function VencordPopout(onClose: () => void) {
             />
             <Menu.MenuItem
                 id="vc-toolbox-quickcss-toggle"
-                label="Toggle QuickCSS"
+                label={Settings.useQuickCss ? "Disable QuickCSS" : "Enable QuickCSS"}
                 action={() => Settings.useQuickCss = !Settings.useQuickCss}
             />
             {...pluginEntries}
