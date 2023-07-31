@@ -51,17 +51,15 @@ export default definePlugin({
                     content: "This shouldn't take long...",
                 });
 
-                const zipContents: { file: Uint8Array, filename: string; }[] = [];
-
                 const fetchEmojis = async e => {
                     const emoji = await fetch(`https://cdn.discordapp.com/emojis/${e.id}${e.animated ? ".gif" : ".png"}?size=96&quality=lossless`).then(res => res.blob());
                     return { file: new Uint8Array(await emoji.arrayBuffer()), filename: `${e.id}${e.animated ? ".gif" : ".png"}` };
                 };
+                const emojiPromises = emojis.map(e => fetchEmojis(e));
 
-                Promise.all(zipContents.map(fetchEmojis))
+                Promise.all(emojiPromises)
                     .then(results => {
-                        const zipContents = results;
-                        const emojis = zipSync(Object.fromEntries(zipContents.map(({ file, filename }) => [filename, file])));
+                        const emojis = zipSync(Object.fromEntries(results.map(({ file, filename }) => [filename, file])));
                         const blob = new Blob([emojis], { type: "application/zip" });
                         const link = document.createElement("a");
                         link.href = URL.createObjectURL(blob);
