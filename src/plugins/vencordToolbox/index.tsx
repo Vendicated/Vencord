@@ -26,6 +26,7 @@ import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
+import { Settings } from "Vencord";
 
 const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
 
@@ -70,6 +71,11 @@ function VencordPopout(onClose: () => void) {
                 id="vc-toolbox-quickcss"
                 label="Open QuickCSS"
                 action={() => VencordNative.quickCss.openEditor()}
+            />
+            <Menu.MenuItem
+                id="vc-toolbox-quickcss-toggle"
+                label="Toggle QuickCSS"
+                action={() => Settings.useQuickCss = !Settings.useQuickCss}
             />
             {...pluginEntries}
         </Menu.Menu>
