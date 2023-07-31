@@ -51,7 +51,6 @@ const settings = definePluginSettings({
     notifs: settingsBool("View notifications log from toolbox"),
     quickCss: settingsBool("Edit QuickCss from toolbox"),
     toggleQuickCss: settingsBool("Enable/Disable QuickCss from toolbox"),
-    toggleSidebar: settingsBool("Enable/Disable Sidebar from toolbox"),
     updater: settingsBool("Open UpdaterTab from toolbox", IS_WEB),
 
     // for enabling and disabling misc plugin quick actions
@@ -62,18 +61,17 @@ const settings = definePluginSettings({
 }).withPrivateSettings<{
     pinnedSettings: string[];
     pinnedActions: string[];
-    sidebarVisible: boolean;
 }>();
 
 function VencordPopout({ onClose }: { onClose: () => void; }) {
     // keeps track of added plugin settings entries ex) textreplace, quickreply
-    const ps = settings.use(["pinnedSettings", "pinnedActions", "sidebarVisible"]);
+    const ps = settings.use(["pinnedSettings", "pinnedActions"]);
     const { pinnedSettings = [], pinnedActions = [] } = ps;
 
+    const allSettingsRNList = [] as ReactNode[]; // all enabled plugins if they have settings
+    const pinnedSettingsRNList = [] as ReactNode[]; // pinned plugin settings
     const allActionsRNList = [] as ReactNode[]; // all possible plugin actions
     const pinnedActionsRNList = [] as ReactNode[]; // pinned actions
-    const allEnabledRNList = [] as ReactNode[]; // all enabled plugins if they have settings
-    const pinnedEnabledRNList = [] as ReactNode[]; // pinned plugin settings
 
     for (const plugin of Object.values(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p.name))) {
         if (plugin.toolboxActions) {
@@ -115,7 +113,7 @@ function VencordPopout({ onClose }: { onClose: () => void; }) {
 
         if (plugin.settings) { // if plugin has settings make checkbox option
             const checkedSettings = pinnedSettings.some(p => p === plugin.name);
-            allEnabledRNList.push(
+            allSettingsRNList.push(
                 <Menu.MenuCheckboxItem
                     key={"vc-toolbox-checkbox-key-" + plugin.name}
                     id={"vc-toolbox-checkbox-" + plugin.name}
@@ -129,7 +127,7 @@ function VencordPopout({ onClose }: { onClose: () => void; }) {
                 />
             );
             if (pinnedSettings.includes(plugin.name)) { // plugins that have been pinned to toolbox
-                pinnedEnabledRNList.push(
+                pinnedSettingsRNList.push(
                     <Menu.MenuItem
                         id={"vc-toolbox-settings-" + plugin.name}
                         key={"vc-toolbox-settings-key-" + plugin.name}
@@ -178,10 +176,10 @@ function VencordPopout({ onClose }: { onClose: () => void; }) {
                     <Menu.MenuItem
                         id="vc-toolbox-plugins"
                         label="Pin or Unpin Plugins">
-                        {...allEnabledRNList}
+                        {...allSettingsRNList}
                     </Menu.MenuItem>
                 }
-                {...pinnedEnabledRNList}
+                {...pinnedSettingsRNList}
             </Menu.MenuGroup>
 
             <Menu.MenuGroup label="App Tools">
