@@ -78,7 +78,7 @@ export default definePlugin({
                 </Avatar>
                 <div className={ProfileListClasses.listRowContent}>
                     <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                    <div className={GuildLabelClasses.guildNick}>{c.recipients.length} Members</div>
+                    <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
                 </div>
             </Clickable>
         ));

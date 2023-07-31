@@ -17,6 +17,7 @@
 */
 
 import "./updater";
+import "./ipcPlugins";
 
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";

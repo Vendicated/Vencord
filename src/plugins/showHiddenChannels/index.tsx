@@ -29,7 +29,7 @@ import type { Channel, Role } from "discord-types/general";
 
 import HiddenChannelLockScreen, { setChannelBeginHeaderComponent } from "./components/HiddenChannelLockScreen";
 
-const ChannelListClasses = findByPropsLazy("channelName", "subtitle", "modeMuted", "iconContainer");
+const ChannelListClasses = findByPropsLazy("channelEmoji", "unread", "icon");
 
 export const VIEW_CHANNEL = 1n << 10n;
 const CONNECT = 1n << 20n;
@@ -342,32 +342,27 @@ export default definePlugin({
             ]
         },
         {
-            find: "Guild voice channel without guild id.",
+            find: "useNotificationSettingsItem: channel cannot be undefined",
             replacement: [
                 {
                     // Render our HiddenChannelLockScreen component instead of the main stage channel component
-                    match: /Guild voice channel without guild id.+?children:(?<=(\i)\.getGuildId\(\).+?)(?=.{0,20}?}\)}function)/,
+                    match: /"124px".+?children:(?<=var (\i)=\i\.channel.+?)(?=.{0,20}?}\)}function)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?$self.HiddenChannelLockScreen(${channel}):`
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of stage channels
-                    match: /render(?!Header).{0,30}?:(?<=(\i)\.getGuildId\(\).+?Guild voice channel without guild id.+?)/g,
+                    match: /render(?:BottomLeft|BottomCenter|BottomRight|ChatToasts):(?<=var (\i)=\i\.channel.+?)/g,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?null:`
-                },
-                // Prevent Discord from replacing our route if we aren't connected to the stage channel
-                {
-                    match: /(?=!\i&&!\i&&!\i.{0,80}?(\i)\.getGuildId\(\).{0,50}?Guild voice channel without guild id)(?<=if\()/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
+                    match: /"124px".+?disableGradients:(?<=(\i)\.getGuildId\(\).+?)/,
                     replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})||`
                 },
                 {
                     // Disable strange styles applied to the header for the HiddenChannelLockScreen of stage channels
-                    match: /Guild voice channel without guild id.+?style:(?<=(\i)\.getGuildId\(\).+?)/,
-                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?undefined:`
+                    match: /"124px".+?style:(?<=(\i)\.getGuildId\(\).+?)/,
+                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?void 0:`
                 },
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
@@ -376,7 +371,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /"recents".+?null,(?=.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
+                    match: /"recents".+?&&(?=\(.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ],
@@ -477,7 +472,7 @@ export default definePlugin({
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
 
-    LockIcon: () => (
+    LockIcon: ErrorBoundary.wrap(() => (
         <svg
             className={ChannelListClasses.icon}
             height="18"
@@ -488,7 +483,7 @@ export default definePlugin({
         >
             <path className="shc-evenodd-fill-current-color" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
         </svg>
-    ),
+    ), { noop: true }),
 
     HiddenChannelIcon: ErrorBoundary.wrap(() => (
         <Tooltip text="Hidden Channel">

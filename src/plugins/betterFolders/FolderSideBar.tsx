@@ -36,7 +36,8 @@ function Guilds(props: {
     // @ts-expect-error
     const res = Vencord.Plugins.plugins.BetterFolders.Guilds(props);
 
-    const scrollerProps = res.props.children?.props?.children?.[1]?.props;
+    // TODO: Make this better
+    const scrollerProps = res.props.children?.props?.children?.props?.children?.[1]?.props;
     if (scrollerProps?.children) {
         const servers = scrollerProps.children.find(c => c?.props?.["aria-label"] === i18n.Messages.SERVERS);
         if (servers) scrollerProps.children = servers;
