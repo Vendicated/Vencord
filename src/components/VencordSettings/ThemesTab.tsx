@@ -308,7 +308,15 @@ function ThemesTab() {
                             <li>• Click the fork button on the top right</li>
                             <li>• Edit the file</li>
                             <li>• Use the link to your own repository instead</li>
+                            <li>OR</li>
+                            <li>• Paste the contents of the edited theme file into the QuickCSS editor</li>
                         </ul>
+                        <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom16} />
+                        <Button
+                            onClick={() => VencordNative.quickCss.openEditor()}
+                            size={Button.Sizes.SMALL}>
+                            Open QuickCSS File
+                        </Button>
                     </Forms.FormText>
                 </Card>
 

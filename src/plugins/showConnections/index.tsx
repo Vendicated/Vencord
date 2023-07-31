@@ -147,6 +147,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         className="vc-user-connection"
                         href={url}
                         target="_blank"
+                        onClick={e => {
+                            if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
+                                const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
+                                // handleLink will .preventDefault() if applicable
+                                OpenInApp.handleLink(e.currentTarget, e);
+                            }
+                        }}
                     >
                         {img}
                     </a>

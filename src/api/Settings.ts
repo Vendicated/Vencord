@@ -256,8 +256,12 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
-export function definePluginSettings<D extends SettingsDefinition, C extends SettingsChecks<D>>(def: D, checks?: C) {
-    const definedSettings: DefinedSettings<D> = {
+export function definePluginSettings<
+    Def extends SettingsDefinition,
+    Checks extends SettingsChecks<Def>,
+    PrivateSettings extends object = {}
+>(def: Def, checks?: Checks) {
+    const definedSettings: DefinedSettings<Def, Checks, PrivateSettings> = {
         get store() {
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
@@ -266,11 +270,11 @@ export function definePluginSettings<D extends SettingsDefinition, C extends Set
             settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
         ).plugins[definedSettings.pluginName] as any,
         def,
-        checks: checks ?? {},
+        checks: checks ?? {} as any,
         pluginName: "",
 
-        withPrivateSettings<T>() {
-            return this as DefinedSettings<D, C> & { store: T; };
+        withPrivateSettings<T extends object>() {
+            return this as DefinedSettings<Def, Checks, T>;
         }
     };
 
