@@ -20,6 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessa
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { EmojiStore } from "@webpack/common";
+import { zipSync } from "fflate";
 
 export default definePlugin({
     name: "zipServerEmojis",
@@ -49,26 +50,23 @@ export default definePlugin({
                 sendBotMessage(cmdCtx.channel.id, {
                     content: "This shouldn't take long...",
                 });
-                if (!window.JSZip) {
-                    await fetch("https://unpkg.com/jszip/dist/jszip.min.js").then(r => r.text()).then(eval);
-                }
-                // @ts-ignore JSZip exists
-                const zip = new JSZip();
-                var waitForFetches = new Promise((resolve, _) => {
+
+                const zipContents: { file: Uint8Array, filename: string; }[] = [];
+                const waitForFetches = new Promise((resolve, _) => {
                     emojis.forEach(async (e, index, array) => {
                         const emoji = await fetch(`https://cdn.discordapp.com/emojis/${e.id}${e.animated ? ".gif" : ".png"}?size=96&quality=lossless`).then(res => res.blob());
-                        zip.file(`${e.id}${e.animated ? ".gif" : ".png"}`, emoji);
+                        zipContents.push({ file: new Uint8Array(await emoji.arrayBuffer()), filename: `${e.id}${e.animated ? ".gif" : ".png"}` });
                         if (index === array.length - 1) resolve(null);
                     });
                 });
-                waitForFetches.then(() => {
-                    zip.generateAsync({ type: "blob" }).then(content => {
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(content);
-                        link.download = "emojis.zip";
-                        link.click();
-                        link.remove();
-                    });
+                waitForFetches.then(async () => {
+                    const emojis = zipSync(Object.fromEntries(zipContents.map(({ file, filename }) => [filename, file])));
+                    const blob = new Blob([emojis], { type: "application/zip" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "emojis.zip";
+                    link.click();
+                    link.remove();
                 });
             },
         },
