@@ -52,22 +52,26 @@ export default definePlugin({
                 });
 
                 const zipContents: { file: Uint8Array, filename: string; }[] = [];
-                const waitForFetches = new Promise((resolve, _) => {
-                    emojis.forEach(async (e, index, array) => {
-                        const emoji = await fetch(`https://cdn.discordapp.com/emojis/${e.id}${e.animated ? ".gif" : ".png"}?size=96&quality=lossless`).then(res => res.blob());
-                        zipContents.push({ file: new Uint8Array(await emoji.arrayBuffer()), filename: `${e.id}${e.animated ? ".gif" : ".png"}` });
-                        if (index === array.length - 1) resolve(null);
+
+                const fetchEmojis = async e => {
+                    const emoji = await fetch(`https://cdn.discordapp.com/emojis/${e.id}${e.animated ? ".gif" : ".png"}?size=96&quality=lossless`).then(res => res.blob());
+                    return { file: new Uint8Array(await emoji.arrayBuffer()), filename: `${e.id}${e.animated ? ".gif" : ".png"}` };
+                };
+
+                Promise.all(zipContents.map(fetchEmojis))
+                    .then(results => {
+                        const zipContents = results;
+                        const emojis = zipSync(Object.fromEntries(zipContents.map(({ file, filename }) => [filename, file])));
+                        const blob = new Blob([emojis], { type: "application/zip" });
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = "emojis.zip";
+                        link.click();
+                        link.remove();
+                    })
+                    .catch(error => {
+                        console.error(error);
                     });
-                });
-                waitForFetches.then(async () => {
-                    const emojis = zipSync(Object.fromEntries(zipContents.map(({ file, filename }) => [filename, file])));
-                    const blob = new Blob([emojis], { type: "application/zip" });
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = "emojis.zip";
-                    link.click();
-                    link.remove();
-                });
             },
         },
     ]
