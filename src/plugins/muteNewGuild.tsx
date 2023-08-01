@@ -36,7 +36,7 @@ const settings = definePluginSettings({
         description: "Suppress All Role @mentions",
         type: OptionType.BOOLEAN,
         default: true
-    },
+    }
 });
 
 export default definePlugin({
@@ -49,6 +49,13 @@ export default definePlugin({
             replacement: {
                 match: /INVITE_ACCEPT_SUCCESS.+?;(\i)=null.+?;/,
                 replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
+            }
+        },
+        {
+            find: "{joinGuild:function",
+            replacement: {
+                match: /guildId:(\w+),lurker:(\w+).{0,20}\)}\)\);/,
+                replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
             }
         }
     ],
