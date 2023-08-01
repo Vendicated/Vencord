@@ -14,8 +14,8 @@
     overflow: hidden;
 }
 
-/* user avatars in dm's */
-.vc-channeltabs-container [class^="wrapper-"] {
+/* user avatars */
+.vc-channeltabs-tab [class^="wrapper-"] {
     min-width: 1.5rem;
 }
 
@@ -81,6 +81,10 @@
 .vc-channeltabs-bookmark:hover {
     background: var(--bg-overlay-hover);
     background-color: var(--background-modifier-hover);
+}
+
+.vc-channeltabs-bookmark .vc-channeltabs-name-text {
+    margin-left: 0.25rem;
 }
 
 .vc-channeltabs-bookmark-icon {
