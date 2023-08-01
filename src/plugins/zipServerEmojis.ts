@@ -52,8 +52,9 @@ export default definePlugin({
                 });
 
                 const fetchEmojis = async e => {
-                    const emoji = await fetch(`https://cdn.discordapp.com/emojis/${e.id}${e.animated ? ".gif" : ".png"}?size=96&quality=lossless`).then(res => res.blob());
-                    return { file: new Uint8Array(await emoji.arrayBuffer()), filename: `${e.id}${e.animated ? ".gif" : ".png"}` };
+                    const filename = e.id + (e.animated ? ".gif" : ".png");
+                    const emoji = await fetch(`https://cdn.discordapp.com/emojis/${filename}?size=96&quality=lossless`).then(res => res.blob());
+                    return { file: new Uint8Array(await emoji.arrayBuffer()), filename };
                 };
                 const emojiPromises = emojis.map(e => fetchEmojis(e));
 
