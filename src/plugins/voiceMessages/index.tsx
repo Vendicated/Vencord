@@ -100,7 +100,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply).messageReference : null,
+                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });
