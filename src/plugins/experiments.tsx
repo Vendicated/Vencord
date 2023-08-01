@@ -75,7 +75,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser().id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
                 },
                 {
                     match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
