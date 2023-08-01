@@ -19,11 +19,12 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { useAwaiter } from "@utils/react.jsx";
+import { closeModal } from "@utils/modal";
+import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useState } from "@webpack/common";
 
-import { ChannelTabsPreview } from "./components/ChannelTabsContainer.jsx";
+import { ChannelTabsPreview } from "./components/ChannelTabsContainer";
 
 export type BasicChannelTabsProps = {
     guildId: string;
@@ -44,16 +45,17 @@ interface PersistedTabs {
 interface Bookmark {
     channelId: string;
     guildId: string;
-    name?: string;
+    name: string;
 }
 interface BookmarkFolder {
     bookmarks: Bookmark[];
-    name?: string;
+    name: string;
 }
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
     addBookmark: (bookmark: Bookmark, folderIndex?: number) => void;
-    deleteBookmark: (channelId: string) => void;
+    editBookmark: (index: number, bookmark: { name: string; }, modalKey?) => void;
+    deleteBookmark: (index: number) => void;
 }];
 
 const logger = new Logger("ChannelTabs");
@@ -356,24 +358,29 @@ function useBookmarks(userId: string): UseBookmark {
                 [userId]: newBookmarks
             }));
         },
-        deleteBookmark(channelId) {
+        editBookmark(index, bookmark, modalKey) {
+            bookmarks[userId][index].name = bookmark.name;
+            setBookmarks({
+                ...bookmarks
+            });
+            DataStore.update("ChannelTabs_bookmarks", old => ({
+                ...old,
+                [userId]: bookmarks[userId]
+            }));
+            if (modalKey) closeModal(modalKey);
+        },
+        deleteBookmark(index) {
             if (!bookmarks) return;
-            const bookmark = bookmarks[userId].findIndex(b =>
-                !("bookmarks" in b) && b.channelId === channelId
-            );
-            if (bookmark !== -1) {
-                bookmarks[userId].splice(bookmark, 1);
-                setBookmarks({
-                    ...bookmarks
-                });
-                DataStore.update("ChannelTabs_bookmarks", old => ({
-                    ...old,
-                    [userId]: bookmarks[userId]
-                }));
-                return;
-            }
-            // TODO: folders
-            return logger.warn("Cannot find bookmark with channel ID " + channelId, bookmarks);
+            if (index === -1 || index > (bookmarks[userId].length - 1))
+                return logger.error("Attempted to delete bookmark at index " + index, bookmarks);
+            bookmarks[userId].splice(index, 1);
+            setBookmarks({
+                ...bookmarks
+            });
+            DataStore.update("ChannelTabs_bookmarks", old => ({
+                ...old,
+                [userId]: bookmarks[userId]
+            }));
         }
     } as UseBookmark[1];
 

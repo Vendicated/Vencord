@@ -31,10 +31,10 @@ const cl = (name: string) => `vc-channeltabs-${name}`;
 const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
 const FolderIcon = LazyComponent(() => findByCode("M20 7H12L10.553 5.106C10.214"));
 
-function bookmarkName(channel: Channel) {
+export function bookmarkName(channel: Channel) {
     if (!channel) return "Bookmark";
     if (channel.name) return `#${channel.name}`;
-    // TODO: do group dm's without a name set actually not have a name or is it the particiapnts
+    // TODO: do group dm's without a name set actually not have a name or is it the particiapnts?
     if (channel.recipients) return UserStore.getUser(channel.recipients?.[0])?.username
         ?? "Unknown User";
     return "Bookmark";
@@ -70,12 +70,12 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmarks[number]; }) {
     return <QuestionIcon height={16} width={16} />;
 }
 
-function Bookmark({ bookmark, methods }: { bookmark: Bookmarks[number], methods: UseBookmark[1]; }) {
+function Bookmark({ bookmark, index, methods }: { bookmark: Bookmarks[number], index: number, methods: UseBookmark[1]; }) {
     return <div
         className={cl("bookmark")}
         onClick={() => "bookmarks" in bookmark || switchChannel(bookmark)}
         onContextMenu={e => ContextMenu.open(e, () =>
-            <BookmarkContextMenu bookmark={bookmark} methods={methods} />
+            <BookmarkContextMenu index={index} bookmark={bookmark} methods={methods} />
         )}
     >
         <BookmarkIcon bookmark={bookmark} />
@@ -94,7 +94,9 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
 
     return <div className={cl("inner-container")}>
         <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
-            ? methods.deleteBookmark(channelId)
+            ? methods.deleteBookmark(
+                bookmarks!.findIndex(b => !("bookmarks" in b) && b.channelId === channelId)
+            )
             : methods.addBookmark({
                 guildId,
                 channelId,
@@ -109,7 +111,9 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         </button>
         {bookmarks
             ? bookmarks.length
-                ? bookmarks.map((bookmark, i) => <Bookmark key={i} bookmark={bookmark} methods={methods} />)
+                ? bookmarks.map((bookmark, i) =>
+                    <Bookmark key={i} index={i} bookmark={bookmark} methods={methods} />
+                )
                 : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
                     You have no bookmarks. You can add an open tab or hide this by right clicking it
                 </Text>

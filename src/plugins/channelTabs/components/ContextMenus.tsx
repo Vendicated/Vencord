@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Margins } from "@utils/margins.js";
+import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, ReadStateStore, showToast, useState } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, showToast, TextInput, useState } from "@webpack/common";
 
 import { Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { bookmarkName } from "./BookmarkContainer";
 
 const { closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
 
@@ -79,7 +82,31 @@ export function BookmarkBarContextMenu() {
     </Menu.Menu>;
 }
 
-export function BookmarkContextMenu({ bookmark, methods }: { bookmark: Bookmarks[number], methods: UseBookmark[1]; }) {
+function EditModal({ modalProps, originalName, channelId, onSave }) {
+    const [name, setName] = useState(originalName);
+    const channel = ChannelStore.getChannel(channelId);
+    const placeholder = bookmarkName(channel);
+
+    return <ModalRoot {...modalProps}>
+        <ModalHeader>
+            <Forms.FormText variant="heading-lg/semibold">Edit Bookmark</Forms.FormText>
+        </ModalHeader>
+        <ModalContent>
+            <Forms.FormTitle className={Margins.top20}>Bookmark Name</Forms.FormTitle>
+            <TextInput
+                value={name === placeholder ? undefined : name}
+                placeholder={placeholder}
+                onChange={v => setName(v)}
+            />
+            <Button
+                className={Margins.top16}
+                onClick={() => onSave(name || bookmarkName(channel))}
+            >Save</Button>
+        </ModalContent>
+    </ModalRoot>;
+}
+
+export function BookmarkContextMenu({ bookmark, index, methods }: { bookmark: Bookmarks[number], index: number, methods: UseBookmark[1]; }) {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
     return <Menu.Menu
@@ -94,13 +121,22 @@ export function BookmarkContextMenu({ bookmark, methods }: { bookmark: Bookmarks
                     key="edit-bookmark"
                     id="edit-bookmark"
                     label="Edit Bookmark"
-                    action={() => showToast("TODO")}
+                    action={() => {
+                        const key = openModal(modalProps =>
+                            <EditModal
+                                modalProps={modalProps}
+                                originalName={bookmark.name}
+                                channelId={bookmark.channelId}
+                                onSave={name => methods.editBookmark(index, { name }, key)}
+                            />
+                        );
+                    }}
                 />
                 <Menu.MenuItem
                     key="delete-bookmark"
                     id="delete-bookmark"
                     label="Delete Bookmark"
-                    action={() => methods.deleteBookmark(bookmark.channelId)}
+                    action={() => methods.deleteBookmark(index)}
                 />
                 <Menu.MenuItem
                     key="add-to-folder"
