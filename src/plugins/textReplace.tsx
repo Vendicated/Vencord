@@ -123,6 +123,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
     const isRegexRules = title === "Using Regex";
 
     async function onClickRemove(index: number) {
+        if (index === rulesArray.length - 1) return;
         rulesArray.splice(index, 1);
 
         await DataStore.set(rulesKey, rulesArray);
