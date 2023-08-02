@@ -51,6 +51,8 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     if (!channelId) return null;
 
     const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return null;
+
     const guild = GuildStore.getGuild(channel.guild_id);
 
     if (!guild) return null; // When in DM call
