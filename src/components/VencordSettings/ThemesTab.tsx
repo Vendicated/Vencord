@@ -23,6 +23,7 @@ import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
 import { classes, intersperse } from "@utils/misc";
+import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
@@ -237,7 +238,7 @@ function ThemesTab() {
                                     </Button>
                                 ) : (
                                     <Button
-                                        onClick={() => window.DiscordNative.fileManager.showItemInFolder(themeDir)}
+                                        onClick={() => showItemInFolder(themeDir!)}
                                         size={Button.Sizes.SMALL}
                                         disabled={themeDirPending}
                                     >
