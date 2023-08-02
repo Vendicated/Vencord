@@ -26,14 +26,15 @@ import { classes, intersperse } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, TabBar, Text, TextArea } from "@webpack/common";
+import { Button, Card, Forms, React, TabBar, Text, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
+import type { ComponentType, ReactNode, Ref, SyntheticEvent } from "react";
 
 import { SettingsTab, wrapTab } from "./shared";
 
-type FileInput = React.ComponentType<{
-    ref: React.Ref<HTMLInputElement>;
-    onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+type FileInput = ComponentType<{
+    ref: Ref<HTMLInputElement>;
+    onChange: (e: SyntheticEvent<HTMLInputElement>) => void;
     multiple?: boolean;
     filters?: { name?: string; extensions: string[]; }[];
 }>;
@@ -101,7 +102,7 @@ interface ThemeCardProps {
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
     function renderLinks() {
-        const links: React.ReactNode[] = [];
+        const links: ReactNode[] = [];
 
         if (theme.website) {
             links.push(<Link href={theme.website}>Website</Link>);
@@ -154,13 +155,13 @@ enum ThemeTab {
 function ThemesTab() {
     const settings = useSettings(["themeLinks", "enabledThemes"]);
 
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const [currentTab, setCurrentTab] = React.useState(ThemeTab.LOCAL);
-    const [themeText, setThemeText] = React.useState(settings.themeLinks.join("\n"));
-    const [userThemes, setUserThemes] = React.useState<UserThemeHeader[] | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
+    const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
+    const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
-    React.useEffect(() => {
+    useEffect(() => {
         refreshLocalThemes();
     }, []);
 
@@ -179,7 +180,7 @@ function ThemesTab() {
         }
     }
 
-    async function onFileUpload(e: React.SyntheticEvent<HTMLInputElement>) {
+    async function onFileUpload(e: SyntheticEvent<HTMLInputElement>) {
         e.stopPropagation();
         e.preventDefault();
         if (!e.currentTarget?.files?.length) return;
@@ -221,7 +222,7 @@ function ThemesTab() {
 
                 <Forms.FormSection title="Local Themes">
                     <Card className="vc-settings-quick-actions-card">
-                        <React.Fragment>
+                        <>
                             {IS_WEB ?
                                 (
                                     <Button
@@ -251,7 +252,7 @@ function ThemesTab() {
                             >
                                 Refresh Theme List
                             </Button>
-                        </React.Fragment>
+                        </>
                     </Card>
 
                     <div className={cl("grid")}>
