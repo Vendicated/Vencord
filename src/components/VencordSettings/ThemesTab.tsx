@@ -25,8 +25,8 @@ import { Margins } from "@utils/margins";
 import { classes, intersperse } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, TabBar, Text, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, Text, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
 import type { ComponentType, ReactNode, Ref, SyntheticEvent } from "react";
 
@@ -39,6 +39,7 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
+const InviteActions = findByPropsLazy("resolveInvite");
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
@@ -109,11 +110,25 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
         }
 
         if (theme.invite) {
-            const invite = /^[-\w]+$/.test(theme.invite)
-                ? `https://discord.gg/${theme.invite}`
-                : theme.invite;
+            links.push(
+                <Link
+                    href={`https://discord.gg/${theme.invite}`}
+                    onClick={async e => {
+                        e.preventDefault();
+                        const { invite } = await InviteActions.resolveInvite(theme.invite, "Desktop Modal");
+                        if (!invite) return showToast("Invalid or expired invite");
 
-            links.push(<Link href={invite}>Discord Server</Link>);
+                        FluxDispatcher.dispatch({
+                            type: "INVITE_MODAL_OPEN",
+                            invite,
+                            code: theme.invite,
+                            context: "APP"
+                        });
+                    }}
+                >
+                    Discord Server
+                </Link>
+            );
         }
 
         // Add commas between links
