@@ -70,6 +70,9 @@ export default definePlugin({
                     })
                     .catch(error => {
                         console.error(error);
+                        sendBotMessage(cmdCtx.channel.id, {
+                            content: `Something went wrong: ${error}`,
+                        });
                     });
             },
         },
