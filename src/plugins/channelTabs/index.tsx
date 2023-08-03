@@ -82,12 +82,20 @@ export default definePlugin({
                 replace: "$1$self.render,{currentChannel:$2,"
             }
         },
-        // ctrl click to open in new tab in inbox
+        // ctrl click to open in new tab in inbox mentions
         {
             find: ".messageGroupWrapper,children",
             replacement: {
                 match: /,\(function\(\i\){(?=return \i\((\i),(\i)\))/,
-                replace: ",(function($2){if ($2.ctrlKey) return $self.open($1);"
+                replace: ",(function($2){ if ($2.ctrlKey) return $self.open($1);"
+            }
+        },
+        // ctrl click to open in new tab in inbox unread
+        {
+            find: ".jumpButton,onJump",
+            replacement: {
+                match: /(.jumpButton,onJump:function\(\i\){)return (\i\(\i,(\i)\.id)/,
+                replace: "$1 if (arguments[0].ctrlKey) return $self.open($3); return $2"
             }
         },
         // ctrl click to open in new tab in search results
