@@ -112,7 +112,6 @@ function ThemesTab() {
                         <li>• Click the fork button on the top right</li>
                         <li>• Edit the file</li>
                         <li>• Use the link to your own repository instead</li>
-                        <li>• Use the link to your own repository instead </li>
                         <li>OR</li>
                         <li>• Paste the contents of the edited theme file into the QuickCSS editor</li>
                     </ul>
