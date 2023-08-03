@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import { closeModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
-import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useState } from "@webpack/common";
+import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, useState } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components/ChannelTabsContainer";
 
@@ -50,15 +50,28 @@ interface Bookmark {
 interface BookmarkFolder {
     bookmarks: Bookmark[];
     name: string;
+    iconColor: string;
 }
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
     addBookmark: (bookmark: Bookmark, folderIndex?: number) => void;
+    addFolder: () => void;
     editBookmark: (index: number, bookmark: { name: string; }, modalKey?) => void;
     deleteBookmark: (index: number) => void;
 }];
 
 const logger = new Logger("ChannelTabs");
+
+const bookmarkFolderColors = [
+    "var(--red-500)",
+    "var(--blue-500)",
+    "var(--yellow-500)",
+    "var(--green-500)",
+    "var(--background-primary)",
+    "var(--white-500)",
+    "var(--orange-500)",
+    "var(--guild-boosting-pink)"
+] as const;
 
 export const channelTabsSettings = definePluginSettings({
     onStartup: {
@@ -335,7 +348,15 @@ function toggleCompactTab(id: number) {
 }
 
 function useBookmarks(userId: string): UseBookmark {
-    const [bookmarks, setBookmarks] = useState<{ [k: string]: Bookmarks; }>({});
+    const [bookmarks, _setBookmarks] = useState<{ [k: string]: Bookmarks; }>({});
+    const setBookmarks = useCallback((bookmarks: { [k: string]: Bookmarks; }) => {
+        _setBookmarks(bookmarks);
+        DataStore.update("ChannelTabs_bookmarks", old => ({
+            ...old,
+            [userId]: bookmarks[userId]
+        }));
+    }, []);
+
     useAwaiter(() => DataStore.get("ChannelTabs_bookmarks"), {
         fallbackValue: undefined,
         onSuccess(bookmarks: { [k: string]: Bookmarks; }) {
@@ -347,26 +368,33 @@ function useBookmarks(userId: string): UseBookmark {
     const methods = {
         addBookmark: (bookmark, folderIndex) => {
             if (!bookmarks) return;
-            // TODO: folders
-            const newBookmarks = [...bookmarks[userId], bookmark];
-            setBookmarks({
-                ...bookmarks,
-                [userId]: newBookmarks
-            });
-            DataStore.update("ChannelTabs_bookmarks", old => ({
-                ...old,
-                [userId]: newBookmarks
-            }));
-        },
-        editBookmark(index, bookmark, modalKey) {
-            bookmarks[userId][index].name = bookmark.name;
+
+            if (folderIndex && !("bookmarks" in bookmarks[userId][folderIndex]))
+                return logger.error("Attempted to add bookmark to non-folder " + folderIndex, bookmarks);
+
+            if (folderIndex)
+                (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.push(bookmark);
+            else bookmarks[userId].push(bookmark);
             setBookmarks({
                 ...bookmarks
             });
-            DataStore.update("ChannelTabs_bookmarks", old => ({
-                ...old,
-                [userId]: bookmarks[userId]
-            }));
+        },
+        addFolder() {
+            if (!bookmarks) return;
+            bookmarks[userId].push({
+                name: "Folder",
+                iconColor: bookmarkFolderColors[4], // var(--background-primary)
+                bookmarks: []
+            });
+            setBookmarks({
+                ...bookmarks
+            });
+        },
+        editBookmark(index, newBookmark, modalKey) {
+            bookmarks[userId][index].name = newBookmark.name;
+            setBookmarks({
+                ...bookmarks
+            });
             if (modalKey) closeModal(modalKey);
         },
         deleteBookmark(index) {
@@ -377,10 +405,6 @@ function useBookmarks(userId: string): UseBookmark {
             setBookmarks({
                 ...bookmarks
             });
-            DataStore.update("ChannelTabs_bookmarks", old => ({
-                ...old,
-                [userId]: bookmarks[userId]
-            }));
         }
     } as UseBookmark[1];
 

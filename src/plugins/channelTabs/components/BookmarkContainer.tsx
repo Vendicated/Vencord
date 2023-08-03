@@ -18,7 +18,7 @@
 
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Avatar, ChannelStore, ContextMenu, GuildStore, Text, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, GuildStore, showToast, Text, UserStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { BasicChannelTabsProps, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
@@ -41,7 +41,8 @@ export function bookmarkName(channel: Channel) {
 }
 
 function BookmarkIcon({ bookmark }: { bookmark: Bookmarks[number]; }) {
-    if ("bookmarks" in bookmark) return <FolderIcon height={16} width={16} color={"var(--background-primary)"} />;
+    if ("bookmarks" in bookmark) return <FolderIcon height={16} width={16} color={bookmark.iconColor} />;
+
     const channel = ChannelStore.getChannel(bookmark.channelId);
     const guild = GuildStore.getGuild(bookmark.guildId);
     if (guild) return guild.icon
@@ -70,12 +71,14 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmarks[number]; }) {
     return <QuestionIcon height={16} width={16} />;
 }
 
-function Bookmark({ bookmark, index, methods }: { bookmark: Bookmarks[number], index: number, methods: UseBookmark[1]; }) {
+function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+    const bookmark = bookmarks[index];
+
     return <div
         className={cl("bookmark")}
-        onClick={() => "bookmarks" in bookmark || switchChannel(bookmark)}
+        onClick={() => "bookmarks" in bookmark ? showToast("TODO") : switchChannel(bookmark)}
         onContextMenu={e => ContextMenu.open(e, () =>
-            <BookmarkContextMenu index={index} bookmark={bookmark} methods={methods} />
+            <BookmarkContextMenu index={index} bookmarks={bookmarks} methods={methods} />
         )}
     >
         <BookmarkIcon bookmark={bookmark} />
@@ -111,8 +114,8 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         </button>
         {bookmarks
             ? bookmarks.length
-                ? bookmarks.map((bookmark, i) =>
-                    <Bookmark key={i} index={i} bookmark={bookmark} methods={methods} />
+                ? bookmarks.map((_, i) =>
+                    <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
                 )
                 : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
                     You have no bookmarks. You can add an open tab or hide this by right clicking it

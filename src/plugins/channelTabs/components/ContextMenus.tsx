@@ -52,36 +52,6 @@ export function BasicContextMenu() {
     </Menu.Menu>;
 }
 
-export function BookmarkBarContextMenu() {
-    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
-
-    return <Menu.Menu
-        navId="channeltabs-bookmark-bar-context"
-        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="ChannelTabs Bookmark Bar Context Menu"
-    >
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                key="create-folder"
-                id="create-folder"
-                label="Create Folder"
-                action={() => showToast("TODO")}
-            />
-        </Menu.MenuGroup>
-        <Menu.MenuGroup>
-            <Menu.MenuCheckboxItem
-                checked={showBookmarkBar}
-                key="show-bookmark-bar"
-                id="show-bookmark-bar"
-                label="Bookmark Bar"
-                action={() => {
-                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
-                }}
-            />
-        </Menu.MenuGroup>
-    </Menu.Menu>;
-}
-
 function EditModal({ modalProps, originalName, channelId, onSave }) {
     const [name, setName] = useState(originalName);
     const channel = ChannelStore.getChannel(channelId);
@@ -106,46 +76,46 @@ function EditModal({ modalProps, originalName, channelId, onSave }) {
     </ModalRoot>;
 }
 
-export function BookmarkContextMenu({ bookmark, index, methods }: { bookmark: Bookmarks[number], index: number, methods: UseBookmark[1]; }) {
+export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+    const bookmark = bookmarks[index];
 
     return <Menu.Menu
         navId="channeltabs-bookmark-context"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="ChannelTabs Bookmark Context Menu"
     >
-        {"bookmarks" in bookmark
-            ? <></> // TODO
-            : <Menu.MenuGroup>
-                <Menu.MenuItem
-                    key="edit-bookmark"
-                    id="edit-bookmark"
-                    label="Edit Bookmark"
-                    action={() => {
-                        const key = openModal(modalProps =>
-                            <EditModal
-                                modalProps={modalProps}
-                                originalName={bookmark.name}
-                                channelId={bookmark.channelId}
-                                onSave={name => methods.editBookmark(index, { name }, key)}
-                            />
-                        );
-                    }}
-                />
-                <Menu.MenuItem
-                    key="delete-bookmark"
-                    id="delete-bookmark"
-                    label="Delete Bookmark"
-                    action={() => methods.deleteBookmark(index)}
-                />
-                <Menu.MenuItem
-                    key="add-to-folder"
-                    id="add-to-folder"
-                    label="Add Bookmark to Folder"
-                    action={() => showToast("TODO")}
-                />
-            </Menu.MenuGroup>
-        }
+        <Menu.MenuGroup>
+            <Menu.MenuItem
+                key="edit-bookmark"
+                id="edit-bookmark"
+                label="Edit Bookmark"
+                action={() => {
+                    if ("bookmarks" in bookmark) return showToast("TODO");
+                    const key = openModal(modalProps =>
+                        <EditModal
+                            modalProps={modalProps}
+                            originalName={bookmark.name}
+                            channelId={bookmark.channelId}
+                            onSave={name => methods.editBookmark(index, { name }, key)}
+                        />
+                    );
+                }}
+            />
+            <Menu.MenuItem
+                key="delete-bookmark"
+                id="delete-bookmark"
+                label="Delete Bookmark"
+                action={() => methods.deleteBookmark(index)}
+            />
+            <Menu.MenuItem
+                key="add-to-folder"
+                id="add-to-folder"
+                label="Add Bookmark to Folder"
+                disabled={"bookmarks" in bookmark}
+                action={() => methods.addFolder()}
+            />
+        </Menu.MenuGroup>
         <Menu.MenuGroup>
             <Menu.MenuCheckboxItem
                 checked={showBookmarkBar}

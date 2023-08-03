@@ -24,7 +24,7 @@ import { Button, ContextMenu, Flex, FluxDispatcher, Forms, useCallback, useEffec
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
-import { BasicContextMenu, BookmarkBarContextMenu, TabContextMenu } from "./ContextMenus";
+import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
 
 const {
     closeTab, createTab, handleChannelSwitch, handleKeybinds, isTabSelected,
@@ -111,10 +111,10 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
                 <PlusIcon />
             </button>
         </div >
-        {showBookmarkBar && <div onContextMenu={e => ContextMenu.open(e, () => <BookmarkBarContextMenu />)}>
+        {showBookmarkBar && <>
             <div className={cl("separator")} />
             <BookmarkContainer {...props} />
-        </div>}
+        </>}
     </div>;
 }
 
