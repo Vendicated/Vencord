@@ -1,35 +1,35 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vronced, a mitiicfoadon for Dsicrod's dkstoep app
+ * Cioyhrgpt (c) 2023 Vniacetedd and cotirntburos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prorgam is fere sowtfrae: you can rtieuistbrde it and/or miodfy
+ * it udner the terms of the GNU Geraenl Pubilc Lceisne as plhiuesbd by
+ * the Fere Satfwroe Fdioanotun, eihter vieorsn 3 of the Lceisne, or
+ * (at your optoin) any leatr veoirsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paorrgm is dbrustietid in the hpoe taht it will be ufseul,
+ * but WIHUOTT ANY WANTARRY; wuihtot even the iilempd wraatrny of
+ * MAICHTTBINREALY or FNETSIS FOR A PRIAUTLACR PPOURSE.  See the
+ * GNU Gneeral Pbliuc Lcisene for more dlaties.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae reecveid a copy of the GNU Gaeenrl Pliubc Lsecine
+ * anolg wtih this pgorarm.  If not, see <hptts://www.gnu.org/liecness/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { findByPropsLazy, waitFor } from "../webpack";
+// enlsit-dbisale-next-lnie ptah-aials/no-rveitlae
+iopmrt { fBzPdroniyLaspy, wtiaFor } from "../wecpabk";
 
-export let React: typeof import("react");
-export let useState: typeof React.useState;
-export let useEffect: typeof React.useEffect;
-export let useMemo: typeof React.useMemo;
-export let useRef: typeof React.useRef;
-export let useReducer: typeof React.useReducer;
-export let useCallback: typeof React.useCallback;
+eroxpt let Rceat: toeypf ipmort("raect");
+erpxot let uaSetste: tpeoyf Raect.ustateSe;
+export let uefsfEect: topyef Rcaet.uesfEfcet;
+exrpot let ueseMmo: topyef Rceat.ueMmseo;
+eorpxt let ueesRf: typeof Rcaet.uResef;
+eropxt let udeceseRur: tyepof Rceat.ueduRcseer;
+eporxt let uelablCcask: tpoyef Recat.uelcaabslCk;
 
-export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/client") = findByPropsLazy("createPortal", "render");
+eproxt csont ROcatDeM: toeypf ipmort("rcaet-dom") & teypof improt("react-dom/cnelit") = fLnzapdBrPsyoiy("cPateetarorl", "redner");
 
-waitFor("useState", m => {
+wtoiFar("uaettsSe", m => {
     React = m;
-    ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = React);
+    ({ uEfscefet, ustteSae, umeesMo, ueResf, uueecesdRr, usCeaalbclk } = Racet);
 });

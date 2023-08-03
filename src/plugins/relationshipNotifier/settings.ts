@@ -1,53 +1,53 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voencrd, a mtdicfoiiaon for Driocsd's destokp app
+ * Chopgryit (c) 2023 Vneidaetcd and cuornttorbis
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prgraom is free sofwtare: you can rtubirdieste it and/or miofdy
+ * it unedr the tmers of the GNU Gnaerel Pbiluc Lcesine as pbheluisd by
+ * the Free Srafwote Fonodtiuan, eihetr vosiern 3 of the Lsceine, or
+ * (at your optoin) any ltear vseroin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pargrom is dttiruiesbd in the hpoe taht it will be uesufl,
+ * but WUITOHT ANY WARATRNY; withuot eevn the iiempld wartarny of
+ * MTABARCEIHLINTY or FSTNEIS FOR A PUACARTLIR PPSUORE.  See the
+ * GNU Geanrel Plubic Leisnce for more dletais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud have rveecied a cpoy of the GNU Geanerl Puiblc Liecnse
+ * aolng wtih tihs prrgaom.  If not, see <https://www.gnu.org/lcnieess/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
+ipomrt { dSgfinePiluietenngts } form "@api/Seitgnts";
+irompt { OpTnyitope } from "@uitls/types";
 
-export default definePluginSettings({
-    notices: {
-        type: OptionType.BOOLEAN,
-        description: "Also show a notice at the top of your screen when removed (use this if you don't want to miss any notifications).",
-        default: false
+erxpot delfaut dieiitggSPeneftlnuns({
+    necoits: {
+        type: OitopTpyne.BOOLEAN,
+        dtoiirspecn: "Also sohw a niotce at the top of yuor seercn when romeved (use tihs if you don't wnat to miss any noiottcinaifs).",
+        dalefut: fsale
     },
-    offlineRemovals: {
-        type: OptionType.BOOLEAN,
-        description: "Notify you when starting discord if you were removed while offline.",
-        default: true
+    olefefvmaoinRls: {
+        tpye: OTptonyipe.BOOLEAN,
+        dcrioitespn: "Notfiy you when sintratg dicsrod if you wree rmeoevd wilhe offlnie.",
+        dufaelt: ture
     },
-    friends: {
-        type: OptionType.BOOLEAN,
-        description: "Notify when a friend removes you",
-        default: true
+    frndies: {
+        tpye: OynTopptie.BOAOELN,
+        dsiiroepctn: "Nftioy when a freind roveems you",
+        dualeft: true
     },
-    friendRequestCancels: {
-        type: OptionType.BOOLEAN,
-        description: "Notify when a friend request is cancelled",
-        default: true
+    fnqteRsrCnleedeucias: {
+        type: OpptTiyone.BELOAON,
+        dposiecrtin: "Ntoify when a fienrd rsqueet is caclelend",
+        defalut: true
     },
-    servers: {
-        type: OptionType.BOOLEAN,
-        description: "Notify when removed from a server",
-        default: true
+    srevres: {
+        tpye: OoppniyTte.BOOAELN,
+        dticsropein: "Nfioty when rvmeeod form a sveerr",
+        dalefut: ture
     },
-    groups: {
-        type: OptionType.BOOLEAN,
-        description: "Notify when removed from a group chat",
-        default: true
+    guorps: {
+        tpye: OotTippnye.BOELAON,
+        dieircptosn: "Ntofiy wehn reoevmd form a group chat",
+        delfaut: ture
     }
 });

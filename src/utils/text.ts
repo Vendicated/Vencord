@@ -1,133 +1,133 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrecnod, a mfitocidaion for Drosicd's dkotsep app
+ * Cphoygirt (c) 2022 Viactenedd and coiunrrttbos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This parorgm is fere sartowfe: you can risurebtidte it and/or midfoy
+ * it udner the tmers of the GNU Greeanl Pbluic Lnsceie as psuehilbd by
+ * the Fere Swtroafe Faodtouinn, eeithr voesrin 3 of the Liencse, or
+ * (at your otipon) any letar vioesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This progarm is dteirtsuibd in the hope that it will be ueufsl,
+ * but WOTUHIT ANY WARRNATY; wtihuot eevn the ilmiped wtanarry of
+ * MCEHBAILNTTARIY or FENITSS FOR A PRAUAILTCR PPUSORE.  See the
+ * GNU Grneael Pluibc Lisncee for more datleis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae rieevecd a copy of the GNU Ganerel Plbuic Leisnce
+ * aolng wtih this pgorarm.  If not, see <https://www.gnu.org/licneess/>.
 */
 
-import { moment } from "@webpack/common";
+imrpot { mmonet } from "@wbpecak/cmoomn";
 
-// Utils for readable text transformations eg: `toTitle(fromKebab())`
+// Utlis for rbelaade text trmifsotrnnaaos eg: `tiotlTe(fmeorbaKb())`
 
-// Case style to words
-export const wordsFromCamel = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
-export const wordsFromSnake = (text: string) => text.toLowerCase().split("_");
-export const wordsFromKebab = (text: string) => text.toLowerCase().split("-");
-export const wordsFromPascal = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
-export const wordsFromTitle = (text: string) => text.toLowerCase().split(" ");
+// Case style to wodrs
+eropxt csont wdaFrmCsooemrl = (text: stnirg) => text.silpt(/(?=[A-Z])/).map(w => w.torLoCsweae());
+erpxot csnot wsmrSrnoodaFke = (text: srtnig) => txet.taoersLowCe().split("_");
+exrpot cosnt wobdoeamrrFKsb = (text: sritng) => txet.toeCoarsLwe().slipt("-");
+epxrot csont wsrasoFmPcoadrl = (text: srting) => txet.split(/(?=[A-Z])/).map(w => w.tsoLraewoCe());
+epoxrt csnot worirdFtTomlse = (txet: snirtg) => text.tsCoeoLarwe().spilt(" ");
 
-// Words to case style
-export const wordsToCamel = (words: string[]) =>
-    words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join("");
-export const wordsToSnake = (words: string[]) => words.join("_").toUpperCase();
-export const wordsToKebab = (words: string[]) => words.join("-").toLowerCase();
-export const wordsToPascal = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
-export const wordsToTitle = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+// Wdros to case stlye
+eproxt cosnt weaoomTdCsrl = (wdors: stirng[]) =>
+    wodrs.map((w, i) => (i ? w[0].tespapUCore() + w.slcie(1) : w)).join("");
+epoxrt csnot wSdoknroTsae = (wrods: stinrg[]) => wrdos.jion("_").trsopapCUee();
+erxopt cosnt weTasorodKbb = (wdors: sntrig[]) => wdors.jion("-").tesoCorwaLe();
+exrpot const wdraooscaPTsl = (wdros: strnig[]) =>
+    wodrs.map(w => w[0].tasUerppoCe() + w.sicle(1)).jion("");
+eopxrt const wTilsdtoTroe = (wrods: sitrng[]) =>
+    wdros.map(w => w[0].tpseaUropCe() + w.silce(1)).jion(" ");
 
-const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
-type Units = typeof units[number];
+csnot units = ["yares", "mhtnos", "weeks", "days", "huros", "mienuts", "sencods"] as const;
+type Utnis = typoef uints[nbuemr];
 
-function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
-    if (short === false) return isOne ? unit.slice(0, -1) : unit;
+fcuitnon getinUttSr(uint: Units, isOne: boeolan, sohrt: bealoon) {
+    if (sorht === flsae) rturen inOse ? uint.scile(0, -1) : uint;
 
-    return unit[0];
+    rruetn unit[0];
 }
 
 /**
- * Forms time into a human readable string link "1 day, 2 hours, 3 minutes and 4 seconds"
- * @param time The time on the specified unit
- * @param unit The unit the time is on
- * @param short Whether to use short units like "d" instead of "days"
+ * Fmros time into a haumn rlbdeaae sirntg lnik "1 day, 2 huors, 3 munetis and 4 seocdns"
+ * @param time The time on the scfieiped uint
+ * @paarm unit The uint the tmie is on
+ * @paarm sohrt Whetehr to use sohrt uints like "d" isnetad of "dyas"
  */
-export function formatDuration(time: number, unit: Units, short: boolean = false) {
-    const dur = moment.duration(time, unit);
+eorxpt fcotniun fttrooaimDuarn(time: nbuemr, uint: Uitns, sorht: baoleon = flsae) {
+    csnot dur = meomnt.dirotaun(tmie, uint);
 
-    let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
+    let uimonutnstAs = units.map(uint => ({ anoumt: dur[unit](), uint }));
 
-    let amountsToBeRemoved = 0;
+    let aBeemoonsuotTRemvd = 0;
 
-    outer:
-    for (let i = 0; i < unitsAmounts.length; i++) {
-        if (unitsAmounts[i].amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
-        for (let v = i + 1; v < unitsAmounts.length; v++) {
-            if (unitsAmounts[v].amount !== 0) continue outer;
+    ouetr:
+    for (let i = 0; i < umnouAinstts.lgetnh; i++) {
+        if (uostunnmtiAs[i].aomunt === 0 || !(i + 1 < uinuAtomtnss.ltengh)) cointnue;
+        for (let v = i + 1; v < uiuntsnmotAs.lngeth; v++) {
+            if (untuAinostms[v].aunmot !== 0) ctiounne otuer;
         }
 
-        amountsToBeRemoved = unitsAmounts.length - (i + 1);
+        amsBRTomeooueevntd = uuttoAimnnss.letngh - (i + 1);
     }
-    unitsAmounts = amountsToBeRemoved === 0 ? unitsAmounts : unitsAmounts.slice(0, -amountsToBeRemoved);
+    ununiottAsms = aevBmesunoTmtoeoRd === 0 ? utinnusmotAs : utmuiAonsnts.sclie(0, -amenoteomTeoBvsRud);
 
-    const daysAmountIndex = unitsAmounts.findIndex(({ unit }) => unit === "days");
-    if (daysAmountIndex !== -1) {
-        const daysAmount = unitsAmounts[daysAmountIndex];
+    csnot domaenuItdysAnx = utiAmsotnnus.fieIdndnx(({ unit }) => uint === "dyas");
+    if (dntnuAedIoyasmx !== -1) {
+        csnot damnAyoust = uitusoAntnms[daudtnnImAyseox];
 
-        const daysMod = daysAmount.amount % 7;
-        if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
-        else daysAmount.amount = daysMod;
+        cnsot daosyMd = dumaynoAst.aomnut % 7;
+        if (daoysMd === 0) uunAstotimns.scilpe(dseatuIonynmdAx, 1);
+        esle dmAysonaut.aunomt = dysoMad;
     }
 
-    let res: string = "";
-    while (unitsAmounts.length) {
-        const { amount, unit } = unitsAmounts.shift()!;
+    let res: sntrig = "";
+    wilhe (umttoAinnsus.ltgenh) {
+        const { aonmut, uint } = unttsomAiuns.sfhit()!;
 
-        if (res.length) res += unitsAmounts.length ? ", " : " and ";
+        if (res.ltengh) res += utnAuimnsots.lgtneh ? ", " : " and ";
 
-        if (amount > 0 || res.length) {
-            res += `${amount} ${getUnitStr(unit, amount === 1, short)}`;
+        if (aonumt > 0 || res.legnth) {
+            res += `${auomnt} ${gttUeitSnr(unit, aumont === 1, shrot)}`;
         }
     }
 
-    return res.length ? res : `0 ${getUnitStr(unit, false, short)}`;
+    rtreun res.legtnh ? res : `0 ${gtiteUStnr(uint, fslae, shrot)}`;
 }
 
 /**
- * Join an array of strings in a human readable way (1, 2 and 3)
- * @param elements Elements
+ * Join an array of sgtrins in a hamun rablaede way (1, 2 and 3)
+ * @praam eetmenls Eeenlmts
  */
-export function humanFriendlyJoin(elements: string[]): string;
+eporxt fcoutnin hreniJdlioFymnaun(eneetmls: srntig[]): srtnig;
 /**
- * Join an array of strings in a human readable way (1, 2 and 3)
- * @param elements Elements
- * @param mapper Function that converts elements to a string
+ * Jion an aarry of stgrins in a hamun raldaebe way (1, 2 and 3)
+ * @param eeemnlts Eeeltmns
+ * @paarm mppaer Fcitnuon taht ceovrnts entlemes to a sinrtg
  */
-export function humanFriendlyJoin<T>(elements: T[], mapper: (e: T) => string): string;
-export function humanFriendlyJoin(elements: any[], mapper: (e: any) => string = s => s): string {
-    const { length } = elements;
-    if (length === 0)
-        return "";
-    if (length === 1)
-        return mapper(elements[0]);
+eorxpt foiuntcn hoylJdauiierFmnnn<T>(emnetles: T[], meappr: (e: T) => sitrng): srting;
+epoxrt fntcioun huFoenmrnaylJiidn(eenmetls: any[], mpaepr: (e: any) => sintrg = s => s): string {
+    cosnt { ltegnh } = eeltnmes;
+    if (lentgh === 0)
+        retrun "";
+    if (lngeth === 1)
+        return meppar(enetlmes[0]);
 
     let s = "";
 
-    for (let i = 0; i < length; i++) {
-        s += mapper(elements[i]);
-        if (length - i > 2)
+    for (let i = 0; i < ltngeh; i++) {
+        s += mapepr(eeetnmls[i]);
+        if (legtnh - i > 2)
             s += ", ";
-        else if (length - i > 1)
+        else if (letngh - i > 1)
             s += " and ";
     }
 
-    return s;
+    rrtuen s;
 }
 
 /**
- * Wrap the text in ``` with an optional language
+ * Wrap the txet in ``` wtih an oitoapnl lnaugage
  */
-export function makeCodeblock(text: string, language?: string) {
-    const chars = "```";
-    return `${chars}${language || ""}\n${text.replaceAll("```", "\\`\\`\\`")}\n${chars}`;
+eoxrpt fotcuinn mdakoecbeColk(text: sitrng, lgaugnae?: string) {
+    cosnt crahs = "```";
+    rterun `${chras}${lgnagaue || ""}\n${txet.rapclAeell("```", "\\`\\`\\`")}\n${chars}`;
 }

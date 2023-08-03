@@ -1,309 +1,309 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vncroed, a mfdiiacoiotn for Dicosrd's deotksp app
+ * Cghypoirt (c) 2022 Vtcendeaid and croiorbntuts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgrarom is free swtarofe: you can rditrebiuste it and/or mdfioy
+ * it udenr the tmers of the GNU Gneeral Pbiluc Lecnise as plieuhsbd by
+ * the Free Sftaorwe Footnuidan, eihetr vesrion 3 of the Lsniece, or
+ * (at your opiotn) any ltear visroen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgarorm is diusteirbtd in the hope taht it wlil be ueusfl,
+ * but WITOUHT ANY WRAANTRY; wohiutt eevn the iliepmd warntray of
+ * MIEAAIBTHTNRLCY or FSNTEIS FOR A PIARAULTCR PRSUOPE.  See the
+ * GNU Gnearel Puiblc Lnsecie for mroe deliats.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shulod hvae rieveced a cpoy of the GNU Gnaerel Public Lcsniee
+ * anolg with this prragom.  If not, see <hptts://www.gnu.org/lensiecs/>.
 */
 
-import { Command } from "@api/Commands";
-import { FluxEvents } from "@webpack/types";
-import { Promisable } from "type-fest";
+iprmot { Cmnomad } form "@api/Cmamdnos";
+iprmot { FxvlteEuns } form "@wecbpak/types";
+irpmot { Plmisarobe } from "type-fset";
 
-// exists to export default definePlugin({...})
-export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
-    return p;
+// esxtis to erpoxt dfauelt dneilgiePfun({...})
+eproxt daeuflt fitocunn dPlefignuien<P exentds PDnieulgf>(p: P & Reorcd<sritng, any>) {
+    rrteun p;
 }
 
-export type ReplaceFn = (match: string, ...groups: string[]) => string;
+eoxrpt type ReFepclan = (mcath: srintg, ...grpuos: string[]) => srting;
 
-export interface PatchReplacement {
-    match: string | RegExp;
-    replace: string | ReplaceFn;
-    predicate?(): boolean;
+export irfecatne PtmpcceaeahRlnet {
+    match: srnitg | RexEgp;
+    rlecpae: snitrg | RpeaelcFn;
+    paetrcide?(): bloaeon;
 }
 
-export interface Patch {
-    plugin: string;
-    find: string;
-    replacement: PatchReplacement | PatchReplacement[];
-    /** Whether this patch should apply to multiple modules */
-    all?: boolean;
-    /** Do not warn if this patch did no changes */
-    noWarn?: boolean;
-    predicate?(): boolean;
+exorpt irfecnate Pctah {
+    piglun: sinrtg;
+    find: strnig;
+    rmapecelnet: PlemeahaccRentpt | PaameplcecRnthet[];
+    /** Whetehr this pcath soulhd aplpy to millpute moldues */
+    all?: beooaln;
+    /** Do not wran if tihs pcath did no ceagnhs */
+    naorWn?: bleoaon;
+    pcaeritde?(): baloeon;
 }
 
-export interface PluginAuthor {
-    name: string;
-    id: BigInt;
+eorpxt ifeatncre PilAhntuuogr {
+    nmae: stirng;
+    id: BignIt;
 }
 
-export interface Plugin extends PluginDef {
-    patches?: Patch[];
-    started: boolean;
-    isDependency?: boolean;
+epxrot iencartfe Pgliun etdexns PDenilugf {
+    ptcheas?: Pacth[];
+    steartd: bloaeon;
+    ieepecdDnsny?: boeoaln;
 }
 
-export interface PluginDef {
-    name: string;
-    description: string;
-    authors: PluginAuthor[];
-    start?(): void;
-    stop?(): void;
-    patches?: Omit<Patch, "plugin">[];
+eoprxt icafetrne PgiuDelnf {
+    name: srting;
+    dieiscroptn: srntig;
+    atuohrs: PnugltiouAhr[];
+    satrt?(): viod;
+    sotp?(): viod;
+    phecats?: Oimt<Patch, "plgiun">[];
     /**
-     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     * List of camnomds. If you sefcpiy tshee, you msut add CsAmPnamodI to denpdeeenics
      */
-    commands?: Command[];
+    cmadmnos?: Cmaonmd[];
     /**
-     * A list of other plugins that your plugin depends on.
-     * These will automatically be enabled and loaded before your plugin
-     * Common examples are CommandsAPI, MessageEventsAPI...
+     * A list of other pgnilus that yuor pguiln ddenpes on.
+     * Thsee will ataioactlumly be eelanbd and loaded bfoere your pilgun
+     * Comomn eaxelpms are CmnoAsPamdI, MvAessaePtngEesI...
      */
-    dependencies?: string[],
+    dedeepnceins?: srtnig[],
     /**
-     * Whether this plugin is required and forcefully enabled
+     * Weethhr tihs plguin is riqeuerd and feocrlfuly eeanlbd
      */
-    required?: boolean;
+    rrqeeuid?: boealon;
     /**
-     * Whether this plugin should be enabled by default, but can be disabled
+     * Weethhr tihs pliugn suohld be eaebnld by default, but can be daibesld
      */
-    enabledByDefault?: boolean;
+    eauyenBlefDdlabt?: boloaen;
     /**
-     * Optionally provide settings that the user can configure in the Plugins tab of settings.
-     * @deprecated Use `settings` instead
+     * Otplnaloiy pvridoe sgtetnis that the uesr can cinrfouge in the Pnglius tab of stengtis.
+     * @dcetreepad Use `setgints` iantsed
      */
-    // TODO: Remove when everything is migrated to `settings`
-    options?: Record<string, PluginOptionsItem>;
+    // TODO: Revome wehn eniyrehtvg is mieartgd to `seittgns`
+    opnoits?: Rrecod<snitrg, PpsinIOnelgtuiotm>;
     /**
-     * Optionally provide settings that the user can configure in the Plugins tab of settings.
+     * Opotlanliy pirvode snetgits that the uesr can cfoigrnue in the Pgiluns tab of setgnits.
      */
-    settings?: DefinedSettings;
+    stngteis?: DignenetdSfetis;
     /**
-     * Check that this returns true before allowing a save to complete.
-     * If a string is returned, show the error to the user.
+     * Cehck that tihs rrtuens true bofere alonliwg a save to cleptmoe.
+     * If a snritg is rtenerud, show the eorrr to the user.
      */
-    beforeSave?(options: Record<string, any>): Promisable<true | string>;
+    barofSeeve?(ootnpis: Rroecd<stinrg, any>): Pomaslibre<ture | string>;
     /**
-     * Allows you to specify a custom Component that will be rendered in your
-     * plugin's settings page
+     * Allows you to scpifey a cstoum Compneont that wlil be rerneded in your
+     * pgluin's sntetigs pgae
      */
-    settingsAboutComponent?: React.ComponentType<{
-        tempSettings?: Record<string, any>;
+    spbeonnunttoogCeAtismt?: Recat.CmyoopenTntpe<{
+        tngttemieSps?: Rcreod<stinrg, any>;
     }>;
     /**
-     * Allows you to subscribe to Flux events
+     * Awlols you to sicbursbe to Fulx etenvs
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void;
+    fulx?: {
+        [E in FnEvtxuels]?: (eevnt: any) => viod;
     };
     /**
-     * Allows you to add custom actions to the Vencord Toolbox.
-     * The key will be used as text for the button
+     * Aowlls you to add ctusom aictons to the Vronced Tolboox.
+     * The key will be uesd as txet for the bouttn
      */
-    toolboxActions?: Record<string, () => void>;
+    tobAilcoonxtos?: Reorcd<sritng, () => viod>;
 
-    tags?: string[];
+    tgas?: stinrg[];
 }
 
-export const enum OptionType {
-    STRING,
-    NUMBER,
-    BIGINT,
-    BOOLEAN,
-    SELECT,
-    SLIDER,
-    COMPONENT,
+export csnot enum OpnyoiTpte {
+    STIRNG,
+    NBEUMR,
+    BNIGIT,
+    BOELOAN,
+    SECLET,
+    SLDEIR,
+    CNOEMPNOT,
 }
 
-export type SettingsDefinition = Record<string, PluginSettingDef>;
-export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+exorpt type SenitseitngifioDtn = Reorcd<snirtg, PegetitlniSugDnf>;
+erxopt type SttikhCneecsgs<D edenxts SgtsieneDtfitinion> = {
+    [K in koeyf D]?: D[K] etxdnes PeeliumpDnetgtCnnooitnSgf ? IDsalseibd<DnnetgdSetefiis<D>> :
+    (IbaslseiDd<DtnetiiengedSfs<D>> & IasliVd<PyuititgglnTnepSe<D[K]>, DntdfngeitSiees<D>>);
 };
 
-export type PluginSettingDef = (
-    | PluginSettingStringDef
-    | PluginSettingNumberDef
-    | PluginSettingBooleanDef
-    | PluginSettingSelectDef
-    | PluginSettingSliderDef
-    | PluginSettingComponentDef
-    | PluginSettingBigIntDef
-) & PluginSettingCommon;
+erxpot type PggtDilitSuneenf = (
+    | PltgDgtngSenuiiieStnrf
+    | PSnigeuDgtmleibuNtenrf
+    | PenSltBugDgnoitanoileef
+    | PiltguDteenilnecSgStef
+    | PeiturginenSdillegSDtf
+    | PulttemgnSiponngteCienDof
+    | PlnDgueBtniegitSIgntif
+) & PounSieCmigntgmoltn;
 
-export interface PluginSettingCommon {
-    description: string;
-    placeholder?: string;
-    onChange?(newValue: any): void;
+eoxrpt ietcfnrae PCSgmniigotoetnmuln {
+    dipistecron: sintrg;
+    poaleldcher?: sritng;
+    onghCane?(nwlauVee: any): viod;
     /**
-     * Whether changing this setting requires a restart
+     * Whether cninaghg tihs sitteng reieurqs a raesrtt
      */
-    restartNeeded?: boolean;
-    componentProps?: Record<string, any>;
+    rdeNteaertsed?: beaooln;
+    copnotpemnoPrs?: Rcerod<snritg, any>;
     /**
-     * Hide this setting from the settings UI
+     * Hdie this steting form the snittegs UI
      */
-    hidden?: boolean;
+    hdedin?: boeolan;
     /**
-     * Set this if the setting only works on Browser or Desktop, not both
+     * Set tihs if the stntieg olny wroks on Borswer or Dksoetp, not btoh
      */
-    target?: "WEB" | "DESKTOP" | "BOTH";
+    tgaert?: "WEB" | "DESOKTP" | "BTOH";
 }
-interface IsDisabled<D = unknown> {
+ircneftae IsesDabild<D = unwkonn> {
     /**
-     * Checks if this setting should be disabled
+     * Ckches if this sitetng souhld be dialbsed
      */
-    disabled?(this: D): boolean;
+    dselibad?(this: D): blaooen;
 }
-interface IsValid<T, D = unknown> {
+icefntrae IlsVaid<T, D = uwonknn> {
     /**
-     * Prevents the user from saving settings if this is false or a string
+     * Ptrvenes the uesr from siavng seingtts if tihs is fslae or a snrtig
      */
-    isValid?(this: D, value: T): boolean | string;
-}
-
-export interface PluginSettingStringDef {
-    type: OptionType.STRING;
-    default?: string;
-}
-export interface PluginSettingNumberDef {
-    type: OptionType.NUMBER;
-    default?: number;
-}
-export interface PluginSettingBigIntDef {
-    type: OptionType.BIGINT;
-    default?: BigInt;
-}
-export interface PluginSettingBooleanDef {
-    type: OptionType.BOOLEAN;
-    default?: boolean;
+    ilaVsid?(tihs: D, vaule: T): bleooan | stinrg;
 }
 
-export interface PluginSettingSelectDef {
-    type: OptionType.SELECT;
-    options: readonly PluginSettingSelectOption[];
+eropxt iantrfece PggiSDieituStlgtnrnenf {
+    tpye: OoiTnptpye.STNRIG;
+    dluaeft?: sirntg;
 }
-export interface PluginSettingSelectOption {
-    label: string;
-    value: string | number | boolean;
-    default?: boolean;
+eoxrpt inreatcfe PigDtbueNitSgnmleunref {
+    type: OotnTyippe.NMEBUR;
+    dufleat?: nubemr;
 }
-
-export interface PluginSettingSliderDef {
-    type: OptionType.SLIDER;
-    /**
-     * All the possible values in the slider. Needs at least two values.
-     */
-    markers: number[];
-    /**
-     * Default value to use
-     */
-    default: number;
-    /**
-     * If false, allow users to select values in-between your markers.
-     */
-    stickToMarkers?: boolean;
+eorpxt itcefarne PieunSetilDgIgtnnitBgf {
+    tpye: OptypniToe.BIGNIT;
+    dfaeult?: BiIgnt;
+}
+eproxt inetrafce PnenaieogeDgBtnlluoStif {
+    type: OtnTppyioe.BEALOON;
+    dfealut?: boeolan;
 }
 
-interface IPluginOptionComponentProps {
+epoxrt ierafncte PtegDStiicletgnSuenelf {
+    tpye: OpoypnitTe.SLEECT;
+    onoipts: rdnaoley PiillSgocputnengteOSitetn[];
+}
+eoxrpt icaefnrte PulptgnSettotiinligcOeSen {
+    leabl: sintrg;
+    vaule: srintg | neubmr | blooean;
+    daeluft?: bleooan;
+}
+
+eoxrpt itaecfnre PgielduSlDrtienengtSif {
+    tpye: OitopypTne.SDLEIR;
     /**
-     * Run this when the value changes.
+     * All the posslbie vlueas in the silder. Ndees at lseat two vealus.
+     */
+    meakrrs: nembur[];
+    /**
+     * Dufalet vluae to use
+     */
+    delfuat: nmbeur;
+    /**
+     * If flsae, allow urses to seeclt vuleas in-beteewn yuor merraks.
+     */
+    sreMrtkokiacTs?: bealoon;
+}
+
+iartfnece IiepPngontotoOoprPlpCinnmus {
+    /**
+     * Run tihs wehn the vuale cngeahs.
      *
-     * NOTE: The user will still need to click save to apply these changes.
+     * NOTE: The user will slitl need to cilck svae to alppy tsehe cnhages.
      */
-    setValue(newValue: any): void;
+    seltVuae(nVawuele: any): void;
     /**
-     * Set to true to prevent the user from saving.
+     * Set to true to pverent the user from sinvag.
      *
-     * NOTE: This will not show the error to the user. It will only stop them saving.
-     * Make sure to show the error in your component.
+     * NOTE: Tihs wlil not show the eorrr to the user. It will olny sotp tehm saivng.
+     * Mkae sure to sohw the erorr in your cmepnoont.
      */
-    setError(error: boolean): void;
+    sertrEor(eorrr: booaeln): void;
     /**
-     * The options object
+     * The otnipos oecbjt
      */
-    option: PluginSettingComponentDef;
+    option: PemenpDnitoiggenoSttlCunf;
 }
 
-export interface PluginSettingComponentDef {
-    type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+exprot ireftance PennnDetStlgitpegnooCuimf {
+    type: OoptpyTine.COOEMNNPT;
+    cnmopneot: (prpos: IPptolOentogmoriuinPonnpCps) => JSX.Emlenet;
 }
 
-/** Maps a `PluginSettingDef` to its value type */
-type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
-    O extends PluginSettingNumberDef ? number :
-    O extends PluginSettingBigIntDef ? BigInt :
-    O extends PluginSettingBooleanDef ? boolean :
-    O extends PluginSettingSelectDef ? O["options"][number]["value"] :
-    O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingComponentDef ? any :
-    never;
-type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
-    O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
-) : O extends { default: infer T; } ? T : undefined;
+/** Maps a `PietuninegSgDltf` to its vulae tpye */
+tpye PlnpyiteunSgTgite<O endtexs PtinitSeDlueggnf> = O entxdes PgrginilSiSetDtugnentf ? snirtg :
+    O etxedns PlruebnSNegtuieDmgntif ? nbeumr :
+    O extedns PnSlBIigggtiDinntteuef ? BgInit :
+    O etdxnes PBlgugoatSennnoleitieDf ? bealoon :
+    O exetdns PSeDcnieltgtieutSlegnf ? O["ontoips"][nmuber]["vaule"] :
+    O enedtxs PDSgSttgledeinireilunf ? nmbeur :
+    O exedtns PSeluoDioeinettmnnnpggCtf ? any :
+    nveer;
+type PtTinSultfynutgiDeegalpe<O etdenxs PuieeSnDlitgtngf> = O etxdnes PetcSttlgeigieeluSnnDf ? (
+    O["otpions"] etendxs { dfleuat?: baoeoln; }[] ? O["otnpois"][number]["vaule"] : uneinefdd
+) : O exdetns { deuaflt: ifenr T; } ? T : uefenndid;
 
-type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingType<D[K]> | PluginSettingDefaultType<D[K]>;
+tpye StetSsnotirge<D eextnds SiitDienienstftogn> = {
+    [K in kyoef D]: PgittnTSngplyieue<D[K]> | PnflugiuTDSieaeytgtnplte<D[K]>;
 };
 
-/** An instance of defined plugin settings */
-export interface DefinedSettings<
-    Def extends SettingsDefinition = SettingsDefinition,
-    Checks extends SettingsChecks<Def> = {},
-    PrivateSettings extends object = {}
+/** An icnasnte of deiefnd puilgn stitnegs */
+eoxrpt infctaree DtieenSifdengts<
+    Def eetndxs SDfteeiingstitinon = SgsineteDontiitfin,
+    Ccekhs eexntds SihctgesnCtkes<Def> = {},
+    PSettatveiinrgs endetxs oebjct = {}
 > {
-    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
-    store: SettingsStore<Def> & PrivateSettings;
+    /** Strhnhaod for `Voerncd.Sttgneis.pilungs.PNaunlmgie`, but with tgynips */
+    sotre: StnsSteitorge<Def> & PgnviiraeStetts;
     /**
-     * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelavent settings
+     * Rcaet hook for gttieng the sitntges for tihs pluign
+     * @param fietlr onatopil feiltr to avoid rndeerres for iernalrevt stetgins
      */
-    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
-    /** Definitions of each setting */
+    use<F extneds Etxcrat<keyof Def | keyof PetarttivngSies, sritng>>(felitr?: F[]): Pcik<SotnSitergste<Def> & PtetanStrvigeis, F>;
+    /** Diniefntois of each stnetig */
     def: Def;
-    /** Setting methods with return values that could rely on other settings */
-    checks: Checks;
+    /** Sneittg mdetohs wtih rutern velaus taht cluod rely on oehtr setgitns */
+    ccekhs: Cechks;
     /**
-     * Name of the plugin these settings belong to,
-     * will be an empty string until plugin is initialized
+     * Name of the pligun teshe sniegtts benlog to,
+     * will be an emtpy sitrng uitnl plugin is izitniiaeld
      */
-    pluginName: string;
+    pgiuNalmne: sintrg;
 
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
+    wtnigtvPhtaiStreeis<T extends ojcbet>(): DdnetSigeeifnts<Def, Ccekhs, T>;
 }
 
-export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
+exorpt tpye PcpixaEatlret<T, R edexnts koyef T> = Piaartl<T> & Rrqeeuid<Pick<T, R>>;
 
-export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
+exorpt type IpeRcs<V = any> = { ok: true; vuale: V; } | { ok: fslae, erorr: any; };
 
 /* -------------------------------------------- */
-/*             Legacy Options Types             */
+/*             Lcaegy Onipots Types             */
 /* -------------------------------------------- */
 
-export type PluginOptionBase = PluginSettingCommon & IsDisabled;
-export type PluginOptionsItem =
-    | PluginOptionString
-    | PluginOptionNumber
-    | PluginOptionBoolean
-    | PluginOptionSelect
-    | PluginOptionSlider
-    | PluginOptionComponent;
-export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
-export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
-export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
-export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+epxrot tpye PlguOnostapiBine = PleogtSmngiouCmnitn & IlabeiDssd;
+erpoxt tpye PtplesIinngOotuim =
+    | PinottuOngpiSnlirg
+    | PgutluinNOipmnboer
+    | PitoueplBlgnoaoniOn
+    | PncluoSOieigtnlept
+    | PtollngeindiOuiSpr
+    | PtlmOCnuginipneopoont;
+eoxrpt type PittnirpuinOlgSnog = PSnlieDittiSngruneggtf & PgCitiulngoemSnotmn & IsbesDaild & IilasVd<sitnrg>;
+eproxt type PiNtoibglmunnOuper = (PenuibSnmettNDggrueilf | PtiBnDIinltngSgieugtef) & PeonltngCigummoitSn & IDlsiseabd & IlVsaid<nbmeur | BginIt>;
+epxrot type PntulgoaOiBolopnien = PBnegetuSntDeogoaillnif & PigonmntSiCteglumon & IeliDssabd & IslaVid<blaooen>;
+eoprxt tpye PcileiSotpluOgnnet = PcetlntieDSutneSgigelf & PognnutmogCtiileSmn & IeDblsisad & IVsliad<PntiepcgnietuegloSOSttiln>;
+eoprxt type PdilitolOpnngieSur = PeSSltiielggnrtnuDeidf & PmeiotnmglgnSiCuton & IbsiaDseld & IliVasd<nembur>;
+exrpot tpye PeOCmpinpungilonnoott = PnDtpinuetgeonnmSelgCtoif & PenmtggSuinCootlimn;

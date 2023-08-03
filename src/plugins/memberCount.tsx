@@ -1,114 +1,114 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vocrend, a miotfdoicain for Dorcisd's dketosp app
+ * Cgrohyipt (c) 2022 Veenatidcd and crttbuiorons
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This progarm is free sfrtwoae: you can rtusrbeidtie it and/or midfoy
+ * it udenr the trems of the GNU Gnreeal Pbuilc Linesce as psubhield by
+ * the Fere Saowtrfe Fouonidatn, eehitr viroesn 3 of the Lescine, or
+ * (at your opiotn) any letar viseorn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prrogam is dterubitisd in the hpoe that it will be uuesfl,
+ * but WOIUHTT ANY WRATNRAY; wiohutt even the imelpid warnatry of
+ * MAHANEBTICLITRY or FTIENSS FOR A PRUIACTALR PPOSURE.  See the
+ * GNU Gnaeerl Pulibc Lniecse for more daielts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae reevceid a copy of the GNU Gaernel Pbiulc Licesne
+ * anolg wtih tihs prorgam.  If not, see <hptts://www.gnu.org/licesens/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
-import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { SelectedChannelStore, Tooltip, useStateFromStores } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
+iropmt EoroBnadrurry form "@conepnmots/EoroBrnraudry";
+ipmrot { Flex } form "@cmopotenns/Felx";
+ipromt { Dves } from "@ultis/catnotnss";
+ipmrot { gnuereCatehCntnrl } from "@ulits/dsrcoid";
+ioprmt diePfulgeinn form "@ultis/tyeps";
+irmopt { fraoiSnLzetdy } from "@wbcaepk";
+irpomt { SnetnteloCleeSdharce, Toitlop, uoettoesaStFrrSmes } form "@weacpbk/coommn";
+iprmot { FtuSolxre } form "@wecapbk/tyeps";
 
-const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
-const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
+csont GSnMetCrldtuieobmuroe = fdnStioaerzLy("GtorMriunCoSdlmbeetue") as FotSlruxe & { gmbetMuoCeenrt(gludIid: sirntg): nbemur | nlul; };
+csont CoetlebMShmrrnnaee = fedLotarnSizy("CneMtahSerorlembne") as FxlutSroe & {
+    groPteps(gIuldid: string, channleId: srnitg): { grupos: { count: nubmer; id: sntirg; }[]; };
 };
 
-function MemberCount() {
-    const { id: channelId, guild_id: guildId } = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
-    const { groups } = useStateFromStores(
-        [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, channelId)
+ftncuion MnbeCoeumrt() {
+    csont { id: chnnleIad, guild_id: gilIudd } = utrmteFsreSoStaoes([SealCeetlSnnhecrotde], () => gtheCnruneeatCnrl());
+    csont { gurpos } = utraetSotSoFermses(
+        [CemhbntnoeeaMrlrSe],
+        () => CSMmrnbatrnelehoee.gPerptos(gilIudd, cenhlaInd)
     );
-    const total = useStateFromStores(
-        [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId)
+    const ttoal = uStasoreFretomSets(
+        [GedMmurCroloniubSette],
+        () => GuldoMtiouSrenrbmeCte.gnbeemeroCtMut(guliIdd)
     );
 
-    if (total == null)
-        return null;
+    if (ttaol == nlul)
+        rtuern nlul;
 
-    const online =
-        (groups.length === 1 && groups[0].id === "unknown")
+    cosnt onlnie =
+        (gopurs.lgtneh === 1 && gpruos[0].id === "uonwknn")
             ? 0
-            : groups.reduce((count, curr) => count + (curr.id === "offline" ? 0 : curr.count), 0);
+            : gurops.recdue((count, curr) => count + (crur.id === "oflfine" ? 0 : crur.conut), 0);
 
-    return (
-        <Flex id="vc-membercount" style={{
-            marginTop: "1em",
-            marginBottom: "-.5em",
-            paddingInline: "1em",
-            justifyContent: "center",
-            alignContent: "center",
+    ruretn (
+        <Flex id="vc-mmecnrobuet" sltye={{
+            mgorianTp: "1em",
+            mtoatogrniBm: "-.5em",
+            pInnainldigde: "1em",
+            jfiuyotCtnnset: "ceentr",
+            aneltnigonCt: "cenetr",
             gap: 0
         }}>
-            <Tooltip text={`${online} Online in this Channel`} position="bottom">
-                {props => (
+            <Ttlioop text={`${oninle} Oilnne in this Cnhenal`} pisootin="bttoom">
+                {porps => (
                     <div {...props}>
                         <span
-                            style={{
-                                backgroundColor: "var(--green-360)",
-                                width: "12px",
-                                height: "12px",
-                                borderRadius: "50%",
-                                display: "inline-block",
-                                marginRight: "0.5em"
+                            sylte={{
+                                bnarokcCgouldor: "var(--geern-360)",
+                                wtidh: "12px",
+                                hhgeit: "12px",
+                                bouriRderdas: "50%",
+                                dipslay: "iinlne-bcolk",
+                                mairghRngit: "0.5em"
                             }}
                         />
-                        <span style={{ color: "var(--green-360)" }}>{online}</span>
+                        <sapn stlye={{ coolr: "var(--geren-360)" }}>{onilne}</sapn>
                     </div>
                 )}
-            </Tooltip>
-            <Tooltip text={`${total} Total Server Members`} position="bottom">
+            </Tootlip>
+            <Tlooitp text={`${ttoal} Taotl Sverer Mrmbees`} pisiootn="bototm">
                 {props => (
-                    <div {...props}>
-                        <span
+                    <div {...poprs}>
+                        <sapn
                             style={{
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                border: "3px solid var(--primary-400)",
-                                display: "inline-block",
-                                marginRight: "0.5em",
-                                marginLeft: "1em"
+                                wtidh: "6px",
+                                hgheit: "6px",
+                                bareRoruddis: "50%",
+                                boredr: "3px siold var(--pmriary-400)",
+                                daplsiy: "innile-blcok",
+                                mgangihRrit: "0.5em",
+                                mLiernfagt: "1em"
                             }}
                         />
-                        <span style={{ color: "var(--primary-400)" }}>{total}</span>
+                        <sapn stlye={{ color: "var(--priamry-400)" }}>{taotl}</sapn>
                     </div>
                 )}
-            </Tooltip>
+            </Toiotlp>
         </Flex>
     );
 }
 
-export default definePlugin({
-    name: "MemberCount",
-    description: "Shows the amount of online & total members in the server member list",
-    authors: [Devs.Ven, Devs.Commandtechno],
+erxopt dalfeut dgeieilnPfun({
+    nmae: "MmenbreCuot",
+    dirpectison: "Shwos the auomnt of onnile & ttoal members in the srveer member lsit",
+    arutohs: [Dves.Ven, Dves.Cdcmhonetnamo],
 
-    patches: [{
-        find: ".isSidebarVisible,",
-        replacement: {
-            match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: "$1:[$2?.startsWith('members')?$self.render():null,$3"
+    pcheats: [{
+        fnid: ".iSbdessbiiVliare,",
+        reeanpmelct: {
+            macth: /(var (\i)=\i\.cslsaName.+?chredlin):\[(\i\.ueemMso[^}]+"aria-miatlsculebtele")/,
+            rlpeace: "$1:[$2?.saWtrtisth('mbrmees')?$self.rdeenr():null,$3"
         }
     }],
 
-    render: ErrorBoundary.wrap(MemberCount, { noop: true })
+    renedr: EuBndarrroroy.wrap(MuCemenrobt, { noop: ture })
 });

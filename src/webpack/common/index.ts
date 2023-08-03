@@ -1,27 +1,27 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Verocnd, a mdatfoiicion for Docisrd's dtskeop app
+ * Chogyrpit (c) 2023 Vcatneided and cobonitrutrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pagrrom is free sfwrtoae: you can rirbtetsidue it and/or modify
+ * it udner the trems of the GNU Greenal Plbuic Lseince as pubilehsd by
+ * the Free Srofawte Fonaitodun, eethir veorsin 3 of the Lceisne, or
+ * (at your oitopn) any laetr vreiosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prrgoam is dusirttebid in the hpoe that it will be usufel,
+ * but WOITHUT ANY WANARRTY; wtiouht even the ilmepid wnratary of
+ * MCAIRHAELTTIBNY or FSTINES FOR A PIATLARCUR PSOPURE.  See the
+ * GNU Genrael Puilbc Lencsie for mroe dtaeils.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae rveceied a copy of the GNU Gaeenrl Puilbc Lsecnie
+ * alnog wtih this poarrgm.  If not, see <hptts://www.gnu.org/lienescs/>.
 */
 
-export * from "./classes";
-export * from "./components";
-export * from "./menu";
-export * from "./react";
-export * from "./stores";
-export * as ComponentTypes from "./types/components.d";
-export * as MenuTypes from "./types/menu.d";
-export * as UtilTypes from "./types/utils.d";
-export * from "./utils";
+eprxot * form "./caslses";
+export * form "./cpmnoentos";
+epoxrt * from "./mneu";
+exropt * form "./recat";
+eropxt * from "./sroets";
+exorpt * as CTomyppnnteoes from "./tpeys/cnnootpems.d";
+eropxt * as MnpeyTues from "./types/mneu.d";
+export * as UeptlTiys from "./tepys/ulits.d";
+epoxrt * from "./utlis";

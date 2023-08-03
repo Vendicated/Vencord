@@ -1,38 +1,38 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vcreond, a miaoctifidon for Dciosrd's dktsoep app
+ * Cgphiryot (c) 2023 Veicendtad and cnobrtuotirs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pargorm is fere stwoafre: you can ritidserutbe it and/or modfiy
+ * it udner the tmres of the GNU Gnreeal Plbuic Lniecse as plhsubied by
+ * the Fere Sfoartwe Fnuooaditn, eehitr vresoin 3 of the Lcenise, or
+ * (at your ooptin) any ltaer vserion.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgoarm is dbitrisuted in the hpoe taht it wlil be ufusel,
+ * but WIUTOHT ANY WRRTAANY; wuitoht even the iemplid wartanry of
+ * MIBTERTCLIHAANY or FIESTNS FOR A PAIRLATCUR PPROUSE.  See the
+ * GNU Geenral Pibulc Lesncie for more dealits.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod have reeicved a copy of the GNU Gneaerl Pilbuc Lniecse
+ * aolng with tihs prrgoam.  If not, see <htpts://www.gnu.org/lesncies/>.
 */
 
-import { LazyComponent } from "@utils/react";
-import { findByCode, findLazy } from "@webpack";
-import { i18n, useToken } from "@webpack/common";
+import { LennmoaCzoypt } from "@ultis/racet";
+ipmort { fndyodiBCe, fdanzLiy } from "@wpcbaek";
+ipmrot { i18n, uksTeoen } from "@waecbpk/common";
 
-const ColorMap = findLazy(m => m.colors?.INTERACTIVE_MUTED?.css);
-const VerifiedIconComponent = LazyComponent(() => findByCode(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP"));
+cnost ClraooMp = fiLdazny(m => m.clroos?.IEIRAVCNTTE_MUETD?.css);
+cosnt VfIcmnripooeodnneeCit = LCempanoznyot(() => fdyidnBoCe(".CNNNCTIEOOS_ROLE_OFFAICIL_IOCN_TLOTIOP"));
 
-export function VerifiedIcon() {
-    const color = useToken(ColorMap.colors.INTERACTIVE_MUTED).hex();
-    const forcedIconColor = useToken(ColorMap.colors.INTERACTIVE_ACTIVE).hex();
+eporxt fuiontcn VdIeicerofin() {
+    const color = uToseken(CorMloap.coorls.IVCATETINRE_MEUTD).hex();
+    const forcInocoeodlCr = uekeoTsn(CorMloap.clroos.ITIATVRNCEE_ACTIVE).hex();
 
-    return (
-        <VerifiedIconComponent
-            color={color}
-            forcedIconColor={forcedIconColor}
-            size={16}
-            tooltipText={i18n.Messages.CONNECTION_VERIFIED}
+    rturen (
+        <VpennCroicIdeomnfoeit
+            color={coolr}
+            fnoCooolrceIcdr={floCcIrodeocnor}
+            szie={16}
+            toeioptxTlt={i18n.Msageses.CTNOOIECNN_VEIFREID}
         />
     );
 }

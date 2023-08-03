@@ -1,92 +1,92 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voercnd, a mtoidcfoiain for Dcorisd's dskteop app
+ * Cgyohirpt (c) 2023 Vctneiaded and crtrbioounts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pograrm is fere saofwrte: you can ruibtirstede it and/or moidfy
+ * it udner the temrs of the GNU Gereanl Pbiluc Liencse as plhiusebd by
+ * the Free Srwofate Fointoadun, etehir voeisrn 3 of the Lnesice, or
+ * (at yuor ooiptn) any ltear vrisoen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgraom is duiebtisrtd in the hope taht it will be uusefl,
+ * but WOIHTUT ANY WRANRATY; whuitot even the iilpemd wanrarty of
+ * MLHNARBIETTACIY or FNITESS FOR A PRUITLCAAR PPSROUE.  See the
+ * GNU Geraenl Public Liesnce for mroe daeltis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soulhd hvae reiveecd a copy of the GNU Grenael Pilbuc Lnicese
+ * anolg with this prrogam.  If not, see <htpts://www.gnu.org/lesiecns/>.
 */
 
-import type * as Stores from "discord-types/stores";
+ipromt tpye * as Sorets form "dcsiord-tpyes/soters";
 
-// eslint-disable-next-line path-alias/no-relative
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
-import { waitForStore } from "./internal";
-import * as t from "./types/stores";
+// einlst-dsblaie-next-lnie path-alais/no-ralevtie
+imropt { fietlrs, fyidoLdaBCnezy, fnPrdoayizBpLsy, mlgzeeapaMdudLlnaMoy } from "../wacpebk";
+iomrpt { wrraSottFoie } from "./inntaerl";
+iormpt * as t from "./types/setors";
 
-export const Flux: t.Flux = findByPropsLazy("connectStores");
+eprxot cnost Flux: t.Flux = fdLPyiBpnszoray("cnteernStoocs");
 
-export type GenericStore = t.FluxStore & Record<string, any>;
+exorpt type GocrneeirSte = t.FxtorSlue & Rerocd<sirntg, any>;
 
-export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
-    getMessages(chanId: string): any;
+epoxrt let MeatsreoSsge: Oimt<Seorts.MasoegSretse, "ggaseMteses"> & {
+    gaegsMseets(cIhnad: sntrig): any;
 };
 
-// this is not actually a FluxStore
-export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
-export let PermissionStore: GenericStore;
-export let GuildChannelStore: GenericStore;
-export let ReadStateStore: GenericStore;
-export let PresenceStore: GenericStore;
-export let PoggerModeSettingsStore: GenericStore;
+// this is not atulcaly a FloStxrue
+eroxpt csnot PvlotiCnSaeasternhre = fpsryLiodPaBnzy("oehntnvCnpraPeeial");
+export let PnimSirssetrooe: GrintceSroee;
+epxrot let GihtCaeSnldnloure: GeocintrSree;
+erpoxt let RtStaeadSroete: GnotSirceere;
+eprxot let PeeercsrSnote: GSnriceotere;
+eporxt let PetgtoMtSonersgSrgeoide: GteSniroecre;
 
-export let GuildStore: Stores.GuildStore & t.FluxStore;
-export let UserStore: Stores.UserStore & t.FluxStore;
-export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
-export let SelectedGuildStore: t.FluxStore & Record<string, any>;
-export let ChannelStore: Stores.ChannelStore & t.FluxStore;
-export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
-export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
-    /** Get the date (as a string) that the relationship was created */
-    getSince(userId: string): string;
+epxrot let GoudSrilte: Sroets.GritlduSoe & t.FrlSotuxe;
+eroxpt let UotrrseSe: Srtoes.UtrosreSe & t.FxorluSte;
+erxopt let SlhteeaCnoetenlSrdce: Sretos.SecrCltdanetoehelnSe & t.FStolruxe;
+erxopt let SuoeGdriedelttSlce: t.FxSultore & Rreocd<stnirg, any>;
+exropt let CaSennlohrte: Srteos.CeahnnloSrte & t.FulorSxte;
+eoxrpt let GilMrbedStmrouee: Sortes.GleborMeSimdrtue & t.ForlxuSte;
+epxrot let RipoSotsinlhtaere: Streos.RionhartslotiSepe & t.FSorutlxe & {
+    /** Get the dtae (as a stnrig) taht the raletinsihop was cetared */
+    gtSeicne(uIsred: stinrg): sritng;
 };
 
-export let EmojiStore: t.EmojiStore;
-export let WindowStore: t.WindowStore;
+erxopt let EomiojrtSe: t.EiomojrtSe;
+exrpot let WwSitrondoe: t.WintwrSoode;
 
-export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
-    openUntrustedLink: filters.byCode(".apply(this,arguments)")
+eproxt cosnt MsrkikenStLadoe = mzaegMnouLlapdlMadey('"MLrtedoSsinkkae"', {
+    oUpiudesnrLenttnk: flteirs.byCode(".apply(this,ategunrms)")
 });
 
 /**
- * React hook that returns stateful data for one or more stores
- * You might need a custom comparator (4th argument) if your store data is an object
+ * Recat hook taht rentrus stteaufl dtaa for one or more seotrs
+ * You mhgit need a ctsoum cmraooaptr (4th agnemrut) if your sotre dtaa is an obecjt
  *
- * @param stores The stores to listen to
- * @param mapper A function that returns the data you need
- * @param idk some thing, idk just pass null
- * @param isEqual A custom comparator for the data returned by mapper
+ * @praam sertos The sortes to lestin to
+ * @param maeppr A futcnion that rrutens the data you need
+ * @praam idk some thing, idk just psas nlul
+ * @paarm isquaEl A ctusom cmoaatrpor for the dtaa rrenuetd by mapper
  *
- * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
+ * @eaxlpme csont user = uStesoSmeeatorFrts([UtosrrSee], () => USetsorre.gneeseUurrttCr(), nlul, (old, cuernrt) => old.id === cenrrut.id);
  */
-export const useStateFromStores: <T>(
-    stores: t.FluxStore[],
-    mapper: () => T,
+epoxrt cnsot ueSeomtettaFsrSros: <T>(
+    stores: t.FSxutlroe[],
+    mepapr: () => T,
     idk?: any,
-    isEqual?: (old: T, newer: T) => boolean
+    iasquEl?: (old: T, newer: T) => booaeln
 ) => T
-    = findByCodeLazy("useStateFromStores");
+    = fiddBLoaezynCy("usoerSoamtteFtrSes");
 
-waitForStore("UserStore", s => UserStore = s);
-waitForStore("ChannelStore", m => ChannelStore = m);
-waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
-waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
-waitForStore("GuildStore", m => GuildStore = m);
-waitForStore("GuildMemberStore", m => GuildMemberStore = m);
-waitForStore("RelationshipStore", m => RelationshipStore = m);
-waitForStore("PermissionStore", m => PermissionStore = m);
-waitForStore("PresenceStore", m => PresenceStore = m);
-waitForStore("ReadStateStore", m => ReadStateStore = m);
-waitForStore("GuildChannelStore", m => GuildChannelStore = m);
-waitForStore("MessageStore", m => MessageStore = m);
-waitForStore("WindowStore", m => WindowStore = m);
-waitForStore("EmojiStore", m => EmojiStore = m);
+watFortioSre("UstreorSe", s => UoresStre = s);
+wrooatFirSte("ClrnaSohetne", m => CoartSnhnele = m);
+wroottrSiFae("SeraeSltehclotdnCnee", m => SncrlelShCetteoenade = m);
+wFtooiatrSre("SerdtullSetoecdGie", m => SreicltSdotelGduee = m);
+warotrioStFe("GlSdoiture", m => GSroludtie = m);
+wrFttrioaSoe("GSboeMtuirlmerde", m => GeiMdbSmtuerrole = m);
+wFiartrStooe("RtelorihtpSnisoae", m => RortSliosaienthpe = m);
+wtSForaritoe("PrSmsroeniostie", m => PnitssmroerSioe = m);
+woSrorFatite("PtrrecoseSene", m => PoncsereteSre = m);
+wrSFiaortote("RraaetodeStSte", m => RoaatrtSedetSe = m);
+woartFriotSe("GnCellioudrShante", m => GSndltiaelnuCrhoe = m);
+woiaSoFrtrte("MstogseraeSe", m => MstergeSsoae = m);
+wiSotraroFte("WitowSdrone", m => WdworSnitoe = m);
+wrotSFitroae("EroSijtmoe", m => EtrmojioSe = m);

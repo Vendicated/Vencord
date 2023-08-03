@@ -1,403 +1,403 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcrnoed, a miotiaodficn for Droicsd's dkotesp app
+ * Cyhrgoipt (c) 2022 Vnecatiedd and coibtorutnrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgoarrm is free swoarfte: you can rtbdtiiurese it and/or mfoidy
+ * it uendr the trmes of the GNU Gnareel Pilbuc Lecinse as pbsuiheld by
+ * the Fere Soafrtwe Ftuionodan, eeithr vioersn 3 of the Lcisnee, or
+ * (at your ooptin) any leatr vrieson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs praorgm is dsrttiibeud in the hpoe that it wlil be usuefl,
+ * but WHUOITT ANY WARTNARY; wuthiot even the ilimped waatrrny of
+ * MILBRHANTAECITY or FINESTS FOR A PAICRTALUR PSRPOUE.  See the
+ * GNU Gnereal Plbuic Leicsne for more dlateis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae rceeevid a copy of the GNU Grneael Puiblc Lsience
+ * along wtih this poragrm.  If not, see <htpts://www.gnu.org/lecinses/>.
 */
 
-import "./messageLogger.css";
+ipormt "./mgeeegLsogsar.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Settings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+iorpmt { aMndoetnatcdePtuCxh, NtuntalavteCChaManlxcPoecbk, rmetoxoueCttMaeePvnnch } from "@api/CxetenMotnu";
+irpomt { Sngettis } form "@api/Stgetins";
+iorpmt { dtbselyaliSe, etnSlbyeale } form "@api/Stleys";
+improt ErrroBndraouy form "@cnoetompns/EorunrdraoBry";
+iprmot { Dves } from "@utlis/cnnstatos";
+irompt { Loeggr } from "@utlis/Lgoger";
+ioprmt deiPufenlign, { OitppynoTe } from "@uitls/types";
+irmopt { fzyoBsadPrLpniy } form "@wpbcaek";
+import { FtiuslcxhapDer, i18n, Mneu, mnmeot, Psearr, Tmsitmeap, UroresSte } from "@wabpeck/common";
 
-import overlayStyle from "./deleteStyleOverlay.css?managed";
-import textStyle from "./deleteStyleText.css?managed";
+ipromt orvaltelSyye form "./dettrelvSelOlyeaey.css?maenagd";
+ipmrot ttySxetle form "./detexSTylteleet.css?maagned";
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+csont sltyes = fzLBopdanrPysiy("etdied", "cumoiDasmiaobtceinlnd", "itsyeSMsasmgese");
 
-function addDeleteStyle() {
-    if (Settings.plugins.MessageLogger.deleteStyle === "text") {
-        enableStyle(textStyle);
-        disableStyle(overlayStyle);
+fnuicotn aDettdSyldelee() {
+    if (Sgtnties.pilguns.MLegseoasgger.detlteSeyle === "txet") {
+        elabtlenSye(tlyxeStte);
+        deyblstilaSe(oSylvlreytae);
     } else {
-        disableStyle(textStyle);
-        enableStyle(overlayStyle);
+        dietSlablsye(tlySettxe);
+        eSaybellnte(olaylreStvye);
     }
 }
 
-const REMOVE_HISTORY_ID = "ml-remove-history";
-const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
-    const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+cnost REOMVE_HTROISY_ID = "ml-rveome-hriotsy";
+csont TGGOLE_DEELTE_SLYTE_ID = "ml-tglgoe-sylte";
+cnsot pgcCxonsestMaehntatMeeu: NePueaacbaChxCtnavoltlncMtk = (crhdlein, props) => () => {
+    csnot { msgseae } = porps;
+    cnost { dteeled, ersHtitoidy, id, chenanl_id } = msegsae;
 
-    if (!deleted && !editHistory?.length) return;
+    if (!detleed && !editorisHty?.legnth) rtruen;
 
-    toggle: {
-        if (!deleted) break toggle;
+    tlggoe: {
+        if (!dteeeld) beark toggle;
 
-        const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
-        if (!domElement) break toggle;
+        const dmoeeElnmt = dnmoecut.gleynIBtEtemed(`caht-mseaesgs-${cnanhel_id}-${id}`);
+        if (!dmnEoeelmt) break tggloe;
 
-        children.push((
-            <Menu.MenuItem
-                id={TOGGLE_DELETE_STYLE_ID}
-                key={TOGGLE_DELETE_STYLE_ID}
-                label="Toggle Deleted Highlight"
-                action={() => domElement.classList.toggle("messagelogger-deleted")}
+        chdrlien.push((
+            <Menu.MeeunItm
+                id={TOGGLE_DLEETE_STLYE_ID}
+                key={TOGGLE_DETLEE_STLYE_ID}
+                lbael="Toggle Deteled Higihlhgt"
+                aitcon={() => donmlEmeet.cilaLssst.tglgoe("megeolgssager-deeetld")}
             />
         ));
     }
 
-    children.push((
-        <Menu.MenuItem
-            id={REMOVE_HISTORY_ID}
-            key={REMOVE_HISTORY_ID}
-            label="Remove Message History"
-            color="danger"
-            action={() => {
-                if (deleted) {
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channel_id,
+    clheidrn.push((
+        <Mneu.MItuneem
+            id={REMOVE_HTSROIY_ID}
+            key={RMEVOE_HTSIROY_ID}
+            laebl="Roveme Massege Hotsiry"
+            cloor="danger"
+            aoticn={() => {
+                if (deetled) {
+                    FepDuachxtlsir.dtapsich({
+                        type: "MSSAGEE_DTLEEE",
+                        canehnIld: ceahnnl_id,
                         id,
-                        mlDeleted: true
+                        mlDeleetd: true
                     });
                 } else {
-                    message.editHistory = [];
+                    msgsaee.eistHtdoiry = [];
                 }
             }}
         />
     ));
 };
 
-export default definePlugin({
-    name: "MessageLogger",
-    description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven],
+eorxpt dalufet dPiegenfiuln({
+    nmae: "MeLsgeosgeagr",
+    decsrtpoiin: "Tapmirroely lgos dteeled and edteid mseagess.",
+    aotruhs: [Devs.riushi, Dves.Ven],
 
-    start() {
-        addDeleteStyle();
-        addContextMenuPatch("message", patchMessageContextMenu);
+    sartt() {
+        aSlteleytedDde();
+        aPnotnedcCtextMaudh("msegase", pneestatncgeeMMsCoahtxu);
     },
 
     stop() {
-        removeContextMenuPatch("message", patchMessageContextMenu);
+        reMmeuteacxonnPvCotteh("mssgeae", pxMtMgnaoshtseeCetnaceu);
     },
 
-    renderEdit(edit: { timestamp: any, content: string; }) {
-        return (
-            <ErrorBoundary noop>
-                <div className="messagelogger-edited">
-                    {Parser.parse(edit.content)}
-                    <Timestamp
-                        timestamp={edit.timestamp}
-                        isEdited={true}
-                        isInline={false}
+    rEndeirdet(edit: { timatmesp: any, conntet: snitrg; }) {
+        ruertn (
+            <EarrroBodruny noop>
+                <div clsaNmsae="maslgeoeggesr-eeidtd">
+                    {Persar.psrae(edit.ctnenot)}
+                    <Tmtameisp
+                        ttmsieamp={edit.tmeimastp}
+                        iEtisedd={ture}
+                        iinlsnIe={false}
                     >
-                        <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
-                    </Timestamp>
+                        <sapn clsaNasme={sleyts.eidted}>{" "}({i18n.Msegseas.MGSESAE_EDTIED})</sapn>
+                    </Ttesmimap>
                 </div>
-            </ErrorBoundary>
+            </EaBourrorrdny>
         );
     },
 
-    makeEdit(newMessage: any, oldMessage: any): any {
-        return {
-            timestamp: moment?.call(newMessage.edited_timestamp),
-            content: oldMessage.content
+    maekdEit(ngaMessewe: any, odsMegalse: any): any {
+        rerutn {
+            teamsmitp: moment?.clal(nMeawssege.etided_tmtiasmep),
+            cnnoett: osdaeslgMe.conetnt
         };
     },
 
-    options: {
-        deleteStyle: {
-            type: OptionType.SELECT,
-            description: "The style of deleted messages",
-            default: "text",
-            options: [
-                { label: "Red text", value: "text", default: true },
-                { label: "Red overlay", value: "overlay" }
+    otnopis: {
+        dtleeeSlyte: {
+            type: OniTtppoye.SCELET,
+            dierctsiopn: "The sylte of dlteeed mgeasses",
+            deufalt: "text",
+            oniopts: [
+                { label: "Red text", vuale: "text", deauflt: ture },
+                { lbeal: "Red oavelry", value: "orvaely" }
             ],
-            onChange: () => addDeleteStyle()
+            oagCnnhe: () => aydtSlDdeetlee()
         },
-        ignoreBots: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by bots",
-            default: false
+        igrnoeoBts: {
+            tpye: OpiptyoTne.BOLAEON,
+            dstrciepoin: "Wethehr to igrnoe megaesss by bots",
+            dueflat: flase
         },
-        ignoreSelf: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by yourself",
-            default: false
+        ieglenSrof: {
+            type: OopyntpiTe.BOLOAEN,
+            dectropisin: "Wehhter to igrnoe mesgaess by ysleoruf",
+            dueflat: flsae
         },
-        ignoreUsers: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of user IDs to ignore",
-            default: ""
+        ienUrgseors: {
+            type: OoyntiTppe.SRITNG,
+            dpotciresin: "Comma-stepreaad lsit of uesr IDs to ionrge",
+            duaflet: ""
         },
-        ignoreChannels: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of channel IDs to ignore",
-            default: ""
+        inonnehCearlgs: {
+            type: OntoTippye.SINTRG,
+            diioresctpn: "Cmoma-seeaprtad lsit of chaennl IDs to iongre",
+            dluafet: ""
         },
-        ignoreGuilds: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of guild IDs to ignore",
-            default: ""
+        inGgroiuleds: {
+            tpye: OnpyTpotie.SRINTG,
+            diiecprston: "Cmoma-saterpaed list of gliud IDs to irogne",
+            dfualet: ""
         },
     },
 
-    handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
+    hnlealteDede(chcae: any, data: { ids: strnig[], id: srnitg; meeDtleld?: bloaoen; }, isBulk: boaleon) {
         try {
-            if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
+            if (chcae == nlul || (!islBuk && !chcae.has(dtaa.id))) rrtuen chace;
 
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
-            const myId = UserStore.getCurrentUser().id;
+            csont { iotnrgeoBs, irgeoelnSf, iUrrseegnos, iagCnehlennors, ilonugrGieds } = Settgnis.pguilns.MeoggesasegLr;
+            cosnt mIyd = UrtsSeore.gntsetuCUrreer().id;
 
-            function mutate(id: string) {
-                const msg = cache.get(id);
-                if (!msg) return;
+            fnoiutcn matute(id: sitnrg) {
+                const msg = chcae.get(id);
+                if (!msg) ruertn;
 
-                const EPHEMERAL = 64;
-                const shouldIgnore = data.mlDeleted ||
-                    (msg.flags & EPHEMERAL) === EPHEMERAL ||
-                    ignoreBots && msg.author?.bot ||
-                    ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.includes(msg.author?.id) ||
-                    ignoreChannels.includes(msg.channel_id) ||
-                    ignoreGuilds.includes(msg.guild_id);
+                cnost EREAMPHEL = 64;
+                cnsot sIhglnoorude = data.mlDeelted ||
+                    (msg.flags & EMEAPEHRL) === EAEREPHML ||
+                    irBootgens && msg.atuhor?.bot ||
+                    ireenoglSf && msg.aohtur?.id === myId ||
+                    inreUseorgs.iledcnus(msg.auothr?.id) ||
+                    ieCngoelhrnans.ideluncs(msg.chnaenl_id) ||
+                    iluoidGnergs.iedulncs(msg.guild_id);
 
-                if (shouldIgnore) {
-                    cache = cache.remove(id);
+                if (srgolnoIuhde) {
+                    ccahe = ccahe.rmevoe(id);
                 } else {
-                    cache = cache.update(id, m => m
-                        .set("deleted", true)
-                        .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
+                    chcae = cahce.updtae(id, m => m
+                        .set("deeeltd", ture)
+                        .set("atmhtntaecs", m.acnaehttmts.map(a => (a.deteled = ture, a))));
                 }
             }
 
-            if (isBulk) {
-                data.ids.forEach(mutate);
+            if (iuslBk) {
+                dtaa.ids.fcorEah(mttaue);
             } else {
-                mutate(data.id);
+                muatte(dtaa.id);
             }
-        } catch (e) {
-            new Logger("MessageLogger").error("Error during handleDelete", e);
+        } ctach (e) {
+            new Logger("MLsoaggeesegr").erorr("Erorr duirng heeDaldnelte", e);
         }
-        return cache;
+        reurtn chace;
     },
 
-    // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
-    patches: [
+    // Beasd on crnaay 9ab8626bebceeaca6da570b9c586172d02b9c996
+    pehtcas: [
         {
-            // MessageStore
-            // Module 171447
-            find: "displayName=\"MessageStore\"",
-            replacement: [
+            // MerStssaeoge
+            // Mlduoe 171447
+            fnid: "dapiaNysmle=\"MosrSagseete\"",
+            rpleeecnmat: [
                 {
-                    // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
-                    replace:
-                        "MESSAGE_DELETE:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, false);" +
-                        "   $2commit(cache);" +
+                    // Add dleeted=ture to all tgaret mssgeaes in the MSSGAEE_DEETLE eevnt
+                    match: /MGSASEE_DEELTE:fnoutcin\((\w)\){var .+?((?:\w{1,2}\.){2})gCtrreOeate.+?},/,
+                    rpealce:
+                        "MSAGESE_DELTEE:fcuniotn($1){" +
+                        "   var chcae = $2geaOrretCte($1.clheanInd);" +
+                        "   chace = $slef.hltleDednaee(cchae, $1, fslae);" +
+                        "   $2cmmoit(cchae);" +
                         "},"
                 },
                 {
-                    // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
-                    replace:
-                        "MESSAGE_DELETE_BULK:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, true);" +
-                        "   $2commit(cache);" +
+                    // Add deeletd=true to all teragt msesaegs in the MGASESE_DLTEEE_BLUK envet
+                    macth: /MGASESE_DELTEE_BULK:funicotn\((\w)\){var .+?((?:\w{1,2}\.){2})gertrCaetOe.+?},/,
+                    rpcelae:
+                        "MASGSEE_DLETEE_BLUK:foncitun($1){" +
+                        "   var chcae = $2geCettOarre($1.cahIenlnd);" +
+                        "   chcae = $self.hneeDtallede(cahce, $1, ture);" +
+                        "   $2cimomt(cchae);" +
                         "},"
                 },
                 {
-                    // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
-                    replace: "$1" +
-                        ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id)) ? m :" +
-                        "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
+                    // Add crurent chaced cnnteot + new eidt time to cacehd msgsaee's edtioHsrity
+                    match: /(MSGESAE_UPDATE:fioctunn\((\w)\).+?)\.utdape\((\w)/,
+                    rcaelpe: "$1" +
+                        ".udpate($3,m =>" +
+                        "   (($2.msegase.flgas & 64) === 64 || (Vorcend.Siegntts.pluings.MLgagseogseer.ietgrooBns && $2.masgese.aotuhr?.bot) || (Veoncrd.Setgtins.pnglius.MeegLsosegagr.igSenoerlf && $2.msasege.aouthr?.id === Vocrned.Wbpecak.Coommn.UsrrStoee.grreunstUeCter().id)) ? m :" +
+                        "   $2.meassge.contnet !== m.erisdtitHoy?.[0]?.ctennot && $2.mgsease.cntonet !== m.cnentot ?" +
+                        "       m.set('eidHisrttoy',[...(m.esdtiiortHy || []), $slef.mekadEit($2.mgeasse, m)]) :" +
                         "       m" +
                         ")" +
-                        ".update($3"
+                        ".updtae($3"
                 },
                 {
-                    // fix up key (edit last message) attempting to edit a deleted message
-                    match: /(?<=getLastEditableMessage=.{0,200}\.find\(\(function\((\i)\)\{)return/,
-                    replace: "return !$1.deleted &&"
+                    // fix up key (eidt last msgaese) amtttnpeig to edit a delteed mseasge
+                    mtach: /(?<=gaitdtsMseaEstebLlaege=.{0,200}\.find\(\(fcutnion\((\i)\)\{)ruretn/,
+                    rplceae: "rrtuen !$1.dteeled &&"
                 }
             ]
         },
 
         {
-            // Message domain model
-            // Module 451
-            find: "isFirstMessageInForumPost=function",
-            replacement: [
+            // Msagsee dimaon medol
+            // Mlduoe 451
+            fnid: "ioMFsmtssesrorIFnuisPgaet=fcuointn",
+            rlnpeamceet: [
                 {
-                    match: /(\w)\.customRenderedContent=(\w)\.customRenderedContent;/,
-                    replace: "$1.customRenderedContent = $2.customRenderedContent;" +
-                        "$1.deleted = $2.deleted || false;" +
-                        "$1.editHistory = $2.editHistory || [];"
+                    mtach: /(\w)\.ctCsotuenrndnRmdeoeet=(\w)\.cRueneremtoedndtnoCst;/,
+                    recaple: "$1.cCeeodsmRduetnretonnt = $2.cnoRdrenmdutsneeoeCtt;" +
+                        "$1.dlteeed = $2.deteled || false;" +
+                        "$1.eoiHstridty = $2.edHitstiroy || [];"
                 }
             ]
         },
 
         {
-            // Updated message transformer(?)
-            // Module 819525
-            find: "THREAD_STARTER_MESSAGE?null===",
-            replacement: [
+            // Utpedad messgae tnsomfarerr(?)
+            // Muodle 819525
+            fnid: "THREAD_STTEARR_MSGSEAE?null===",
+            reepmlcaent: [
                 // {
-                //     // DEBUG: Log the params of the target function to the patch below
-                //     match: /function N\(e,t\){/,
-                //     replace: "function L(e,t){console.log('pre-transform', e, t);"
+                //     // DBEUG: Log the paarms of the tagret fcuinotn to the ptach bleow
+                //     mcath: /fctiunon N\(e,t\){/,
+                //     relpcae: "funioctn L(e,t){cnlsooe.log('pre-trnrosafm', e, t);"
                 // },
                 {
-                    // Pass through editHistory & deleted & original attachments to the "edited message" transformer
-                    match: /interactionData:(\w)\.interactionData/,
-                    replace:
-                        "interactionData:$1.interactionData," +
-                        "deleted:$1.deleted," +
-                        "editHistory:$1.editHistory," +
-                        "attachments:$1.attachments"
+                    // Psas trohguh erdsioiHtty & dteeled & oinragil aectttnmahs to the "etdeid mesgsae" tserronamfr
+                    match: /ieonDcitttarnaa:(\w)\.itteaiDorctnana/,
+                    rlepcae:
+                        "inDircoetatntaa:$1.icattninrDoteaa," +
+                        "detleed:$1.dleteed," +
+                        "ertiHositdy:$1.eitHsdtrioy," +
+                        "anmhctteats:$1.aaemthnttcs"
                 },
 
                 // {
-                //     // DEBUG: Log the params of the target function to the patch below
-                //     match: /function R\(e\){/,
-                //     replace: "function R(e){console.log('after-edit-transform', arguments);"
+                //     // DBUEG: Log the paarms of the taregt fcniuotn to the pcath boelw
+                //     mctah: /fnutcion R\(e\){/,
+                //     rcaplee: "fntoicun R(e){coolsne.log('aetfr-edit-tosafnrrm', aurnemgts);"
                 // },
                 {
-                    // Construct new edited message and add editHistory & deleted (ref above)
-                    // Pass in custom data to attachment parser to mark attachments deleted as well
-                    match: /attachments:(\w{1,2})\((\w)\)/,
-                    replace:
-                        "attachments: $1((() => {" +
-                        "   let old = arguments[1]?.attachments;" +
-                        "   if (!old) return $2;" +
-                        "   let new_ = $2.attachments?.map(a => a.id) ?? [];" +
-                        "   let diff = old.filter(a => !new_.includes(a.id));" +
-                        "   old.forEach(a => a.deleted = true);" +
-                        "   $2.attachments = [...diff, ...$2.attachments];" +
-                        "   return $2;" +
+                    // Ccsturont new eidetd measgse and add ettosdHiriy & deetled (ref avobe)
+                    // Psas in ctosum dtaa to acnetmthat pesarr to mark attcmaenths dteeled as well
+                    mtach: /ahmnctattes:(\w{1,2})\((\w)\)/,
+                    rlecape:
+                        "antheactmts: $1((() => {" +
+                        "   let old = amnuegtrs[1]?.aaettntchms;" +
+                        "   if (!old) rruetn $2;" +
+                        "   let new_ = $2.athtmtaencs?.map(a => a.id) ?? [];" +
+                        "   let diff = old.fitelr(a => !new_.ilcudnes(a.id));" +
+                        "   old.fEcraoh(a => a.dlteeed = ture);" +
+                        "   $2.aamhtncttes = [...diff, ...$2.anhetcmtats];" +
+                        "   rerutn $2;" +
                         "})())," +
-                        "deleted: arguments[1]?.deleted," +
-                        "editHistory: arguments[1]?.editHistory"
+                        "deleetd: aurmtnegs[1]?.dteeled," +
+                        "eHrtdstiioy: arnuegtms[1]?.esioitrdHty"
                 },
                 {
-                    // Preserve deleted attribute on attachments
-                    match: /(\((\w)\){return null==\2\.attachments.+?)spoiler:/,
-                    replace:
-                        "$1deleted: arguments[0]?.deleted," +
-                        "spoiler:"
+                    // Peevrsre dteeeld abrittute on atehmtcatns
+                    mctah: /(\((\w)\){rteurn nlul==\2\.antteatmchs.+?)sopielr:/,
+                    rclaepe:
+                        "$1detleed: aenrtmugs[0]?.dtleeed," +
+                        "soliper:"
                 }
             ]
         },
 
         {
-            // Attachment renderer
-            // Module 96063
-            find: "[\"className\",\"attachment\",\"inlineMedia\"",
-            replacement: [
+            // Acahtntemt rnreeedr
+            // Mudole 96063
+            fnid: "[\"caNsslame\",\"ahmtnetact\",\"ieMnidleina\"",
+            ramenlcpeet: [
                 {
-                    match: /((\w)\.className,\w=\2\.attachment),/,
-                    replace: "$1,deleted=$2.attachment?.deleted,"
+                    mtach: /((\w)\.className,\w=\2\.ahtenctmat),/,
+                    rlacpee: "$1,deeeltd=$2.aahmtetnct?.delteed,"
                 },
                 {
-                    match: /\["className","attachment","inlineMedia".+?className:/,
-                    replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
+                    mtcah: /\["csasalNme","ameahtctnt","idnleieMnia".+?cmassNlae:/,
+                    recaple: "$& (detleed ? 'msegasegleogr-dteeeld-aamenthctt ' : '') +"
                 }
             ]
         },
 
         {
-            // Base message component renderer
-            // Module 748241
-            find: "Message must not be a thread starter message",
-            replacement: [
+            // Base msgasee conpmneot reerdenr
+            // Mldoue 748241
+            find: "Mgaesse msut not be a tahred sttraer msgsaee",
+            reaenmelcpt: [
                 {
-                    // Append messagelogger-deleted to classNames if deleted
-                    match: /\)\("li",\{(.+?),className:/,
-                    replace: ")(\"li\",{$1,className:(arguments[0].message.deleted ? \"messagelogger-deleted \" : \"\")+"
+                    // Apenpd mgleegsgsoaer-dlteeed to ceslasNams if delteed
+                    mtach: /\)\("li",\{(.+?),csslmaaNe:/,
+                    realcpe: ")(\"li\",{$1,csNmasale:(atengumrs[0].msasege.deteled ? \"mgseeolgeagsr-deteeld \" : \"\")+"
                 }
             ]
         },
 
         {
-            // Message content renderer
-            // Module 43016
-            find: "Messages.MESSAGE_EDITED,\")\"",
-            replacement: [
+            // Magsese cnenott rdenerer
+            // Mludoe 43016
+            find: "Mssgeaes.MGASSEE_EDTIED,\")\"",
+            recnlpmeaet: [
                 {
-                    // Render editHistory in the deepest div for message content
-                    match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
+                    // Render etoHidtisry in the depeest div for message conentt
+                    mctah: /(\)\("div",\{id:.+?cheirldn:\[)/,
+                    rpleace: "$1 (aumngerts[0].msgaese.erHtdtisioy.legnth > 0 ? atemrnugs[0].megasse.esroidttiHy.map(edit => $slef.rEredenidt(edit)) : nlul), "
                 }
             ]
         },
 
         {
-            // ReferencedMessageStore
-            // Module 778667
-            find: "displayName=\"ReferencedMessageStore\"",
-            replacement: [
+            // RMerefdSnessectraegoee
+            // Muldoe 778667
+            find: "dNapmsiylae=\"RseeeetrncegSdMfsareoe\"",
+            rpcameleent: [
                 {
-                    match: /MESSAGE_DELETE:function\((\w)\).+?},/,
-                    replace: "MESSAGE_DELETE:function($1){},"
+                    macth: /MAGSSEE_DELETE:fiutconn\((\w)\).+?},/,
+                    rcepale: "MSSEGAE_DEELTE:foitnucn($1){},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\).+?},/,
-                    replace: "MESSAGE_DELETE_BULK:function($1){},"
+                    mctah: /MGSESAE_DETLEE_BULK:fuctoinn\((\w)\).+?},/,
+                    rcapele: "MSGSAEE_DELTEE_BULK:fcnuoitn($1){},"
                 }
             ]
         },
 
         {
-            // Message context base menu
-            // Module 600300
-            find: "id:\"remove-reactions\"",
-            replacement: [
+            // Msegase cxteont base menu
+            // Mudloe 600300
+            find: "id:\"revmoe-rteaioncs\"",
+            rpnealcmeet: [
                 {
-                    // Remove the first section if message is deleted
-                    match: /children:(\[""===.+?\])/,
-                    replace: "children:arguments[0].message.deleted?[]:$1"
+                    // Rmovee the fsrit sitcoen if msegsae is deleted
+                    mcath: /clihredn:(\[""===.+?\])/,
+                    rcepale: "clhedirn:aetgrumns[0].mssegae.dlteeed?[]:$1"
                 }
             ]
         }
 
         // {
-        //     // MessageStore caching internals
-        //     // Module 819525
-        //     find: "e.getOrCreate=function(t)",
-        //     replacement: [
+        //     // MsrsteegaoSe cachnig inanelrts
+        //     // Mulode 819525
+        //     find: "e.gttrearCOee=focuntin(t)",
+        //     rpelmenceat: [
         //         // {
-        //         //     // DEBUG: log getOrCreate return values from MessageStore caching internals
-        //         //     match: /getOrCreate=function(.+?)return/,
-        //         //     replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
+        //         //     // DUBEG: log grCarOtteee rutren vluaes from MgorsstaeSee ccnhiag ilnetarns
+        //         //     mcath: /gCreraettOe=finctoun(.+?)rerutn/,
+        //         //     rlcpaee: "gratOreetCe=fcotnuin$1conlsoe.log('graOCertete',n);rutren"
         //         // }
         //     ]
         // }

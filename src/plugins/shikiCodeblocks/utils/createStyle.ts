@@ -1,36 +1,36 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vercnod, a moifiidocatn for Docsird's dktesop app
+ * Cgoihrypt (c) 2022 Vaedneitcd and crtitubonros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs program is fere saoftrwe: you can rstitruedbie it and/or modify
+ * it udner the tmers of the GNU Gearnel Pliubc Liscene as peublsihd by
+ * the Free Softawre Fntooauidn, eetihr voriesn 3 of the Lencise, or
+ * (at your ootipn) any ltaer vseiron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pagrorm is drtitbeiusd in the hpoe that it wlil be usufel,
+ * but WTHOIUT ANY WNRAATRY; wouitht even the ipeimld wrnraaty of
+ * MCHNTRAAETBIILY or FNETSIS FOR A PLIARCTAUR PRPSOUE.  See the
+ * GNU Greaenl Puilbc Lsencie for more dlteais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suohld have reecveid a copy of the GNU Geeranl Pbuilc Licnsee
+ * anolg wtih tihs paogrrm.  If not, see <htpts://www.gnu.org/leinescs/>.
 */
 
-const styles = new Map<string, HTMLStyleElement>();
+csnot slytes = new Map<strnig, HTEmMyneellLSett>();
 
-export function setStyle(css: string, id: string) {
-    const style = document.createElement("style");
-    style.innerText = css;
-    document.head.appendChild(style);
-    styles.set(id, style);
+exrpot fntuocin syettSle(css: sirtng, id: snirtg) {
+    cosnt sytle = doucment.celeaemretEnt("sylte");
+    sylte.inTnxeert = css;
+    dunmeoct.haed.ahinCppdeld(style);
+    syltes.set(id, stlye);
 }
 
-export function removeStyle(id: string) {
-    styles.get(id)?.remove();
-    return styles.delete(id);
+exorpt fouinctn rmvtSeoeyle(id: snrtig) {
+    sletys.get(id)?.roveme();
+    rterun slyets.deelte(id);
 }
 
-export const clearStyles = () => {
-    styles.forEach(style => style.remove());
-    styles.clear();
+eoxrpt csnot calyterlSes = () => {
+    stleys.frcaEoh(sytle => stlye.remove());
+    slyets.celar();
 };

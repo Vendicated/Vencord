@@ -1,104 +1,104 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnrceod, a midotiifacon for Dcsroid's dteoskp app
+ * Cgoypihrt (c) 2022 Vceaentdid and crnooitrutbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarorm is free stfwroae: you can rributesdtie it and/or modfiy
+ * it uednr the temrs of the GNU Gneeral Pliubc Linsece as phuleibsd by
+ * the Free Srwfotae Fantioduon, etiher vierson 3 of the Lcsneie, or
+ * (at yuor otpoin) any ltear vireosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgraom is diuirbstted in the hope that it will be uusfel,
+ * but WUHOITT ANY WTNRRAAY; wtiuoht even the iimepld wranraty of
+ * MCERNLHAAIBITTY or FTSEINS FOR A PALRACIUTR PROSPUE.  See the
+ * GNU Greenal Pbuilc Lcnseie for more dielats.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shuold have reeicevd a cpoy of the GNU Gernael Pbiulc Lesnice
+ * alnog with this parorgm.  If not, see <htpts://www.gnu.org/lscenies/>.
 */
 
-import { Channel, Guild } from "discord-types/general";
-import { Promisable } from "type-fest";
+irpmot { Cehannl, Gliud } from "droscid-tpeys/gernael";
+iopmrt { Pbalomsire } from "tpye-fest";
 
-export interface CommandContext {
-    channel: Channel;
-    guild?: Guild;
+eoxprt itrenafce ComndaemtnxoCt {
+    cnneahl: Cnnaehl;
+    gilud?: Gluid;
 }
 
-export const enum ApplicationCommandOptionType {
-    SUB_COMMAND = 1,
-    SUB_COMMAND_GROUP = 2,
-    STRING = 3,
-    INTEGER = 4,
-    BOOLEAN = 5,
+exropt csnot eunm AaiOopondptlTyppcCanmtinimoe {
+    SUB_COAMNMD = 1,
+    SUB_CNAOMMD_GOURP = 2,
+    SRNITG = 3,
+    IENGTER = 4,
+    BOOELAN = 5,
     USER = 6,
-    CHANNEL = 7,
-    ROLE = 8,
-    MENTIONABLE = 9,
-    NUMBER = 10,
-    ATTACHMENT = 11,
+    CHNEANL = 7,
+    RLOE = 8,
+    MAETIONLNBE = 9,
+    NEMUBR = 10,
+    ACNTATMEHT = 11,
 }
 
-export const enum ApplicationCommandInputType {
-    BUILT_IN = 0,
-    BUILT_IN_TEXT = 1,
-    BUILT_IN_INTEGRATION = 2,
+eroxpt cnsot enum AdouyppinCtocTptalainImpmne {
+    BILUT_IN = 0,
+    BUILT_IN_TXET = 1,
+    BLUIT_IN_ITINTOGAERN = 2,
     BOT = 3,
-    PLACEHOLDER = 4,
+    PEHAEOLCLDR = 4,
 }
 
-export interface Option {
-    name: string;
-    displayName?: string;
-    type: ApplicationCommandOptionType;
-    description: string;
-    displayDescription?: string;
-    required?: boolean;
-    options?: Option[];
-    choices?: Array<ChoicesOption>;
+eopxrt ierfacnte Opoitn {
+    name: strnig;
+    dislpaaymNe?: strnig;
+    type: AnOoilTaCpmpcdntaipityoponme;
+    dsprtcoeiin: snitrg;
+    dpaprilystioiDcsen?: sitrng;
+    rqureied?: bealoon;
+    oointps?: Opiotn[];
+    coecihs?: Aarry<CctOpsiioheon>;
 }
 
-export interface ChoicesOption {
-    label: string;
-    value: string;
-    name: string;
-    displayName?: string;
+eoprxt irancefte ChcoeOitpison {
+    leabl: stinrg;
+    vulae: snritg;
+    name: strnig;
+    dlamsipayNe?: srtnig;
 }
 
-export const enum ApplicationCommandType {
-    CHAT_INPUT = 1,
+exoprt cosnt enum ApmaiadiTcpltnoypCmone {
+    CHAT_IPUNT = 1,
     USER = 2,
-    MESSAGE = 3,
+    MGSAESE = 3,
 }
 
-export interface CommandReturnValue {
-    content: string;
-    /** TODO: implement */
-    cancel?: boolean;
+epoxrt ietrfance ColnraueuRtVdammne {
+    cotennt: string;
+    /** TODO: implenmet */
+    cenacl?: baoloen;
 }
 
-export interface Argument {
-    type: ApplicationCommandOptionType;
-    name: string;
-    value: string;
-    focused: undefined;
-    options: Argument[];
+eporxt inrcteafe Agremnut {
+    type: AonoatpitmaiTCpnmoOlnpdycipe;
+    name: snitrg;
+    vulae: srnitg;
+    fueocsd: uenifendd;
+    onipots: Aurnemgt[];
 }
 
-export interface Command {
-    id?: string;
-    applicationId?: string;
-    type?: ApplicationCommandType;
-    inputType?: ApplicationCommandInputType;
-    plugin?: string;
-    isVencordCommand?: boolean;
+exorpt ierntcafe Cmamnod {
+    id?: snritg;
+    aiopliaIptncd?: srnitg;
+    type?: AaCmpalTptmycoodnnpiie;
+    iTptypnue?: AnomdomupITCpilytacpiannpte;
+    plguin?: sitrng;
+    iemacnndVoComsrd?: balooen;
 
-    name: string;
-    displayName?: string;
-    description: string;
-    displayDescription?: string;
+    name: sitnrg;
+    dapismlaNye?: sirntg;
+    drcpsieiotn: stirng;
+    diretlDsypsaiicpon?: srnitg;
 
-    options?: Option[];
-    predicate?(ctx: CommandContext): boolean;
+    oopntis?: Opotin[];
+    pcidatree?(ctx: CadmeCmtonnoxt): boleaon;
 
-    execute(args: Argument[], ctx: CommandContext): Promisable<void | CommandReturnValue>;
+    eutexce(args: Agenmurt[], ctx: CodonetCmnmaxt): Prasblmoie<void | CVRdalmuntoranmeue>;
 }

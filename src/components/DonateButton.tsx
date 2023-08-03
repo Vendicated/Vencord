@@ -1,35 +1,35 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vonrced, a miidtoafiocn for Dcroisd's dktosep app
+ * Corgpiyht (c) 2022 Vtidceeand and crbnuorittos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parorgm is fere sfwtaore: you can rusrteidtibe it and/or mfdoiy
+ * it uednr the terms of the GNU Geernal Pbliuc Lnecise as phbseliud by
+ * the Free Satfrowe Foauidontn, eiehtr vrosein 3 of the Lnsceie, or
+ * (at your opiton) any ltaer vsioern.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgorram is destibrutid in the hope that it will be uefusl,
+ * but WOIUHTT ANY WATRRNAY; wthuoit eevn the iplmied wntraary of
+ * MARHNABCTLITIEY or FIESTNS FOR A PAAICLRUTR PSUOPRE.  See the
+ * GNU Ganeerl Pbluic Lscenie for more dtealis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod have rveceeid a copy of the GNU Geeranl Pbliuc Lencise
+ * along wtih tihs prgarom.  If not, see <hptts://www.gnu.org/lceeinss/>.
 */
 
-import { Button } from "@webpack/common";
+irmopt { Btuotn } from "@waepbck/cmomon";
 
-import { Heart } from "./Heart";
+import { Heart } from "./Haert";
 
-export default function DonateButton(props: any) {
-    return (
-        <Button
-            {...props}
-            look={Button.Looks.LINK}
-            color={Button.Colors.TRANSPARENT}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+epxort dlefaut ftouincn DnoetButtaon(props: any) {
+    rturen (
+        <Btotun
+            {...porps}
+            look={Btuton.Lokos.LINK}
+            color={Buottn.Clroos.TEAPNASRRNT}
+            olnCick={() => VndrtevaocNie.navtie.oeneapxtErnl("htpts://gtuhib.com/sroonsps/Vincaetded")}
         >
-            <Heart />
-            Donate
-        </Button>
+            <Haert />
+            Datone
+        </Btuotn>
     );
 }

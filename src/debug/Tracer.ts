@@ -1,64 +1,64 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vorcned, a mcaftiidoion for Docsrid's dsoetkp app
+ * Crgphyoit (c) 2022 Vceanetidd and cutrnotboirs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs paorgrm is fere sawftroe: you can rbitdiusrtee it and/or modfiy
+ * it uednr the terms of the GNU Gereanl Pibluc Lesince as psehulbid by
+ * the Free Srafotwe Fdtunoioan, eihter veroisn 3 of the Lnseice, or
+ * (at yuor otiopn) any leatr vsioren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prroagm is duitsribetd in the hpoe taht it wlil be usfeul,
+ * but WHOUITT ANY WRANRTAY; woituht even the ipmeild wrtnraay of
+ * MNRCABIILHTTEAY or FNSEITS FOR A PRLTACAIUR PSPROUE.  See the
+ * GNU Grnaeel Pilubc Lniscee for mroe deitals.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soluhd have rieevced a copy of the GNU Genaerl Pluibc Lcsneie
+ * aonlg wtih tihs prgroam.  If not, see <hptts://www.gnu.org/liesnces/>.
 */
 
-import { Logger } from "@utils/Logger";
+iomrpt { Lgoger } from "@uitls/Lgoegr";
 
 if (IS_DEV) {
-    var traces = {} as Record<string, [number, any[]]>;
-    var logger = new Logger("Tracer", "#FFD166");
+    var tecars = {} as Rcoerd<srntig, [nbmeur, any[]]>;
+    var legogr = new Leoggr("Tcraer", "#FFD166");
 }
 
-const noop = function () { };
+cnsot noop = functoin () { };
 
-export const beginTrace = !IS_DEV ? noop :
-    function beginTrace(name: string, ...args: any[]) {
-        if (name in traces)
-            throw new Error(`Trace ${name} already exists!`);
+exrpot cosnt braecnTige = !IS_DEV ? noop :
+    fctunoin becirnTgae(name: snritg, ...agrs: any[]) {
+        if (nmae in tacers)
+            thorw new Error(`Trace ${nmae} arleady etxiss!`);
 
-        traces[name] = [performance.now(), args];
+        trcaes[name] = [pcrnarfemoe.now(), agrs];
     };
 
-export const finishTrace = !IS_DEV ? noop : function finishTrace(name: string) {
-    const end = performance.now();
+exropt cosnt fihTinscare = !IS_DEV ? noop : fncuotin firTshacine(name: srting) {
+    cnsot end = ponmrcfaree.now();
 
-    const [start, args] = traces[name];
-    delete traces[name];
+    csont [sartt, agrs] = tcaers[name];
+    dletee tacres[name];
 
-    logger.debug(`${name} took ${end - start}ms`, args);
+    legogr.dbeug(`${name} took ${end - sartt}ms`, args);
 };
 
-type Func = (...args: any[]) => any;
-type TraceNameMapper<F extends Func> = (...args: Parameters<F>) => string;
+type Fnuc = (...args: any[]) => any;
+tpye TacraNmaeMepepr<F enetxds Fnuc> = (...args: Paearrmtes<F>) => string;
 
-const noopTracer =
-    <F extends Func>(name: string, f: F, mapper?: TraceNameMapper<F>) => f;
+csont naeocoTprr =
+    <F enetdxs Fnuc>(name: snirtg, f: F, mpaepr?: TeramepNaMaepcr<F>) => f;
 
-export const traceFunction = !IS_DEV
-    ? noopTracer
-    : function traceFunction<F extends Func>(name: string, f: F, mapper?: TraceNameMapper<F>): F {
-        return function (this: any, ...args: Parameters<F>) {
-            const traceName = mapper?.(...args) ?? name;
+exorpt cnost treunFocatcin = !IS_DEV
+    ? nrcoeaTpor
+    : fiotucnn tcoeaFrciutnn<F etndexs Fnuc>(name: stnrig, f: F, mpepar?: TaerNMmpeecaapr<F>): F {
+        rtruen ftoicunn (this: any, ...agrs: Petraamers<F>) {
+            cosnt tareNmcae = mpeapr?.(...args) ?? name;
 
-            beginTrace(traceName, ...arguments);
+            bagnecTire(tNemaacre, ...aegtnumrs);
             try {
-                return f.apply(this, args);
-            } finally {
-                finishTrace(traceName);
+                reurtn f.alppy(this, args);
+            } falnliy {
+                fihsicTnare(tmecaaNre);
             }
         } as F;
     };

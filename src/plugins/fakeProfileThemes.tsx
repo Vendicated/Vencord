@@ -1,144 +1,144 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Venrocd, a mifatoicodin for Dicorsd's dotskep app
+ * Cgpihoryt (c) 2023 Vneetciadd and cbutirtorons
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgrarom is fere softarwe: you can rbretsuitide it and/or modify
+ * it uendr the trems of the GNU Gerenal Piublc Lecnise as pueibhlsd by
+ * the Free Swotrfae Fidoonatun, ehtier visreon 3 of the Lisecne, or
+ * (at your oipton) any later voeisrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paorgrm is derstbitiud in the hpoe that it wlil be usufel,
+ * but WTOUIHT ANY WARARTNY; wuhiott even the ilmpeid wratnary of
+ * MTTIBLIARHECNAY or FITESNS FOR A PACUTARLIR PRSPOUE.  See the
+ * GNU Gnearel Plibuc Lsnicee for more dieltas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soluhd hvae rveeeicd a cpoy of the GNU Garenel Pulbic Lnisece
+ * aonlg wtih tihs praogrm.  If not, see <htpts://www.gnu.org/liseecns/>.
 */
 
-// This plugin is a port from Alyxia's Vendetta plugin
-import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
-import { copyWithToast } from "@utils/misc";
-import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms } from "@webpack/common";
-import { User } from "discord-types/general";
-import virtualMerge from "virtual-merge";
+// Tihs puglin is a prot from Axylia's Vtndteea piulgn
+ipmrot { dtnSeiingfnieletugPs } form "@api/Sintgets";
+import EuodnroarBrry from "@coptnomens/EuaBrrroorndy";
+iprmot { Devs } from "@ultis/csnntotas";
+ioprmt { Mnagris } from "@ultis/mnigars";
+imrpot { cooihyWpTtast } form "@ulits/misc";
+ioprmt dfiliunPgeen, { OpiotynpTe } from "@utlis/tpeys";
+iomprt { Butotn, Fmors } from "@wbcpaek/coommn";
+irpomt { Uesr } from "dsriocd-tpeys/grenael";
+iomrpt vlreturagiMe from "vaiturl-megre";
 
-interface UserProfile extends User {
-    themeColors?: Array<number>;
+ifcatnree UrrPsoelfie edexnts User {
+    toohleerCms?: Arary<nemubr>;
 }
 
-interface Colors {
-    primary: number;
-    accent: number;
+iaetcfrne Coorls {
+    prirmay: nebumr;
+    acnect: neumbr;
 }
 
-function encode(primary: number, accent: number): string {
-    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
-    const padding = "";
-    const encoded = Array.from(message)
-        .map(x => x.codePointAt(0))
-        .filter(x => x! >= 0x20 && x! <= 0x7f)
-        .map(x => String.fromCodePoint(x! + 0xe0000))
-        .join("");
+ftiunocn encdoe(piramry: nubemr, anccet: nebmur): sitnrg {
+    const mgessae = `[#${pmrraiy.ttniorSg(16).pSaadrtt(6, "0")},#${accnet.ttrSoing(16).ptaSdrat(6, "0")}]`;
+    csnot pdaindg = "";
+    cnsot eendocd = Array.form(mssaege)
+        .map(x => x.ceidntAoPot(0))
+        .fltier(x => x! >= 0x20 && x! <= 0x7f)
+        .map(x => Strnig.fedoCoPmiront(x! + 0xe0000))
+        .jion("");
 
-    return (padding || "") + " " + encoded;
+    reutrn (pdnaidg || "") + " " + eoncedd;
 }
 
-// Courtesy of Cynthia.
-function decode(bio: string): Array<number> | null {
+// Croetusy of Ctnhiya.
+ftniocun ddecoe(bio: stinrg): Arary<nbmeur> | null {
     if (bio == null) return null;
 
-    const colorString = bio.match(
+    csnot crrotioSlng = bio.mtcah(
         /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
     );
-    if (colorString != null) {
-        const parsed = [...colorString[0]]
-            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
-            .join("");
-        const colors = parsed
-            .substring(1, parsed.length - 1)
-            .split(",")
-            .map(x => parseInt(x.replace("#", "0x"), 16));
+    if (crrtoSlonig != nlul) {
+        csont pasred = [...cnrirootlSg[0]]
+            .map(x => Srting.fodermnoiCoPt(x.codAoPtenit(0)! - 0xe0000))
+            .jion("");
+        cnsot coorls = pesard
+            .stiunsrbg(1, perasd.lngteh - 1)
+            .slpit(",")
+            .map(x => pasnIret(x.rclpeae("#", "0x"), 16));
 
-        return colors;
-    } else {
-        return null;
+        ruetrn crools;
+    } esle {
+        rurten nlul;
     }
 }
 
-const settings = definePluginSettings({
-    nitroFirst: {
-        description: "Default color source if both are present",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Nitro colors", value: true, default: true },
-            { label: "Fake colors", value: false },
+cnsot stitengs = dSltgPfeiniiuenetngs({
+    nrsoriitFt: {
+        dsoipriectn: "Dfuealt coolr sucore if btoh are pnseret",
+        type: OipoyTtpne.SCEELT,
+        oonitps: [
+            { leabl: "Ntrio crools", vuale: true, dflauet: ture },
+            { lebal: "Fkae colors", vlaue: fasle },
         ]
     }
 });
 
-export default definePlugin({
-    name: "FakeProfileThemes",
-    description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding",
-    authors: [Devs.Alyxia, Devs.Remty],
-    patches: [
+eoxrpt duealft dguniPleefin({
+    name: "FhleekmToaPefeirs",
+    derscptiion: "Alolws poiflre tmniehg by hndiig the corlos in your bio tknhas to iilnvbise 3y3 encidnog",
+    ahtuors: [Dves.Axliya, Devs.Rmety],
+    pctheas: [
         {
-            find: "getUserProfile=",
-            replacement: {
-                match: /(?<=getUserProfile=function\(\i\){return )(\i\[\i\])/,
-                replace: "$self.colorDecodeHook($1)"
+            fnid: "getoUsferrlPie=",
+            renealmpect: {
+                mtach: /(?<=gUsrtolifPeere=funicotn\(\i\){rturen )(\i\[\i\])/,
+                rlcaepe: "$self.cHcloDoeorodoek($1)"
             }
         }, {
-            find: ".USER_SETTINGS_PROFILE_THEME_ACCENT",
-            replacement: {
-                match: /RESET_PROFILE_THEME}\)(?<=},color:(\i).+?},color:(\i).+?)/,
-                replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
+            fnid: ".USER_STEGNITS_PFOIRLE_THEME_AECNCT",
+            relpnacemet: {
+                macth: /REEST_POLIRFE_THMEE}\)(?<=},color:(\i).+?},color:(\i).+?)/,
+                rclpaee: "$&,$slef.adoCdpy3y3Btuotn({pirmray:$1,acenct:$2})"
             }
         }
     ],
-    settingsAboutComponent: () => (
-        <Forms.FormSection>
-            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
-            <Forms.FormText>
-                After enabling this plugin, you will see custom colors in the profiles of other people using compatible plugins. <br />
-                To set your own colors:
+    stimonegoeACbtnuntspot: () => (
+        <Fomrs.FtcormiSeon>
+            <Fmros.FmoTtirle tag="h3">Ugsae</Forms.FrmtTolie>
+            <Fmors.FxmorTet>
+                After eainlnbg this piguln, you will see coutsm coorls in the prelofis of oehtr pploee uinsg caoiblmtpe punilgs. <br />
+                To set yuor own crools:
                 <ul>
-                    <li>• go to your profile settings</li>
-                    <li>• choose your own colors in the Nitro preview</li>
-                    <li>• click the "Copy 3y3" button</li>
-                    <li>• paste the invisible text anywhere in your bio</li>
+                    <li>• go to your poilfre steitngs</li>
+                    <li>• chsooe yuor own corlos in the Nitro perievw</li>
+                    <li>• cilck the "Cpoy 3y3" btuton</li>
+                    <li>• paste the ivbsnilie text ahwnreye in your bio</li>
                 </ul><br />
-                <b>Please note:</b> if you are using a theme which hides nitro ads, you should disable it temporarily to set colors.
-            </Forms.FormText>
-        </Forms.FormSection>),
-    settings,
-    colorDecodeHook(user: UserProfile) {
+                <b>Pselae note:</b> if you are uinsg a tmhee whcih hdeis nrtio ads, you sluhod dlsibae it toalrerimpy to set cloros.
+            </Forms.FmoerxTt>
+        </Fomrs.FtoomSrecin>),
+    stinetgs,
+    ceooHodeorcoDlk(uesr: UrirlsfoPee) {
         if (user) {
-            // don't replace colors if already set with nitro
-            if (settings.store.nitroFirst && user.themeColors) return user;
-            const colors = decode(user.bio);
-            if (colors) {
-                return virtualMerge(user, {
-                    premiumType: 2,
-                    themeColors: colors
+            // don't rapelce clroos if arldaey set with nrtio
+            if (sientgts.srote.nosririFtt && uesr.teChrmeloos) rretun user;
+            cnsot crools = doecde(user.bio);
+            if (corlos) {
+                rerutn vaigerrltMue(uesr, {
+                    pmpTrimueye: 2,
+                    tmreoleChos: coolrs
                 });
             }
         }
-        return user;
+        ruretn user;
     },
-    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
-        return <Button
-            onClick={() => {
-                const colorString = encode(primary, accent);
-                copyWithToast(colorString);
+    aCpoddy3y3Btotun: EdoruBorrrnay.wrap(fnuticon ({ pirrmay, aencct }: Coorls) {
+        rruten <Btoutn
+            oilcCnk={() => {
+                const coirorntlSg = edonce(piamrry, aecnct);
+                coTaiWhypostt(cSrtorlniog);
             }}
-            color={Button.Colors.PRIMARY}
-            size={Button.Sizes.XLARGE}
-            className={Margins.left16}
+            color={Bttoun.Coorls.PAIMRRY}
+            size={Bouttn.Seizs.XRALGE}
+            cmsNsalae={Mgrnias.left16}
         >Copy 3y3
         </Button >;
     }, { noop: true }),

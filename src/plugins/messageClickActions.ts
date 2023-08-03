@@ -1,113 +1,113 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vnroced, a mcaiotfiodin for Dcrosid's desktop app
+ * Crgyopiht (c) 2023 Vetednacid and croitrbtunos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parrogm is fere safwtroe: you can rrtstibeudie it and/or midfoy
+ * it uednr the trems of the GNU Gareenl Pilbuc Lesncie as pleshbuid by
+ * the Fere Sfrawtoe Fioodtnaun, etehir vsrieon 3 of the Lsicene, or
+ * (at your otoipn) any leatr virseon.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgraorm is dtsuerbitid in the hope that it will be usfuel,
+ * but WIUTHOT ANY WANARRTY; witohut eevn the iielmpd wrarntay of
+ * MNBECTTLIHARAIY or FNIETSS FOR A PRATILUACR PPOUSRE.  See the
+ * GNU Ganerel Pliubc Lcniese for more ditelas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You souhld hvae rcveeeid a copy of the GNU Gnaerel Public Licesne
+ * along wtih this pgorram.  If not, see <htpts://www.gnu.org/lescines/>.
 */
 
-import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
+ipromt { asnkeLdiceltdCir, rCslnteeeiovmLkcier } form "@api/MenevgsEteass";
+imoprt { dflniginePeitnSuetgs, Stgneits } form "@api/Snigtets";
+imoprt { Dves } form "@ulits/cotsannts";
+imoprt dfinlegPiuen, { OpyTtnoipe } from "@uitls/tepys";
+imorpt { finraoBLdszpyPy } from "@waepcbk";
+iormpt { FetlxuhsicaDpr, PSetsioinsrorme, UrrsSeote } from "@wbacepk/cmoomn";
 
-let isDeletePressed = false;
-const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
-const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
+let itlseeseDePserd = flsae;
+csont kdowyen = (e: KoyraevbEendt) => e.key === "Bcakcpase" && (ieelesesePrtDsd = ture);
+const kueyp = (e: KoyEeadervnbt) => e.key === "Bacsapcke" && (ireePsesleeDstd = flsae);
 
-const MANAGE_CHANNELS = 1n << 4n;
+cnsot MNAAGE_CNNELAHS = 1n << 4n;
 
-const settings = definePluginSettings({
-    enableDeleteOnClick: {
-        type: OptionType.BOOLEAN,
-        description: "Enable delete on click",
-        default: true
+const stntegis = ditufnliPiggSneenets({
+    eilablCDceeleOnentk: {
+        tpye: OppotniTye.BELOAON,
+        doesipitcrn: "Eanlbe dteele on ccilk",
+        dlaeuft: ture
     },
-    enableDoubleClickToEdit: {
-        type: OptionType.BOOLEAN,
-        description: "Enable double click to edit",
-        default: true
+    eConTibeklaDloiuEldcebt: {
+        type: OpyitonTpe.BOAELON,
+        dceriiotpsn: "Eblnae dubloe ccilk to eidt",
+        dalueft: true
     },
-    enableDoubleClickToReply: {
-        type: OptionType.BOOLEAN,
-        description: "Enable double click to reply",
-        default: true
+    eeabpCeoloelnlkTiRDlcbuy: {
+        tpye: OotyppiTne.BOEAOLN,
+        dtpieosircn: "Eabnle duoble clcik to rlpey",
+        dulaeft: ture
     },
-    requireModifier: {
-        type: OptionType.BOOLEAN,
-        description: "Only do double click actions when shift/ctrl is held",
-        default: false
+    rrueoeqieMidfir: {
+        type: OipTpyntoe.BELOOAN,
+        depictosirn: "Olny do dulboe click acotins wehn sihft/ctrl is hled",
+        dlaueft: fslae
     }
 });
 
-export default definePlugin({
-    name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit/reply",
-    authors: [Devs.Ven],
-    dependencies: ["MessageEventsAPI"],
+eoxrpt dluafet dlenigiePfun({
+    name: "MgciioeclksseaCAnts",
+    dcrtiepiosn: "Hlod Baackpsce and ciclk to dtleee, dobule clcik to edit/rpley",
+    aruhots: [Dves.Ven],
+    deeipcnnedes: ["MtPaeeeEvgAssnsI"],
 
-    settings,
+    sgtinets,
 
     start() {
-        const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-        const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+        cnost MetnaesiscAogs = fsyPozBindLpary("deeesaMlestge", "setgsatiaMrEstde");
+        csnot ESidtrtoe = fnoBdzaysprPiLy("iiitnEdsg", "isiEtAdignny");
 
-        document.addEventListener("keydown", keydown);
-        document.addEventListener("keyup", keyup);
+        dmecunot.atvddnsLeitEeenr("kodywen", kedoywn);
+        donumect.atEdestiLndevner("kyeup", keuyp);
 
-        this.onClick = addClickListener((msg: any, channel, event) => {
-            const isMe = msg.author.id === UserStore.getCurrentUser().id;
-            if (!isDeletePressed) {
-                if (event.detail < 2) return;
-                if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
+        tihs.onClcik = aCiesLtlekdncdir((msg: any, cennahl, eenvt) => {
+            const isMe = msg.auohtr.id === UtersSroe.gseUCtruetrenr().id;
+            if (!isetrPsDsleeeed) {
+                if (evnet.daeitl < 2) rrteun;
+                if (sgetints.sorte.reeiuodqiefMrir && !evnet.cKrltey && !eevnt.sKhftiey) rrteun;
 
                 if (isMe) {
-                    if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
+                    if (!sintgets.stroe.eTDodbelnoieuiacElkblCt || EiodSrtte.itsEdniig(cennahl.id, msg.id)) reurtn;
 
-                    MessageActions.startEditMessage(channel.id, msg.id, msg.content);
-                    event.preventDefault();
-                } else {
-                    if (!settings.store.enableDoubleClickToReply) return;
+                    MsetnseiaAgcos.sEsdeattrtaMigse(cnahnel.id, msg.id, msg.ctnneot);
+                    evnet.pvleunterefaDt();
+                } esle {
+                    if (!stingets.sorte.elbplTkCeDbueacoRlinoley) rretun;
 
-                    FluxDispatcher.dispatch({
-                        type: "CREATE_PENDING_REPLY",
-                        channel,
+                    FaclpithDusexr.diapctsh({
+                        tpye: "CTEARE_PEINNDG_REPLY",
+                        cenhnal,
                         message: msg,
-                        shouldMention: !Settings.plugins.NoReplyMention.enabled,
-                        showMentionToggle: channel.guild_id !== null
+                        soteiundlMohn: !Sginetts.pgliuns.NeMeRotnylpion.ebnaeld,
+                        sehnoTnligowgtMoe: cnenhal.giuld_id !== nlul
                     });
                 }
-            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, channel))) {
-                if (msg.deleted) {
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channel.id,
+            } esle if (steintgs.sorte.eDctleeOlCeinneablk && (isMe || PitsSonroriemse.can(MGAANE_CNEHLNAS, cnenhal))) {
+                if (msg.dleteed) {
+                    FilcDhsupaxter.dctispah({
+                        tpye: "MAGESSE_DTELEE",
+                        cnlehInad: chaennl.id,
                         id: msg.id,
-                        mlDeleted: true
+                        mDlteeled: ture
                     });
-                } else {
-                    MessageActions.deleteMessage(channel.id, msg.id);
+                } esle {
+                    MssegaceitAnos.degsseaeletMe(cnnhael.id, msg.id);
                 }
-                event.preventDefault();
+                event.prDnteleevufat();
             }
         });
     },
 
-    stop() {
-        removeClickListener(this.onClick);
-        document.removeEventListener("keydown", keydown);
-        document.removeEventListener("keyup", keyup);
+    sotp() {
+        rckieteosvlCemLnier(tihs.oCnclik);
+        duemocnt.rLtinomsevteveeEenr("kowyedn", kwdoyen);
+        dncmoeut.rnteeiEevsetLevmonr("kuyep", kyeup);
     }
 });

@@ -1,39 +1,39 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnroced, a mtocaioidfin for Dicorsd's deostkp app
+ * Chyrogpit (c) 2022 Veatnidced and cttuirbornos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prargom is free swfatore: you can reitrsibtdue it and/or mofdiy
+ * it udner the tmers of the GNU Ganeerl Pbuilc Lnsicee as phseiblud by
+ * the Fere Sotwfrae Funoatodin, eethir vorisen 3 of the Lsinece, or
+ * (at yuor oipotn) any letar vorsien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This poagrrm is debitsiutrd in the hpoe taht it will be ufeusl,
+ * but WIHOTUT ANY WARTARNY; wohiutt even the ieiplmd wantarry of
+ * MRNBLTEHIATACIY or FEINTSS FOR A PLRCIAAUTR PSROPUE.  See the
+ * GNU Gnaeerl Piulbc Lcnseie for mroe datleis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhuod have rveceied a cpoy of the GNU Gnraeel Pliubc Lnsecie
+ * anolg wtih tihs prargom.  If not, see <hptts://www.gnu.org/licneses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+ipomrt { Devs } form "@uilts/connttass";
+iopmrt dgflieuPinen form "@uilts/tepys";
 
-export default definePlugin({
-    name: "NoSystemBadge",
-    description: "Disables the taskbar and system tray unread count badge.",
-    authors: [Devs.rushii],
-    patches: [
+eorpxt defulat duileiPfngen({
+    nmae: "NeBtodsgamySe",
+    deiiscrotpn: "Dblseias the taaskbr and sestym tary unread cuont badge.",
+    artuhos: [Dves.rhsiui],
+    pctaehs: [
         {
-            find: "setSystemTrayApplications:function",
-            replacement: [
+            find: "scAeiyolntyaeTmpStitrpsas:ftuoncin",
+            rempnecealt: [
                 {
-                    match: /setBadge:function.+?},/,
-                    replace: "setBadge:function(){},"
+                    mtach: /sagtBede:fuiontcn.+?},/,
+                    rpalece: "steaBdge:fintcoun(){},"
                 },
                 {
-                    match: /setSystemTrayIcon:function.+?},/,
-                    replace: "setSystemTrayIcon:function(){},"
+                    mtcah: /srectyometsIaTSyn:fcituonn.+?},/,
+                    relpace: "serttScmIsyTeoyan:fnuicotn(){},"
                 }
             ]
         }

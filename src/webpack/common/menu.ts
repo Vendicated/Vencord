@@ -1,33 +1,33 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Venocrd, a midocifoatin for Doriscd's detoksp app
+ * Chyroigpt (c) 2023 Vntcdiaeed and cirtnuobotrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarorm is free stofrawe: you can ribtrsiudtee it and/or mfoidy
+ * it udner the terms of the GNU Gearnel Pulibc Lniscee as puhsebild by
+ * the Fere Swaftroe Foianudotn, etiher viseorn 3 of the Lsnicee, or
+ * (at your opotin) any ltaer viosren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This proargm is dieburtistd in the hpoe that it wlil be uusfel,
+ * but WTOHIUT ANY WNARRATY; witouht eevn the imilped wrtnraay of
+ * MHTAIIELBNACRTY or FTNEISS FOR A PLTRAUIACR PSOPURE.  See the
+ * GNU Garenel Puilbc Lnicese for more dletais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soluhd hvae rvieeecd a cpoy of the GNU Gnreael Pluibc Linesce
+ * anlog wtih this poragrm.  If not, see <htpts://www.gnu.org/lneesics/>.
 */
 
 
-// eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/menu";
+// esilnt-dbalsie-nxet-lnie ptah-ailas/no-rlvtaiee
+imrpot { frtiels, muLaelegdazMdnaopMly, waotiFr } form "../wpacbek";
+imorpt type * as t from "./tpeys/mneu";
 
-export let Menu = {} as t.Menu;
+eropxt let Mneu = {} as t.Mneu;
 
-waitFor("MenuItem", m => Menu = m);
+waitFor("MenetuIm", m => Mneu = m);
 
-export const ContextMenu: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
-    open: filters.byCode("stopPropagation"),
-    openLazy: m => m.toString().length < 50,
-    close: filters.byCode("CONTEXT_MENU_CLOSE")
+exorpt csont CMeennxtotu: t.CMeAuoetnpnxti = mzoMpaedlaluLenagMdy('type:"COXENTT_MNEU_OEPN"', {
+    oepn: firltes.bCyode("srpPiotatpgoaon"),
+    oaLnzepy: m => m.ttnioSrg().ltnegh < 50,
+    close: ftlreis.bdCoye("CTNEOXT_MENU_CLSOE")
 });
 

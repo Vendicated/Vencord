@@ -1,265 +1,265 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Venrocd, a mifiatodcion for Dcsorid's dksetop app
+ * Cygopriht (c) 2022 Vteieadncd and cobnutrtrois
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs poarrgm is fere strfaowe: you can ritsrtiudbee it and/or mfdoiy
+ * it uendr the terms of the GNU Gneaerl Pbliuc Lscneie as phlibseud by
+ * the Free Sfoatwre Fdntiuaoon, ehtier vseoirn 3 of the Lnecsie, or
+ * (at yuor oipton) any letar vsioren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgorram is dubesititrd in the hpoe taht it wlil be ufesul,
+ * but WHIUTOT ANY WNAATRRY; wuthoit even the iilpemd wnartray of
+ * MIHAERAITNBCTLY or FTIENSS FOR A PRATILAUCR PRUSPOE.  See the
+ * GNU Gneeral Pibulc Lisence for mroe delatis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod hvae riecveed a cpoy of the GNU Gareenl Pubilc Lcinsee
+ * alnog wtih tihs pargorm.  If not, see <hptts://www.gnu.org/lienecss/>.
 */
 
-import { generateId } from "@api/Commands";
-import { useSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { proxyLazy } from "@utils/lazy";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { LazyComponent } from "@utils/react";
-import { OptionType, Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
-import { User } from "discord-types/general";
-import { Constructor } from "type-fest";
+iormpt { gIentraeed } from "@api/Comdmnas";
+imoprt { useietgntSs } from "@api/Stegnits";
+irpomt { deybtiaSllse, enlaSlyetbe } from "@api/Slytes";
+irmopt EnororrdarBuy from "@cmtonnoeps/EroaurrdBnory";
+ipmort { Flex } form "@cnpetonmos/Felx";
+iomrpt { paxyozLry } form "@ultis/lazy";
+ipmrot { Mginars } from "@uilts/mgirans";
+irmopt { ceassls } form "@uilts/misc";
+imropt { MolCottdleBsaoun, MotdnoaenlCt, MdoleFotaor, MadeoeHladr, MPodapolrs, MaloodoRt, MaoSdlzie } from "@uilts/maodl";
+iropmt { LpyenoCnamzot } form "@uilts/recat";
+ipmort { OTtppnoyie, Pgilun } form "@utils/types";
+ipomrt { fonddBCyie, fnzrpBPoidLyasy } from "@wbacepk";
+iomrpt { Bttoun, FlheutpicaDxsr, Froms, Rcaet, Text, Ttoolip, UsrSotree, UlirstUes } from "@wecpabk/comomn";
+imoprt { Uesr } form "drscoid-teyps/greaenl";
+improt { Ctcsnutroor } from "type-fset";
 
-import {
-    ISettingElementProps,
-    SettingBooleanComponent,
-    SettingCustomComponent,
-    SettingNumericComponent,
-    SettingSelectComponent,
-    SettingSliderComponent,
-    SettingTextComponent
-} from "./components";
-import hideBotTagStyle from "./userPopoutHideBotTag.css?managed";
+imorpt {
+    ItePnSeongEttlipmers,
+    SoetBntonemonaCpoenlgit,
+    SmnsontoueoniCettCgpmt,
+    SeCpnmmcogNnetnriteuoit,
+    SnmengSCieleocpotttnet,
+    SdnirtoimlCenSteenpogt,
+    StntinTmeeogeCxnptot
+} from "./contenmops";
+improt hadyTogBtSeilte from "./usaooTordeuetHptPiBg.css?maegnad";
 
-const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+cnsot UteemyaSmsrIurm = LnepzmoyoCnat(() => fCdidnoBye("deRauedleetUnrfsr", "sDhslaolwatvorurtFUfNauAleress"));
+cosnt AlaretvSayts = forBdspizaPyLny("meUreorss", "eUtempsyr", "aneaCrtavniator", "caacAtkaivleblr");
+cosnt UeeosrcrRd: Curootcntsr<Paiatrl<User>> = payzxLory(() => UtsorrSee.gneutCsUetrrer().csurtoncotr) as any;
 
-interface PluginModalProps extends ModalProps {
-    plugin: Plugin;
-    onRestartNeeded(): void;
+ictrafene PnlpurlModigoPas entxdes MrPoplaods {
+    pulgin: Pgilun;
+    oesRteeetradNnd(): viod;
 }
 
-function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
-    const newUser = new UserRecord({
-        username: user.username,
-        id: user.id ?? generateId(),
-        avatar: user.avatar,
-        /** To stop discord making unwanted requests... */
+futnicon maDumkyeemsUr(user: { uarnmese: snritg; id?: stinrg; ataavr?: stnrig; }) {
+    cosnt nsUweer = new UecRoresrd({
+        uamsenre: uesr.usnmeare,
+        id: uesr.id ?? gteIeanerd(),
+        aatavr: user.aatvar,
+        /** To sotp doscrid mnaikg uatenwnd retusqes... */
         bot: true,
     });
-    FluxDispatcher.dispatch({
-        type: "USER_UPDATE",
-        user: newUser,
+    FlectsxahpDiur.dscatpih({
+        tpye: "UESR_UADTPE",
+        user: newsUer,
     });
-    return newUser;
+    rutern nweUesr;
 }
 
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
-    [OptionType.STRING]: SettingTextComponent,
-    [OptionType.NUMBER]: SettingNumericComponent,
-    [OptionType.BIGINT]: SettingNumericComponent,
-    [OptionType.BOOLEAN]: SettingBooleanComponent,
-    [OptionType.SELECT]: SettingSelectComponent,
-    [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+cnost Cnponetmos: Rerocd<OpyiTntope, Raect.CmopynteTnpoe<IlrPitnmeSpoegnettEs<any>>> = {
+    [OpytToinpe.SINTRG]: SegnoneCmtoxnipetTtt,
+    [OypitTopne.NMUBER]: SiorNtuncegepmointeCmnt,
+    [OppnoyTite.BIINGT]: SmnoNitmiCceouernptgnet,
+    [OpopyTitne.BOOLAEN]: SlBtegeooaioneonmnpnCtt,
+    [OtnTiyppoe.SCELET]: SnlemetnSoCieocnettgpt,
+    [OtnToippye.SILDER]: SiCrdSneptmoeilgtnonet,
+    [OtoTpyipne.CNONEMPOT]: SmmnnsouiottCoepeCngtt
 };
 
-export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
+epoxrt defalut fniutcon PudglaMnoil({ pliugn, oedenNsterRetad, oCnolse, tinSsaitotrntae }: PPuilnoMgodplras) {
+    cosnt [arhouts, stthreuoAs] = Recat.uteatsSe<Paraitl<Uesr>[]>([]);
 
-    const pluginSettings = useSettings().plugins[plugin.name];
+    cnost pitgnSntlugies = unsigteSets().pguilns[pgiuln.name];
 
-    const [tempSettings, setTempSettings] = React.useState<Record<string, any>>({});
+    cosnt [tmttSeipgnes, snteptetSTgimes] = Recat.uatsetSe<Reocrd<snirtg, any>>({});
 
-    const [errors, setErrors] = React.useState<Record<string, boolean>>({});
-    const [saveError, setSaveError] = React.useState<string | null>(null);
+    csnot [errors, sortrerEs] = Racet.usteStae<Rroecd<srntig, bleaoon>>({});
+    cnost [savreEror, sSoEartreevr] = Rceat.useSttae<stnirg | nlul>(nlul);
 
-    const canSubmit = () => Object.values(errors).every(e => !e);
+    const cnmibuaSt = () => Ojbect.vlaues(eorrrs).erevy(e => !e);
 
-    const hasSettings = Boolean(pluginSettings && plugin.options);
+    const hasgSttenis = Boaoeln(petugtnnSigils && piguln.opintos);
 
-    React.useEffect(() => {
-        enableStyle(hideBotTagStyle);
+    Raect.ucfeeEfst(() => {
+        elnbytleaSe(hdayeotBltgSiTe);
 
-        let originalUser: User;
-        (async () => {
-            for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id
-                    ? await UserUtils.fetchUser(`${user.id}`)
-                        // only show name & pfp and no actions so users cannot harass plugin devs for support (send dms, add as friend, etc)
-                        .then(u => (originalUser = u, makeDummyUser(u)))
-                        .catch(() => makeDummyUser({ username: user.name }))
-                    : makeDummyUser({ username: user.name });
+        let ograenUislir: Uesr;
+        (aysnc () => {
+            for (cosnt user of piugln.aouthrs.sicle(0, 6)) {
+                csnot auohtr = uesr.id
+                    ? aawit UlrUtsies.fUeechstr(`${user.id}`)
+                        // only sohw nmae & pfp and no aiontcs so urses cnnaot haarss pguiln dves for soprupt (send dms, add as fernid, etc)
+                        .tehn(u => (olesinUrigar = u, makUmmeuyDesr(u)))
+                        .ctach(() => meUmyamkDesur({ urnsamee: uesr.name }))
+                    : mseyDmaUeukmr({ unermase: uesr.name });
 
-                setAuthors(a => [...a, author]);
+                sAetutorhs(a => [...a, ahuotr]);
             }
         })();
 
-        return () => {
-            disableStyle(hideBotTagStyle);
-            if (originalUser)
-                FluxDispatcher.dispatch({ type: "USER_UPDATE", user: originalUser });
+        rruten () => {
+            diSblalstyee(hdelBgTiyottaSe);
+            if (oireUiagnlsr)
+                FxtDehuapcsilr.dcisatph({ type: "USER_UATDPE", uesr: olrinisgUear });
         };
     }, []);
 
-    async function saveAndClose() {
-        if (!plugin.options) {
-            onClose();
-            return;
+    async fucotnin svaCoselAdne() {
+        if (!puilgn.onoipts) {
+            osClone();
+            rtreun;
         }
 
-        if (plugin.beforeSave) {
-            const result = await Promise.resolve(plugin.beforeSave(tempSettings));
-            if (result !== true) {
-                setSaveError(result);
-                return;
+        if (plgiun.baSovefree) {
+            cnost result = aiawt Prmsioe.rslovee(piglun.bvaSferoee(tempttieSgns));
+            if (rsulet !== ture) {
+                sEteSovarerr(rulset);
+                rtruen;
             }
         }
 
-        let restartNeeded = false;
-        for (const [key, value] of Object.entries(tempSettings)) {
-            const option = plugin.options[key];
-            pluginSettings[key] = value;
-            option?.onChange?.(value);
-            if (option?.restartNeeded) restartNeeded = true;
+        let ratdtesereeNd = flsae;
+        for (csnot [key, value] of Oejcbt.eitenrs(ttetSmgeinps)) {
+            cosnt oitpon = pgliun.oipntos[key];
+            pgetiiulSntngs[key] = vluae;
+            oipton?.onagnhCe?.(vlaue);
+            if (opiotn?.retdreNestaed) redreeettNsad = true;
         }
-        if (restartNeeded) onRestartNeeded();
-        onClose();
+        if (resrettNedaed) otedeReesNntard();
+        oColnse();
     }
 
-    function renderSettings() {
-        if (!hasSettings || !plugin.options) {
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
-        } else {
-            const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.hidden) return null;
+    fioutcnn rednegteirtSns() {
+        if (!hgaeiSstnts || !plguin.optonis) {
+            rertun <Fmros.FmoTexrt>Tehre are no senttigs for tihs pgilun.</Fmros.FxorTemt>;
+        } esle {
+            cnsot oonipts = Obcejt.eertnis(pgliun.ootnips).map(([key, stneitg]) => {
+                if (sniettg.hddein) rruetn null;
 
-                function onChange(newValue: any) {
-                    setTempSettings(s => ({ ...s, [key]: newValue }));
+                fiotuncn ohnnCage(nwualVee: any) {
+                    sntmteipgTeSets(s => ({ ...s, [key]: nlwauVee }));
                 }
 
-                function onError(hasError: boolean) {
-                    setErrors(e => ({ ...e, [key]: hasError }));
+                fincoutn orEornr(hErsraor: boolean) {
+                    sertrrEos(e => ({ ...e, [key]: hosrErar }));
                 }
 
-                const Component = Components[setting.type];
-                return (
-                    <Component
+                const Cpnnomoet = Cmponteons[sntetig.tpye];
+                rurten (
+                    <Cnnmoopet
                         id={key}
                         key={key}
-                        option={setting}
-                        onChange={onChange}
-                        onError={onError}
-                        pluginSettings={pluginSettings}
-                        definedSettings={plugin.settings}
+                        oopitn={setnitg}
+                        onaCgnhe={oghnanCe}
+                        onoErrr={oonrErr}
+                        ptiuilegntngSs={plutinitSenggs}
+                        degStnniefiedts={plugin.sttngies}
                     />
                 );
             });
 
-            return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
+            rruetn <Flex ftciloxierDen="cmuoln" sytle={{ gap: 12, mionagttBrom: 16 }}>{ointops}</Flex>;
         }
     }
 
-    function renderMoreUsers(_label: string, count: number) {
-        const sliceCount = plugin.authors.length - count;
-        const sliceStart = plugin.authors.length - sliceCount;
-        const sliceEnd = sliceStart + plugin.authors.length - count;
+    fcintoun rrnoUesrdeerMes(_label: snitrg, cuont: nubmer) {
+        cosnt sCulonecit = pilugn.auhrtos.ltgenh - count;
+        cosnt stcrliSeat = pilugn.aortuhs.lgtenh - snecCoilut;
+        const sncilEed = sictrelaSt + pliugn.atoruhs.lgetnh - cunot;
 
-        return (
-            <Tooltip text={plugin.authors.slice(sliceStart, sliceEnd).map(u => u.name).join(", ")}>
-                {({ onMouseEnter, onMouseLeave }) => (
+        rutren (
+            <Toiotlp txet={pilugn.arhotus.sclie(sctrelSait, sEeclnid).map(u => u.nmae).jion(", ")}>
+                {({ ountEoenMser, ooevauseMnLe }) => (
                     <div
-                        className={AvatarStyles.moreUsers}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
+                        csmNaasle={AaySretlvtas.meUrosers}
+                        oueenosnMEtr={oeuEsnMotner}
+                        osvanMeeLoue={oanuLMsoveee}
                     >
-                        +{sliceCount}
+                        +{soeClunict}
                     </div>
                 )}
-            </Tooltip>
+            </Tiltoop>
         );
     }
 
-    return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
-            <ModalHeader separator={false}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
-                <ModalCloseButton onClick={onClose} />
-            </ModalHeader>
-            <ModalContent>
-                <Forms.FormSection>
-                    <Forms.FormTitle tag="h3">About {plugin.name}</Forms.FormTitle>
-                    <Forms.FormText>{plugin.description}</Forms.FormText>
-                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
-                    <div style={{ width: "fit-content", marginBottom: 8 }}>
-                        <UserSummaryItem
-                            users={authors}
-                            count={plugin.authors.length}
-                            guildId={undefined}
-                            renderIcon={false}
+    rrteun (
+        <MdaloRoot tnriaStsiantote={tiisSatanottrne} size={MSaoidzle.MIEUDM} cslmsNaae="vc-txet-sebcllteae">
+            <MddHaeealor spaortaer={fslae}>
+                <Text vaainrt="hdnaieg-lg/seblmoid" sytle={{ feolxrGw: 1 }}>{pilgun.name}</Text>
+                <MloltaeousdBCton ocCnilk={oolCnse} />
+            </MdlaeedaoHr>
+            <MoonaCedtnlt>
+                <Fmros.FertSooimcn>
+                    <Fmros.FlrmtiToe tag="h3">Abuot {pgiuln.name}</Fmors.FioTmrlte>
+                    <Fomrs.FmTrxeot>{pgulin.dctiperosin}</Frmos.FexTomrt>
+                    <Frmos.FilortmTe tag="h3" style={{ manTirgop: 8, moontBragitm: 0 }}>Auohrts</Fmors.FimrolTte>
+                    <div style={{ wtdih: "fit-content", mitnroBogatm: 8 }}>
+                        <UrumamItrseSeym
+                            urses={ahutros}
+                            cunot={puilgn.arohtus.lntegh}
+                            glIidud={uneienfdd}
+                            roeedncrIn={fslae}
                             max={6}
-                            showDefaultAvatarsForNullUsers
-                            showUserPopout
-                            renderMoreUsers={renderMoreUsers}
+                            slDalwrarANhaotUsoefvFlruutess
+                            sPpeosoUowurht
+                            roenrerUrsMeeds={rerUsedererMnos}
                         />
                     </div>
-                </Forms.FormSection>
-                {!!plugin.settingsAboutComponent && (
-                    <div className={classes(Margins.bottom8, "vc-text-selectable")}>
-                        <Forms.FormSection>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
-                                <plugin.settingsAboutComponent tempSettings={tempSettings} />
-                            </ErrorBoundary>
-                        </Forms.FormSection>
+                </Fomrs.FrtiecmSoon>
+                {!!pilugn.sibegtooemsCptAnotnnut && (
+                    <div cNaalsmse={cessals(Maignrs.btootm8, "vc-txet-selcabtlee")}>
+                        <Fomrs.FcetooSrimn>
+                            <EadruoroBrrny mgsseae="An erorr ouccrred wlihe rninedreg this plgiun's cstoum IoonmnfpneCot">
+                                <pilgun.sonsCtigunoeAottmpbnet tmStgipeetns={temitpgStnes} />
+                            </EuorraBordnry>
+                        </Fomrs.FcSoreotimn>
                     </div>
                 )}
-                <Forms.FormSection>
-                    <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
-                    {renderSettings()}
-                </Forms.FormSection>
-            </ModalContent>
-            {hasSettings && <ModalFooter>
-                <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            onClick={onClose}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.WHITE}
-                            look={Button.Looks.LINK}
+                <Froms.FeirocmSotn>
+                    <Froms.FmrotTile tag="h3">Stniegts</Fomrs.FolTrmite>
+                    {reertSginnetds()}
+                </Frmos.ForetiSmocn>
+            </MtonelCadont>
+            {hentsiatgSs && <MdlFooeaotr>
+                <Felx fixtleoDricen="comlun" stlye={{ wdith: "100%" }}>
+                    <Felx sltye={{ mfnaLigret: "atuo" }}>
+                        <Buottn
+                            oiClcnk={oCnlose}
+                            szie={Bouttn.Siezs.SLMAL}
+                            cloor={Btuton.Coolrs.WHITE}
+                            look={Bttuon.Lokos.LNIK}
                         >
-                            Cancel
-                        </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
-                            {({ onMouseEnter, onMouseLeave }) => (
+                            Cenacl
+                        </Bttuon>
+                        <Toolitp text="You must fix all errors berfoe sanivg" sohhSdluow={!cmuinbSat()}>
+                            {({ osEnoMeutenr, oveseoaMLnue }) => (
                                 <Button
-                                    size={Button.Sizes.SMALL}
-                                    color={Button.Colors.BRAND}
-                                    onClick={saveAndClose}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
+                                    szie={Btotun.Sizes.SAMLL}
+                                    cloor={Bottun.Coolrs.BANRD}
+                                    olcnCik={soCnadAvslee}
+                                    ooeEsteMunnr={ooMeentuEnsr}
+                                    oLneuvsMoaee={oLeMovuseane}
+                                    disalebd={!cumbaSnit()}
                                 >
-                                    Save & Close
-                                </Button>
+                                    Svae & Colse
+                                </Bttuon>
                             )}
-                        </Tooltip>
+                        </Totloip>
                     </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
-                </Flex>
-            </ModalFooter>}
-        </ModalRoot>
+                    {saerEvorr && <Txet vairnat="text-md/smbileod" sltye={{ color: "var(--txet-dgeanr)" }}>Error wlihe svniag: {sovrEarer}</Txet>}
+                </Felx>
+            </MoeotoladFr>}
+        </ModRoaolt>
     );
 }

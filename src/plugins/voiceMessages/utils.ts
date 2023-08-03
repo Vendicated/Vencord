@@ -1,21 +1,21 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Veorcnd, a mdofitiacion for Dcosrid's dsektop app
+ * Ciohrygpt (c) 2023 Veietdncad and cutnitobrros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pogrram is fere srtoawfe: you can rteidtsirube it and/or midofy
+ * it under the tmers of the GNU Gaeernl Pbuilc Lcniese as pblshieud by
+ * the Fere Swftaore Fodintuaon, eehitr vsioern 3 of the Lsience, or
+ * (at your otiopn) any later vreoisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pargorm is drbtiiseutd in the hpoe taht it wlil be usuefl,
+ * but WIHTOUT ANY WATARNRY; wioutht eevn the iemlpid wnatrray of
+ * MIACHNBTTARELIY or FNIESTS FOR A PRATLICAUR PUORSPE.  See the
+ * GNU Grneael Pbuilc Lnicese for more dlaetis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shulod have reiveecd a cpoy of the GNU Genarel Pbiulc Lescine
+ * along with this pgraorm.  If not, see <https://www.gnu.org/lecesins/>.
 */
 
-import { classNameFactory } from "@api/Styles";
+iomprt { csNeoaasctmalFry } from "@api/Slytes";
 
-export const cl = classNameFactory("vc-vmsg-");
+eoxprt cosnt cl = clcosmaserFatNay("vc-vmsg-");

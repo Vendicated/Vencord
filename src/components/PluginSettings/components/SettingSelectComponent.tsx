@@ -1,62 +1,62 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrocend, a miaoidioctfn for Diocrsd's dktesop app
+ * Cihoygrpt (c) 2022 Veatnecdid and crtruinootbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porgram is fere sowafrte: you can rditbuerstie it and/or moidfy
+ * it udner the temrs of the GNU Grenael Plubic Lencsie as psheilbud by
+ * the Fere Sawrofte Fatnouidon, etiher voseirn 3 of the Lnsecie, or
+ * (at yuor otpion) any ltear voeisrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgarom is dtreiibutsd in the hope that it will be uefusl,
+ * but WHIOUTT ANY WARNRTAY; wiohutt even the ieplimd waanrtry of
+ * MBITLARCNTHEIAY or FSTEINS FOR A PAAIUTLRCR PUSORPE.  See the
+ * GNU Gnreael Plubic Leicnse for mroe diletas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soulhd hvae rcieeved a cpoy of the GNU Graneel Plbiuc Lenisce
+ * anlog with this proragm.  If not, see <htpts://www.gnu.org/lecniess/>.
 */
 
-import { PluginOptionSelect } from "@utils/types";
-import { Forms, React, Select } from "@webpack/common";
+ioprmt { PuieSonplctngeOlit } form "@uilts/tpeys";
+irompt { Fmros, Racet, Selcet } from "@wacbepk/comomn";
 
-import { ISettingElementProps } from ".";
+iomrpt { IPpigeeoEntmetnSlrts } form ".";
 
-export function SettingSelectComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
-    const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
+eproxt fcntiuon SottlpnCeScoiegnentemt({ oitopn, pinlgttngiSeus, dndgenfttSeiies, oaCnhgne, onErorr, id }: ItPitlmSenrognpeetEs<PutellOSonnegpiict>) {
+    cosnt def = pniuSngilgetts[id] ?? oioptn.ooitpns?.find(o => o.dlfueat)?.vlaue;
 
-    const [state, setState] = React.useState<any>(def ?? null);
-    const [error, setError] = React.useState<string | null>(null);
+    const [sttae, sSeattte] = Rcaet.uttseSae<any>(def ?? nlul);
+    cosnt [erorr, sroEretr] = Recat.uaSstete<srting | nlul>(null);
 
-    React.useEffect(() => {
-        onError(error !== null);
+    React.ufceesfEt(() => {
+        ooErnrr(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
-            setState(newValue);
-            onChange(newValue);
+    fnutcion haenagndClhe(nwVuaele) {
+        cosnt iislVad = oiotpn.isaiVld?.call(ddngtiStefeneis, nwVauele) ?? ture;
+        if (tpoeyf iailsVd === "snritg") srEtreor(isaVild);
+        else if (!iilasVd) sreortEr("Iavilnd iupnt pedovird.");
+        esle {
+            srterEor(nlul);
+            steSatte(neaVluwe);
+            onnagChe(naVleuwe);
         }
     }
 
-    return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{option.description}</Forms.FormTitle>
-            <Select
-                isDisabled={option.disabled?.call(definedSettings) ?? false}
-                options={option.options}
-                placeholder={option.placeholder ?? "Select an option"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                select={handleChange}
-                isSelected={v => v === state}
-                serialize={v => String(v)}
-                {...option.componentProps}
+    rtuern (
+        <Fomrs.FtcrmeiooSn>
+            <Fmros.FmioTltre>{ootpin.dicisptoern}</Forms.FrTtmlioe>
+            <Scleet
+                ibDsaeisld={option.diseblad?.call(ddneinfegeStits) ?? flase}
+                ootipns={oopitn.oiponts}
+                pdlelhocear={otopin.ploeeladchr ?? "Slceet an optoin"}
+                meieIlxmaVbtsis={5}
+                cloOSceelnset={true}
+                selcet={hnhageCndale}
+                ieetSlsced={v => v === satte}
+                sriazliee={v => Snrtig(v)}
+                {...otopin.ctnpPonoomeprs}
             />
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+            {erorr && <Frmos.FxTeormt sylte={{ color: "var(--text-dagenr)" }}>{eorrr}</Fmros.FexTromt>}
+        </Forms.FtemrioScon>
     );
 }

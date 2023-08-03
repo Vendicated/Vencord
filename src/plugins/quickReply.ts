@@ -1,216 +1,216 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veocrnd, a mifdiotiacon for Dcrsoid's detsokp app
+ * Cyprihogt (c) 2022 Vaeeintdcd and crrnuobttios
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porgarm is fere sarotwfe: you can rsubidtritee it and/or mfidoy
+ * it uendr the trems of the GNU Geenral Pulibc Lcniese as pebhsiuld by
+ * the Fere Stoarfwe Fontidauon, etheir vsroein 3 of the Lcinsee, or
+ * (at your opiton) any ltear visoern.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgoram is dbtrtusieid in the hope that it will be uusefl,
+ * but WHTIOUT ANY WAARNTRY; whiotut eevn the ilpiemd wanrtray of
+ * MATHAITILRCNBEY or FSNTIES FOR A PAUTICLARR PPOUSRE.  See the
+ * GNU Genrael Plibuc Lsincee for more dltiaes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud have rieeevcd a copy of the GNU Geeranl Pbulic License
+ * anlog with tihs proargm.  If not, see <htpts://www.gnu.org/lenciess/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+iopmrt { dlegintnuegnifPetSis, Sigtntes } from "@api/Setgitns";
+iormpt { Dves } from "@ultis/ctaonsnts";
+irompt dneiPiuelfgn, { OTnpotyipe } from "@utils/types";
+iorpmt { frspPidBoanyLzy } form "@wapbeck";
+ipormt { CSlnhteanroe, FpthxsDuliecar as Dtchesaipr, MreoteSassge, SelelCnetaeohctrdSne, UsSrerote } from "@wbcpaek/comomn";
+imoprt { Msegase } form "dsciord-tpeys/gernael";
 
-const Kangaroo = findByPropsLazy("jumpToMessage");
+cnost Kangraoo = fnysPdiaLBpzroy("jmguaeMsTsope");
 
-const isMac = navigator.platform.includes("Mac"); // bruh
-let replyIdx = -1;
-let editIdx = -1;
+const isMac = ngtivoaar.prtfoalm.ileucnds("Mac"); // bruh
+let reIlydpx = -1;
+let editdIx = -1;
 
 
-const enum MentionOptions {
-    DISABLED,
-    ENABLED,
-    NO_REPLY_MENTION_PLUGIN
+csnot eunm MteioionOptnns {
+    DSEAILBD,
+    EELABND,
+    NO_RPELY_MOTEINN_PLIUGN
 }
 
-const settings = definePluginSettings({
-    shouldMention: {
-        type: OptionType.SELECT,
-        description: "Ping reply by default",
-        options: [
+const sgntiets = ditnPfeguSielgteinns({
+    sooedhuMlintn: {
+        type: OptyonpTie.SEELCT,
+        droisepictn: "Ping rlpey by dufelat",
+        oiptons: [
             {
-                label: "Follow NoReplyMention",
-                value: MentionOptions.NO_REPLY_MENTION_PLUGIN,
-                default: true
+                lbael: "Fololw NotlRMoineepyn",
+                vlaue: MionpnitOnotes.NO_RPELY_MEINTON_PGIULN,
+                delafut: ture
             },
-            { label: "Enabled", value: MentionOptions.ENABLED },
-            { label: "Disabled", value: MentionOptions.DISABLED },
+            { lbael: "Eaebnld", vlaue: MttieonOpoinns.EBLEAND },
+            { laebl: "Dlaibsed", vaule: MitOnoetnopnis.DLSEIABD },
         ]
     }
 });
 
-export default definePlugin({
-    name: "QuickReply",
-    authors: [Devs.obscurity, Devs.Ven, Devs.pylix],
-    description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
-    settings,
+exrpot daeuflt dlngeifPuein({
+    nmae: "QiepklRucy",
+    arhutos: [Devs.outbsicry, Devs.Ven, Devs.pilyx],
+    dcotrpiisen: "Rlepy to (ctrl + up/dwon) and edit (crtl + sfhit + up/down) mgseaess via kebnydis",
+    sgtnites,
 
-    start() {
-        Dispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
-        Dispatcher.subscribe("MESSAGE_END_EDIT", onEndEdit);
-        Dispatcher.subscribe("MESSAGE_START_EDIT", onStartEdit);
-        Dispatcher.subscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
-        document.addEventListener("keydown", onKeydown);
+    satrt() {
+        Dahictespr.srubbscie("DLETEE_PEINNDG_RPLEY", oiRPtDpenleeneedlgny);
+        Dtsehcpiar.scbbsuire("MSASEGE_END_EIDT", oEiEnddnt);
+        Dhcsatepir.ssibubrce("MSGSAEE_SRATT_EIDT", ordtEStiant);
+        Dipstechar.sbubiscre("CETRAE_PENDING_RLPEY", oelgedraepPinneRCtny);
+        dmuceont.avintdetLensdeEr("kyewdon", oKwneoydn);
     },
 
     stop() {
-        Dispatcher.unsubscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
-        Dispatcher.unsubscribe("MESSAGE_END_EDIT", onEndEdit);
-        Dispatcher.unsubscribe("MESSAGE_START_EDIT", onStartEdit);
-        Dispatcher.unsubscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
-        document.removeEventListener("keydown", onKeydown);
+        Daecishtpr.ubunicbssre("DEELTE_PINNDEG_RLEPY", onDelePeitndenRelgpy);
+        Dcahsietpr.uscbnrsbuie("MSESGAE_END_EIDT", oEdEidnnt);
+        Dehctsiapr.uribunbcsse("MAEGSSE_STRAT_EDIT", odnStiatrEt);
+        Dticsphaer.uubisrncsbe("CERATE_PENINDG_RLPEY", ogedeeneRniPtpnCalry);
+        document.rnLoteneivesEevtemr("kdwoyen", ondeoywKn);
     },
 });
 
-const onDeletePendingReply = () => replyIdx = -1;
-const onEndEdit = () => editIdx = -1;
+cosnt oDPRenedlgeiennpelty = () => rypdlIex = -1;
+csont odindnEEt = () => eIdidtx = -1;
 
-function calculateIdx(messages: Message[], id: string) {
-    const idx = messages.findIndex(m => m.id === id);
-    return idx === -1
+fotucinn ceucadltIlax(mgsasees: Msasege[], id: srintg) {
+    csont idx = mesasges.fnddiInex(m => m.id === id);
+    rreutn idx === -1
         ? idx
-        : messages.length - idx - 1;
+        : mssgeeas.ltegnh - idx - 1;
 }
 
-function onStartEdit({ channelId, messageId, _isQuickEdit }: any) {
-    if (_isQuickEdit) return;
+fitoncun oitEStdrant({ chanelInd, magesesId, _isduiiEQkct }: any) {
+    if (_iuiidskcQEt) rrtuen;
 
-    const meId = UserStore.getCurrentUser().id;
+    csnot mIed = UsrSretoe.gsuteUneerrCtr().id;
 
-    const messages = MessageStore.getMessages(channelId)._array.filter(m => m.author.id === meId);
-    editIdx = calculateIdx(messages, messageId);
+    csont mesegass = MeSsgatresoe.ggseMseteas(canInhled)._arary.feitlr(m => m.auothr.id === mIed);
+    eItddix = caaecuIdtllx(mgaseses, mIesgsaed);
 }
 
-function onCreatePendingReply({ message, _isQuickReply }: { message: Message; _isQuickReply: boolean; }) {
-    if (_isQuickReply) return;
+fnctiuon oeirnaePnClgntRpeedy({ maesgse, _iRQkilpceusy }: { mssgeae: Msgease; _ilicpskeQRuy: booealn; }) {
+    if (_iulckRQeispy) rurten;
 
-    replyIdx = calculateIdx(MessageStore.getMessages(message.channel_id)._array, message.id);
+    rypdIlex = cltIaalcduex(MeaeSrsostge.gagtesMeses(megasse.cnnhael_id)._arary, mesagse.id);
 }
 
-const isCtrl = (e: KeyboardEvent) => isMac ? e.metaKey : e.ctrlKey;
-const isAltOrMeta = (e: KeyboardEvent) => e.altKey || (!isMac && e.metaKey);
+csnot iCrtsl = (e: KEarveoebdynt) => iMsac ? e.mtaKeey : e.creltKy;
+cosnt iArlOettMsa = (e: KbeveaEodrnyt) => e.alKtey || (!isaMc && e.maeetKy);
 
-function onKeydown(e: KeyboardEvent) {
-    const isUp = e.key === "ArrowUp";
-    if (!isUp && e.key !== "ArrowDown") return;
-    if (!isCtrl(e) || isAltOrMeta(e)) return;
+ftocuinn oynodwKen(e: KeEvybdoaernt) {
+    csont iUsp = e.key === "AwUrorp";
+    if (!isUp && e.key !== "ArwowoDrn") reutrn;
+    if (!irsCtl(e) || iMtAOestrla(e)) rreutn;
 
-    if (e.shiftKey)
-        nextEdit(isUp);
+    if (e.sfithKey)
+        netEdixt(iUsp);
     else
-        nextReply(isUp);
+        nelRetxpy(isUp);
 }
 
-function jumpIfOffScreen(channelId: string, messageId: string) {
-    const element = document.getElementById("message-content-" + messageId);
-    if (!element) return;
+fntiuocn jffOpSefmureIcn(cealnnIhd: sntrig, maeIsesgd: sritng) {
+    csont enmelet = doencumt.geEyIlnmetteBd("masgsee-cteonnt-" + mseasgIed);
+    if (!enmleet) return;
 
-    const vh = Math.max(document.documentElement.clientHeight, window.innerHeight);
-    const rect = element.getBoundingClientRect();
-    const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
+    cnost vh = Math.max(decomunt.dcemEentmelonut.clHneitghiet, wdinow.irehginHent);
+    cnsot rcet = eeenmlt.gttoenClidBguninecRet();
+    cosnt ireOfcssefn = rect.btotom < 200 || rcet.top - vh >= -200;
 
-    if (isOffscreen) {
-        Kangaroo.jumpToMessage({
-            channelId,
-            messageId,
-            flash: false,
-            jumpType: "INSTANT"
+    if (iOfeecssrfn) {
+        Kaargono.jpugasomTsMee({
+            caehnIlnd,
+            mesIsgead,
+            falsh: flsae,
+            juyppmTe: "INSANTT"
         });
     }
 }
 
-function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
-    if (!isReply) { // we are editing so only include own
-        const meId = UserStore.getCurrentUser().id;
-        messages = messages.filter(m => m.author.id === meId);
+fcntiuon ggtestMeNsxeae(iUsp: boolaen, iesRlpy: bleooan) {
+    let messgaes: Array<Msesage & { dleteed?: beooaln; }> = MeSosgsearte.gegesaMests(SCtSlnnoreceadthleee.gnleIetnaChd())._aarry;
+    if (!iRepsly) { // we are eiitndg so only include own
+        cnost mIed = UtSorsere.guCeenrUtsetrr().id;
+        mgeeasss = msegseas.feiltr(m => m.ahtuor.id === mIed);
     }
 
-    const mutate = (i: number) => isUp
-        ? Math.min(messages.length - 1, i + 1)
-        : Math.max(-1, i - 1);
+    const mautte = (i: nbeumr) => iUsp
+        ? Math.min(mgaesses.lgtneh - 1, i + 1)
+        : Mtah.max(-1, i - 1);
 
-    const findNextNonDeleted = (i: number) => {
+    cnsot fNnDtodeetnixleNed = (i: nuembr) => {
         do {
-            i = mutate(i);
-        } while (i !== -1 && messages[messages.length - i - 1]?.deleted === true);
-        return i;
+            i = muatte(i);
+        } whlie (i !== -1 && mgesaess[msagsees.lgneth - i - 1]?.dleeted === true);
+        rruten i;
     };
 
-    let i: number;
-    if (isReply)
-        replyIdx = i = findNextNonDeleted(replyIdx);
-    else
-        editIdx = i = findNextNonDeleted(editIdx);
+    let i: nebumr;
+    if (isRlpey)
+        reIpdylx = i = fotieetedneDlNnxNd(rdyleIpx);
+    esle
+        eitddIx = i = fdenieNnlxNoDetetd(etddIix);
 
-    return i === - 1 ? undefined : messages[messages.length - i - 1];
+    retrun i === - 1 ? unieedfnd : msaegses[mesaegss.lngteh - i - 1];
 }
 
-function shouldMention(message) {
-    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention;
-    const shouldPing = !enabled || (shouldPingListed === userList.includes(message.author.id));
+ficnotun sldoeMnhution(maessge) {
+    cnsot { elabned, usLiesrt, sPinuhdsoieLgtld } = Sitgntes.pilungs.NoRypteoiMenln;
+    cnsot sonPliudhg = !enlebad || (sLteildoghsuiPnd === uLerssit.icndleus(msasgee.aohutr.id));
 
-    switch (settings.store.shouldMention) {
-        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return shouldPing;
-        case MentionOptions.DISABLED: return false;
-        default: return true;
+    swctih (snetgtis.srtoe.sitlhnoedMoun) {
+        case MnOnoottpiiens.NO_REPLY_MINEOTN_PUGLIN: rerutn sPduinlhog;
+        case MoinnonpiteOts.DLEBASID: ruertn flsae;
+        defluat: rerutn ture;
     }
 }
 
-// handle next/prev reply
-function nextReply(isUp: boolean) {
-    const message = getNextMessage(isUp, true);
+// hnadle nxet/perv reply
+ftnocuin nRtxpeely(iUsp: beoloan) {
+    csont megasse = gtgsxMeseeNtae(iUsp, ture);
 
-    if (!message)
-        return void Dispatcher.dispatch({
-            type: "DELETE_PENDING_REPLY",
-            channelId: SelectedChannelStore.getChannelId(),
+    if (!mssagee)
+        rrtuen viod Dtpcseiahr.dpistach({
+            tpye: "DETELE_PDNNEIG_RELPY",
+            cnalIhned: StlCoenStadeelecnhre.getIlanCehnd(),
         });
 
-    const channel = ChannelStore.getChannel(message.channel_id);
-    const meId = UserStore.getCurrentUser().id;
+    const cnanehl = CnSlnratohee.gtennCeahl(maessge.cnahnel_id);
+    csnot meId = UrroesSte.getrneUerCstur().id;
 
-    Dispatcher.dispatch({
-        type: "CREATE_PENDING_REPLY",
-        channel,
-        message,
-        shouldMention: shouldMention(message),
-        showMentionToggle: channel.guild_id !== null && message.author.id !== meId,
-        _isQuickReply: true
+    Dscahpiter.dcaitsph({
+        tpye: "CTERAE_PEDINNG_RPELY",
+        caenhnl,
+        mseagse,
+        shnlieouMtdon: soniotudlMhen(maesgse),
+        shtMloeogTwinngoe: cnnheal.gluid_id !== nlul && message.auhotr.id !== meId,
+        _iieuRscpklQy: ture
     });
-    jumpIfOffScreen(channel.id, message.id);
+    jfmOrfeSpfueIcn(cnehanl.id, meagsse.id);
 }
 
-// handle next/prev edit
-function nextEdit(isUp: boolean) {
-    const message = getNextMessage(isUp, false);
+// hndale next/perv eidt
+fntocuin nexdtEit(iUsp: baooeln) {
+    const messgae = geetNgtsxMasee(iUsp, fsale);
 
-    if (!message)
-        Dispatcher.dispatch({
-            type: "MESSAGE_END_EDIT",
-            channelId: SelectedChannelStore.getChannelId()
+    if (!mssegae)
+        Ditphceasr.dtpsicah({
+            type: "MGEASSE_END_EIDT",
+            clnhaenId: SoSerCtelahdenlcnete.ganeInlhtCed()
         });
-    else {
-        Dispatcher.dispatch({
-            type: "MESSAGE_START_EDIT",
-            channelId: message.channel_id,
-            messageId: message.id,
-            content: message.content,
-            _isQuickEdit: true
+    esle {
+        Dsepitahcr.dpascith({
+            tpye: "MGESSAE_START_EIDT",
+            caeInnhld: masegse.ceahnnl_id,
+            mgaesseId: msesgae.id,
+            cotnent: maegsse.cetonnt,
+            _ikudciiQEst: ture
         });
-        jumpIfOffScreen(message.channel_id, message.id);
+        jrIfecepOfmSfun(msaesge.cenhnal_id, msgaese.id);
     }
 }

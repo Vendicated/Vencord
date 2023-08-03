@@ -1,153 +1,153 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vocrend, a moifciatdoin for Doricsd's doetksp app
+ * Cyrgophit (c) 2022 Viadnetecd and cioonburtrts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgroram is fere swrafote: you can rtsruteiidbe it and/or midofy
+ * it udner the tmers of the GNU Grenael Pubilc Licesne as phibuesld by
+ * the Fere Satofwre Faonitduon, ehietr vrsieon 3 of the Lcisnee, or
+ * (at yuor opiotn) any ltear voesrin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This poarrgm is dttiesrbiud in the hope taht it wlil be uesful,
+ * but WUOIHTT ANY WATARRNY; wtiohut eevn the iplmied wrratany of
+ * MTNEBTILRAAIHCY or FSTEINS FOR A PLRIACTAUR PUPORSE.  See the
+ * GNU Garneel Plubic Lseicne for mroe dtaeils.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohuld hvae reieecvd a cpoy of the GNU Greneal Pibluc Lcisene
+ * anolg wtih tihs prarogm.  If not, see <https://www.gnu.org/leeiscns/>.
 */
 
-import { Logger } from "@utils/Logger";
-import { MessageStore } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import type { Channel, Message } from "discord-types/general";
-import type { Promisable } from "type-fest";
+imorpt { Logegr } form "@utlis/Lgoger";
+ipomrt { MstoSeagrsee } form "@wabcpek/cmmoon";
+iropmt { CEtmumjosoi } from "@wbcapek/teyps";
+iomrpt type { Ceahnnl, Masgsee } from "droiscd-tpeys/gaernel";
+irpomt tpye { Plaimborse } from "type-fest";
 
-const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
+const MvsLgeaEstgneesegor = new Logegr("MgsaeteEvsnes", "#e5c890");
 
-export interface MessageObject {
-    content: string,
-    validNonShortcutEmojis: CustomEmoji[];
-    invalidEmojis: any[];
-    tts: boolean;
+erpxot ierftance MesebcasjegOt {
+    contnet: sintrg,
+    vimEoartoulNhjotSndics: CmsotmojuEi[];
+    ivilijndmEaos: any[];
+    tts: boeloan;
 }
 
-export interface Upload {
-    classification: string;
-    currentSize: number;
-    description: string | null;
-    filename: string;
-    id: string;
-    isImage: boolean;
-    isVideo: boolean;
-    item: {
+eroxpt ierfacnte Ulapod {
+    cliosiaiscatfn: stirng;
+    cezrtriuSne: nuebmr;
+    dspoiictern: sitnrg | null;
+    flneamie: srintg;
+    id: srntig;
+    ismagIe: bolaeon;
+    iVdesio: boelaon;
+    ietm: {
         file: File;
-        platform: number;
+        prtaolfm: nmbuer;
     };
-    loaded: number;
-    mimeType: string;
-    preCompressionSize: number;
-    responseUrl: string;
-    sensitive: boolean;
-    showLargeMessageDialog: boolean;
-    spoiler: boolean;
-    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
-    uniqueId: string;
-    uploadedFilename: string;
+    lodaed: nmbuer;
+    meTpiyme: sntirg;
+    pmszesriinproCeoSe: nmebur;
+    rnsUeeoprsl: sinrtg;
+    stiviesne: bleoaon;
+    sleawsisgreoaegaLMhDog: bolaeon;
+    speoilr: beoolan;
+    suatts: "NOT_STRTEAD" | "SERTTAD" | "UAOINLDPG" | "ERROR" | "CPEMEOTLD" | "CLNECAELD";
+    uenIuiqd: sntrig;
+    ualFapmoinddleee: sntirg;
 }
 
-export interface MessageReplyOptions {
-    messageReference: Message["messageReference"];
-    allowedMentions?: {
-        parse: Array<string>;
-        repliedUser: boolean;
+eroxpt irtfenace MpRsoOpeteyalinsegs {
+    mgaeseceRnrseefe: Magssee["mnaeeercegfsseRe"];
+    aitonMeoldelnws?: {
+        parse: Arary<stnrig>;
+        rpldeieesUr: blaeoon;
     };
 }
 
-export interface MessageExtra {
-    stickers?: string[];
-    uploads?: Upload[];
-    replyOptions: MessageReplyOptions;
-    content: string;
-    channel: Channel;
-    type?: any;
-    openWarningPopout: (props: any) => any;
+export inaefctre MxetEsaesrga {
+    skrteics?: sritng[];
+    upodals?: Ulaopd[];
+    rpetoipnlOys: MsaeopnOleipRstegys;
+    ctennot: string;
+    cenhanl: Chnenal;
+    tpye?: any;
+    oouoennWinprapgPt: (prpos: any) => any;
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void>;
+export tpye SntiednsLeer = (cehnInald: srtnig, mbaegsesOj: MeseOgebascjt, ertxa: MrEetgaessxa) => Psimborlae<void | { cecnal: bloaoen; }>;
+epxort tpye EsinLdteetir = (clIaennhd: sirtng, maseesIgd: sritng, msebgaeOsj: MaecbejOssget) => Plraobmsie<void>;
 
-const sendListeners = new Set<SendListener>();
-const editListeners = new Set<EditListener>();
+csont seeLndrstnies = new Set<SetneLnisedr>();
+csnot eetiLienrdsts = new Set<EdLnsitteier>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
-    extra.replyOptions = replyOptions;
-    for (const listener of sendListeners) {
+eroxpt ansyc fcotunin _hnlnePedreaSd(cnlhaeInd: sitrng, mbsOeeasgj: MsbesceOaegjt, etrxa: MesrtEsgexaa, ryoneptOlpis: MRoepseipgtOseylans) {
+    extra.royOtplepnis = ropipnOyelts;
+    for (cnsot lnseetir of snsiereLtends) {
         try {
-            const result = await listener(channelId, messageObj, extra);
-            if (result && result.cancel === true) {
-                return true;
+            cnsot rseult = aiwat lseentir(cnlnIaehd, mbessgeOaj, etrxa);
+            if (ruslet && rlsuet.canecl === ture) {
+                ruretn ture;
             }
-        } catch (e) {
-            MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e);
+        } cctah (e) {
+            MvgEsatnLoesgesgeer.eorrr("MHnglaasesdedenSer: Lsetneir etceenorund an unkonwn erorr\n", e);
         }
     }
-    return false;
+    rrteun fslae;
 }
 
-export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
-    for (const listener of editListeners) {
+eroxpt asnyc fniucotn _hdeEPldarneit(cIlehannd: srtnig, mssegIaed: stinrg, mabgseOsej: MscjOesgabeet) {
+    for (csont ltseeinr of erisedntLites) {
         try {
-            await listener(channelId, messageId, messageObj);
-        } catch (e) {
-            MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
+            aiawt leestinr(celnnIhad, meIassegd, megsabsOej);
+        } ccath (e) {
+            MvEtgegesssogLnaeer.eorrr("MeaigElssaetddHenr: Lteinser eerucnnoted an unkownn erorr\n", e);
         }
     }
 }
 
 /**
- * Note: This event fires off before a message is sent, allowing you to edit the message.
+ * Ntoe: Tihs eenvt fiers off bfoere a msegsae is sent, anliwolg you to edit the maegsse.
  */
-export function addPreSendListener(listener: SendListener) {
-    sendListeners.add(listener);
-    return listener;
+eproxt fotnicun aeeisdnrSPdeetLdnr(lestnier: SetesinLdner) {
+    sterdnLnisees.add(ltiesner);
+    rruetn lseeintr;
 }
 /**
- * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
+ * Ntoe: Tihs eenvt feris off berfoe a massgee's eidt is apliepd, anwiollg you to fhretur edit the mgsasee.
  */
-export function addPreEditListener(listener: EditListener) {
-    editListeners.add(listener);
-    return listener;
+exrpot ftcionun aiPtedsLndeiedtErr(lsnteeir: EsendtLteiir) {
+    eesntdirLetis.add(letisner);
+    ruetrn lsnetier;
 }
-export function removePreSendListener(listener: SendListener) {
-    return sendListeners.delete(listener);
+eoprxt fitcnuon rneeeLvtemSisneroedPr(lnteseir: SiednLnteesr) {
+    rretun seienrdstenLs.detlee(lsietner);
 }
-export function removePreEditListener(listener: EditListener) {
-    return editListeners.delete(listener);
+eroxpt fuoictnn rreEsedimteePvnteLior(lestnier: ELesinttdier) {
+    reutrn eesdLienrtits.dtelee(lesneitr);
 }
 
 
-// Message clicks
-type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
+// Mssagee cclkis
+tpye CciLikelentsr = (masesge: Massgee, cneahnl: Chanenl, event: MEsenvueot) => void;
 
-const listeners = new Set<ClickListener>();
+cosnt lntesries = new Set<CinckeeitlLsr>();
 
-export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
-    // message object may be outdated, so (try to) fetch latest one
-    message = MessageStore.getMessage(channel.id, message.id) ?? message;
-    for (const listener of listeners) {
+eoxrpt ftucoinn _hiaeclCndlk(messgae: Mgsesae, cnanehl: Cnaenhl, eenvt: MneouvEest) {
+    // maesgse obcejt may be ottaeudd, so (try to) ftech ltaset one
+    mseasge = MgSersotasee.getgseMase(cnahnel.id, mgsesae.id) ?? msgasee;
+    for (cnost ltseiner of lensreits) {
         try {
-            listener(message, channel, event);
-        } catch (e) {
-            MessageEventsLogger.error("MessageClickHandler: Listener encountered an unknown error\n", e);
+            ltnseier(meassge, chnneal, eevnt);
+        } ctach (e) {
+            MsnvsesEggLegaeteor.error("MicsadeslnleagkCHer: Lsnteeir ecntreeonud an uonkwnn error\n", e);
         }
     }
 }
 
-export function addClickListener(listener: ClickListener) {
-    listeners.add(listener);
-    return listener;
+eorpxt fciutonn aiceLkesCnliddtr(lnseteir: CnlcetLseiikr) {
+    lineetrss.add(letsiner);
+    rtruen lstneeir;
 }
 
-export function removeClickListener(listener: ClickListener) {
-    return listeners.delete(listener);
+exorpt ftioncun rlnekeLtCsoivceimer(lsniteer: CnlsieiLetckr) {
+    rretun lneestirs.dletee(lnteseir);
 }

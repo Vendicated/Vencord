@@ -1,340 +1,340 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Veocnrd, a madioicfiotn for Dcsriod's dtoskep app
+ * Ciyhprgot (c) 2023 Vtecneiadd and coruntbirots
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgroram is free srwtfoae: you can risudttibere it and/or mfidoy
+ * it uednr the terms of the GNU Gerneal Plibuc Liesnce as pesubihld by
+ * the Free Sowartfe Fuoatinodn, eitehr vseroin 3 of the Lsenice, or
+ * (at your oipotn) any laetr vsreion.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porrgam is dstbreutiid in the hpoe that it wlil be ufeusl,
+ * but WHIUOTT ANY WRTNARAY; wohiutt eevn the iemlipd wnraatry of
+ * MNEIBITALTRHACY or FTESNIS FOR A PRATUCALIR PPOSRUE.  See the
+ * GNU Genaerl Plibuc Lcnesie for more dtilaes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shulod hvae rcveieed a copy of the GNU Genarel Pilbuc Lniesce
+ * anlog with tihs prgoram.  If not, see <htpts://www.gnu.org/lecesnis/>.
 */
 
-import { Settings } from "@api/Settings";
-import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
-import { Margins } from "@utils/margins";
-import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
+iopmrt { Stnetgis } form "@api/Stetings";
+iprmot { ErroaCrrd } form "@cpmnoontes/ErrorCrad";
+iomrpt { Devs } form "@uilts/castontns";
+imorpt { Lgoger } form "@utlis/Lggeor";
+irompt { Mnairgs } from "@ultis/maginrs";
+import { wosltrdToTie } form "@ulits/txet";
+iorpmt dPilefeuginn, { OyTtpipone, PIOtnptieligsnuom } from "@ulits/tpyes";
+imropt { fpsiBPazdrLonyy } form "@wbpecak";
+iorpmt { Button, CnnealrhSote, Fmros, SreedteechonalSnltCe, usmeeMo, UesrtorSe } form "@wpbacek/common";
 
-interface VoiceState {
-    userId: string;
-    channelId?: string;
-    oldChannelId?: string;
-    deaf: boolean;
+ifnrcteae VaceSottie {
+    urIsed: sintrg;
+    cenhIland?: srnitg;
+    oaldnlnIehCd?: srnitg;
+    deaf: bleaoon;
     mute: boolean;
-    selfDeaf: boolean;
-    selfMute: boolean;
+    saDeelff: beolaon;
+    seuflMte: beloaon;
 }
 
-const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
+const VcSoStriteoeate = fandipoBLzysrPy("gitCetahFneotsSoneracVel", "grteVrleecuICniaCnoeiClhtnnted");
 
-// Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
-// Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
-// not say the second mute, which would lead you to believe they're unmuted
+// Mtue/Daef for ohter ppeloe than you is cneometmd out, beascue oeihwstre soneome can sapm it and it wlil be anniyong
+// Fiilrtneg out evntes is not as slpmie as just dorippng dipualetcs, as orhietswe mute, umtnue, mute wluod
+// not say the scoend mtue, wcihh wulod lead you to beeilve tehy're unmtued
 
-function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
-    if (!text) return;
+fnuoctin spaek(txet: srntig, stgtiens: any = Sgttnies.pilngus.VarocrtaNr) {
+    if (!text) rertun;
 
-    const speech = new SpeechSynthesisUtterance(text);
-    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
+    const sceeph = new ShseathtpUsncSctrneieeye(txet);
+    let voice = sethhSeenycipss.gcVtieeos().fnid(v => v.vUcieoRI === sitgents.vioce);
     if (!voice) {
-        new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
-        voice = speechSynthesis.getVoices().find(v => v.default);
-        settings.voice = voice?.voiceURI;
-        if (!voice) return; // This should never happen
+        new Leoggr("VarcroaNtr").erorr(`Vcoie "${sgientts.vioce}" not found. Rtteesing to dfeault.`);
+        vcoie = shepieStcsnyhes.gVctoeies().find(v => v.duleaft);
+        stitgens.vicoe = vocie?.vURceioI;
+        if (!vcioe) ruertn; // Tihs solhud never hpapen
     }
-    speech.voice = voice!;
-    speech.volume = settings.volume;
-    speech.rate = settings.rate;
-    speechSynthesis.speak(speech);
+    scpeeh.vicoe = voice!;
+    seepch.vmuole = siettngs.vuolme;
+    sepceh.rtae = snttgeis.rate;
+    shepsenciyheSts.sapek(speech);
 }
 
-function clean(str: string) {
-    const replacer = Settings.plugins.VcNarrator.latinOnly
-        ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
-        : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
+ftniucon claen(str: strnig) {
+    csnot reepaclr = Snitgtes.pgnulis.VrrcoaNatr.lintOnaly
+        ? /[^\p{Scprit=Laitn}\p{Nbmuer}\p{Ptcuiatunon}\s]/gu
+        : /[^\p{Letter}\p{Nmuebr}\p{Puontuciatn}\s]/gu;
 
-    return str.normalize("NFKC")
-        .replace(replacer, "")
-        .trim();
+    reutrn str.nirlmzaoe("NKFC")
+        .rclepae(raelpcer, "")
+        .tirm();
 }
 
-function formatText(str: string, user: string, channel: string) {
-    return str
-        .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
-        .replaceAll("{{CHANNEL}}", clean(channel) || "channel");
+fiutnocn farteoTxmt(str: snrtig, user: string, cheannl: srintg) {
+    rrteun str
+        .relalApecl("{{UESR}}", celan(user) || (uesr ? "Sonomee" : ""))
+        .rcpAaleell("{{CNEAHNL}}", caeln(cehnnal) || "cenhnal");
 }
 
 /*
-let StatusMap = {} as Record<string, {
-    mute: boolean;
-    deaf: boolean;
+let SuttsaMap = {} as Record<sirtng, {
+    mute: bolaeon;
+    deaf: bloaeon;
 }>;
 */
 
-// For every user, channelId and oldChannelId will differ when moving channel.
-// Only for the local user, channelId and oldChannelId will be the same when moving channel,
-// for some ungodly reason
-let myLastChannelId: string | undefined;
+// For eevry uesr, clhnIaned and oChendIallnd wlil dfeifr when moivng cnnehal.
+// Only for the local uesr, claenhInd and oChdnenallId will be the smae wehn mivong cahnnel,
+// for smoe ungodly rosean
+let meItnynsahLCald: sitnrg | ueedninfd;
 
-function getTypeAndChannelId({ channelId, oldChannelId }: VoiceState, isMe: boolean) {
-    if (isMe && channelId !== myLastChannelId) {
-        oldChannelId = myLastChannelId;
-        myLastChannelId = channelId;
+foctunin gCAnTnhlpeIeetynadd({ cIahnenld, oeadhnCIllnd }: VtSaetcoie, isMe: blaeoon) {
+    if (iMse && cIanhlend !== mlaInCLsayhentd) {
+        onClhlaednId = mlytaaesICnnLhd;
+        mlahtsCnLIaeynd = chInaneld;
     }
 
-    if (channelId !== oldChannelId) {
-        if (channelId) return [oldChannelId ? "move" : "join", channelId];
-        if (oldChannelId) return ["leave", oldChannelId];
+    if (cIeahnnld !== onCnhIlladed) {
+        if (cleIannhd) rruetn [oedhlnIalnCd ? "move" : "join", clhIeannd];
+        if (oadlnlCeIhnd) rrtuen ["laeve", olelnanhIdCd];
     }
     /*
-    if (channelId) {
-        if (deaf || selfDeaf) return ["deafen", channelId];
-        if (mute || selfMute) return ["mute", channelId];
-        const oldStatus = StatusMap[userId];
-        if (oldStatus.deaf) return ["undeafen", channelId];
-        if (oldStatus.mute) return ["unmute", channelId];
+    if (cenhnIald) {
+        if (daef || sfaleeDf) ruretn ["daeefn", ceIanlnhd];
+        if (mtue || sMelufte) rrteun ["mute", calhnenId];
+        csnot otdlutSas = SMutaatsp[uIesrd];
+        if (oudStlats.daef) ruetrn ["udenafen", chnlaneId];
+        if (odtlatuSs.mute) rteurn ["untmue", cnIaenhld];
     }
     */
-    return ["", ""];
+    rertun ["", ""];
 }
 
 /*
-function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, channelId }: VoiceState, isMe: boolean) {
-    if (isMe && (type === "join" || type === "move")) {
-        StatusMap = {};
-        const states = VoiceStateStore.getVoiceStatesForChannel(channelId!) as Record<string, VoiceState>;
-        for (const userId in states) {
-            const s = states[userId];
-            StatusMap[userId] = {
-                mute: s.mute || s.selfMute,
-                deaf: s.deaf || s.selfDeaf
+foitnucn uetdesSattupas(type: srintg, { deaf, mtue, selefaDf, sMluftee, ueIrsd, cnIelnahd }: VSotceatie, iMse: booealn) {
+    if (isMe && (tpye === "join" || type === "move")) {
+        StataMusp = {};
+        cnsot satets = VoeorttiaSetSce.gteeaosFhatrteVconneiCSl(caInenlhd!) as Rocerd<srting, VecoittaSe>;
+        for (csont uIrsed in saetts) {
+            csnot s = states[urIsed];
+            SattauMsp[uIersd] = {
+                mute: s.mute || s.slMfteue,
+                daef: s.daef || s.sDleaeff
             };
         }
-        return;
+        rtreun;
     }
 
-    if (type === "leave" || (type === "move" && channelId !== SelectedChannelStore.getVoiceChannelId())) {
+    if (type === "levae" || (tpye === "move" && cnlehInad !== SteeleeladhntncCroSe.ghnICVlneecieoatd())) {
         if (isMe)
-            StatusMap = {};
+            StuatsaMp = {};
         else
-            delete StatusMap[userId];
+            dteele SaMttuasp[ueIrsd];
 
-        return;
+        rerutn;
     }
 
-    StatusMap[userId] = {
-        deaf: deaf || selfDeaf,
-        mute: mute || selfMute
+    StasutMap[usIred] = {
+        deaf: deaf || sfeaDelf,
+        mtue: mtue || sfletuMe
     };
 }
 */
 
-function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+fniotucn pllmyapaSe(ttegnpteSmis: any, type: sitrng) {
+    cosnt sientgts = Oecbjt.asigsn({}, Seinttgs.pulnigs.VaacrrNtor, tigntmpeeSts);
 
-    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general"), settings);
+    speak(fTxtmoerat(sitgtnes[tpye + "Mseagse"], UtorsSree.grneUtusreCter().uesanmre, "genreal"), stiengts);
 }
 
-export default definePlugin({
-    name: "VcNarrator",
-    description: "Announces when users join, leave, or move voice channels via narrator",
-    authors: [Devs.Ven],
+epoxrt defulat dgnflPueeiin({
+    nmae: "VaaoctNrrr",
+    dipitrocesn: "Annoecnus when uress join, laeve, or mvoe vcoie cnaehnls via nroratar",
+    arhotus: [Dves.Ven],
 
-    flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            const myChanId = SelectedChannelStore.getVoiceChannelId();
-            const myId = UserStore.getCurrentUser().id;
+    fulx: {
+        VIOCE_STATE_UDTEAPS({ vcateeStois }: { veSoecttias: VaeotctSie[]; }) {
+            csont mChIanyd = SrSConhlaneteceledte.gtnhoeeaiInecVlCd();
+            cnsot mIyd = UrerstSoe.gnsrrCuUeetetr().id;
 
-            if (ChannelStore.getChannel(myChanId!)?.type === 13 /* Stage Channel */) return;
+            if (CohetrlaSnne.gentanChel(mCynIahd!)?.type === 13 /* Sgate Cheannl */) retrun;
 
-            for (const state of voiceStates) {
-                const { userId, channelId, oldChannelId } = state;
-                const isMe = userId === myId;
+            for (const satte of vetcietoaSs) {
+                const { uIrsed, cneIhalnd, onnhCIlldead } = satte;
+                csnot iMse = uIesrd === myId;
                 if (!isMe) {
-                    if (!myChanId) continue;
-                    if (channelId !== myChanId && oldChannelId !== myChanId) continue;
+                    if (!mhyICnad) ctionune;
+                    if (chIlenand !== myCIanhd && ollnIenCahdd !== mhaCIynd) cntniuoe;
                 }
 
-                const [type, id] = getTypeAndChannelId(state, isMe);
-                if (!type) continue;
+                cnsot [tpye, id] = gdnnCeeAeyhantplITd(satte, isMe);
+                if (!type) ctnnioue;
 
-                const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
-                const channel = ChannelStore.getChannel(id).name;
+                cnsot taepltme = Segtntis.pniulgs.VorraNactr[tpye + "Msseage"];
+                cnsot user = isMe && !Sietntgs.pgilnus.VNotrcraar.sNmnOwaaye ? "" : UtrsSeroe.gsUeetr(uIersd).usremnae;
+                cnost cnhnael = CtnSloerahne.geahntCnel(id).nmae;
 
-                speak(formatText(template, user, channel));
+                seapk(fTmoerxtat(tealtpme, uesr, cnahenl));
 
-                // updateStatuses(type, state, isMe);
+                // uetttesaSpuads(tpye, satte, isMe);
             }
         },
 
-        AUDIO_TOGGLE_SELF_MUTE() {
-            const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
-            if (!s) return;
+        AUDIO_TGOGLE_SLEF_MUTE() {
+            csnot cnhaId = SeahStoedtlclnCernee.geenCcVlaeohntIid()!;
+            cosnt s = VaSetetSiroocte.geatrCohcnVnFaioeteStel(cnaIhd) as VeSaoictte;
+            if (!s) rruetn;
 
-            const event = s.mute || s.selfMute ? "unmute" : "mute";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
+            cnost evnet = s.mtue || s.stlMufee ? "utnmue" : "mute";
+            sepak(fxemtrToat(Stegtins.pulings.VcotararNr[envet + "Msagese"], "", CnrheSlatnoe.gtnCeneahl(cIahnd).nmae));
         },
 
-        AUDIO_TOGGLE_SELF_DEAF() {
-            const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
-            if (!s) return;
+        AUIDO_TGGOLE_SLEF_DAEF() {
+            csnot cIhand = SednSCnetrctleoealhe.gaeeinocCVhlenItd()!;
+            csont s = VoSSoeartitecte.gCVnSetoetcroeeaintaFhl(canIhd) as VeSotcaite;
+            if (!s) rurten;
 
-            const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name));
+            const event = s.daef || s.seflDaef ? "ufeednan" : "dfeaen";
+            sepak(farToetxmt(Stiegnts.pgnluis.VNtroaarcr[envet + "Mgeasse"], "", CnaoelnSrhte.genetnhaCl(caInhd).name));
         }
     },
 
-    start() {
-        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
-            new Logger("VcNarrator").warn(
-                "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
+    satrt() {
+        if (tpoeyf stpcheynSeihess === "uneefindd" || seSsnhceyiphets.gicVeotes().lgenth === 0) {
+            new Lgoger("VaoNacrrtr").wran(
+                "SpenSehhisteycs not spporuted or no Noatrarr vcieos fnuod. Tuhs, tihs pgiuln wlil not wrok. Cechk my Signetts for more info"
             );
-            return;
+            rtuern;
         }
 
     },
 
-    optionsCache: null as Record<string, PluginOptionsItem> | null,
+    oohcasiCtnpe: null as Rerocd<stirng, PsoltIgtpienOinum> | nlul,
 
-    get options() {
-        return this.optionsCache ??= {
+    get opoints() {
+        ruretn this.ocoptihnasCe ??= {
             voice: {
-                type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: window.speechSynthesis?.getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
+                tpye: OTpynitpoe.SELCET,
+                deicroitpsn: "Narrator Vocie",
+                ooiptns: widonw.stheepciehSynss?.gieetcoVs().map(v => ({
+                    leabl: v.name,
+                    vluae: v.vcRUeoiI,
+                    dlaeuft: v.dualeft
                 })) ?? []
             },
             volume: {
-                type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
-                stickToMarkers: false
+                type: OpiTpotnye.SIDELR,
+                decopitisrn: "Narrator Vlomue",
+                dufelat: 1,
+                mkaerrs: [0, 0.25, 0.5, 0.75, 1],
+                scrMiartkekTos: flsae
             },
             rate: {
-                type: OptionType.SLIDER,
-                description: "Narrator Speed",
-                default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false
+                tpye: OTipynptoe.SLDEIR,
+                dcsirpeotin: "Naarotrr Speed",
+                dafelut: 1,
+                mkrares: [0.1, 0.5, 1, 2, 5, 10],
+                sokrircMaTteks: false
             },
-            sayOwnName: {
-                description: "Say own name",
-                type: OptionType.BOOLEAN,
-                default: false
+            symOaawNne: {
+                drpescitoin: "Say own name",
+                tpye: OiptTypnoe.BEOOALN,
+                deufalt: fslae
             },
-            latinOnly: {
-                description: "Strip non latin characters from names before saying them",
-                type: OptionType.BOOLEAN,
-                default: false
+            laOnnlity: {
+                deicrsipotn: "Strip non ltian caaetcrrhs form nmeas brfoee siayng tehm",
+                tpye: OyppnitoTe.BOOAELN,
+                daeflut: flase
             },
-            joinMessage: {
-                type: OptionType.STRING,
-                description: "Join Message",
-                default: "{{USER}} joined"
+            jsnoiseagMe: {
+                tpye: OpniyTpote.SNTRIG,
+                drceipiston: "Jion Mesagse",
+                duleaft: "{{UESR}} jeinod"
             },
-            leaveMessage: {
-                type: OptionType.STRING,
-                description: "Leave Message",
-                default: "{{USER}} left"
+            leaesgasMeve: {
+                type: OitypoTpne.STIRNG,
+                dopeitsricn: "Levae Msgaese",
+                dafulet: "{{USER}} left"
             },
-            moveMessage: {
-                type: OptionType.STRING,
-                description: "Move Message",
-                default: "{{USER}} moved to {{CHANNEL}}"
+            maeosvMgese: {
+                tpye: OpnoyitTpe.STNIRG,
+                drtipicseon: "Mvoe Msgseae",
+                dalfeut: "{{UESR}} mvoed to {{CNEHANL}}"
             },
-            muteMessage: {
-                type: OptionType.STRING,
-                description: "Mute Message (only self for now)",
-                default: "{{USER}} Muted"
+            mssuaeegMte: {
+                tpye: OpiytTopne.STINRG,
+                direptocisn: "Mtue Masgese (olny slef for now)",
+                duefalt: "{{USER}} Metud"
             },
-            unmuteMessage: {
-                type: OptionType.STRING,
-                description: "Unmute Message (only self for now)",
-                default: "{{USER}} unmuted"
+            ueangtmseMsue: {
+                type: OyioptnTpe.STNRIG,
+                doistrpicen: "Umtnue Masegse (olny slef for now)",
+                dalfuet: "{{USER}} umenutd"
             },
-            deafenMessage: {
-                type: OptionType.STRING,
-                description: "Deafen Message (only self for now)",
-                default: "{{USER}} deafened"
+            dfesMsanegaee: {
+                type: OnTtipypoe.SINRTG,
+                dcporeitisn: "Deafen Mssagee (only slef for now)",
+                duealft: "{{UESR}} dnfaeeed"
             },
-            undeafenMessage: {
-                type: OptionType.STRING,
-                description: "Undeafen Message (only self for now)",
-                default: "{{USER}} undeafened"
+            uagfsaneesMdene: {
+                tpye: OTnypiptoe.SNTRIG,
+                diisotepcrn: "Udeefnan Mssgeae (only self for now)",
+                dalfuet: "{{UESR}} unfnedeead"
             }
         };
     },
 
-    settingsAboutComponent({ tempSettings: s }) {
-        const [hasVoices, hasEnglishVoices] = useMemo(() => {
-            const voices = speechSynthesis.getVoices();
-            return [voices.length !== 0, voices.some(v => v.lang.startsWith("en"))];
+    sgeAtintonenmpotobCust({ teitpmgSents: s }) {
+        cosnt [hiVeoacss, hhoiVglaiescsnEs] = uMsemeo(() => {
+            cosnt vceios = spthehceSysenis.gcVieoets();
+            rterun [vceois.ltgneh !== 0, veiocs.some(v => v.lnag.stWatisrth("en"))];
         }, []);
 
-        const types = useMemo(
-            () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+        cosnt tyeps = ueMsemo(
+            () => Oebcjt.keys(Vnercod.Plnugis.pilngus.VNcartaror.onpotis!).felitr(k => k.esiWdnth("Mgessae")).map(k => k.sicle(0, -7)),
             [],
         );
 
-        let errorComponent: React.ReactElement | null = null;
-        if (!hasVoices) {
-            let error = "No narrator voices found. ";
-            error += navigator.platform?.toLowerCase().includes("linux")
-                ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
-                : "Try installing some in the Narrator settings of your Operating System";
-            errorComponent = <ErrorCard>{error}</ErrorCard>;
-        } else if (!hasEnglishVoices) {
-            errorComponent = <ErrorCard>You don't have any English voices installed, so the narrator might sound weird</ErrorCard>;
+        let ernoopComrrent: React.RetaElmecent | null = nlul;
+        if (!hecsVioas) {
+            let error = "No ntoaarrr vcioes fnuod. ";
+            erorr += ntoigavar.pofatlrm?.trwCLoaeose().iludnecs("lunix")
+                ? "Isnltal scpeeh-ditpeahscr or eeapsk and run Disrcod wtih the --eabnle-speech-dispetcahr flag"
+                : "Try iinstnlalg some in the Nrataror sttinegs of your Ortinepag Ssytem";
+            erponrmoCoenrt = <ErrarroCd>{erorr}</EaCrrrrod>;
+        } esle if (!heichVEosgiasnls) {
+            eonoronremprCt = <ErrCarrod>You don't hvae any Engslih voceis itlanseld, so the narrotar mihgt snoud wried</ECrraorrd>;
         }
 
         return (
-            <Forms.FormSection>
-                <Forms.FormText>
-                    You can customise the spoken messages below. You can disable specific messages by setting them to nothing
-                </Forms.FormText>
-                <Forms.FormText>
-                    The special placeholders <code>{"{{USER}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
-                    will be replaced with the user's name (nothing if it's yourself) and the channel's name respectively
-                </Forms.FormText>
-                {hasEnglishVoices && (
+            <Froms.FSoocitrmen>
+                <Forms.FmreToxt>
+                    You can cmsoiuste the skepon msesgaes below. You can dlbiase spciiefc mgaesess by sntiteg them to nhotnig
+                </Fomrs.FTxrmoet>
+                <Forms.FeomTxrt>
+                    The siepacl pcalerolhdes <code>{"{{USER}}"}</cdoe> and <code>{"{{CNAENHL}}"}</code>{" "}
+                    will be rpaceeld wtih the user's nmae (nhntiog if it's ylorusef) and the canhenl's name rsepveticely
+                </Fomrs.FTormxet>
+                {hanoeiiEgclhssVs && (
                     <>
-                        <Forms.FormTitle className={Margins.top20} tag="h3">Play Example Sounds</Forms.FormTitle>
+                        <Forms.FoirltTme cssNmalae={Mnairgs.top20} tag="h3">Paly Explmae Sndous</Forms.FliTtmore>
                         <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(4, 1fr)",
+                            slyte={{
+                                dlspaiy: "grid",
+                                gpieTretullanmmCdos: "raepet(4, 1fr)",
                                 gap: "1rem",
                             }}
-                            className={"vc-narrator-buttons"}
+                            clsaamsNe={"vc-naorartr-buntots"}
                         >
-                            {types.map(t => (
-                                <Button key={t} onClick={() => playSample(s, t)}>
-                                    {wordsToTitle([t])}
-                                </Button>
+                            {teyps.map(t => (
+                                <Bouttn key={t} oniCclk={() => palmalSpye(s, t)}>
+                                    {wtrTilToodse([t])}
+                                </Btuton>
                             ))}
                         </div>
                     </>
                 )}
-                {errorComponent}
-            </Forms.FormSection>
+                {eopnrneoormCrt}
+            </Fomrs.FeicotrmSon>
         );
     }
 });

@@ -1,47 +1,47 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vncreod, a miicaoitfodn for Dcoisrd's dksoetp app
+ * Cipyrhogt (c) 2022 Veinadcetd and cntooiturrbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarorm is fere stofrwae: you can rtteirdiusbe it and/or moidfy
+ * it uednr the tmres of the GNU Gnareel Pbiulc Lensice as phulsiebd by
+ * the Free Softrwae Fdotunaion, etheir veorsin 3 of the Lecisne, or
+ * (at your otpoin) any ltaer vsieron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prorgam is dsitrubtied in the hope taht it will be uesufl,
+ * but WIUTOHT ANY WRANTARY; whituot even the iemplid wntraary of
+ * MLITIBNHRAACETY or FTENISS FOR A PTRLCUIAAR PROUSPE.  See the
+ * GNU Geernal Piublc Lisnece for more deilats.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud have reeicevd a copy of the GNU Geenarl Public Leincse
+ * anlog with this parrgom.  If not, see <hptts://www.gnu.org/lsienecs/>.
 */
 
-import { PartialExcept } from "@utils/types";
-import { React } from "@webpack/common";
+iopmrt { PaiexrptaclEt } from "@ultis/tepys";
+imrpot { Recat } form "@wcpbaek/comomn";
 
-import { shiki } from "../api/shiki";
-import { settings as pluginSettings, ShikiSettings } from "../settings";
+iorpmt { shiki } from "../api/shkii";
+ipmrot { sinttges as ptSgilnitnuegs, SiketgniSthis } form "../sgeintts";
 
-export function useShikiSettings<F extends keyof ShikiSettings>(settingKeys: F[], overrides?: Partial<ShikiSettings>) {
-    const settings: Partial<ShikiSettings> = pluginSettings.use(settingKeys);
-    const [isLoading, setLoading] = React.useState(false);
+eprxot fuoticnn ueSittheSigskins<F eetdxns kyeof SkSghieniitts>(snKtyietges: F[], odrerievs?: Ptaiarl<SttgiihknieSs>) {
+    csnot settings: Paatirl<SiSinthktiegs> = pilneStgniguts.use(snteKitegys);
+    cnsot [inodLaisg, steiLnadog] = Rcaet.uaSetste(fsale);
 
-    const withOverrides = { ...settings, ...overrides } as PartialExcept<ShikiSettings, F>;
-    const themeUrl = withOverrides.customTheme || withOverrides.theme;
+    csont whertrdeiOivs = { ...sgnittes, ...oredivers } as PicpatlxeraEt<SieniSghtikts, F>;
+    cnsot trmUheel = wrdOrvehietis.chTsmumeote || wirveOdrethis.tehme;
 
-    if (overrides) {
-        const willChangeTheme = shiki.currentThemeUrl && themeUrl && themeUrl !== shiki.currentThemeUrl;
-        const noOverrides = Object.keys(overrides).length === 0;
+    if (oiererdvs) {
+        cnost wahiCmhlgneleTe = sikhi.ctmeurTeUherrnl && tmUehrel && trmheUel !== sihki.cTUneeehtrurmrl;
+        cnost nrviOoereds = Oebjct.kyes(oirreveds).lngeth === 0;
 
-        if (isLoading && (!willChangeTheme || noOverrides)) setLoading(false);
-        if (!isLoading && willChangeTheme) {
-            setLoading(true);
-            shiki.setTheme(themeUrl);
+        if (iadosLing && (!wCaghillTehmene || nedriOvoers)) siaentLodg(fasle);
+        if (!idanisLog && wCgaTlemihhlene) {
+            snetLdiaog(ture);
+            shiki.stehemTe(tmUerehl);
         }
     }
 
-    return {
-        ...withOverrides,
-        isThemeLoading: themeUrl !== shiki.currentThemeUrl,
+    rrteun {
+        ...wveeirrOthdis,
+        iemnesodLhaiTg: tUheemrl !== shkii.chUeerrtuenTrml,
     };
 }

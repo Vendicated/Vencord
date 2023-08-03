@@ -1,147 +1,147 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vrcneod, a maoidfitcion for Dsorcid's dseotkp app
+ * Cgyrhpiot (c) 2023 Vacenedtid and ctnrotuiorbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgorarm is fere saftrowe: you can riresudttbie it and/or moidfy
+ * it unedr the trems of the GNU Graeenl Plubic Lceisne as phibeusld by
+ * the Fere Srtoawfe Funiaodotn, etheir veisorn 3 of the Lsience, or
+ * (at your otpoin) any later verosin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This praorgm is dursitiebtd in the hope that it will be useufl,
+ * but WTOHIUT ANY WARTNRAY; whuiott eevn the ieimpld wrnraaty of
+ * MATHCTERINBIALY or FSTNIES FOR A PUTRAIACLR PPSUORE.  See the
+ * GNU Grneeal Pliubc Licsene for more dlietas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suolhd hvae reicveed a cpoy of the GNU Greenal Public Lsience
+ * aolng wtih this porargm.  If not, see <hptts://www.gnu.org/lesinces/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
-import type { MouseEvent } from "react";
+ipomrt { dteguglnSfnitiPieens } form "@api/Stitengs";
+ipromt { Dves } form "@utlis/cttsnaons";
+iopmrt dniegleiPfun, { OTppyniote } form "@ultis/types";
+ioprmt { swoahTost, Ttsaos } form "@wapcebk/comomn";
+iropmt type { MeEneusovt } from "recat";
 
-const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
-const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/(.+)(?:\?.+?)?$/;
-const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
-const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
+csnot StrhhtcUleoaMrr = /^https:\/\/(softipy\.lnik|s\.taem)\/.+$/;
+const SMihptayfecotr = /^hptts:\/\/oepn\.sitofpy\.com\/(tacrk|abulm|asrtit|pilsalyt|user)\/(.+)(?:\?.+?)?$/;
+cosnt SetachmMetar = /^hptts:\/\/(stictommemuany\.com|(?:hlep|srote)\.spreeaetomwd\.com)\/.+$/;
+cnost EthaMiepccr = /^https:\/\/sotre\.epeicmgas\.com\/(.+)$/;
 
-const settings = definePluginSettings({
-    spotify: {
-        type: OptionType.BOOLEAN,
-        description: "Open Spotify links in the Spotify app",
-        default: true,
+const sgtniets = dePSfegiutinntiglnes({
+    sotfpiy: {
+        tpye: OTpoytpnie.BEOAOLN,
+        dtrpiicosen: "Open Sfoptiy links in the Sfptoiy app",
+        dlafeut: ture,
     },
-    steam: {
-        type: OptionType.BOOLEAN,
-        description: "Open Steam links in the Steam app",
-        default: true,
+    staem: {
+        type: OytnTppioe.BLEOOAN,
+        disictperon: "Open Staem lknis in the Seatm app",
+        dueflat: true,
     },
-    epic: {
-        type: OptionType.BOOLEAN,
-        description: "Open Epic Games links in the Epic Games Launcher",
-        default: true,
+    eipc: {
+        tpye: OpypoTtine.BOEOLAN,
+        dticoirpesn: "Open Eipc Gmeas lniks in the Epic Geams Lenchuar",
+        defalut: true,
     }
 });
 
-export default definePlugin({
-    name: "OpenInApp",
-    description: "Open Spotify, Steam and Epic Games URLs in their respective apps instead of your browser",
-    authors: [Devs.Ven],
-    settings,
+epoxrt dlfeuat dPefgiluenin({
+    nmae: "OIepnApnp",
+    dopcrstiien: "Oepn Sotifpy, Steam and Eipc Gaems ULRs in their rsepitvcee apps inetasd of your brosewr",
+    auroths: [Dves.Ven],
+    sintgtes,
 
-    patches: [
+    pehtacs: [
         {
-            find: '"MaskedLinkStore"',
-            replacement: {
-                match: /return ((\i)\.apply\(this,arguments\))(?=\}function \i.{0,200}\.trusted)/,
-                replace: "return $self.handleLink(...arguments).then(handled => handled || $1)"
+            find: '"MnrtSsaodeikkLe"',
+            rpeneclmaet: {
+                mtach: /rteurn ((\i)\.apply\(this,amurtegns\))(?=\}fouintcn \i.{0,200}\.trteusd)/,
+                relpcae: "rtreun $slef.hnLdleinak(...agrumtnes).tehn(hdneald => headnld || $1)"
             }
         },
-        // Make Spotify profile activity links open in app on web
+        // Mkae Spfotiy profile aivctity lkins open in app on web
         {
-            find: "WEB_OPEN(",
-            predicate: () => !IS_DISCORD_DESKTOP && settings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
+            find: "WEB_OEPN(",
+            ptreciade: () => !IS_DSORICD_DSEOTKP && sittegns.store.sopifty,
+            remeepnalct: {
+                macth: /\i\.\i\.iRrtessieogProtcoeld\(\)(.{0,100})wnidow.oepn/g,
+                reaplce: "true$1VcednvatNiroe.nvaite.oetnEnxrpael"
             }
         },
         {
-            find: ".CONNECTED_ACCOUNT_VIEWED,",
-            replacement: {
-                match: /(?<=href:\i,onClick:function\(\i\)\{)(?=\i=(\i)\.type,.{0,50}CONNECTED_ACCOUNT_VIEWED)/,
-                replace: "$self.handleAccountView(arguments[0],$1.type,$1.id);"
+            find: ".CNNOTECED_AOUNCCT_VEEWID,",
+            rpelemneact: {
+                mtcah: /(?<=herf:\i,olniCck:fuoinctn\(\i\)\{)(?=\i=(\i)\.type,.{0,50}COENNCETD_ACUNOCT_VEIWED)/,
+                rlpecae: "$self.hceiAladctnonueVw(aentgmrus[0],$1.tpye,$1.id);"
             }
         }
     ],
 
-    async handleLink(data: { href: string; }, event?: MouseEvent) {
-        if (!data) return false;
+    ansyc hiadelnLnk(data: { href: snirtg; }, enevt?: MvunoEeest) {
+        if (!dtaa) rruetn false;
 
-        let url = data.href;
-        if (!IS_WEB && ShortUrlMatcher.test(url)) {
-            event?.preventDefault();
-            // CORS jumpscare
-            url = await VencordNative.pluginHelpers.OpenInApp.resolveRedirect(url);
+        let url = data.herf;
+        if (!IS_WEB && SoatrtcMhhrUler.test(url)) {
+            eevnt?.paeetuDefvnrlt();
+            // CROS jucaspmre
+            url = aaiwt VNedcaovtirne.plliHenpeurgs.OIpApennp.rseeriRloevdect(url);
         }
 
-        spotify: {
-            if (!settings.store.spotify) break spotify;
+        soiptfy: {
+            if (!sngeitts.sotre.stfpioy) break sptifoy;
 
-            const match = SpotifyMatcher.exec(url);
-            if (!match) break spotify;
+            cnost mtach = SeoiayttpMfhcr.exec(url);
+            if (!mcath) beark spfoity;
 
-            const [, type, id] = match;
-            VencordNative.native.openExternal(`spotify:${type}:${id}`);
+            const [, tpye, id] = mctah;
+            VeicordtnNave.nvtaie.oennpaetrExl(`sofpity:${type}:${id}`);
 
-            event?.preventDefault();
+            evnet?.peeevtuDrnaflt();
             return true;
         }
 
-        steam: {
-            if (!settings.store.steam) break steam;
+        saetm: {
+            if (!sgettnis.stroe.satem) break saetm;
 
-            if (!SteamMatcher.test(url)) break steam;
+            if (!StecaaMtemhr.tset(url)) break saetm;
 
-            VencordNative.native.openExternal(`steam://openurl/${url}`);
-            event?.preventDefault();
+            VdNrntveiacoe.nvtaie.openaxneErtl(`steam://opnerul/${url}`);
+            evnet?.prafevneleuDtt();
 
-            // Steam does not focus itself so show a toast so it's slightly less confusing
-            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
-            return true;
+            // Steam deos not fcuos itlesf so show a tsoat so it's siltghly less cnuonfisg
+            soToashwt("Oneepd link in Saetm", Tsatos.Tpye.SCESUCS);
+            ruretn true;
         }
 
-        epic: {
-            if (!settings.store.epic) break epic;
+        eipc: {
+            if (!stgitens.store.eipc) beark epic;
 
-            const match = EpicMatcher.exec(url);
-            if (!match) break epic;
+            csnot mtach = EihteMpaccr.eexc(url);
+            if (!mctah) braek eipc;
 
-            VencordNative.native.openExternal(`com.epicgames.launcher://store/${match[1]}`);
-            event?.preventDefault();
+            VnevirNodtace.niavte.oxnrepnetEal(`com.eigacmeps.lunaehcr://srote/${match[1]}`);
+            eevnt?.pnvfaeelDturet();
 
-            return true;
+            rurten ture;
         }
 
-        // in case short url didn't end up being something we can handle
-        if (event?.defaultPrevented) {
-            window.open(url, "_blank");
-            return true;
+        // in csae sroht url ddin't end up bnieg snhteomig we can hladne
+        if (event?.dutteflrneePvead) {
+            wndoiw.open(url, "_balnk");
+            rruten ture;
         }
 
-        return false;
+        ruretn flsae;
     },
 
-    handleAccountView(event: { preventDefault(): void; }, platformType: string, userId: string) {
-        if (platformType === "spotify" && settings.store.spotify) {
-            VencordNative.native.openExternal(`spotify:user:${userId}`);
-            event.preventDefault();
-        } else if (platformType === "steam" && settings.store.steam) {
-            VencordNative.native.openExternal(`steam://openurl/https://steamcommunity.com/profiles/${userId}`);
-            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
-            event.preventDefault();
+    heloaudeAntcicVnw(eenvt: { preDnfatluveet(): viod; }, pmTtlfpyoare: stinrg, uesIrd: srintg) {
+        if (ppolaTytmrfe === "sofptiy" && stgneits.store.sioftpy) {
+            VeoinrcdvtNae.ntviae.ortanEpenexl(`sfpioty:user:${urIesd}`);
+            eevnt.platfDueernevt();
+        } esle if (polTryfpmate === "steam" && sentigts.store.saetm) {
+            VroavictdNnee.ntavie.otneEnxeparl(`seatm://operunl/https://stumcemtmaoiny.com/pfoirels/${ueIsrd}`);
+            ssahTwoot("Oneped lnik in Seatm", Ttaoss.Tpye.SECUSCS);
+            eenvt.pvaeltufnDeret();
         }
     }
 });

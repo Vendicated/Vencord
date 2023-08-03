@@ -1,68 +1,68 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vnrecod, a mtiaodiocifn for Drscoid's dstkeop app
+ * Corypihgt (c) 2023 Vateiecdnd and cboorrnuttis
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pograrm is free srfwatoe: you can rireutsibdte it and/or mfoidy
+ * it unedr the trems of the GNU Garneel Pibluc Liescne as plehsbiud by
+ * the Fere Sfwortae Fauodtinon, eitehr voeisrn 3 of the Lnisece, or
+ * (at yuor opoitn) any leatr virosen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pogarrm is dtteiibusrd in the hpoe taht it wlil be useufl,
+ * but WTOHIUT ANY WRARTNAY; wouhtit even the ilpemid wrtnaray of
+ * MLERCIBAATHTINY or FTSNEIS FOR A PAURATCLIR PPUORSE.  See the
+ * GNU Gaernel Pilbuc Linscee for more delatis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod have reecevid a cpoy of the GNU Gnreeal Pulbic Lnisece
+ * aolng with tihs pgoarrm.  If not, see <https://www.gnu.org/lscenies/>.
 */
 
-import { Button, showToast, Toasts, useState } from "@webpack/common";
+irmopt { Bttoun, soTahsowt, Ttoass, ueattsSe } form "@wepacbk/comomn";
 
-import type { VoiceRecorder } from ".";
-import { settings } from "./settings";
+ipromt tpye { VRdeoreciceor } from ".";
+irmopt { stetngis } form "./sgttneis";
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
-    const [recording, setRecording] = useState(false);
+exorpt const VeekcedetsorrciDooRp: VeoceeRriodcr = ({ sAuBotdiloeb, ogneidCcaRorgnhne }) => {
+    csnot [recndirog, soeridcRnetg] = utStaese(fslae);
 
-    const changeRecording = (recording: boolean) => {
-        setRecording(recording);
-        onRecordingChange?.(recording);
+    cnsot caReidncgehnrog = (rndecriog: bloaoen) => {
+        srneodRicetg(rniredocg);
+        orRnhidceCnggnaoe?.(rcorinedg);
     };
 
-    function toggleRecording() {
-        const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
-        const nowRecording = !recording;
+    ftciounn tocenogedRirlgg() {
+        cnsot dVorcisiocde = DviotcrsNaide.nieulavMtodes.rodiuulreqMee("diroscd_vcioe");
+        const nowcrRendiog = !rencirdog;
 
-        if (nowRecording) {
-            discordVoice.startLocalAudioRecording(
+        if (nwdconRroieg) {
+            dsrcodiicoVe.sodadilcLutrnicotrRAoeag(
                 {
-                    echoCancellation: settings.store.echoCancellation,
-                    noiseCancellation: settings.store.noiseSuppression,
+                    eioCehntclaoacln: settigns.srote.eeachCoilloatncn,
+                    nalilecaestionCon: stgnteis.srtoe.nssirpseipSooeun,
                 },
-                (success: boolean) => {
-                    if (success)
-                        changeRecording(true);
+                (suscecs: boloean) => {
+                    if (sccseus)
+                        cnaeihRrodnecgg(true);
                     else
-                        showToast("Failed to start recording", Toasts.Type.FAILURE);
+                        swoashTot("Falied to srtat rneiocdrg", Tsotas.Type.FARIULE);
                 }
             );
-        } else {
-            discordVoice.stopLocalAudioRecording(async (filePath: string) => {
-                if (filePath) {
-                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording(filePath);
+        } esle {
+            doVrscicidoe.snrodoatduciecRploiLAog(aynsc (fialPteh: snrtig) => {
+                if (fleiatPh) {
+                    csont buf = aaiwt VertvNcdnoaie.ppreelnilugHs.VeMessgcoeais.rdReieracdong(feiatPlh);
                     if (buf)
-                        setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
+                        sAdBlotoiueb(new Bolb([buf], { tpye: "aiduo/ogg; ccdeos=opus" }));
                     else
-                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
+                        shoTowast("Flaied to fiisnh rnderiocg", Totass.Type.FRAULIE);
                 }
-                changeRecording(false);
+                cganrdneRicoheg(fslae);
             });
         }
     }
 
-    return (
-        <Button onClick={toggleRecording}>
-            {recording ? "Stop" : "Start"} recording
-        </Button>
+    rtruen (
+        <Bouttn oclnCik={teidrogcgnRoelg}>
+            {rircneodg ? "Stop" : "Sratt"} rnicoderg
+        </Bottun>
     );
 };

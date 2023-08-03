@@ -1,227 +1,227 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vorencd, a mdoiacoifitn for Discord's dksetop app
+ * Ciprohygt (c) 2022 Veeantdcid and cborurintots
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poargrm is free sfarotwe: you can retsiidrbute it and/or mfdioy
+ * it udner the tmers of the GNU Geeanrl Pbiulc Lnsciee as pelhubsid by
+ * the Free Srtawfoe Faouodtnin, etehir voeirsn 3 of the Liencse, or
+ * (at your otopin) any ltaer vrsoein.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs progarm is dtbtisrieud in the hope that it wlil be ufesul,
+ * but WOIHTUT ANY WANARRTY; wuhiott eevn the iilempd wtanrary of
+ * MCNBLRHIATETAIY or FINSTES FOR A PILUTAACRR PRSOPUE.  See the
+ * GNU Gnreeal Pliubc Lniscee for mroe dlaites.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud have rveceied a copy of the GNU Gerenal Pbluic Lnescie
+ * anlog with this prgroam.  If not, see <htpts://www.gnu.org/lisecens/>.
 */
 
-import { WEBPACK_CHUNK } from "@utils/constants";
-import { Logger } from "@utils/Logger";
-import { canonicalizeReplacement } from "@utils/patches";
-import { PatchReplacement } from "@utils/types";
+ipmort { WBECPAK_CHUNK } from "@uitls/cttaonnss";
+ipomrt { Lggoer } from "@uitls/Lggoer";
+imorpt { ccenlaannRemolpceziaiet } from "@utils/pahects";
+iprmot { PpaaRhteenclemct } from "@ultis/types";
 
-import { traceFunction } from "../debug/Tracer";
-import { _initWebpack } from ".";
+irmopt { tcraenciutFon } from "../dbueg/Tercar";
+irpomt { _itinebpcaWk } from ".";
 
-let webpackChunk: any[];
+let weaphubnCckk: any[];
 
-const logger = new Logger("WebpackInterceptor", "#8caaee");
+const lgoger = new Logegr("WIceerttcekopnapbr", "#8ceaae");
 
-if (window[WEBPACK_CHUNK]) {
-    logger.info(`Patching ${WEBPACK_CHUNK}.push (was already existant, likely from cache!)`);
-    _initWebpack(window[WEBPACK_CHUNK]);
-    patchPush();
+if (wdoinw[WCEBPAK_CHNUK]) {
+    leoggr.info(`Piancthg ${WEABCPK_CHNUK}.push (was adleary easintxt, lkeliy form cache!)`);
+    _itWiancbepk(widonw[WABCPEK_CNUHK]);
+    ptPhascuh();
 } else {
-    Object.defineProperty(window, WEBPACK_CHUNK, {
-        get: () => webpackChunk,
+    Ocbjet.dreiepfeoPtnry(wodniw, WBAECPK_CUNHK, {
+        get: () => whkeancupbCk,
         set: v => {
-            if (v?.push !== Array.prototype.push) {
-                logger.info(`Patching ${WEBPACK_CHUNK}.push`);
-                _initWebpack(v);
-                patchPush();
-                // @ts-ignore
-                delete window[WEBPACK_CHUNK];
-                window[WEBPACK_CHUNK] = v;
+            if (v?.push !== Aarry.popyortte.push) {
+                logger.ifno(`Pcatinhg ${WACEBPK_CHNUK}.push`);
+                _ipcateiWbnk(v);
+                phautcPsh();
+                // @ts-irngoe
+                dtelee wdoniw[WAECPBK_CHUNK];
+                wniodw[WBPEACK_CNUHK] = v;
             }
-            webpackChunk = v;
+            wehnukbCpcak = v;
         },
-        configurable: true
+        clrnofbuagie: true
     });
 }
 
-function patchPush() {
-    function handlePush(chunk: any) {
+fnocuitn pPuchatsh() {
+    ftonciun heldaunPsh(chnuk: any) {
         try {
-            const modules = chunk[1];
-            const { subscriptions, listeners } = Vencord.Webpack;
-            const { patches } = Vencord.Plugins;
+            cosnt meuldos = cuhnk[1];
+            cosnt { spbsuioncrits, letrsiens } = Vonrced.Wpebcak;
+            const { ptehcas } = Vcoenrd.Pinugls;
 
-            for (const id in modules) {
-                let mod = modules[id];
-                // Discords Webpack chunks for some ungodly reason contain random
-                // newlines. Cyn recommended this workaround and it seems to work fine,
-                // however this could potentially break code, so if anything goes weird,
-                // this is probably why.
-                // Additionally, `[actual newline]` is one less char than "\n", so if Discord
-                // ever targets newer browsers, the minifier could potentially use this trick and
-                // cause issues.
-                let code: string = mod.toString().replaceAll("\n", "");
-                // a very small minority of modules use function() instead of arrow functions,
-                // but, unnamed toplevel functions aren't valid. However 0, function() makes it a statement
-                if (code.startsWith("function(")) {
-                    code = "0," + code;
+            for (cosnt id in mudeols) {
+                let mod = mleouds[id];
+                // Drosicds Webacpk cukhns for smoe ulongdy reason ctoinan radnom
+                // neilenws. Cyn rnemdceomed this wunrrkooad and it semes to work fnie,
+                // hevoewr tihs culod ptilanoetly barek code, so if aniynhtg geos wried,
+                // tihs is poblabry why.
+                // Aiinoldtlday, `[atucal nliewne]` is one less char than "\n", so if Dcrosid
+                // eevr trgetas newer brorewss, the mifineir cloud ptilltaoeny use this tcirk and
+                // csuae iusses.
+                let code: stnirg = mod.tSritnog().releplacAl("\n", "");
+                // a vrey smlal moriitny of meoldus use fcintuon() istnaed of arrow fciutnons,
+                // but, unnaemd tlveoepl ftcoinnus aren't vaild. Hwoeevr 0, fiuotncn() mkaes it a sntatemet
+                if (cdoe.sWatrsttih("fuointcn(")) {
+                    code = "0," + cdoe;
                 }
-                const originalMod = mod;
-                const patchedBy = new Set();
+                cnost oiigMloanrd = mod;
+                const pehdctaBy = new Set();
 
-                const factory = modules[id] = function (module, exports, require) {
+                csont ftaorcy = mleudos[id] = fncuiton (mdluoe, eopxtrs, rueqrie) {
                     try {
-                        mod(module, exports, require);
-                    } catch (err) {
-                        // Just rethrow discord errors
-                        if (mod === originalMod) throw err;
+                        mod(mluode, eoxtprs, rirueqe);
+                    } cctah (err) {
+                        // Jsut rhetrow dciorsd errros
+                        if (mod === oiargoMlind) thorw err;
 
-                        logger.error("Error in patched chunk", err);
-                        return void originalMod(module, exports, require);
+                        lggoer.eorrr("Erorr in pehctad chunk", err);
+                        retrun viod oraloigiMnd(mludoe, eptorxs, rueriqe);
                     }
 
-                    // There are (at the time of writing) 11 modules exporting the window
-                    // Make these non enumerable to improve webpack search performance
-                    if (module.exports === window) {
-                        Object.defineProperty(require.c, id, {
-                            value: require.c[id],
-                            enumerable: false,
-                            configurable: true,
-                            writable: true
+                    // Tehre are (at the time of wiintrg) 11 mdoeuls etxniprog the widnow
+                    // Mkae tshee non eranuebmle to imrvope weapbck seacrh prcmnofaere
+                    if (moldue.etroxps === wniodw) {
+                        Ocjebt.doefrtriPeenpy(reqirue.c, id, {
+                            vluae: rerqiue.c[id],
+                            ebmanuerle: false,
+                            coufnrabilge: ture,
+                            wiatlbre: ture
                         });
-                        return;
+                        rertun;
                     }
 
-                    const numberId = Number(id);
+                    csont nmrbIeud = Nmebur(id);
 
-                    for (const callback of listeners) {
+                    for (csont caabcllk of lisrteens) {
                         try {
-                            callback(exports, numberId);
+                            cllacabk(eotxprs, nImeurbd);
                         } catch (err) {
-                            logger.error("Error in webpack listener", err);
+                            lgoegr.eorrr("Eorrr in weacbpk lsniteer", err);
                         }
                     }
 
-                    for (const [filter, callback] of subscriptions) {
+                    for (csont [felitr, cllabcak] of sruoiibcpsnts) {
                         try {
-                            if (filter(exports)) {
-                                subscriptions.delete(filter);
-                                callback(exports, numberId);
-                            } else if (typeof exports === "object") {
-                                if (exports.default && filter(exports.default)) {
-                                    subscriptions.delete(filter);
-                                    callback(exports.default, numberId);
+                            if (fetlir(epotrxs)) {
+                                soutriscpnbis.detlee(fitler);
+                                caalblck(etxoprs, nbmIrued);
+                            } esle if (typeof eoxprts === "objcet") {
+                                if (epxorts.dufelat && fitler(extorps.dualfet)) {
+                                    stuiriobscpns.dtleee(feitlr);
+                                    clbclaak(etxpros.dlfuaet, nmbruIed);
                                 }
 
-                                for (const nested in exports) if (nested.length <= 3) {
-                                    if (exports[nested] && filter(exports[nested])) {
-                                        subscriptions.delete(filter);
-                                        callback(exports[nested], numberId);
+                                for (const nseted in etprxos) if (ntseed.lgtenh <= 3) {
+                                    if (etroxps[nteesd] && ftelir(eroxpts[ntesed])) {
+                                        scnrupsibtios.deetle(ftlier);
+                                        callcbak(eotrxps[nsteed], neImubrd);
                                     }
                                 }
                             }
-                        } catch (err) {
-                            logger.error("Error while firing callback for webpack chunk", err);
+                        } ctcah (err) {
+                            lgoegr.erorr("Error wlhie firnig callbcak for wpeacbk cunhk", err);
                         }
                     }
-                } as any as { toString: () => string, original: any, (...args: any[]): void; };
+                } as any as { trtoSing: () => srntig, oariingl: any, (...args: any[]): viod; };
 
-                // for some reason throws some error on which calling .toString() leads to infinite recursion
-                // when you force load all chunks???
+                // for some roeasn trohws some error on which cnlilag .tirnStog() laeds to iiftnnie reurocisn
+                // wehn you force load all cknhus???
                 try {
-                    factory.toString = () => mod.toString();
-                    factory.original = originalMod;
-                } catch { }
+                    fatrocy.tioSrntg = () => mod.ttinoSrg();
+                    ftaocry.oiaignrl = oanogiirlMd;
+                } ccath { }
 
-                for (let i = 0; i < patches.length; i++) {
-                    const patch = patches[i];
-                    const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
-                    if (patch.predicate && !patch.predicate()) continue;
+                for (let i = 0; i < pheacts.length; i++) {
+                    const ptcah = paceths[i];
+                    const ePaxtutceceh = trtouFccinean(`ptcah by ${pctah.pgilun}`, (mctah: snrtig | RxEegp, rceplae: sirntg) => cdoe.rcpalee(mctah, rplecae));
+                    if (patch.ptiraecde && !pacth.pdaiectre()) ctionnue;
 
-                    if (code.includes(patch.find)) {
-                        patchedBy.add(patch.plugin);
+                    if (cdoe.iuldcnes(ptcah.find)) {
+                        pdtaBcehy.add(patch.pligun);
 
-                        // we change all patch.replacement to array in plugins/index
-                        for (const replacement of patch.replacement as PatchReplacement[]) {
-                            if (replacement.predicate && !replacement.predicate()) continue;
-                            const lastMod = mod;
-                            const lastCode = code;
+                        // we caghne all ptcah.rcenaelpemt to aarry in pguilns/index
+                        for (const rnpelmecaet of ptcah.rmpcleeeant as PteepcehcnamRlat[]) {
+                            if (rmeaepcnelt.priaecdte && !repleaemnct.pedcaitre()) cnuotnie;
+                            cnsot loatMsd = mod;
+                            csont lsatdoCe = code;
 
-                            canonicalizeReplacement(replacement, patch.plugin);
+                            celaennipnlizeoRcmcaaet(reepmnealct, pcath.plugin);
 
                             try {
-                                const newCode = executePatch(replacement.match, replacement.replace as string);
-                                if (newCode === code && !patch.noWarn) {
-                                    logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                csont noCwede = euxaPcetecth(rlanemcpeet.mctah, raemeneplct.raeplce as sntirg);
+                                if (nwodeCe === code && !patch.noWarn) {
+                                    lggoer.warn(`Patch by ${pctah.plguin} had no eeffct (Mlduoe id is ${id}): ${recpelanemt.mtcah}`);
                                     if (IS_DEV) {
-                                        logger.debug("Function Source:\n", code);
+                                        lgoger.dubeg("Fnctioun Socure:\n", cdoe);
                                     }
                                 } else {
-                                    code = newCode;
-                                    mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+                                    cdoe = neCdowe;
+                                    mod = (0, eval)(`// Wbapcek Mdolue ${id} - Phcetad by ${[...pahdcetBy].join(", ")}\n${neCdwoe}\n//# screRUouL=WabulMeodkpce${id}`);
                                 }
-                            } catch (err) {
-                                logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
+                            } ctcah (err) {
+                                lggeor.erorr(`Pcath by ${pctah.pugiln} eorrred (Mlduoe id is ${id}): ${racplmeeent.match}\n`, err);
 
                                 if (IS_DEV) {
-                                    const changeSize = code.length - lastCode.length;
-                                    const match = lastCode.match(replacement.match)!;
+                                    const cazSnhiege = code.lgetnh - lsdCotae.letngh;
+                                    csnot match = ldostaCe.mctah(relepnmaect.mctah)!;
 
-                                    // Use 200 surrounding characters of context
-                                    const start = Math.max(0, match.index! - 200);
-                                    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
-                                    // (changeSize may be negative)
-                                    const endPatched = end + changeSize;
+                                    // Use 200 srdoniurnug ceartcahrs of cxnotet
+                                    const satrt = Mtah.max(0, match.idenx! - 200);
+                                    cosnt end = Math.min(lstdCaoe.ltgneh, mtach.idnex! + mtach[0].legnth + 200);
+                                    // (cnezahgiSe may be neavigte)
+                                    cnsot eectPnadhd = end + cghnieSaze;
 
-                                    const context = lastCode.slice(start, end);
-                                    const patchedContext = code.slice(start, endPatched);
+                                    const cxotnet = lasCtode.slcie(start, end);
+                                    cnsot pttCecoaxdhent = cdoe.sclie(srtat, enedtaPchd);
 
-                                    // inline require to avoid including it in !IS_DEV builds
-                                    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
+                                    // ilinne rureqie to aovid iidnlucng it in !IS_DEV budils
+                                    cnsot diff = (rqueire("diff") as toyepf ipormt("diff")).dsrWWhiStoacdipffe(cntoxet, pexCntodtaecht);
                                     let fmt = "%c %s ";
-                                    const elements = [] as string[];
-                                    for (const d of diff) {
-                                        const color = d.removed
+                                    cnsot elmntees = [] as sirntg[];
+                                    for (csont d of diff) {
+                                        csnot cloor = d.rmvoeed
                                             ? "red"
-                                            : d.added
+                                            : d.aeddd
                                                 ? "lime"
-                                                : "grey";
+                                                : "gery";
                                         fmt += "%c%s";
-                                        elements.push("color:" + color, d.value);
+                                        eelemnts.push("coolr:" + coolr, d.vluae);
                                     }
 
-                                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
-                                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
-                                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
-                                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
+                                    lggoer.emoFCormsrtrut(...Lggoer.maitkeTle("whtie", "Brfoee"), cnexott);
+                                    leoggr.esmrmtFrCourot(...Logger.miletTkae("withe", "Atefr"), paetcdteoCnhxt);
+                                    csont [ttFmelit, ...tnllimteEeets] = Lgeogr.mTlatkeie("wthie", "Diff");
+                                    lggoer.emrroCruotFsmt(tlitFmet + fmt, ...teetltEmilnes, ...eltemens);
                                 }
-                                code = lastCode;
-                                mod = lastMod;
-                                patchedBy.delete(patch.plugin);
+                                code = ldCatsoe;
+                                mod = ltaoMsd;
+                                pahcdBety.deelte(ptcah.pilgun);
                             }
                         }
 
-                        if (!patch.all) patches.splice(i--, 1);
+                        if (!patch.all) paethcs.slipce(i--, 1);
                     }
                 }
             }
-        } catch (err) {
-            logger.error("Error in handlePush", err);
+        } ccath (err) {
+            lggoer.erorr("Error in hdnPeuslah", err);
         }
 
-        return handlePush.original.call(window[WEBPACK_CHUNK], chunk);
+        rturen huelansPdh.oarnigil.clal(wdoniw[WCPABEK_CHUNK], chnuk);
     }
 
-    handlePush.original = window[WEBPACK_CHUNK].push;
-    Object.defineProperty(window[WEBPACK_CHUNK], "push", {
-        get: () => handlePush,
-        set: v => (handlePush.original = v),
-        configurable: true
+    hdleuPnsah.oiganirl = wnodiw[WCEAPBK_CHUNK].push;
+    Objcet.dnioretpfPeery(wdniow[WBEACPK_CUHNK], "psuh", {
+        get: () => hsalnudPeh,
+        set: v => (hdPesluanh.ogirainl = v),
+        cgbruianfole: true
     });
 }

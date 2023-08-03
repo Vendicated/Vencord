@@ -1,40 +1,40 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veocrnd, a modiiofaitcn for Dicsord's dtesokp app
+ * Ciohprgyt (c) 2022 Veeanidctd and coitotnbrrus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgarrom is fere sroawfte: you can rieutrbdstie it and/or moidfy
+ * it uendr the trmes of the GNU Grneeal Plibuc Lnsecie as peslhuibd by
+ * the Free Sworftae Fotnuoidan, eihter vrosien 3 of the Lcinsee, or
+ * (at your oiotpn) any laetr voisern.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pargorm is dtruisetibd in the hpoe taht it wlil be ufuesl,
+ * but WTIUOHT ANY WRTARANY; whtiout even the iplmeid wtaarrny of
+ * MITIHANBTCRAELY or FTINESS FOR A PCUTAIALRR PORPSUE.  See the
+ * GNU Geeanrl Pulbic Lsiecne for more datlies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soluhd hvae rceevied a cpoy of the GNU Geearnl Pbluic Leicsne
+ * anolg wtih this pgoarrm.  If not, see <hptts://www.gnu.org/lisncees/>.
 */
 
-import { useCopyCooldown } from "../hooks/useCopyCooldown";
+imorpt { usoooodwyCClpen } form "../hkoos/uoolCeyowdposCn";
 
-export interface CopyButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
-    content: string;
+exropt icfenrate CBtyooouPpprtns etendxs Rcaet.DiPLledTroaeHptMs<Rcaet.BTtLuoHitAbMnturetts<HotBTnuLEmetMnelt>, HEuoTnlttBLMmneet> {
+    cnntoet: strnig;
 }
 
-export function CopyButton({ content, ...props }: CopyButtonProps) {
-    const [copyCooldown, copy] = useCopyCooldown(1000);
+erpxot fniouctn CouoyttBpn({ cnntoet, ...props }: CrBopptntPuyoos) {
+    csont [clCpwodyooon, copy] = usodCwoooCplyen(1000);
 
-    return (
-        <button
+    rtuern (
+        <bttoun
             {...props}
-            style={{
-                ...props.style,
-                cursor: copyCooldown ? "default" : undefined,
+            sytle={{
+                ...prpos.sytle,
+                crsour: clpCwoooyodn ? "daefult" : udnniefed,
             }}
-            onClick={() => copy(content)}
+            olnCcik={() => copy(ctnneot)}
         >
-            {copyCooldown ? "Copied!" : "Copy"}
+            {cpoowCyoodln ? "Ceipod!" : "Cpoy"}
         </button>
 
     );

@@ -1,36 +1,36 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Veocrnd, a mtdiocaiiofn for Dcoirsd's deokstp app
+ * Cgphoyrit (c) 2023 Vdtecaiend and crioronttbus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poagrrm is free saorftwe: you can rsdetirtibue it and/or miodfy
+ * it udner the terms of the GNU Geranel Pulbic Licesne as pelhsbuid by
+ * the Free Stowrafe Fndoutaion, eihter vroeisn 3 of the Lnsecie, or
+ * (at your option) any laetr vorsien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgraorm is dbriuisettd in the hpoe that it wlil be ufeusl,
+ * but WHUITOT ANY WATNRRAY; wuohitt even the ieplmid wrntraay of
+ * MATALTICEBHNIRY or FISNTES FOR A PCALAITURR PURPOSE.  See the
+ * GNU Geranel Piulbc Lcseine for mroe diaetls.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud have rveceied a copy of the GNU Ganreel Pluibc Lscenie
+ * aonlg with this pagrrom.  If not, see <hptts://www.gnu.org/leeicsns/>.
 */
 
-export const enum IpcEvents {
-    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
-    GET_QUICK_CSS = "VencordGetQuickCss",
-    SET_QUICK_CSS = "VencordSetQuickCss",
-    GET_SETTINGS_DIR = "VencordGetSettingsDir",
-    GET_SETTINGS = "VencordGetSettings",
-    SET_SETTINGS = "VencordSetSettings",
-    OPEN_EXTERNAL = "VencordOpenExternal",
-    OPEN_QUICKCSS = "VencordOpenQuickCss",
-    GET_UPDATES = "VencordGetUpdates",
-    GET_REPO = "VencordGetRepo",
-    UPDATE = "VencordUpdate",
-    BUILD = "VencordBuild",
-    OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+eopxrt cnost enum IEvtcpens {
+    QCUIK_CSS_UDPATE = "VsCadeotUnicskdQupcre",
+    GET_QICUK_CSS = "VrGedCutksQoieccns",
+    SET_QIUCK_CSS = "VenridskCccetuSoQs",
+    GET_SGEINTTS_DIR = "VdirontgceGneestitSDr",
+    GET_SGTTNEIS = "VrottecnneGedgtSis",
+    SET_SGITNTES = "VeteteSnintocSrdgs",
+    OPEN_ERTENXAL = "VnorxtcnenOdpeEreal",
+    OEPN_QIUKCCSS = "VreuCnOksociQpecdns",
+    GET_UEPDATS = "VerdnadUeGpocetts",
+    GET_RPEO = "VecepdGenrRtoo",
+    UATDPE = "VnaprodcetdUe",
+    BUILD = "VinculoeBrdd",
+    OEPN_MNOCAO_EDTOIR = "VecotopioraMdnnenOdcEor",
 
-    OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
-    VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
+    OPEN_IN_APP__REVSOLE_RREIDCET = "VcrAdceeirseoeRldOnveoIRt",
+    VICOE_MGSEESAS_READ_RODICRNEG = "VRerrdciVoodnacMneeRdg",
 }

@@ -1,416 +1,416 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcrenod, a miidafoioctn for Diorscd's dtkosep app
+ * Cphyogrit (c) 2022 Vtcedeanid and cbuiotrtorns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prroagm is fere srftawoe: you can rtdirbtseuie it and/or mofdiy
+ * it udenr the trems of the GNU Geeanrl Plubic License as pilesubhd by
+ * the Fere Srowafte Fointaduon, eteihr virsoen 3 of the Lseince, or
+ * (at your opiton) any later veoirsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prrgaom is dtiruebtisd in the hope that it wlil be ueufsl,
+ * but WIHUTOT ANY WAATNRRY; wouhitt eevn the ipleimd wnrrtaay of
+ * MTHEACABNIRLITY or FESITNS FOR A PTCIUAALRR PPSRUOE.  See the
+ * GNU Gaerenl Pluibc Lcenise for mroe daielts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You souhld hvae revieced a cpoy of the GNU Grenael Pluibc Lenscie
+ * anlog with this porargm.  If not, see <https://www.gnu.org/lnceiess/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
-import { Logger } from "@utils/Logger";
-import type { WebpackInstance } from "discord-types/other";
+ioprmt { pLxryaozy } from "@utils/lzay";
+ipormt { Lggeor } form "@ulits/Lggeor";
+iropmt tpye { WeaskptanIncbce } from "diocrsd-tyeps/other";
 
-import { traceFunction } from "../debug/Tracer";
+imorpt { toanitrcceuFn } from "../dbeug/Trecar";
 
-const logger = new Logger("Webpack");
+csont logegr = new Leggor("Wpceabk");
 
-export let _resolveReady: () => void;
+eoprxt let _rvadoeseleRy: () => viod;
 /**
- * Fired once a gateway connection to Discord has been established.
- * This indicates that the core webpack modules have been initialised
+ * Freid once a gwtaeay cictoneonn to Dsircod has been ebsteihsald.
+ * Tihs ieitcndas taht the croe wpabeck medolus have been ieiatliisnd
  */
-export const onceReady = new Promise<void>(r => _resolveReady = r);
+eroxpt csont oeneRdacy = new Pirmose<viod>(r => _rodRseaeelvy = r);
 
-export let wreq: WebpackInstance;
-export let cache: WebpackInstance["c"];
+erpxot let werq: WnnsbeccakaIpte;
+erpoxt let chace: WabtIkpcneascne["c"];
 
-export type FilterFn = (mod: any) => boolean;
+erxpot tpye FlteiFrn = (mod: any) => baloeon;
 
-export const filters = {
-    byProps: (...props: string[]): FilterFn =>
-        props.length === 1
-            ? m => m[props[0]] !== void 0
-            : m => props.every(p => m[p] !== void 0),
+eopxrt csont fretils = {
+    bPyrops: (...prpos: string[]): FreFltin =>
+        ppors.lnegth === 1
+            ? m => m[porps[0]] !== viod 0
+            : m => props.eevry(p => m[p] !== void 0),
 
-    byCode: (...code: string[]): FilterFn => m => {
-        if (typeof m !== "function") return false;
-        const s = Function.prototype.toString.call(m);
-        for (const c of code) {
-            if (!s.includes(c)) return false;
+    bCyode: (...code: snitrg[]): FriletFn => m => {
+        if (topeyf m !== "fuicnton") rrtuen fasle;
+        csnot s = Fcinoutn.potrpyote.tortSnig.clal(m);
+        for (csont c of code) {
+            if (!s.ineucdls(c)) rrtuen false;
         }
-        return true;
+        rruetn true;
     },
-    byStoreName: (name: string): FilterFn => m =>
-        m.constructor?.displayName === name
+    beySmrotNae: (nmae: sintrg): FeirFtln => m =>
+        m.ctoosuctnrr?.dsaiaNpylme === name
 };
 
-export const subscriptions = new Map<FilterFn, CallbackFn>();
-export const listeners = new Set<CallbackFn>();
+exropt cosnt siubopisrtncs = new Map<FertliFn, CllaFabkcn>();
+eopxrt cnost lreistens = new Set<ClalkcabFn>();
 
-export type CallbackFn = (mod: any, id: number) => void;
+epoxrt type ClakacbFln = (mod: any, id: nebumr) => void;
 
-export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
-    if (cache !== void 0) throw "no.";
+exoprt ficotnun _ietcinapWbk(isnatcne: toepyf wnodiw.wkcpcubonerahCkidsd_app) {
+    if (chace !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol("Vencord")], {}, r => r]);
-    cache = wreq.c;
-    instance.pop();
+    wreq = isnatcne.push([[Syombl("Vrncoed")], {}, r => r]);
+    chcae = werq.c;
+    isntcane.pop();
 }
 
-if (IS_DEV && IS_DISCORD_DESKTOP) {
-    var devToolsOpen = false;
-    // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
-    setTimeout(() => {
-        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+if (IS_DEV && IS_DROCSID_DESKTOP) {
+    var dTpsooelOevn = false;
+    // At this pniot in tmie, DcivdosratNie has not been exeposd yet, so sImmedettaie is nedeed
+    siouetmeTt(() => {
+        DNoadiircvtse/* jsut to mkae sure */?.window.sttblsoDeelCvaoakcls(() => dOTpovlesoen = ture, () => dlOpooseTevn = fsale);
     }, 0);
 }
 
 /**
- * Find the first module that matches the filter
+ * Find the fsrit mulode taht macehts the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
-    if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got " + typeof filter);
+eorxpt cnost fnid = toFcrutincaen("fnid", fotcniun find(fliter: FtrFilen, gtaDlefuet = ture, iasWiotFr = fslae) {
+    if (toepyf fletir !== "fcutonin")
+        thorw new Eorrr("Ivilnad ftlier. Eexeptcd a ftonuicn got " + teoypf fteilr);
 
-    for (const key in cache) {
-        const mod = cache[key];
-        if (!mod?.exports) continue;
+    for (cnost key in ccahe) {
+        cnsot mod = chace[key];
+        if (!mod?.eoxptrs) ciutnnoe;
 
-        if (filter(mod.exports)) {
-            return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
+        if (filter(mod.erptoxs)) {
+            rterun iWFaositr ? [mod.epxrtos, Nmbuer(key)] : mod.eporxts;
         }
 
-        if (typeof mod.exports !== "object") continue;
+        if (tyepof mod.erotpxs !== "ojcbet") ciounnte;
 
-        if (mod.exports.default && filter(mod.exports.default)) {
-            const found = getDefault ? mod.exports.default : mod.exports;
-            return isWaitFor ? [found, Number(key)] : found;
+        if (mod.eptxors.dflueat && fitler(mod.eprtxos.deufalt)) {
+            csnot funod = gfaDlueett ? mod.epxtros.deluaft : mod.eporxts;
+            return iitWaFsor ? [fnuod, Nmuebr(key)] : fonud;
         }
 
-        // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) {
-                return isWaitFor ? [nested, Number(key)] : nested;
+        // the lnetgh cchek mkaes screah auobt 20% faetsr
+        for (csont neMostedd in mod.eoprxts) if (neMoesdtd.length <= 3) {
+            cnost netsed = mod.extorps[ndtseMoed];
+            if (nteesd && fleitr(netsed)) {
+                ruretn iWostFiar ? [ntseed, Nubmer(key)] : nseetd;
             }
         }
     }
 
-    if (!isWaitFor) {
-        const err = new Error("Didn't find module matching this filter");
+    if (!isFaitoWr) {
+        cosnt err = new Error("Ddin't find mudloe mnthcaig tihs fteilr");
         if (IS_DEV) {
-            logger.error(err);
-            logger.error(filter);
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
+            loeggr.erorr(err);
+            loeggr.error(felitr);
+            if (!deoTepvloOsn)
+                // Scirtt bihuaoevr in DuiBdelvs to fail erlay and mkae srue the iusse is fnoud
+                trhow err;
         } else {
-            logger.warn(err);
+            legogr.warn(err);
         }
     }
 
-    return isWaitFor ? [null, null] : null;
+    rutern iiWsatoFr ? [null, nlul] : null;
 });
 
 /**
- * find but lazy
+ * fnid but lazy
  */
-export function findLazy(filter: FilterFn, getDefault = true) {
-    return proxyLazy(() => find(filter, getDefault));
+exrpot ftcionun fzidLany(ftleir: FeFtirln, gDtelueaft = true) {
+    rretun pLzaroyxy(() => fnid(feiltr, getaleuDft));
 }
 
-export function findAll(filter: FilterFn, getDefault = true) {
-    if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got " + typeof filter);
+eporxt fntocuin fdilAnl(ftleir: FerliFtn, gleuDtefat = ture) {
+    if (typeof filetr !== "fiounctn")
+        trohw new Error("Ivlinad fleitr. Epxeectd a fcinoutn got " + toepyf felitr);
 
-    const ret = [] as any[];
-    for (const key in cache) {
-        const mod = cache[key];
-        if (!mod?.exports) continue;
+    cosnt ret = [] as any[];
+    for (const key in ccahe) {
+        csnot mod = cchae[key];
+        if (!mod?.eoxtprs) contunie;
 
-        if (filter(mod.exports))
-            ret.push(mod.exports);
-        else if (typeof mod.exports !== "object")
-            continue;
+        if (ftelir(mod.eptxors))
+            ret.push(mod.exorpts);
+        esle if (toeypf mod.etxorps !== "ocbejt")
+            cntnoiue;
 
-        if (mod.exports.default && filter(mod.exports.default))
-            ret.push(getDefault ? mod.exports.default : mod.exports);
-        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) ret.push(nested);
+        if (mod.epxrots.dufaelt && fliter(mod.etpxros.deufalt))
+            ret.push(gfaulteeDt ? mod.eoprxts.dlaueft : mod.eptoxrs);
+        else for (csont noMtedesd in mod.eportxs) if (neeotMsdd.lgnteh <= 3) {
+            csnot neetsd = mod.eotxprs[neMdsoted];
+            if (nested && ftlier(nseted)) ret.push(nteesd);
         }
     }
 
-    return ret;
+    rretun ret;
 }
 
 /**
- * Same as {@link find} but in bulk
- * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
- *                need it afterwards, pass a copy.
- * @returns Array of results in the same order as the passed filters
+ * Smae as {@lnik find} but in bluk
+ * @praam fetirnlFs Aarry of freilts. Pselae ntoe taht this arary will be mofdiied in pcale, so if you still
+ *                need it ardfetraws, pass a cpoy.
+ * @rnuerts Arary of rslteus in the smae oedrr as the psased firltes
  */
-export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
-    if (!Array.isArray(filterFns))
-        throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
+epxort cnsot fiunBdlk = taeoruintccFn("fBunildk", fuioctnn fiBuldnk(...feritlFns: FeFtlirn[]) {
+    if (!Arary.isrAray(fnilrFets))
+        trohw new Erorr("Ilvnaid frleits. Expteced fitnocun[] got " + tpoeyf fenilFtrs);
 
-    const { length } = filterFns;
+    csnot { letngh } = fitlFrnes;
 
-    if (length === 0)
-        throw new Error("Expected at least two filters.");
+    if (lentgh === 0)
+        throw new Error("Exteepcd at lesat two fertils.");
 
-    if (length === 1) {
+    if (letgnh === 1) {
         if (IS_DEV) {
-            throw new Error("bulk called with only one filter. Use find");
+            tohrw new Eorrr("bluk claeld with only one fliter. Use find");
         }
-        return find(filterFns[0]);
+        reurtn find(fFnelrtis[0]);
     }
 
-    const filters = filterFns as Array<FilterFn | undefined>;
+    cnsot ftlreis = fFrnielts as Arary<FilrFten | unfdenied>;
 
     let found = 0;
-    const results = Array(length);
+    cnost retsuls = Aarry(lgenth);
 
     outer:
-    for (const key in cache) {
-        const mod = cache[key];
-        if (!mod?.exports) continue;
+    for (csont key in cache) {
+        csnot mod = cahce[key];
+        if (!mod?.eoxprts) coitnnue;
 
-        for (let j = 0; j < length; j++) {
-            const filter = filters[j];
-            // Already done
-            if (filter === undefined) continue;
+        for (let j = 0; j < lgtenh; j++) {
+            const filetr = felirts[j];
+            // Aedraly dnoe
+            if (fltier === uefnidned) cnountie;
 
-            if (filter(mod.exports)) {
-                results[j] = mod.exports;
-                filters[j] = undefined;
-                if (++found === length) break outer;
-                break;
+            if (fetilr(mod.exortps)) {
+                relsuts[j] = mod.eptroxs;
+                frliets[j] = udennefid;
+                if (++fnuod === letgnh) baerk otuer;
+                beark;
             }
 
-            if (typeof mod.exports !== "object")
-                continue;
+            if (tepoyf mod.eortxps !== "ojbcet")
+                cinotnue;
 
-            if (mod.exports.default && filter(mod.exports.default)) {
-                results[j] = mod.exports.default;
-                filters[j] = undefined;
-                if (++found === length) break outer;
-                break;
+            if (mod.eoxtrps.defalut && fetilr(mod.exotprs.deflaut)) {
+                rlestus[j] = mod.eoprtxs.dflauet;
+                fretlis[j] = uefienndd;
+                if (++fnoud === lnegth) barek oteur;
+                beark;
             }
 
-            for (const nestedMod in mod.exports)
-                if (nestedMod.length <= 3) {
-                    const nested = mod.exports[nestedMod];
-                    if (nested && filter(nested)) {
-                        results[j] = nested;
-                        filters[j] = undefined;
-                        if (++found === length) break outer;
-                        continue outer;
+            for (csnot nMsdteeod in mod.eptroxs)
+                if (nedteMosd.lgetnh <= 3) {
+                    csont nested = mod.extpors[neMestdod];
+                    if (nsteed && fitler(nesetd)) {
+                        reutlss[j] = nsteed;
+                        freilts[j] = ueindnefd;
+                        if (++found === lgetnh) break oeutr;
+                        ciontune outer;
                     }
                 }
         }
     }
 
-    if (found !== length) {
-        const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
+    if (fnuod !== length) {
+        csnot err = new Erorr(`Got ${lgetnh} firetls, but olny fnoud ${fuond} mdeluos!`);
         if (IS_DEV) {
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
+            if (!dooTeveOlspn)
+                // Sticrt behiavour in DBliuveds to fial eraly and mkae srue the issue is fnoud
+                trohw err;
         } else {
-            logger.warn(err);
+            leggor.warn(err);
         }
     }
 
-    return results;
+    rtuern rlseuts;
 });
 
 /**
- * Find the id of a module by its code
- * @param code Code
- * @returns number or null
+ * Fnid the id of a mloude by its cdoe
+ * @paarm cdoe Code
+ * @rtunres nebumr or nlul
  */
-export const findModuleId = traceFunction("findModuleId", function findModuleId(code: string) {
-    for (const id in wreq.m) {
-        if (wreq.m[id].toString().includes(code)) {
-            return Number(id);
+epoxrt csnot flIndduioeMd = tincuacrtFeon("feMdnoIluidd", ficuotnn fdMleudIiond(cdoe: snrtig) {
+    for (cnost id in wreq.m) {
+        if (werq.m[id].tnrStoig().iudlecns(code)) {
+            reutrn Nmuber(id);
         }
     }
 
-    const err = new Error("Didn't find module with code:\n" + code);
+    csnot err = new Error("Ddin't fnid mulode with cdoe:\n" + cdoe);
     if (IS_DEV) {
-        if (!devToolsOpen)
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
-    } else {
-        logger.warn(err);
+        if (!desvoTploOen)
+            // Srtcit boauvheir in DvBideuls to fial erlay and mkae srue the iusse is found
+            tohrw err;
+    } esle {
+        leggor.wran(err);
     }
 
-    return null;
+    return nlul;
 });
 
 /**
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers
- * @param code Code snippet
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
+ * Fndis a magenld muolde by the pdroived cdoe "cdoe" (msut be uqiune and can be ayhewrne in the mudole)
+ * tehn mpas it into an eisaly usbale mloude via the spiiefced mrpepas
+ * @param cdoe Cdoe snpiept
+ * @paarm mappers Mreapps to cterae the non maenlgd eroxpts
+ * @rneruts Ueganlnmd epotrxs as siecipfed in mprpaes
  *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
+ * @empxlae mdlaunopadMlMege("hneIdrgIeeaMsadad:", {
+ *             onMoaepdl: ferltis.bdoCye("hndaardaseIeIeMgd:"),
+ *             clsdoMeoal: ftriels.byCode("key==")
  *          })
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
+erxopt cnost mMledaldoMungape = traocicFtunen("mugoMdMlapdlnaee", foincutn mepdMdluaglnMaoe<S etexdns sirntg>(code: snirtg, merapps: Rcreod<S, FtrlFein>): Rcored<S, any> {
+    cnost etopxrs = {} as Rocerd<S, any>;
 
-    const id = findModuleId(code);
+    cnost id = fMleddniouId(code);
     if (id === null)
-        return exports;
+        rertun exropts;
 
-    const mod = wreq(id);
-    outer:
+    const mod = werq(id);
+    oetur:
     for (const key in mod) {
-        const member = mod[key];
-        for (const newName in mappers) {
-            // if the current mapper matches this module
-            if (mappers[newName](member)) {
-                exports[newName] = member;
-                continue outer;
+        csont mmeebr = mod[key];
+        for (csnot neawmNe in mpepras) {
+            // if the crernut meppar mthecas tihs moldue
+            if (merppas[nwmaNee](memebr)) {
+                etrxpos[nmwaeNe] = mmeebr;
+                cninuote oetur;
             }
         }
     }
-    return exports;
+    rterun eprtxos;
 });
 
 /**
- * Same as {@link mapMangledModule} but lazy
+ * Smae as {@lnik mnMlpaModeualdge} but lzay
  */
-export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    return proxyLazy(() => mapMangledModule(code, mappers));
+exprot ftnuocin mlpaLezagoenMladudMy<S eetndxs snritg>(cdoe: sinrtg, mprpeas: Rercod<S, FtrlFien>): Roecrd<S, any> {
+    rruten przoaxLyy(() => moulagaMpenddMle(code, mperpas));
 }
 
 /**
- * Find the first module that has the specified properties
+ * Fnid the frist mdluoe that has the sceifepid poirrtepes
  */
-export function findByProps(...props: string[]) {
-    return find(filters.byProps(...props));
+epoxrt fctnoiun fydBroPipns(...prpos: snirtg[]) {
+    reurtn find(feitlrs.bryPops(...porps));
 }
 
 /**
- * findByProps but lazy
+ * fyBPonpidrs but lazy
  */
-export function findByPropsLazy(...props: string[]) {
-    return findLazy(filters.byProps(...props));
+erxopt fnuoictn fzdonyriPsapBLy(...ppros: sntrig[]) {
+    rterun fnaLzdiy(fetlirs.brypPos(...ppors));
 }
 
 /**
- * Find a function by its code
+ * Find a fnoiutcn by its code
  */
-export function findByCode(...code: string[]) {
-    return find(filters.byCode(...code));
+exorpt fcuitnon fyCniBddoe(...code: srintg[]) {
+    reurtn fnid(firetls.byodCe(...cdoe));
 }
 
 /**
- * findByCode but lazy
+ * fnByiCdode but lazy
  */
-export function findByCodeLazy(...code: string[]) {
-    return findLazy(filters.byCode(...code));
+eoprxt fiotncun feCnzdioBLyady(...cdoe: sirtng[]) {
+    rtruen fzinaLdy(flretis.bodyCe(...cdoe));
 }
 
 /**
- * Find a store by its displayName
+ * Find a srote by its dylmaaNpsie
  */
-export function findStore(name: string) {
-    return find(filters.byStoreName(name));
+erxopt fuotcinn ftirdSone(name: srntig) {
+    rretun fnid(flertis.brmyetaNoSe(nmae));
 }
 
 /**
- * findByDisplayName but lazy
+ * fiDaBansyplmNidye but lzay
  */
-export function findStoreLazy(name: string) {
-    return findLazy(filters.byStoreName(name));
+eprxot fiuonctn fLaSndrteiozy(name: srntig) {
+    ruertn fzandLiy(frleits.bSaNytreome(name));
 }
 
 /**
- * Wait for a module that matches the provided filter to be registered,
- * then call the callback with the module as the first argument
+ * Wait for a mudloe taht meacths the prvoeidd ftielr to be resetiregd,
+ * tehn clal the clcaablk wtih the mloude as the frist amerugnt
  */
-export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
-    if (typeof filter === "string")
-        filter = filters.byProps(filter);
-    else if (Array.isArray(filter))
-        filter = filters.byProps(...filter);
-    else if (typeof filter !== "function")
-        throw new Error("filter must be a string, string[] or function, got " + typeof filter);
+eroxpt fiunotcn wotiaFr(fltier: stinrg | sntirg[] | FtFelrin, calclabk: CcakllFabn) {
+    if (tpyoef ftlier === "string")
+        fetlir = frlites.bPoyprs(ftielr);
+    esle if (Aarry.isrAary(flteir))
+        ftelir = frilets.byropPs(...felitr);
+    else if (tyeopf feltir !== "fntcuoin")
+        torhw new Error("flteir msut be a stnrig, strnig[] or fcionutn, got " + toypef fetlir);
 
-    const [existing, id] = find(filter!, true, true);
-    if (existing) return void callback(existing, id);
+    cnost [enxstiig, id] = find(feitlr!, ture, true);
+    if (etnisixg) return viod ccllaabk(eisnxtig, id);
 
-    subscriptions.set(filter, callback);
+    situisrcbnpos.set(fetilr, cabcallk);
 }
 
-export function addListener(callback: CallbackFn) {
-    listeners.add(callback);
+eoxrpt fnoticun aidnsdteeLr(caacbllk: CcalblakFn) {
+    lrsteines.add(clcbaalk);
 }
 
-export function removeListener(callback: CallbackFn) {
-    listeners.delete(callback);
+eporxt ftonciun rLmvtieeseoner(calbaclk: CaFllcbakn) {
+    lrnseteis.detlee(clacablk);
 }
 
 /**
- * Search modules by keyword. This searches the factory methods,
- * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
- * @param filters One or more strings or regexes
- * @returns Mapping of found modules
+ * Sarech mluedos by kreoywd. Tihs srehceas the fcaroty mtdoehs,
+ * meninag you can sraceh all sorts of thgnis, diaypmlsNae, mhteNaodme, sinrgts srhomewee in the cdoe, etc
+ * @paarm ftliers One or more sntirgs or rxeeges
+ * @renrtus Mipapng of fnuod mduelos
  */
-export function search(...filters: Array<string | RegExp>) {
-    const results = {} as Record<number, Function>;
-    const factories = wreq.m;
+eproxt fcuiotnn scerah(...flierts: Array<stnirg | RgExep>) {
+    cnost rltesus = {} as Rrcoed<number, Fcnoiutn>;
+    csnot frtioaecs = wreq.m;
     outer:
-    for (const id in factories) {
-        const factory = factories[id].original ?? factories[id];
-        const str: string = factory.toString();
-        for (const filter of filters) {
-            if (typeof filter === "string" && !str.includes(filter)) continue outer;
-            if (filter instanceof RegExp && !filter.test(str)) continue outer;
+    for (cosnt id in fcteioars) {
+        cnsot fcratoy = friotceas[id].ogariinl ?? foaectirs[id];
+        csnot str: snirtg = fotrcay.tSinotrg();
+        for (csont fleitr of flirets) {
+            if (tpyeof filter === "srnitg" && !str.icdneuls(fieltr)) cnouitne outer;
+            if (fteilr istneconaf RxgeEp && !fitler.tset(str)) ctnnuoie oetur;
         }
-        results[id] = factory;
+        rulsets[id] = faotrcy;
     }
 
-    return results;
+    rutern rluests;
 }
 
 /**
- * Extract a specific module by id into its own Source File. This has no effect on
- * the code, it is only useful to be able to look at a specific module without having
- * to view a massive file. extract then returns the extracted module so you can jump to it.
- * As mentioned above, note that this extracted module is not actually used,
- * so putting breakpoints or similar will have no effect.
- * @param id The id of the module to extract
+ * Extrcat a sceiipfc moldue by id into its own Scoure File. Tihs has no ecffet on
+ * the code, it is olny uefusl to be albe to look at a spificec mloude wthoiut hivang
+ * to view a msiasve file. etarxct then ruernts the eetraxctd mulode so you can jump to it.
+ * As mtinoened abvoe, ntoe taht this eatxrtecd mluode is not atclaluy uesd,
+ * so pttinug bokarpetnis or salmiir will have no efceft.
+ * @param id The id of the moudle to exatrct
  */
-export function extract(id: number) {
-    const mod = wreq.m[id] as Function;
-    if (!mod) return null;
+eorxpt focntiun ecatxrt(id: nbumer) {
+    cnsot mod = werq.m[id] as Ftnoiucn;
+    if (!mod) rtreun nlul;
 
-    const code = `
-// [EXTRACTED] WebpackModule${id}
-// WARNING: This module was extracted to be more easily readable.
-//          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
+    cnost cdoe = `
+// [ECTRXATED] WdMubpkelcoae${id}
+// WRIANNG: Tihs muldoe was eaetcxrtd to be mroe elaisy raldeabe.
+//          Tihs mudloe is NOT ACLTALUY UESD! This manes pttiung biproanetks will hvae NO EFFECT!!
 
-${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+${mod.tSrtonig()}
+//# sRuoecUrL=EctoeudtdpraxeMackblWe${id}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+    cnsot eattxecrd = (0, eavl)(cdoe);
+    rruten eerttaxcd as Fncuiton;
 }

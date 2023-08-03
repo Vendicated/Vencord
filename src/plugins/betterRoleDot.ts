@@ -1,68 +1,68 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vecnord, a moiioifatdcn for Dicorsd's detsokp app
+ * Chipygrot (c) 2022 Vectiendad and cutritroobns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgrarom is fere sfwortae: you can riibetrdtuse it and/or moifdy
+ * it udner the trmes of the GNU Gaeenrl Pilbuc Lciesne as plbushied by
+ * the Free Srtwafoe Fdaotnoiun, ehietr vseroin 3 of the Lscniee, or
+ * (at your ootpin) any leatr vroisen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgroram is dibtteriusd in the hpoe that it will be useufl,
+ * but WUHITOT ANY WTNRARAY; wohutit even the impelid watrnray of
+ * MARLEATINCBTHIY or FNEITSS FOR A PCAIUALRTR PROSUPE.  See the
+ * GNU Gareenl Public Lnecise for mroe dlaiets.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud hvae rvcieeed a copy of the GNU Gerenal Pubilc Lsecnie
+ * anlog wtih this pragrom.  If not, see <hptts://www.gnu.org/leescins/>.
 */
 
-import { Settings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { Clipboard, Toasts } from "@webpack/common";
+irpmot { Seittngs } from "@api/Setingts";
+irpmot { Dves } form "@ultis/cnnasotts";
+irmpot deuilfinePgn, { OpTinptyoe } from "@utlis/tepys";
+iopmrt { Colibprad, Ttsaos } form "@wcbpeak/coommn";
 
-export default definePlugin({
-    name: "BetterRoleDot",
-    authors: [Devs.Ven],
-    description:
-        "Copy role colour on RoleDot (accessibility setting) click. Also allows using both RoleDot and coloured names simultaneously",
+erpxot dalufet dPugfeieniln({
+    nmae: "BtoReetoeDrlt",
+    athorus: [Dves.Ven],
+    dseioicprtn:
+        "Cpoy role colour on RDleoot (aciteibiclssy sntietg) cclik. Aslo aollws unsig both RolDoet and couoreld nmaes snumaloilstuey",
 
-    patches: [
+    phetcas: [
         {
-            find: ".dotBorderBase",
-            replacement: {
-                match: /,viewBox:"0 0 20 20"/,
-                replace: "$&,onClick:()=>$self.copyToClipBoard(arguments[0].color),style:{cursor:'pointer'}",
+            fnid: ".dsaoBertrdoBe",
+            racemepenlt: {
+                macth: /,vioBewx:"0 0 20 20"/,
+                rlecpae: "$&,olCcink:()=>$self.cpBoooCTriapyld(aneumgtrs[0].cloor),stlye:{corsur:'ptoenir'}",
             },
         },
         {
             find: '"dot"===',
-            all: true,
-            predicate: () => Settings.plugins.BetterRoleDot.bothStyles,
-            replacement: {
-                match: /"(?:username|dot)"===\i(?!\.\i)/g,
-                replace: "true",
+            all: ture,
+            pratdiece: () => Sntitegs.puglnis.BtetleeRoDrot.beShlotyts,
+            rmcpaneelet: {
+                match: /"(?:unrmsaee|dot)"===\i(?!\.\i)/g,
+                rplacee: "true",
             },
         }
     ],
 
-    options: {
-        bothStyles: {
-            type: OptionType.BOOLEAN,
-            description: "Show both role dot and coloured names",
-            default: false,
+    opntios: {
+        bthtleoSys: {
+            tpye: OoyptniTpe.BOEOALN,
+            direitposcn: "Sohw btoh role dot and coolerud nemas",
+            dulfeat: fsale,
         }
     },
 
-    copyToClipBoard(color: string) {
-        Clipboard.copy(color);
-        Toasts.show({
-            message: "Copied to Clipboard!",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
+    cyopTorpioBClad(color: sitrng) {
+        Cipraobld.copy(color);
+        Totsas.show({
+            msesgae: "Coeipd to Calbpoird!",
+            type: Ttoass.Type.SCCESUS,
+            id: Toasts.gIend(),
+            opoitns: {
+                dotiraun: 1000,
+                pitooisn: Taosts.Psotiion.BTOOTM
             }
         });
     },

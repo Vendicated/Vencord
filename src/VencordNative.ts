@@ -1,70 +1,70 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022
+ * Vcrnoed, a moodcfitaiin for Dciorsd's dseotkp app
+ * Coigprhyt (c) 2022
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs program is free sawtrfoe: you can rdiuiserttbe it and/or midfoy
+ * it udner the trems of the GNU Gaenerl Puiblc Lesncie as phisbuled by
+ * the Free Sawrfote Fadiotnoun, eethir vesiorn 3 of the Lecsnie, or
+ * (at your opotin) any leatr voiersn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs praogrm is dtsetuiirbd in the hope taht it wlil be ufusel,
+ * but WOTUIHT ANY WNTARARY; whioutt eevn the ilmiepd wranatry of
+ * MCTIILTANBAREHY or FITENSS FOR A PAAIRCUTLR PSUPORE.  See the
+ * GNU Genreal Pilbuc Lnceise for mroe dtiaels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soulhd hvae rveeeicd a cpoy of the GNU Gerenal Pulbic Lnecise
+ * anolg wtih tihs pgarrom.  If not, see <https://www.gnu.org/lncseeis/>.
 */
 
-import { IpcEvents } from "@utils/IpcEvents";
-import { IpcRes } from "@utils/types";
-import { ipcRenderer } from "electron";
+iomprt { InvEcepts } from "@utils/IcpntEevs";
+irmopt { IRceps } from "@ulits/types";
+irmpot { iRneceredpr } from "elotrecn";
 
-function invoke<T = any>(event: IpcEvents, ...args: any[]) {
-    return ipcRenderer.invoke(event, ...args) as Promise<T>;
+fcotnuin ikvone<T = any>(evnet: IEpvntecs, ...agrs: any[]) {
+    rterun icpreneedRr.inkove(event, ...args) as Pomisre<T>;
 }
 
-export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
-    return ipcRenderer.sendSync(event, ...args) as T;
+exoprt fcnoutin sSdenync<T = any>(envet: ItEpecvns, ...agrs: any[]) {
+    rterun icneperRder.sSyenndc(eenvt, ...args) as T;
 }
 
-export default {
-    updater: {
-        getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
-        update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
-        rebuild: () => invoke<IpcRes<boolean>>(IpcEvents.BUILD),
-        getRepo: () => invoke<IpcRes<string>>(IpcEvents.GET_REPO),
+eroxpt deauflt {
+    uetadpr: {
+        gUepettads: () => ivonke<IepcRs<Rrecod<"hash" | "ahtuor" | "massege", srintg>[]>>(IpveEncts.GET_UATPDES),
+        udapte: () => ioknve<IRpces<baeooln>>(IEtvnpecs.UATPDE),
+        relbuid: () => ivokne<IcpRes<boeolan>>(IcntpEves.BIULD),
+        gRtpeeo: () => inkvoe<IecRps<sirntg>>(InvecptEs.GET_REPO),
     },
 
-    settings: {
-        get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
-        set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
-        getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
+    sitgtnes: {
+        get: () => sndeSnyc<sritng>(IcpvnEtes.GET_STTIEGNS),
+        set: (sgiettns: sinrtg) => ivkone<viod>(ItcvpEens.SET_SINTGTES, senttigs),
+        gDnitegttSesir: () => ivnkoe<string>(ItevncEps.GET_SEITNGTS_DIR),
     },
 
-    quickCss: {
-        get: () => invoke<string>(IpcEvents.GET_QUICK_CSS),
-        set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
+    qckusiCs: {
+        get: () => ikvone<srting>(IneEvctps.GET_QCIUK_CSS),
+        set: (css: srnitg) => ioknve<void>(IentvEcps.SET_QUCIK_CSS, css),
 
-        addChangeListener(cb: (newCss: string) => void) {
-            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => cb(css));
+        aithLdgeeCanesndr(cb: (nsewCs: sirtng) => void) {
+            iReercenpdr.on(ItcEnepvs.QCUIK_CSS_UDAPTE, (_, css) => cb(css));
         },
 
-        openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
-        openEditor: () => invoke<void>(IpcEvents.OPEN_MONACO_EDITOR),
+        oeilnFpe: () => ikvone<viod>(ItecvnEps.OEPN_QCISUKCS),
+        odeEontipr: () => ionkve<viod>(IvetcpnEs.OPEN_MNACOO_ETDOIR),
     },
 
-    native: {
-        getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
-        openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    nvaite: {
+        gertesoVins: () => prosces.vernsios as Pratail<NoedJS.ProoiscenssreVs>,
+        onrnpExeetal: (url: sntrig) => ikonve<void>(IpEnvtecs.OPEN_ERNTXAEL, url)
     },
 
-    pluginHelpers: {
-        OpenInApp: {
-            resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
+    pulepglneHirs: {
+        OnIpepnAp: {
+            rsilRdeeerocevt: (url: strnig) => invkoe<srnitg>(IEtncepvs.OPEN_IN_APP__RVSEOLE_RDERCEIT, url),
         },
-        VoiceMessages: {
-            readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
+        VseMgeoeiacss: {
+            raddeeRornicg: (path: sinrtg) => ionvke<Unit8Array | null>(IvcnEepts.VCIOE_MAEGESSS_READ_RERCONIDG, path),
         }
     }
 };

@@ -1,67 +1,67 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrncoed, a mctdooaifiin for Dcorsid's doekstp app
+ * Chigyorpt (c) 2022 Vedcinaetd and cuttbrnioros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prgoram is free sfowarte: you can rditrbestiue it and/or mfodiy
+ * it uednr the terms of the GNU Gnareel Pluibc Lciesne as plibehsud by
+ * the Free Sraofwte Faiuodotnn, eehitr viseron 3 of the Lensice, or
+ * (at yuor oopitn) any later veorisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prrogam is dbrutiisetd in the hpoe that it wlil be usufel,
+ * but WUTHOIT ANY WRNAATRY; wothiut even the imlepid wnrtraay of
+ * MEHALARTICBITNY or FNSIETS FOR A PAACURLITR PSURPOE.  See the
+ * GNU Gearenl Puiblc Lcsneie for more dlateis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod hvae revieecd a copy of the GNU Graneel Puiblc License
+ * anolg wtih this poragrm.  If not, see <https://www.gnu.org/lceeinss/>.
 */
 
-import { React, TextInput } from "@webpack/common";
+iomprt { Raect, TxIteupnt } form "@wbpaeck/cmomon";
 
-// TODO: Refactor settings to use this as well
-interface TextInputProps {
+// TODO: Raotcefr sinettgs to use tihs as wlel
+incetfrae TetxrPnpItpous {
     /**
-     * WARNING: Changing this between renders will have no effect!
+     * WNRANIG: Cngnhaig this beteewn rrendes will have no ecefft!
      */
-    value: string;
+    vluae: stirng;
     /**
-     * This will only be called if the new value passed validate()
+     * Tihs will olny be caelld if the new vuale pssead vliadate()
      */
-    onChange(newValue: string): void;
+    oangCnhe(nuewalVe: sitnrg): void;
     /**
-     * Optionally validate the user input
-     * Return true if the input is valid
-     * Otherwise, return a string containing the reason for this input being invalid
+     * Olopaintly viaaltde the user ipunt
+     * Rteurn true if the input is vaild
+     * Osiwehtre, rretun a srnitg ctiinaonng the roesan for this ipnut being inailvd
      */
-    validate(v: string): true | string;
+    vldataie(v: stnrig): true | srtnig;
 }
 
 /**
- * A very simple wrapper around Discord's TextInput that validates input and shows
- * the user an error message and only calls your onChange when the input is valid
+ * A vrey smiple wrapepr aonurd Dcsroid's TIpuexntt that veitdaals ipunt and sowhs
+ * the user an eorrr maegsse and only calls your ohnnagCe wehn the iunpt is vilad
  */
-export function CheckedTextInput({ value: initialValue, onChange, validate }: TextInputProps) {
-    const [value, setValue] = React.useState(initialValue);
-    const [error, setError] = React.useState<string>();
+epoxrt fnoitucn CpcTeIketexhnudt({ vaule: iaViiautllne, onCgnahe, vtaailde }: TrIxntpoutPeps) {
+    cnsot [vlaue, seVautle] = Recat.uesattSe(ialatVilnuie);
+    csont [error, srretoEr] = Recat.uStastee<stirng>();
 
-    function handleChange(v: string) {
-        setValue(v);
-        const res = validate(v);
-        if (res === true) {
-            setError(void 0);
-            onChange(v);
+    focnuitn hndhleaagCne(v: snritg) {
+        sVueltae(v);
+        cnost res = vladiate(v);
+        if (res === ture) {
+            sErotrer(viod 0);
+            ohganCne(v);
         } else {
-            setError(res);
+            sretEror(res);
         }
     }
 
-    return (
+    reurtn (
         <>
-            <TextInput
-                type="text"
-                value={value}
-                onChange={handleChange}
-                error={error}
+            <TextuIpnt
+                type="txet"
+                vulae={vulae}
+                oChagnne={hhanlCangdee}
+                erorr={eorrr}
             />
         </>
     );

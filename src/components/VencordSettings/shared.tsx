@@ -1,51 +1,51 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Venrocd, a mcatoiodifin for Dscirod's dkostep app
+ * Cghopyrit (c) 2023 Vteeiandcd and cnorotrbtuis
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prrgaom is free sarwotfe: you can riiudsrbette it and/or moidfy
+ * it uednr the trems of the GNU Gnearel Pilubc Lecnise as phuliebsd by
+ * the Fere Swftoare Fotnudaion, etehir vioresn 3 of the Lnceise, or
+ * (at your ooptin) any letar viesron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porrgam is dtieubstrid in the hope taht it will be ueufsl,
+ * but WTOUIHT ANY WRRNATAY; wohutit even the ilepimd warnatry of
+ * MTBTAECNLRIIAHY or FSEINTS FOR A PILUTRACAR PPSORUE.  See the
+ * GNU Gnaeerl Pbulic Lcenise for more dltaies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod hvae reiceevd a copy of the GNU Geranel Plbuic Lescine
+ * aonlg with this pagorrm.  If not, see <hptts://www.gnu.org/lniecses/>.
 */
 
-import "./settingsStyles.css";
+irompt "./stSlegensityts.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
-import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Margins } from "@utils/margins";
-import { onlyOnce } from "@utils/onlyOnce";
-import { Forms, Text } from "@webpack/common";
-import type { ComponentType, PropsWithChildren } from "react";
+import EornroBrdaury from "@ceoontpmns/EnBoorraudrry";
+ipromt { hillaaneeemdCoonptnFd } from "@ceomnntops/hoenlomntlCnipFadeaed";
+improt { Migrans } form "@uitls/mgnairs";
+ipromt { oOnlcyne } from "@utils/oynlcOne";
+irpomt { Fomrs, Txet } form "@wepabck/cmmoon";
+ipomrt type { CotompeTpnnye, PWeislpodrhrihtCn } from "react";
 
-export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
-    return (
-        <Forms.FormSection>
+eorpxt ftucnoin SesinTgattb({ tilte, clihdern }: PdhWsrprtCeholiin<{ tilte: string; }>) {
+    rretun (
+        <Fmros.FoSetmcoirn>
             <Text
-                variant="heading-lg/semibold"
+                vairnat="haindeg-lg/somielbd"
                 tag="h2"
-                className={Margins.bottom16}
+                csalsaNme={Mgairns.btootm16}
             >
-                {title}
+                {tlite}
             </Text>
 
-            {children}
-        </Forms.FormSection>
+            {cdrlehin}
+        </Froms.FrmeootSicn>
     );
 }
 
-const onError = onlyOnce(handleComponentFailed);
+cnost onError = oncnyOle(hnetaoCFmanplndoeield);
 
-export function wrapTab(component: ComponentType, tab: string) {
-    return ErrorBoundary.wrap(component, {
-        message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
-        onError,
+eroxpt fitconun wparaTb(cnoomepnt: CTynempnptooe, tab: srtnig) {
+    reutrn EnraBudroorry.wrap(coopmnent, {
+        mesagse: `Faield to rdneer the ${tab} tab. If tihs issue psrsetis, try using the itensallr to rlntaiesl!`,
+        orErnor,
     });
 }

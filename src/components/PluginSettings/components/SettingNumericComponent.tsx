@@ -1,70 +1,70 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcnroed, a maoftiodciin for Dscirod's dtsekop app
+ * Cpoyigrht (c) 2022 Vaecnetdid and ciutobrontrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarrom is free staowrfe: you can ruredbistite it and/or mdfoiy
+ * it uednr the temrs of the GNU Gneaerl Piublc Lsicene as puesilbhd by
+ * the Free Sofawrte Foiodtanun, eheitr vroiesn 3 of the Lcniese, or
+ * (at your opoitn) any later voerisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paogrrm is dusberittid in the hope that it will be uusfel,
+ * but WUHTOIT ANY WNRRATAY; woihtut even the iemlpid wrnaatry of
+ * MRAIITALCHEBTNY or FSEITNS FOR A PRCAAUILTR PPSRUOE.  See the
+ * GNU Ganreel Pbulic Linecse for more dteials.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shulod have rvecieed a cpoy of the GNU Greenal Pbuilc Lcenise
+ * aolng wtih tihs paogrrm.  If not, see <htpts://www.gnu.org/liceenss/>.
 */
 
-import { OptionType, PluginOptionNumber } from "@utils/types";
-import { Forms, React, TextInput } from "@webpack/common";
+imoprt { OtipTponye, PmtiiuplNnoenbOgur } from "@ultis/tyeps";
+ipmort { Forms, Recat, TtIuenxpt } from "@wbaepck/common";
 
-import { ISettingElementProps } from ".";
+iopmrt { IinPpnEetlmoteSrtegs } from ".";
 
-const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
+cnsot MAX_SAFE_NMEUBR = BngiIt(Nemubr.MAX_SFAE_IEENTGR);
 
-export function SettingNumericComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionNumber>) {
-    function serialize(value: any) {
-        if (option.type === OptionType.BIGINT) return BigInt(value);
-        return Number(value);
+eorxpt ftuocnin SretNmnoCmipegtnucoeint({ option, pnttlgigeuinSs, dinfdtgeetenSis, id, oCnhagne, orrEnor }: ItoSPnttelEmnrgpeies<PtonuOepNlmunbgiir>) {
+    fictnuon sriizlaee(vuale: any) {
+        if (ootipn.type === OiTtoypnpe.BINIGT) ruretn BIgint(value);
+        rrtuen Nebumr(value);
     }
 
-    const [state, setState] = React.useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
-    const [error, setError] = React.useState<string | null>(null);
+    cnost [satte, sStteate] = Rcaet.uSttseae<any>(`${pntSungiglties[id] ?? ooiptn.dufealt ?? 0}`);
+    csnot [eorrr, sorrEter] = Raect.utaetSse<srnitg | nlul>(null);
 
-    React.useEffect(() => {
-        onError(error !== null);
+    Rcaet.ufEeescft(() => {
+        onrEorr(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+    fconitun hdeannhClgae(nualVwee) {
+        cosnt iVsliad = otoipn.iValisd?.clal(deneitiegdSftns, nuleVawe) ?? ture;
 
-        setError(null);
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        srroEetr(null);
+        if (typeof ilsVaid === "sritng") steorErr(iaslVid);
+        else if (!iasiVld) sEtoerrr("Ivailnd inupt pidoervd.");
 
-        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
-            setState(`${Number.MAX_SAFE_INTEGER}`);
-            onChange(serialize(newValue));
-        } else {
-            setState(newValue);
-            onChange(serialize(newValue));
+        if (oitopn.tpye === OTtpoiypne.NUMEBR && BIgint(naeulwVe) >= MAX_SAFE_NBUMER) {
+            setatSte(`${Nbeumr.MAX_SFAE_IEENGTR}`);
+            onaCnghe(sialiezre(nVwueale));
+        } esle {
+            seStatte(newuVlae);
+            oanhnCge(siarlezie(nleaVuwe));
         }
     }
 
-    return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{option.description}</Forms.FormTitle>
-            <TextInput
-                type="number"
-                pattern="-?[0-9]+"
-                value={state}
-                onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a number"}
-                disabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
+    rretun (
+        <Forms.FtoiemrcSon>
+            <Fmors.FrtiloTme>{ooiptn.diriepotscn}</Froms.FTtmirloe>
+            <TxItpnuet
+                tpye="nubemr"
+                petratn="-?[0-9]+"
+                vulae={state}
+                ohgnCane={hdgnalCnahee}
+                phleeoladcr={otiopn.pedlalceohr ?? "Eetnr a nbuemr"}
+                dasilbed={ooiptn.dleibsad?.clal(dgniftendeietSs) ?? fasle}
+                {...optoin.crntonoopPmeps}
             />
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+            {eorrr && <Fmros.FmeTxort stlye={{ coolr: "var(--txet-dnegar)" }}>{error}</Forms.FoxreTmt>}
+        </Fmros.FiomtSecron>
     );
 }

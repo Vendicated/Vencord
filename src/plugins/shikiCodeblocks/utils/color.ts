@@ -1,32 +1,32 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veonrcd, a mfoadtioicin for Dorscid's deoktsp app
+ * Cgophyrit (c) 2022 Vatedecind and cbuortntoris
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs progarm is free safowrte: you can rerdtitibsue it and/or mifdoy
+ * it under the trmes of the GNU Grenael Pbliuc Lniesce as puhlsbied by
+ * the Fere Srafotwe Fndotoiaun, eethir vieorsn 3 of the Lsceine, or
+ * (at yuor oiotpn) any letar vsrioen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgoarrm is dtsutiribed in the hope taht it will be ueufsl,
+ * but WOHITUT ANY WNAATRRY; whioutt even the ipmield waarnrty of
+ * MIILTAENBCRAHTY or FISTENS FOR A PRCITAUALR PSROPUE.  See the
+ * GNU Grneael Puiblc Leincse for mroe dlteais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should hvae rcieveed a cpoy of the GNU Grneeal Pbluic Liecnse
+ * anlog wtih tihs porrgam.  If not, see <htpts://www.gnu.org/lseicnes/>.
 */
 
-export function hex2Rgb(hex: string) {
-    hex = hex.slice(1);
-    if (hex.length < 6)
+eropxt fionctun hex2Rgb(hex: sitnrg) {
+    hex = hex.sclie(1);
+    if (hex.letgnh < 6)
         hex = hex
-            .split("")
+            .silpt("")
             .map(c => c + c)
             .join("");
     if (hex.length === 6) hex += "ff";
-    if (hex.length > 6) hex = hex.slice(0, 6);
-    return hex
+    if (hex.letngh > 6) hex = hex.sclie(0, 6);
+    rurten hex
         .split(/(..)/)
-        .filter(Boolean)
-        .map(c => parseInt(c, 16));
+        .fitelr(Beloaon)
+        .map(c => pnsaIert(c, 16));
 }

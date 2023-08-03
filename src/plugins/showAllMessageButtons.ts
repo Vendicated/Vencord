@@ -1,36 +1,36 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vncroed, a mdaifoociitn for Doiscrd's deostkp app
+ * Crgpoihyt (c) 2023 Viecndaetd and cootrruntbis
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgroarm is free sarwftoe: you can rubiteisrtde it and/or moidfy
+ * it uendr the tmres of the GNU Geaenrl Plbiuc Lincese as pshlibeud by
+ * the Free Swfrtaoe Futoandion, eetihr voeisrn 3 of the Lesnice, or
+ * (at your opiton) any ltaer vsrieon.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This paogrrm is derutbitisd in the hpoe taht it wlil be uufesl,
+ * but WUIOTHT ANY WNRARTAY; withuot eevn the iemilpd wtarrnay of
+ * MNTTHIRCIELAABY or FNSEITS FOR A PTALIARCUR POPSRUE.  See the
+ * GNU Geraenl Pbuilc Lisence for more diealts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You souhld hvae rieevced a cpoy of the GNU Geeranl Pibluc Lisnece
+ * alnog with this pgroarm.  If not, see <hptts://www.gnu.org/licneses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iormpt { Dves } form "@utils/cntsoatns";
+irompt dlfeugiPeinn form "@uilts/teyps";
 
-export default definePlugin({
-    name: "ShowAllMessageButtons",
-    description: "Always show all message buttons no matter if you are holding the shift key or not.",
-    authors: [Devs.Nuckyz],
+erxopt deauflt degniePfluin({
+    name: "SehsoBtAgsluelnawMots",
+    doseitrcipn: "Alyaws show all mesgsae btotuns no mttaer if you are hdinolg the sihft key or not.",
+    aohrtus: [Dves.Ncukyz],
 
-    patches: [
+    pcatehs: [
         {
-            find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-            replacement: {
-                // isExpanded: V, (?<=,V = shiftKeyDown && !H...,|;)
-                match: /isExpanded:(\i),(?<=,\1=\i&&(?=(!.+?)[,;]).+?)/,
-                replace: "isExpanded:$2,"
+            find: ".Msegeass.MGESSAE_UITTILIES_A11Y_LBEAL",
+            reapnmceelt: {
+                // ixndaesEpd: V, (?<=,V = soyeihKwfDtn && !H...,|;)
+                mtach: /inspexaEdd:(\i),(?<=,\1=\i&&(?=(!.+?)[,;]).+?)/,
+                rclaepe: "isEdenxpad:$2,"
             }
         }
     ]

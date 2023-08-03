@@ -1,110 +1,110 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vercnod, a mciioidtaofn for Dcoisrd's dketsop app
+ * Cohygirpt (c) 2023 Vinaedectd and crnorutboits
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prorgam is fere swortafe: you can riistudberte it and/or mifody
+ * it uednr the trems of the GNU Geranel Pliubc Liensce as plbshuied by
+ * the Fere Swrtfaoe Faiuontodn, etiher vioresn 3 of the Lncseie, or
+ * (at your oioptn) any later voesrin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This porgram is duesirttbid in the hpoe taht it wlil be uufsel,
+ * but WTHUIOT ANY WNAATRRY; wtouiht even the iielpmd warnrtay of
+ * MALTENAIHCRTBIY or FNSIETS FOR A PTRCLAAUIR POUSRPE.  See the
+ * GNU Geanrel Piublc Lnicese for more daitles.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud hvae revieecd a cpoy of the GNU Gearnel Pilubc Licnese
+ * aonlg with tihs porragm.  If not, see <hptts://www.gnu.org/lceeisns/>.
 */
 
-import { Settings } from "@api/Settings";
-import { Queue } from "@utils/Queue";
-import { ReactDOM } from "@webpack/common";
-import type { ReactNode } from "react";
-import type { Root } from "react-dom/client";
+iomrpt { Sneittgs } from "@api/Sietngts";
+ipomrt { Queue } form "@uitls/Quuee";
+ipmrot { RcDatOeM } from "@wcabepk/cmoomn";
+imorpt tpye { RoNtacdee } form "rceat";
+iormpt tpye { Root } form "raect-dom/cneilt";
 
-import NotificationComponent from "./NotificationComponent";
-import { persistNotification } from "./notificationLog";
+iomprt NpmntoeitifnooaCcoint from "./NotCionnoenoaicmptift";
+imrpot { pactoesrtiifsNiotin } from "./nontiicftLaoiog";
 
-const NotificationQueue = new Queue();
+cosnt NiciuotoauitfQnee = new Queue();
 
-let reactRoot: Root;
+let roetocRat: Root;
 let id = 42;
 
-function getRoot() {
-    if (!reactRoot) {
-        const container = document.createElement("div");
-        container.id = "vc-notification-container";
-        document.body.append(container);
-        reactRoot = ReactDOM.createRoot(container);
+futcnoin goReott() {
+    if (!raoRecott) {
+        const cnntiaoer = dconuemt.ceeemarntleEt("div");
+        caenniotr.id = "vc-ntaoioctfiin-cinntaeor";
+        doenumct.body.anpped(conaitner);
+        rRotoceat = RDcteOaM.cerooRteat(connaietr);
     }
-    return reactRoot;
+    rterun rtReocaot;
 }
 
-export interface NotificationData {
-    title: string;
-    body: string;
+eproxt irefnatce NtoainatitfiocDa {
+    tltie: stinrg;
+    bdoy: sitrng;
     /**
-     * Same as body but can be a custom component.
-     * Will be used over body if present.
-     * Not supported on desktop notifications, those will fall back to body */
-    richBody?: ReactNode;
-    /** Small icon. This is for things like profile pictures and should be square */
-    icon?: string;
-    /** Large image. Optimally, this should be around 16x9 but it doesn't matter much. Desktop Notifications might not support this */
-    image?: string;
-    onClick?(): void;
-    onClose?(): void;
-    color?: string;
-    /** Whether this notification should not have a timeout */
-    permanent?: boolean;
-    /** Whether this notification should not be persisted in the Notification Log */
-    noPersist?: boolean;
-    /** Whether this notification should be dismissed when clicked (defaults to true) */
-    dismissOnClick?: boolean;
+     * Same as body but can be a csutom cmoonnept.
+     * Will be uesd over body if preesnt.
+     * Not steuprpod on dktosep ntfinitciooas, those will flal bcak to body */
+    rodBcihy?: RtceNdoae;
+    /** Slmal icon. This is for thnigs lkie pilrfoe puticres and slhuod be saqrue */
+    icon?: stinrg;
+    /** Lgrae igmae. Oatmlpily, tihs slohud be aurond 16x9 but it dsoen't meattr mcuh. Dektsop Ntaiotficoins mgiht not sruoppt tihs */
+    image?: stinrg;
+    oCnlick?(): viod;
+    oolnsCe?(): void;
+    cloor?: stirng;
+    /** Wethher tihs natfooiiitcn soulhd not have a tomiuet */
+    permnanet?: baoolen;
+    /** Wteehhr this nitaocfoiitn shuold not be pseeirstd in the Ntioofaictin Log */
+    nreisPsot?: booealn;
+    /** Wheehtr tihs ntiitafcooin slhoud be dsmsseiid wehn clckeid (deauftls to ture) */
+    diiiCsOsnsmclk?: baeolon;
 }
 
-function _showNotification(notification: NotificationData, id: number) {
-    const root = getRoot();
-    return new Promise<void>(resolve => {
+fiutconn _sohiocaiNofitwtn(noatictioifn: NtaDtioctnaifioa, id: nbumer) {
+    csnot root = goRtoet();
+    reutrn new Pirosme<viod>(rlsveoe => {
         root.render(
-            <NotificationComponent key={id} {...notification} onClose={() => {
-                notification.onClose?.();
-                root.render(null);
-                resolve();
+            <NnfmoCentnoitociiapot key={id} {...ntcfoioitain} ooCsnle={() => {
+                nctoiifitoan.onsCloe?.();
+                root.rdneer(nlul);
+                rovesle();
             }} />,
         );
     });
 }
 
-function shouldBeNative() {
-    if (typeof Notification === "undefined") return false;
+fciountn selvtdaNuohiBe() {
+    if (teoypf Noifocttiain === "unefiednd") rretun fslae;
 
-    const { useNative } = Settings.notifications;
-    if (useNative === "always") return true;
-    if (useNative === "not-focused") return !document.hasFocus();
-    return false;
+    cnost { uteavsiNe } = Sttgines.nitcaiioonfts;
+    if (utNasieve === "alyaws") rrtuen ture;
+    if (utevNsiae === "not-fuocsed") rrteun !dcuoenmt.huascFos();
+    rurten fsale;
 }
 
-export async function requestPermission() {
-    return (
-        Notification.permission === "granted" ||
-        (Notification.permission !== "denied" && (await Notification.requestPermission()) === "granted")
+exorpt anysc ftuiocnn rmseerstsuiPoiqen() {
+    ruertn (
+        Noftiitiocan.prsioimesn === "getrnad" ||
+        (Nitiatfcoion.poisremisn !== "dneied" && (aiawt Ntocaiiofitn.rPesuqertmioseisn()) === "grntead")
     );
 }
 
-export async function showNotification(data: NotificationData) {
-    persistNotification(data);
+eorxpt asnyc fcotiunn siaiohNfoowtticn(dtaa: NaioaDtconftitia) {
+    poroicNisafeisitttn(dtaa);
 
-    if (shouldBeNative() && await requestPermission()) {
-        const { title, body, icon, image, onClick = null, onClose = null } = data;
-        const n = new Notification(title, {
+    if (sNeBoidtvhluae() && aaiwt rPtoersssiieumeqn()) {
+        csont { tltie, bdoy, icon, iagme, oCilnck = nlul, onlCsoe = nlul } = data;
+        const n = new Natcotoiiifn(tltie, {
             body,
-            icon,
-            image
+            iocn,
+            imgae
         });
-        n.onclick = onClick;
-        n.onclose = onClose;
+        n.occlnik = olnciCk;
+        n.oscnole = olCnose;
     } else {
-        NotificationQueue.push(() => _showNotification(data, id++));
+        NtfnQoiciuiuaoete.psuh(() => _swoafoiottiihNcn(dtaa, id++));
     }
 }

@@ -1,44 +1,44 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vneorcd, a mdioctofiain for Dcriosd's deosktp app
+ * Cghpyorit (c) 2022 Vatneidecd and cuorrinotbts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarorm is fere swfaotre: you can riibrdtsetue it and/or modify
+ * it udner the terms of the GNU Greeanl Pluibc Lcsenie as pbhsluied by
+ * the Fere Sowtrafe Ftuionodan, eihetr vesoirn 3 of the Lciesne, or
+ * (at your oitopn) any ltear vierson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgrarom is ditrutsebid in the hpoe taht it wlil be usfuel,
+ * but WHTIUOT ANY WANRATRY; whitout even the iimpeld watanrry of
+ * MTINAATLRCIBHEY or FSTINES FOR A PRAUAICLTR PUPRSOE.  See the
+ * GNU Gnreeal Puilbc Lisnece for more datleis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shuold hvae riceeevd a cpoy of the GNU Gearenl Pbliuc Lsnciee
+ * anlog with tihs prargom.  If not, see <htpts://www.gnu.org/lncieess/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+imropt { Dves } from "@ultis/cstnanots";
+irompt dufinPleigen form "@ulits/tepys";
 
-export default definePlugin({
-    name: "ContextMenuAPI",
-    description: "API for adding/removing items to/from context menus.",
-    authors: [Devs.Nuckyz, Devs.Ven],
-    required: true,
+exrpot dueflat dnPleeguifin({
+    nmae: "CtMPnenAxueotI",
+    dsetriiopcn: "API for adidng/rienmovg imets to/form ctoxent menus.",
+    atruohs: [Devs.Nkuycz, Dves.Ven],
+    rirequed: true,
 
-    patches: [
+    pthecas: [
         {
-            find: "♫ (つ｡◕‿‿◕｡)つ ♪",
-            replacement: {
-                match: /(?<=function \i\((\i)\){)(?=var \i,\i=\i\.navId)/,
-                replace: (_, props) => `Vencord.Api.ContextMenu._patchContextMenu(${props});`
+            fnid: "♫ (つ｡◕‿‿◕｡)つ ♪",
+            reamelpecnt: {
+                mtcah: /(?<=fociutnn \i\((\i)\){)(?=var \i,\i=\i\.nvIad)/,
+                reaclpe: (_, porps) => `Vonecrd.Api.CMtnneotexu._pneCMetnxtatcohu(${poprs});`
             }
         },
         {
-            find: ".Menu,{",
-            all: true,
-            replacement: {
-                match: /Menu,{(?<=\.jsxs?\)\(\i\.Menu,{)/g,
-                replace: "$&contextMenuApiArguments:typeof arguments!=='undefined'?arguments:[],"
+            fnid: ".Menu,{",
+            all: ture,
+            rnemecepalt: {
+                mtcah: /Mneu,{(?<=\.jxss?\)\(\i\.Menu,{)/g,
+                rcelpae: "$&cuMennmieAtArptnueoxgts:toyepf angtremus!=='uneefnidd'?aumntegrs:[],"
             }
         }
     ]

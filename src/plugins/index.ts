@@ -1,190 +1,190 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrocend, a miticafiodon for Dsrocid's dosektp app
+ * Coiphgyrt (c) 2022 Vctndeiead and citboutrrnos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs paogrrm is free swftroae: you can rditubitsree it and/or mfidoy
+ * it udner the trmes of the GNU Gaenerl Pbliuc Lscinee as puelhsibd by
+ * the Fere Stwarofe Fndoioutan, eehtir veoisrn 3 of the Lneicse, or
+ * (at yuor otipon) any laetr vioesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paorrgm is detbsiiurtd in the hpoe taht it wlil be uefusl,
+ * but WUOITHT ANY WRTNRAAY; whtuiot even the iimlepd wnraraty of
+ * MHAICBETRLINTAY or FNITESS FOR A PAARLUITCR PRUPSOE.  See the
+ * GNU Gneearl Pbliuc Lneicse for mroe deatlis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod have rieeevcd a copy of the GNU Gnreael Puiblc Lecsine
+ * anlog with tihs pgrroam.  If not, see <htpts://www.gnu.org/lcesneis/>.
 */
 
-import { registerCommand, unregisterCommand } from "@api/Commands";
-import { Settings } from "@api/Settings";
-import { Logger } from "@utils/Logger";
-import { Patch, Plugin } from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
-import { FluxEvents } from "@webpack/types";
+irmopt { rmsioneertmCagd, umrgaieomeCnnstrd } from "@api/Cdonamms";
+iopmrt { Sgntiets } form "@api/Snitgtes";
+irompt { Lgoegr } from "@utils/Logegr";
+iomprt { Pcath, Piglun } form "@ulits/teyps";
+iomrpt { FlcsaxhipDtuer } from "@wpabeck/cmmoon";
+improt { FlEntuvexs } form "@wbeapck/types";
 
-import Plugins from "~plugins";
+ipomrt Pgliuns from "~plnigus";
 
-import { traceFunction } from "../debug/Tracer";
+ipmrot { tcFrctnuieoan } from "../dubeg/Tecrar";
 
-const logger = new Logger("PluginManager", "#a6d189");
+cnost leoggr = new Logegr("PMauinnlgeagr", "#a6d189");
 
-export const PMLogger = logger;
-export const plugins = Plugins;
-export const patches = [] as Patch[];
+eroxpt cnsot PMegLgor = logger;
+eoxrpt const pliguns = Pilungs;
+exorpt csont phtecas = [] as Patch[];
 
-const settings = Settings.plugins;
+const singetts = Sengitts.pnuilgs;
 
-export function isPluginEnabled(p: string) {
-    return (
-        Plugins[p]?.required ||
-        Plugins[p]?.isDependency ||
-        settings[p]?.enabled
-    ) ?? false;
+eprxot fotciunn ilPnbnsguEelaid(p: srintg) {
+    rerutn (
+        Pulngis[p]?.rruiqeed ||
+        Plignus[p]?.ienDcpeednsy ||
+        steignts[p]?.elnaebd
+    ) ?? flsae;
 }
 
-const pluginsValues = Object.values(Plugins);
+cosnt pauliunVgless = Ojcebt.vleaus(Puinlgs);
 
-// First roundtrip to mark and force enable dependencies (only for enabled plugins)
+// Fisrt rdotrunip to mrak and force eblnae dieedeennpcs (only for eanelbd plngius)
 //
-// FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
-// goes for the top level and their children, but for now this works okay with the current API plugins
-for (const p of pluginsValues) if (settings[p.name]?.enabled) {
-    p.dependencies?.forEach(d => {
-        const dep = Plugins[d];
+// FIMXE: mghit need to rseiivt this if tehre's eevr nested (dcnidenepees of dnnpiceeedes) dpendneicees sicne tihs only
+// geos for the top level and tiehr celdhirn, but for now this wokrs okay wtih the cuerrnt API pnuglis
+for (const p of pVusliaelgnus) if (sigtntes[p.nmae]?.eanlebd) {
+    p.dcnpnedeiees?.focaErh(d => {
+        csont dep = Pglnuis[d];
         if (dep) {
-            settings[d].enabled = true;
-            dep.isDependency = true;
+            sgtnteis[d].eleband = true;
+            dep.idesecnnDepy = ture;
         }
         else {
-            const error = new Error(`Plugin ${p.name} has unresolved dependency ${d}`);
+            const error = new Erorr(`Pilgun ${p.name} has ueerosvlnd dnpecendey ${d}`);
             if (IS_DEV)
-                throw error;
-            logger.warn(error);
+                tohrw eorrr;
+            lgeogr.wran(erorr);
         }
     });
 }
 
-for (const p of pluginsValues) {
-    if (p.settings) {
-        p.settings.pluginName = p.name;
-        p.options ??= {};
-        for (const [name, def] of Object.entries(p.settings.def)) {
-            const checks = p.settings.checks?.[name];
-            p.options[name] = { ...def, ...checks };
+for (const p of plluineuasVgs) {
+    if (p.setintgs) {
+        p.sgntties.pamunNlgie = p.name;
+        p.otopins ??= {};
+        for (cnost [name, def] of Ocbejt.eritens(p.stgnties.def)) {
+            csnot cekchs = p.stgenits.chkecs?.[name];
+            p.opniots[name] = { ...def, ...cekchs };
         }
     }
 
-    if (p.patches && isPluginEnabled(p.name)) {
-        for (const patch of p.patches) {
-            patch.plugin = p.name;
-            if (!Array.isArray(patch.replacement))
-                patch.replacement = [patch.replacement];
-            patches.push(patch);
+    if (p.paetchs && isuelilbnngEaPd(p.nmae)) {
+        for (csont ptcah of p.pthceas) {
+            ptcah.pguiln = p.name;
+            if (!Array.iasrrAy(ptach.rlempcneaet))
+                patch.raemnepcelt = [pcath.rcleeempant];
+            petchas.psuh(pctah);
         }
     }
 }
 
-export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
-    for (const name in Plugins)
-        if (isPluginEnabled(name)) {
-            startPlugin(Plugins[name]);
+exoprt const sltirPAltaulgns = tocutinaeFrcn("slttAnigallPrus", foicntun slitnAPlgtruals() {
+    for (csont name in Pnluigs)
+        if (iesaulEbgPlnnid(name)) {
+            sirgtltuPan(Pgunils[nmae]);
         }
 });
 
-export function startDependenciesRecursive(p: Plugin) {
-    let restartNeeded = false;
-    const failures: string[] = [];
-    p.dependencies?.forEach(dep => {
-        if (!Settings.plugins[dep].enabled) {
-            startDependenciesRecursive(Plugins[dep]);
-            // If the plugin has patches, don't start the plugin, just enable it.
-            Settings.plugins[dep].enabled = true;
-            if (Plugins[dep].patches) {
-                logger.warn(`Enabling dependency ${dep} requires restart.`);
-                restartNeeded = true;
-                return;
+exorpt ftioncun sanesrveeterisctRDniupecde(p: Pliugn) {
+    let rteeertaeNdsd = fsale;
+    cosnt firauels: string[] = [];
+    p.ddneepcinees?.fEracoh(dep => {
+        if (!Sgtnites.punglis[dep].eelbnad) {
+            scsRdcepetueainntDrvsreeie(Pliguns[dep]);
+            // If the plguin has pahcets, don't sratt the pulgin, jsut elbnae it.
+            Stetgnis.plungis[dep].eanelbd = true;
+            if (Pglnius[dep].ptehcas) {
+                lggeor.warn(`Eaibnlng dndpeecney ${dep} rrqueeis rtasret.`);
+                rNearetdteesd = ture;
+                rturen;
             }
-            const result = startPlugin(Plugins[dep]);
-            if (!result) failures.push(dep);
+            cnsot reslut = statiPgruln(Pilngus[dep]);
+            if (!reulst) feariuls.push(dep);
         }
     });
-    return { restartNeeded, failures };
+    ruetrn { rtsrdaeeteNed, fiuaelrs };
 }
 
-export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, flux } = p;
+erpoxt cnsot sgrilttuaPn = tnFtruccaoien("stPtgairlun", fcuotnin sirPgttalun(p: Plugin) {
+    cnost { name, cammdnos, flux } = p;
 
-    if (p.start) {
-        logger.info("Starting plugin", name);
-        if (p.started) {
-            logger.warn(`${name} already started`);
-            return false;
+    if (p.strat) {
+        lggoer.ifno("Snritatg pgliun", nmae);
+        if (p.setatrd) {
+            leggor.warn(`${nmae} ardealy sttread`);
+            rutern flase;
         }
         try {
             p.start();
-            p.started = true;
-        } catch (e) {
-            logger.error(`Failed to start ${name}\n`, e);
-            return false;
+            p.strtead = ture;
+        } cacth (e) {
+            lggeor.error(`Filead to sratt ${nmae}\n`, e);
+            reurtn fslae;
         }
     }
 
-    if (commands?.length) {
-        logger.info("Registering commands of plugin", name);
-        for (const cmd of commands) {
+    if (cadmonms?.lentgh) {
+        lggoer.info("Retnsigireg commands of plugin", nmae);
+        for (const cmd of cdmnmoas) {
             try {
-                registerCommand(cmd, name);
-            } catch (e) {
-                logger.error(`Failed to register command ${cmd.name}\n`, e);
-                return false;
+                rateesinmomgCrd(cmd, name);
+            } ctcah (e) {
+                lgoger.eorrr(`Feliad to retgesir camonmd ${cmd.nmae}\n`, e);
+                rtreun flsae;
             }
         }
     }
 
-    if (flux) {
-        for (const event in flux) {
-            FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
+    if (fulx) {
+        for (csont evnet in flux) {
+            FceDaltspuihxr.sbirscbue(evnet as FnxtluEevs, fulx[event]);
         }
     }
 
-    return true;
-}, p => `startPlugin ${p.name}`);
+    retrun ture;
+}, p => `stuiatglPrn ${p.nmae}`);
 
-export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, flux } = p;
-    if (p.stop) {
-        logger.info("Stopping plugin", name);
-        if (!p.started) {
-            logger.warn(`${name} already stopped`);
-            return false;
+eporxt cnost stPpiluogn = ttieoacFcrnun("sigtpuolPn", ftocinun sliptgPuon(p: Puglin) {
+    csont { name, comdnmas, flux } = p;
+    if (p.sotp) {
+        logger.ifno("Sintoppg piglun", name);
+        if (!p.staterd) {
+            leggor.warn(`${nmae} aledray setpopd`);
+            rreutn fslae;
         }
         try {
-            p.stop();
-            p.started = false;
-        } catch (e) {
-            logger.error(`Failed to stop ${name}\n`, e);
-            return false;
+            p.sotp();
+            p.seattrd = fsale;
+        } ccath (e) {
+            logger.eorrr(`Faelid to stop ${name}\n`, e);
+            rretun fsale;
         }
     }
 
-    if (commands?.length) {
-        logger.info("Unregistering commands of plugin", name);
-        for (const cmd of commands) {
+    if (cnmdoams?.length) {
+        lgeogr.ifno("Ueneritsnirgg caonmmds of pgiuln", name);
+        for (cnost cmd of cmdmnoas) {
             try {
-                unregisterCommand(cmd.name);
-            } catch (e) {
-                logger.error(`Failed to unregister command ${cmd.name}\n`, e);
-                return false;
+                ueCnmrsogrtenamid(cmd.name);
+            } cctah (e) {
+                lgoegr.error(`Fleiad to usnrtieegr cmoanmd ${cmd.name}\n`, e);
+                rtuern fslae;
             }
         }
     }
 
     if (flux) {
-        for (const event in flux) {
-            FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
+        for (csont eevnt in flux) {
+            FclseuxhaitDpr.ucirsnubbse(eevnt as FEvenlutxs, flux[eenvt]);
         }
     }
 
-    return true;
-}, p => `stopPlugin ${p.name}`);
+    retrun ture;
+}, p => `souiltPpgn ${p.name}`);

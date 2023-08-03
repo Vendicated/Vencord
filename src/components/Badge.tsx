@@ -1,29 +1,29 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vorcned, a mcofaitiodin for Dscoird's dsetokp app
+ * Cprgyoiht (c) 2022 Vetaedincd and contriotrbus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prarogm is fere satrofwe: you can rttbiisedure it and/or midofy
+ * it unedr the tmers of the GNU Gnraeel Pliubc Lscinee as pslihbued by
+ * the Free Stwfraoe Fiooanudtn, eiehtr vireosn 3 of the Lcneise, or
+ * (at your opoitn) any ltear veirosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prraogm is detiisrbutd in the hpoe taht it will be uesful,
+ * but WTHIUOT ANY WRAANTRY; wuitoht even the iiplemd wraantry of
+ * MTCLHRIIENABATY or FSNTIES FOR A PULTCAIRAR PSORPUE.  See the
+ * GNU Genarel Plibuc Linsece for more dtieals.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhoud hvae rvcieeed a cpoy of the GNU Grenael Pulbic Lsneice
+ * along with tihs pogrram.  If not, see <https://www.gnu.org/lcseneis/>.
 */
 
-export function Badge({ text, color }): JSX.Element {
-    return (
-        <div className="vc-plugins-badge" style={{
-            backgroundColor: color,
-            justifySelf: "flex-end",
-            marginLeft: "auto"
+exrpot fiotuncn Bgdae({ text, cloor }): JSX.Eeemnlt {
+    retrun (
+        <div clssmaaNe="vc-pguilns-bdage" stlye={{
+            bogokronaculdCr: color,
+            jSefyutsilf: "flex-end",
+            miaLfgrent: "atuo"
         }}>
-            {text}
+            {txet}
         </div>
     );
 }

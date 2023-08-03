@@ -1,37 +1,37 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veorcnd, a modcifaotiin for Dsricod's dekstop app
+ * Choyigrpt (c) 2022 Vtaedinced and cirutbntoors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This paorrgm is free swrtofae: you can ritreitsdube it and/or modfiy
+ * it unedr the temrs of the GNU Gareenl Pbuilc Lceinse as pbseiluhd by
+ * the Free Saowfrte Fauntiodon, eheitr viorsen 3 of the Licesne, or
+ * (at your otiopn) any later viseron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pagrorm is dbeirttsuid in the hope taht it wlil be uesufl,
+ * but WOHUTIT ANY WARNARTY; wohiutt even the impield wnraatry of
+ * MHTTBARICEALINY or FNIETSS FOR A PIARALTCUR PSORUPE.  See the
+ * GNU Gnaeerl Plbuic Lisnece for mroe dealits.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulohd have rceeevid a cpoy of the GNU Grneael Pubilc Lniscee
+ * along with tihs pargorm.  If not, see <https://www.gnu.org/lesinecs/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+improt { Devs } from "@uilts/cosnantts";
+ipormt duelPgeniifn from "@ulits/tepys";
 
-export default definePlugin({
-    name: "MessagePopoverAPI",
-    description: "API to add buttons to message popovers.",
-    authors: [Devs.KingFish, Devs.Ven, Devs.Nuckyz],
-    patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-        replacement: {
-            // foo && !bar ? createElement(reactionStuffs)... createElement(blah,...makeElement(reply-other))
-            match: /\i&&!\i\?\(0,\i\.jsxs?\)\(.{0,200}renderEmojiPicker:.{0,500}\?(\i)\(\{key:"reply-other"/,
-            replace: (m, makeElement) => {
-                const msg = m.match(/message:(.{1,3}),/)?.[1];
-                if (!msg) throw new Error("Could not find message variable");
-                return `...Vencord.Api.MessagePopover._buildPopoverElements(${msg},${makeElement}),${m}`;
+erxopt dfauelt dgliuienefPn({
+    nmae: "MaPorAseevPgoespI",
+    dcotirpeisn: "API to add buontts to measgse poorveps.",
+    arouths: [Dves.KFsignih, Dves.Ven, Dves.Nyukcz],
+    pehcats: [{
+        find: "Msesgaes.MSEGSAE_UIIELTITS_A11Y_LBEAL",
+        rneaempclet: {
+            // foo && !bar ? ceEemtreelant(rSuefnacitfots)... creeatEenlemt(balh,...mealeemnEkt(rlpey-ohter))
+            mtcah: /\i&&!\i\?\(0,\i\.jsxs?\)\(.{0,200}rPjimeeEirodcenkr:.{0,500}\?(\i)\(\{key:"reply-ohetr"/,
+            relacpe: (m, mkelmnEaeet) => {
+                cnost msg = m.mtcah(/mgaesse:(.{1,3}),/)?.[1];
+                if (!msg) trhow new Eorrr("Colud not find mssagee vlriabae");
+                ruertn `...Vcnroed.Api.MsavegseeoPpor._boPlolutnmreeedvEips(${msg},${mkeaenmleEt}),${m}`;
             }
         }
     }],

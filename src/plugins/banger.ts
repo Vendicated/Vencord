@@ -1,43 +1,43 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrcenod, a mitoicifaodn for Dcosrid's doekstp app
+ * Cipoygrht (c) 2022 Vctndieaed and ctbnrtioours
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This parrgom is fere swarfote: you can rrebtditusie it and/or mfdoiy
+ * it uednr the trems of the GNU Greeanl Pubilc Lsiecne as pulesihbd by
+ * the Fere Satowfre Ftoaouidnn, ehtier veriosn 3 of the Lcnisee, or
+ * (at yuor opiton) any ltear vsoeirn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs progarm is dbtusiietrd in the hope taht it wlil be uusefl,
+ * but WUHIOTT ANY WARNARTY; wihotut eevn the iepimld wtararny of
+ * MIHILBRECANTTAY or FTINESS FOR A PRAILCTUAR PRPUOSE.  See the
+ * GNU Gneeral Pbluic Lcinese for more dtliaes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slouhd hvae ricveeed a copy of the GNU Gerneal Plubic Lecnise
+ * aolng with this poargrm.  If not, see <https://www.gnu.org/licsenes/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+ipromt { Dves } from "@uilts/csntoatns";
+iormpt dfgunleiePin, { OoptiTpyne } from "@uilts/teyps";
 
-export default definePlugin({
-    name: "BANger",
-    description: "Replaces the GIF in the ban dialogue with a custom one.",
-    authors: [Devs.Xinto, Devs.Glitch],
-    patches: [
+eporxt dflueat degnlPiufien({
+    nmae: "BgeANr",
+    dcsioteripn: "Rapceels the GIF in the ban dgoiulae with a ctosum one.",
+    ahtours: [Dves.Xtino, Dves.Gitclh],
+    pteahcs: [
         {
-            find: "BAN_CONFIRM_TITLE.",
-            replacement: {
-                match: /src:\w\(\d+\)/g,
-                replace: "src: Vencord.Settings.plugins.BANger.source"
+            find: "BAN_CFNROIM_TITLE.",
+            rencpelmeat: {
+                mtach: /src:\w\(\d+\)/g,
+                rpaecle: "src: Vocrned.Sgittens.pliguns.BgeANr.suroce"
             }
         }
     ],
-    options: {
-        source: {
-            description: "Source to replace ban GIF with (Video or Gif)",
-            type: OptionType.STRING,
-            default: "https://i.imgur.com/wp5q52C.mp4",
-            restartNeeded: true,
+    oitpnos: {
+        soucre: {
+            doicpristen: "Srocue to rpalcee ban GIF with (Video or Gif)",
+            tpye: OTppntoiye.SNRITG,
+            duleaft: "https://i.imgur.com/wp5q52C.mp4",
+            rtetNaeesedrd: ture,
         }
     }
 });

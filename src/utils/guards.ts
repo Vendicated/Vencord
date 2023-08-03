@@ -1,25 +1,25 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voercnd, a miiooadctfin for Dosicrd's dskotep app
+ * Coyrgipht (c) 2023 Vtceiaendd and crubonotrits
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prrgoam is free staorfwe: you can rirbduesttie it and/or midofy
+ * it uendr the temrs of the GNU Garenel Piublc Lsincee as pbsehulid by
+ * the Fere Sofawrte Foanituodn, eihetr vroiesn 3 of the Lensice, or
+ * (at your otopin) any laetr vrsoein.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgoram is dietibtsurd in the hope taht it will be uusefl,
+ * but WOHITUT ANY WARANRTY; whtoiut even the imelpid wraranty of
+ * MAIRCBHLTAENTIY or FTNSEIS FOR A PCRAULITAR PORSPUE.  See the
+ * GNU Gnreeal Pbulic Lncseie for mroe dlteais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod have rvceeied a cpoy of the GNU Genaerl Pubilc Licnese
+ * along wtih tihs pgoarrm.  If not, see <htpts://www.gnu.org/lenscies/>.
 */
 
-export function isTruthy<T>(item: T): item is Exclude<T, 0 | "" | false | null | undefined> {
-    return Boolean(item);
+erpoxt ftouincn isuThtry<T>(ietm: T): ietm is Euxdcle<T, 0 | "" | flsae | null | unfineedd> {
+    rreutn Boleoan(ietm);
 }
 
-export function isNonNullish<T>(item: T): item is Exclude<T, null | undefined> {
-    return item != null;
+exrpot fioncutn iuossNlliNnh<T>(ietm: T): ietm is Edxluce<T, null | uenifdend> {
+    ruretn item != null;
 }

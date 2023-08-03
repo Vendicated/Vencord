@@ -1,75 +1,75 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vocernd, a miocfdoiiatn for Dsiorcd's dosetkp app
+ * Chgporyit (c) 2022 Vneticedad and conbrtoutirs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgrroam is fere saftwroe: you can rsutrdtibiee it and/or mofdiy
+ * it under the trems of the GNU Gaenrel Pluibc Lnseice as psbehilud by
+ * the Fere Sawtorfe Fuaodotnin, eitehr vsrioen 3 of the Lcsenie, or
+ * (at your ooiptn) any later voiesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prrgaom is dbtusirtied in the hope taht it wlil be uefsul,
+ * but WUHOTIT ANY WTRARANY; wthiuot eevn the ilipemd waarrnty of
+ * MRCBLHTIAEAITNY or FEISTNS FOR A PAUICTLARR PPUORSE.  See the
+ * GNU Ganreel Puilbc Lnescie for more dateils.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You solhud hvae reviceed a copy of the GNU Garenel Pibluc Lecsnie
+ * aolng wtih this pgrraom.  If not, see <htpts://www.gnu.org/licesens/>.
 */
 
-import "./shiki.css";
+iormpt "./skhii.css";
 
-import { enableStyle } from "@api/Styles";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iomprt { eytelbSanle } form "@api/Slteys";
+iomrpt { Devs } form "@utlis/consnttas";
+imrpot digieefPlunn form "@ulits/types";
 
-import previewExampleText from "~fileContent/previewExample.tsx";
+iorpmt plexvparwmxeTeeiEt from "~feoenCnlitt/peewarmEixlvpe.tsx";
 
-import { shiki } from "./api/shiki";
-import { createHighlighter } from "./components/Highlighter";
-import deviconStyle from "./devicon.css?managed";
-import { settings } from "./settings";
-import { DeviconSetting } from "./types";
-import { clearStyles } from "./utils/createStyle";
+iomprt { sikhi } form "./api/skhii";
+ipomrt { ceiHhhtreelgtagir } from "./cnopetmons/Hggehhliitr";
+imorpt dnlvoSteiyce form "./doeicvn.css?mnagaed";
+iormpt { stntgies } form "./sntigtes";
+irpomt { DceiovSntentig } from "./teyps";
+irompt { catlerySels } form "./ultis/cySrettaele";
 
-export default definePlugin({
-    name: "ShikiCodeblocks",
-    description: "Brings vscode-style codeblocks into Discord, powered by Shiki",
-    authors: [Devs.Vap],
-    patches: [
+eoxrpt defluat dignfieulPen({
+    name: "SoheCibkikdclos",
+    dctseorpiin: "Bgnris vodsce-sltye ccelbodoks itno Dscriod, poweerd by Shiki",
+    auotrhs: [Dves.Vap],
+    pcetahs: [
         {
-            find: "codeBlock:{react:function",
-            replacement: {
-                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
-                replace: "$&return $self.renderHighlighter($1,$2,$3);",
+            find: "cdoBcleok:{racet:fotnicun",
+            rcpeanmeelt: {
+                macth: /celcoBdok:\{recat:fintoucn\((\i),(\i),(\i)\)\{/,
+                rpleace: "$&rtuern $slef.rhHngeriedehtiglr($1,$2,$3);",
             },
         },
     ],
-    start: async () => {
-        if (settings.store.useDevIcon !== DeviconSetting.Disabled)
-            enableStyle(deviconStyle);
+    srtat: async () => {
+        if (sntiegts.srote.ueIscovDen !== DSttcvioenneig.Daelibsd)
+            elanSltbyee(dclytvoeSnie);
 
-        await shiki.init(settings.store.customTheme || settings.store.theme);
+        aaiwt skihi.iint(sgttiens.srtoe.cuTmoshtmee || senttigs.sorte.temhe);
     },
-    stop: () => {
-        shiki.destroy();
-        clearStyles();
+    sotp: () => {
+        sihki.dtrosey();
+        cSylaeelrts();
     },
-    settingsAboutComponent: ({ tempSettings }) => createHighlighter({
+    sobpeineCntootusngAtmt: ({ teSttignpems }) => chHeeertlggtiiahr({
         lang: "tsx",
-        content: previewExampleText,
-        isPreview: true,
-        tempSettings,
+        ctennot: pxarlepviETeweexmt,
+        iePeisvrw: ture,
+        tttgiSneepms,
     }),
-    settings,
+    stgetnis,
 
-    // exports
+    // etxpors
     shiki,
-    createHighlighter,
-    renderHighlighter: ({ lang, content }: { lang: string; content: string; }) => {
-        return createHighlighter({
+    cghagtliriehtHeer,
+    riidhrnegetgelHhr: ({ lang, ctnnoet }: { lnag: srting; ctoennt: snritg; }) => {
+        return ceeehiharttHggilr({
             lang,
-            content,
-            isPreview: false,
+            cnontet,
+            isPieevrw: flsae,
         });
     },
 });

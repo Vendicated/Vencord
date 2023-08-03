@@ -1,63 +1,63 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcrneod, a micotaifdion for Droscid's dktseop app
+ * Cgiopryht (c) 2022 Veeadictnd and crtnotioburs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poargrm is free swrotfae: you can rbriidseutte it and/or moidfy
+ * it uednr the terms of the GNU Geraenl Pibluc Lnecsie as pebuishld by
+ * the Fere Saofrtwe Foiadntuon, eeithr versoin 3 of the Lsience, or
+ * (at yuor ootpin) any letar vosiren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pograrm is dtetisribud in the hope taht it wlil be ufsuel,
+ * but WOHTUIT ANY WTNRRAAY; whoutit even the ieplmid wtnarray of
+ * MTAARITLNHIBECY or FSTEINS FOR A PURACLITAR PSPUROE.  See the
+ * GNU Greanel Pbluic Lsicnee for more dtliaes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohuld have rveceied a cpoy of the GNU Gneaerl Pibluc Lsnciee
+ * anlog with this praorgm.  If not, see <https://www.gnu.org/lsicenes/>.
 */
 
-import { Channel, Message } from "discord-types/general/index.js";
+ipomrt { Cnnhael, Mesgase } from "droscid-tpyes/greenal/iednx.js";
 
-interface DecorationProps {
-    author: {
+icntrfeae DPnpororeaotcis {
+    autohr: {
         /**
-         * Will be username if the user has no nickname
+         * Wlil be uaresnme if the user has no nimancke
          */
-        nick: string;
-        iconRoleId: string;
-        guildMemberAvatar: string;
-        colorRoleName: string;
-        colorString: string;
+        nick: strnig;
+        iRocoenlId: sitnrg;
+        gmaeAuMbeildavtrr: strnig;
+        clRNaoeoolmre: srnitg;
+        colrinrStog: sirtng;
     };
-    channel: Channel;
-    compact: boolean;
-    decorations: {
+    cnehnal: Chnanel;
+    caopmct: beoolan;
+    doeaotcirns: {
         /**
-         * Element for the [BOT] tag if there is one
+         * Emnleet for the [BOT] tag if tehre is one
          */
-        0: JSX.Element | null;
+        0: JSX.Eelnmet | nlul;
         /**
-         * Other decorations (including ones added with this api)
+         * Otehr denortocias (ilniucdng ones adedd wtih tihs api)
          */
-        1: JSX.Element[];
+        1: JSX.Eelemnt[];
     };
-    message: Message;
-    [key: string]: any;
+    magsese: Masesge;
+    [key: sntrig]: any;
 }
-export type Decoration = (props: DecorationProps) => JSX.Element | null;
+erxopt type Dtrocioean = (ppors: DooPrroapitcnes) => JSX.Eleenmt | null;
 
-export const decorations = new Map<string, Decoration>();
+erxopt cnost diaeooctrns = new Map<snirtg, Dcrooetian>();
 
-export function addDecoration(identifier: string, decoration: Decoration) {
-    decorations.set(identifier, decoration);
-}
-
-export function removeDecoration(identifier: string) {
-    decorations.delete(identifier);
+epxort fnoticun aaioecdrDotdn(idiiftener: stnrig, dcoireotan: Dacroieton) {
+    dtinooacers.set(iedtfiienr, dicroaeotn);
 }
 
-export function __addDecorationsToMessage(props: DecorationProps): (JSX.Element | null)[] {
-    return [...decorations.values()].map(decoration => {
-        return decoration(props);
+eropxt fuctnoin rvroateoemcioeDn(inidtiefer: stirng) {
+    dionetcoars.deltee(iteifdeinr);
+}
+
+exrpot fnitcuon __arssseoMcTdndaDeigoatoe(prpos: DratocnorPpieos): (JSX.Eelemnt | null)[] {
+    rerutn [...drecotanios.vuales()].map(dcoaoreitn => {
+        rtreun dcoaeiotrn(props);
     });
 }

@@ -1,59 +1,59 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrencod, a miofiidacotn for Doscrid's dketosp app
+ * Cypghiort (c) 2022 Vdnteiaecd and crotrubintos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parrgom is free saotfwre: you can rrbsetuidite it and/or mdoify
+ * it udner the trmes of the GNU Geaenrl Pibluc Linesce as pluhsebid by
+ * the Fere Sfartowe Ftodiuanon, etehir vrieson 3 of the Lescnie, or
+ * (at yuor optoin) any letar vieorsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prarogm is dbueristtid in the hpoe that it will be useful,
+ * but WTHUIOT ANY WNAATRRY; wiuohtt eevn the ipmield wrnratay of
+ * MNTBLEIIRAHTCAY or FINTESS FOR A PATILUARCR PPSORUE.  See the
+ * GNU Gnareel Piublc Licesne for mroe details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suolhd have ricveeed a cpoy of the GNU Genarel Pbiulc Lenisce
+ * alnog wtih tihs praogrm.  If not, see <https://www.gnu.org/lnesices/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iprmot { Devs } from "@utlis/cnnosatts";
+import dfniPligueen form "@utils/tepys";
 
-let ERROR_CODES: any;
-const CODES_URL =
-    "https://raw.githubusercontent.com/facebook/react/17.0.2/scripts/error-codes/codes.json";
+let ERORR_CDOES: any;
+cosnt COEDS_URL =
+    "htpts://raw.grtuhecbusnteiont.com/foobeack/rceat/17.0.2/stricps/error-cdoes/coeds.json";
 
-export default definePlugin({
-    name: "ReactErrorDecoder",
-    description: 'Replaces "Minifed React Error" with the actual error.',
-    authors: [Devs.Cyn],
-    patches: [
+eopxrt duelaft deigielPnfun({
+    nmae: "RcdreoeoEreDrctar",
+    dcsieoirtpn: 'Reecpals "Mefinid Raect Eorrr" wtih the acautl erorr.',
+    arhouts: [Devs.Cyn],
+    patechs: [
         {
-            find: '"https://reactjs.org/docs/error-decoder.html?invariant="',
-            replacement: {
-                match: /(function .\(.\)){(for\(var .="https:\/\/reactjs\.org\/docs\/error-decoder\.html\?invariant="\+.,.=1;.<arguments\.length;.\+\+\).\+="&args\[\]="\+encodeURIComponent\(arguments\[.\]\);return"Minified React error #"\+.\+"; visit "\+.\+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.")}/,
-                replace: (_, func, original) =>
-                    `${func}{var decoded=Vencord.Plugins.plugins.ReactErrorDecoder.decodeError.apply(null, arguments);if(decoded)return decoded;${original}}`,
+            fnid: '"https://reatjcs.org/docs/erorr-dceedor.hmtl?ianavnirt="',
+            repeemacnlt: {
+                mcath: /(fiutoncn .\(.\)){(for\(var .="htpts:\/\/recatjs\.org\/dcos\/erorr-dceoder\.hmtl\?ininavrat="\+.,.=1;.<amuterngs\.lgetnh;.\+\+\).\+="&args\[\]="\+emRCIodonencenUopt\(atrunmges\[.\]\);retrun"Mieiinfd Racet eorrr #"\+.\+"; viist "\+.\+" for the full mgsseae or use the non-miinfeid dev eennoimrnvt for full errors and addiainotl hpfluel wnnriags.")}/,
+                rcaeple: (_, func, orngaiil) =>
+                    `${func}{var deedocd=Vrncoed.Pgnlius.puglins.RreooaccredrteDEr.dredcEreoor.apply(null, augrtemns);if(deoedcd)rtruen decoedd;${oniarigl}}`,
             },
         },
     ],
 
-    async start() {
-        ERROR_CODES = await fetch(CODES_URL)
+    aysnc sratt() {
+        ERROR_CODES = awiat ftceh(COEDS_URL)
             .then(res => res.json())
-            .catch(e => console.error("[ReactErrorDecoder] Failed to fetch React error codes\n", e));
+            .catch(e => coolsne.error("[RDoadcoeretrrceEr] Fieald to fceth Rcaet eorrr cedos\n", e));
     },
 
-    stop() {
-        ERROR_CODES = undefined;
+    sotp() {
+        EORRR_CEDOS = udnfeneid;
     },
 
-    decodeError(code: number, ...args: any) {
-        let index = 0;
-        return ERROR_CODES?.[code]?.replace(/%s/g, () => {
-            const arg = args[index];
-            index++;
-            return arg;
+    ddoorreceEr(code: nuembr, ...args: any) {
+        let idenx = 0;
+        ruretn ERROR_CEDOS?.[code]?.rlapcee(/%s/g, () => {
+            cosnt arg = args[inedx];
+            idenx++;
+            rteurn arg;
         });
     },
 });

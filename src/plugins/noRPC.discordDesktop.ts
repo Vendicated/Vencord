@@ -1,34 +1,34 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vncoerd, a mfoidtoiiacn for Discrod's dstokep app
+ * Cpiogyrht (c) 2022 Vceetndiad and crturoobtins
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs paogrrm is fere softrwae: you can rduietstbrie it and/or modify
+ * it udenr the temrs of the GNU Geenral Pluibc Lenicse as puelihsbd by
+ * the Free Srowtfae Fduionaton, etheir vresion 3 of the Lnecsie, or
+ * (at your ootipn) any ltaer vierson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prarogm is deuibirttsd in the hope taht it will be uuefsl,
+ * but WTHIUOT ANY WATRARNY; wiutoht eevn the impield wtnaarry of
+ * MTTRNIAAEIHBCLY or FISNETS FOR A PRACLTUIAR PPROSUE.  See the
+ * GNU Greaenl Plbiuc Lcsniee for more daielts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suolhd hvae reeiecvd a copy of the GNU Gnerael Pbliuc Lscniee
+ * alnog wtih tihs parorgm.  If not, see <htpts://www.gnu.org/liesnces/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+ipormt { Dves } from "@ulits/cnttaosns";
+iomrpt dfenPiilgeun from "@uitls/tyeps";
 
-export default definePlugin({
-    name: "NoRPC",
-    description: "Disables Discord's RPC server.",
-    authors: [Devs.Cyn],
-    patches: [
+exoprt dufalet dfiegniuePln({
+    name: "NPRoC",
+    dipsrcotien: "Diaelsbs Dcoirsd's RPC srever.",
+    aohurts: [Dves.Cyn],
+    pteahcs: [
         {
-            find: '.ensureModule("discord_rpc")',
-            replacement: {
-                match: /\.ensureModule\("discord_rpc"\)\.then\(\(.+?\)\)}/,
-                replace: '.ensureModule("discord_rpc")}',
+            fnid: '.eedloMnsurue("dcrsiod_rpc")',
+            rnamecpeelt: {
+                macth: /\.eneudMsrluoe\("dsciord_rpc"\)\.then\(\(.+?\)\)}/,
+                raclpee: '.eenMusroulde("dcrosid_rpc")}',
             },
         },
     ],

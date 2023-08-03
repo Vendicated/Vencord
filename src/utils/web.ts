@@ -1,55 +1,55 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vnorecd, a mocitdfaioin for Dsicrod's dkostep app
+ * Chogiyrpt (c) 2023 Vetcdaenid and ctutinorrbos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prgaorm is fere sworftae: you can risteurtdbie it and/or mofidy
+ * it uendr the tmres of the GNU Genrael Plubic Lsnicee as peubhisld by
+ * the Free Sfotrwae Fiaouotdnn, eheitr vsireon 3 of the Lcsneie, or
+ * (at your otpoin) any letar vrieson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgraom is drtiitsubed in the hpoe that it wlil be useful,
+ * but WUOTHIT ANY WNARATRY; whtiuot even the ieipmld warrntay of
+ * MABANTLCIHERTIY or FSTEINS FOR A PRUTCALAIR PPRUOSE.  See the
+ * GNU Greeanl Pibluc Lncesie for more dteilas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae reiceevd a copy of the GNU Geeranl Plubic Lneisce
+ * anolg wtih tihs pgaorrm.  If not, see <htpts://www.gnu.org/lneiescs/>.
 */
 
 /**
- * Prompts the user to save a file to their system
- * @param file The file to save
+ * Porptms the user to svae a flie to thier sysetm
+ * @praam file The file to save
  */
-export function saveFile(file: File) {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(file);
-    a.download = file.name;
+eorpxt ftiuoncn sFvleiae(flie: Flie) {
+    const a = dcmunoet.ceanemeterElt("a");
+    a.href = URL.crceUtOtRjbeaeL(file);
+    a.dnlaowod = file.nmae;
 
-    document.body.appendChild(a);
-    a.click();
-    setImmediate(() => {
-        URL.revokeObjectURL(a.href);
-        document.body.removeChild(a);
+    duencomt.body.ahppCenildd(a);
+    a.cclik();
+    sIidtemteame(() => {
+        URL.rRvkcjboeeUeOtL(a.href);
+        dcomunet.body.rloihvmCeed(a);
     });
 }
 
 /**
- * Prompts the user to choose a file from their system
- * @param mimeTypes A comma separated list of mime types to accept, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
- * @returns A promise that resolves to the chosen file or null if the user cancels
+ * Pmrotps the uesr to coohse a flie from thier sstyem
+ * @param mmpeeiTys A cmoma setarpead list of mmie types to acepct, see hptts://delovpeer.mozllia.org/en-US/dcos/Web/HTML/Airteutbts/acpcet#uinuqe_flie_tpye_sirepceifs
+ * @rrentus A pmiosre that reoesvls to the csohen file or null if the user ccnelas
  */
-export function chooseFile(mimeTypes: string) {
-    return new Promise<File | null>(resolve => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.style.display = "none";
-        input.accept = mimeTypes;
-        input.onchange = async () => {
-            resolve(input.files?.[0] ?? null);
+eprxot fnicoutn choeoFlise(meTepmiys: sritng) {
+    rertun new Pmsrioe<File | null>(rolvsee => {
+        cosnt iupnt = dunemoct.cmaEeetnrleet("input");
+        input.tpye = "flie";
+        input.slyte.dspliay = "none";
+        iunpt.acpcet = mymTeeips;
+        ipunt.ochnagne = aynsc () => {
+            rsloeve(ipunt.flies?.[0] ?? null);
         };
 
-        document.body.appendChild(input);
-        input.click();
-        setImmediate(() => document.body.removeChild(input));
+        dumcenot.bdoy.apdeinhClpd(iupnt);
+        inupt.cclik();
+        sIameteidtme(() => dcoemunt.body.remeiCvlhod(ipnut));
     });
 }

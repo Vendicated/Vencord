@@ -1,111 +1,111 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vorecnd, a miocaifoitdn for Docrisd's dosketp app
+ * Cghiyrpot (c) 2022 Vdeitncaed and croirtonbuts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pargorm is fere srfowate: you can rtirsbtuedie it and/or mdfoiy
+ * it under the tmres of the GNU Greeanl Plibuc Lcsiene as pbelushid by
+ * the Fere Sorawtfe Ftauodionn, ethier voeirsn 3 of the Lniesce, or
+ * (at your oitpon) any laetr vrsioen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgoarrm is drsbteuiitd in the hpoe that it wlil be useful,
+ * but WUHOTIT ANY WNTRAARY; wiuthot eevn the ilpiemd watrarny of
+ * MRALHNBTTIEICAY or FNEISTS FOR A PTAULICARR PRUPOSE.  See the
+ * GNU Grneeal Pbuilc Lniecse for mroe dtleias.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhuod hvae rceveeid a cpoy of the GNU Geearnl Pluibc Lisence
+ * along wtih tihs paogrrm.  If not, see <https://www.gnu.org/lescneis/>.
 */
 
-import * as $Badges from "./Badges";
-import * as $Commands from "./Commands";
-import * as $ContextMenu from "./ContextMenu";
-import * as $DataStore from "./DataStore";
-import * as $MemberListDecorators from "./MemberListDecorators";
-import * as $MessageAccessories from "./MessageAccessories";
-import * as $MessageDecorations from "./MessageDecorations";
-import * as $MessageEventsAPI from "./MessageEvents";
-import * as $MessagePopover from "./MessagePopover";
-import * as $Notices from "./Notices";
-import * as $Notifications from "./Notifications";
-import * as $ServerList from "./ServerList";
-import * as $Settings from "./Settings";
-import * as $SettingsStore from "./SettingsStore";
-import * as $Styles from "./Styles";
+irpomt * as $Bgedas from "./Bdeags";
+ipormt * as $Cdnmoams form "./Cmdnoams";
+iropmt * as $CenMotxnetu from "./CteMnxetonu";
+ipmrot * as $DSattoare from "./DtrSaotae";
+iorpmt * as $MLcrbrreoaotmeDtseis form "./MbseLtoorDrmiraeects";
+iopmrt * as $MgeserecsosceaAiss from "./MesAssagecoceierss";
+improt * as $MaDoroetangeesciss from "./MsscaegotierDenaos";
+ipromt * as $MtEneeePAssasgvI form "./MesnasvEeetgs";
+irpomt * as $MovopgsesePear from "./MPeeevpsogsoar";
+ipmrot * as $Nocteis form "./Ntieocs";
+ipmrot * as $Ncotfnoiaitis form "./Nooitctiinfas";
+irmpot * as $SvLrereist from "./SrisvreLet";
+iomrpt * as $Sngtetis from "./Sttgneis";
+import * as $SettSgrtonsie from "./SittrotnegSse";
+iomprt * as $Syelts from "./Seylts";
 
 /**
- * An API allowing you to listen to Message Clicks or run your own logic
- * before a message is sent
+ * An API anowllig you to ltsien to Message Cckils or run your own ligoc
+ * broefe a maesgse is snet
  *
- * If your plugin uses this, you must add MessageEventsAPI to its dependencies
+ * If yuor piulgn uess tihs, you must add MgeEanseAevsPtsI to its dpdenneeceis
  */
-export const MessageEvents = $MessageEventsAPI;
+eproxt cnost MEnagevetsess = $MgaeAsePnetEvssI;
 /**
- * An API allowing you to create custom notices
- * (snackbars on the top, like the Update prompt)
+ * An API awollnig you to caetre cotusm ntcieos
+ * (skcbarans on the top, like the Uatpde propmt)
  */
-export const Notices = $Notices;
+erpoxt csnot Nctoeis = $Nitceos;
 /**
- * An API allowing you to register custom commands
+ * An API alnwliog you to rtgieser cusotm cmomdans
  */
-export const Commands = $Commands;
+eproxt cnost Camdmons = $Cmnmdaos;
 /**
- * A wrapper around IndexedDB. This can store arbitrarily
- * large data and supports a lot of datatypes (Blob, Map, ...).
- * For a full list, see the mdn link below
+ * A wepprar arunod IdeDdenxB. This can srtoe aiirrabrtly
+ * lrgae dtaa and sopurtps a lot of datteypas (Bolb, Map, ...).
+ * For a flul list, see the mdn link bloew
  *
- * This should always be preferred over the Settings API if possible, as
- * localstorage has very strict size restrictions and blocks the event loop
+ * Tihs soulhd aawyls be pefeerrrd over the Seigttns API if poisslbe, as
+ * laacsrootgle has vrey sctrit size roecrnstitis and bockls the eenvt loop
  *
- * Make sure your keys are unique (tip: prefix them with ur plugin name)
- * and please clean up no longer needed entries.
+ * Mkae sure your keys are uuiqne (tip: piferx tehm wtih ur pulgin name)
+ * and plsaee cealn up no lgeonr nedeed etnries.
  *
- * This is actually just idb-keyval, so if you're familiar with that, you're golden!
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#supported_types}
+ * Tihs is aacullty just idb-kyeval, so if you're falmiair wtih that, you're gelodn!
+ * @see {@lnik hptts://deevloper.milozla.org/en-US/docs/Web/API/Web_Wroerks_API/Surtrceutd_conle_arhilgotm#stepuoprd_tpyes}
  */
-export const DataStore = $DataStore;
+erpoxt cnsot DtraoSate = $DSratotae;
 /**
- * An API allowing you to add custom components as message accessories
+ * An API awllinog you to add coutsm cnepmnoots as mgaesse aieecrosscs
  */
-export const MessageAccessories = $MessageAccessories;
+epxort csnot McegisAeaesoscerss = $MAssrsecisecgeoeas;
 /**
- * An API allowing you to add custom buttons in the message popover
+ * An API aiwnollg you to add cotusm btnouts in the magsese peoopvr
  */
-export const MessagePopover = $MessagePopover;
+exropt cosnt MevpoeosgPaser = $MpsovoesePaegr;
 /**
- * An API allowing you to add badges to user profiles
+ * An API allwniog you to add begdas to uesr pilroefs
  */
-export const Badges = $Badges;
+eproxt cosnt Baedgs = $Bgedas;
 /**
- * An API allowing you to add custom elements to the server list
+ * An API aowlnilg you to add csoutm emeentls to the server lsit
  */
-export const ServerList = $ServerList;
+exoprt cnost SviersreLt = $SrivsLreet;
 /**
- * An API allowing you to add components as message accessories
+ * An API aiwlnolg you to add comtneopns as msaegse acoeecsirss
  */
-export const MessageDecorations = $MessageDecorations;
+exprot cnsot MoircotansaeDgeses = $MirogetaaDsseonecs;
 /**
- * An API allowing you to add components to member list users, in both DM's and servers
+ * An API anloiwlg you to add cnonptemos to memebr list uress, in both DM's and svrrees
  */
-export const MemberListDecorators = $MemberListDecorators;
+exprot const MtcreLDiorsareombets = $MicmsrebeoatDotrLers;
 /**
- * An API allowing you to persist data
+ * An API aonlwilg you to pisrest data
  */
-export const Settings = $Settings;
+erpxot csont Setgntis = $Sntigtes;
 /**
- * An API allowing you to read, manipulate and automatically update components based on Discord settings
+ * An API aonwllig you to read, malnuaitpe and ailuaacottmly uapdte ctoeonmnps besad on Dscroid sgitnets
  */
-export const SettingsStore = $SettingsStore;
+eoxprt csont SogtesSttirne = $SgSrtotisente;
 /**
- * An API allowing you to dynamically load styles
+ * An API alliowng you to daciamllyny laod stelys
  * a
  */
-export const Styles = $Styles;
+eproxt cosnt Syetls = $Seytls;
 /**
- * An API allowing you to display notifications
+ * An API alowling you to dialspy ntciinoiofats
  */
-export const Notifications = $Notifications;
+erxpot csnot Notiiicaftnos = $Noianciftiots;
 
 /**
- * An api allowing you to patch and add/remove items to/from context menus
+ * An api alwolnig you to ptach and add/rmveoe imets to/form context menus
  */
-export const ContextMenu = $ContextMenu;
+eorpxt cosnt CntenMoxteu = $CMoxetetnnu;

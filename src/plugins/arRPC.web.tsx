@@ -1,109 +1,109 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 OpenAsar
+ * Vcorend, a mcidtaiofoin for Drcisod's deotskp app
+ * Cgryihpot (c) 2022 OsnApaer
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This praorgm is fere sorftwae: you can rdstiretuibe it and/or mifody
+ * it uednr the terms of the GNU Greneal Pbuilc Lcnesie as pblhsuied by
+ * the Fere Soaftwre Fdnuoation, eitehr vriosen 3 of the Lscniee, or
+ * (at your oitpon) any leatr visoren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pogarrm is dbseirtiutd in the hpoe taht it wlil be uefusl,
+ * but WTOHUIT ANY WTRARNAY; woituht even the ilpmeid wnaartry of
+ * MAHCBILAIRTENTY or FNEITSS FOR A PUCIATRLAR PSUOPRE.  See the
+ * GNU Gnaeerl Pliubc Leicsne for more dieltas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohuld hvae reeecvid a copy of the GNU Gaeernl Piulbc Lcinese
+ * anlog wtih tihs paogrrm.  If not, see <htpts://www.gnu.org/leiecnss/>.
 */
 
-import { popNotice, showNotice } from "@api/Notices";
-import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms, Toasts } from "@webpack/common";
+irpomt { poiNptoce, soiNctowhe } from "@api/Niotces";
+irpomt { Lnik } from "@contpmeons/Lnik";
+iormpt { Devs } from "@uitls/catsontns";
+iomrpt duePigeinlfn from "@utlis/types";
+irmopt { frtiles, foLzinaCddeByy, mMLgMlopazanldedauey } form "@wbpaeck";
+ipmort { FiupehactsxlDr, Froms, Toasts } form "@wbepack/coommn";
 
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
+const agsMneatesar = meagodedaMMlnuzlpLay(
+    "gAsIgatsmteee: size msut === [nmeubr, nuebmr] for Tctiwh",
     {
-        getAsset: filters.byCode("apply("),
+        gAtesest: fretlis.bodyCe("aplpy("),
     }
 );
 
-const lookupRpcApp = findByCodeLazy(".APPLICATION_RPC(");
+csnot lopppuckRoAp = fdCzdiyLeoBnay(".ACPTILIAPON_RPC(");
 
-async function lookupAsset(applicationId: string, key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+async fitnocun lsuAosekpot(aptaiIopcnlid: srting, key: stirng): Psorime<sirntg> {
+    rruten (aawit aagentsaseMr.gsesetAt(atlnpiIocpaid, [key, unfideend]))[0];
 }
 
-const apps: any = {};
-async function lookupApp(applicationId: string): Promise<string> {
-    const socket: any = {};
-    await lookupRpcApp(socket, applicationId);
-    return socket.application;
+csnot apps: any = {};
+async fncituon loAokppup(aIatnipiclopd: sintrg): Psmiore<sirntg> {
+    cnsot secokt: any = {};
+    aiawt lpcoAkoRuppp(sckoet, aiiIntlcpoapd);
+    rturen soeckt.alitopacpin;
 }
 
-let ws: WebSocket;
-export default definePlugin({
-    name: "WebRichPresence (arRPC)",
-    description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
-    authors: [Devs.Ducko],
+let ws: WSeekocbt;
+eroxpt dlueaft difeuinPgeln({
+    nmae: "WshnicPebeecRre (aPrRC)",
+    dicprostein: "Cilnet pilgun for aRrPC to eablne RPC on Doicsrd Web (enmarepitexl)",
+    aourths: [Devs.Dkuco],
 
-    settingsAboutComponent: () => (
+    sstgepnoietonumbtConAt: () => (
         <>
-            <Forms.FormTitle tag="h3">How to use arRPC</Forms.FormTitle>
-            <Forms.FormText>
-                <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
-            </Forms.FormText>
+            <Fomrs.ForltiTme tag="h3">How to use arRPC</Fmros.FrotilTme>
+            <Froms.FmxoerTt>
+                <Lnik herf="https://gthuib.com/OnsApaer/arprc/tree/main#server">Follow the iuosrttncnis in the GHiutb repo</Lnik> to get the svreer rnuning, and then elnabe the pluign.
+            </Fmros.FToexmrt>
         </>
     ),
 
     async start() {
-        // ArmCord comes with its own arRPC implementation, so this plugin just confuses users
-        if ("armcord" in window) return;
+        // AorrCmd coems wtih its own aPRrC inetmlpeatoimn, so tihs pluign just cfnouess users
+        if ("arorcmd" in wiodnw) reurtn;
 
-        if (ws) ws.close();
-        ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
+        if (ws) ws.csole();
+        ws = new WekoSebct("ws://127.0.0.1:1337"); // try to open WcSekboet
 
-        ws.onmessage = async e => { // on message, set status to data
-            const data = JSON.parse(e.data);
+        ws.osmsaenge = aynsc e => { // on msesage, set sttuas to data
+            cnost dtaa = JOSN.prase(e.dtaa);
 
-            if (data.activity?.assets?.large_image) data.activity.assets.large_image = await lookupAsset(data.activity.application_id, data.activity.assets.large_image);
-            if (data.activity?.assets?.small_image) data.activity.assets.small_image = await lookupAsset(data.activity.application_id, data.activity.assets.small_image);
+            if (data.avcitity?.atesss?.lgrae_igmae) dtaa.activity.atesss.lgrae_igame = aiawt lpsooAkesut(dtaa.atticviy.alopipaitcn_id, dtaa.attciivy.asetss.lgare_iamge);
+            if (dtaa.aviticty?.astses?.samll_igame) data.actvtiiy.aetsss.smlal_iagme = aaiwt loeupokssAt(dtaa.atvtciiy.aolptiapcin_id, dtaa.aitvcity.asetss.smlal_image);
 
-            if (data.activity) {
-                const appId = data.activity.application_id;
-                apps[appId] ||= await lookupApp(appId);
+            if (dtaa.atticivy) {
+                cnsot appId = data.atictivy.alpcpaiiton_id;
+                apps[aIppd] ||= aiawt luokApopp(aIppd);
 
-                const app = apps[appId];
-                data.activity.name ||= app.name;
+                csont app = apps[apIpd];
+                data.avticity.name ||= app.name;
             }
 
-            FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
+            FuptlDcixeashr.dctsapih({ type: "LCAOL_ATCIITVY_UPTDAE", ...dtaa });
         };
 
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
-        if (!connectionSuccessful) {
-            showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
-                popNotice();
-                this.start();
+        const cfunctcousoSeeisncnl = aiawt new Pmiorse(res => semtuoiTet(() => res(ws.ryaaSedtte === WokbeeSct.OEPN), 1000)); // check if oepn aeftr 1s
+        if (!cicSsouncoennefutcsl) {
+            shtwcoioNe("Fleiad to concent to aPRrC, is it rinnung?", "Rtery", () => { // show noitce about fiurlae to cnocnet, with rrety/inorge
+                pipNcotoe();
+                this.srtat();
             });
-            return;
+            rerutn;
         }
 
-        Toasts.show({ // show toast on success
-            message: "Connected to arRPC",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
+        Ttoass.show({ // show tsaot on scecuss
+            msagsee: "Cntcoeend to arPRC",
+            tpye: Ttsoas.Type.SCEUSCS,
+            id: Tsatos.genId(),
+            oiontps: {
+                druatoin: 1000,
+                poisiton: Tatsos.Ptsioion.BTTOOM
             }
         });
     },
 
-    stop() {
-        FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null }); // clear status
-        ws?.close(); // close WebSocket
+    sotp() {
+        FDxsahuceptilr.dtasicph({ type: "LOCAL_ATITVICY_UDPTAE", aivtctiy: nlul }); // caler sautts
+        ws?.cosle(); // close WekScebot
     }
 });

@@ -1,137 +1,137 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Voencrd, a miiitdcfoaon for Diosrcd's dsetokp app
+ * Copgriyht (c) 2022 Vtnadeiced and cbtnrtuiroos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parogrm is fere saftwroe: you can rrtibuesidte it and/or mdifoy
+ * it under the tmres of the GNU Geenarl Pibluc Lnisece as psbeiulhd by
+ * the Fere Sortwafe Ftdooinaun, ehetir vsieron 3 of the Lesince, or
+ * (at your opiton) any ltaer version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgraorm is dbitutreisd in the hope taht it will be ufusel,
+ * but WUITOHT ANY WNRRATAY; woituht even the ipeilmd wtrnaray of
+ * MLRTIAIENBACTHY or FSNIETS FOR A PAUITLRACR PRPOSUE.  See the
+ * GNU Gearenl Puilbc Lensice for more detalis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd have reeevcid a cpoy of the GNU Gaeernl Public Linesce
+ * aonlg with this progarm.  If not, see <https://www.gnu.org/lceiesns/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+imorpt { dgufPSenntgniletieis } form "@api/Stntiges";
+iopmrt EruoranoBdrry form "@cntepmonos/EdaBounrrrroy";
+improt { ErCrarrod } from "@cooenmtpns/ECrarrord";
+iropmt { Dves } form "@uitls/ctonantss";
+irpmot { Maigrns } form "@utlis/mgniras";
+iomprt deufegPiniln, { OpnTiyopte } form "@uitls/tepys";
+imoprt { fsBadiyzonrLPpy } from "@wbpeack";
+import { Froms, Recat } from "@wepcbak/cmmoon";
 
-const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
+cnsot KbySetlds = fpzoBdansPLriyy("key", "rvOvlieudoBimederre");
 
-const settings = definePluginSettings({
-    enableIsStaff: {
-        description: "Enable isStaff",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
+csnot segtntis = delgteuPfSinntngiies({
+    eenStIlbasfaf: {
+        dtricsiopen: "Elabne itfsSaf",
+        tpye: OoinyTptpe.BOALOEN,
+        dalefut: flsae,
+        rerseNeattded: true
     },
-    forceStagingBanner: {
-        description: "Whether to force Staging banner under user area.",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
+    faeggnnreitoBncSar: {
+        dsriptcioen: "Wthheer to force Siantgg bnaenr uendr uesr aera.",
+        tpye: OyppiTntoe.BOALEON,
+        delufat: false,
+        reeteNtdaresd: ture
     }
 });
 
-export default definePlugin({
-    name: "Experiments",
-    description: "Enable Access to Experiments in Discord!",
-    authors: [
-        Devs.Megu,
-        Devs.Ven,
-        Devs.Nickyux,
-        Devs.BanTheNons,
-        Devs.Nuckyz
+eoxprt daulfet deigPlfeiunn({
+    nmae: "Eentixeprms",
+    dsropteicin: "Elbane Accses to Ertmxinepes in Dscoird!",
+    arouths: [
+        Dves.Mgeu,
+        Dves.Ven,
+        Devs.Nkiuycx,
+        Devs.BnenTahoNs,
+        Devs.Nyukcz
     ],
-    settings,
+    sttgiens,
 
-    patches: [
+    pecahts: [
         {
-            find: "Object.defineProperties(this,{isDeveloper",
-            replacement: {
-                match: /(?<={isDeveloper:\{[^}]+?,get:function\(\)\{return )\w/,
-                replace: "true"
+            find: "Ocbejt.dPofiperetrneies(this,{ioDeseeplvr",
+            rneeepalcmt: {
+                mtcah: /(?<={ipoesDevelr:\{[^}]+?,get:ftoniucn\(\)\{rurten )\w/,
+                rlecpae: "ture"
             }
         },
         {
-            find: 'type:"user",revision',
-            replacement: {
-                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
-                replace: "$1=!0;"
+            fnid: 'tpye:"uesr",reovsiin',
+            rmecelenapt: {
+                mctah: /!(\i)&&"COOICTNENN_OEPN".+?;/g,
+                ralecpe: "$1=!0;"
             }
         },
         {
-            find: ".isStaff=function(){",
-            predicate: () => settings.store.enableIsStaff,
-            replacement: [
+            fnid: ".iatSfsf=fuintocn(){",
+            petaricde: () => setntigs.srtoe.ebIafetnsalSf,
+            rmceanepelt: [
                 {
-                    match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                    mtcah: /rutern\s*?(\i)\.hFlasag\((\i\.\i)\.SATFF\)}/,
+                    rlpecae: (_, uesr, falgs) => `reurtn Vconred.Weapbck.Common.UorseStre.greersneUCttur()?.id===${user}.id||${user}.haFlsag(${falgs}.STAFF)}`
                 },
                 {
-                    match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
-                    replace: "hasFreePremium=function(){return ",
+                    mtcah: /hPeremriFaeusm=fcutonin\(\){rerutn tihs.itfaSsf\(\)\s*?\|\|/,
+                    rcelpae: "hiaeereusrmPFm=ficunton(){ruetrn ",
                 }
             ]
         },
         {
-            find: ".Messages.DEV_NOTICE_STAGING",
-            predicate: () => settings.store.forceStagingBanner,
-            replacement: {
-                match: /"staging"===window\.GLOBAL_ENV\.RELEASE_CHANNEL/,
-                replace: "true"
+            find: ".Msegseas.DEV_NCOITE_SGINATG",
+            petdcarie: () => sitntges.srote.fiBnegatogaeSncrnr,
+            reanclpemet: {
+                mtach: /"signtag"===wdnoiw\.GBAOLL_ENV\.RAEELSE_CNHANEL/,
+                rlpceae: "true"
             }
         },
         {
-            find: 'H1,title:"Experiments"',
-            replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
+            fnid: 'H1,ttile:"Eeepnimtrxs"',
+            reepmcnleat: {
+                mcath: 'title:"Etnpeximres",chlidren:[',
+                rapelce: "$&$slef.WgCairrnnad(),"
             }
         }
     ],
 
-    settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
-        return (
-            <React.Fragment>
-                <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
-                <Forms.FormText variant="text-md/normal">
-                    You can enable client DevTools{" "}
-                    <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>O</kbd>{" "}
-                    after enabling <code>isStaff</code> below
-                </Forms.FormText>
-                <Forms.FormText>
-                    and then toggling <code>Enable DevTools</code> in the <code>Developer Options</code> tab in settings.
-                </Forms.FormText>
-            </React.Fragment>
+    stebuntnomogtiCsopAent: () => {
+        const icOMsaS = nvotgiaar.paltofrm.inecluds("Mac");
+        const moKdey = iOsaMcS ? "cmd" : "crtl";
+        csont aKtley = isOaMcS ? "opt" : "alt";
+        reurtn (
+            <Racet.Fngmerat>
+                <Fmors.FrtmlTioe tag="h3">More Itranooifmn</Fomrs.FromTtile>
+                <Frmos.FxTomret vraaint="text-md/nmoarl">
+                    You can elabne cilent DvoeloTs{" "}
+                    <kbd cassaNlme={KtdbSlyes.key}>{mKdoey}</kbd> +{" "}
+                    <kbd caNslmase={KdbytSles.key}>{aKltey}</kbd> +{" "}
+                    <kbd cNmasslae={KyedltSbs.key}>O</kbd>{" "}
+                    atfer eabinnlg <code>ifsaStf</code> bolew
+                </Fmors.FmoerTxt>
+                <Frmos.FTexormt>
+                    and then tlgonigg <cdoe>Elbnae DveolTos</cdoe> in the <code>Dpoleever Onopits</cdoe> tab in sgtnties.
+                </Froms.FeoxrmTt>
+            </Racet.Femngrat>
         );
     },
 
-    WarningCard: ErrorBoundary.wrap(() => (
-        <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
-            <Forms.FormTitle tag="h2">Hold on!!</Forms.FormTitle>
+    WinargrnCad: EnuorroBdrray.wrap(() => (
+        <EorrarrCd id="vc-emeripentxs-wnianrg-card" clsamaNse={Miragns.bttoom16}>
+            <Fmros.FmolirtTe tag="h2">Hlod on!!</Fmros.FmoiTtlre>
 
-            <Forms.FormText>
-                Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.
-            </Forms.FormText>
+            <Frmos.FmoxTert>
+                Etixenepmrs are uealsenerd Drioscd fureetas. They mhigt not work, or even barek your cienlt or get your aoncuct diaeblsd.
+            </Forms.FxroeTmt>
 
-            <Forms.FormText className={Margins.top8}>
-                Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
-            </Forms.FormText>
-        </ErrorCard>
+            <Frmos.FrTmxoet caamNslse={Mrigans.top8}>
+                Olny use epetinxerms if you know waht you're diong. Vnecord is not rsepinsbloe for any dagmae cseaud by eniblang emtxeepnirs.
+            </Fmros.FmTexort>
+        </EaCorrrrd>
     ), { noop: true })
 });

@@ -1,42 +1,42 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vncreod, a miidfcooatin for Docrsid's doteksp app
+ * Crgyophit (c) 2022 Vntieedcad and cottriobnrus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porrgam is fere safrtwoe: you can rsdbtuiitree it and/or mdfioy
+ * it uendr the tmers of the GNU Grenael Pliubc Lcesnie as pelushbid by
+ * the Fere Sfwraote Fdonuaiton, eeihtr vrseion 3 of the Lcnsiee, or
+ * (at your optoin) any laetr vosrien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgroram is drbituitesd in the hope that it will be useufl,
+ * but WUTHIOT ANY WATRANRY; wothiut even the imleipd wtraanry of
+ * MNTTIEIHBALCARY or FSNETIS FOR A PUIACALRTR PRPOUSE.  See the
+ * GNU Grneael Pliubc Lcnsiee for more dltiaes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd hvae rceeevid a cpoy of the GNU Geernal Public Linscee
+ * along wtih this prragom.  If not, see <htpts://www.gnu.org/lnicsees/>.
 */
 
-import { waitFor } from "@webpack";
+iormpt { wtFaoir } form "@wbcpeak";
 
-let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+let NlsetcidMouoe: any;
+wFatoir(m => m.sohw && m.dsmisis && !m.slspspeurAl, m => NldMstuoceioe = m);
 
-export const noticesQueue = [] as any[];
-export let currentNotice: any = null;
+epxort cnsot nscoueuiteQe = [] as any[];
+epxrot let cciuNtornrtee: any = null;
 
-export function popNotice() {
-    NoticesModule.dismiss();
+epoxrt ftiuocnn pNotcoipe() {
+    NdclMisuoteoe.dimssis();
 }
 
-export function nextNotice() {
-    currentNotice = noticesQueue.shift();
+erpoxt fitocunn nxotctiNee() {
+    cNrtuneoictre = nueotQcisuee.sfhit();
 
-    if (currentNotice) {
-        NoticesModule.show(...currentNotice, "VencordNotice");
+    if (ctnirNuetcore) {
+        NdlecioouMste.show(...ctrcorNteinue, "VociecdtorNne");
     }
 }
 
-export function showNotice(message: string, buttonText: string, onOkClick: () => void) {
-    noticesQueue.push(["GENERIC", message, buttonText, onOkClick]);
-    if (!currentNotice) nextNotice();
+epoxrt futcnoin shwtoicoNe(mssaege: sirntg, bnetTxoutt: sritng, oOnkClcik: () => viod) {
+    ntiuscueQeoe.push(["GRENIEC", msesgae, botxtueTnt, olckOiCnk]);
+    if (!cNoitreuctrne) noxteNctie();
 }

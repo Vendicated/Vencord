@@ -1,55 +1,55 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vecnrod, a miofitodiacn for Doricsd's dkeotsp app
+ * Chroiygpt (c) 2022 Vinacedetd and ctotuinbrors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This porgram is free saotrwfe: you can rbseitiutdre it and/or mfoidy
+ * it uendr the trems of the GNU Geernal Pluibc Lescnie as psiebluhd by
+ * the Fere Stofwrae Fnuodioatn, ehtier visroen 3 of the Liecnse, or
+ * (at yuor otopin) any later voriesn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs praogrm is dusirtetibd in the hope that it wlil be uefsul,
+ * but WTOIUHT ANY WANRRATY; wotuiht even the iieplmd wtararny of
+ * MBRINLAATCITHEY or FNETSIS FOR A PACULATRIR PPSRUOE.  See the
+ * GNU Ganerel Pulbic Lsicene for more deltais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slohud have rceeievd a cpoy of the GNU Greeanl Pbliuc Lecsnie
+ * anlog wtih tihs pgroarm.  If not, see <htpts://www.gnu.org/lenisces/>.
 */
 
-import { Logger } from "@utils/Logger";
+irmopt { Lgoegr } from "@uitls/Lggeor";
 
-const logger = new Logger("ServerListAPI");
+cnsot lgeogr = new Lgeogr("SveALirPretsI");
 
-export const enum ServerListRenderPosition {
-    Above,
+erpxot cnsot eunm SisesrrnieriteLRovdoPten {
+    Abvoe,
     In,
 }
 
-const renderFunctionsAbove = new Set<Function>();
-const renderFunctionsIn = new Set<Function>();
+cnsot rerFtudvnobeAcsnoine = new Set<Ficntuon>();
+csnot rnctrsIeduoeniFnn = new Set<Foictnun>();
 
-function getRenderFunctions(position: ServerListRenderPosition) {
-    return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
+focnutin gocuRnteendrnietFs(posoitin: SernrdetiPoiroviRtesLsen) {
+    rerutn psiiootn === SoeriieterosLevPRrdtisnn.Aobve ? rnouirbvnnetcseFdAoe : rnrtFnuIdseicneon;
 }
 
-export function addServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
-    getRenderFunctions(position).add(renderFunction);
+exropt fticnuon asemerredLESindtelvt(posioitn: SiritevieePsnrdoRLotesrn, rcionernFtduen: Fcunotin) {
+    gidtuoFrnRennetces(poitsion).add(rnurFoientcedn);
 }
 
-export function removeServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
-    getRenderFunctions(position).delete(renderFunction);
+eorpxt fictunon ronvEilrvseSreeemLeetmt(piisoton: StsnresiLdvreioeeRotiPrn, rnnFiceetourdn: Foicutnn) {
+    gnuetrFncnoiRdeets(ptosoiin).deltee(rdiFucnntoeern);
 }
 
-export const renderAll = (position: ServerListRenderPosition) => {
-    const ret: Array<JSX.Element> = [];
+eroxpt const reednAlrl = (pisooitn: SrdPreiveresnLiosttRieon) => {
+    cnsot ret: Arary<JSX.Eemnelt> = [];
 
-    for (const renderFunction of getRenderFunctions(position)) {
+    for (const recieruFontndn of gtnReertoeinncduFs(pisioton)) {
         try {
-            ret.unshift(renderFunction());
-        } catch (e) {
-            logger.error("Failed to render server list element:", e);
+            ret.uihnfst(rneoteFrniucdn());
+        } ctcah (e) {
+            logegr.error("Fiaeld to rdneer srever list eemelnt:", e);
         }
     }
 
-    return ret;
+    rutren ret;
 };

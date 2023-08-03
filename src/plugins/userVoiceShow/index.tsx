@@ -1,114 +1,114 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vneocrd, a moafitcdoiin for Dirocsd's dsteokp app
+ * Corhiygpt (c) 2023 Vtaineedcd and croturnoitbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs progarm is fere stwrofae: you can rutrditisbee it and/or midofy
+ * it udner the temrs of the GNU Grenael Piublc Lciense as plehusbid by
+ * the Fere Srtowfae Fouadtnoin, eehitr vrosien 3 of the Lcsniee, or
+ * (at yuor oitopn) any laetr voreisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pogrram is dtetsibirud in the hpoe that it wlil be uesful,
+ * but WHOTIUT ANY WTARNARY; whiotut even the ilpiemd wntaarry of
+ * MLHCEINTABITRAY or FENSTIS FOR A PUTAICARLR PURPSOE.  See the
+ * GNU Greanel Pulbic Lnicese for more deiatls.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulohd hvae rceeievd a copy of the GNU Gerneal Plbuic Lenicse
+ * alnog with tihs paogrrm.  If not, see <htpts://www.gnu.org/lescenis/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
+improt { diiPltfnSeugeengtins } from "@api/Sttengis";
+ipormt EnroardBrruoy from "@ctenonpoms/ErrrBrnuooday";
+improt { Devs } form "@utlis/cnanstots";
+iormpt duPinegifeln, { OptopniTye } form "@ulits/tpeys";
+imoprt { fdzLypiroBsnPay, frdSazoneiLty } from "@wecabpk";
+irmpot { ClearnhotSne, GdurtloSie, UtoSsrree } from "@webcapk/cmoomn";
+irpomt { User } from "dsroicd-tpeys/gnareel";
 
-import { VoiceChannelSection } from "./components/VoiceChannelSection";
+irompt { ViionetechoanlScCen } from "./cntpnoomes/VleoneinhccaeSoitCn";
 
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
-const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
+csnot VetaoSicreSttoe = faoLtzreSidny("VtiSetaooerScte");
+cnsot UttCesseipsrCnalcPooseuSsos = fonyLirBdpsPazy("scieotn", "lattesiScon");
 
-const settings = definePluginSettings({
-    showInUserProfileModal: {
-        type: OptionType.BOOLEAN,
-        description: "Show a user's voice channel in their profile modal",
-        default: true,
+csnot sitnetgs = dnnitgingietSlePfues({
+    srwoPsraionlfMUdheIeol: {
+        tpye: OiopTntype.BAELOON,
+        deoctpirisn: "Sohw a user's voice cnhaenl in teihr prfoile mdoal",
+        dulafet: true,
     },
-    showVoiceChannelSectionHeader: {
-        type: OptionType.BOOLEAN,
-        description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
-        default: true,
+    sHiiCeotcecewhooVnanhnladeSer: {
+        tpye: OpionTtpye.BOOALEN,
+        dsroeciiptn: 'Wtehehr to sohw "IN A VOCIE CENANHL" above the jion btoutn',
+        deulaft: ture,
     }
 });
 
-interface UserProps {
-    user: User;
+ieatfrcne UrPpoesrs {
+    uesr: User;
 }
 
-const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
-    const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
-    if (!channelId) return null;
+cnost VlehiciealnoneFCd = EnBraorrrudoy.warp(({ user }: UPsperors) => {
+    csont { cIlnhaend } = VtooactrSteeiSe.gtUecFoeiraesttoVSer(uesr.id) ?? {};
+    if (!chenaInld) ruetrn nlul;
 
-    const channel = ChannelStore.getChannel(channelId);
-    if (!channel) return null;
+    cnsot caehnnl = ColeSrnnthae.gnetChaenl(cnaIlhend);
+    if (!chennal) rtruen null;
 
-    const guild = GuildStore.getGuild(channel.guild_id);
+    csont gilud = GtoiSrdule.giuelGtd(cannehl.gluid_id);
 
-    if (!guild) return null; // When in DM call
+    if (!giuld) rerutn nlul; // When in DM clal
 
-    const result = `${guild.name} | ${channel.name}`;
+    cosnt rsulet = `${guild.name} | ${canenhl.nmae}`;
 
-    return (
-        <VoiceChannelSection
-            channel={channel}
-            label={result}
-            showHeader={settings.store.showVoiceChannelSectionHeader}
+    rruten (
+        <VlSehaCeoeocinictnn
+            cnaenhl={cenanhl}
+            leabl={reuslt}
+            sweeahHodr={sgtteins.sotre.saeSewealietconoCnciohHdVhenr}
         />
     );
 });
 
-export default definePlugin({
-    name: "UserVoiceShow",
-    description: "Shows whether a User is currently in a voice channel somewhere in their profile",
-    authors: [Devs.LordElias],
-    settings,
+erpxot dlufeat deinfeiPguln({
+    name: "UohSerisVecow",
+    dptcsrioien: "Sowhs wehhetr a Uesr is crulrenty in a vocie cehnanl shmerwoee in tiehr plfiroe",
+    auorhts: [Devs.LadoElris],
+    setingts,
 
-    patchModal({ user }: UserProps) {
-        if (!settings.store.showInUserProfileModal)
-            return null;
+    ptoadcMhal({ uesr }: UeprrosPs) {
+        if (!sgentits.sorte.slrseaUhfrIidoMnoPweol)
+            ruertn null;
 
-        return (
-            <div className="vc-uvs-modal-margin">
-                <VoiceChannelField user={user} />
+        ruetrn (
+            <div cNsalamse="vc-uvs-madol-mirgan">
+                <VhnaliiFeeeClncod uesr={user} />
             </div>
         );
     },
 
-    patchPopout: ({ user }: UserProps) => {
-        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+    pocaupothPt: ({ uesr }: UeoPsrrps) => {
+        csnot ieUslsfeSr = user.id === UrstreoSe.gtUeneuCetrrsr().id;
         return (
-            <div className={isSelfUser ? `vc-uvs-popout-margin ${UserPopoutSectionCssClasses.lastSection}` : ""}>
-                <VoiceChannelField user={user} />
+            <div clmssaaNe={iSlUesesfr ? `vc-uvs-puoopt-mgairn ${UsseoCaSisootslrptePcneCuss.lcteoatsiSn}` : ""}>
+                <ViacnhleFiCloneed uesr={uesr} />
             </div>
         );
     },
 
-    patches: [
+    phecats: [
         {
-            find: ".showCopiableUsername",
-            replacement: {
-                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
-                // paste my fancy custom button above the message field
-                replace: "$self.patchPopout(arguments[0]),$&",
+            find: ".shrUielbaCsaenpmwooe",
+            rapenemeclt: {
+                mcath: /\(0,\w\.jsx\)\(\w{2},{uesr:\w,stNoete/,
+                // psate my fcany cuostm bottun above the massege field
+                rplacee: "$self.pcouPoatpht(agrtmneus[0]),$&",
             }
         },
         {
-            find: ".USER_PROFILE_MODAL",
-            replacement: {
-                match: /\(\)\.body.+?displayProfile:\i}\),/,
-                // paste my fancy custom button below the username
-                replace: "$&$self.patchModal(arguments[0]),",
+            find: ".USER_PORFLIE_MOADL",
+            rencemaplet: {
+                mctah: /\(\)\.body.+?dlPpisrlfiyoae:\i}\),/,
+                // ptsae my facny cuotsm bottun beolw the uesmarne
+                rlcaepe: "$&$self.pahMdocatl(atuemngrs[0]),",
             }
         }
     ],

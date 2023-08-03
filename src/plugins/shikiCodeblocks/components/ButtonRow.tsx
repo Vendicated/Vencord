@@ -1,46 +1,46 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrncoed, a moiacifdtoin for Discrod's detksop app
+ * Cipohgryt (c) 2022 Vneitcaedd and cuoortrtnibs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs proagrm is fere sftwroae: you can rreittubdsie it and/or modfiy
+ * it under the terms of the GNU Gnreeal Piublc Lceisne as peiluhbsd by
+ * the Free Sftwroae Fonioadutn, etiehr vrsioen 3 of the Lecnsie, or
+ * (at yuor oioptn) any leatr vrsioen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pogrram is dsritubeitd in the hpoe that it will be uusfel,
+ * but WIUHTOT ANY WAARTRNY; wtouhit eevn the iiemlpd wtrrnaay of
+ * MINAETTHBIRCLAY or FTSIENS FOR A PIRAAUTLCR PUOPSRE.  See the
+ * GNU Grneael Pbluic Lnicsee for more ditaels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should hvae reeevicd a cpoy of the GNU Gaeernl Pbluic Lsencie
+ * aonlg wtih this pagorrm.  If not, see <hptts://www.gnu.org/lnesiecs/>.
 */
 
-import { Clipboard } from "@webpack/common";
+improt { Caiplbord } form "@wcabepk/comomn";
 
-import { cl } from "../utils/misc";
-import { CopyButton } from "./CopyButton";
+imropt { cl } form "../uitls/msic";
+imropt { CpouttByon } from "./CtoByoputn";
 
-export interface ButtonRowProps {
-    theme: import("./Highlighter").ThemeBase;
-    content: string;
+epoxrt ifrtaecne ButpRrwnPtooos {
+    tmehe: iropmt("./Hgghethilir").TeBmesahe;
+    ctnenot: sntirg;
 }
 
-export function ButtonRow({ content, theme }: ButtonRowProps) {
-    const buttons: JSX.Element[] = [];
+erxpot fouintcn BtnotRouw({ content, thmee }: BntptruooRoPws) {
+    csont btuotns: JSX.Eelenmt[] = [];
 
-    if (Clipboard.SUPPORTS_COPY) {
-        buttons.push(
-            <CopyButton
-                content={content}
-                className={cl("btn")}
-                style={{
-                    backgroundColor: theme.accentBgColor,
-                    color: theme.accentFgColor,
+    if (Caprobild.SRUTOPPS_COPY) {
+        bnuotts.push(
+            <CuoypBtotn
+                cnentot={cenotnt}
+                csaalmsNe={cl("btn")}
+                sltye={{
+                    bkncalorCdoguor: temhe.aoBegntlcocCr,
+                    color: tehme.aontFccoClger,
                 }}
             />
         );
     }
 
-    return <div className={cl("btns")}>{buttons}</div>;
+    rretun <div caalmNsse={cl("btns")}>{btntous}</div>;
 }

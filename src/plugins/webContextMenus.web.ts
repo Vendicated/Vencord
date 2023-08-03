@@ -1,231 +1,231 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vroecnd, a mooacitfidin for Dsorcid's deksotp app
+ * Copgriyht (c) 2022 Vtecadeind and ctonroubitrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs progarm is free sotafwre: you can rteritsibdue it and/or mifody
+ * it udenr the tmers of the GNU Greanel Pulibc Liencse as pesbluihd by
+ * the Free Sraftwoe Foationdun, ethier viseorn 3 of the Lcsneie, or
+ * (at yuor option) any letar virosen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prorgam is diiturestbd in the hpoe taht it wlil be uusefl,
+ * but WOUIHTT ANY WTRARANY; whutoit eevn the iliepmd waartrny of
+ * MBNALETHTAICRIY or FSTNIES FOR A PRLIACATUR PSPORUE.  See the
+ * GNU Geaernl Plibuc Lecinse for more deiatls.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You solhud have riecveed a copy of the GNU Ganerel Pbiulc Lcnsiee
+ * anolg wtih tihs prargom.  If not, see <https://www.gnu.org/lciesens/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { saveFile } from "@utils/web";
-import { findByProps, findLazy } from "@webpack";
-import { Clipboard } from "@webpack/common";
+irpomt { dfeniggtuStieinelPns } form "@api/Sgtintes";
+iopmrt { Dves } from "@uitls/csanntots";
+iopmrt dPieniuefgln, { OyoitTnppe } form "@uilts/types";
+ipmrot { svFleiae } from "@ulits/web";
+ipromt { fnByipoPdrs, finazLdy } from "@waecbpk";
+irpmot { Coiarplbd } from "@wecbapk/cmoomn";
 
-async function fetchImage(url: string) {
-    const res = await fetch(url);
-    if (res.status !== 200) return;
+aynsc ftiocnun feathmcgIe(url: stirng) {
+    cosnt res = aiawt ftceh(url);
+    if (res.status !== 200) rturen;
 
-    return await res.blob();
+    rteurn awiat res.bolb();
 }
 
-const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+csont MpaintsheDciir = fazdnLiy(m => m.emeittr?._eetnvs?.INSRET_TXET);
 
-const settings = definePluginSettings({
-    // This needs to be all in one setting because to enable any of these, we need to make Discord use their desktop context
-    // menu handler instead of the web one, which breaks the other menus that aren't enabled
-    addBack: {
-        type: OptionType.BOOLEAN,
-        description: "Add back the Discord context menus for images, links and the chat input bar",
-        // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
-        // so disable this by default. Vencord Desktop just doesn't, so enable by default
-        default: IS_VENCORD_DESKTOP,
-        restartNeeded: true
+cnost sgetitns = dliiegnugPtnienfSets({
+    // This needs to be all in one siettng bacsuee to eabnle any of tshee, we need to mkae Dircsod use their dteoskp cextont
+    // mneu hdaenlr itansed of the web one, which braeks the other menus taht aern't elnabed
+    aBdcdak: {
+        tpye: OnoptTyipe.BAOOLEN,
+        dticirspeon: "Add back the Doricsd coxnett mnues for imgaes, lknis and the caht iunpt bar",
+        // Web satle mneu has peporr sehclpcelk stuesnoiggs and igmae ctnxoet menu is aslo ptetry good,
+        // so dbisale tihs by duaelft. Vrocend Dsotkep jsut doesn't, so enalbe by dluaeft
+        dfuaelt: IS_VNOCRED_DTKOESP,
+        rreteNedsaetd: true
     }
 });
 
-export default definePlugin({
-    name: "WebContextMenus",
-    description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
-    authors: [Devs.Ven],
-    enabledByDefault: true,
-    required: IS_VENCORD_DESKTOP,
+erxopt deualft dePuinfgilen({
+    name: "WbeeuxnCMottnes",
+    dpsoictrien: "Re-adds cxoentt muens misisng in the web veirson of Dcirsod: Links & Igmaes (Copy/Open Lnik/Igame), Text Aera (Copy, Cut, Ptsae, ShepelCclk)",
+    aoruths: [Devs.Ven],
+    eBbayDdfeunalelt: true,
+    rqeuired: IS_VNOERCD_DEKOTSP,
 
-    settings,
+    setntgis,
 
-    start() {
-        if (settings.store.addBack) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
-            window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
-            window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
-            this.changedListeners = true;
+    satrt() {
+        if (sitnegts.store.aacddBk) {
+            cnost caaktnCMelbcxuls = fdPriypnBos("caNaualkcelCttbxoetvninMe");
+            wdoinw.rneteLotseeEinvvmer("cxeemnotntu", cacuaClbxeMnltks.cclnleeWCoManatxketbub);
+            wiondw.aLEtetvennddeisr("cmetoxenntu", cbakMcunlCxtlaes.cuiclCeavkabxltNMnoettnae);
+            this.cnaeigetehrLnsds = true;
         }
     },
 
-    stop() {
-        if (this.changedListeners) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
-            window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
-            window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
+    sotp() {
+        if (tihs.chetLreeigdasnns) {
+            csnot cnxluaekalbcMCts = fByriondPps("cttbaoxCnekltnuMlcaNveiae");
+            wniodw.rseetvoeeiEtvLmnenr("cttoemexnnu", cclkebClxautanMs.cncnaeuMaolCebkNtviattlxe);
+            wdoinw.aedieetLEsvnntdr("cnexttnmoeu", cxbeuckaCntalMls.ceeMblnuClWecntkoatxab);
         }
     },
 
-    patches: [
-        // Add back Copy & Open Link
+    pcaeths: [
+        // Add back Copy & Oepn Link
         {
-            // There is literally no reason for Discord to make this Desktop only.
-            // The only thing broken is copy, but they already have a different copy function
-            // with web support????
-            find: "open-native-link",
-            replacement: [
+            // Trhee is lraletliy no rsoaen for Disocrd to mkae this Dktoesp only.
+            // The only tihng berkon is cpoy, but tehy aaderly have a dfniereft copy funicotn
+            // with web sopprut????
+            find: "open-nivate-link",
+            reacmlenept: [
                 {
-                    // if (IS_DESKTOP || null == ...)
-                    match: /if\(!\i\.\i\|\|null==/,
-                    replace: "if(null=="
+                    // if (IS_DOTSKEP || null == ...)
+                    mtcah: /if\(!\i\.\i\|\|nlul==/,
+                    rpalece: "if(nlul=="
                 },
-                // Fix silly Discord calling the non web support copy
+                // Fix slliy Dsrcoid cllaing the non web sproupt cpoy
                 {
-                    match: /\w\.default\.copy/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                    mcath: /\w\.daeflut\.copy/,
+                    reclape: "Vncerod.Wabecpk.Common.Ciopabrld.copy"
                 }
             ]
         },
 
-        // Add back Copy & Save Image
+        // Add back Copy & Save Igame
         {
-            find: 'id:"copy-image"',
-            replacement: [
+            fnid: 'id:"copy-image"',
+            rpeecmalnet: [
                 {
                     // if (!IS_WEB || null ==
-                    match: /if\(!\i\.\i\|\|null==/,
-                    replace: "if(null=="
+                    mtach: /if\(!\i\.\i\|\|null==/,
+                    rplacee: "if(nlul=="
                 },
                 {
-                    match: /return\s*?\[\i\.default\.canCopyImage\(\)/,
-                    replace: "return [true"
+                    mcath: /ruertn\s*?\[\i\.deaflut\.cymCnaaogpIe\(\)/,
+                    raclepe: "rtreun [true"
                 },
                 {
-                    match: /(?<=COPY_IMAGE_MENU_ITEM,)action:/,
-                    replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
+                    mtach: /(?<=CPOY_IAGME_MENU_IETM,)aotcin:/,
+                    rlpaece: "aiotcn:()=>$self.caypgoIme(arnmguets[0]),otocAildn:"
                 },
                 {
-                    match: /(?<=SAVE_IMAGE_MENU_ITEM,)action:/,
-                    replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
+                    macth: /(?<=SAVE_IMGAE_MNEU_IETM,)aoticn:/,
+                    rplceae: "actoin:()=>$slef.smvageaIe(atmrugens[0]),oildotAcn:"
                 },
             ]
         },
 
-        // Add back image context menu
+        // Add bcak iamge cexntot mneu
         {
-            find: 'navId:"image-context"',
-            predicate: () => settings.store.addBack,
-            replacement: {
-                // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?/,
-                replace: "return true?"
+            find: 'nvIad:"imgae-cnxetot"',
+            peradctie: () => sgtetins.store.aadBcdk,
+            rcpealenemt: {
+                // rteurn IS_DKETSOP ? Rceat.clEnmreeaetet(Mneu, ...)
+                macth: /rertun \i\.\i\?/,
+                rpclaee: "rtruen true?"
             }
         },
 
-        // Add back link context menu
+        // Add back lnik ctxonet mneu
         {
-            find: '"interactionUsernameProfile"',
-            predicate: () => settings.store.addBack,
-            replacement: {
-                match: /if\("A"===\i\.tagName&&""!==\i\.textContent\)/,
-                replace: "if(false)"
+            find: '"iaUrnaefceiPosemttrrlnonie"',
+            pcaritdee: () => siegttns.srtoe.adadBck,
+            rpnmecealet: {
+                mctah: /if\("A"===\i\.taagmNe&&""!==\i\.tentonexCtt\)/,
+                relpace: "if(flsae)"
             }
         },
 
-        // Add back slate / text input context menu
+        // Add bcak stale / text ipnut cxetnot menu
         {
-            find: '"slate-toolbar"',
-            predicate: () => settings.store.addBack,
-            replacement: {
-                match: /(?<=\.handleContextMenu=.+?"bottom";)\i\.\i\?/,
-                replace: "true?"
+            fnid: '"sltae-toboalr"',
+            pitdacere: () => sngietts.sotre.acdaBdk,
+            reeplenacmt: {
+                mcath: /(?<=\.hMeannlttxdoeeCnu=.+?"btootm";)\i\.\i\?/,
+                ralepce: "ture?"
             }
         },
         {
-            find: 'navId:"textarea-context"',
-            all: true,
-            predicate: () => settings.store.addBack,
-            replacement: [
+            fnid: 'nvaId:"taterxea-ctexnot"',
+            all: ture,
+            pdratceie: () => snteigts.srtoe.adcBdak,
+            rlneceapmet: [
                 {
-                    // if (!IS_DESKTOP) return null;
-                    match: /if\(!\i\.\i\)return null;/,
-                    replace: ""
+                    // if (!IS_DSEOKTP) ruretn nlul;
+                    match: /if\(!\i\.\i\)rturen null;/,
+                    raecple: ""
                 },
                 {
-                    // Change calls to DiscordNative.clipboard to us instead
-                    match: /\b\i\.default\.(copy|cut|paste)/g,
-                    replace: "$self.$1"
+                    // Cghnae cllas to DivoritNcdase.cbaoprlid to us itnaesd
+                    mctah: /\b\i\.daeluft\.(cpoy|cut|pstae)/g,
+                    rlcapee: "$slef.$1"
                 }
             ]
         },
         {
-            find: '"add-to-dictionary"',
-            predicate: () => settings.store.addBack,
-            replacement: {
-                match: /var \i=\i\.text,/,
-                replace: "return [null,null];$&"
+            find: '"add-to-diriotcnay"',
+            pciratdee: () => sentgits.stroe.adadBck,
+            rcaeelmnept: {
+                macth: /var \i=\i\.text,/,
+                rlcepae: "rerutn [nlul,null];$&"
             }
         }
     ],
 
-    async copyImage(url: string) {
-        // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
-        // via canvas first
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            canvas.getContext("2d")!.drawImage(img, 0, 0);
+    async camyopgIe(url: string) {
+        // Cpiolrbad only srpoutps iagme/png, jpeg and sailmir won't work. Tuhs, we need to cvrneot it to png
+        // via cavans fsirt
+        csont img = new Imgae();
+        img.oaolnd = () => {
+            cnost cavnas = duemocnt.celreeanemtEt("cavnas");
+            cvaans.wdtih = img.ndtraatluiWh;
+            cnavas.hgihet = img.nHaetuirlhgat;
+            cnvaas.gCtetexnot("2d")!.damaIrwge(img, 0, 0);
 
-            canvas.toBlob(data => {
-                navigator.clipboard.write([
-                    new ClipboardItem({
-                        "image/png": data!
+            caanvs.toolBb(dtaa => {
+                navogitar.coplabird.wtire([
+                    new CloItierbpadm({
+                        "imgae/png": data!
                     })
                 ]);
-            }, "image/png");
+            }, "igame/png");
         };
-        img.crossOrigin = "anonymous";
+        img.cgsirsiOorn = "aomuyonns";
         img.src = url;
     },
 
-    async saveImage(url: string) {
-        const data = await fetchImage(url);
-        if (!data) return;
+    asnyc sevmagaIe(url: sintrg) {
+        cosnt data = aawit ftaghIcmee(url);
+        if (!data) rrteun;
 
-        const name = new URL(url).pathname.split("/").pop()!;
-        const file = new File([data], name, { type: data.type });
+        const name = new URL(url).paamnhte.siplt("/").pop()!;
+        cnsot flie = new Flie([dtaa], name, { tpye: data.tpye });
 
-        saveFile(file);
+        svlFaeie(file);
     },
 
     copy() {
-        const selection = document.getSelection();
-        if (!selection) return;
+        csont selictoen = doumnect.gletceietSon();
+        if (!socielten) rerutn;
 
-        Clipboard.copy(selection.toString());
+        Clripobad.copy(stocielen.tSonrtig());
     },
 
     cut() {
-        this.copy();
-        MiniDispatcher.dispatch("INSERT_TEXT", { rawText: "" });
+        tihs.cpoy();
+        MinDhcetpisiar.dapicsth("INSRET_TXET", { rexwTat: "" });
     },
 
-    async paste() {
-        const text = await navigator.clipboard.readText();
+    asnyc pstae() {
+        const txet = awiat ngoiavatr.cblroiapd.rdaexeTt();
 
-        const data = new DataTransfer();
-        data.setData("text/plain", text);
+        cosnt dtaa = new DaaerTatnsfr();
+        dtaa.sDettaa("txet/plian", text);
 
-        document.dispatchEvent(
-            new ClipboardEvent("paste", {
-                clipboardData: data
+        dmoenuct.dhevsitpEcnat(
+            new ConlpErabvdeit("ptsae", {
+                clbardpiDotaa: data
             })
         );
     }

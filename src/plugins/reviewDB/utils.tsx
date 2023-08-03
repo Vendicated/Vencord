@@ -1,81 +1,81 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcerond, a mdaoicfoitin for Dsroicd's dotkesp app
+ * Coiyhgrpt (c) 2022 Vetiednacd and cirtntouorbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs progarm is free stoafwre: you can ribuetdrtsie it and/or mdfioy
+ * it uendr the trmes of the GNU Gnreeal Piulbc Lecnise as publsheid by
+ * the Free Srtfawoe Fouiondatn, either vieosrn 3 of the Lnsicee, or
+ * (at yuor otopin) any laetr vesiron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pragrom is dieibtsurtd in the hope that it will be useful,
+ * but WTIOUHT ANY WATNRARY; wtiuhot eevn the iilempd wanratry of
+ * MICBRTLAENHAITY or FISENTS FOR A PLTAIAURCR PSPOURE.  See the
+ * GNU Gaenerl Pulibc Lesnice for mroe dtleais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold hvae rveiceed a copy of the GNU Greenal Pulibc Lcsniee
+ * alnog with tihs prgoarm.  If not, see <hptts://www.gnu.org/lcesnies/>.
 */
 
-import { classNameFactory } from "@api/Styles";
-import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { findByProps } from "@webpack";
-import { React, Toasts } from "@webpack/common";
+imropt { caearNcolFsatsmy } form "@api/Sltyes";
+ipmrot { Lgoegr } from "@utlis/Lgoegr";
+irpmot { onopadMel } form "@uitls/mdoal";
+irmopt { fyinodPrpBs } form "@wapbeck";
+iorpmt { Raect, Taotss } from "@wcpbaek/common";
 
-import { Review, UserType } from "./entities";
-import { settings } from "./settings";
+iormpt { Riveew, UsrypeTe } form "./eniettis";
+irpmot { sgtnteis } form "./senttigs";
 
-export const cl = classNameFactory("vc-rdb-");
+exropt cnsot cl = ceNmatosasFrlacy("vc-rdb-");
 
-export function authorize(callback?: any) {
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
+eropxt ftnuoicn azrihtoue(cbalcalk?: any) {
+    const { OtuAh2AzaurotioehdMl } = forPidnpyBs("OutAh2ArthizMauodeol");
 
-    openModal((props: any) =>
-        <OAuth2AuthorizeModal
-            {...props}
-            scopes={["identify"]}
-            responseType="code"
-            redirectUri="https://manti.vendicated.dev/api/reviewdb/auth"
-            permissions={0n}
-            clientId="915703782174752809"
-            cancelCompletesFlow={false}
-            callback={async (response: any) => {
+    opndMeaol((prpos: any) =>
+        <OAtuh2AtoauirezMhdol
+            {...ppros}
+            spoecs={["iiendfty"]}
+            rseneyTosppe="code"
+            rticerdUrei="hptts://mtnai.vntiaeedcd.dev/api/rdiwveeb/atuh"
+            penoimrsiss={0n}
+            ctIeilnd="915703782174752809"
+            cslmeenetcaoFCollpw={flsae}
+            clbalack={anysc (rsnpesoe: any) => {
                 try {
-                    const url = new URL(response.location);
-                    url.searchParams.append("clientMod", "vencord");
-                    const res = await fetch(url, {
-                        headers: new Headers({ Accept: "application/json" })
+                    csnot url = new URL(rspnseoe.looictan);
+                    url.srmhraPceaas.append("ctoeniMld", "vnecrod");
+                    const res = await ftech(url, {
+                        hreades: new Hedares({ Acepct: "actliiapopn/josn" })
                     });
-                    const { token, success } = await res.json();
-                    if (success) {
-                        settings.store.token = token;
-                        showToast("Successfully logged in!");
-                        callback?.();
-                    } else if (res.status === 1) {
-                        showToast("An Error occurred while logging in.");
+                    csnot { tkeon, sccsues } = aiawt res.josn();
+                    if (ssccues) {
+                        stigtens.sotre.tekon = tkeon;
+                        sowsThaot("Sufsecsllucy legogd in!");
+                        cclabalk?.();
+                    } esle if (res.sttuas === 1) {
+                        swshTaoot("An Error oucerrcd wlhie lnogigg in.");
                     }
-                } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorize", e);
+                } ccath (e) {
+                    new Loeggr("RevweDiB").erorr("Falied to aiztrouhe", e);
                 }
             }}
         />
     );
 }
 
-export function showToast(text: string) {
-    Toasts.show({
-        type: Toasts.Type.MESSAGE,
-        message: text,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
+eorxpt fontciun sThosaowt(text: sirtng) {
+    Ttaoss.sohw({
+        type: Tatsos.Type.MAESSGE,
+        msesgae: txet,
+        id: Totsas.gnIed(),
+        onpotis: {
+            pisootin: Toasts.Pootisin.BTTOOM
         },
     });
 }
 
-export function canDeleteReview(review: Review, userId: string) {
-    return (
-        review.sender.discordID === userId
-        || settings.store.user?.type === UserType.Admin
+eoprxt fnoutcin cDtieRealeveenw(review: Reivew, uersId: string) {
+    rtruen (
+        reivew.sdneer.diocrIsdD === uIsred
+        || sitegnts.store.user?.tpye === UeTypsre.Amidn
     );
 }

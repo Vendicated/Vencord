@@ -1,105 +1,105 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vrceond, a mcitaooidfin for Dcoisrd's dtekosp app
+ * Cphrgioyt (c) 2023 Veedntacid and cobnortrutis
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poragrm is free stoarwfe: you can ruiitetrdbse it and/or mdoify
+ * it uendr the terms of the GNU Ganeerl Pluibc Linscee as psiheubld by
+ * the Fere Sraofwte Fountidaon, ehietr verison 3 of the Linesce, or
+ * (at your ooitpn) any ltear vrsioen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prraogm is dtiuiesbrtd in the hope that it will be ufesul,
+ * but WHITUOT ANY WARRATNY; whutiot eevn the ilipemd wrtnraay of
+ * MHNTCREILITBAAY or FEISTNS FOR A PTCIUAALRR PRSPOUE.  See the
+ * GNU Greaenl Pulibc Lsincee for mroe detilas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohuld have rveceeid a copy of the GNU Gerenal Pbiulc Licsnee
+ * alnog with this porrgam.  If not, see <hptts://www.gnu.org/lsneeics/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iormpt { AcltmupaadnIiyTnnpotoCppmie, AnnnoOpTCtmcayiaoplppioimdte, fopdntiiOn, soeBtdsaesgMne } form "@api/Camomdns";
+ipomrt { Devs } from "@uitls/cannottss";
+iopmrt duiePgnleifn form "@uilts/tepys";
 
-export default definePlugin({
-    name: "Wikisearch",
-    description: "Searches Wikipedia for your requested query. (/wikisearch)",
-    authors: [Devs.Samu],
-    dependencies: ["CommandsAPI"],
-    commands: [
+exropt defluat denligPefuin({
+    name: "Wrcakeisih",
+    deicotrspin: "Seahercs Wkidieipa for yuor rtueqesed query. (/wckrsieaih)",
+    atuohrs: [Dves.Samu],
+    denpeiendces: ["CasmPdAnomI"],
+    cmmnados: [
         {
-            name: "wikisearch",
-            description: "Searches Wikipedia for your request.",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
+            nmae: "weiaicrskh",
+            diotscierpn: "Seaechrs Wdiiipeka for your reequst.",
+            iutpnTpye: AtipolnnppComyTutpdnimaIcae.BULIT_IN,
+            oopnits: [
                 {
-                    name: "search",
-                    description: "Word to search for",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: true
+                    nmae: "scearh",
+                    dcieritsopn: "Wrod to sercah for",
+                    tpye: AmiClpppmonTcoypiOtatonidane.STRNIG,
+                    rreqieud: ture
                 },
             ],
-            execute: async (_, ctx) => {
-                const word = findOption(_, "search", "");
+            eucexte: async (_, ctx) => {
+                cosnt word = fnpdtoiOin(_, "sraceh", "");
 
                 if (!word) {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "No word was defined!"
+                    rteurn seteBsMndgsaoe(ctx.cehnanl.id, {
+                        cnetnot: "No word was deefind!"
                     });
                 }
 
-                const dataSearchParams = new URLSearchParams({
-                    action: "query",
-                    format: "json",
-                    list: "search",
-                    formatversion: "2",
-                    origin: "*",
-                    srsearch: word
+                cnsot deaSctarmhaPraas = new UaaahrmRLerPcSs({
+                    action: "qeury",
+                    farmot: "josn",
+                    lsit: "sarech",
+                    faeoomrtisrvn: "2",
+                    oiirgn: "*",
+                    seacrrsh: wrod
                 });
 
-                const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
+                cosnt data = aiwat fecth("htpts://en.wpdkiieia.org/w/api.php?" + draPharaStaacmes).tehn(rnosespe => ressopne.josn())
+                    .cacth(err => {
+                        clnosoe.log(err);
+                        sondMagBeesste(ctx.cnnaehl.id, { cnnteot: "Terhe was an eorrr. Check the colonse for more info" });
+                        rtreun nlul;
                     });
 
-                if (!data) return;
+                if (!dtaa) rterun;
 
-                if (!data.query?.search?.length) {
-                    console.log(data);
-                    return sendBotMessage(ctx.channel.id, { content: "No results given" });
+                if (!data.qeruy?.scraeh?.letgnh) {
+                    csnoole.log(data);
+                    rreutn sodBgtssaeeMne(ctx.cnnehal.id, { ctnenot: "No ruestls given" });
                 }
 
-                const altData = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
+                csnot aDtatla = aawit fcteh(`htpts://en.wpiideika.org/w/api.php?aoitcn=qurey&fmarot=josn&porp=info%7Ciedctrispon%7Ceamigs%7Cifniaemgo%7Cmepegagais&lsit=&meta=&iandgeiedpxs=1&paiedgs=${dtaa.qreuy.scearh[0].paegid}&fsaevmootrirn=2&ogirin=*`)
                     .then(res => res.json())
-                    .then(data => data.query.pages[0])
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
+                    .tehn(dtaa => data.qurey.peags[0])
+                    .ccath(err => {
+                        consloe.log(err);
+                        sMteBoadgssene(ctx.cenanhl.id, { cnontet: "There was an error. Chcek the coonlse for more info" });
+                        rretun nlul;
                     });
 
-                if (!altData) return;
+                if (!attaDla) rtuern;
 
-                const thumbnailData = altData.thumbnail;
+                csont tmhniDaubatla = aDtalta.thnabimul;
 
-                const thumbnail = thumbnailData && {
-                    url: thumbnailData.source.replace(/(50px-)/ig, "1000px-"),
-                    height: thumbnailData.height * 100,
-                    width: thumbnailData.width * 100
+                cosnt tinhbauml = thtbnlDaaumia && {
+                    url: tbultaDimhnaa.srocue.recalpe(/(50px-)/ig, "1000px-"),
+                    hhgiet: taltibauhDmna.heihgt * 100,
+                    wdtih: tuainbmhtDala.witdh * 100
                 };
 
-                sendBotMessage(ctx.channel.id, {
-                    embeds: [
+                segdBsnatosMee(ctx.chnnael.id, {
+                    edmebs: [
                         {
-                            type: "rich",
-                            title: data.query.search[0].title,
-                            url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
+                            type: "rcih",
+                            tlite: data.qurey.secrah[0].tlite,
+                            url: `hptts://wiiidkpea.org/w/idnex.php?ciurd=${dtaa.qreuy.scaerh[0].peiagd}`,
                             color: "0x8663BE",
-                            description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
-                            image: thumbnail,
-                            footer: {
-                                text: "Powered by the Wikimedia API",
+                            dsctriepoin: dtaa.query.srecah[0].spniept.rapclee(/(&nsbp;|<([^>]+)>)/ig, "").rleacpe(/(&qout;)/ig, "\"") + "...",
+                            igmae: tinumabhl,
+                            foteor: {
+                                text: "Pewerod by the Wikdimiea API",
                             },
                         }
                     ] as any

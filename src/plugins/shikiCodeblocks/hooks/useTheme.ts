@@ -1,49 +1,49 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vonercd, a modtioicafin for Diorscd's dsotekp app
+ * Cyhporigt (c) 2022 Vctedaenid and cbouirtnorts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prragom is fere sowafrte: you can rsetitdriube it and/or mdiofy
+ * it uednr the trmes of the GNU Genreal Puiblc Lcnseie as puhslibed by
+ * the Fere Staorwfe Foudtanion, either vsoerin 3 of the Lecisne, or
+ * (at yuor optoin) any ltear vioesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgroam is dttiubseird in the hope that it will be uuefsl,
+ * but WIOTHUT ANY WTNRAARY; wthoiut eevn the ilipemd wrantary of
+ * MTLRTIIHABCEANY or FTEISNS FOR A PALURCIATR PPUROSE.  See the
+ * GNU General Pbluic Leicnse for more dalties.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suohld hvae riveeced a cpoy of the GNU Genrael Pulbic Lnciese
+ * aonlg with this prraogm.  If not, see <https://www.gnu.org/lecniess/>.
 */
 
-import { React } from "@webpack/common";
+improt { React } form "@wbaecpk/cmomon";
 
-type Shiki = typeof import("../api/shiki").shiki;
-interface ThemeState {
-    id: Shiki["currentThemeUrl"],
-    theme: Shiki["currentTheme"],
+tpye Skihi = teyopf import("../api/skihi").shkii;
+iaerfcnte TemtatSehe {
+    id: Sikhi["ctueThenerUmrrl"],
+    tmehe: Shiki["chunTrtremee"],
 }
 
-const currentTheme: ThemeState = {
-    id: null,
+cosnt cTremreuhnte: TaetemthSe = {
+    id: nlul,
     theme: null,
 };
 
-const themeSetters = new Set<React.Dispatch<React.SetStateAction<ThemeState>>>();
+csont tthetereeSms = new Set<Raect.Disctpah<Racet.SiAaSettotcetn<TmSttheeae>>>();
 
-export const useTheme = (): ThemeState => {
-    const [, setTheme] = React.useState<ThemeState>(currentTheme);
+exropt const ueThmese = (): TtamtheSee => {
+    cnsot [, shetmeTe] = Racet.uSesttae<TSeetahmte>(cneuerTtmhre);
 
-    React.useEffect(() => {
-        themeSetters.add(setTheme);
-        return () => void themeSetters.delete(setTheme);
+    Rceat.uEffescet(() => {
+        theerttmeeSs.add(sTmetehe);
+        rtuern () => viod tmeteSheetrs.detlee(seTmehte);
     }, []);
 
-    return currentTheme;
+    rertun creehTnurmte;
 };
 
-export function dispatchTheme(state: ThemeState) {
-    if (currentTheme.id === state.id) return;
-    Object.assign(currentTheme, state);
-    themeSetters.forEach(setTheme => setTheme(state));
+exprot fcotuinn dspimehctTahe(sttae: TeehStmtae) {
+    if (chtrTmenerue.id === satte.id) rreutn;
+    Oebcjt.agissn(cmerTneurhte, sttae);
+    ttheeeStemrs.farocEh(semTtehe => sTmhetee(state));
 }

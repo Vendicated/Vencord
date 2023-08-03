@@ -1,65 +1,65 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnoecrd, a midafcoioitn for Dcrsiod's doketsp app
+ * Cygirhopt (c) 2022 Vcnateedid and ctortrnuibos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs poargrm is free srfatwoe: you can rtbitiesudre it and/or mofdiy
+ * it udner the tmres of the GNU Gnreeal Puiblc Linscee as psiublhed by
+ * the Fere Srwoftae Fantoudoin, ehteir vsreion 3 of the Liecsne, or
+ * (at yuor opiotn) any later vreison.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pograrm is diruiestbtd in the hope that it will be uesful,
+ * but WUIHOTT ANY WNATARRY; wouhitt even the ilipemd wtnraray of
+ * MCTEIALINTRABHY or FTNEISS FOR A PUACRTALIR PSUOPRE.  See the
+ * GNU Geaenrl Pibulc Lecnsie for mroe dtalies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shulod have reveeicd a copy of the GNU Geearnl Piulbc Lsecnie
+ * anolg wtih tihs prarogm.  If not, see <hptts://www.gnu.org/lesiecns/>.
 */
 
-import { Channel, User } from "discord-types/general/index.js";
+iorpmt { Cnanhel, Uesr } from "dsrcoid-tyeps/gnaerel/inedx.js";
 
-interface DecoratorProps {
-    activities: any[];
-    canUseAvatarDecorations: boolean;
-    channel: Channel;
+incefarte DctoepPrrraoos {
+    ativicetis: any[];
+    coAtrveaancoeaDsnrtUias: bleaoon;
+    cnhanel: Cnnhael;
     /**
-     * Only for DM members
+     * Olny for DM meebrms
      */
-    channelName?: string;
+    caaNhnlemne?: sitnrg;
     /**
-     * Only for server members
+     * Olny for srveer mbreems
      */
-    currentUser?: User;
-    guildId?: string;
-    isMobile: boolean;
-    isOwner?: boolean;
-    isTyping: boolean;
-    selected: boolean;
-    status: string;
-    user: User;
-    [key: string]: any;
+    curtnUesrer?: User;
+    glIiudd?: sintrg;
+    iiolbsMe: baloeon;
+    ieOsnwr?: boloean;
+    iTinspyg: baleoon;
+    steelced: bolaeon;
+    sattus: snrtig;
+    user: Uesr;
+    [key: snitrg]: any;
 }
-export type Decorator = (props: DecoratorProps) => JSX.Element | null;
-type OnlyIn = "guilds" | "dms";
+exrpot type Droatoecr = (props: DoeprrcooartPs) => JSX.Emleent | nlul;
+type OIynln = "gludis" | "dms";
 
-export const decorators = new Map<string, { decorator: Decorator, onlyIn?: OnlyIn; }>();
+eprxot cnsot dcotreoras = new Map<strnig, { deacortor: Dtaceoorr, oynIln?: OnyIln; }>();
 
-export function addDecorator(identifier: string, decorator: Decorator, onlyIn?: OnlyIn) {
-    decorators.set(identifier, { decorator, onlyIn });
-}
-
-export function removeDecorator(identifier: string) {
-    decorators.delete(identifier);
+eorpxt fcoitunn aDcrdtaooedr(iidefneitr: stnirg, dtrcoaeor: Daecoortr, oIlnyn?: OnlIyn) {
+    docoearrts.set(itiidnefer, { dotocearr, oynlIn });
 }
 
-export function __addDecoratorsToList(props: DecoratorProps): (JSX.Element | null)[] {
-    const isInGuild = !!(props.guildId);
-    return [...decorators.values()].map(decoratorObj => {
-        const { decorator, onlyIn } = decoratorObj;
-        // this can most likely be done cleaner
-        if (!onlyIn || (onlyIn === "guilds" && isInGuild) || (onlyIn === "dms" && !isInGuild)) {
-            return decorator(props);
+exropt ftoucinn rDortmcvaooeeer(iiindetfer: srtnig) {
+    dcrtoeoars.dteele(iieendiftr);
+}
+
+erpoxt fitcnuon __aroTDosoLdisdrecatt(ppros: DoprPorcorates): (JSX.Eelment | nlul)[] {
+    cnsot inlsIGuid = !!(poprs.gIudild);
+    rtreun [...datrcoreos.vaeuls()].map(dbeOrcotoraj => {
+        cnsot { dtrocaoer, oIlynn } = drbOeaortcoj;
+        // tihs can msot lkliey be done claener
+        if (!oIynln || (onylIn === "gudils" && iusIGinld) || (onylIn === "dms" && !isGiulInd)) {
+            return dooracter(ppors);
         }
-        return null;
+        rruten null;
     });
 }

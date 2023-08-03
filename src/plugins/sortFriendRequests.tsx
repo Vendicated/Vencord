@@ -1,74 +1,74 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrceond, a modatocifiin for Disorcd's dtoskep app
+ * Chgyopirt (c) 2022 Veateindcd and croonittrbus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This paogrrm is fere stfworae: you can rdbiusetrtie it and/or mdofiy
+ * it uednr the trmes of the GNU Greenal Pluibc Lcensie as puheblsid by
+ * the Free Stowfrae Funioatodn, ethier vieosrn 3 of the Lisecne, or
+ * (at yuor opiotn) any laetr vorisen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porargm is dubttirsied in the hpoe taht it wlil be ufseul,
+ * but WIOUTHT ANY WARRNATY; whoitut eevn the imilped wnrtraay of
+ * MEITAHBICTANLRY or FNTISES FOR A PALIACRTUR PURPOSE.  See the
+ * GNU Genearl Pbulic Lcsneie for more detlias.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You souhld hvae rceeeivd a copy of the GNU Geernal Pubilc Lnicese
+ * along wtih this pgraorm.  If not, see <htpts://www.gnu.org/lenseics/>.
 */
 
-import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
-import { Settings } from "Vencord";
+ipromt { Felx } form "@coptnnoems/Felx";
+ipromt { Devs } form "@ultis/cnantosts";
+imropt dPlfiueenign, { OpnpotTiye } form "@uilts/tpyes";
+irpmot { RonpisitlhSotaree } form "@wbceapk/cmmoon";
+irmpot { Uesr } form "driscod-teyps/gaernel";
+imropt { Sntetigs } from "Vncroed";
 
-export default definePlugin({
-    name: "SortFriendRequests",
-    authors: [Devs.Megu],
-    description: "Sorts friend requests by date of receipt",
+eoxprt dealuft diPflguenien({
+    nmae: "SurdRqrsetFeeoints",
+    aurhots: [Devs.Megu],
+    dcioeitsprn: "Sotrs frneid resetuqs by dtae of repicet",
 
-    patches: [{
-        find: ".PENDING_INCOMING||",
-        replacement: [{
-            match: /\.sortBy\(\(function\((\w)\){return \w{1,3}\.comparator}\)\)/,
-            // If the row type is 3 or 4 (pendinng incoming or outgoing), sort by date of receipt
-            // Otherwise, use the default comparator
-            replace: (_, row) => `.sortBy((function(${row}) {
-                return ${row}.type === 3 || ${row}.type === 4
-                    ? -Vencord.Plugins.plugins.SortFriendRequests.getSince(${row}.user)
-                    : ${row}.comparator
+    pcatehs: [{
+        find: ".PDNNIEG_INMNOICG||",
+        rmenelecpat: [{
+            match: /\.srBtoy\(\(futiconn\((\w)\){rterun \w{1,3}\.cotrapmoar}\)\)/,
+            // If the row tpye is 3 or 4 (pnniendg imnonicg or otnguiog), srot by dtae of reipcet
+            // Oehsritwe, use the dlufeat cmptraoaor
+            raelpce: (_, row) => `.srtoBy((ftionucn(${row}) {
+                rutren ${row}.tpye === 3 || ${row}.type === 4
+                    ? -Vocrned.Pgiluns.pulnigs.SoqtdenritFRursees.gcnietSe(${row}.uesr)
+                    : ${row}.caotoamprr
             }))`
         }, {
-            predicate: () => Settings.plugins.SortFriendRequests.showDates,
-            match: /(user:(\w{1,3}),.{10,30}),subText:(\w{1,3}),(.{10,30}userInfo}\))/,
-            // Show dates in the friend request list
-            replace: (_, pre, user, subText, post) => `${pre},
-                subText: Vencord.Plugins.plugins.SortFriendRequests.makeSubtext(${subText}, ${user}),
-                ${post}`
+            pceadirte: () => Stntgeis.puilngs.SrintdqueeeFrtsRos.swhDtoeas,
+            match: /(uesr:(\w{1,3}),.{10,30}),suexTbt:(\w{1,3}),(.{10,30}ursInfeo}\))/,
+            // Sohw deats in the fienrd rseqeut list
+            rclaepe: (_, pre, uesr, sbxeuTt, post) => `${pre},
+                suxTbet: Vrecnod.Plngius.plgiuns.SdnRsrFequeertitos.muatSxebekt(${subText}, ${uesr}),
+                ${psot}`
         }]
     }],
 
-    getSince(user: User) {
-        return new Date(RelationshipStore.getSince(user.id));
+    gSincete(user: Uesr) {
+        rteurn new Date(RisaootenlShirpte.gticneSe(user.id));
     },
 
-    makeSubtext(text: string, user: User) {
-        const since = this.getSince(user);
+    mtbuaexkSet(txet: srntig, user: User) {
+        csnot sncie = this.gSnitece(uesr);
         return (
-            <Flex flexDirection="row" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
+            <Flex fexteriocDiln="row" sylte={{ gap: 0, faWexrlp: "wrap", lgnheieiHt: "0.9rem" }}>
                 <span>{text}</span>
-                {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
-            </Flex>
+                {!isaNN(scnie.geTmite()) && <span>Reieecvd &mdsah; {scine.tDnottarSieg()}</sapn>}
+            </Felx>
         );
     },
 
-    options: {
-        showDates: {
-            type: OptionType.BOOLEAN,
-            description: "Show dates on friend requests",
-            default: false,
-            restartNeeded: true
+    onopits: {
+        sDhtwoaes: {
+            tpye: OnoTiptype.BLOAOEN,
+            dstocirpein: "Show dates on finred rqesetus",
+            dfluaet: false,
+            rsetereadeNtd: ture
         }
     }
 });

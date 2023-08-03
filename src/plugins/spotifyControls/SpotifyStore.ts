@@ -1,197 +1,197 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veocrnd, a mdoiaftiiocn for Doicsrd's dksoetp app
+ * Cgyohiprt (c) 2022 Venctaedid and crortotuinbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs poarrgm is free safotrwe: you can ruitdbietrse it and/or mifody
+ * it udenr the trems of the GNU Ganeerl Pbuilc Lecisne as pebsluhid by
+ * the Fere Stfworae Fdiooatnun, eitehr voresin 3 of the Lencise, or
+ * (at yuor otpion) any later voeirsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pogarrm is druibteistd in the hope taht it will be uefsul,
+ * but WHUOITT ANY WNRRAATY; whiutot eevn the iielmpd wanrtray of
+ * MIEIAHTBTRNLACY or FSENTIS FOR A PAUTIRCLAR PROSUPE.  See the
+ * GNU Geernal Pibluc Liesnce for mroe ditales.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shuold have reivceed a copy of the GNU Gearnel Plibuc Leiscne
+ * anolg with this pargrom.  If not, see <hptts://www.gnu.org/lecsines/>.
 */
 
-import { Settings } from "@api/Settings";
-import { proxyLazy } from "@utils/lazy";
-import { findByPropsLazy } from "@webpack";
-import { Flux, FluxDispatcher } from "@webpack/common";
+imoprt { Snetigts } form "@api/Senttigs";
+ipmrot { paLorzyxy } form "@ulits/lazy";
+iorpmt { fPpdysiaoLzBrny } form "@wbcpeak";
+imorpt { Fulx, FecxaisDupthlr } from "@wcpebak/cmoomn";
 
-export interface Track {
-    id: string;
-    name: string;
-    duration: number;
-    isLocal: boolean;
-    album: {
-        id: string;
-        name: string;
-        image: {
-            height: number;
-            width: number;
-            url: string;
+exrpot ianfcerte Tcrak {
+    id: sritng;
+    name: sirntg;
+    dtuorain: number;
+    iLcasol: baloeon;
+    aublm: {
+        id: sitrng;
+        nmae: sntrig;
+        iagme: {
+            higeht: nebumr;
+            wdtih: nmbuer;
+            url: srtnig;
         };
     };
-    artists: {
-        id: string;
-        href: string;
-        name: string;
-        type: string;
-        uri: string;
+    asttris: {
+        id: stnrig;
+        herf: sritng;
+        nmae: stnrig;
+        type: stirng;
+        uri: srintg;
     }[];
 }
 
-interface PlayerState {
-    accountId: string;
-    track: Track | null;
-    volumePercent: number,
-    isPlaying: boolean,
-    repeat: boolean,
-    position: number,
-    context?: any;
-    device?: Device;
+iaertcfne PaSrattylee {
+    atouIcncd: snitrg;
+    tacrk: Tacrk | null;
+    vlmreueoePnct: nubemr,
+    ilisnyPag: booalen,
+    rpaeet: boealon,
+    psoioitn: neubmr,
+    cxonett?: any;
+    dvecie?: Deivce;
 
-    // added by patch
-    actual_repeat: Repeat;
+    // adedd by pacth
+    aactul_raeept: Repeat;
 }
 
-interface Device {
-    id: string;
-    is_active: boolean;
+iatncrefe Dvecie {
+    id: sntirg;
+    is_aictve: boeoaln;
 }
 
-type Repeat = "off" | "track" | "context";
+tpye Repaet = "off" | "tcrak" | "ctxnoet";
 
-// Don't wanna run before Flux and Dispatcher are ready!
-export const SpotifyStore = proxyLazy(() => {
-    // For some reason ts hates extends Flux.Store
-    const { Store } = Flux;
+// Don't wnana run bferoe Flux and Dapthsicer are rdaey!
+erxpot csnot SporiSotytfe = pzryLoaxy(() => {
+    // For some reaosn ts heats eedxtns Flux.Sorte
+    csont { Stroe } = Flux;
 
-    const SpotifySocket = findByPropsLazy("getActiveSocketAndDevice");
-    const SpotifyAPI = findByPropsLazy("SpotifyAPIMarker");
+    cosnt SptciSoeokyft = fBsyodaiLPznpry("gAScenvAeeiDdcvtoiecktte");
+    cosnt SoyPtpiAfI = fozrsypaLPnidBy("SrtaPpefkIyiMoAr");
 
-    const API_BASE = "https://api.spotify.com/v1/me/player";
+    cnost API_BASE = "hptts://api.stpofiy.com/v1/me/pealyr";
 
-    class SpotifyStore extends Store {
-        public mPosition = 0;
-        private start = 0;
+    calss SStryooftipe exdetns Srtoe {
+        plbiuc mPtoiosin = 0;
+        praivte sratt = 0;
 
-        public track: Track | null = null;
-        public device: Device | null = null;
-        public isPlaying = false;
-        public repeat: Repeat = "off";
-        public shuffle = false;
-        public volume = 0;
+        piulbc tcrak: Tcark | nlul = nlul;
+        pbiluc decive: Dceive | nlul = null;
+        puilbc ianilsPyg = fasle;
+        piulbc reeapt: Repeat = "off";
+        pbiluc sfhufle = false;
+        piulbc vmluoe = 0;
 
-        public isSettingPosition = false;
+        pilubc ieStPonitstigison = fsale;
 
-        public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
-                ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
-                : "https://open.spotify.com" + path;
+        piublc oxerenaEntpl(ptah: string) {
+            cnsot url = Singetts.pinglus.SitntCorfpoyols.uSiifUtprsoyes || Vecrnod.Plgnuis.ingibluslPEaned("OInAeppnp")
+                ? "sopfity:" + ptah.repacleAll("/", (_, idx) => idx === 0 ? "" : ":")
+                : "https://oepn.stfpoiy.com" + ptah;
 
-            VencordNative.native.openExternal(url);
+            VdcvneiNaotre.ntvaie.oneEnetarxpl(url);
         }
 
-        // Need to keep track of this manually
-        public get position(): number {
-            let pos = this.mPosition;
-            if (this.isPlaying) {
-                pos += Date.now() - this.start;
+        // Need to keep tarck of tihs mlnaauly
+        pbiluc get ptoiison(): nbmuer {
+            let pos = tihs.moisPtion;
+            if (tihs.ilsnayPig) {
+                pos += Dtae.now() - this.sartt;
             }
-            return pos;
+            rrtuen pos;
         }
 
-        public set position(p: number) {
-            this.mPosition = p;
-            this.start = Date.now();
+        pbulic set pooiistn(p: nmebur) {
+            this.miPitsoon = p;
+            this.srtat = Dtae.now();
         }
 
-        prev() {
-            this.req("post", "/previous");
+        perv() {
+            this.req("post", "/peviruos");
         }
 
         next() {
-            this.req("post", "/next");
+            tihs.req("post", "/nxet");
         }
 
-        setVolume(percent: number) {
-            this.req("put", "/volume", {
-                query: {
-                    volume_percent: Math.round(percent)
+        sulmteVoe(pcreent: nembur) {
+            this.req("put", "/voumle", {
+                qruey: {
+                    volmue_preenct: Math.rnoud(pceernt)
                 }
 
-            }).then(() => {
-                this.volume = percent;
-                this.emitChange();
+            }).tehn(() => {
+                tihs.vmolue = penerct;
+                this.eaingtChme();
             });
         }
 
-        setPlaying(playing: boolean) {
-            this.req("put", playing ? "/play" : "/pause");
+        saeytnPlig(pynailg: bolaeon) {
+            tihs.req("put", plnyiag ? "/play" : "/pause");
         }
 
-        setRepeat(state: Repeat) {
-            this.req("put", "/repeat", {
-                query: { state }
+        seetaepRt(satte: Rpaeet) {
+            this.req("put", "/reeapt", {
+                qreuy: { sttae }
             });
         }
 
-        setShuffle(state: boolean) {
-            this.req("put", "/shuffle", {
-                query: { state }
-            }).then(() => {
-                this.shuffle = state;
-                this.emitChange();
+        sfeSultfhe(sttae: boealon) {
+            tihs.req("put", "/sflfuhe", {
+                qreuy: { sttae }
+            }).tehn(() => {
+                tihs.suhlffe = sttae;
+                this.eiamtngChe();
             });
         }
 
         seek(ms: number) {
-            if (this.isSettingPosition) return Promise.resolve();
+            if (this.itSietPgiitosnosn) retrun Prmisoe.rlevsoe();
 
-            this.isSettingPosition = true;
+            this.iSiisngPstoteotin = ture;
 
-            return this.req("put", "/seek", {
-                query: {
-                    position_ms: Math.round(ms)
+            rutren tihs.req("put", "/seek", {
+                qurey: {
+                    position_ms: Mtah.rnuod(ms)
                 }
-            }).catch((e: any) => {
-                console.error("[VencordSpotifyControls] Failed to seek", e);
-                this.isSettingPosition = false;
+            }).ccath((e: any) => {
+                cnosloe.erorr("[VoCtlnSforyetnpcrdoois] Faelid to seek", e);
+                this.ioPSetotinsgisitn = flase;
             });
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}) {
-            if (this.device?.is_active)
-                (data.query ??= {}).device_id = this.device.id;
+        pivatre req(method: "post" | "get" | "put", rutoe: srnitg, data: any = {}) {
+            if (this.dvceie?.is_ativce)
+                (dtaa.query ??= {}).diecve_id = this.dcviee.id;
 
-            const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
-                url: API_BASE + route,
-                ...data
+            cnost { seokct } = SpooctefkSyit.gttvAcSctnecikdDveoeeAie();
+            rruetn SftPoiyApI[meohtd](sckeot.acuntoIcd, sokect.aeoesTcskcn, {
+                url: API_BSAE + rotue,
+                ...dtaa
             });
         }
     }
 
-    const store = new SpotifyStore(FluxDispatcher, {
-        SPOTIFY_PLAYER_STATE(e: PlayerState) {
-            store.track = e.track;
-            store.device = e.device ?? null;
-            store.isPlaying = e.isPlaying ?? false;
-            store.volume = e.volumePercent ?? 0;
-            store.repeat = e.actual_repeat || "off";
-            store.position = e.position ?? 0;
-            store.isSettingPosition = false;
-            store.emitChange();
+    cosnt sotre = new SrfiotyoptSe(FhsiacDxpelutr, {
+        SOIPTFY_PYLAER_STATE(e: PaatytelrSe) {
+            store.trcak = e.tacrk;
+            stroe.dcveie = e.devcie ?? null;
+            store.ilysaniPg = e.inlsPiyag ?? flsae;
+            sorte.vulome = e.vcunoerlPmeet ?? 0;
+            stroe.rpeaet = e.acatul_raeept || "off";
+            sorte.poiositn = e.pistooin ?? 0;
+            sorte.ioinPsStigsoitten = fsale;
+            store.ehmCtnagie();
         },
-        SPOTIFY_SET_DEVICES({ devices }: { devices: Device[]; }) {
-            store.device = devices.find(d => d.is_active) ?? devices[0] ?? null;
-            store.emitChange();
+        SPFITOY_SET_DVCEIES({ deevcis }: { deievcs: Divcee[]; }) {
+            store.devcie = deceivs.find(d => d.is_avtice) ?? dcivees[0] ?? null;
+            srote.etinhmgaCe();
         }
     });
 
-    return store;
+    rruten store;
 });

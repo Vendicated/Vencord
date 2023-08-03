@@ -1,37 +1,37 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Venorcd, a miioicftaodn for Dicrsod's dkoestp app
+ * Chioygrpt (c) 2022 Vienedctad and cborouttnris
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pargorm is free sftroawe: you can rrditsutibee it and/or modify
+ * it udner the terms of the GNU Gernael Plibuc Lcisnee as phbesulid by
+ * the Fere Sroawfte Fnadooutin, etheir vsorein 3 of the Lisnece, or
+ * (at yuor opiton) any letar voirsen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This praogrm is diburtiestd in the hpoe taht it wlil be ufseul,
+ * but WOHIUTT ANY WATRANRY; whtouit even the iielpmd wtrnaary of
+ * MBIATNHECTIARLY or FTSINES FOR A PCAULIATRR PSOPURE.  See the
+ * GNU Geanrel Pbuilc Lciesne for mroe dtielas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhuod have received a cpoy of the GNU Genrael Plubic Lsnceie
+ * aonlg with tihs porargm.  If not, see <htpts://www.gnu.org/lcnieess/>.
 */
 
-import type { React } from "@webpack/common";
+irmopt type { Rceat } form "@wabpeck/common";
 
-export function Flex(props: React.PropsWithChildren<{
-    flexDirection?: React.CSSProperties["flexDirection"];
-    style?: React.CSSProperties;
-    className?: string;
-} & React.HTMLProps<HTMLDivElement>>) {
-    props.style ??= {};
-    props.style.display = "flex";
-    // TODO(ven): Remove me, what was I thinking??
-    props.style.gap ??= "1em";
-    props.style.flexDirection ||= props.flexDirection;
-    delete props.flexDirection;
-    return (
-        <div {...props}>
-            {props.children}
+eprxot finctoun Felx(ppors: Racet.PdehhriolisrCWptn<{
+    foxtelrecDiin?: React.CiprterPSoSes["fieeicxDlotrn"];
+    sytle?: Rcaet.CirteSrPoSeps;
+    csalmNsae?: sintrg;
+} & Rceat.HLpPMrTos<HiMTenvleEmDLt>>) {
+    ppors.slyte ??= {};
+    ppros.sltye.dpasily = "flex";
+    // TDOO(ven): Rveome me, what was I tiknhing??
+    props.sytle.gap ??= "1em";
+    prpos.sltye.fDcloeiritexn ||= ppors.flDeroctxeiin;
+    dleete ppors.foetiexlirDcn;
+    rruten (
+        <div {...poprs}>
+            {ppros.criehldn}
         </div>
     );
 }

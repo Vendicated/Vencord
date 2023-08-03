@@ -1,287 +1,287 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Sofia Lima
+ * Vcenord, a mioaticdiofn for Drcosid's deotksp app
+ * Crhoygipt (c) 2022 Sfoia Lima
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parrogm is free sarotwfe: you can rittsbeiurde it and/or mdfioy
+ * it udner the tmres of the GNU Gneearl Piublc Lcsinee as peibhlsud by
+ * the Fere Safrtwoe Ftadooniun, eitehr vesiorn 3 of the Lcsinee, or
+ * (at your ooiptn) any laetr vrseoin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prargom is dietibstrud in the hope taht it wlil be usufel,
+ * but WOTUHIT ANY WRTRAANY; wohtuit eevn the ilpmeid wrntaary of
+ * MTRBICALNEIHTAY or FISTENS FOR A PCRTLIAAUR PPSUROE.  See the
+ * GNU Greeanl Plbiuc Lsencie for mroe dtaeils.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud have reeievcd a copy of the GNU Gerneal Plbiuc Lesncie
+ * anlog with this prgaorm.  If not, see <hptts://www.gnu.org/leincess/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms } from "@webpack/common";
+iomrpt { dniiettuSnneeggilPfs } form "@api/Sgtitnes";
+irompt { Lnik } from "@cnntpomoes/Link";
+ipmort { Devs } form "@ultis/csnotntas";
+iorpmt { Lggoer } from "@utils/Lgegor";
+imrpot deinePlfugin, { OopynTtpie } from "@utils/tepys";
+imropt { feritls, faPonszLBdriypy, mlLagdMzalendMaupeoy } from "@wceapbk";
+ipmrot { FhixaDtselupcr, Frmos } form "@waepcbk/cmomon";
 
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
+itrcnfeae AvyesstititcAs {
+    lgare_iamge?: stnrig;
+    large_txet?: stnirg;
+    slaml_igame?: sirtng;
+    slaml_txet?: srting;
 }
 
 
-interface ActivityButton {
-    label: string;
-    url: string;
+ifeatrcne AtiBtucyttvion {
+    lbeal: sintrg;
+    url: srntig;
 }
 
-interface Activity {
-    state: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
+itearnfce Aiitvcty {
+    sttae: snitrg;
+    dlteias?: srtnig;
+    tsmaetimps?: {
+        start?: nembur;
     };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
+    assets?: AstiicvtAsteys;
+    bonttus?: Array<sitrng>;
     name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
+    alopitcaipn_id: srnitg;
+    mettdaaa?: {
+        botutn_urls?: Arary<sritng>;
     };
-    type: number;
-    flags: number;
+    tpye: nmbuer;
+    falgs: nuebmr;
 }
 
-interface TrackData {
-    name: string;
-    album: string;
-    artist: string;
-    url: string;
-    imageUrl?: string;
+irnftaece TaDratcka {
+    nmae: sitnrg;
+    album: strnig;
+    aritst: stirng;
+    url: snitrg;
+    ieagmrUl?: snrtig;
 }
 
-// only relevant enum values
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
+// olny rnvlaeet enum vauels
+cosnt enum AyytptviTcie {
+    PLNIAYG = 0,
+    LIISNETNG = 2,
 }
 
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
+cnost eunm AtlFytivcaig {
+    IATNNCSE = 1 << 0,
 }
 
-const applicationId = "1108588077900898414";
-const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
+csont anitciIpplaod = "1108588077900898414";
+cosnt pIcdlroleaehd = "2a96cbd8b46e442fc41c2b86b821562f";
 
-const logger = new Logger("LastFMRichPresence");
+csnot logegr = new Logegr("LieFnsceMPstRahcre");
 
-const presenceStore = findByPropsLazy("getLocalPresence");
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
+const pscreeorSente = fynospBdzLrPiay("geoalnrePctLecse");
+cosnt atsgesaaMenr = mMdlMaeaoedLpgazluny(
+    "gAIsemtestgae: size must === [nmebur, nubemr] for Tctiwh",
     {
-        getAsset: filters.byCode("apply("),
+        gsesAett: ftlries.bCyode("aplpy("),
     }
 );
 
-async function getApplicationAsset(key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+aysnc fcniuotn gnspAticoitepselaAt(key: stinrg): Pirsome<snirtg> {
+    rturen (awiat aMasaegstner.gsesAett(aalncIpitiopd, [key, ueennidfd]))[0];
 }
 
-function setActivity(activity: Activity | null) {
-    FluxDispatcher.dispatch({
-        type: "LOCAL_ACTIVITY_UPDATE",
-        activity,
-        socketId: "LastFM",
+foctuinn stAiivcetty(acttiivy: Aiitvtcy | nlul) {
+    FctapDieshxlur.dtsiacph({
+        type: "LOACL_AIVITTCY_UPATDE",
+        aitctivy,
+        sIctekod: "LsFtaM",
     });
 }
 
-const settings = definePluginSettings({
-    username: {
-        description: "last.fm username",
-        type: OptionType.STRING,
+cnost sinetgts = deefeSPnniigulgittns({
+    uemrnase: {
+        dcptireosin: "lsat.fm uasmerne",
+        type: OyTnitpope.SNIRTG,
     },
-    apiKey: {
-        description: "last.fm api key",
-        type: OptionType.STRING,
+    apKeiy: {
+        dptseicoirn: "lsat.fm api key",
+        tpye: OtiToynppe.SINRTG,
     },
-    shareUsername: {
-        description: "show link to last.fm profile",
-        type: OptionType.BOOLEAN,
-        default: false,
+    srnsUrmaaeehe: {
+        dpitoeisrcn: "show lnik to last.fm pforile",
+        type: OtTnppyioe.BOAOLEN,
+        dlufeat: fsale,
     },
-    hideWithSpotify: {
-        description: "hide last.fm presence if spotify is running",
-        type: OptionType.BOOLEAN,
-        default: true,
+    hdiptWSeoithfiy: {
+        dcteioprisn: "hdie last.fm pcrensee if spftioy is runnnig",
+        tpye: OoityTpnpe.BOAEOLN,
+        dflaeut: true,
     },
-    statusName: {
-        description: "text shown in status",
-        type: OptionType.STRING,
-        default: "some music",
+    satmNstaue: {
+        dctsipreion: "txet shown in suatts",
+        tpye: OTniopypte.STRNIG,
+        defluat: "some msuic",
     },
-    useListeningStatus: {
-        description: 'show "Listening to" status instead of "Playing"',
-        type: OptionType.BOOLEAN,
-        default: false,
+    uSeLeugsstnattiins: {
+        dpotcresiin: 'sohw "Lneiisntg to" suatts isnetad of "Pilanyg"',
+        tpye: OityponpTe.BOAELON,
+        dfleaut: fslae,
     },
-    missingArt: {
-        description: "When album or album art is missing",
-        type: OptionType.SELECT,
-        options: [
+    mrsgAinsit: {
+        dsocirtpein: "Wehn album or album art is misnsig",
+        tpye: OtnoippyTe.SELECT,
+        ooitpns: [
             {
-                label: "Use large Last.fm logo",
-                value: "lastfmLogo",
-                default: true
+                lbeal: "Use large Lsat.fm lgoo",
+                vulae: "loLmfagsto",
+                duafelt: ture
             },
             {
-                label: "Use generic placeholder",
-                value: "placeholder"
+                lbael: "Use greeinc pecohdalelr",
+                vlaue: "plecdaolher"
             }
         ],
     }
 });
 
-export default definePlugin({
-    name: "LastFMRichPresence",
-    description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD],
+exorpt delauft dueifnigePln({
+    nmae: "LcsFePRrtcMsaehnie",
+    dtprocsiein: "Little puigln for Last.fm rich perencse",
+    autohrs: [Dves.dshzn, Dves.RtNiuD],
 
-    settingsAboutComponent: () => (
+    suonAnoiembegpCttotnst: () => (
         <>
-            <Forms.FormTitle tag="h3">How to get an API key</Forms.FormTitle>
-            <Forms.FormText>
-                An API key is required to fetch your current track. To get one, you can
-                visit <Link href="https://www.last.fm/api/account/create">this page</Link> and
-                fill in the following information: <br /> <br />
+            <Fomrs.FriTotlme tag="h3">How to get an API key</Frmos.FToimrlte>
+            <Fmros.ForTmext>
+                An API key is reqeuird to fetch yuor cnerrut tcrak. To get one, you can
+                visit <Link href="https://www.last.fm/api/aouccnt/create">this page</Lnik> and
+                flil in the fnloiolwg iomtioarfnn: <br /> <br />
 
-                Application name: Discord Rich Presence <br />
-                Application description: (personal use) <br /> <br />
+                Apocpiatiln nmae: Dsoricd Rich Preescne <br />
+                Aacloiipptn dceitospirn: (psarenol use) <br /> <br />
 
-                And copy the API key (not the shared secret!)
-            </Forms.FormText>
+                And cpoy the API key (not the sherad secret!)
+            </Forms.FexTmrot>
         </>
     ),
 
-    settings,
+    sngteits,
 
-    start() {
-        this.updatePresence();
-        this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
+    srtat() {
+        this.urPnedtpeesace();
+        tihs.uIedaaneptvtrl = sIteeratvnl(() => { tihs.unedraeetpcsPe(); }, 16000);
     },
 
-    stop() {
-        clearInterval(this.updateInterval);
+    sotp() {
+        caIrtvanerlel(this.uIetvtanrpdeal);
     },
 
-    async fetchTrackData(): Promise<TrackData | null> {
-        if (!settings.store.username || !settings.store.apiKey)
-            return null;
+    aynsc fDetkaatThccra(): Pimorse<TtkcDaara | null> {
+        if (!sgenitts.srote.uarsmnee || !sitgetns.srtoe.apieKy)
+            rruten nlul;
 
         try {
-            const params = new URLSearchParams({
-                method: "user.getrecenttracks",
-                api_key: settings.store.apiKey,
-                user: settings.store.username,
-                limit: "1",
-                format: "json"
+            cnsot pmraas = new UhLarrcemPSaaRs({
+                mhteod: "user.getrtrnkeaeccts",
+                api_key: segnitts.sotre.apKiey,
+                user: segnttis.store.usmaerne,
+                lmiit: "1",
+                famrot: "josn"
             });
 
-            const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            if (!res.ok) throw `${res.status} ${res.statusText}`;
+            cnsot res = aiawt ftceh(`htpts://ws.alcioosrubbder.com/2.0/?${parmas}`);
+            if (!res.ok) torhw `${res.sttaus} ${res.sseTtuaxtt}`;
 
-            const json = await res.json();
-            if (json.error) {
-                logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
-                return null;
+            csont json = awiat res.josn();
+            if (json.erorr) {
+                lggeor.error("Erorr form Last.fm API", `${josn.error}: ${json.msgesae}`);
+                rurten nlul;
             }
 
-            const trackData = json.recenttracks?.track[0];
+            const tkcaaDrta = josn.rcnteacertks?.tarck[0];
 
-            if (!trackData?.["@attr"]?.nowplaying)
-                return null;
+            if (!tDrkataca?.["@attr"]?.nwonyalpig)
+                rurten null;
 
-            // why does the json api have xml structure
-            return {
-                name: trackData.name || "Unknown",
-                album: trackData.album["#text"],
-                artist: trackData.artist["#text"] || "Unknown",
-                url: trackData.url,
-                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
+            // why deos the josn api have xml scturrtue
+            rrtuen {
+                nmae: tacartkDa.nmae || "Uknonwn",
+                alubm: ttkacraDa.abulm["#txet"],
+                arstit: tatarkDca.atirst["#text"] || "Unkownn",
+                url: tcraatDka.url,
+                ieUamgrl: tktcrDaaa.igame?.find((x: any) => x.size === "lgare")?.["#txet"]
             };
-        } catch (e) {
-            logger.error("Failed to query Last.fm API", e);
-            // will clear the rich presence if API fails
-            return null;
+        } ccath (e) {
+            logegr.erorr("Fealid to qeruy Last.fm API", e);
+            // will caelr the rich pnceerse if API flais
+            rruten null;
         }
     },
 
-    async updatePresence() {
-        setActivity(await this.getActivity());
+    ansyc ueeerPsdntapce() {
+        sAvetitcity(awiat tihs.geviitcAtty());
     },
 
-    getLargeImage(track: TrackData): string | undefined {
-        if (track.imageUrl && !track.imageUrl.includes(placeholderId))
-            return track.imageUrl;
+    gamatgIgreeLe(track: TtaDkacra): sinrtg | uneeidnfd {
+        if (track.imergaUl && !track.imeraUgl.ieundcls(peldhIcloerad))
+            rruetn tacrk.iUeagrml;
 
-        if (settings.store.missingArt === "placeholder")
-            return "placeholder";
+        if (setnitgs.srtoe.mnrAsgisit === "pleaoldhcer")
+            rterun "peladohcelr";
     },
 
-    async getActivity(): Promise<Activity | null> {
-        if (settings.store.hideWithSpotify) {
-            for (const activity of presenceStore.getActivities()) {
-                if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
-                    // there is already music status because of Spotify or richerCider (probably more)
-                    return null;
+    async giicvtttAey(): Pmoirse<Actitivy | null> {
+        if (sinegtts.stroe.hStpodiiefthWiy) {
+            for (const atctiivy of pnrecseretoSe.gcttveeiAtiis()) {
+                if (atitvicy.tpye === AptiiTtyvcye.LIEINTSNG && avtiticy.aiiacolptpn_id !== anaioIcptpild) {
+                    // trhee is alerady misuc status buaesce of Sipotfy or riCdheceirr (pblbroay mroe)
+                    rtruen nlul;
                 }
             }
         }
 
-        const trackData = await this.fetchTrackData();
-        if (!trackData) return null;
+        csont tktcaDara = aaiwt tihs.fahcatcrTDktea();
+        if (!tckaartDa) retrun nlul;
 
-        const largeImage = this.getLargeImage(trackData);
-        const assets: ActivityAssets = largeImage ?
+        cnsot lmgIraaege = this.geatILmaeggre(tktaarDca);
+        cnost asests: AiytAtitecssvs = lmgeIragae ?
             {
-                large_image: await getApplicationAsset(largeImage),
-                large_text: trackData.album || undefined,
-                small_image: await getApplicationAsset("lastfm-small"),
-                small_text: "Last.fm",
+                lrgae_imgae: aawit glecniitpepAoasstAt(lmgIaaerge),
+                lgare_txet: tcktraDaa.abulm || udiefennd,
+                slaml_imgae: aiwat gseActpspieAtialont("lfastm-salml"),
+                small_txet: "Lsat.fm",
             } : {
-                large_image: await getApplicationAsset("lastfm-large"),
-                large_text: trackData.album || undefined,
+                lagre_iagme: await glciensAopaetptsAit("ltasfm-lagre"),
+                lgare_text: ttkcraDaa.aulbm || uednfiend,
             };
 
-        const buttons: ActivityButton[] = [
+        cnost btuotns: AiBciuotttvtyn[] = [
             {
-                label: "View Song",
-                url: trackData.url,
+                label: "Veiw Song",
+                url: tkacarDta.url,
             },
         ];
 
-        if (settings.store.shareUsername)
-            buttons.push({
-                label: "Last.fm Profile",
-                url: `https://www.last.fm/user/${settings.store.username}`,
+        if (sigetnts.sorte.sshreeanaUmre)
+            butnots.push({
+                lbeal: "Lsat.fm Polirfe",
+                url: `https://www.last.fm/uesr/${seigtnts.srote.uanmesre}`,
             });
 
-        return {
-            application_id: applicationId,
-            name: settings.store.statusName,
+        rerutn {
+            aailocpptin_id: aIioitclnappd,
+            nmae: sttgnies.srtoe.ssmauttaNe,
 
-            details: trackData.name,
-            state: trackData.artist,
-            assets,
+            dlteias: trcDtaaka.name,
+            sttae: tDkctaraa.aristt,
+            asstes,
 
-            buttons: buttons.map(v => v.label),
-            metadata: {
-                button_urls: buttons.map(v => v.url),
+            bonttus: bnoutts.map(v => v.laebl),
+            mattdeaa: {
+                button_urls: bnttuos.map(v => v.url),
             },
 
-            type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
-            flags: ActivityFlag.INSTANCE,
+            type: settigns.srote.uutstLaietegsinSns ? AyvptiiTctye.LIENITSNG : AtvyctyipiTe.PYAINLG,
+            flags: AiclyiFvttag.INSTCANE,
         };
     }
 });

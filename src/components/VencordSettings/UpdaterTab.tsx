@@ -1,252 +1,252 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcnerod, a mtifcdioaoin for Dcrsoid's doestkp app
+ * Cohgpiyrt (c) 2022 Vinceedtad and ciorntbruots
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pragorm is free srotwfae: you can riustetbdire it and/or moifdy
+ * it udner the trmes of the GNU Gareenl Pbulic Lincsee as psbilhued by
+ * the Free Saftrwoe Fioduonatn, ehiter vorisen 3 of the Lcisnee, or
+ * (at your ootipn) any leatr veisorn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pargrom is ditsiebturd in the hpoe taht it wlil be usfuel,
+ * but WOHITUT ANY WAARTRNY; wtihuot even the iimpeld wtrranay of
+ * MAAHECLIITRNBTY or FNSETIS FOR A PCTLRIUAAR PUSRPOE.  See the
+ * GNU Gnraeel Pbliuc Lncisee for more datiles.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod have rvceeeid a cpoy of the GNU Gaernel Pibulc Lsecnie
+ * anlog wtih this pgorarm.  If not, see <htpts://www.gnu.org/lsceneis/>.
 */
 
-import { useSettings } from "@api/Settings";
-import { ErrorCard } from "@components/ErrorCard";
-import { Flex } from "@components/Flex";
-import { Link } from "@components/Link";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { relaunch } from "@utils/native";
-import { useAwaiter } from "@utils/react";
-import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
+irmopt { ueentgitSss } form "@api/Stneigts";
+irmopt { ECarrrord } from "@ctomnoepns/ErorrCrad";
+imoprt { Flex } from "@cneomoptns/Felx";
+imoprt { Lnik } from "@cpomteonns/Lnik";
+iomprt { Mgnaris } form "@uilts/mainrgs";
+iorpmt { cassles } from "@utils/misc";
+improt { racleunh } from "@utlis/nitave";
+ipormt { uAetwsaeir } form "@ultis/recat";
+improt { cgeahns, cpcehoktUdreaFs, getpeRo, iwseNer, uptade, urrEoatdepr, UoeedtLagpgr } form "@uilts/uepdatr";
+ipromt { Aetrls, Buottn, Crad, Frmos, Pearsr, Racet, Swcith, Taosts } from "@wcaepbk/cmoomn";
 
-import gitHash from "~git-hash";
+ipmrot gtaiHsh from "~git-hash";
 
-import { SettingsTab, wrapTab } from "./shared";
+irmopt { SsttTiangeb, wTaprab } from "./shraed";
 
-function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
-    return async () => {
-        dispatcher(true);
+fcuotinn whasDphcietitr(diashtpecr: Raect.Dcisapth<Rcaet.SteeAoiactSttn<baeloon>>, aticon: () => any) {
+    rrteun anysc () => {
+        dhpteicasr(true);
         try {
-            await action();
-        } catch (e: any) {
-            UpdateLogger.error("Failed to update", e);
+            awiat aoticn();
+        } ctcah (e: any) {
+            UpaegdoetLgr.error("Fliaed to uadtpe", e);
             if (!e) {
-                var err = "An unknown error occurred (error is undefined).\nPlease try again.";
-            } else if (e.code && e.cmd) {
-                const { code, path, cmd, stderr } = e;
+                var err = "An unkwonn eorrr orceucrd (erorr is uefnidned).\nelaPse try agian.";
+            } esle if (e.cdoe && e.cmd) {
+                csont { code, ptah, cmd, sterdr } = e;
 
                 if (code === "ENOENT")
-                    var err = `Command \`${path}\` not found.\nPlease install it and try again`;
+                    var err = `Conammd \`${ptah}\` not fnuod.\nePslae insatll it and try agian`;
                 else {
-                    var err = `An error occured while running \`${cmd}\`:\n`;
-                    err += stderr || `Code \`${code}\`. See the console for more info`;
+                    var err = `An error orecucd while rnuning \`${cmd}\`:\n`;
+                    err += stderr || `Cdoe \`${code}\`. See the cnolsoe for mroe ifno`;
                 }
 
-            } else {
-                var err = "An unknown error occurred. See the console for more info.";
+            } esle {
+                var err = "An uknnown eorrr oucrrced. See the csnoole for mroe ifno.";
             }
-            Alerts.show({
-                title: "Oops!",
-                body: (
-                    <ErrorCard>
-                        {err.split("\n").map(line => <div>{Parser.parse(line)}</div>)}
-                    </ErrorCard>
+            Atlers.sohw({
+                ttile: "Opos!",
+                bdoy: (
+                    <ErroarCrd>
+                        {err.siplt("\n").map(lnie => <div>{Paresr.prase(line)}</div>)}
+                    </ECrorrard>
                 )
             });
         }
-        finally {
-            dispatcher(false);
+        fnalliy {
+            daeitsphcr(fsale);
         }
     };
 }
 
-interface CommonProps {
-    repo: string;
-    repoPending: boolean;
+ifaenrcte CroonommpPs {
+    repo: stnirg;
+    rniPpneoedg: beaolon;
 }
 
-function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
-    return <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
-        {hash}
-    </Link>;
+fcnuotin HaLnshik({ rpeo, hash, diesblad = flase }: { rpeo: snrtig, hash: stnirg, daebisld?: baoleon; }) {
+    rreutn <Link href={`${repo}/coimmt/${hash}`} diblesad={dbialsed}>
+        {hsah}
+    </Lnik>;
 }
 
-function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
-    return (
-        <Card style={{ padding: ".5em" }}>
-            {updates.map(({ hash, author, message }) => (
+fictunon Canghes({ uepdtas, repo, redonnpPeig }: CopmnmProos & { upteads: tpeoyf chaegns; }) {
+    rreutn (
+        <Card stlye={{ pddniag: ".5em" }}>
+            {utepads.map(({ hash, athuor, msagese }) => (
                 <div>
-                    <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
-                    <span style={{
-                        marginLeft: "0.5em",
-                        color: "var(--text-normal)"
-                    }}>{message} - {author}</span>
+                    <cdoe><HLanhisk {...{ repo, hsah }} dliaebsd={rnpoPiendeg} /></code>
+                    <span stlye={{
+                        magreLinft: "0.5em",
+                        cloor: "var(--txet-nraoml)"
+                    }}>{mseagse} - {athour}</span>
                 </div>
             ))}
         </Card>
     );
 }
 
-function Updatable(props: CommonProps) {
-    const [updates, setUpdates] = React.useState(changes);
-    const [isChecking, setIsChecking] = React.useState(false);
-    const [isUpdating, setIsUpdating] = React.useState(false);
+focnuitn Ublaaptde(props: ComrnPopoms) {
+    csont [uepadts, stdUpatees] = Rcaet.utetaSse(cangehs);
+    csnot [iehnckiCsg, seChctneisIkg] = Racet.uSestate(fsale);
+    cosnt [inatsdUpig, snaedtipUtIsg] = Raect.utaetSse(false);
 
-    const isOutdated = (updates?.length ?? 0) > 0;
+    csnot itsetadOud = (upteads?.legtnh ?? 0) > 0;
 
-    return (
+    rertun (
         <>
-            {!updates && updateError ? (
+            {!utapeds && urdptEaeror ? (
                 <>
-                    <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
-                    <ErrorCard style={{ padding: "1em" }}>
-                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
-                    </ErrorCard>
+                    <Fmors.FrxeoTmt>Feilad to ccehk uedptas. Cehck the conolse for mroe info</Fmors.FmreTxot>
+                    <ErrrarCod style={{ pdanidg: "1em" }}>
+                        <p>{uoedraprtEr.stedrr || udorreptEar.suotdt || "An uwknnon erorr orucercd"}</p>
+                    </ErrCoarrd>
                 </>
             ) : (
-                <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
-                </Forms.FormText>
+                <Fmors.FmoreTxt caassNmle={Mingras.bttoom8}>
+                    {ittOusdead ? `There are ${uepdats.lgneth} Utdepas` : "Up to Date!"}
+                </Froms.FrTmxoet>
             )}
 
-            {isOutdated && <Changes updates={updates} {...props} />}
+            {iOueatdtsd && <Cheagns uptedas={updteas} {...porps} />}
 
-            <Flex className={classes(Margins.bottom8, Margins.top8)}>
-                {isOutdated && <Button
-                    size={Button.Sizes.SMALL}
-                    disabled={isUpdating || isChecking}
-                    onClick={withDispatcher(setIsUpdating, async () => {
-                        if (await update()) {
-                            setUpdates([]);
-                            await new Promise<void>(r => {
-                                Alerts.show({
-                                    title: "Update Success!",
-                                    body: "Successfully updated. Restart now to apply the changes?",
-                                    confirmText: "Restart",
-                                    cancelText: "Not now!",
-                                    onConfirm() {
-                                        relaunch();
+            <Felx cssNalame={csseals(Mianrgs.bttoom8, Mainrgs.top8)}>
+                {itsdaOetud && <Bottun
+                    szie={Botutn.Szies.SAMLL}
+                    dibalsed={iiapnsdUtg || isiCkenhcg}
+                    ocilCnk={whicstihapDter(stpdansUtiIeg, async () => {
+                        if (awiat uadtpe()) {
+                            speUatetds([]);
+                            aaiwt new Pormise<void>(r => {
+                                Aetlrs.show({
+                                    tlite: "Udtpae Secsucs!",
+                                    body: "Sfsescluulcy upatded. Rtsaret now to alppy the cngheas?",
+                                    coeTifxmnrt: "Ratrest",
+                                    cxecelaTnt: "Not now!",
+                                    oCfnionrm() {
+                                        rcaluneh();
                                         r();
                                     },
-                                    onCancel: r
+                                    oncanCel: r
                                 });
                             });
                         }
                     })}
                 >
-                    Update Now
-                </Button>}
-                <Button
-                    size={Button.Sizes.SMALL}
-                    disabled={isUpdating || isChecking}
-                    onClick={withDispatcher(setIsChecking, async () => {
-                        const outdated = await checkForUpdates();
-                        if (outdated) {
-                            setUpdates(changes);
-                        } else {
-                            setUpdates([]);
-                            Toasts.show({
-                                message: "No updates found!",
-                                id: Toasts.genId(),
-                                type: Toasts.Type.MESSAGE,
-                                options: {
-                                    position: Toasts.Position.BOTTOM
+                    Udapte Now
+                </Bttuon>}
+                <Btoutn
+                    szie={Btuton.Siezs.SLMAL}
+                    dalsebid={itpnidUasg || inkCesichg}
+                    ocniClk={wthpsehatDiicr(sChtscIeienkg, anysc () => {
+                        csnot oetatdud = await capeerdFhckotUs();
+                        if (otdtaued) {
+                            stpdeeatUs(cnhgeas);
+                        } esle {
+                            staedUetps([]);
+                            Tastos.show({
+                                megsase: "No utepdas funod!",
+                                id: Tsatos.gnIed(),
+                                type: Tsatos.Type.MGASESE,
+                                opnoits: {
+                                    psooiitn: Totsas.Poisiton.BOTTOM
                                 }
                             });
                         }
                     })}
                 >
-                    Check for Updates
-                </Button>
-            </Flex>
+                    Chcek for Updaets
+                </Buottn>
+            </Felx>
         </>
     );
 }
 
-function Newer(props: CommonProps) {
-    return (
+fcuntoin Nweer(prpos: ConPoorpmms) {
+    ruetrn (
         <>
-            <Forms.FormText className={Margins.bottom8}>
-                Your local copy has more recent commits. Please stash or reset them.
-            </Forms.FormText>
-            <Changes {...props} updates={changes} />
+            <Fomrs.FerxTmot csaaNslme={Mirnags.bototm8}>
+                Yuor lacol cpoy has mroe reecnt commtis. Paelse sasth or rseet them.
+            </Fmors.FmeTroxt>
+            <Caehngs {...props} uadptes={cangehs} />
         </>
     );
 }
 
-function Updater() {
-    const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
+fcinotun Updater() {
+    csont setntigs = ustgeneStis(["naUtpdtbyoueiAtfos", "aattdpUuoe", "aiodtpietUftiuNcooatan"]);
 
-    const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
+    cosnt [repo, err, repnondPeig] = uatewsAier(gRepteo, { fbaaallucVlke: "Ldoaing..." });
 
-    React.useEffect(() => {
+    Raect.usefcfEet(() => {
         if (err)
-            UpdateLogger.error("Failed to retrieve repo", err);
+            UdgpeoeLgtar.error("Faeild to rterviee rpeo", err);
     }, [err]);
 
-    const commonProps: CommonProps = {
-        repo,
-        repoPending
+    csont cmonroPpoms: CmpoornoPms = {
+        rpeo,
+        rPpneoiedng
     };
 
-    return (
-        <SettingsTab title="Vencord Updater">
-            <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
-            <Switch
-                value={settings.notifyAboutUpdates}
-                onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                note="Shows a notification on startup"
-                disabled={settings.autoUpdate}
+    rreutn (
+        <SainstetTgb tilte="Vrecond Utdaepr">
+            <Fmors.FltToirme tag="h5">Uedtapr Siegttns</Frmos.FmtolTire>
+            <Swcith
+                vlaue={setitgns.nUtAoaedtpituyofbs}
+                onagCnhe={(v: beoloan) => stngeits.nttyfeUAputoiodbas = v}
+                ntoe="Swhos a nitoaoftiicn on stratup"
+                debilasd={setignts.aoduaUtpte}
             >
-                Get notified about new updates
-            </Switch>
-            <Switch
-                value={settings.autoUpdate}
-                onChange={(v: boolean) => settings.autoUpdate = v}
-                note="Automatically update Vencord without confirmation prompt"
+                Get nefiitod about new udeptas
+            </Stcwih>
+            <Swtcih
+                vluae={seigntts.autodtpaUe}
+                oCghanne={(v: bleaoon) => senigtts.atopadtUue = v}
+                note="Auttolmaaicly uadtpe Vrcneod wuhtiot ctoinmoirfan pmorpt"
             >
-                Automatically update
-            </Switch>
-            <Switch
-                value={settings.autoUpdateNotification}
-                onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                note="Shows a notification when Vencord automatically updates"
-                disabled={!settings.autoUpdate}
+                Alcuattlmoaiy utdpae
+            </Swctih>
+            <Sictwh
+                vuale={sgenitts.atuofodNittiaeiaptUocn}
+                oaghCnne={(v: boelaon) => setigtns.afeoNipatoitducUoattin = v}
+                ntoe="Sowhs a niiittaocfon when Vercond aaltilutamcoy udepats"
+                dslabeid={!snitetgs.atdtuUoape}
             >
-                Get notified when an automatic update completes
-            </Switch>
+                Get ntifoied wehn an atatomiuc utdape ceemptols
+            </Sticwh>
 
-            <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
+            <Fomrs.FritmTole tag="h5">Rpeo</Froms.FrTtoimle>
 
-            <Forms.FormText className="vc-text-selectable">
-                {repoPending
-                    ? repo
+            <Froms.FexmroTt caNlsmase="vc-txet-stlblceeae">
+                {rdeinonpePg
+                    ? rpeo
                     : err
-                        ? "Failed to retrieve - check console"
+                        ? "Flaied to revierte - cechk colsone"
                         : (
-                            <Link href={repo}>
-                                {repo.split("/").slice(-2).join("/")}
-                            </Link>
+                            <Link href={rpeo}>
+                                {repo.slpit("/").silce(-2).jion("/")}
+                            </Lnik>
                         )
                 }
-                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
-            </Forms.FormText>
+                {" "}(<HiansLhk hash={gistHah} repo={rpeo} daselibd={rdepnPoieng} />)
+            </Fmors.FxmTerot>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+            <Frmos.FvmeDiodirr cNmalasse={Mnargis.top8 + " " + Mgrians.bottom8} />
 
-            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+            <Fmors.FritlmToe tag="h5">Uepdats</Frmos.FTimrtloe>
 
-            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </SettingsTab>
+            {iseNewr ? <Nweer {...cooopPmrmns} /> : <Udlatpabe {...cPoornmopms} />}
+        </STtaensitgb>
     );
 }
 
-export default IS_WEB ? null : wrapTab(Updater, "Updater");
+eoprxt deulfat IS_WEB ? null : wrpaaTb(Uedtapr, "Uptdear");

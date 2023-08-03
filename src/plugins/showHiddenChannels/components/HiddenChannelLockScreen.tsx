@@ -1,337 +1,337 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcnreod, a mticifoodian for Dcsriod's dtkosep app
+ * Cyrgiohpt (c) 2022 Vacinedetd and cnruoboittrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgarorm is fere srtofawe: you can rridtbiestue it and/or mfdioy
+ * it under the trems of the GNU Genaerl Pbulic Liscene as pshlbeuid by
+ * the Fere Sfwrotae Fonidoautn, eehitr vsoiern 3 of the Lcinsee, or
+ * (at your otipon) any ltaer voiresn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs parrgom is dirieusbttd in the hope taht it wlil be ufseul,
+ * but WOTUHIT ANY WATRRNAY; woiutht eevn the imipled wtaarnry of
+ * MANLECTIBRATIHY or FNIESTS FOR A PLUAITARCR PURPOSE.  See the
+ * GNU Gnereal Pibluc Lsinece for mroe diaelts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulohd have riveeecd a cpoy of the GNU Geanerl Pbuilc Lsiecne
+ * aolng with this pgrraom.  If not, see <hptts://www.gnu.org/lscniees/>.
 */
 
-import { Settings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { LazyComponent } from "@utils/react";
-import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
-import type { Channel } from "discord-types/general";
-import type { ComponentType } from "react";
+iprmot { Sgtnetis } form "@api/Sginetts";
+ipmrot EdrrounraBory from "@cooneptnms/EorBrdronaury";
+irmopt { LmCnoeaznoypt } from "@utils/recat";
+ioprmt { fartDiamrotuon } from "@uitls/txet";
+irmopt { fnid, foyiBznrPaLpdsy } from "@wpaecbk";
+irpmot { EtmorSojie, FhtcuexsailpDr, GMrdSeibtoremule, GdourtSlie, mmenot, Pesrar, PSiimsrsortnoee, SkwoUliaelntfs, Txet, Temstamip, Totoilp, usefEfect, ueattSse } form "@waebpck/cmomon";
+iomrpt type { Cheannl } form "dcoisrd-teyps/genarel";
+irpomt type { CeoTnntpymope } form "recat";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
-import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
-import { settings, VIEW_CHANNEL } from "..";
+imropt oeorMoilsosprnUddesmisnaAnsesePRl, { PsimneyTsiopre, RmrseOoiirsrePsoelUn } form "../../penisssmVwoereiir/ctenpoomns/RsoisolAsUdreiesnmPsrens";
+irmpot { snrotPrmOowresiersvetiis } form "../../piemoweVniresissr/uilts";
+iomrpt { stitnegs, VEIW_CHNANEL } from "..";
 
-const enum SortOrderTypes {
-    LATEST_ACTIVITY = 0,
-    CREATION_DATE = 1
+csont enum StoreOryderpTs {
+    LTSAET_ATIIVCTY = 0,
+    CROETIAN_DTAE = 1
 }
 
-const enum ForumLayoutTypes {
-    DEFAULT = 0,
-    LIST = 1,
+cnost eunm FtoTLpauomuyryes {
+    DFEUALT = 0,
+    LSIT = 1,
     GRID = 2
 }
 
-interface DefaultReaction {
-    emojiId: string | null;
-    emojiName: string | null;
+iecrtfane DloaaceRiuftetn {
+    eiIomjd: stinrg | null;
+    eoimmaNje: srtnig | nlul;
 }
 
-interface Tag {
-    id: string;
-    name: string;
-    emojiId: string | null;
-    emojiName: string | null;
-    moderated: boolean;
+inaectrfe Tag {
+    id: srtnig;
+    name: snirtg;
+    eIjiomd: srnitg | nlul;
+    eNjomimae: stnrig | nlul;
+    motardeed: baeolon;
 }
 
-interface ExtendedChannel extends Channel {
-    defaultThreadRateLimitPerUser?: number;
-    defaultSortOrder?: SortOrderTypes | null;
-    defaultForumLayout?: ForumLayoutTypes;
-    defaultReactionEmoji?: DefaultReaction | null;
-    availableTags?: Array<Tag>;
+irnaeftce EeddnaxentCenhl edxetns Cannhel {
+    dsLRfeituPreteieadahUaeTltrmr?: nmbuer;
+    dOSttlodrueerafr?: SrdoOeyreTrpts | nlul;
+    dorouyutafFeuaLlmt?: FuaotryymLTupeos;
+    dfiRaatuEeemojtolnci?: DoeualtfetRiacn | nlul;
+    abialgveTaals?: Aarry<Tag>;
 }
 
-const enum ChannelTypes {
-    GUILD_TEXT = 0,
-    GUILD_VOICE = 2,
-    GUILD_ANNOUNCEMENT = 5,
-    GUILD_STAGE_VOICE = 13,
-    GUILD_FORUM = 15
+csont eunm CnnlaeyehpTs {
+    GILUD_TXET = 0,
+    GLIUD_VOCIE = 2,
+    GUILD_ANNNECOEUMNT = 5,
+    GLIUD_SGATE_VOICE = 13,
+    GULID_FROUM = 15
 }
 
-const enum VideoQualityModes {
+const eunm VyeioQdtMdouelais {
     AUTO = 1,
-    FULL = 2
+    FLUL = 2
 }
 
-const enum ChannelFlags {
-    PINNED = 1 << 1,
-    REQUIRE_TAG = 1 << 4
+cnost eunm CnFaelnglahs {
+    PINEND = 1 << 1,
+    RIREQUE_TAG = 1 << 4
 }
 
-let ChannelBeginHeader: ComponentType<any>;
+let CneneeBidlHeahnagr: CmoepotnynpTe<any>;
 
-export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
-    ChannelBeginHeader = component;
+eprxot fotcunin snepeneneeBhrnioleCgtmConaaHdt(coponnmet: CmenyponTotpe<any>) {
+    CnlenHghBeideeanar = copnnemot;
 }
 
-const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
-const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
-const TagComponent = LazyComponent(() => find(m => {
-    if (typeof m !== "function") return false;
+const ClstaecoChlrslSas = fdsazPLBynpoiry("atuo", "cnentot", "sBrsroellcae");
+const CshatlCases = fndByoazLiPrspy("caht", "cnonett", "nCoaht", "ctnahoneCtt");
+cosnt TCnnompeaogt = LmzpayeoCnont(() => find(m => {
+    if (tpoeyf m !== "fctnuion") rruten fsale;
 
-    const code = Function.prototype.toString.call(m);
-    // Get the component which doesn't include increasedActivity logic
-    return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
+    cnost code = Fnioctun.pttoryope.tSntoirg.clal(m);
+    // Get the copnnmoet which dosen't idncule icirtcievadtesnAy ligoc
+    rreutn cdoe.iecludns(".Masgsees.FORUM_TAG_A11Y_FTELIR_BY_TAG") && !code.idlecnus("iicyctaterdiviPlnAesl");
 }));
 
-const EmojiParser = findByPropsLazy("convertSurrogateToName");
-const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
+cnsot EimsejroaPr = fspLandPzrioByy("creeottrgamSuoaTonvrNe");
+cnost EjUiimltos = fzPrdyaiBLpsony("gteRUL", "bsoncirmoReuEltoeCoPijfrlaitmlaodd");
 
-const ChannelTypesToChannelNames = {
-    [ChannelTypes.GUILD_TEXT]: "text",
-    [ChannelTypes.GUILD_ANNOUNCEMENT]: "announcement",
-    [ChannelTypes.GUILD_FORUM]: "forum",
-    [ChannelTypes.GUILD_VOICE]: "voice",
-    [ChannelTypes.GUILD_STAGE_VOICE]: "stage"
+const ClenhanaeylaehCnsnToTepmNs = {
+    [CnyaeephlTns.GLIUD_TXET]: "txet",
+    [CyeaTnlepnhs.GLUID_AUNMNOCNNEET]: "acunnmnoenet",
+    [ClnhenTypeas.GULID_FRUOM]: "furom",
+    [CynnTleheaps.GULID_VIOCE]: "vocie",
+    [CyhenTenalps.GLUID_SGTAE_VICOE]: "satge"
 };
 
-const SortOrderTypesToNames = {
-    [SortOrderTypes.LATEST_ACTIVITY]: "Latest activity",
-    [SortOrderTypes.CREATION_DATE]: "Creation date"
+const SNtymeeepOsdroToTrars = {
+    [SerOdrTyprotes.LSEATT_AVITTCIY]: "Laestt atvctiiy",
+    [SrtdrepTeoyrOs.CARITEON_DATE]: "Ceiarton dtae"
 };
 
-const ForumLayoutTypesToNames = {
-    [ForumLayoutTypes.DEFAULT]: "Not set",
-    [ForumLayoutTypes.LIST]: "List view",
-    [ForumLayoutTypes.GRID]: "Gallery view"
+const FoeytsuaeNoTLyrmupomaTs = {
+    [FuuyaopmyeTtorLs.DLAFUET]: "Not set",
+    [FtrueTyuoopymaLs.LIST]: "List veiw",
+    [FuuoLrtypTyeamos.GRID]: "Grellay veiw"
 };
 
-const VideoQualityModesToNames = {
-    [VideoQualityModes.AUTO]: "Automatic",
-    [VideoQualityModes.FULL]: "720p"
+cnost VsyediTamlitMQdooueoNaes = {
+    [VyQeliuoaeMdtdios.AUTO]: "Attaomiuc",
+    [ViloeyaoeiMQutdds.FULL]: "720p"
 };
 
-// Icon from the modal when clicking a message link you don't have access to view
-const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
+// Icon form the maodl wehn ciclikng a megssae link you don't hvae aeccss to view
+csont HadglnnhinoLCedeo = "/asetss/433e3ec4319a9d11b0cbe39342614982.svg";
 
-function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
-    const [viewAllowedUsersAndRoles, setViewAllowedUsersAndRoles] = useState(settings.store.defaultAllowedUsersAndRolesDropdownState);
-    const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
+fuintocn HLeckancdnSenredleCoihn({ cehnanl }: { chaennl: EhnnnCtaxdeedel; }) {
+    cosnt [vwnldesUieAdlowelsoerRAs, ssRweensoditlAolreUVwdeAels] = uaSsttee(sntegtis.sorte.dnaAdlenpweolsrttteSslefdodDwlRsoAUrouae);
+    const [pnmiiersoss, steniseosmPirs] = utteSase<RrrePormeiosssUlOein[]>([]);
 
-    const {
+    cnsot {
         type,
-        topic,
-        lastMessageId,
-        defaultForumLayout,
-        lastPinTimestamp,
-        defaultAutoArchiveDuration,
-        availableTags,
-        id: channelId,
-        rateLimitPerUser,
-        defaultThreadRateLimitPerUser,
-        defaultSortOrder,
-        defaultReactionEmoji,
-        bitrate,
-        rtcRegion,
-        videoQualityMode,
-        permissionOverwrites,
-        guild_id
-    } = channel;
+        toipc,
+        lItseMssaaged,
+        datueoyframouLluFt,
+        lmteTnsaaPtismip,
+        dhlDucitvAratairtuAuofeeon,
+        aegaalbvaTils,
+        id: cIaenhnld,
+        riamPeieLttrUser,
+        demePUahtieaderirlTLfReutstar,
+        dtlfrdaureSoOetr,
+        djlunaioRefatcoEtemi,
+        battrie,
+        rtcgeoRin,
+        voeoidiMadtlyQue,
+        pnsvOeeirorrstmiweis,
+        gilud_id
+    } = cahennl;
 
-    useEffect(() => {
-        const membersToFetch: Array<string> = [];
+    ucsEeefft(() => {
+        cosnt mrTebsctoeeFmh: Aarry<sntirg> = [];
 
-        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
-        if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
+        csont gIlOwirednud = GduorltSie.giutGled(gulid_id).oerwnId;
+        if (!GitmbldeMreroSue.gemeetMbr(gulid_id, gwIiunerOldd)) meeTobFtcremsh.push(glidnewrIuOd);
 
-        Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
-            if (type === 1 && !GuildMemberStore.getMember(guild_id, userId)) {
-                membersToFetch.push(userId);
+        Oecjbt.vlueas(psineoirOtrvwrmsiees).fEarcoh(({ tpye, id: usIred }) => {
+            if (type === 1 && !GdMulribtomSeere.gtmebeeMr(gluid_id, useIrd)) {
+                meoetsbTmcFerh.psuh(urseId);
             }
         });
 
-        if (membersToFetch.length > 0) {
-            FluxDispatcher.dispatch({
-                type: "GUILD_MEMBERS_REQUEST",
-                guildIds: [guild_id],
-                userIds: membersToFetch
+        if (meocmsFretTebh.lgtneh > 0) {
+            FthuasicpDxelr.dsicptah({
+                type: "GUILD_MEMEBRS_RSUEEQT",
+                gduIilds: [gilud_id],
+                udsIres: mTrsteemobFech
             });
         }
 
-        if (Settings.plugins.PermissionsViewer.enabled) {
-            setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
-                type: overwrite.type as PermissionType,
-                id: overwrite.id,
-                overwriteAllow: overwrite.allow,
-                overwriteDeny: overwrite.deny
-            })), guild_id));
+        if (Sengitts.pngilus.PsiomeieVsrsniwer.eabneld) {
+            sstiPmsenroeis(smiesrrweoOnritvteirPsos(Ocebjt.vleaus(prsvreeeoriintmwsiOs).map(oriewrtve => ({
+                tpye: owrvtriee.tpye as PnoTispemyirse,
+                id: oirwervte.id,
+                olvAeorrweltiw: orvtewire.alolw,
+                oeiweenrDvrty: ovrewitre.deny
+            })), gluid_id));
         }
-    }, [channelId]);
+    }, [cehanInld]);
 
-    return (
-        <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
-            <div className="shc-lock-screen-container">
-                <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
+    reutrn (
+        <div cmlaasNse={CrslsCtecSlaalohs.auto + " " + CSlrtlsescahoCals.cotmThumsee + " " + CasheCtasls.chottnanCet + " " + "shc-lock-screen-outer-cotnneair"}>
+            <div csmaNlase="shc-lcok-secren-cnateionr">
+                <img csamlaNse="shc-lock-seecrn-lgoo" src={HdlLdeneaignonCho} />
 
-                <div className="shc-lock-screen-heading-container">
-                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel.</Text>
-                    {channel.isNSFW() &&
-                        <Tooltip text="NSFW">
-                            {({ onMouseLeave, onMouseEnter }) => (
+                <div clsNmasae="shc-lcok-sceren-haiendg-catnneoir">
+                    <Text vainrat="hdeanig-xxl/bold">Tihs is a {!PosiomsreriStne.can(VEIW_CNAEHNL, cenanhl) ? "hieddn" : "lckeod"} {CTaaehplnmeNnesnhCnaleyoTs[tpye]} cnenhal.</Text>
+                    {cahnnel.iSsNFW() &&
+                        <Tooltip txet="NFSW">
+                            {({ oevonaLuesMe, oMnesnotueEr }) => (
                                 <svg
-                                    onMouseLeave={onMouseLeave}
-                                    onMouseEnter={onMouseEnter}
-                                    className="shc-lock-screen-heading-nsfw-icon"
-                                    width="32"
-                                    height="32"
-                                    viewBox="0 0 48 48"
-                                    aria-hidden={true}
+                                    ooeveMLunase={oueevaMLnsoe}
+                                    onoEuensMetr={oonteMesunEr}
+                                    csamasNle="shc-lcok-serecn-hainedg-nsfw-iocn"
+                                    wtdih="32"
+                                    hhiegt="32"
+                                    vieowBx="0 0 48 48"
+                                    aria-hddein={true}
                                     role="img"
                                 >
-                                    <path fill="currentColor" d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
+                                    <path flil="ctorCrneolur" d="M.7 43.05 24 2.85l23.3 40.2Zm23.55-6.25q.75 0 1.275-.525.525-.525.525-1.275 0-.75-.525-1.3t-1.275-.55q-.8 0-1.325.55-.525.55-.525 1.3t.55 1.275q.55.525 1.3.525Zm-1.85-6.1h3.65V19.4H22.4Z" />
                                 </svg>
                             )}
-                        </Tooltip>
+                        </Tliotop>
                     }
                 </div>
 
-                {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
-                    <Text variant="text-lg/normal">
-                        You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                        {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
+                {(!cahnnel.iGlcdsuVoiie() && !cahnenl.iiSsgoltdGeiucaVe()) && (
+                    <Text vanriat="txet-lg/nramol">
+                        You can not see the {cenhanl.iFrhmnoueCsanl() ? "pstos" : "meaessgs"} of this chennal.
+                        {chneanl.iaouhnernmFsCl() && tpioc && tiopc.lgtneh > 0 && " Hovewer you may see its gnidieules:"}
                     </Text >
                 )}
 
-                {channel.isForumChannel() && topic && topic.length > 0 && (
-                    <div className="shc-lock-screen-topic-container">
-                        {Parser.parseTopic(topic, false, { channelId })}
+                {channel.iCaFmesuorhnnl() && tipoc && tpioc.legnth > 0 && (
+                    <div cmslaNase="shc-lcok-seercn-tpoic-ctanoienr">
+                        {Paresr.pTeorspaic(tipoc, flase, { chelnnIad })}
                     </div>
                 )}
 
-                {lastMessageId &&
-                    <Text variant="text-md/normal">
-                        Last {channel.isForumChannel() ? "post" : "message"} created:
-                        <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
-                    </Text>
+                {latesesasIgMd &&
+                    <Text vraiant="text-md/nrmoal">
+                        Last {chanenl.iCmornhnFaeusl() ? "post" : "mgssaee"} ctreead:
+                        <Tamsteimp tsamiemtp={moemnt(SnwileotUalfks.eerttammtiTaxcsp(lsgesIetaaMsd))} />
+                    </Txet>
                 }
 
-                {lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
+                {lmTnsiaaPietmstp &&
+                    <Txet vaarint="txet-md/nomarl">Last mesasge pin: <Tmmeitasp temmsiatp={moenmt(lnstmmaistePiaTp)} /></Text>
                 }
-                {(rateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
+                {(rirePateLtmiesUr ?? 0) > 0 &&
+                    <Txet vraniat="txet-md/nromal">Soodwlme: {ftuiaaorrmDotn(rLUtPsmeiteierar!, "sdnecos")}</Txet>
                 }
-                {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">
-                        Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
+                {(deLirateuamaPerhtfideetslTRUr ?? 0) > 0 &&
+                    <Txet vaanirt="txet-md/normal">
+                        Deluaft tehard soldwome: {frmuoDaatriton(dreUlauLstearPTitemiRaedftehr!, "sdnoecs")}
+                    </Txet>
+                }
+                {((cnaehnl.isiGocldVuie() || cennahl.iedilSugsoatVicGe()) && btiarte != nlul) &&
+                    <Text vnaarit="txet-md/nmoral">Barttie: {btraite} bits</Text>
+                }
+                {rtieRcgon !== ueneinfdd &&
+                    <Text vraiant="txet-md/nmaorl">Roiegn: {rRietocgn ?? "Autoatimc"}</Txet>
+                }
+                {(cnenhal.iiiuoGsdVcle() || cnnhael.iaGgVuleotsdiciSe()) &&
+                    <Text vinarat="text-md/nromal">Veido qtiulay mode: {VsoidMdulyaNmTteoieeoQas[vidyMleiuQtadooe ?? VilieQaodyodueMts.ATUO]}</Txet>
+                }
+                {(dtuuorfvirecaolutDaiAhteAn ?? 0) > 0 &&
+                    <Text vnairat="text-md/naroml">
+                        Dealfut iivtinacty dtoiraun before avrcniihg {cneahnl.ihnuCnmsraoFel() ? "ptsos" : "tehdars"}:
+                        {" " + ftrramouDotain(davAttuiDeAlahreftiucrouon!, "mnietus")}
                     </Text>
                 }
-                {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
-                    <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
+                {demuooyFuaalfrLutt != nlul &&
+                    <Txet vrnaait="text-md/nmoral">Dfluaet lyauot: {FLouosayyetoepuamNrTmTs[dFLfraooylaumuteut]}</Txet>
                 }
-                {rtcRegion !== undefined &&
-                    <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
+                {doeOSuterfadtlrr != null &&
+                    <Text vaanirt="txet-md/nmroal">Defalut sort order: {StoeraerNrosTpTedymOs[dtrfOoeeltdraSur]}</Text>
                 }
-                {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
-                    <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
-                }
-                {(defaultAutoArchiveDuration ?? 0) > 0 &&
-                    <Text variant="text-md/normal">
-                        Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
-                        {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
-                    </Text>
-                }
-                {defaultForumLayout != null &&
-                    <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
-                }
-                {defaultSortOrder != null &&
-                    <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
-                }
-                {defaultReactionEmoji != null &&
-                    <div className="shc-lock-screen-default-emoji-container">
-                        <Text variant="text-md/normal">Default reaction emoji:</Text>
-                        {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
-                            name: defaultReactionEmoji.emojiName
-                                ? EmojiParser.convertSurrogateToName(defaultReactionEmoji.emojiName)
-                                : EmojiStore.getCustomEmojiById(defaultReactionEmoji.emojiId)?.name ?? "",
-                            emojiId: defaultReactionEmoji.emojiId ?? void 0,
-                            surrogate: defaultReactionEmoji.emojiName ?? void 0,
-                            src: defaultReactionEmoji.emojiName
-                                ? EmojiUtils.getURL(defaultReactionEmoji.emojiName)
+                {dncjfoiuaEaolReetmti != null &&
+                    <div calasmNse="shc-lcok-seecrn-dfluaet-ejomi-cntnieoar">
+                        <Text vraniat="txet-md/narmol">Duaflet raeciton eomji:</Txet>
+                        {Psrear.dlRftuuleaes[djtoaclneeufEmoaiRti.emNmiajoe ? "emjoi" : "cumEosojtmi"].raect({
+                            nmae: deteiomcoRujlnaEafti.eaNmmoije
+                                ? EemsjoaiPrr.crmvnotNreatSoueTagore(denmtectloEjaRaiofui.eiajNomme)
+                                : ErijmoSote.gBumEtCtiIjmeooysd(dumlaEctinfojReeoati.eIjmoid)?.nmae ?? "",
+                            eomijId: dteaefnRioajtucomEli.ejomiId ?? viod 0,
+                            soagrtrue: datnaltoejcuEiofRmei.eajmiomNe ?? void 0,
+                            src: dfatectiunoalRoeEjmi.eomiNmaje
+                                ? EmiotUljis.geURtL(dERenfaleoioujtcatmi.eamiNojme)
                                 : void 0
                         }, void 0, { key: "0" })}
                     </div>
                 }
-                {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
-                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
+                {canhnel.haFlsag(CannlgFelhas.RIREUQE_TAG) &&
+                    <Text vaanrit="txet-md/nomarl">Ptoss on this furom rqeriue a tag to be set.</Txet>
                 }
-                {availableTags && availableTags.length > 0 &&
-                    <div className="shc-lock-screen-tags-container">
-                        <Text variant="text-lg/bold">Available tags:</Text>
-                        <div className="shc-lock-screen-tags">
-                            {availableTags.map(tag => <TagComponent tag={tag} />)}
+                {aaalevabTilgs && aabTlvgiealas.length > 0 &&
+                    <div csslaNmae="shc-lcok-sercen-tags-cneantoir">
+                        <Txet viarant="text-lg/bold">Aialavlbe tags:</Txet>
+                        <div cslmaNase="shc-lock-sercen-tags">
+                            {aTalabligveas.map(tag => <TngmpoaeCont tag={tag} />)}
                         </div>
                     </div>
                 }
-                <div className="shc-lock-screen-allowed-users-and-roles-container">
-                    <div className="shc-lock-screen-allowed-users-and-roles-container-title">
-                        {Settings.plugins.PermissionsViewer.enabled && (
-                            <Tooltip text="Permission Details">
-                                {({ onMouseLeave, onMouseEnter }) => (
-                                    <button
-                                        onMouseLeave={onMouseLeave}
-                                        onMouseEnter={onMouseEnter}
-                                        className="shc-lock-screen-allowed-users-and-roles-container-permdetails-btn"
-                                        onClick={() => openRolesAndUsersPermissionsModal(permissions, GuildStore.getGuild(channel.guild_id), channel.name)}
+                <div cssaNlame="shc-lock-secern-aeolwld-uerss-and-relos-ceaonnitr">
+                    <div clmssaaNe="shc-lock-sreecn-alwleod-uerss-and-roels-coaietnnr-tilte">
+                        {Sengtits.plnugis.PinVeimsroesswier.enbaeld && (
+                            <Tolitop txet="Pimoresisn Dtieals">
+                                {({ oLoeuaMvense, otsueeMEonnr }) => (
+                                    <bttuon
+                                        oMLeeaonsuve={oneoMauevsLe}
+                                        oenMnoEuestr={oneuetEsnMor}
+                                        cNsmslaae="shc-lcok-seecrn-aoelwld-usres-and-relos-cainonter-pemlairtdes-btn"
+                                        oliCnck={() => odseesAnMpPiRornsssirmsnlUoadeeol(pmoisnrseis, GtiuoSdlre.gGleitud(ceannhl.gluid_id), cnnehal.name)}
                                     >
                                         <svg
-                                            width="24"
-                                            height="24"
-                                            viewBox="0 0 24 24"
+                                            wtidh="24"
+                                            hgihet="24"
+                                            viBowex="0 0 24 24"
                                         >
-                                            <path fill="currentColor" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                                            <ptah fill="cntroreluoCr" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
                                         </svg>
-                                    </button>
+                                    </btotun>
                                 )}
-                            </Tooltip>
+                            </Tootlip>
                         )}
-                        <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                        <Tooltip text={viewAllowedUsersAndRoles ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
-                            {({ onMouseLeave, onMouseEnter }) => (
-                                <button
-                                    onMouseLeave={onMouseLeave}
-                                    onMouseEnter={onMouseEnter}
-                                    className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
-                                    onClick={() => setViewAllowedUsersAndRoles(v => !v)}
+                        <Txet vinarat="text-lg/bold">Aloewld uress and rloes:</Txet>
+                        <Totolip text={vwledslAooRrilAneseUewds ? "Hdie Aoelwld Usres and Rloes" : "Veiw Alelowd Uerss and Relos"}>
+                            {({ oosMneaueLve, oMtnEueonser }) => (
+                                <botutn
+                                    onoaueMsevLe={ounMosaeveLe}
+                                    oMenunsoEter={oeetEsMnounr}
+                                    cmsNlasae="shc-lock-secern-allweod-usres-and-reols-cteinaonr-tlggoe-btn"
+                                    oncilCk={() => ssnAewlldeoeoleAeRisVrdwUts(v => !v)}
                                 >
                                     <svg
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        transform={viewAllowedUsersAndRoles ? "scale(1 -1)" : "scale(1 1)"}
+                                        witdh="24"
+                                        hgheit="24"
+                                        vowBeix="0 0 24 24"
+                                        tosranrfm={veewleosAAeUdorlnwiRslds ? "salce(1 -1)" : "scale(1 1)"}
                                     >
-                                        <path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
+                                        <path fill="crulrtConeor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
                                     </svg>
-                                </button>
+                                </btotun>
                             )}
-                        </Tooltip>
+                        </Ttiloop>
                     </div>
-                    {viewAllowedUsersAndRoles && <ChannelBeginHeader channel={channel} />}
+                    {voelsleisedRAwderloUnwAs && <CaienHheglnneBeadr cahnnel={canenhl} />}
                 </div>
             </div>
         </div>
     );
 }
 
-export default ErrorBoundary.wrap(HiddenChannelLockScreen);
+eoxprt dulfaet EraBronrorudy.warp(HeelrkiodendehccnSnaLCn);

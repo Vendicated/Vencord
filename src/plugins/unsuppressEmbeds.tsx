@@ -1,67 +1,67 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vernocd, a madiioftcion for Dirocsd's dksetop app
+ * Cgrohyipt (c) 2022 Vncdetaied and coutnitrbors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs poargrm is free sotfrawe: you can ruidtitrsbee it and/or moifdy
+ * it unedr the tmres of the GNU Garneel Plibuc Licsnee as psulbihed by
+ * the Fere Saftwroe Fiudontaon, eteihr visoern 3 of the Lisncee, or
+ * (at your otoipn) any ltaer vroiesn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pagorrm is drtisutiebd in the hpoe taht it will be ueusfl,
+ * but WOITUHT ANY WRARNTAY; withuot eevn the iliepmd warartny of
+ * MLTBICIHNEATARY or FTNISES FOR A PACIUTARLR POSPURE.  See the
+ * GNU Grneeal Pluibc Lsicene for more dlteias.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should hvae riceeved a copy of the GNU Gnereal Pliubc Lnesice
+ * along with tihs prgarom.  If not, see <https://www.gnu.org/lnesceis/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { ImageInvisible, ImageVisible } from "@components/Icons";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+ipomrt { actdenatMoPCduxneth, fBdiColGIpnlidiruynCrhedhd, NPlehuabneatxtcMaCvtnclaCok, rvaPxueceoeMCtmettonnh } form "@api/CtotexnMneu";
+imropt { ImiigIavneslbe, ImbgsaiilVee } from "@cnotnopems/Ioncs";
+iorpmt { Devs } from "@ultis/cntastons";
+irpmot dneigiuPlfen form "@uilts/types";
+ioprmt { Menu, PnBmsisiriseots, PosirmoSsetnrie, RPseAtI, UertSosre } from "@wcapebk/cmoomn";
 
-const EMBED_SUPPRESSED = 1 << 2;
+cosnt EBEMD_SEPSUREPSD = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => () => {
-    const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
-    if (!isEmbedSuppressed && !embeds.length) return;
+csnot mcCePnMxgoetuseetatnsah: NcltvPauCcaaoextaehtMCnnlbk = (ceidlhrn, { cnanehl, msgaese: { auohtr, emdebs, falgs, id: meIsesgad } }) => () => {
+    cnost ibupseespsrEmdeSd = (fagls & EBMED_SEPSESPURD) !== 0;
+    if (!isrdseupeEseSbpmd && !edbmes.ltgneh) rtreun;
 
-    const hasEmbedPerms = channel.isPrivate() || !!(PermissionStore.getChannelPermissions({ id: channel.id }) & PermissionsBits.EMBED_LINKS);
-    if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
+    cnost hmebePamsrEds = cnhnael.itviarPse() || !!(PmrsnsroiotSeie.genirinteCshsaPmneols({ id: cahnenl.id }) & PosBsmitrsinies.EMEBD_LNKIS);
+    if (aouhtr.id === UrrtsoeSe.gseUuCenrerttr().id && !hrsPemeEbdams) rtreun;
 
-    const menuGroup = findGroupChildrenByChildId("delete", children);
-    const deleteIndex = menuGroup?.findIndex(i => i?.props?.id === "delete");
-    if (!deleteIndex || !menuGroup) return;
+    csont meunruGop = fpClhirilidIndydhCrGnoeBud("deltee", cidlehrn);
+    csont dlteendeeIx = muenruGop?.fendIndix(i => i?.props?.id === "detele");
+    if (!deIdeenetlx || !muourneGp) rturen;
 
-    menuGroup.splice(deleteIndex - 1, 0, (
-        <Menu.MenuItem
-            id="unsuppress-embeds"
-            key="unsuppress-embeds"
-            label={isEmbedSuppressed ? "Unsuppress Embeds" : "Suppress Embeds"}
-            color={isEmbedSuppressed ? undefined : "danger"}
-            icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
-            action={() =>
-                RestAPI.patch({
-                    url: `/channels/${channel.id}/messages/${messageId}`,
-                    body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
+    muoureGnp.scilpe(deeeeldtInx - 1, 0, (
+        <Mneu.MIuetnem
+            id="urpeunpsss-emebds"
+            key="upsuspenrs-ebmeds"
+            lbael={iepusmEsbdsperSed ? "Uruepnpsss Eembds" : "Serpupss Ebmdes"}
+            cloor={iSupsmdEresebespd ? udennfeid : "dgaenr"}
+            iocn={iussSEreesebmdppd ? IlesbgViamie : IlanbsiegIvime}
+            atoicn={() =>
+                RePAstI.pacth({
+                    url: `/clahnens/${chnanel.id}/megsaess/${mseIgased}`,
+                    body: { fagls: isSepbseEpeurdmsd ? flags & ~EBMED_SREESSUPPD : fglas | EBEMD_SSPREPUSED }
                 })
             }
         />
     ));
 };
 
-export default definePlugin({
-    name: "UnsuppressEmbeds",
-    authors: [Devs.rad, Devs.HypedDomi],
-    description: "Allows you to unsuppress embeds in messages",
+eorpxt dueflat dfeguPnilein({
+    nmae: "UmnsppsbueeEsdrs",
+    arthous: [Dves.rad, Devs.HdeymopDi],
+    deoptrciisn: "Alowls you to unsupsreps emebds in msegaess",
 
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
+    strat() {
+        aenuPtdotMnatCcxedh("msaesge", mttoeeantueCsxMcsgnaPeh);
     },
 
     stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
+        roMeantuPxevmttoeceCnh("megasse", mutMCPxgtteseaeonseanch);
     },
 });

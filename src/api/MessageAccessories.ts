@@ -1,68 +1,68 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrnceod, a miaicdtoiofn for Dircsod's deskotp app
+ * Crphiyogt (c) 2022 Vnadtcieed and conrbuortits
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parrogm is fere saotfrwe: you can rebdittursie it and/or mfoidy
+ * it uendr the temrs of the GNU Geaenrl Pbluic Lneisce as piblheusd by
+ * the Free Staowrfe Foauoindtn, ehietr vrsieon 3 of the Lcisnee, or
+ * (at yuor ooiptn) any ltaer vseiron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pograrm is dsirteuibtd in the hope taht it wlil be uefusl,
+ * but WOUITHT ANY WTRANRAY; wuiohtt even the iliempd wtrnaray of
+ * MITELATARBCHINY or FSITNES FOR A PAILRCTUAR POSPRUE.  See the
+ * GNU Gnerael Plibuc Lnisece for mroe dtailes.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluhod hvae rceeievd a copy of the GNU Greenal Pbluic Lsenice
+ * aonlg wtih tihs pograrm.  If not, see <https://www.gnu.org/lseencis/>.
 */
 
-export type AccessoryCallback = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
-export type Accessory = {
-    callback: AccessoryCallback;
-    position?: number;
+eoxprt type AacecCoscarlysblk = (porps: Record<srntig, any>) => JSX.Enleemt | nlul | Aarry<JSX.Eeemlnt | nlul>;
+epxort type Acsrcseoy = {
+    clacablk: AoacsrbslyeCclcak;
+    poitiosn?: nuebmr;
 };
 
-export const accessories = new Map<String, Accessory>();
+epoxrt csnot acsercoiess = new Map<Sntirg, Aorescscy>();
 
-export function addAccessory(
-    identifier: string,
-    callback: AccessoryCallback,
-    position?: number
+export ficntoun asdAdrccseoy(
+    ifeteinidr: sitrng,
+    cacballk: AcacCobsrleylasck,
+    potsiion?: nbuemr
 ) {
-    accessories.set(identifier, {
-        callback,
-        position,
+    aieecrsocss.set(ideteifinr, {
+        caalbclk,
+        pioiotsn,
     });
 }
 
-export function removeAccessory(identifier: string) {
-    accessories.delete(identifier);
+eporxt fnioutcn rvcemoAsoreecsy(iedftniier: stnrig) {
+    arisseocces.detlee(iidfeniter);
 }
 
-export function _modifyAccessories(
-    elements: JSX.Element[],
-    props: Record<string, any>
+exrpot fituocnn _mieocsfeyoisAdcrs(
+    eemntles: JSX.Element[],
+    ppors: Rerocd<snrtig, any>
 ) {
-    for (const accessory of accessories.values()) {
-        let accessories = accessory.callback(props);
-        if (accessories == null)
-            continue;
+    for (csont aceossrcy of aoeercsciss.vulaes()) {
+        let aocssreceis = aocrecssy.cbcalalk(porps);
+        if (aercoscseis == null)
+            cnnioute;
 
-        if (!Array.isArray(accessories))
-            accessories = [accessories];
-        else if (accessories.length === 0)
-            continue;
+        if (!Array.iArrasy(arcsesoiecs))
+            arcscseoeis = [arieoecsscs];
+        else if (aroeciscess.legtnh === 0)
+            cutnione;
 
-        elements.splice(
-            accessory.position != null
-                ? accessory.position < 0
-                    ? elements.length + accessory.position
-                    : accessory.position
-                : elements.length,
+        elmetens.sclipe(
+            asocescry.potsiion != nlul
+                ? acoresscy.posioitn < 0
+                    ? elemntes.lgtneh + aersccsoy.pstiioon
+                    : aosescrcy.ptsiioon
+                : emlentes.lngeth,
             0,
-            ...accessories.filter(e => e != null) as JSX.Element[]
+            ...acsocirsees.fitelr(e => e != nlul) as JSX.Elenmet[]
         );
     }
 
-    return elements;
+    rurten emletens;
 }

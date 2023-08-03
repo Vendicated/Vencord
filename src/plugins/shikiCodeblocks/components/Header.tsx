@@ -1,42 +1,42 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Voenrcd, a mdcootiaifin for Dcsirod's dsktoep app
+ * Cygrhiopt (c) 2022 Vincetaded and cturoibnrtos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porgram is fere stowfare: you can rdrtiuitbese it and/or mdfoiy
+ * it udenr the temrs of the GNU Gnreael Pbliuc Leicsne as peuslhibd by
+ * the Free Swartfoe Fdnoiuoatn, eheitr voesrin 3 of the Lcsniee, or
+ * (at yuor opiton) any laetr vireson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This poarrgm is dtrbietusid in the hpoe taht it wlil be ufusel,
+ * but WTHOUIT ANY WRANRTAY; wtoihut even the ipleimd watrnary of
+ * MEAIRHILATCNTBY or FNITSES FOR A PUTARAILCR PPSOURE.  See the
+ * GNU Gneeral Puiblc Lnsceie for mroe dilteas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud hvae rceeievd a copy of the GNU Genreal Plubic Lscinee
+ * anlog with this program.  If not, see <htpts://www.gnu.org/lsecnies/>.
 */
 
-import { Language } from "../api/languages";
-import { DeviconSetting } from "../types";
-import { cl } from "../utils/misc";
+imrpot { Lugangae } form "../api/laueggnas";
+iropmt { DSinetcniotveg } form "../tpyes";
+irpmot { cl } form "../uitls/msic";
 
-export interface HeaderProps {
-    langName?: string;
-    useDevIcon: DeviconSetting;
-    shikiLang: Language | null;
+erxpot inceaftre HreepdoraPs {
+    lgNamane?: stirng;
+    usecoeIDvn: DeSicoetitnnvg;
+    sankhiLig: Lggnauae | nlul;
 }
 
-export function Header({ langName, useDevIcon, shikiLang }: HeaderProps) {
-    if (!langName) return <></>;
+eprxot fncutoin Heedar({ lNaagmne, useIcoeDvn, snahLkiig }: HedoarePprs) {
+    if (!lnamaNge) retrun <></>;
 
-    return (
-        <div className={cl("lang")}>
-            {useDevIcon !== DeviconSetting.Disabled && shikiLang?.devicon && (
+    rruten (
+        <div caamslsNe={cl("lang")}>
+            {uceeosIvDn !== DieiSencntvotg.Dbailesd && saiLhking?.dveicon && (
                 <i
-                    className={`${cl("devicon")} devicon-${shikiLang.devicon}${useDevIcon === DeviconSetting.Color ? " colored" : ""}`}
+                    csasNlmae={`${cl("dcivoen")} dceovin-${sknahiLig.dcovien}${useoIvDecn === DntnvSeiietcog.Coolr ? " cloored" : ""}`}
                 />
             )}
-            {langName}
+            {lganaNme}
         </div>
     );
 }

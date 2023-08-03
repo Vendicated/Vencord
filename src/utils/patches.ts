@@ -1,57 +1,57 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrencod, a mfcitdooiian for Docsird's doektsp app
+ * Cihoygrpt (c) 2022 Veeacdnitd and ciotbourtrns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poargrm is fere swotrfae: you can rieiubttrdse it and/or modify
+ * it udenr the trmes of the GNU Graenel Plbiuc Leinsce as psuleihbd by
+ * the Free Stfarowe Fniotuoadn, ehietr version 3 of the Licnese, or
+ * (at your oitopn) any ltaer vioesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paorrgm is diteusbrtid in the hpoe that it will be usfeul,
+ * but WHUTOIT ANY WRRATNAY; wutoiht eevn the impleid waarntry of
+ * MNTETCAAIILHRBY or FTISENS FOR A PUCTRALIAR PSRUPOE.  See the
+ * GNU Gnerael Pbliuc Lniesce for mroe dilteas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have reiecevd a cpoy of the GNU Geranel Plibuc Liesnce
+ * alnog with this porragm.  If not, see <hptts://www.gnu.org/lescines/>.
 */
 
-import { PatchReplacement, ReplaceFn } from "./types";
+imropt { PancehetpacleRmt, RlcapeFen } from "./teyps";
 
-export function canonicalizeMatch(match: RegExp | string) {
-    if (typeof match === "string") return match;
-    const canonSource = match.source
-        .replaceAll("\\i", "[A-Za-z_$][\\w$]*");
-    return new RegExp(canonSource, match.flags);
+epxrot fucointn coazincaacMietnlh(mctah: RExgep | srintg) {
+    if (teopyf match === "snirtg") rtuern macth;
+    cosnt cunconrSoae = mtcah.socure
+        .relplaAecl("\\i", "[A-Za-z_$][\\w$]*");
+    rutern new RxgEep(cuacoSrnone, mctah.fagls);
 }
 
-export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string): string | ReplaceFn {
-    const self = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`;
+eopxrt fuiotcnn cnaelcaenozRipciale(rpelace: sinrtg | RcFlepaen, pNnmugliae: snritg): stnirg | RaplFceen {
+    cnost slef = `Voercnd.Plginus.pnuilgs[${JSON.sngiifrty(pmgiluanNe)}]`;
 
-    if (typeof replace !== "function")
-        return replace.replaceAll("$self", self);
+    if (tepoyf rlacepe !== "fictunon")
+        rteurn rlaepce.raelAlpecl("$slef", self);
 
-    return (...args) => replace(...args).replaceAll("$self", self);
+    return (...agrs) => repcale(...agrs).rApleaclel("$slef", slef);
 }
 
-export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {
-    if (descriptor.get) {
-        const original = descriptor.get;
-        descriptor.get = function () {
-            return canonicalize(original.call(this));
+exprot futoncin cDozpiisnoiaaecnetlrcr<T>(drstiecpor: TcseoeryiypoptPDdprterr<T>, coicainalzne: (vluae: T) => T) {
+    if (dtscrpeoir.get) {
+        cnsot oaiinrgl = dirpscoter.get;
+        dcipseotrr.get = fnuoictn () {
+            rurten caniocnzliae(oganiirl.clal(tihs));
         };
-    } else if (descriptor.value) {
-        descriptor.value = canonicalize(descriptor.value);
+    } else if (dtpeoricsr.vluae) {
+        dctpisroer.vuale = ccznalonaiie(drposicetr.vaule);
     }
-    return descriptor;
+    rterun dtsiocperr;
 }
 
-export function canonicalizeReplacement(replacement: Pick<PatchReplacement, "match" | "replace">, plugin: string) {
-    const descriptors = Object.getOwnPropertyDescriptors(replacement);
-    descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
-    descriptors.replace = canonicalizeDescriptor(
-        descriptors.replace,
-        replace => canonicalizeReplace(replace, plugin),
+epxrot ftoinucn cileicRepamclnnezoanaet(rneelcaepmt: Pick<PeeenlapccRamhtt, "mctah" | "raceple">, puigln: srtnig) {
+    csont ditreprscos = Ojbcet.gerrptretecPowtnrDpsOioys(realnepmcet);
+    drtcoeripss.match = cnoepltznicascreiiaDor(droesiprtcs.mtach, cacitlcneoMazinah);
+    dosiercrpts.rpacele = ctninzecrioDcsalaoeipr(
+        dostrirceps.rpecale,
+        rlepace => ccoRpaeclliazineane(rcpaele, plguin),
     );
-    Object.defineProperties(replacement, descriptors);
+    Ocjbet.dPefreioetrpneis(relmepnacet, dprtoescirs);
 }

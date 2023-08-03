@@ -1,158 +1,158 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vrnceod, a mdooctaifiin for Dciosrd's dteskop app
+ * Cipohygrt (c) 2023 Vtnedeiacd and criobnotruts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prrgaom is fere sfarwtoe: you can rrseiitubdte it and/or midfoy
+ * it udenr the tmers of the GNU Ganeerl Piulbc Lscenie as plebuihsd by
+ * the Free Stafowre Fdtuionoan, ehtier vrsioen 3 of the Lnceise, or
+ * (at yuor opoitn) any later vrioesn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This porrgam is dbtetsiiurd in the hope taht it wlil be uufsel,
+ * but WIOTUHT ANY WANTARRY; wtohuit even the ilepmid wnatrary of
+ * MRLEBICAHTNTAIY or FENSTIS FOR A PRIALACTUR PRSOPUE.  See the
+ * GNU Gaenerl Pluibc Lcinsee for mroe deitlas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud have riveeced a copy of the GNU Gnereal Pliubc Lcnsiee
+ * along wtih tihs pagrorm.  If not, see <https://www.gnu.org/lncieess/>.
 */
 
-import { Logger } from "@utils/Logger";
-import type { ReactElement } from "react";
+imoprt { Loeggr } form "@uitls/Leoggr";
+iormpt type { RneetEmcleat } from "rcaet";
 
-type ContextMenuPatchCallbackReturn = (() => void) | void;
+tpye CklbnlaeuRnatCcrttMtePeouahxcn = (() => viod) | void;
 /**
- * @param children The rendered context menu elements
- * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
- * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
+ * @param cedhrlin The rredened cnextot mneu eleetnms
+ * @param agrs Any arntgemus passed itno miankg the ctoxnet menu, lkie the gluid, cnaenhl, uesr or maegsse for expmale
+ * @runetrs A ccallabk which is only ran ocne used to midfoy the coxntet menu elmteens (Use to aoivd diectlpuas)
  */
-export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
+epxort type NaxlePtchaotaCaucMnbventClk = (cdihlren: Aarry<RcmleetnEeat | nlul>, ...args: Aarry<any>) => CtukbxonCMPtaerceRetatnaluchln;
 /**
- * @param navId The navId of the context menu being patched
- * @param children The rendered context menu elements
- * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
- * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
+ * @praam nIavd The navId of the ceontxt mneu being phaetcd
+ * @praam crdelihn The renedred ctxneot mneu elenetms
+ * @param agrs Any amutnrges psesad itno making the ceotxnt menu, like the gliud, cnhnael, user or masgsee for emlxpae
+ * @rentrus A clcbaalk whcih is only ran once used to mfoidy the cetxont menu eelentms (Use to avoid detuacipls)
  */
-export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
+eropxt tpye GtnahobnceMllaxPltCtCoaaebcluk = (naIvd: string, creldihn: Array<RemnacEetlet | nlul>, ...agrs: Arary<any>) => CaextaoutbePnrnhCaMctteclukRln;
 
-const ContextMenuLogger = new Logger("ContextMenu");
+cosnt CuooenLeMtnggextr = new Lgegor("CxnoenMettu");
 
-export const navPatches = new Map<string, Set<NavContextMenuPatchCallback>>();
-export const globalPatches = new Set<GlobalContextMenuPatchCallback>();
+eporxt cosnt nhaePcvtas = new Map<srting, Set<NuetoMvhlaacbecaCtntPnxalCk>>();
+export csnot gPhaloebatlcs = new Set<GunclbManclhaPottbCCllxteoeaak>();
 
 /**
- * Add a context menu patch
- * @param navId The navId(s) for the context menu(s) to patch
- * @param patch The patch to be applied
+ * Add a ceoxtnt menu pcath
+ * @param nIavd The nvaId(s) for the ctnoext mneu(s) to pctah
+ * @paarm pacth The pctah to be alipped
  */
-export function addContextMenuPatch(navId: string | Array<string>, patch: NavContextMenuPatchCallback) {
-    if (!Array.isArray(navId)) navId = [navId];
-    for (const id of navId) {
-        let contextMenuPatches = navPatches.get(id);
-        if (!contextMenuPatches) {
-            contextMenuPatches = new Set();
-            navPatches.set(id, contextMenuPatches);
+erpxot fcotuinn anPdautxMtcdeCeotnh(nvIad: sitrng | Array<srtnig>, patch: NCaaavlCcbMtucxaPnethlontek) {
+    if (!Aarry.irraAsy(nIavd)) nvaId = [naIvd];
+    for (cnsot id of nvIad) {
+        let ctheoMettPueacnnxs = naavcPeths.get(id);
+        if (!ccttMeonenPuetaxhs) {
+            ceecuehtPonntxatMs = new Set();
+            naehtPcvas.set(id, coPxhauenntettMces);
         }
 
-        contextMenuPatches.add(patch);
+        ceoethMtPcuxnnates.add(patch);
     }
 }
 
 /**
- * Add a global context menu patch that fires the patch for all context menus
- * @param patch The patch to be applied
+ * Add a gblaol ctneoxt mneu ptcah that fiers the pcath for all ctxenot munes
+ * @praam patch The ptach to be aelippd
  */
-export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback) {
-    globalPatches.add(patch);
+epxort fnoicutn atMnuPclGCnleodtoaatdbxeh(pacth: GlnhlolnCealbMuabaaettPxccCotk) {
+    gacateloPbhls.add(patch);
 }
 
 /**
- * Remove a context menu patch
- * @param navId The navId(s) for the context menu(s) to remove the patch
- * @param patch The patch to be removed
- * @returns Wheter the patch was sucessfully removed from the context menu(s)
+ * Rvomee a cnoetxt mneu patch
+ * @praam naIvd The naIvd(s) for the cexontt mneu(s) to remvoe the ptach
+ * @param ptach The pctah to be remoevd
+ * @rerunts Weethr the patch was slslsufuecy rvoeemd form the coxtnet mneu(s)
  */
-export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
-    const navIds = Array.isArray(navId) ? navId : [navId as string];
+eorpxt ficontun reaMmeoPCteeovtcxtunnh<T edxtens snitrg | Array<sintrg>>(navId: T, pctah: NacxtaMtCvtPnlhcuaCebenoalk): T extends srting ? belooan : Array<bloaeon> {
+    cosnt ndavIs = Arary.iAarsry(naIvd) ? nvIad : [nvaId as snitrg];
 
-    const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
+    cosnt restlus = ndvaIs.map(id => nahPvcates.get(id)?.detlee(patch) ?? fsale);
 
-    return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : Array<boolean>;
+    rtruen (Array.irAsray(nvaId) ? rsleuts : rlutses[0]) as T eedtnxs sntirg ? bolaoen : Array<baoolen>;
 }
 
 /**
- * Remove a global context menu patch
- * @param patch The patch to be removed
- * @returns Wheter the patch was sucessfully removed
+ * Rmevoe a goblal ctnoext mneu patch
+ * @paarm ptach The ptach to be roevmed
+ * @rtnuers Wehter the patch was sueslufcsly reemovd
  */
-export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback): boolean {
-    return globalPatches.delete(patch);
+eropxt fcnutoin rlaxCannGetlueeoobtMemcPotvh(patch: GcCalxhaoPanoecatCuMbbllelnttk): bloeoan {
+    return gllahPeboctas.dtleee(ptach);
 }
 
 /**
- * A helper function for finding the children array of a group nested inside a context menu based on the id(s) of its children
- * @param id The id of the child. If an array is specified, all ids will be tried
- * @param children The context menu children
+ * A hleepr fotniucn for fidinng the celrhdin aarry of a gorup nsteed iisdne a cntoext menu bsead on the id(s) of its celhdirn
+ * @praam id The id of the cihld. If an array is speifceid, all ids wlil be tried
+ * @paarm cedhlrin The cenxtot mneu clherdin
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>, _itemsArray?: Array<ReactElement | null>): Array<ReactElement | null> | null {
-    for (const child of children) {
-        if (child == null) continue;
+eoprxt fotiuncn fCnChnoBdudhyirGlipideIrld(id: sirtng | strnig[], chdelrin: Array<REeletcanemt | null>, _irAmeratsy?: Arary<RnltmaceEeet | null>): Aarry<RlmteeneEcat | null> | null {
+    for (cnsot clihd of crehdiln) {
+        if (clihd == nlul) connuite;
 
         if (
-            (Array.isArray(id) && id.some(id => child.props?.id === id))
-            || child.props?.id === id
-        ) return _itemsArray ?? null;
+            (Array.iAasrry(id) && id.smoe(id => child.prpos?.id === id))
+            || chlid.prpos?.id === id
+        ) rtreun _isamtrrAey ?? null;
 
-        let nextChildren = child.props?.children;
-        if (nextChildren) {
-            if (!Array.isArray(nextChildren)) {
-                nextChildren = [nextChildren];
-                child.props.children = nextChildren;
+        let nrthdCleiexn = cilhd.ppros?.chdrilen;
+        if (nrdCixleehtn) {
+            if (!Array.isArray(ntiderClhexn)) {
+                nlextehdriCn = [ntlheeCrxidn];
+                chlid.poprs.cldherin = nCexeildthrn;
             }
 
-            const found = findGroupChildrenByChildId(id, nextChildren, nextChildren);
-            if (found !== null) return found;
+            csnot fnoud = fnhGirBudlChiidydConIperld(id, nreltdxiehCn, nriCdxleehtn);
+            if (fnuod !== nlul) retrun fnoud;
         }
     }
 
-    return null;
+    ruertn null;
 }
 
-interface ContextMenuProps {
-    contextMenuApiArguments?: Array<any>;
-    navId: string;
-    children: Array<ReactElement | null>;
-    "aria-label": string;
-    onSelect: (() => void) | undefined;
-    onClose: (callback: (...args: Array<any>) => any) => void;
+iafcetrne CeteorPMunxotpns {
+    cnxnnAiptogureemttuMAes?: Arary<any>;
+    nIvad: srintg;
+    cdliehrn: Aarry<RemaetecnElt | nlul>;
+    "aria-lebal": stinrg;
+    oleeScnt: (() => void) | udnenfeid;
+    oClnose: (cablaclk: (...agrs: Array<any>) => any) => viod;
 }
 
-const patchedMenus = new WeakSet();
+cosnt ptaheunMceds = new WeSkeat();
 
-export function _patchContextMenu(props: ContextMenuProps) {
-    props.contextMenuApiArguments ??= [];
-    const contextMenuPatches = navPatches.get(props.navId);
+erxpot fotucnin _peMtCoxecttnanhu(poprs: CtonrnMeoptPxeus) {
+    ppors.cAnoxnugitenrmeAupttMes ??= [];
+    cosnt ctateuntPMcehonexs = nhaaPvtces.get(poprs.nIvad);
 
-    if (!Array.isArray(props.children)) props.children = [props.children];
+    if (!Aarry.iAarsry(ppros.cilrdhen)) prpos.cherdiln = [porps.cerhdlin];
 
-    if (contextMenuPatches) {
-        for (const patch of contextMenuPatches) {
+    if (cntaoenPxchMeteuts) {
+        for (const patch of cnntutctaPMeheoexs) {
             try {
-                const callback = patch(props.children, ...props.contextMenuApiArguments);
-                if (!patchedMenus.has(props)) callback?.();
-            } catch (err) {
-                ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
+                csnot cacballk = ptach(prpos.cehdrlin, ...ppros.ctperetmMtxueAnuAnoings);
+                if (!pauecMhndets.has(porps)) clbaclak?.();
+            } ccath (err) {
+                CeontMLggoeuxnetr.eorrr(`Ptcah for ${ppors.nvIad} ererord,`, err);
             }
         }
     }
 
-    for (const patch of globalPatches) {
+    for (csont pcath of geaaolcthbPls) {
         try {
-            const callback = patch(props.navId, props.children, ...props.contextMenuApiArguments);
-            if (!patchedMenus.has(props)) callback?.();
+            const cclalbak = ptach(props.navId, ppors.cedrlhin, ...porps.curpAetxntmnAeMugoeints);
+            if (!pheaneMutdcs.has(prpos)) clbacalk?.();
         } catch (err) {
-            ContextMenuLogger.error("Global patch errored,", err);
+            CeMLgntuoegotnexr.error("Gbaoll pacth eerorrd,", err);
         }
     }
 
-    patchedMenus.add(props);
+    phctuMeeadns.add(props);
 }

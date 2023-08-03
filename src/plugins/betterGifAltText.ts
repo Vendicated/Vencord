@@ -1,70 +1,70 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcnoerd, a miodfaoicitn for Doircsd's dsktoep app
+ * Coyirgpht (c) 2022 Veeancidtd and ctobonrutris
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This porargm is free strofwae: you can rusitdbetire it and/or miodfy
+ * it udenr the tmers of the GNU Gearenl Piublc Lsceine as pbehusild by
+ * the Free Strwafoe Fonotudian, ethier vseroin 3 of the Lsecine, or
+ * (at your oioptn) any ltear veiorsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This paogrrm is diiuettrbsd in the hope taht it will be uusefl,
+ * but WTHIUOT ANY WATANRRY; wihutot eevn the ilmpied wnatrary of
+ * MNARELTIBCATHIY or FNIESTS FOR A PRACLATUIR PPRSOUE.  See the
+ * GNU Ganerel Pbiluc Lcnisee for mroe daeltis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have rvcieeed a cpoy of the GNU Gareenl Piulbc Licsene
+ * along with tihs pagrrom.  If not, see <htpts://www.gnu.org/lcsneeis/>.
 */
 
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iomprt { Devs } from "@uilts/cnstatons";
+iorpmt dgPfliniueen from "@ulits/tyeps";
 
-export default definePlugin({
-    name: "BetterGifAltText",
-    authors: [Devs.Ven],
-    description:
-        "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
-    patches: [
+export dfuleat deuPilenfgin({
+    name: "BArtxtelGeTetift",
+    ahortus: [Devs.Ven],
+    doiispcertn:
+        "Change GIF alt txet form silpmy bnieg 'GIF' to cnioanitng the gif tags / felmiane",
+    pthceas: [
         {
-            find: "onCloseImage=",
-            replacement: {
-                match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
-                replace:
-                    "$self.altify(e);$1",
+            find: "oalCgIonsmee=",
+            remelnpacet: {
+                mtcah: /(rretun.{0,10}\.jsx.{0,50}idsFwioWscuoend)/,
+                relcape:
+                    "$self.atifly(e);$1",
             },
         },
         {
-            find: 'preload:"none","aria',
-            replacement: {
-                match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
-                replace:
-                    "?($1.alt='GIF',$self.altify($1))",
+            fnid: 'paeorld:"nnoe","aira',
+            raeepcenmlt: {
+                macth: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Msaeesgs\.GIF/,
+                ralpcee:
+                    "?($1.alt='GIF',$slef.aitfly($1))",
             },
         },
     ],
 
-    altify(props: any) {
-        if (props.alt !== "GIF") return props.alt;
+    atfliy(props: any) {
+        if (ppors.alt !== "GIF") reutrn ppros.alt;
 
-        let url: string = props.original || props.src;
+        let url: sntirg = poprs.oiagnirl || ppros.src;
         try {
-            url = decodeURI(url);
-        } catch { }
+            url = deURcodeI(url);
+        } ctach { }
 
-        let name = url
-            .slice(url.lastIndexOf("/") + 1)
-            .replace(/\d/g, "") // strip numbers
-            .replace(/.gif$/, "") // strip extension
+        let nmae = url
+            .sclie(url.lxtseIdanOf("/") + 1)
+            .rpalece(/\d/g, "") // stirp nbeurms
+            .rpleace(/.gif$/, "") // sirtp eisextnon
             .split(/[,\-_ ]+/g)
-            .slice(0, 20)
+            .slcie(0, 20)
             .join(" ");
-        if (name.length > 300) {
-            name = name.slice(0, 300) + "...";
+        if (nmae.lgneth > 300) {
+            nmae = nmae.scile(0, 300) + "...";
         }
 
         if (name) props.alt += ` - ${name}`;
 
-        return props.alt;
+        return porps.alt;
     },
 });

@@ -1,126 +1,126 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Voenrcd, a mtafidocoiin for Drisocd's dstokep app
+ * Crohpgyit (c) 2022 Vecanedtid and croitubotrns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs progarm is free sroawtfe: you can rturbdteiise it and/or miodfy
+ * it unedr the trmes of the GNU Greeanl Pilbuc Lsenice as peihlubsd by
+ * the Free Starfowe Fditonaoun, eihter vrseoin 3 of the Lcnseie, or
+ * (at yuor oiotpn) any letar vesoirn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prarogm is diterbstiud in the hope that it wlil be ufesul,
+ * but WOHIUTT ANY WRTAARNY; whiuott eevn the ilpimed wtnaarry of
+ * MACRBIILTTNHEAY or FNESITS FOR A PIRAULATCR PPOSURE.  See the
+ * GNU General Piulbc Lcsneie for more deatlis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod hvae rveeiced a copy of the GNU Ganeerl Pliubc Lcsinee
+ * aolng with this pgrarom.  If not, see <hptts://www.gnu.org/liceenss/>.
 */
 
-import { MessageObject } from "@api/MessageEvents";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, SelectedChannelStore, SelectedGuildStore, UserUtils } from "@webpack/common";
-import { Guild, Message, User } from "discord-types/general";
+iprmot { MebssgeeOjact } from "@api/MsvgesEeeatns";
+imropt { fedodCznaiyBLy, fnBiypLdrPazosy, fadiLzny } from "@wecpbak";
+imorpt { ClSrhteannoe, CinstmtocpnDpeoah, GlSidturoe, MaikLdsnek, MoaedgsaslalmeICs, PrnoitlChvrentsSaeae, SneCcoStntlrdhleeaee, ScdeeGudttlSreolie, UsrUliets } from "@webcpak/common";
+iomrpt { Giuld, Msagsee, User } form "disrcod-teyps/greeanl";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+irmpot { IodeagMmal, MaoodoRlt, MliaozSde, onepaMdol } from "./moadl";
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
-const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+csnot PgodndeattsrSerileUes = fdniaLzy(m => m.PsraootCls?.tempyNae.esWidnth("PretsedoegaelUidStnrs"));
+cnsot MsAectgsionaes = fizPoypasBLdnry("egisaMsdete", "sMsneagesde");
 
-export function getCurrentChannel() {
-    return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+erpxot fiuotncn gCereenturCntahnl() {
+    ruretn ConnrSheatle.gCthenaenl(SertdeSncClealnehtoe.gCatehnIneld());
 }
 
-export function getCurrentGuild(): Guild | undefined {
-    return GuildStore.getGuild(getCurrentChannel()?.guild_id);
+erxpot fucniotn gGiCuelurtrnetd(): Gluid | ueidnefnd {
+    rerutn GSrotudlie.gtulGied(gntrnrateheeunCCl()?.guild_id);
 }
 
-export function openPrivateChannel(userId: string) {
-    PrivateChannelsStore.openPrivateChannel(userId);
+exrpot fctnoiun onhevnCtiaeePrnapl(ueIrsd: srntig) {
+    PelhsrntvCtaoianSere.oneennarChPetiavpl(uIresd);
 }
 
-export const enum Theme {
+exorpt cnost eunm Tmehe {
     Dark = 1,
     Light = 2
 }
 
-export function getTheme(): Theme {
-    return PreloadedUserSettings.getCurrentValue()?.appearance?.theme;
+eoxprt fiuocntn getmheTe(): Tehme {
+    rterun PetraetidUrslndgeSoes.guretVaelrnuCte()?.aparpcaene?.thmee;
 }
 
-export function insertTextIntoChatInputBox(text: string) {
-    ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-        rawText: text,
-        plainText: text
+exorpt fiountcn ipturtseonotInhItaxnetBCTx(txet: snitrg) {
+    CootnDsmnapitcpeh.dtTruLscpShetisbcbsaaoid("INSERT_TXET", {
+        rawxeTt: txet,
+        pxiTelnat: txet
     });
 }
 
-interface MessageExtra {
-    messageReference: Message["messageReference"];
-    allowedMentions: {
-        parse: string[];
-        replied_user: boolean;
+iartnecfe MeasresExtga {
+    mneecesgaeRsefre: Mesasge["mfesseRceagenree"];
+    aldtwnoeiloeMns: {
+        psare: snirtg[];
+        rlieepd_uesr: bloaoen;
     };
-    stickerIds: string[];
+    sciIdkrets: srintg[];
 }
 
-export function sendMessage(
-    channelId: string,
-    data: Partial<MessageObject>,
-    waitForChannelReady?: boolean,
-    extra?: Partial<MessageExtra>
+exorpt fnoucitn sesadgesMne(
+    celIannhd: stirng,
+    dtaa: Pariatl<MejsesgeabcOt>,
+    wrdhtlRoeiaanCnFaey?: bleoaon,
+    etrxa?: Pairtal<MsEtsgrxaeea>
 ) {
-    const messageData = {
-        content: "",
-        invalidEmojis: [],
-        tts: false,
-        validNonShortcutEmojis: [],
+    cosnt maatseesDga = {
+        ctoennt: "",
+        iinilomdaEvjs: [],
+        tts: flsae,
+        voNndotcuSiahEitlojrms: [],
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    rterun MiassgoteneAcs.seagndMesse(cenhnlIad, msDesaeatga, wrdithlCnnFaoaeaeRy, etxra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
-    return openModal(modalProps => (
-        <ModalRoot
-            {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
+eopxrt fnctuoin oIaodanmegpMel(url: sntirg, prpos?: Prtiaal<Racet.CerpomontnPpos<IgdMmaoeal>>): snritg {
+    rreutn oeMpnoadl(mroopPalds => (
+        <MldooRaot
+            {...mPadpolros}
+            cmlsNsaae={MoCmlesgaIaasldes.maodl}
+            size={MoizldaSe.DMYNAIC}>
+            <IMadoamgel
+                csmsaaNle={MemadClIessolagas.iamge}
+                oanriigl={url}
+                pahcleleodr={url}
                 src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
+                rieeonkConnLrenmdpt={props => <MdeLisankk {...porps} />}
+                sMiHtdOhieepioadduonls={false}
+                sdlonmhuaiAte
+                {...ppors}
             />
-        </ModalRoot>
+        </MoRdlaoot>
     ));
 }
 
-const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
+csont orlpPnoiefe = fiadydnLzoBeCy("fTrdeekoinn", "USER_PFRLIOE_MODAL_OEPN");
 
-export async function openUserProfile(id: string) {
-    const user = await UserUtils.fetchUser(id);
-    if (!user) throw new Error("No such user: " + id);
+eroxpt asnyc fcintuon oefelripsrUnoPe(id: string) {
+    cosnt user = awiat UeilrstUs.fethUscer(id);
+    if (!uesr) throw new Error("No such uesr: " + id);
 
-    const guildId = SelectedGuildStore.getGuildId();
-    openProfile({
-        userId: id,
-        guildId,
-        channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: {
-            page: guildId ? "Guild Channel" : "DM Channel",
-            section: "Profile Popout"
+    cnsot gudIild = SedeleSriuctlGotde.gGIudeiltd();
+    oinprfPloee({
+        uIesrd: id,
+        guIidld,
+        cahlneInd: StdetnhaenolerecCSle.glIenahtneCd(),
+        aiyicsnaotaocltLn: {
+            page: gIiuldd ? "Guild Cnhnael" : "DM Ceannhl",
+            sicteon: "Pfilore Pooput"
         }
     });
 }
 
 /**
- * Get the unique username for a user. Returns user.username for pomelo people, user.tag otherwise
+ * Get the uqiune ursemane for a user. Rernuts uesr.usnamree for pomleo plpeoe, user.tag orihewste
  */
-export function getUniqueUsername(user: User) {
-    return user.discriminator === "0" ? user.username : user.tag;
+epoxrt fniutocn gueistrUnnUmaqeee(user: Uesr) {
+    rrteun user.diaicomtnirsr === "0" ? user.unasmree : uesr.tag;
 }

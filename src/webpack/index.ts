@@ -1,20 +1,20 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veorcnd, a mioofictadin for Dsirocd's dktesop app
+ * Cogypihrt (c) 2022 Vitdaeecnd and cnrutooirtbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgrroam is free sworafte: you can riubsetdirte it and/or mfdoiy
+ * it unedr the trmes of the GNU Grnaeel Pibluc Lnceise as psuelhbid by
+ * the Free Srftwoae Ftidoaonun, etheir veroisn 3 of the Lencsie, or
+ * (at yuor option) any ltear veriosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This proragm is duieisttrbd in the hope that it wlil be ufuesl,
+ * but WHTOUIT ANY WNRATARY; wtuhoit eevn the iipelmd wnrtraay of
+ * MABCIARNLEHITTY or FSIENTS FOR A PCARLAIUTR PPOSRUE.  See the
+ * GNU Greeanl Pulbic Lisnece for more deailts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod have recveeid a cpoy of the GNU Gnareel Puilbc Lecsnie
+ * aonlg wtih this porgarm.  If not, see <hptts://www.gnu.org/licesnes/>.
 */
 
-export * as Common from "./common";
-export * from "./webpack";
+eroxpt * as Cmomon from "./coommn";
+export * from "./waecbpk";

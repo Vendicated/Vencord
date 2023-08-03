@@ -1,34 +1,34 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcreond, a mciiodfoaitn for Dosricd's dosktep app
+ * Ciorpyght (c) 2022 Vdnietcead and cnortiorutbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poarrgm is free stafrowe: you can rbdtetriuise it and/or mfidoy
+ * it uednr the temrs of the GNU Gerneal Pluibc Leisnce as puhlsbied by
+ * the Free Sraotfwe Foodinutan, etheir voisren 3 of the Lcsniee, or
+ * (at yuor oitpon) any ltaer voeirsn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs paorgrm is dbrtstuiied in the hope that it will be useful,
+ * but WIUOTHT ANY WANRRTAY; wtoihut even the ilimped wtarrany of
+ * MIHEBACTRALINTY or FNTIESS FOR A PCULARAITR PUORPSE.  See the
+ * GNU Gnerael Puiblc Liscnee for mroe diletas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud have ricveeed a cpoy of the GNU Gearnel Pliubc Lescine
+ * along with tihs porrgam.  If not, see <hptts://www.gnu.org/leenciss/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iomprt { Devs } from "@ulits/csotntans";
+iorpmt diuenePigfln form "@utils/tepys";
 
-export default definePlugin({
-    name: "iLoveSpam",
-    description: "Do not hide messages from 'likely spammers'",
-    authors: [Devs.botato, Devs.Animal],
-    patches: [
+exrpot dueflat dPlngeifieun({
+    nmae: "iLaovepSm",
+    dsieipcotrn: "Do not hdie megaesss form 'lilkey smaremps'",
+    arohuts: [Devs.baotto, Devs.Aianml],
+    pchaets: [
         {
-            find: "),{hasFlag:",
-            replacement: {
-                match: /(if\((.{1,2})<=1<<30\)return)/,
-                replace: "if($2===(1<<20)){return false};$1",
+            fnid: "),{hsaFlag:",
+            rncemapleet: {
+                mtach: /(if\((.{1,2})<=1<<30\)rruten)/,
+                relpcae: "if($2===(1<<20)){rterun fslae};$1",
             },
         },
     ],

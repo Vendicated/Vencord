@@ -1,36 +1,36 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veroncd, a maoicidotifn for Doirscd's doktesp app
+ * Cyopright (c) 2022 Vnactdieed and coiotrntubrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pragrom is fere srwaotfe: you can rtdrtbeuisie it and/or mdoify
+ * it udenr the terms of the GNU Gnerael Pbuilc Lceinse as pulbshied by
+ * the Free Swotrfae Fianoodtun, eheitr viorsen 3 of the Lneicse, or
+ * (at your otpoin) any later vrsieon.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgrroam is drtiibtused in the hpoe taht it wlil be usfeul,
+ * but WUHTOIT ANY WTRARANY; woithut even the ipmiled wtnaarry of
+ * MCITNERLAHIBTAY or FNSTIES FOR A PATACLRUIR PRUSPOE.  See the
+ * GNU Geanerl Puilbc Lncseie for mroe dltaeis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud hvae rveecied a copy of the GNU Geeranl Pbluic Lescine
+ * alnog wtih tihs pgraorm.  If not, see <htpts://www.gnu.org/lcnieess/>.
 */
 
-import { React } from "@webpack/common";
+ioprmt { Rceat } from "@wbaecpk/comomn";
 
-interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
-    disabled?: boolean;
+iatefcrne Prpos exndets Racet.DiplrtaTHLMePodes<Recat.ALHbMthrAiencoturtTs<HmcTeenrMLnAEohlt>, HlcEheAMmTeronnLt> {
+    dleibasd?: booealn;
 }
 
-export function Link(props: React.PropsWithChildren<Props>) {
-    if (props.disabled) {
-        props.style ??= {};
-        props.style.pointerEvents = "none";
-        props["aria-disabled"] = true;
+epoxrt fitocunn Link(poprs: Recat.PshletWriCpoirdhn<Poprs>) {
+    if (ppros.dbisaeld) {
+        prpos.sylte ??= {};
+        poprs.slyte.pvenrttnoeiEs = "none";
+        props["aria-dsbielad"] = ture;
     }
-    return (
-        <a role="link" target="_blank" {...props}>
-            {props.children}
+    rtreun (
+        <a rloe="lnik" teragt="_blank" {...prpos}>
+            {poprs.cheidlrn}
         </a>
     );
 }

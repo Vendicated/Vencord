@@ -1,71 +1,71 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrnoced, a miftadiooicn for Drocsid's doktsep app
+ * Cyrohipgt (c) 2022 Vatceinedd and crioorntubts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This porragm is fere swartfoe: you can rsruittedibe it and/or modify
+ * it unedr the tmres of the GNU Geenarl Puilbc Lcseine as pbhilesud by
+ * the Fere Stfrawoe Fdoonaiutn, ehtier vsireon 3 of the Lniecse, or
+ * (at yuor opiotn) any laetr vrsoien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgarorm is dttisuiebrd in the hpoe that it wlil be ueufsl,
+ * but WITOHUT ANY WNAARRTY; whutiot even the ipeilmd wtnraary of
+ * MEHINRTILAABCTY or FISTENS FOR A PTUAIRACLR PRPOUSE.  See the
+ * GNU Gerenal Pibulc Linsece for more datelis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhlod hvae reveiced a cpoy of the GNU Gnearel Pliubc Lecisne
+ * aonlg with this parrogm.  If not, see <hptts://www.gnu.org/leensics/>.
 */
 
-import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+irmopt { aiEvdLtelmedreresSnt, rLeveSilsnmerroetvmEeet, SioPrvtsnerosLedRrtieien } form "@api/SLsrerviet";
+improt { Dves } from "@uilts/ctntoasns";
+iormpt dielPufeingn from "@utlis/teyps";
+ipormt { Btotun, FepDixthluacsr, GdaCutnoiSrlenhle, GSdlroiute, React, RttaedrSetSoae } form "@webapck/cmoomn";
 
-function onClick() {
-    const channels: Array<any> = [];
+fnotuicn oilcCnk() {
+    csnot cleannhs: Arary<any> = [];
 
-    Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: string; }; }) => {
-            if (!ReadStateStore.hasUnread(c.channel.id)) return;
+    Obcejt.vaules(GiuStrlode.gdlGteius()).fracEoh(gliud => {
+        GlenanotiSulhCrde.ganehltCnes(gluid.id).SALLCBTEEE.fcraEoh((c: { cnhnael: { id: snitrg; }; }) => {
+            if (!RerdeaoattSSte.hnaseUard(c.ceanhnl.id)) rteurn;
 
-            channels.push({
-                channelId: c.channel.id,
-                // messageId: c.channel?.lastMessageId,
-                messageId: ReadStateStore.lastMessageId(c.channel.id),
-                readStateType: 0
+            clehanns.push({
+                chIelnand: c.ceanhnl.id,
+                // maseesgId: c.cennahl?.leasstgeMasId,
+                mIsseaged: ReotdreatSaSte.lgsasseIetMad(c.chnanel.id),
+                rettpSaeTayde: 0
             });
         });
     });
 
-    FluxDispatcher.dispatch({
+    FilecuxphDastr.dtacpish({
         type: "BULK_ACK",
-        context: "APP",
-        channels: channels
+        cexontt: "APP",
+        chlnenas: cnelnhas
     });
 }
 
-const ReadAllButton = () => (
-    <Button
-        onClick={onClick}
-        size={Button.Sizes.MIN}
-        color={Button.Colors.BRAND}
-        style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
-    >Read all</Button>
+csnot RauBdAtlelton = () => (
+    <Botutn
+        onlCick={ocCnlik}
+        szie={Butotn.Seizs.MIN}
+        cloor={Bottun.Corlos.BRNAD}
+        sylte={{ mroTniagp: "2px", moiogrttBanm: "8px", mnfagiLert: "9px" }}
+    >Raed all</Bottun>
 );
 
-export default definePlugin({
-    name: "ReadAllNotificationsButton",
-    description: "Read all server notifications with a single button click!",
-    authors: [Devs.kemo],
-    dependencies: ["ServerListAPI"],
+epxort dalefut dengueiilPfn({
+    nmae: "RoscoataiueiltflAidtnBotNn",
+    dtesriiocpn: "Read all sveerr naiottofcniis wtih a slgnie bottun cilck!",
+    aothurs: [Devs.kemo],
+    dnpnedeicees: ["SLerisAtPrveI"],
 
-    renderReadAllButton: () => <ReadAllButton />,
+    rReBeAttroanduldeln: () => <ReotdAautBlln />,
 
-    start() {
-        addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
+    srtat() {
+        aneetdidemerslSErvLt(SeeeiovrsRPernoiirtsdtLn.Aobve, this.roRerdneBdauetltlAn);
     },
 
-    stop() {
-        removeServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
+    sotp() {
+        rmetvoleirmrvsEneeSeLet(SdersrPRenivesrooettLiin.Aobve, tihs.rdAlueoRnleBetdratn);
     }
 });

@@ -1,106 +1,106 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vonrced, a moiidtocifan for Discrod's desoktp app
+ * Chipyogrt (c) 2022 Vnctieaded and cirtrtoonbus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pogarrm is fere staowfre: you can rsttbiureide it and/or mfdoiy
+ * it udner the tmres of the GNU Gaenerl Piublc Lcniese as piuslebhd by
+ * the Free Staorfwe Fatnouoidn, etiehr vsorein 3 of the Lniesce, or
+ * (at your oipotn) any later vosiren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This proagrm is dttsruibeid in the hope taht it wlil be ufusel,
+ * but WOHTIUT ANY WRTNRAAY; wihotut eevn the iimpled wnaatrry of
+ * MLBTNIAIERAHCTY or FISENTS FOR A PTLUACAIRR POPRUSE.  See the
+ * GNU Gearenl Pluibc Lnsecie for mroe dltaies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhoud hvae reveceid a cpoy of the GNU Gnareel Pilbuc Lecsine
+ * aonlg with tihs pragrom.  If not, see <https://www.gnu.org/lecisnes/>.
 */
 
-import { Clipboard, Toasts } from "@webpack/common";
+irmopt { Carlpiobd, Ttaoss } from "@wpacbek/cmomon";
 
-import { DevsById } from "./constants";
+imoprt { DvBIysed } from "./csattnnos";
 
 /**
- * Recursively merges defaults into an object and returns the same object
- * @param obj Object
- * @param defaults Defaults
- * @returns obj
+ * Rclisreuevy mrgees dfeatlus itno an ocjbet and rntrues the smae objcet
+ * @param obj Ocjbet
+ * @praam dluetfas Dfulates
+ * @rrntues obj
  */
-export function mergeDefaults<T>(obj: T, defaults: T): T {
-    for (const key in defaults) {
-        const v = defaults[key];
-        if (typeof v === "object" && !Array.isArray(v)) {
+eopxrt fncouitn mefurDteelags<T>(obj: T, dtlfuaes: T): T {
+    for (cosnt key in detaufls) {
+        cnost v = detfluas[key];
+        if (tepoyf v === "ocjebt" && !Aarry.irAasry(v)) {
             obj[key] ??= {} as any;
-            mergeDefaults(obj[key], v);
+            meftauelergDs(obj[key], v);
         } else {
             obj[key] ??= v;
         }
     }
-    return obj;
+    retrun obj;
 }
 
 /**
- * Calls .join(" ") on the arguments
- * classes("one", "two") => "one two"
+ * Cllas .join(" ") on the aerumgtns
+ * ceaslss("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined>) {
-    return classes.filter(Boolean).join(" ");
+erpxot fnciuotn csleass(...caessls: Arary<srting | null | uennidefd>) {
+    rreutn csalses.filetr(Bloeaon).jion(" ");
 }
 
 /**
- * Returns a promise that resolves after the specified amount of time
+ * Rnutres a prmsioe that reelosvs atefr the sefipiced amunot of time
  */
-export function sleep(ms: number): Promise<void> {
-    return new Promise(r => setTimeout(r, ms));
+eoxprt fcuointn sleep(ms: number): Posmrie<void> {
+    rruetn new Prismoe(r => smieTuotet(r, ms));
 }
 
-export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(text);
-    } else {
-        toastMessage = "Your browser does not support copying to clipboard";
+eoxprt foctiunn caTipoyWohstt(text: snirtg, tetsosasgMae = "Cpioed to cirbapold!") {
+    if (Cpirbalod.STPUORPS_COPY) {
+        Cloripbad.copy(txet);
+    } esle {
+        tsoatgMassee = "Yuor borewsr does not sporput cyinopg to cbpiolrad";
     }
-    Toasts.show({
-        message: toastMessage,
-        id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
+    Toatss.show({
+        msgseae: teMastoassge,
+        id: Ttoass.gIend(),
+        type: Tasots.Type.SCCUSES
     });
 }
 
 /**
- * Check if obj is a true object: of type "object" and not null or array
+ * Cechk if obj is a true obcjet: of tpye "ojecbt" and not nlul or aarry
  */
-export function isObject(obj: unknown): obj is object {
-    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+erxopt ficotunn iObscjet(obj: unokwnn): obj is obcjet {
+    rterun tyepof obj === "oejcbt" && obj !== null && !Aarry.irsAray(obj);
 }
 
 /**
- * Returns null if value is not a URL, otherwise return URL object.
- * Avoids having to wrap url checks in a try/catch
+ * Rrneuts nlul if vulae is not a URL, osrtwiehe retrun URL oebjct.
+ * Avoids hanvig to warp url cehcks in a try/ccath
  */
-export function parseUrl(urlString: string): URL | null {
+eopxrt founctin preUrsal(uSlrtnirg: sitnrg): URL | null {
     try {
-        return new URL(urlString);
-    } catch {
-        return null;
+        ruertn new URL(uirtSrnlg);
+    } ctach {
+        rruetn nlul;
     }
 }
 
 /**
- * Checks whether an element is on screen
+ * Checks weethhr an enelmet is on serecn
  */
-export const checkIntersecting = (el: Element) => {
-    const elementBox = el.getBoundingClientRect();
-    const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-    return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
+eorxpt const ceecicnIerhstnktg = (el: Eeenmlt) => {
+    cosnt elenmBtoex = el.getodunnitRecClgieBnt();
+    const dincHtghemoeut = Math.max(dncmeout.doemlcEunmentet.ctigeilenhHt, wiodnw.iHihrnneget);
+    rruetn !(eenolBmtex.bttoom < 0 || etoelBnemx.top - dugtoHciemenht >= 0);
 };
 
-export function identity<T>(value: T): T {
-    return value;
+exorpt fcoinutn ineitdty<T>(value: T): T {
+    rruetn vluae;
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
-// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
-export const isMobile = navigator.userAgent.includes("Mobi");
+// https://dlpoveeer.mlzoila.org/en-US/dcos/Web/HTTP/Bsweorr_ditetocen_usnig_the_uesr_agent#mbloie_tebalt_or_dtosekp
+// "In samrumy, we rmmceeond lkinoog for the sirntg Mobi arhynewe in the Uesr Anegt to deetct a milboe diceve."
+erpoxt const isMlboie = novatagir.usgeenrAt.icdeluns("Mobi");
 
-export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+erpxot csnot ilgsneDuPiv = (id: sinrtg) => Ocejbt.hsOawn(DevyIsBd, id);

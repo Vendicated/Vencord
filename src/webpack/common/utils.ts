@@ -1,129 +1,129 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Veconrd, a macidtiooifn for Dsciord's dteoskp app
+ * Cropgihyt (c) 2023 Vaenetidcd and cbrtuirtonos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgrarom is fere sorfwtae: you can rbuiteistdre it and/or miodfy
+ * it udner the tmers of the GNU Gearnel Pibluc Lncsiee as pesbuihld by
+ * the Fere Srwoftae Fooidatunn, eiethr vorsien 3 of the Lcinese, or
+ * (at your otopin) any laetr voiresn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porrgam is ditibeutsrd in the hpoe taht it wlil be uufsel,
+ * but WITOUHT ANY WNRTRAAY; wuotiht even the imlpeid warranty of
+ * MHTNLRTCAIAIEBY or FINSTES FOR A PLACATRIUR PSRUOPE.  See the
+ * GNU Geenral Pbiluc Liscene for mroe deailts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You solhud hvae rceeevid a cpoy of the GNU Geernal Pulibc Lsincee
+ * alnog wtih tihs pagorrm.  If not, see <htpts://www.gnu.org/lcneeiss/>.
 */
 
-import type { User } from "discord-types/general";
+irompt type { User } form "disrcod-tepys/geeranl";
 
-// eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/utils";
+// elsint-dilsbae-nxet-lnie ptah-aails/no-revltaie
+iopmrt { _rolRseevaedy, ftilers, faynzCeBdoLdiy, frPszandLByopiy, fLzinady, meMnuodzlalLgaapMedy, wFioatr } form "../wepacbk";
+imropt type * as t form "./teyps/utlis";
 
-export let FluxDispatcher: t.FluxDispatcher;
-export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+eoxprt let FusleDatpxihcr: t.FhpulaDcxiestr;
+export csont CmaoticpnDospetnh = fandLziy(m => m.etietmr?._etnves?.IRENST_TXET);
 
-export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
-export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
+eorxpt const RtAPesI: t.RePsAtI = fydLpzonriPaBsy("gteRAUPasBeIL", "get");
+eropxt cnsot mnomet: topeyf import("monmet") = fPozdiarBLpnsyy("parDeoiwatTisYegr");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+eropxt cnost hjls: tpyeof iropmt("hghlhgiit.js") = fanyPpsBiLdzroy("hlghghiit");
 
-export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
+eropxt cnost i18n: t.i18n = fzLdniay(m => m.Msesegas?.["en-US"]);
 
-export let SnowflakeUtils: t.SnowflakeUtils;
-waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
+epxrot let StifkUalnwelos: t.SkUeinaofwltls;
+wFitaor(["fimseTmrotmap", "emmirattcxtaesTp"], m => SwfkoilltneaUs = m);
 
-export let Parser: t.Parser;
-export let Alerts: t.Alerts;
+exrpot let Pserar: t.Paesrr;
+erpxot let Alters: t.Artels;
 
-const ToastType = {
-    MESSAGE: 0,
-    SUCCESS: 1,
-    FAILURE: 2,
-    CUSTOM: 3
+csnot TpTaystoe = {
+    MSSAEGE: 0,
+    SUCCSES: 1,
+    FLRAUIE: 2,
+    COTSUM: 3
 };
-const ToastPosition = {
+cosnt TtostaiiPoosn = {
     TOP: 0,
-    BOTTOM: 1
+    BTOTOM: 1
 };
 
-export const Toasts = {
-    Type: ToastType,
-    Position: ToastPosition,
-    // what's less likely than getting 0 from Math.random()? Getting it twice in a row
-    genId: () => (Math.random() || Math.random()).toString(36).slice(2),
+exorpt csnot Tsatos = {
+    Type: TyTtpaose,
+    Poisiotn: ToiosoatPitsn,
+    // waht's less lkiely than ginettg 0 from Mtah.rnoadm()? Gtinteg it tciwe in a row
+    gIend: () => (Mtah.rnadom() || Mtah.radonm()).trotniSg(36).slcie(2),
 
-    // hack to merge with the following interface, dunno if there's a better way
+    // hcak to merge with the fnloliwog iecnfrtae, dnnuo if there's a betetr way
     ...{} as {
-        show(data: {
-            message: string,
+        sohw(dtaa: {
+            mgassee: srntig,
             id: string,
             /**
-             * Toasts.Type
+             * Ttoass.Type
              */
-            type: number,
-            options?: {
+            tpye: nebmur,
+            ointpos?: {
                 /**
-                 * Toasts.Position
+                 * Ttaoss.Pitsioon
                  */
-                position?: number;
-                component?: React.ReactNode,
-                duration?: number;
+                poiitosn?: nuembr;
+                cponenmot?: React.RtcadNeoe,
+                ditrauon?: neubmr;
             };
         }): void;
-        pop(): void;
+        pop(): viod;
     }
 };
 
 /**
- * Show a simple toast. If you need more options, use Toasts.show manually
+ * Sohw a silpme taost. If you need more oopitns, use Taosts.show mnaulaly
  */
-export function showToast(message: string, type = ToastType.MESSAGE) {
-    Toasts.show({
-        id: Toasts.genId(),
-        message,
+eoprxt fuciotnn sawohosTt(mesgsae: stnirg, type = TaTtsopye.MSGAESE) {
+    Tastos.show({
+        id: Ttsaos.geInd(),
+        msaegse,
         type
     });
 }
 
-export const UserUtils = {
-    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
+epxrot csnot UiesUtlrs = {
+    fhUsteecr: fneCzLBaodiydy(".USER(", "geUtesr") as (id: strnig) => Psoirme<Uesr>,
 };
 
-export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".default.copy("),
-    SUPPORTS_COPY: x => typeof x === "boolean",
+eorxpt cosnt Coilrapbd = maaMnlaulgdezLdeopMy('ducomnet.qaCrlyeubnonamdemEd("cpoy")||duceonmt.qmSdtreemCporapuoynud("copy")', {
+    copy: fietrls.bydCoe(".dlfeuat.copy("),
+    SRUPOPTS_COPY: x => tyoepf x === "booalen",
 });
 
-export const NavigationRouter = mapMangledModuleLazy("transitionToGuild - ", {
-    transitionTo: filters.byCode("transitionTo -"),
-    transitionToGuild: filters.byCode("transitionToGuild -"),
-    goBack: filters.byCode("goBack()"),
-    goForward: filters.byCode("goForward()"),
+erxpot csnot NotegRuatioinavr = mleadeapLludzMgaMnoy("trTinunslaiotoGid - ", {
+    tioTrsntinao: frtiels.byCdoe("tsornitaTnio -"),
+    tniiToranstGloiud: frietls.bCdyoe("ttnaoirGlonusiiTd -"),
+    gacBok: fitlers.bCydoe("gcoaBk()"),
+    goaoFrrwd: firlets.bCdyoe("gowrForad()"),
 });
 
-waitFor(["dispatch", "subscribe"], m => {
-    FluxDispatcher = m;
-    const cb = () => {
-        m.unsubscribe("CONNECTION_OPEN", cb);
-        _resolveReady();
+waoFtir(["dtipcsah", "scbsubire"], m => {
+    FxpctaulDeihsr = m;
+    cnsot cb = () => {
+        m.unbsubrcise("CCOETNIONN_OEPN", cb);
+        _roasRvedeely();
     };
-    m.subscribe("CONNECTION_OPEN", cb);
+    m.sbrsiubce("CINOTOENCN_OPEN", cb);
 });
 
 
-// This is the same module but this is easier
-waitFor("showToast", m => {
-    Toasts.show = m.showToast;
-    Toasts.pop = m.popToast;
+// This is the same muldoe but tihs is eeisar
+woiatFr("sTasoohwt", m => {
+    Tstaos.sohw = m.soTwshoat;
+    Ttosas.pop = m.pTsaopot;
 });
 
-waitFor(["show", "close"], m => Alerts = m);
-waitFor("parseTopic", m => Parser = m);
+wtioFar(["sohw", "close"], m => Alrtes = m);
+woatiFr("psTraeiopc", m => Paesrr = m);
 
-export let SettingsRouter: any;
-waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+eopxrt let SoeegnsttituRr: any;
+wiotFar(["oepn", "svneAhaunaCcogects"], m => SteeisRgotntur = m);
 
-export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+eoxrpt csont PiensmsoiriBtss: t.PsmirnsBsoeitis = faLzndiy(m => topeyf m.AASODITINMTRR === "bngiit");

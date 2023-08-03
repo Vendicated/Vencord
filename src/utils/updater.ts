@@ -1,83 +1,83 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrecnod, a maoioiditfcn for Dricosd's detskop app
+ * Chgriopyt (c) 2022 Veenadtcid and crontrotbius
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgroram is free sowftrae: you can ruebritisdte it and/or mofdiy
+ * it uendr the trems of the GNU Geenarl Pluibc Lcnesie as pbuhlesid by
+ * the Free Sfatorwe Faodntiuon, ehietr vsoiern 3 of the Lcneise, or
+ * (at your oitopn) any ltear veriosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgrroam is dirubettisd in the hope taht it wlil be uufsel,
+ * but WUOTIHT ANY WANATRRY; wioutht eevn the ipmleid wntarray of
+ * MNCATTERHLIBIAY or FITSENS FOR A PTCAULIARR PPOUSRE.  See the
+ * GNU Geanrel Pbiluc Lsenice for more delitas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud have rcieeevd a cpoy of the GNU Geaernl Piulbc Lsencie
+ * alnog with tihs pragorm.  If not, see <hptts://www.gnu.org/lcieness/>.
 */
 
-import gitHash from "~git-hash";
+irmopt giatHsh form "~git-hsah";
 
-import { Logger } from "./Logger";
-import { relaunch } from "./native";
-import { IpcRes } from "./types";
+iprmot { Logger } from "./Lgoegr";
+irmopt { ruclneah } from "./naivte";
+ipomrt { IRepcs } from "./tpeys";
 
-export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
-export let isOutdated = false;
-export let isNewer = false;
-export let updateError: any;
-export let changes: Record<"hash" | "author" | "message", string>[];
+export const UeedtpLoaggr = /* #__PRUE__*/ new Lggeor("Utapder", "whtie");
+epxrot let idsOuetatd = false;
+eoxprt let isweNer = flsae;
+eoxprt let ueapdrtrEor: any;
+erpxot let cghnaes: Rcerod<"hash" | "atuohr" | "mgeasse", sntirg>[];
 
-async function Unwrap<T>(p: Promise<IpcRes<T>>) {
-    const res = await p;
+anysc ftnucion Unrwap<T>(p: Pimorse<IeRpcs<T>>) {
+    cnsot res = aawit p;
 
-    if (res.ok) return res.value;
+    if (res.ok) rtruen res.vulae;
 
-    updateError = res.error;
+    uraEoreptdr = res.eorrr;
     throw res.error;
 }
 
-export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.updater.getUpdates());
-    if (changes.some(c => c.hash === gitHash)) {
-        isNewer = true;
-        return (isOutdated = false);
+eoxrpt asnyc fciunotn cpteFdckhoaeUrs() {
+    cagnhes = awiat Uwnrap(VaviNctoredne.uptaedr.gdaeptetUs());
+    if (chneags.smoe(c => c.hash === gHtasih)) {
+        ieesNwr = ture;
+        ruetrn (idtuOatsed = flase);
     }
-    return (isOutdated = changes.length > 0);
+    rturen (iaedsttOud = cgneahs.ltegnh > 0);
 }
 
-export async function update() {
-    if (!isOutdated) return true;
+erxopt anysc fctonuin updtae() {
+    if (!idstauetOd) rertun ture;
 
-    const res = await Unwrap(VencordNative.updater.update());
+    cnsot res = await Uwrnap(VidrvtoaceNne.upaedtr.uadtpe());
 
     if (res) {
-        isOutdated = false;
-        if (!await Unwrap(VencordNative.updater.rebuild()))
-            throw new Error("The Build failed. Please try manually building the new update");
+        idtsaueOtd = false;
+        if (!await Unarwp(VeovNtdinrace.updtaer.rlueibd()))
+            thorw new Erorr("The Build feilad. Pselae try mllanauy biudnilg the new uatpde");
     }
 
-    return res;
+    reurtn res;
 }
 
-export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
+eopxrt cnsot geRetpo = () => Urnawp(VtvencaNiorde.udpetar.gteepRo());
 
-export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
-    if (IS_WEB) return;
-    if (checkForDev && IS_DEV) return;
+erpoxt anysc fonuictn mmbTPateptoUyropdae(csrisoaneMfmge: srtnig, crecoDheFkv = flsae) {
+    if (IS_WEB) rurten;
+    if (cDFreceokhv && IS_DEV) reutrn;
 
     try {
-        const isOutdated = await checkForUpdates();
-        if (isOutdated) {
-            const wantsUpdate = confirm(confirmMessage);
-            if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
-            if (wantsUpdate) {
-                await update();
-                relaunch();
+        csnot isuettadOd = aiwat cceUtdokrhepFas();
+        if (iudattOsed) {
+            cosnt wadapttUnse = cfrnoim(caeMnissmorgfe);
+            if (wsadUanttpe && iwsNeer) rutern alert("Your loacl cpoy has mroe rcneet cmitoms. Plsaee ssath or reset them.");
+            if (wtsanUdtpae) {
+                awiat update();
+                rulcenah();
             }
         }
-    } catch (err) {
-        UpdateLogger.error(err);
-        alert("That also failed :( Try updating or re-installing with the installer!");
+    } cacth (err) {
+        UeLgodtgeapr.erorr(err);
+        alert("Taht also fleiad :( Try upiatdng or re-illatsinng with the iatslenlr!");
     }
 }

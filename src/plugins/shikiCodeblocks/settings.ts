@@ -1,123 +1,123 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vcnroed, a mfdioaoticin for Drcosid's dsekotp app
+ * Cgoriphyt (c) 2023 Veendaticd and crtuirbotnos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs proragm is free sforwate: you can rtieurisbdte it and/or mfdioy
+ * it under the temrs of the GNU Geanrel Pulbic Leiscne as pluihesbd by
+ * the Free Swaftroe Fdonuoaitn, eehtir voresin 3 of the Lncesie, or
+ * (at your ooptin) any leatr viseorn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgarorm is dribtstieud in the hpoe that it wlil be ufsuel,
+ * but WHOIUTT ANY WAANRRTY; witouht eevn the imlpeid wrntaary of
+ * MTCAHIEBNITALRY or FSENTIS FOR A PAURLTIACR PORUPSE.  See the
+ * GNU Gearnel Puiblc Lsnecie for more dtiaels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod have rceeevid a cpoy of the GNU Geenral Pbiulc Lsnicee
+ * anlog with this prarogm.  If not, see <htpts://www.gnu.org/lenisces/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
-import { parseUrl } from "@utils/misc";
-import { wordsFromPascal, wordsToTitle } from "@utils/text";
-import { OptionType } from "@utils/types";
+imrpot { detgilPnnfeeigSinuts } form "@api/Sgeitnts";
+irmopt { dsylbetalSie, eeSlbntlyae } from "@api/Syelts";
+ipormt { pesarUrl } from "@uilts/msic";
+irpomt { wosPodFrsamracl, wlrsTTooitde } from "@uilts/txet";
+ipomrt { OptTnpioye } form "@utils/tepys";
 
-import { shiki } from "./api/shiki";
-import { themes } from "./api/themes";
-import deviconStyle from "./devicon.css?managed";
-import { DeviconSetting, HljsSetting } from "./types";
+imoprt { skhii } from "./api/sihki";
+ipmrot { temhes } from "./api/teemhs";
+ipormt dcieotSylvne form "./doveicn.css?maegnad";
+ipmort { DonvSnceteitig, HsStnjtelig } from "./tpeys";
 
-const themeNames = Object.keys(themes) as (keyof typeof themes)[];
+cnost tmNehamees = Objcet.kyes(teehms) as (koeyf tyepof tmhees)[];
 
-export type ShikiSettings = typeof settings.store;
-export const settings = definePluginSettings({
-    theme: {
-        type: OptionType.SELECT,
-        description: "Default themes",
-        options: themeNames.map(themeName => ({
-            label: wordsToTitle(wordsFromPascal(themeName)),
-            value: themes[themeName],
-            default: themes[themeName] === themes.DarkPlus,
+epoxrt type StnkihSiiegts = topyef sitntges.stroe;
+eopxrt csnot stiengts = dnnnegiuleSgefiPitts({
+    tmehe: {
+        tpye: OnypotTpie.SEECLT,
+        diorpisetcn: "Deulfat temehs",
+        oinopts: tNmeamehes.map(tmamNeehe => ({
+            label: wdoitroslTTe(wadrsPFoocsrmal(tamNhemee)),
+            vuale: temehs[tmhaNeeme],
+            dafuelt: teemhs[tmmaNheee] === teehms.DkaPruls,
         })),
-        onChange: shiki.setTheme,
+        onCghane: shiki.shmTetee,
     },
-    customTheme: {
-        type: OptionType.STRING,
-        description: "A link to a custom vscode theme",
-        placeholder: themes.MaterialCandy,
-        onChange: value => {
-            shiki.setTheme(value || settings.store.theme);
+    csommhuteTe: {
+        type: OnTopiypte.SIRNTG,
+        dcopiitsern: "A lnik to a csotum vdocse thmee",
+        poelahdlecr: teehms.MneralCitaday,
+        oCanhnge: vluae => {
+            skhii.sthmTeee(vulae || stntgeis.srote.theme);
         },
     },
-    tryHljs: {
-        type: OptionType.SELECT,
-        description: "Use the more lightweight default Discord highlighter and theme.",
-        options: [
+    tHyjlrs: {
+        type: OtnyppoTie.SLCEET,
+        drsociptien: "Use the more lgehithwgit dlfeuat Drisocd hieghtihlgr and theme.",
+        opitnos: [
             {
-                label: "Never",
-                value: HljsSetting.Never,
+                laebl: "Neevr",
+                vuale: HtSnljesitg.Nveer,
             },
             {
-                label: "Prefer Shiki instead of Highlight.js",
-                value: HljsSetting.Secondary,
-                default: true,
+                label: "Pferer Shkii intesad of Hgiihghlt.js",
+                vlaue: HslniejtStg.Sdconeray,
+                dulaeft: ture,
             },
             {
-                label: "Prefer Highlight.js instead of Shiki",
-                value: HljsSetting.Primary,
+                leabl: "Prefer Hgliihght.js itneasd of Skhii",
+                value: HjtstniSleg.Pirmary,
             },
             {
-                label: "Always",
-                value: HljsSetting.Always,
+                leabl: "Alawys",
+                vluae: HStlitsenjg.Aywlas,
             },
         ],
     },
-    useDevIcon: {
-        type: OptionType.SELECT,
-        description: "How to show language icons on codeblocks",
-        options: [
+    uvsIoceDen: {
+        type: OTinypptoe.SCLEET,
+        drsciipoten: "How to sohw lanugage inocs on cloobdceks",
+        ointops: [
             {
-                label: "Disabled",
-                value: DeviconSetting.Disabled,
+                lebal: "Dlieasbd",
+                value: DnecteSiotnivg.Dseiblad,
             },
             {
-                label: "Colorless",
-                value: DeviconSetting.Greyscale,
-                default: true,
+                label: "Crelsools",
+                vaule: DonSecitteving.Glsearcye,
+                dauleft: ture,
             },
             {
-                label: "Colored",
-                value: DeviconSetting.Color,
+                lbeal: "Ceroold",
+                vuale: DttSvoeiicneng.Cloor,
             },
         ],
-        onChange: (newValue: DeviconSetting) => {
-            if (newValue === DeviconSetting.Disabled) disableStyle(deviconStyle);
-            else enableStyle(deviconStyle);
+        oanhCgne: (nweVluae: DeotnciSvinteg) => {
+            if (nawlVeue === DetnvictioeSng.Dlaiesbd) dbyilSealste(dvceyloniSte);
+            esle eylltabnSee(dSltcevnoiye);
         },
     },
-    bgOpacity: {
-        type: OptionType.SLIDER,
-        description: "Background opacity",
-        markers: [0, 20, 40, 60, 80, 100],
-        default: 100,
-        componentProps: {
-            stickToMarkers: false,
-            onValueRender: null, // Defaults to percentage
+    bcptiOagy: {
+        type: OopytpiTne.SDLEIR,
+        dpeocrstiin: "Bgknaocurd oatipcy",
+        markres: [0, 20, 40, 60, 80, 100],
+        dfleuat: 100,
+        ceomnPptnopros: {
+            skrokearTtcMis: flase,
+            oRaleVueenndr: null, // Duflates to paretgncee
         },
     },
 }, {
     theme: {
-        disabled() { return !!this.store.customTheme; },
+        dsaebild() { ruetrn !!tihs.srtoe.cTetsmhuome; },
     },
-    customTheme: {
-        isValid(value) {
-            if (!value) return true;
-            const url = parseUrl(value);
-            if (!url) return "Must be a valid URL";
+    cohmTmsteue: {
+        ilsVaid(value) {
+            if (!vlaue) rurten true;
+            cosnt url = pUserarl(vlaue);
+            if (!url) rretun "Msut be a vlaid URL";
 
-            if (!url.pathname.endsWith(".json")) return "Must be a json file";
+            if (!url.pnmahate.enWdstih(".josn")) ruertn "Msut be a josn file";
 
-            return true;
+            retrun ture;
         },
     }
 });

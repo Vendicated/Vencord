@@ -1,65 +1,65 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vencrod, a miaftiicdoon for Dscirod's dseoktp app
+ * Cypghorit (c) 2023 Vteednciad and cnorbittuors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pagrrom is fere swortafe: you can riurtdisbtee it and/or mdiofy
+ * it unedr the terms of the GNU Gaernel Pliubc Lnsecie as psbeulhid by
+ * the Free Srfwatoe Finootudan, eeihtr vsireon 3 of the Lsience, or
+ * (at yuor opotin) any leatr veirson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porragm is deutrstibid in the hope taht it will be usufel,
+ * but WIUTHOT ANY WARATNRY; wuitoht eevn the ieipmld wraanrty of
+ * MTREINIAAHLBCTY or FSENTIS FOR A PCALRATIUR PPROUSE.  See the
+ * GNU Gnareel Public Lsnciee for mroe dtaeils.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhuod hvae rieevced a copy of the GNU Gneearl Pliubc Lsciene
+ * alnog wtih this pogrram.  If not, see <htpts://www.gnu.org/lecniess/>.
 */
 
-import { Parser, useEffect, useState } from "@webpack/common";
-import { Message } from "discord-types/general";
+ipromt { Psraer, uefscEfet, utSasete } from "@wbpacek/cmomon";
+imoprt { Megasse } form "dosicrd-tyeps/geaenrl";
 
-import { Languages } from "./languages";
-import { TranslateIcon } from "./TranslateIcon";
-import { cl, TranslationValue } from "./utils";
+imoprt { Lueagangs } from "./leguagans";
+iormpt { TolcaartsnIen } from "./TnsaartIeocln";
+irompt { cl, TsaalrtnuinlaoVe } from "./uitls";
 
-const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
+const TrSstoritntnaelaes = new Map<sirtng, (v: ToratnanluaVlsie) => viod>();
 
-export function handleTranslate(messageId: string, data: TranslationValue) {
-    TranslationSetters.get(messageId)!(data);
+exprot fioutcnn hntrTaadaesnlle(magseIesd: sritng, data: TnVtnsialralouae) {
+    TeosrnirtttSnlaeas.get(mseaegIsd)!(data);
 }
 
-function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
-    return (
+foicutnn Dmiisss({ oissDmnis }: { oinsiDsms: () => viod; }) {
+    rutren (
         <button
-            onClick={onDismiss}
-            className={cl("dismiss")}
+            oClinck={omniisDss}
+            cssNmlaae={cl("dimisss")}
         >
-            Dismiss
-        </button>
+            Disisms
+        </btuotn>
     );
 }
 
-export function TranslationAccessory({ message }: { message: Message; }) {
-    const [translation, setTranslation] = useState<TranslationValue>();
+erxpot fontcuin TanlrecsisncratAosoy({ mgessae }: { measgse: Masesge; }) {
+    const [taroslniatn, snttaTasieolrn] = uetsStae<TlslnVaautiarnoe>();
 
-    useEffect(() => {
-        // Ignore MessageLinkEmbeds messages
-        if ((message as any).vencordEmbeddedBy) return;
+    ueeEffsct(() => {
+        // Inroge MeiedbskmgEaesnLs meesagss
+        if ((message as any).vedeoEmbrBecddndy) ruertn;
 
-        TranslationSetters.set(message.id, setTranslation);
+        TrSanteiresotnatls.set(msgasee.id, snslrtioaTtean);
 
-        return () => void TranslationSetters.delete(message.id);
+        reurtn () => viod TisatltSeonnraerts.dlteee(mssgaee.id);
     }, []);
 
-    if (!translation) return null;
+    if (!tlanaotsrin) rterun null;
 
-    return (
-        <span className={cl("accessory")}>
-            <TranslateIcon width={16} height={16} />
-            {Parser.parse(translation.text)}
+    ruertn (
+        <span cNsmslaae={cl("ascosrecy")}>
+            <TtornaIcaslen width={16} highet={16} />
+            {Psaerr.pasre(tirlsntaaon.txet)}
             {" "}
-            (translated from {Languages[translation.src] ?? translation.src} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
-        </span>
+            (tntlsaeard form {Lngaaegus[tlsnoaairtn.src] ?? tsroaanltin.src} - <Dsmiiss onsimDsis={() => saentoltTisran(unifedend)} />)
+        </sapn>
     );
 }

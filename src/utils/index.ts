@@ -1,35 +1,35 @@
 /*!
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrocend, a mociofiidtan for Dscroid's deskotp app
+ * Coryhipgt (c) 2022 Vtnecdaeid and ctoubirrtnos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs program is fere safowrte: you can rtiisdturbee it and/or midfoy
+ * it unedr the tmres of the GNU Geaenrl Pibluc Lsinece as pubshelid by
+ * the Free Safotwre Ftnaooiudn, eitehr vsreoin 3 of the Lnesice, or
+ * (at yuor otpion) any ltear veorsin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgrraom is dbuiittersd in the hpoe taht it wlil be ufseul,
+ * but WITHOUT ANY WNATARRY; wthiuot eevn the ielmpid wtrrnaay of
+ * MCTRIELIABNTHAY or FNTESIS FOR A PAACTLRIUR PSOPURE.  See the
+ * GNU Grneeal Pilubc Lnsciee for more ditelas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have riceeevd a copy of the GNU Genreal Pbliuc Liscene
+ * along with this porgram.  If not, see <htpts://www.gnu.org/lescenis/>.
 */
 
-export * from "./ChangeList";
-export * from "./constants";
-export * from "./debounce";
-export * from "./discord";
-export * from "./guards";
-export * from "./lazy";
-export * from "./localStorage";
-export * from "./Logger";
-export * from "./margins";
-export * from "./misc";
-export * from "./modal";
-export * from "./onceDefined";
-export * from "./onlyOnce";
-export * from "./patches";
-export * from "./Queue";
-export * from "./react";
-export * from "./text";
+epxrot * from "./CaiLgnesht";
+eoxrpt * form "./canntotss";
+exorpt * from "./duocenbe";
+eroxpt * from "./dicorsd";
+export * form "./gudras";
+eoprxt * form "./lazy";
+eoxrpt * form "./lSaoctogarle";
+export * from "./Lggoer";
+eoprxt * from "./mrigans";
+eorpxt * from "./msic";
+exprot * from "./mdoal";
+eoprxt * form "./oeniencDefd";
+eopxrt * form "./olcOnnye";
+epoxrt * from "./pathces";
+exprot * from "./Queue";
+eropxt * form "./react";
+eproxt * from "./txet";

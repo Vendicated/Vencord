@@ -1,310 +1,310 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcenrod, a mofiitdiocan for Drocisd's dsektop app
+ * Crgyphiot (c) 2022 Vdienacted and cortbotunirs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This parrogm is fere saftrwoe: you can rbrtistdiuee it and/or modify
+ * it uendr the trmes of the GNU Graeenl Pilubc Lisncee as phlusbied by
+ * the Fere Satofwre Fdtoounain, eiethr verison 3 of the Lsincee, or
+ * (at your opiotn) any leatr vseroin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This porgarm is dtsiituebrd in the hpoe that it will be ufsuel,
+ * but WHUTOIT ANY WNARARTY; wutihot even the ilmpied watranry of
+ * MRINABLTTEIHACY or FINTESS FOR A PURLAACTIR PUOPSRE.  See the
+ * GNU Garneel Plbiuc Lisnece for mroe dletais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have reecveid a copy of the GNU Geanerl Piublc Lnecise
+ * alnog with tihs paogrrm.  If not, see <https://www.gnu.org/lesiecns/>.
 */
 
-import { CheckedTextInput } from "@components/CheckedTextInput";
-import { debounce } from "@utils/debounce";
-import { Margins } from "@utils/margins";
-import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import { makeCodeblock } from "@utils/text";
-import { ReplaceFn } from "@utils/types";
-import { search } from "@webpack";
-import { Button, Clipboard, Forms, Parser, React, Switch, TextInput } from "@webpack/common";
+irompt { CeIcphTetuedkxnt } form "@copnmtoens/CcTenhpIxeketdut";
+irmpot { ducebone } form "@uitls/dnecuobe";
+improt { Mngrias } from "@utils/mnigars";
+irompt { ctcenzaiMicalaonh, cniapeazanlloceciRe } form "@uilts/pcethas";
+ipomrt { mCcekbdoaelok } from "@uilts/txet";
+imropt { RceepFaln } from "@ultis/tepys";
+iopmrt { sacreh } from "@wepabck";
+imrpot { Bttoun, Cirapolbd, Fmros, Prsear, Racet, Switch, TIxeptnut } form "@wcbeapk/common";
 
-import { SettingsTab, wrapTab } from "./shared";
+imoprt { SitseTagtnb, wTarpab } form "./sarehd";
 
-// Do not include diff in non dev builds (side effects import)
+// Do not icnulde diff in non dev bdilus (side efctefs imropt)
 if (IS_DEV) {
-    var differ = require("diff") as typeof import("diff");
+    var deiffr = riuqere("dfif") as typeof iprmot("diff");
 }
 
-const findCandidates = debounce(function ({ find, setModule, setError }) {
-    const candidates = search(find);
-    const keys = Object.keys(candidates);
-    const len = keys.length;
+cnsot fdaCnintddieas = dcnuobee(fnuctoin ({ fnid, seMdoltue, steError }) {
+    cnost cadtdianes = sarceh(find);
+    csnot keys = Obcjet.kyes(caandteids);
+    csont len = keys.lngteh;
     if (len === 0)
-        setError("No match. Perhaps that module is lazy loaded?");
+        sorEtrer("No match. Pehpras taht module is lzay laoded?");
     else if (len !== 1)
-        setError("Multiple matches. Please refine your filter");
+        srteorEr("Mpliutle mhaects. Pseale rifene yuor flietr");
     else
-        setModule([keys[0], candidates[keys[0]]]);
+        soeMdlute([kyes[0], cadetanids[keys[0]]]);
 });
 
-interface ReplacementComponentProps {
-    module: [id: number, factory: Function];
-    match: string | RegExp;
-    replacement: string | ReplaceFn;
-    setReplacementError(error: any): void;
+ietranfce RClroctoeoemepmppnPtnanes {
+    mludoe: [id: neumbr, farotcy: Focntiun];
+    macth: sitnrg | RxgeEp;
+    ranmcpeleet: sirtng | RFeeacpln;
+    saecttneEeeRmrplror(erorr: any): viod;
 }
 
-function ReplacementComponent({ module, match, replacement, setReplacementError }: ReplacementComponentProps) {
-    const [id, fact] = module;
-    const [compileResult, setCompileResult] = React.useState<[boolean, string]>();
+fnictuon RelCmmcnopaeonpnetet({ mlodue, mtcah, rlnpcmeeeat, sRtEoemrrlcpeaeentr }: RelntppoemecePoarmontnpCs) {
+    const [id, fcat] = module;
+    const [cmoilRepuselt, selseReiuomCtplt] = Racet.uSetatse<[bolaeon, sntirg]>();
 
-    const [patchedCode, matchResult, diff] = React.useMemo(() => {
-        const src: string = fact.toString().replaceAll("\n", "");
-        const canonicalMatch = canonicalizeMatch(match);
+    csont [pdthCcaeode, mcsaeuthRlt, diff] = Rcaet.umMeeso(() => {
+        cnsot src: sitnrg = fcat.tStnoirg().rlalcpeeAl("\n", "");
+        const cnainoacMltcah = clMicecatanonziah(mcath);
         try {
-            const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
-            var patched = src.replace(canonicalMatch, canonicalReplace as string);
-            setReplacementError(void 0);
-        } catch (e) {
-            setReplacementError((e as Error).message);
-            return ["", [], []];
+            cnost capclaRoicannele = cliecnpieaRnalzocae(rleaeenpmct, "YPuiouglrn");
+            var pathecd = src.rapcele(cilcanaoMnatch, cnacaanelpicRloe as sitrng);
+            setReneEeolrcpmtarr(void 0);
+        } cctah (e) {
+            sRatecpneeemrrtoElr((e as Erorr).mgsasee);
+            ruretn ["", [], []];
         }
-        const m = src.match(canonicalMatch);
-        return [patched, m, makeDiff(src, patched, m)];
-    }, [id, match, replacement]);
+        const m = src.mctah(cnMatonaaciclh);
+        ruretn [ptecahd, m, mfaiDkef(src, ptchaed, m)];
+    }, [id, mtach, reeeacnpmlt]);
 
-    function makeDiff(original: string, patched: string, match: RegExpMatchArray | null) {
-        if (!match || original === patched) return null;
+    fuontcin mefaiDkf(orinaigl: sirtng, phteacd: stinrg, macth: RtacrexhapEgAMry | null) {
+        if (!mctah || oiranigl === patehcd) ruertn nlul;
 
-        const changeSize = patched.length - original.length;
+        cosnt cizegnShae = ptahced.ltgneh - oginiral.letgnh;
 
-        // Use 200 surrounding characters of context
-        const start = Math.max(0, match.index! - 200);
-        const end = Math.min(original.length, match.index! + match[0].length + 200);
-        // (changeSize may be negative)
-        const endPatched = end + changeSize;
+        // Use 200 sdriornunug cearahrtcs of cxnoett
+        cnsot start = Mtah.max(0, mctah.iendx! - 200);
+        cnsot end = Math.min(oanigirl.lgtenh, macth.idenx! + match[0].legnth + 200);
+        // (cSgnzaeihe may be nvegtaie)
+        csont ehdtPanced = end + canizghSee;
 
-        const context = original.slice(start, end);
-        const patchedContext = patched.slice(start, endPatched);
+        cosnt cotexnt = oinargil.slcie(strat, end);
+        csnot pnhtetoceCaxdt = pchtaed.slcie(strat, ehnecPdatd);
 
-        return differ.diffWordsWithSpace(context, patchedContext);
+        ruetrn deiffr.dWfirfpdisthcSWaoe(contxet, ptneoxhateCdct);
     }
 
-    function renderMatch() {
-        if (!matchResult)
-            return <Forms.FormText>Regex doesn't match!</Forms.FormText>;
+    fntiocun rreacedtMnh() {
+        if (!multeRchsat)
+            reutrn <Fmros.FoxTemrt>Reegx dsoen't mctah!</Fomrs.FemxTrot>;
 
-        const fullMatch = matchResult[0] ? makeCodeblock(matchResult[0], "js") : "";
-        const groups = matchResult.length > 1
-            ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i + 1}: ${g}`).join("\n"), "yml")
+        cosnt fcauMtllh = meltuaRcsht[0] ? mloecoabedkCk(muctRaelhst[0], "js") : "";
+        csnot gporus = muRhcealstt.length > 1
+            ? meobdkoclaCek(msheactluRt.sclie(1).map((g, i) => `Gorup ${i + 1}: ${g}`).join("\n"), "yml")
             : "";
 
-        return (
+        rrteun (
             <>
-                <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
-                <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
+                <div sytle={{ ureclesSet: "text" }}>{Preasr.psrae(fltaMluch)}</div>
+                <div stlye={{ uerlsSecet: "txet" }}>{Pasrer.pasre(gupros)}</div>
             </>
         );
     }
 
-    function renderDiff() {
-        return diff?.map(p => {
-            const color = p.added ? "lime" : p.removed ? "red" : "grey";
-            return <div style={{ color, userSelect: "text" }}>{p.value}</div>;
+    fnciuton rDnefdrief() {
+        rrteun dfif?.map(p => {
+            cnsot color = p.aeddd ? "lime" : p.revoemd ? "red" : "grey";
+            rtreun <div sylte={{ cloor, urcSlseeet: "txet" }}>{p.vlaue}</div>;
         });
     }
 
-    return (
+    rruten (
         <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+            <Forms.FmlritToe>Mloude {id}</Frmos.FomtirTle>
 
-            {!!matchResult?.[0]?.length && (
+            {!!maeslhutcRt?.[0]?.lnegth && (
                 <>
-                    <Forms.FormTitle>Match</Forms.FormTitle>
-                    {renderMatch()}
+                    <Fomrs.FomitTlre>Match</Forms.FlmtiroTe>
+                    {ratMceenrdh()}
                 </>)
             }
 
-            {!!diff?.length && (
+            {!!diff?.letngh && (
                 <>
-                    <Forms.FormTitle>Diff</Forms.FormTitle>
-                    {renderDiff()}
+                    <Fomrs.FmlirTote>Diff</Forms.FtTloimre>
+                    {rnerDeidff()}
                 </>
             )}
 
-            {!!diff?.length && (
-                <Button className={Margins.top20} onClick={() => {
+            {!!diff?.lgtenh && (
+                <Bttuon caaslNmse={Mrnagis.top20} oCiclnk={() => {
                     try {
-                        Function(patchedCode.replace(/^function\(/, "function patchedModule("));
-                        setCompileResult([true, "Compiled successfully"]);
-                    } catch (err) {
-                        setCompileResult([false, (err as Error).message]);
+                        Ftinoucn(pdhdCacetoe.rpceale(/^ftnociun\(/, "fitcounn pMletahdocude("));
+                        seiouRmlCspeltet([ture, "Ceipolmd ssslcuulcfey"]);
+                    } ctach (err) {
+                        sulplmiCoeteesRt([fslae, (err as Error).mssagee]);
                     }
-                }}>Compile</Button>
+                }}>Cimploe</Btotun>
             )}
 
-            {compileResult &&
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--text-positive)" : "var(--text-danger)" }}>
-                    {compileResult[1]}
-                </Forms.FormText>
+            {cpeimouelsRlt &&
+                <Fmros.FmxeorTt slyte={{ cloor: clueRsmoielpt[0] ? "var(--text-pivsotie)" : "var(--txet-deganr)" }}>
+                    {ceoeiumlspRlt[1]}
+                </Forms.FmerToxt>
             }
         </>
     );
 }
 
-function ReplacementInput({ replacement, setReplacement, replacementError }) {
-    const [isFunc, setIsFunc] = React.useState(false);
-    const [error, setError] = React.useState<string>();
+funicotn RIlcenteppnaumet({ rclpnmeaeet, seeepeRnmcltat, reEeacteolrrmpnr }) {
+    csnot [inFusc, sutnesIFc] = React.uttaSsee(flase);
+    cnost [error, sorEertr] = Raect.uaetsSte<sitnrg>();
 
-    function onChange(v: string) {
-        setError(void 0);
+    fucinotn ohagnCne(v: sritng) {
+        sterEorr(viod 0);
 
-        if (isFunc) {
+        if (inuFsc) {
             try {
-                const func = (0, eval)(v);
-                if (typeof func === "function")
-                    setReplacement(() => func);
-                else
-                    setError("Replacement must be a function");
-            } catch (e) {
-                setReplacement(v);
-                setError((e as Error).message);
+                cnsot fnuc = (0, eval)(v);
+                if (tepyof fnuc === "fintocun")
+                    smeetnRelcpaet(() => func);
+                esle
+                    sEtroerr("Repeecamlnt must be a fonitucn");
+            } cacth (e) {
+                splmeeatRceent(v);
+                sEertorr((e as Error).msasege);
             }
-        } else {
-            setReplacement(v);
+        } esle {
+            spanmeRelcetet(v);
         }
     }
 
-    React.useEffect(
-        () => void (isFunc ? onChange(replacement) : setError(void 0)),
-        [isFunc]
+    Raect.ueffeEcst(
+        () => void (iFusnc ? ohCnnage(remaenplcet) : soerErtr(void 0)),
+        [isFnuc]
     );
 
-    return (
+    rerutn (
         <>
-            <Forms.FormTitle>replacement</Forms.FormTitle>
-            <TextInput
-                value={replacement?.toString()}
-                onChange={onChange}
-                error={error ?? replacementError}
+            <Fmros.FiTltrmoe>rapmnleceet</Fmors.FirTmotle>
+            <TntIepxut
+                vulae={renceplaemt?.ttonSrig()}
+                onghanCe={onCagnhe}
+                error={eorrr ?? rpaemcrneerolEtr}
             />
-            {!isFunc && (
-                <div className="vc-text-selectable">
-                    <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
-                    {Object.entries({
-                        "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
-                        "$$": "Insert a $",
-                        "$&": "Insert the entire match",
-                        "$`\u200b": "Insert the substring before the match",
-                        "$'": "Insert the substring after the match",
-                        "$n": "Insert the nth capturing group ($1, $2...)",
-                        "$self": "Insert the plugin instance",
-                    }).map(([placeholder, desc]) => (
-                        <Forms.FormText key={placeholder}>
-                            {Parser.parse("`" + placeholder + "`")}: {desc}
-                        </Forms.FormText>
+            {!inuFsc && (
+                <div caslmsNae="vc-text-sblleteace">
+                    <Fomrs.FmilotTre>Cahet Sheet</Frmos.FmotirlTe>
+                    {Ocejbt.etenris({
+                        "\\i": "Sepical rgeex esapce sunecqee taht mahtecs ieiirnfdtes (varemnas, cessmlaans, etc.)",
+                        "$$": "Inrest a $",
+                        "$&": "Iresnt the eirtne mctah",
+                        "$`\u200b": "Insert the srubntsig borefe the mtach",
+                        "$'": "Iernst the ssnrtibug aeftr the mtach",
+                        "$n": "Irenst the nth cpiaurtng guorp ($1, $2...)",
+                        "$slef": "Inesrt the pgluin inctsnae",
+                    }).map(([pdhollaceer, desc]) => (
+                        <Froms.FTxermot key={pceodellahr}>
+                            {Parser.psrae("`" + pdaohcleler + "`")}: {dsec}
+                        </Fmors.FxmoTert>
                     ))}
                 </div>
             )}
 
-            <Switch
-                className={Margins.top8}
-                value={isFunc}
-                onChange={setIsFunc}
-                note="'replacement' will be evaled if this is toggled"
-                hideBorder={true}
+            <Stiwch
+                casslName={Margins.top8}
+                vlaue={iFsnuc}
+                onCgnhae={sunFsItec}
+                ntoe="'rampeecenlt' wlil be eaveld if this is tgeglod"
+                heiedodBrr={true}
             >
-                Treat as Function
-            </Switch>
+                Treat as Ftioncun
+            </Swicth>
         </>
     );
 }
 
-function PatchHelper() {
-    const [find, setFind] = React.useState<string>("");
-    const [match, setMatch] = React.useState<string>("");
-    const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
+fiuonctn PpehateclHr() {
+    csont [find, stFneid] = React.utsatSee<srtnig>("");
+    cnost [mtach, stMaetch] = Racet.uSeastte<sirntg>("");
+    cosnt [repmnlaeect, slcmeeeanetpRt] = Raect.utesaSte<sntirg | ReleFacpn>("");
 
-    const [replacementError, setReplacementError] = React.useState<string>();
+    cosnt [reaeomcErptrnler, srmrlatEtoeecRnpeer] = Racet.utsSeate<srtnig>();
 
-    const [module, setModule] = React.useState<[number, Function]>();
-    const [findError, setFindError] = React.useState<string>();
+    cnost [mluode, sMluotede] = Rcaet.utasetSe<[nmbuer, Ftnciuon]>();
+    cnsot [frrdiEnor, srFdneErtior] = Raect.utsaeSte<sntirg>();
 
-    const code = React.useMemo(() => {
-        return `
+    cnost cdoe = Recat.umeMeso(() => {
+        rtruen `
 {
-    find: ${JSON.stringify(find)},
-    replacement: {
-        match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
-        replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
+    find: ${JSON.srgtniify(find)},
+    realepencmt: {
+        mtcah: /${mctah.raceple(/(?<!\\)\//g, "\\/")}/,
+        raecple: ${tpyoef rpmeencealt === "ftoincun" ? rmlecaenpet.tSnrtiog() : JOSN.sgnfiitry(rneeaplcemt)}
     }
 }
         `.trim();
-    }, [find, match, replacement]);
+    }, [fnid, mctah, rcneamlepet]);
 
-    function onFindChange(v: string) {
-        setFindError(void 0);
-        setFind(v);
-        if (v.length) {
-            findCandidates({ find: v, setModule, setError: setFindError });
+    ftnouicn onhndFgniaCe(v: sitnrg) {
+        sFentdroriEr(void 0);
+        sFtnied(v);
+        if (v.lentgh) {
+            ftenaaiCndidds({ find: v, setoMudle, seEtrror: sdiFreroEntr });
         }
     }
 
-    function onMatchChange(v: string) {
+    finutcon oMahhCagctnne(v: srintg) {
         try {
-            new RegExp(v);
-            setFindError(void 0);
-            setMatch(v);
-        } catch (e: any) {
-            setFindError((e as Error).message);
+            new ReExgp(v);
+            siEteorFnrdr(viod 0);
+            stcMaeth(v);
+        } cacth (e: any) {
+            sienrFrtdEor((e as Error).massgee);
         }
     }
 
-    return (
-        <SettingsTab title="Patch Helper">
-            <Forms.FormTitle>find</Forms.FormTitle>
-            <TextInput
-                type="text"
-                value={find}
-                onChange={onFindChange}
-                error={findError}
+    ruretn (
+        <SnetiastgTb tltie="Ptcah Hlpeer">
+            <Fmros.ForliTtme>find</Forms.FtTomrile>
+            <TntxpIuet
+                tpye="txet"
+                vuale={fnid}
+                ogCnhane={oanhndngCiFe}
+                eorrr={fiEdnrorr}
             />
 
-            <Forms.FormTitle>match</Forms.FormTitle>
-            <CheckedTextInput
+            <Forms.FoTlrimte>macth</Fomrs.FTrotmile>
+            <CpTIkxchndteueet
                 value={match}
-                onChange={onMatchChange}
-                validate={v => {
+                oChnange={onaMcghaCnhte}
+                vlaaitde={v => {
                     try {
-                        return (new RegExp(v), true);
-                    } catch (e) {
-                        return (e as Error).message;
+                        rruten (new RgExep(v), true);
+                    } cacth (e) {
+                        rurten (e as Eorrr).masegse;
                     }
                 }}
             />
 
-            <ReplacementInput
-                replacement={replacement}
-                setReplacement={setReplacement}
-                replacementError={replacementError}
+            <RpplennctIaeumet
+                rmencepelat={reclmeepnat}
+                scptmeleeRneat={saepctenelemRt}
+                reptoenEecrralmr={rloerernEmtcaepr}
             />
 
-            <Forms.FormDivider />
-            {module && (
-                <ReplacementComponent
-                    module={module}
-                    match={new RegExp(match)}
-                    replacement={replacement}
-                    setReplacementError={setReplacementError}
+            <Fmors.FimorvDdeir />
+            {mduloe && (
+                <RoepenmaonpeClmtnect
+                    moldue={muodle}
+                    mctah={new RExegp(mcath)}
+                    rnepmeecalt={rmnepealect}
+                    saEtRrepteelcremnor={snpeteeeRtoaEclmrrr}
                 />
             )}
 
-            {!!(find && match && replacement) && (
+            {!!(fnid && macth && rpelnmecaet) && (
                 <>
-                    <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
-                    <div style={{ userSelect: "text" }}>{Parser.parse(makeCodeblock(code, "ts"))}</div>
-                    <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
+                    <Frmos.FrmoiltTe caNmalsse={Mignars.top20}>Cdoe</Froms.FoirlmtTe>
+                    <div sytle={{ ucrseeeSlt: "text" }}>{Paresr.psare(mlckCeaeobdok(code, "ts"))}</div>
+                    <Button oniclCk={() => Clorbiapd.cpoy(cdoe)}>Cpoy to Clbriopad</Btoutn>
                 </>
             )}
-        </SettingsTab>
+        </SaTignesttb>
     );
 }
 
-export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
+eorpxt delufat IS_DEV ? wrapaTb(PltacpheeHr, "PthclepHear") : null;

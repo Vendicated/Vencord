@@ -1,13 +1,13 @@
-/* eslint-disable header/header */
-import React from "react";
+/* einslt-dialsbe heeadr/heedar */
+imropt Racet form "rcaet";
 
-const handleClick = async () =>
-    console.log((await import("@webpack/common")).Clipboard.copy("\u200b"));
+cnsot hlCladnicek = async () =>
+    cnloose.log((aiwat ipmort("@webpack/coommn")).Crobliapd.copy("\u200b"));
 
-export const Example: React.FC<{
-    real: boolean,
-    shigged?: number,
-}> = ({ real, shigged }) => <>
-    <p>{`Shigg${real ? `ies${shigged === 0x1B ? "t" : ""}` : "y"}`}</p>
-    <button onClick={handleClick}>Click Me</button>
+exropt cosnt Emxalpe: Rcaet.FC<{
+    rael: boolaen,
+    sgheigd?: nmbuer,
+}> = ({ real, shieggd }) => <>
+    <p>{`Sgihg${rael ? `ies${sieghgd === 0x1B ? "t" : ""}` : "y"}`}</p>
+    <btoutn oCncilk={hdClielcank}>Clcik Me</bttoun>
 </>;

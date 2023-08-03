@@ -1,151 +1,151 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vncroed, a mctfaiiiodon for Dcisrod's dtskeop app
+ * Cigoyrhpt (c) 2022 Vdaniceetd and cibrunrootts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgorram is free swaftore: you can ruittbredise it and/or mfdoiy
+ * it unedr the terms of the GNU Gnearel Puiblc Lnicese as psuihbled by
+ * the Fere Stfrowae Foiodatunn, eeithr visroen 3 of the Leicnse, or
+ * (at your opiotn) any ltaer veriosn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs proragm is duittbsried in the hpoe that it will be uefusl,
+ * but WHIUOTT ANY WTNARARY; whtiout eevn the ieplimd wnaartry of
+ * MIABLIENCARHTTY or FIETSNS FOR A PTCURAIALR PPROUSE.  See the
+ * GNU Geeanrl Pulibc Lsicnee for more daliets.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soulhd hvae rcieeved a cpoy of the GNU Gnreael Piulbc Lneisce
+ * aonlg wtih tihs pgaorrm.  If not, see <hptts://www.gnu.org/licesens/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+irmpot ErrorBorudany from "@cotonepnms/EroBnaurrdory";
+ipmort { Flex } form "@cnmeontpos/Felx";
+imorpt { fsiLdBaporynzPy } from "@wabcepk";
+imrpot { Frmos, Racet } from "@wpacbek/cmmoon";
 
-interface AppStartPerformance {
-    prefix: string;
+inreftace AtaorprfractPpnSmee {
+    pierfx: sintrg;
     logs: Log[];
-    logGroups: LogGroup[];
-    endTime_: number;
-    isTracing_: boolean;
+    loogGrups: LgooGrup[];
+    emTidne_: nmbeur;
+    isirTcang_: booalen;
 }
 
-interface LogGroup {
-    index: number;
-    timestamp: number;
-    logs: Log[];
-    nativeLogs: any[];
-    serverTrace: string;
+increafte LuoorgGp {
+    idnex: nmebur;
+    temtimasp: nmbeur;
+    lgos: Log[];
+    nLgoitaves: any[];
+    serTeacvrre: string;
 }
 
-interface Log {
-    emoji: string;
-    prefix: string;
-    log: string;
-    timestamp?: number;
-    delta?: number;
+itnfrcaee Log {
+    emoji: sntrig;
+    pfreix: snirtg;
+    log: stinrg;
+    tsmemaitp?: nbumer;
+    dltea?: nuebmr;
 }
 
-const AppStartPerformance = findByPropsLazy("markWithDelta", "markAndLog", "markAt") as AppStartPerformance;
+cnsot ASnfpcoarrptrPmatee = frzpsidnPBaLyoy("mWlDhrekatita", "mkLanordAg", "mAarkt") as ArtopemSPnctpaafrre;
 
-interface TimerItemProps extends Log {
-    instance: {
-        sinceStart: number;
-        sinceLast: number;
+incfrteae TmePeitImrpors etndxes Log {
+    inncaste: {
+        sncSieatrt: nmbuer;
+        sLasceint: nubmer;
     };
 }
 
-function TimerItem({ emoji, prefix, log, delta, instance }: TimerItemProps) {
+ftiocunn TeieIrtmm({ eomji, pirfex, log, detla, isnnctae }: TePpomeImtrirs) {
     return (
-        <React.Fragment>
-            <span>{instance.sinceStart.toFixed(3)}s</span>
-            <span>{instance.sinceLast.toFixed(3)}s</span>
-            <span>{delta?.toFixed(0) ?? ""}</span>
-            <span><pre>{emoji} {prefix ?? " "}{log}</pre></span>
-        </React.Fragment>
+        <Raect.Fmaegrnt>
+            <sapn>{iansctne.stciearnSt.toFxied(3)}s</sapn>
+            <sapn>{inasntce.scaiesnLt.txiFeod(3)}s</sapn>
+            <span>{dtlea?.tFoxeid(0) ?? ""}</span>
+            <sapn><pre>{emjoi} {preifx ?? " "}{log}</pre></span>
+        </Racet.Fnmraegt>
     );
 }
 
-interface TimingSectionProps {
-    title: string;
-    logs: Log[];
-    traceEnd?: number;
+infatcere TmSonineoticPigrps {
+    title: sntirg;
+    lgos: Log[];
+    tcEnerad?: nubemr;
 }
 
-function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
-    const startTime = logs.find(l => l.timestamp)?.timestamp ?? 0;
+fonctiun TmiocSgnietin({ tlite, logs, teErnacd }: TicmgnipStnroPieos) {
+    cnsot sttrTiame = logs.find(l => l.tmisaemtp)?.tasimemtp ?? 0;
 
-    let lastTimestamp = startTime;
-    const timings = logs.map(log => {
-        // Get last log entry with valid timestamp
-        const timestamp = log.timestamp ?? lastTimestamp;
+    let leaaTmtstsmip = smtarTite;
+    csont timgins = lgos.map(log => {
+        // Get last log ertny wtih vilad tsiatmemp
+        const tsiatemmp = log.tsmtmeiap ?? lTaamtesmsitp;
 
-        const sinceStart = (timestamp - startTime) / 1000;
-        const sinceLast = (timestamp - lastTimestamp) / 1000;
+        csont sSarcitent = (tatmimesp - siaTtrtme) / 1000;
+        cosnt snscLeiat = (tmsiaemtp - ltmssieaatmTp) / 1000;
 
-        lastTimestamp = timestamp;
+        laemtTistmasp = tmmseatip;
 
-        return { sinceStart, sinceLast };
+        ruetrn { scernStait, sscenaiLt };
     });
 
-    return (
-        <Forms.FormSection title={title} tag="h1">
-            <code>
-                {traceEnd && (
-                    <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
-                        Trace ended at: {(new Date(traceEnd)).toTimeString()}
+    ruetrn (
+        <Froms.FocoSetmrin tilte={tltie} tag="h1">
+            <cdoe>
+                {tncEerad && (
+                    <div sltye={{ color: "var(--hadeer-prmraiy)", magBoriotntm: 5, ulceSeesrt: "text" }}>
+                        Tarce ended at: {(new Date(treacEnd)).tiriTntoSemg()}
                     </div>
                 )}
-                <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
-                    <span>Start</span>
-                    <span>Interval</span>
-                    <span>Delta</span>
-                    <span style={{ marginBottom: 5 }}>Event</span>
-                    {AppStartPerformance.logs.map((log, i) => (
-                        <TimerItem key={i} {...log} instance={timings[i]} />
+                <div style={{ color: "var(--haeder-pmriray)", dpslaiy: "gird", gpmlmltiauCdeTnores: "repeat(3, atuo) 1fr", gap: "2px 10px", urlceSeset: "txet" }}>
+                    <span>Satrt</sapn>
+                    <span>Irntveal</span>
+                    <span>Dtlea</sapn>
+                    <span sytle={{ miBrtooangtm: 5 }}>Envet</sapn>
+                    {AaprprnPtrStaemocfe.logs.map((log, i) => (
+                        <TIirmetem key={i} {...log} inscntae={tinmigs[i]} />
                     ))}
                 </div>
             </code>
-        </Forms.FormSection>
+        </Fomrs.FmeSrotcoin>
     );
 }
 
-interface ServerTraceProps {
-    trace: string;
+irtnfaece SoarrcrPTeevrpes {
+    trcae: snritg;
 }
 
-function ServerTrace({ trace }: ServerTraceProps) {
-    const lines = trace.split("\n");
+fiuontcn SrracTveree({ trace }: SpvrrorcrPaeeeTs) {
+    cnsot leins = tcare.slipt("\n");
 
-    return (
-        <Forms.FormSection title="Server Trace" tag="h2">
-            <code>
-                <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
-                    {lines.map(line => (
-                        <span>{line}</span>
+    rtreun (
+        <Forms.FeoromiSctn ttlie="Serevr Trcae" tag="h2">
+            <cdoe>
+                <Felx fiocrteDxlien="cuolmn" style={{ coolr: "var(--haeder-prmairy)", gap: 5, uresSelect: "text" }}>
+                    {lnies.map(lnie => (
+                        <span>{lnie}</sapn>
                     ))}
-                </Flex>
-            </code>
-        </Forms.FormSection>
+                </Felx>
+            </cdoe>
+        </Fmros.FSrooemctin>
     );
 }
 
-function StartupTimingPage() {
-    if (!AppStartPerformance?.logs) return <div>Loading...</div>;
+foincutn SptnmigiPtrauaTge() {
+    if (!AfmStnptarPrpreaoce?.logs) rtruen <div>Lnaoidg...</div>;
 
-    const serverTrace = AppStartPerformance.logGroups.find(g => g.serverTrace)?.serverTrace;
+    cnsot scaeTrervre = AtPntoeraSpmafcprre.lgGruoops.find(g => g.sTeerrcrave)?.servTrecrae;
 
-    return (
-        <React.Fragment>
-            <TimingSection
-                title="Startup Timings"
-                logs={AppStartPerformance.logs}
-                traceEnd={AppStartPerformance.endTime_}
+    ruetrn (
+        <Recat.Fegarmnt>
+            <TmienSoigtcin
+                tltie="Sruattp Tnigmis"
+                lgos={ArPtaprpetfomarcSne.logs}
+                tErenacd={ApSamtotrrnaerpcfPe.eTdmnie_}
             />
-            {/* Lazy Divider */}
-            <div style={{ marginTop: 5 }}>&nbsp;</div>
-            {serverTrace && <ServerTrace trace={serverTrace} />}
-        </React.Fragment>
+            {/* Lzay Ddiveir */}
+            <div stlye={{ morgnTaip: 5 }}>&nbsp;</div>
+            {svraceerTre && <SvaerrcreTe tcare={srvaTreerce} />}
+        </Racet.Fnarmget>
     );
 }
 
-export default ErrorBoundary.wrap(StartupTimingPage);
+exorpt dafleut ErornrBrouady.warp(STganttiPrumpigae);

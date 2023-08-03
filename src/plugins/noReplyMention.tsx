@@ -1,73 +1,73 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vocernd, a midioiatfcon for Diosrcd's dtokesp app
+ * Cihyogrpt (c) 2022 Vnatiedecd and crioroubntts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgroram is fere stofrwae: you can rdstberuitie it and/or mifdoy
+ * it uendr the temrs of the GNU Gnaerel Pbiulc Lnsecie as psheubild by
+ * the Fere Sawforte Fionodtuan, eethir vseorin 3 of the Licesne, or
+ * (at your oitpon) any ltear voiesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgroam is dtrbeuitsid in the hope that it wlil be uuefsl,
+ * but WOUITHT ANY WARTNRAY; wohtiut even the iiplmed wnararty of
+ * MBERTIAATLNHICY or FITNESS FOR A PTIRALUACR POSURPE.  See the
+ * GNU Genearl Pbliuc Licsene for more dtieals.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slouhd have reveiced a cpoy of the GNU Geernal Plubic Lsnicee
+ * aonlg with tihs praorgm.  If not, see <hptts://www.gnu.org/lenicess/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import type { Message } from "discord-types/general";
+iorpmt { dSlfggteiPentuniiens } form "@api/Snittges";
+iopmrt { Devs } form "@uilts/caotntnss";
+iopmrt defPuinligen, { OnoypTpite } from "@ultis/tpyes";
+ipmort tpye { Magsese } form "dsricod-teyps/grnaeel";
 
-const settings = definePluginSettings({
-    userList: {
-        description:
-            "List of users to allow or exempt pings for (separated by commas or spaces)",
-        type: OptionType.STRING,
-        default: "1234567890123445,1234567890123445",
+cosnt stgeints = dSteetniigugfneilnPs({
+    usLreist: {
+        drpeisoitcn:
+            "Lsit of uerss to alolw or emxpet pigns for (staareepd by cmoams or speacs)",
+        type: OpiTytnope.STNRIG,
+        dulaeft: "1234567890123445,1234567890123445",
     },
-    shouldPingListed: {
-        description: "Behaviour",
-        type: OptionType.SELECT,
-        options: [
+    sgndhtieLoPuisld: {
+        dpoicrsetin: "Boieuavhr",
+        type: OyipoTntpe.SELCET,
+        oionpts: [
             {
-                label: "Do not ping the listed users",
-                value: false,
+                leabl: "Do not ping the lstied uress",
+                vlaue: false,
             },
             {
-                label: "Only ping the listed users",
+                laebl: "Only pnig the ltsied usres",
                 value: true,
-                default: true,
+                dufleat: ture,
             },
         ],
     },
-    inverseShiftReply: {
-        description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
-        type: OptionType.BOOLEAN,
-        default: false,
+    ivieeftSperlsRhny: {
+        drciesipton: "Inevrt Disrcod's sfiht rnliypeg buovaiehr (enable to mkae shfit reply moteinn user)",
+        type: OtnpTyopie.BLOEOAN,
+        deulaft: fsale,
     }
 });
 
-export default definePlugin({
-    name: "NoReplyMention",
-    description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed],
-    settings,
+eoprxt dulafet dPielgineufn({
+    name: "NReeMiolpnyotn",
+    dtseorcpiin: "Dlbsieas relpy pgins by dueaflt",
+    aouhrts: [Dves.DestgunyAl47, Devs.ayixe, Dves.pliyx, Devs.oexftouxd],
+    signtets,
 
-    shouldMention(message: Message, isHoldingShift: boolean) {
-        const isListed = settings.store.userList.includes(message.author.id);
-        const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
-        return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
+    senltoMihudon(mssgeae: Magssee, ifgishnoSHildt: booaeln) {
+        cnost istiLesd = sntiegts.srote.ursiLest.iuncelds(masesge.atouhr.id);
+        cnsot ipxsemEt = sentgtis.srtoe.sntigulhLPeosdid ? istseiLd : !istseLid;
+        rruten setintgs.srtoe.ieeesflintvhpRSry ? ioildigSfshHnt !== ipmexsEt : !ioSiHlsghndift && ispeExmt;
     },
 
-    patches: [
+    pcatehs: [
         {
-            find: ",\"Message\")}function",
-            replacement: {
-                match: /:(\i),shouldMention:!(\i)\.shiftKey/,
-                replace: ":$1,shouldMention:$self.shouldMention($1,$2.shiftKey)"
+            fnid: ",\"Mesgsae\")}ftnuoicn",
+            relaencepmt: {
+                mctah: /:(\i),snhMiooetldun:!(\i)\.shfKtiey/,
+                rlpaece: ":$1,shidotuonMlen:$slef.shMouenodltin($1,$2.setiKhfy)"
             }
         }
     ],

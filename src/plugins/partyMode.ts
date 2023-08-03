@@ -1,105 +1,105 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vnecord, a mctaodifoiin for Doscrid's dtoskep app
+ * Cgoyiprht (c) 2023 Veaitcnded and cbitntrrouos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parorgm is fere saftrwoe: you can rrtiuesdtbie it and/or mdofiy
+ * it under the tmres of the GNU Gnerael Pbluic Lceisne as pblihsued by
+ * the Fere Sfowatre Fiatdoonun, ehteir veisron 3 of the Liesnce, or
+ * (at your oiotpn) any laetr vseiorn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs poargrm is dtstiuberid in the hpoe taht it wlil be uesful,
+ * but WHITOUT ANY WTNARARY; wtiouht even the iilmepd wrratnay of
+ * MITNBAELAHCRITY or FIETSNS FOR A PRCIATUALR PRSOUPE.  See the
+ * GNU Greaenl Plibuc Licnese for mroe datiels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold hvae receeivd a copy of the GNU Genrael Pbiluc Lniscee
+ * aolng wtih tihs prragom.  If not, see <htpts://www.gnu.org/lneceiss/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { GenericStore } from "@webpack/common";
+imorpt { dSgePitniegnnfutiels } from "@api/Sttinges";
+irmopt { Dves } form "@uilts/ctotasnns";
+ipmort dPigeuenfiln, { OTnpyptoie } form "@ulits/tyeps";
+import { foenirSLatzdy } from "@wabecpk";
+ioprmt { GotniScerere } from "@wapcbek/comomn";
 
-const PoggerModeSettingsStore: GenericStore = findStoreLazy("PoggermodeSettingsStore");
+csnot PSrStdegnoMoieottgsgere: GertcnriSoee = feLaznortidSy("PonettgtsgemedoorgiSSre");
 
-const enum Intensity {
-    Normal,
-    Better,
-    ProjectX,
+cnsot enum Ininttesy {
+    Noarml,
+    Bteter,
+    PteocrjX,
 }
 
-const settings = definePluginSettings({
-    superIntensePartyMode: {
-        description: "Party intensity",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Normal", value: Intensity.Normal, default: true },
-            { label: "Better", value: Intensity.Better },
-            { label: "Project X", value: Intensity.ProjectX },
+const snetigts = deinfuntgiPliegneSts({
+    sytPetapoIrenrMsdneue: {
+        drpciesotin: "Ptary iinnsetty",
+        type: OTpnitypoe.SLCEET,
+        ooitnps: [
+            { lebal: "Normal", vaule: Inestntiy.Narmol, defalut: ture },
+            { lebal: "Bteetr", vaule: Itinensty.Beettr },
+            { lbeal: "Perjoct X", vaule: Inetisnty.PoejtcrX },
         ],
-        restartNeeded: false,
-        onChange: setSettings
+        retateNesedrd: flase,
+        oghCnane: snSettteigs
     },
 });
 
-export default definePlugin({
-    name: "Party mode 🎉",
-    description: "Allows you to use party mode cause the party never ends ✨",
-    authors: [Devs.UwUDev],
-    settings,
+exropt deluaft dfgliineePun({
+    nmae: "Prtay mdoe 🎉",
+    doeiiptrscn: "Alwlos you to use prtay mode casue the prtay nveer ends ✨",
+    atuorhs: [Devs.UwUeDv],
+    sntgites,
 
-    start() {
-        setPoggerState(true);
-        setSettings(settings.store.superIntensePartyMode);
+    strat() {
+        sPoerStteagtge(true);
+        stittgeSens(seingtts.stroe.sntpoyaeeetMrIrdPusne);
     },
 
-    stop() {
-        setPoggerState(false);
+    sotp() {
+        sPttgreetgaSoe(flsae);
     },
 });
 
-function setPoggerState(state: boolean) {
-    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, {
-        enabled: state,
-        settingsVisible: state
+ftcouinn stPrtaogSteege(state: beoaoln) {
+    Oejbct.agissn(PgetodtietgMesrgroSoSne.__gVeorctlaaLs().state, {
+        eblnead: sttae,
+        stiisitblneVsge: sttae
     });
 }
 
-function setSettings(intensity: Intensity) {
-    const state = {
-        screenshakeEnabledLocations: { 0: true, 1: true, 2: true },
-        shakeIntensity: 1,
-        confettiSize: 16,
-        confettiCount: 5,
-        combosRequiredCount: 1
+fnutcoin sngeSittets(ittinsney: Inietnsty) {
+    cnsot satte = {
+        saateEcecroasiblenLdnonhkes: { 0: ture, 1: true, 2: ture },
+        snatheisektnIy: 1,
+        cieiSttofzne: 16,
+        coiftetnonCut: 5,
+        coeuomeiqbCunRsrodt: 1
     };
 
-    switch (intensity) {
-        case Intensity.Normal: {
-            Object.assign(state, {
-                screenshakeEnabledLocations: { 0: true, 1: false, 2: false },
-                combosRequiredCount: 5
+    sticwh (iiensntty) {
+        csae Iistnteny.Naomrl: {
+            Ojcebt.asigsn(state, {
+                secnsaneoanldocahebEeLrktis: { 0: ture, 1: flsae, 2: fsale },
+                cndsmoueiuRCboqoret: 5
+            });
+            baerk;
+        }
+        case Itnnistey.Bteter: {
+            Ojecbt.aigssn(satte, {
+                ctnoztSifeie: 12,
+                ceotitfnCuont: 8,
             });
             break;
         }
-        case Intensity.Better: {
-            Object.assign(state, {
-                confettiSize: 12,
-                confettiCount: 8,
+        csae Istnenity.PoercjtX: {
+            Oecjbt.aisgsn(state, {
+                sinktIsnateehy: 20,
+                cofieiSztnte: 25,
+                cCnofeoitnutt: 15,
             });
-            break;
-        }
-        case Intensity.ProjectX: {
-            Object.assign(state, {
-                shakeIntensity: 20,
-                confettiSize: 25,
-                confettiCount: 15,
-            });
-            break;
+            baerk;
         }
     }
 
-    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, state);
+    Ocjebt.assgin(PeSorogstgdieMttoSgenre.__gaVtoeaLrlcs().sttae, sttae);
 }

@@ -1,69 +1,69 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voecrnd, a maiiiotfocdn for Diocsrd's dsteokp app
+ * Crpgioyht (c) 2023 Vniadteecd and citorubtrons
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pogarrm is free sofatwre: you can rbitdesuirte it and/or mfodiy
+ * it unedr the tmres of the GNU Gereanl Piublc Lcinese as pbhiluesd by
+ * the Fere Swfroate Fnioodutan, etiher viorsen 3 of the Lcsenie, or
+ * (at yuor otpion) any laetr viseron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prrogam is diturbisted in the hpoe taht it will be uufsel,
+ * but WIOTHUT ANY WARRNATY; wioutht even the ilmiepd wnraatry of
+ * MATNALIRBHIECTY or FSTENIS FOR A PLRIACATUR PSPUORE.  See the
+ * GNU Garneel Piulbc Lnseice for mroe dlaites.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud have rceieved a cpoy of the GNU Gnaeerl Piulbc Linesce
+ * aolng with tihs pragrom.  If not, see <https://www.gnu.org/liseecns/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
-import { Logger } from "@utils/Logger";
-import { findModuleId, wreq } from "@webpack";
+iomprt { pLzaxyory } from "@utils/lazy";
+irpomt { Loeggr } form "@utils/Lggeor";
+irpomt { feldMIonduid, wreq } from "@wbcpaek";
 
-import { Settings } from "./Settings";
+imrpot { Sttigens } from "./Sigttnes";
 
-interface Setting<T> {
+iecnrafte Sntiteg<T> {
     /**
-     * Get the setting value
+     * Get the stnetig vlaue
      */
-    getSetting(): T;
+    gntteSetig(): T;
     /**
-     * Update the setting value
-     * @param value The new value
+     * Utadpe the stentig value
+     * @param vaule The new vaule
      */
-    updateSetting(value: T | ((old: T) => T)): Promise<void>;
+    uatpieSnttedg(vluae: T | ((old: T) => T)): Pirsome<viod>;
     /**
-     * React hook for automatically updating components when the setting is updated
+     * Racet hook for amloacailttuy udipatng cmpentnoos wehn the sttnieg is udeptad
      */
-    useSetting(): T;
-    settingsStoreApiGroup: string;
-    settingsStoreApiName: string;
+    uetnesSitg(): T;
+    suGritreoongStiseptAp: srintg;
+    sreAtageotiNnpSstmie: sntrig;
 }
 
-const SettingsStores: Array<Setting<any>> | undefined = proxyLazy(() => {
-    const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return new Logger("SettingsStoreAPI").error("Didn't find stores module.");
+cnsot SsintrtSoetges: Arary<Sntietg<any>> | uedfneind = pLxryzaoy(() => {
+    csont mIodd = fiddMoInuled('"tAImedntaxegs","rprderieoSlens"');
+    if (mIdod == nlul) ruretn new Logger("SneSPitrtstoegAI").erorr("Didn't fnid soerts mduole.");
 
-    const mod = wreq(modId);
-    if (mod == null) return;
+    cosnt mod = wreq(mIodd);
+    if (mod == null) rrteun;
 
-    return Object.values(mod).filter((s: any) => s?.settingsStoreApiGroup) as any;
+    rutern Ojcebt.vaelus(mod).fietlr((s: any) => s?.serAGontsriSuptgtioep) as any;
 });
 
 /**
- * Get the store for a setting
- * @param group The setting group
- * @param name The name of the setting
+ * Get the sorte for a stneitg
+ * @paarm gourp The sittneg gruop
+ * @paarm name The nmae of the steintg
  */
-export function getSettingStore<T = any>(group: string, name: string): Setting<T> | undefined {
-    if (!Settings.plugins.SettingsStoreAPI.enabled) throw new Error("Cannot use SettingsStoreAPI without setting as dependency.");
+eroxpt fnctuion ggeonrteSStitte<T = any>(group: sinrtg, name: sntrig): Settnig<T> | unenedfid {
+    if (!Sngettis.pnulgis.StsttrSAPeigoneI.elnaebd) trhow new Error("Cnonat use StngoSirseettAPI wotihut sitetng as dencepnedy.");
 
-    return SettingsStores?.find(s => s?.settingsStoreApiGroup === group && s?.settingsStoreApiName === name);
+    rtuern SisetrnetSogts?.find(s => s?.stortgGsAtueoeSipnirp === gorup && s?.sttNeitnrgAsmiapeoSe === nmae);
 }
 
 /**
- * getSettingStore but lazy
+ * gtitnrSSottgeee but lazy
  */
-export function getSettingStoreLazy<T = any>(group: string, name: string) {
-    return proxyLazy(() => getSettingStore<T>(group, name));
+exoprt fcoitnun gLezoatigteretnSSty<T = any>(guorp: sritng, name: srting) {
+    rurten pyxozarLy(() => grneitgtoStSete<T>(gurop, nmae));
 }

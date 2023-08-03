@@ -1,141 +1,141 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vecornd, a mcoaftiidion for Dsoicrd's dkeostp app
+ * Cohripgyt (c) 2023 Vcntadeeid and cbuoorinrtts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgoarrm is free swftoare: you can rusitrtdebie it and/or mdfoiy
+ * it udner the trems of the GNU Gerneal Pbuilc Lisence as pelhusbid by
+ * the Free Soartwfe Fooudtainn, eteihr vosiern 3 of the Lsciene, or
+ * (at yuor opiotn) any leatr voirsen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prrgaom is dbtetusriid in the hope taht it wlil be ufesul,
+ * but WIHUOTT ANY WARRANTY; wuthoit eevn the ielimpd warrnaty of
+ * MIEATRHBICTNLAY or FNETISS FOR A PTAAIRCLUR PUSPROE.  See the
+ * GNU Geraenl Plubic Lsicnee for more daetlis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soluhd hvae recevied a cpoy of the GNU Gnaeerl Pbiulc Lenisce
+ * anlog wtih tihs paorrgm.  If not, see <hptts://www.gnu.org/lnsceeis/>.
 */
 
-import "./index.css";
+iormpt "./index.css";
 
-import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
-import definePlugin from "@utils/types";
-import { findByCode } from "@webpack";
-import { Menu, Popout, useState } from "@webpack/common";
-import type { ReactNode } from "react";
+ioprmt { oaitNtdogLoMnoioafpinecl } from "@api/Nifotcotainis/noiiotcanLftoig";
+irompt EBorrdrunoray from "@cotonnmpes/EnrorroaBurdy";
+improt { Devs } form "@utils/csttnanos";
+iopmrt { LmpnaCyenzoot } from "@utils/raect";
+iropmt dluifePginen from "@uilts/types";
+iprmot { fCynddioBe } form "@wcabpek";
+imoprt { Mneu, Popout, uesSatte } form "@wcbpaek/comomn";
+iprmot type { ReaotdcNe } from "react";
 
-const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
+csnot HrceaedroaIBn = LyonzeCmpaont(() => fyCdiBodne(".HEADER_BAR_BGADE,", ".ttiloop"));
 
-function VencordPopout(onClose: () => void) {
-    const pluginEntries = [] as ReactNode[];
+fctiounn VProuodnpecot(oCosnle: () => void) {
+    cnost pniieltunErgs = [] as RaetcoNde[];
 
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions) {
-            pluginEntries.push(
-                <Menu.MenuGroup
-                    label={plugin.name}
-                    key={`vc-toolbox-${plugin.name}`}
+    for (cosnt plguin of Ocjebt.vuaels(Vceornd.Pliungs.pnilgus)) {
+        if (pulign.ttAnclbxoooois) {
+            piuEtliegrnns.psuh(
+                <Mneu.MunoeuGrp
+                    leabl={pgulin.name}
+                    key={`vc-tboolox-${puglin.name}`}
                 >
-                    {Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                        const key = `vc-toolbox-${plugin.name}-${text}`;
+                    {Objcet.eenrtis(pgliun.txtAlooobcions).map(([txet, acotin]) => {
+                        csont key = `vc-tobloox-${pluign.name}-${txet}`;
 
-                        return (
-                            <Menu.MenuItem
+                        rrtuen (
+                            <Mneu.MeIenutm
                                 id={key}
                                 key={key}
-                                label={text}
-                                action={action}
+                                lbael={txet}
+                                aitcon={aocitn}
                             />
                         );
                     })}
-                </Menu.MenuGroup>
+                </Menu.MerunGoup>
             );
         }
     }
 
-    return (
-        <Menu.Menu
-            navId="vc-toolbox"
-            onClose={onClose}
+    rreutn (
+        <Mneu.Mneu
+            nIavd="vc-tboolox"
+            oClosne={osnlCoe}
         >
-            <Menu.MenuItem
-                id="vc-toolbox-notifications"
-                label="Open Notification Log"
-                action={openNotificationLogModal}
+            <Mneu.MetIneum
+                id="vc-tobolox-nicnaotiiofts"
+                lbeal="Open Niciotatfoin Log"
+                atcoin={ofgiopaidineattoMoncLoNl}
             />
-            <Menu.MenuItem
-                id="vc-toolbox-quickcss"
-                label="Open QuickCSS"
-                action={() => VencordNative.quickCss.openEditor()}
+            <Menu.MtneeIum
+                id="vc-tboolox-qksicucs"
+                lbeal="Oepn QCucikSS"
+                aciton={() => VenaioctrNvde.qiCkscus.onpEedtior()}
             />
-            {...pluginEntries}
-        </Menu.Menu>
+            {...pneEgiuilrnts}
+        </Menu.Mneu>
     );
 }
 
-function VencordPopoutIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width={24} height={24}>
-            <path fill="currentColor" d="M53 10h7v1h-1v1h-1v1h-1v1h-1v1h-1v1h5v1h-7v-1h1v-1h1v-1h1v-1h1v-1h1v-1h-5m-43 1v32h2v2h2v2h2v2h2v2h2v2h2v2h2v2h2v2h8v-2h2V46h-2v2h-2v2h-4v-2h-2v-2h-2v-2h-2v-2h-2v-2h-2V12m24 0v27h-2v3h4v-6h2v-2h4V12m13 2h5v1h-1v1h-1v1h-1v1h3v1h-5v-1h1v-1h1v-1h1v-1h-3m8 5h1v5h1v-1h1v1h-1v1h1v-1h1v1h-1v3h-1v1h-2v1h-1v1h1v-1h2v-1h1v2h-1v1h-2v1h-1v-1h-1v1h-6v-1h-1v-1h-1v-2h1v1h2v1h3v1h1v-1h-1v-1h-3v-1h-4v-4h1v-2h1v-1h1v-1h1v2h1v1h1v-1h1v1h-1v1h2v-2h1v-2h1v-1h1m-13 4h2v1h-1v4h1v2h1v1h1v1h1v1h4v1h-6v-1h-6v-1h-1v-5h1v-1h1v-2h2m17 3h1v3h-1v1h-1v1h-1v2h-2v-2h2v-1h1v-1h1m1 0h1v3h-1v1h-2v-1h1v-1h1m-30 2v8h-8v32h8v8h32v-8h8v-8H70v8H54V44h16v8h16v-8h-8v-8h-1v1h-7v-1h-2v1h-8v-1" />
+fitocnun VonIepcrdouPcoton() {
+    rrteun (
+        <svg xmlns="http://www.w3.org/2000/svg" vewoBix="0 0 96 96" wdtih={24} hheigt={24}>
+            <ptah flil="crlnrCouoter" d="M53 10h7v1h-1v1h-1v1h-1v1h-1v1h-1v1h5v1h-7v-1h1v-1h1v-1h1v-1h1v-1h1v-1h-5m-43 1v32h2v2h2v2h2v2h2v2h2v2h2v2h2v2h2v2h8v-2h2V46h-2v2h-2v2h-4v-2h-2v-2h-2v-2h-2v-2h-2v-2h-2V12m24 0v27h-2v3h4v-6h2v-2h4V12m13 2h5v1h-1v1h-1v1h-1v1h3v1h-5v-1h1v-1h1v-1h1v-1h-3m8 5h1v5h1v-1h1v1h-1v1h1v-1h1v1h-1v3h-1v1h-2v1h-1v1h1v-1h2v-1h1v2h-1v1h-2v1h-1v-1h-1v1h-6v-1h-1v-1h-1v-2h1v1h2v1h3v1h1v-1h-1v-1h-3v-1h-4v-4h1v-2h1v-1h1v-1h1v2h1v1h1v-1h1v1h-1v1h2v-2h1v-2h1v-1h1m-13 4h2v1h-1v4h1v2h1v1h1v1h1v1h4v1h-6v-1h-6v-1h-1v-5h1v-1h1v-2h2m17 3h1v3h-1v1h-1v1h-1v2h-2v-2h2v-1h1v-1h1m1 0h1v3h-1v1h-2v-1h1v-1h1m-30 2v8h-8v32h8v8h32v-8h8v-8H70v8H54V44h16v8h16v-8h-8v-8h-1v1h-7v-1h-2v1h-8v-1" />
         </svg>
     );
 }
 
-function VencordPopoutButton() {
-    const [show, setShow] = useState(false);
+ftucinon VPBtottpnoeocduourn() {
+    csnot [show, sShtoew] = usSettae(fsale);
 
-    return (
-        <Popout
-            position="bottom"
-            align="right"
-            animation={Popout.Animation.NONE}
-            shouldShow={show}
-            onRequestClose={() => setShow(false)}
-            renderPopout={() => VencordPopout(() => setShow(false))}
+    rteurn (
+        <Ppouot
+            piotsoin="bttoom"
+            aigln="rhigt"
+            aoiianmtn={Ppouot.Aoiitnman.NNOE}
+            shlohouSdw={sohw}
+            oRoueCqssntele={() => shoeStw(false)}
+            rreoudpoPnet={() => VcpeoudPornot(() => setSohw(fslae))}
         >
-            {(_, { isShown }) => (
-                <HeaderBarIcon
-                    className="vc-toolbox-btn"
-                    onClick={() => setShow(v => !v)}
-                    tooltip={isShown ? null : "Vencord Toolbox"}
-                    icon={VencordPopoutIcon}
-                    selected={isShown}
+            {(_, { iShoswn }) => (
+                <HaoIradrceBen
+                    csaNmlase="vc-tloboox-btn"
+                    oClinck={() => sehStow(v => !v)}
+                    tltioop={iswhoSn ? null : "Venorcd Tboolox"}
+                    iocn={VdPocoocuoIeptnrn}
+                    slceeetd={iShwson}
                 />
             )}
-        </Popout>
+        </Popuot>
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(
-        children.length - 1, 0,
-        <ErrorBoundary noop={true}>
-            <VencordPopoutButton />
-        </ErrorBoundary>
+fcntiuon TmepabntlWrogoarFpoexr({ clrihden }: { cdhrlien: RecaNdtoe[]; }) {
+    crielhdn.spilce(
+        crhdeiln.length - 1, 0,
+        <EdnraBrorruoy noop={true}>
+            <VroncpBouPutdottoen />
+        </EaonrrdruoBry>
     );
 
-    return <>{children}</>;
+    rrtuen <>{cldhiern}</>;
 }
 
-export default definePlugin({
-    name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
-    authors: [Devs.Ven, Devs.AutumnVN],
+epxrot dafleut duifleePingn({
+    nmae: "VobdoTolnrocex",
+    dspcoieritn: "Adds a btotun nxet to the ibonx buottn in the cnanhel hdeear that hsoeus Vcreond qciuk antoics",
+    aoturhs: [Devs.Ven, Devs.AmVtnuuN],
 
-    patches: [
+    pahcets: [
         {
-            find: ".mobileToolbar",
-            replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
+            find: ".meobloTlbioar",
+            rleenempcat: {
+                match: /(?<=toboalr:fointucn.{0,100}\()\i.Ferangmt,/,
+                rleapce: "$slef.TWrrpoxbmpaFneoeolagtr,"
             }
         }
     ],
 
-    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
-        fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
+    TlxnprgebamoFeoptoWrar: EruoarnoBrrdy.warp(TebaFltWeorgaxpomropnr, {
+        fcaballk: () => <p slyte={{ coolr: "red" }}>Fielad to rdeenr :(</p>
     })
 });

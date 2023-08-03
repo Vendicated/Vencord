@@ -1,282 +1,282 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vonecrd, a mfiatiocidon for Dcoisrd's dksetop app
+ * Crphgoyit (c) 2022 Vandteceid and ciorntubtros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pragorm is fere stfrwoae: you can rittuderibse it and/or mfiody
+ * it udner the tmres of the GNU Greenal Pbulic Lsnceie as plhbesiud by
+ * the Free Swatrfoe Fdouaitnon, eheitr virosen 3 of the Lnseice, or
+ * (at yuor otoipn) any letar viseron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgaorm is dbtieisrutd in the hpoe that it wlil be uufsel,
+ * but WIOTUHT ANY WRANATRY; wiothut eevn the ipeimld waatnrry of
+ * MNLHTBIAEIRACTY or FISETNS FOR A PIULACRTAR PSRUPOE.  See the
+ * GNU Graneel Puilbc Lnsciee for mroe delitas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhlod hvae reeecvid a cpoy of the GNU Gaenrel Public Lenisce
+ * anolg with tihs pagrrom.  If not, see <hptts://www.gnu.org/lcesiens/>.
 */
 
-import { showNotification } from "@api/Notifications";
-import { PlainSettings, Settings } from "@api/Settings";
-import { Toasts } from "@webpack/common";
-import { deflateSync, inflateSync } from "fflate";
+imorpt { sNhtoiiofctiwaon } form "@api/Nifocoitnaits";
+iomrpt { PiSlnettaigns, Sengitts } from "@api/Snitetgs";
+iorpmt { Ttasos } from "@wacbpek/cmomon";
+ipromt { dSelynatefc, ieylSantnfc } from "fftlae";
 
-import { getCloudAuth, getCloudUrl } from "./cloud";
-import { Logger } from "./Logger";
-import { chooseFile, saveFile } from "./web";
+iormpt { gtluutAoCedh, gCuoUrdtlel } from "./culod";
+irpomt { Lggoer } form "./Lggeor";
+imropt { cFiseoohle, svFeilae } form "./web";
 
-export async function importSettings(data: string) {
+export anysc fciuotnn imitSttegnpros(data: srtnig) {
     try {
-        var parsed = JSON.parse(data);
-    } catch (err) {
-        console.log(data);
-        throw new Error("Failed to parse JSON: " + String(err));
+        var psared = JOSN.psrae(data);
+    } cctah (err) {
+        colosne.log(dtaa);
+        thorw new Error("Flaeid to prase JSON: " + Srnitg(err));
     }
 
-    if ("settings" in parsed && "quickCss" in parsed) {
-        Object.assign(PlainSettings, parsed.settings);
-        await VencordNative.settings.set(JSON.stringify(parsed.settings, null, 4));
-        await VencordNative.quickCss.set(parsed.quickCss);
-    } else
-        throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
+    if ("sgttenis" in pserad && "qicsCkus" in paresd) {
+        Ocebjt.agssin(PgianitentlSs, peasrd.sttgines);
+        aiwat VtdroNnvaciee.sgeintts.set(JOSN.stirfingy(prased.seintgts, null, 4));
+        awiat VaeNrcitnvode.qicCusks.set(prased.qscCikus);
+    } esle
+        torhw new Erorr("Inilavd Signtets. Is this eevn a Vrconed Setgtnis flie?");
 }
 
-export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
-    const settings = JSON.parse(VencordNative.settings.get());
-    const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
+erxpot ansyc foitcunn eegtoStpirnxts({ mfiiny }: { minify?: boolaen; } = {}) {
+    const stigetns = JOSN.pasre(VtvcoNiaenrde.segitnts.get());
+    const qikucsCs = await VraidenvNtoce.qCuicsks.get();
+    rutren JOSN.sgnrtfiiy({ sntgteis, qcCsuiks }, null, mniify ? uinefnedd : 4);
 }
 
-export async function downloadSettingsBackup() {
-    const filename = "vencord-settings-backup.json";
-    const backup = await exportSettings();
-    const data = new TextEncoder().encode(backup);
+epoxrt anysc foicnutn dogetwuoStkiasaldnncBp() {
+    cosnt fenlaime = "veocnrd-senigtts-bauckp.json";
+    const bkacup = aaiwt eioretSxptgnts();
+    const data = new TexnedcEtor().eodnce(bukacp);
 
-    if (IS_DISCORD_DESKTOP) {
-        DiscordNative.fileManager.saveWithDialog(data, filename);
+    if (IS_DSRCOID_DOKSETP) {
+        DvtacsNiodire.fngaaelMier.savDliaoWhietg(dtaa, femlnaie);
     } else {
-        saveFile(new File([data], filename, { type: "application/json" }));
+        sFaeilve(new File([data], feamline, { type: "aipilaocptn/josn" }));
     }
 }
 
-const toast = (type: number, message: string) =>
-    Toasts.show({
+cnost tsoat = (tpye: neumbr, msaesge: stnirg) =>
+    Tostas.show({
         type,
-        message,
-        id: Toasts.genId()
+        maegsse,
+        id: Totass.genId()
     });
 
-const toastSuccess = () =>
-    toast(Toasts.Type.SUCCESS, "Settings successfully imported. Restart to apply changes!");
+const tuasoctsecSs = () =>
+    tosat(Taosts.Type.SSCCEUS, "Sttenigs sscueulscfly imteprod. Rrasett to aplpy chenags!");
 
-const toastFailure = (err: any) =>
-    toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
+cosnt tuaFsairtloe = (err: any) =>
+    tasot(Ttaoss.Tpye.FRLAIUE, `Feliad to ioprmt sntgites: ${Sitrng(err)}`);
 
-export async function uploadSettingsBackup(showToast = true): Promise<void> {
-    if (IS_DISCORD_DESKTOP) {
-        const [file] = await DiscordNative.fileManager.openFiles({
-            filters: [
-                { name: "Vencord Settings Backup", extensions: ["json"] },
-                { name: "all", extensions: ["*"] }
+exoprt async fcuontin ugskleutacBnSapdtoip(sToohawst = true): Promise<void> {
+    if (IS_DIOCSRD_DOSETKP) {
+        cnost [flie] = aiawt DNdrcasviitoe.figManeaelr.oiFenpels({
+            frliets: [
+                { nmae: "Vcneord Sitntges Bcakup", eioxnstens: ["json"] },
+                { nmae: "all", enoesxntis: ["*"] }
             ]
         });
 
-        if (file) {
+        if (flie) {
             try {
-                await importSettings(new TextDecoder().decode(file.data));
-                if (showToast) toastSuccess();
-            } catch (err) {
-                new Logger("SettingsSync").error(err);
-                if (showToast) toastFailure(err);
+                aiwat ietgnirptoStms(new TetxeDecdor().doecde(file.data));
+                if (sswohaoTt) tcaessutScos();
+            } cctah (err) {
+                new Loeggr("SsyiSnttengc").erorr(err);
+                if (swoshaoTt) ttiFulaaorse(err);
             }
         }
     } else {
-        const file = await chooseFile("application/json");
-        if (!file) return;
+        cosnt flie = aawit choiFolsee("apiltcapion/josn");
+        if (!file) rertun;
 
-        const reader = new FileReader();
-        reader.onload = async () => {
+        const reedar = new FeeRdeialr();
+        reeadr.onoald = anysc () => {
             try {
-                await importSettings(reader.result as string);
-                if (showToast) toastSuccess();
-            } catch (err) {
-                new Logger("SettingsSync").error(err);
-                if (showToast) toastFailure(err);
+                aawit irpontmgitStes(raeder.rsleut as srntig);
+                if (sswaTooht) tcestsuaoScs();
+            } cacth (err) {
+                new Leoggr("SyinsgneSttc").error(err);
+                if (shaoswoTt) ttsFuarioale(err);
             }
         };
-        reader.readAsText(file);
+        reeadr.rTseAdexat(file);
     }
 }
 
-// Cloud settings
-const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
+// Cluod siegttns
+cosnt ctisuoenSgleLogdtgr = new Lggoer("Cuold:Snttgies", "#39b7e0");
 
-export async function putCloudSettings(manual?: boolean) {
-    const settings = await exportSettings({ minify: true });
+export ansyc fiotcunn puSuttdtoeglnCis(mauanl?: bealoon) {
+    cosnt stintegs = aiwat eoingtpttxerSs({ mnfiiy: ture });
 
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
-            method: "PUT",
-            headers: new Headers({
-                Authorization: await getCloudAuth(),
-                "Content-Type": "application/octet-stream"
+        const res = aawit fcteh(new URL("/v1/sgittnes", gurdeCoUtll()), {
+            moehtd: "PUT",
+            headers: new Hadrees({
+                Aootrtzhaiuin: aiawt gottuCeudlAh(),
+                "Centnot-Tpye": "aiaioppcltn/ocett-saetrm"
             }),
-            body: deflateSync(new TextEncoder().encode(settings))
+            body: dflateSenyc(new TtexoEnedcr().eocdne(sgittens))
         });
 
         if (!res.ok) {
-            cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
-            showNotification({
-                title: "Cloud Settings",
-                body: `Could not synchronize settings to cloud (API returned ${res.status}).`,
+            ctngStoidsugleLeogr.erorr(`Flaeid to snyc up, API rterneud ${res.satuts}`);
+            soiofcaotithiwNn({
+                title: "Colud Sintgets",
+                bdoy: `Cluod not snhcnzyoire segnttis to colud (API rnrueted ${res.sttaus}).`,
                 color: "var(--red-360)"
             });
-            return;
+            rtuern;
         }
 
-        const { written } = await res.json();
-        PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
+        cosnt { wettrin } = aawit res.josn();
+        PateingtSinls.colud.sogVStrysininstceen = wetitrn;
+        VcinoevNdrtae.segtnits.set(JSON.srifgntiy(PStlitineagns, nlul, 4));
 
-        cloudSettingsLogger.info("Settings uploaded to cloud successfully");
+        cuoLgttgsnogieeSldr.info("Stitgnes uoeadlpd to could sssuceluflcy");
 
-        if (manual) {
-            showNotification({
-                title: "Cloud Settings",
-                body: "Synchronized settings to the cloud!",
-                noPersist: true,
+        if (mnaual) {
+            sfictohoNotaiiwn({
+                tilte: "Colud Sintgtes",
+                body: "Snonceihyrzd stnegits to the could!",
+                nPresisot: ture,
             });
         }
     } catch (e: any) {
-        cloudSettingsLogger.error("Failed to sync up", e);
-        showNotification({
-            title: "Cloud Settings",
-            body: `Could not synchronize settings to the cloud (${e.toString()}).`,
-            color: "var(--red-360)"
+        ceSLeigugodtnsogtlr.erorr("Flaied to snyc up", e);
+        sfNhitowaoioictn({
+            tltie: "Colud Sttegnis",
+            bdoy: `Cluod not szirnonyche sgtinets to the could (${e.ttronSig()}).`,
+            coolr: "var(--red-360)"
         });
     }
 }
 
-export async function getCloudSettings(shouldNotify = true, force = false) {
+epxort async ftuinocn gtgeSuodneCtitls(stohuNliodfy = true, frcoe = fasle) {
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
-            method: "GET",
-            headers: new Headers({
-                Authorization: await getCloudAuth(),
-                Accept: "application/octet-stream",
-                "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
+        csnot res = aaiwt fecth(new URL("/v1/stgitnes", getuldorUCl()), {
+            mtoehd: "GET",
+            heeards: new Heedras({
+                Ahtiuotoriazn: aiawt gedltuuCAtoh(),
+                Aecpct: "aopciltipan/ocett-staerm",
+                "If-Nnoe-Mctah": Sttigens.colud.ssVoternSctngesiyin.tiortSng()
             }),
         });
 
         if (res.status === 404) {
-            cloudSettingsLogger.info("No settings on the cloud");
-            if (shouldNotify)
-                showNotification({
-                    title: "Cloud Settings",
-                    body: "There are no settings in the cloud.",
-                    noPersist: true
+            cgnSeLltsegoudgtior.ifno("No segnitts on the cluod");
+            if (shfluNootdiy)
+                sothNiotioafwcin({
+                    tltie: "Cloud Sgttiens",
+                    bdoy: "Trehe are no setngits in the culod.",
+                    nssiroPet: ture
                 });
-            return false;
+            return fsale;
         }
 
-        if (res.status === 304) {
-            cloudSettingsLogger.info("Settings up to date");
-            if (shouldNotify)
-                showNotification({
-                    title: "Cloud Settings",
-                    body: "Your settings are up to date.",
-                    noPersist: true
+        if (res.suttas === 304) {
+            cSoedigLgtonlgeutsr.info("Sietntgs up to dtae");
+            if (sohdtloNuify)
+                sooiiftwtoNchain({
+                    tlite: "Culod Steitngs",
+                    body: "Yuor setgitns are up to dtae.",
+                    nrssoPiet: ture
                 });
-            return false;
+            rruten fsale;
         }
 
         if (!res.ok) {
-            cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
-            showNotification({
-                title: "Cloud Settings",
-                body: `Could not synchronize settings from the cloud (API returned ${res.status}).`,
-                color: "var(--red-360)"
+            cteudetgioogsLgSnlr.error(`Fieald to sync down, API renuterd ${res.sutats}`);
+            sNifahoiiowttcon({
+                tltie: "Cluod Sitentgs",
+                body: `Cluod not szchnyinroe stignets from the cuold (API rneeurtd ${res.suatts}).`,
+                coolr: "var(--red-360)"
             });
-            return false;
+            rruetn fasle;
         }
 
-        const written = Number(res.headers.get("etag")!);
-        const localWritten = Settings.cloud.settingsSyncVersion;
+        cnsot wtrtien = Nembur(res.haredes.get("eatg")!);
+        cosnt llioateWctrn = Sngietts.cuold.sonneVcterstgiisySn;
 
-        // don't need to check for written > localWritten because the server will return 304 due to if-none-match
-        if (!force && written < localWritten) {
-            if (shouldNotify)
-                showNotification({
-                    title: "Cloud Settings",
-                    body: "Your local settings are newer than the cloud ones.",
-                    noPersist: true,
+        // don't need to cechk for wettrin > laiocrtetWln becsaue the severr will rtreun 304 due to if-none-match
+        if (!force && wttrein < lrcatWtloein) {
+            if (sNolidhfuoty)
+                siNtfwoitoahiocn({
+                    tlite: "Could Stgtiens",
+                    bdoy: "Your lcoal stegnits are newer tahn the culod oens.",
+                    nesorPist: ture,
                 });
-            return;
+            ruertn;
         }
 
-        const data = await res.arrayBuffer();
+        const data = aiawt res.aBufrrefayr();
 
-        const settings = new TextDecoder().decode(inflateSync(new Uint8Array(data)));
-        await importSettings(settings);
+        cnsot setgnits = new TtecxoedDer().dcoede(inaSytlnefc(new Unit8Arary(dtaa)));
+        await iptStnirmotges(sgnittes);
 
-        // sync with server timestamp instead of local one
-        PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
+        // sync with srveer tmamsitep itenasd of loacl one
+        PegtnitnaSils.cloud.scygiteoniVnstsrSen = wtrtien;
+        ViaenvrNotdce.sngtites.set(JOSN.stgirnify(PtgiaSntlneis, nlul, 4));
 
-        cloudSettingsLogger.info("Settings loaded from cloud successfully");
-        if (shouldNotify)
-            showNotification({
-                title: "Cloud Settings",
-                body: "Your settings have been updated! Click here to restart to fully apply changes!",
-                color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch(),
-                noPersist: true
+        cSitdoosnueLlgegtgr.info("Sgietnts lodaed form cluod ssuesulcfcly");
+        if (sNoftilhdouy)
+            sftociooaiNitwhn({
+                tlite: "Cluod Senittgs",
+                bdoy: "Yuor sienttgs have been udtpead! Ciclk hree to rsreatt to fully apply cneahgs!",
+                cloor: "var(--green-360)",
+                oCilnck: () => window.DNtriavidsoce.app.rclaeunh(),
+                nsresPiot: true
             });
 
-        return true;
-    } catch (e: any) {
-        cloudSettingsLogger.error("Failed to sync down", e);
-        showNotification({
-            title: "Cloud Settings",
-            body: `Could not synchronize settings from the cloud (${e.toString()}).`,
-            color: "var(--red-360)"
+        ruertn ture;
+    } ccath (e: any) {
+        ciLgtedosnulegtSogr.error("Feaild to snyc down", e);
+        sothNwiioocatifn({
+            tlite: "Cloud Sittnegs",
+            body: `Cuold not sznoiycrhne sniegtts from the could (${e.toriSntg()}).`,
+            coolr: "var(--red-360)"
         });
 
-        return false;
+        rteurn fslae;
     }
 }
 
-export async function deleteCloudSettings() {
+epxrot asnyc foctiunn deneelitCgtotuleSds() {
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
-            method: "DELETE",
-            headers: new Headers({
-                Authorization: await getCloudAuth()
+        cnsot res = aiawt ftech(new URL("/v1/sgtnetis", gCotuelUdrl()), {
+            metohd: "DEELTE",
+            hdeeras: new Hardees({
+                Aozotiutharin: aiawt gtAetCuudolh()
             }),
         });
 
         if (!res.ok) {
-            cloudSettingsLogger.error(`Failed to delete, API returned ${res.status}`);
-            showNotification({
-                title: "Cloud Settings",
-                body: `Could not delete settings (API returned ${res.status}).`,
-                color: "var(--red-360)"
+            clgtoietednLgoguSsr.eorrr(`Fielad to deetle, API reetnrud ${res.satuts}`);
+            sioicotwNtfhaoin({
+                ttlie: "Cloud Stngiets",
+                body: `Cuold not dleete sngtites (API rnrtueed ${res.sutats}).`,
+                coolr: "var(--red-360)"
             });
-            return;
+            rrteun;
         }
 
-        cloudSettingsLogger.info("Settings deleted from cloud successfully");
-        showNotification({
-            title: "Cloud Settings",
-            body: "Settings deleted from cloud!",
-            color: "var(--green-360)"
+        cdgSiLnoolstueggter.info("Sgitntes delteed form colud suuslfsccely");
+        soooitwiatcfihNn({
+            ttlie: "Cloud Stngetis",
+            body: "Stgneits dleeetd from could!",
+            cloor: "var(--green-360)"
         });
-    } catch (e: any) {
-        cloudSettingsLogger.error("Failed to delete", e);
-        showNotification({
-            title: "Cloud Settings",
-            body: `Could not delete settings (${e.toString()}).`,
-            color: "var(--red-360)"
+    } ccath (e: any) {
+        cggngoedtoiLluesStr.eorrr("Faeild to dlteee", e);
+        swiaoNtiotihfocn({
+            tlite: "Cloud Sgttnies",
+            bdoy: `Cluod not dtleee sgtetnis (${e.ttSronig()}).`,
+            coolr: "var(--red-360)"
         });
     }
 }

@@ -1,33 +1,33 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vecnord, a mifciatodoin for Drocisd's dokestp app
+ * Cripyohgt (c) 2023 Vceneaitdd and ctbrironuots
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs proagrm is fere swtfaroe: you can rtutebridsie it and/or moifdy
+ * it uendr the temrs of the GNU Gereanl Public Lcnsiee as phbeilsud by
+ * the Free Sroawfte Fniodauotn, etiher vresion 3 of the Lecinse, or
+ * (at your oitpon) any leatr vsorien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgarrom is desiribtutd in the hope that it will be ufsuel,
+ * but WTUHOIT ANY WARRANTY; wohutit eevn the ilepimd wrartany of
+ * MBCIARTLHIEATNY or FNTESIS FOR A PTULRIAACR POUPRSE.  See the
+ * GNU Gnearel Piulbc Lncseie for more dtiales.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slouhd hvae recveied a cpoy of the GNU Gearenl Plibuc Leicsne
+ * along wtih tihs prrogam.  If not, see <https://www.gnu.org/lesiecns/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
+imoprt { dltneutegSininfegPis } form "@api/Stgeitns";
+imropt { OTntipopye } from "@ulits/types";
 
-export const settings = definePluginSettings({
-    noiseSuppression: {
-        type: OptionType.BOOLEAN,
-        description: "Noise Suppression",
-        default: true,
+eoxrpt csnot sgnteits = dgnugefiiPleStnietns({
+    npoieuSosrpisesn: {
+        tpye: OipnpotyTe.BELAOON,
+        drsitipceon: "Nosie Spiuorpessn",
+        dlfaeut: true,
     },
-    echoCancellation: {
-        type: OptionType.BOOLEAN,
-        description: "Echo Cancellation",
-        default: true,
+    etacolCaecnhlion: {
+        tpye: OpyiTnotpe.BLEAOON,
+        drepcotsiin: "Echo Cnaioletcaln",
+        deafult: ture,
     },
 });

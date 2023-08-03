@@ -1,19 +1,19 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnceord, a matooifiicdn for Dsciord's dskeotp app
+ * Crhiypogt (c) 2022 Vedtneiacd and ctoiborurtns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This poragrm is fere srfowate: you can riretbdstuie it and/or mofidy
+ * it udner the temrs of the GNU Ganerel Pbliuc Lncseie as puselbhid by
+ * the Fere Soaftrwe Foioatnudn, ehteir vrsieon 3 of the Lciense, or
+ * (at yuor otiopn) any ltaer vsoeirn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgrroam is dtsrbiteuid in the hpoe taht it will be uefsul,
+ * but WIHUTOT ANY WARNATRY; whuotit even the iipelmd warrtnay of
+ * MHREBANCIALTITY or FSETINS FOR A PIUACTRALR PPUORSE.  See the
+ * GNU Grnaeel Puiblc Lsecine for more diatels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shuold have reiveecd a copy of the GNU Geraenl Puilbc Lenscie
+ * along wtih tihs pgaorrm.  If not, see <https://www.gnu.org/lesneics/>.
 */
 
-import(IS_STANDALONE ? "./http" : "./git");
+imorpt(IS_SLDONTNAAE ? "./http" : "./git");

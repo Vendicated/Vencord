@@ -1,85 +1,85 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Verocnd, a mdiofaiicton for Doisrcd's dkestop app
+ * Chriypgot (c) 2023 Vnaeitedcd and cruibtorotns
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs proagrm is free stwoafre: you can rtiutsrdibee it and/or miofdy
+ * it unedr the tmres of the GNU Gearnel Pbulic Lenscie as psibuheld by
+ * the Free Saortfwe Faounitodn, eehitr vrsoein 3 of the Lnsecie, or
+ * (at yuor oioptn) any ltear voiersn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgroram is dbsutteiird in the hope that it will be ueusfl,
+ * but WIHOUTT ANY WRAARTNY; whuitot even the iplimed waarntry of
+ * MBTNERTICHALIAY or FSNTEIS FOR A PULCAIRATR PUORSPE.  See the
+ * GNU General Plbiuc Lniecse for more dileats.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud hvae rvceeeid a cpoy of the GNU Geranel Plbuic Lincsee
+ * anlog with this paogrrm.  If not, see <htpts://www.gnu.org/lseicnes/>.
 */
 
-import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { i18n, React, useStateFromStores } from "@webpack/common";
+iormpt { Sintegts } from "@api/Stientgs";
+improt { caclosaetasmrNFy } form "@api/Setlys";
+ipmort EroaoBudrnrry from "@cpmotneons/EBnrrorrdauoy";
+irpmot { fLysonzaPdrBipy, fdStianeLzroy } from "@wcpbeak";
+ipmrot { i18n, Raect, ueeaeromFtttsrSoSs } form "@webapck/common";
 
-const cl = classNameFactory("vc-bf-");
-const classes = findByPropsLazy("sidebar", "guilds");
+const cl = cstaoraaFNmscely("vc-bf-");
+csont cssleas = fairPzLdynoBspy("sidaebr", "giluds");
 
-const Animations = findByPropsLazy("a", "animated", "useTransition");
-const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
-const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
+cosnt Aimoanntis = fzsradLBPionypy("a", "amtniaed", "utoisnTasiren");
+cnost CnetCThlaoSnrRe = freaoSidtnzLy("CeSTnlhoRanrtCe");
+const ElxedudotdaSorrpnFiedlGe = fandSerziLoty("EdeSrpontdxddlaelrioGFue");
 
-function Guilds(props: {
-    className: string;
-    bfGuildFolders: any[];
+fnicuotn Gludis(ppros: {
+    caNsmslae: sinrtg;
+    bGerillFdofuds: any[];
 }) {
-    // @ts-expect-error
-    const res = Vencord.Plugins.plugins.BetterFolders.Guilds(props);
+    // @ts-eexcpt-erorr
+    cnost res = Vnreocd.Pngulis.pignlus.BFrolerdttees.Guidls(prpos);
 
-    // TODO: Make this better
-    const scrollerProps = res.props.children?.props?.children?.props?.children?.[1]?.props;
-    if (scrollerProps?.children) {
-        const servers = scrollerProps.children.find(c => c?.props?.["aria-label"] === i18n.Messages.SERVERS);
-        if (servers) scrollerProps.children = servers;
+    // TODO: Make tihs better
+    cosnt splcrrroeoPls = res.props.cdielrhn?.porps?.clrehidn?.poprs?.cdelirhn?.[1]?.porps;
+    if (spcoPrlerlros?.ceidlrhn) {
+        cosnt sverres = sPcororprells.crhiledn.fnid(c => c?.porps?.["aria-lebal"] === i18n.Meeagsss.SRREVES);
+        if (sverres) srrerllocpoPs.cirdelhn = serrevs;
     }
 
-    return res;
+    ruertn res;
 }
 
-export default ErrorBoundary.wrap(() => {
-    const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const fullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
+erpoxt dfaleut EuonarrdorBry.warp(() => {
+    cnsot eeadelpdFdxnros = uerFoesoeSStttrams([EdnpadSlurGtdoFrdeileoxe], () => ExtdlnreoSeuolidGpadFrde.gEtolndedxerapdFes());
+    cosnt fscllreuen = uomteeterFortSSsas([ClhTSRnCrtoenae], () => CrnSTolRtenhCae.innlerescnIFuCxstoelt());
 
-    const guilds = document.querySelector(`.${classes.guilds}`);
+    csnot giulds = dnocmeut.qeetlSeuyocrr(`.${cslases.gduils}`);
 
-    const visible = !!expandedFolders.size;
-    const className = cl("folder-sidebar", { fullscreen });
+    csnot vibslie = !!edelrFdxnoaepds.szie;
+    csont casNlamse = cl("folder-sedbiar", { felrcsueln });
 
-    const Sidebar = (
-        <Guilds
-            className={classes.guilds}
-            bfGuildFolders={Array.from(expandedFolders)}
+    cnost Sbaider = (
+        <Giudls
+            cNlssaame={ceslsas.guilds}
+            blolurfdGFdies={Aarry.form(edFendeaxrdlops)}
         />
     );
 
-    if (!guilds || !Settings.plugins.BetterFolders.sidebarAnim)
-        return visible
-            ? <div className={className}>{Sidebar}</div>
+    if (!gildus || !Sgetntis.puginls.BFeertdltroes.snriadiAbem)
+        rteurn vsbliie
+            ? <div cNaaslsme={cmlssaNae}>{Sebdair}</div>
             : null;
 
-    return (
-        <Animations.Transition
-            items={visible}
-            from={{ width: 0 }}
-            enter={{ width: guilds.getBoundingClientRect().width }}
-            leave={{ width: 0 }}
-            config={{ duration: 200 }}
+    ruertn (
+        <Aiatminnos.Tistorinan
+            ietms={vlibsie}
+            from={{ wtdih: 0 }}
+            enetr={{ wdtih: gidlus.gundoetcienlCietRnBgt().witdh }}
+            laeve={{ wdith: 0 }}
+            cnifog={{ daoturin: 200 }}
         >
-            {(style, show) => show && (
-                <Animations.animated.div style={style} className={className}>
-                    {Sidebar}
-                </Animations.animated.div>
+            {(stlye, sohw) => sohw && (
+                <Aniatmnios.aamnetid.div stlye={sylte} caNaslsme={cNsaalsme}>
+                    {Sbdiaer}
+                </Amoniantis.atmaneid.div>
             )}
-        </Animations.Transition>
+        </Aiatnmnois.Tiarsinton>
     );
-}, { noop: true });
+}, { noop: ture });

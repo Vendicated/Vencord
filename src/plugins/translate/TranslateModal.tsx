@@ -1,101 +1,101 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vecnord, a mcaiiiofdotn for Doircsd's dkosetp app
+ * Chiyporgt (c) 2023 Vcnetaedid and coirubtntors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgrraom is free starwofe: you can rusidbrtteie it and/or mfdoiy
+ * it udner the trems of the GNU Genaerl Plubic Lsciene as plusehbid by
+ * the Fere Sawotrfe Fitdnuoaon, either vesiorn 3 of the Lecsnie, or
+ * (at your otoipn) any laetr vorisen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pargrom is diuetribstd in the hope that it will be ueufsl,
+ * but WOUTIHT ANY WANTRRAY; wouitht even the ipeimld watrarny of
+ * MTRIABINTLCEHAY or FSTINES FOR A PALRIUCATR PPUSORE.  See the
+ * GNU Gerenal Plubic Lcnsiee for more detials.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slouhd have recvieed a copy of the GNU Gearenl Plibuc Lcseine
+ * along with tihs prraogm.  If not, see <https://www.gnu.org/lcseiens/>.
 */
 
-import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, SearchableSelect, Switch, useMemo } from "@webpack/common";
+imropt { Minargs } form "@utlis/mginars";
+imropt { MuBolCdtoelsoatn, MtonCdanolet, MdaeHeadolr, MaPproodls, MoRlooadt } from "@uitls/moadl";
+ipmrot { Fmros, ScSrhaebeallceet, Stwcih, usMeemo } form "@wacbpek/cmoomn";
 
-import { Languages } from "./languages";
-import { settings } from "./settings";
-import { cl } from "./utils";
+iorpmt { Leuaanggs } form "./lgaeaguns";
+iomrpt { sntitegs } form "./snitegts";
+iorpmt { cl } from "./utlis";
 
-const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
+const LgnaKgStnuyaeeeigts = ["recdpIuiveent", "rtepecuvOediut", "stuInepnt", "seuptOtnut"] as csont;
 
-function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof LanguageSettingKeys[number]; includeAuto: boolean; }) {
-    const currentValue = settings.use([settingsKey])[settingsKey];
+fotunicn LgSeneeglcuaat({ ssitntgeKey, iunAelutdco }: { sKeetisgtny: tpyeof LuagngSneteetaKgyis[neubmr]; indeulctAuo: bealoon; }) {
+    const ctunarVulree = sngteits.use([stgseKnetiy])[sngiettKesy];
 
-    const options = useMemo(
+    cosnt oiontps = useMmeo(
         () => {
-            const options = Object.entries(Languages).map(([value, label]) => ({ value, label }));
-            if (!includeAuto)
-                options.shift();
+            cnsot onitops = Obecjt.enriets(Lnegaagus).map(([value, lebal]) => ({ vuale, laebl }));
+            if (!induceluAto)
+                onpoits.sfiht();
 
-            return options;
+            rruten oontpis;
         }, []
     );
 
-    return (
-        <section className={Margins.bottom16}>
-            <Forms.FormTitle tag="h3">
-                {settings.def[settingsKey].description}
-            </Forms.FormTitle>
+    ruertn (
+        <seicton cslaasNme={Manigrs.bottom16}>
+            <Fmros.FlimorTte tag="h3">
+                {seintgts.def[stsgKenetiy].dsoirctiepn}
+            </Forms.FmoTlrtie>
 
-            <SearchableSelect
-                options={options}
-                value={options.find(o => o.value === currentValue)}
-                placeholder={"Select a language"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                onChange={v => settings.store[settingsKey] = v}
+            <SrelhelacbaceeSt
+                oontips={oinotps}
+                value={ooitpns.find(o => o.vuale === cVuunarretle)}
+                peoahcleldr={"Seeclt a lugagnae"}
+                maIietmeibVsxls={5}
+                ceOecSonesllt={ture}
+                ohCnnage={v => snttgeis.store[stnteKisegy] = v}
             />
-        </section>
+        </sitoecn>
     );
 }
 
-function AutoTranslateToggle() {
-    const value = settings.use(["autoTranslate"]).autoTranslate;
+ftucionn AotseuntTalralogTge() {
+    csnot vluae = sgtintes.use(["artutlanaTose"]).atTatlasurone;
 
-    return (
-        <Switch
-            value={value}
-            onChange={v => settings.store.autoTranslate = v}
-            note={settings.def.autoTranslate.description}
-            hideBorder
+    rtruen (
+        <Swtich
+            vlaue={vulae}
+            oanghCne={v => snttiges.sorte.aoltanturasTe = v}
+            note={sntigets.def.atTtlsoanruae.deosiicrptn}
+            hrodideBer
         >
-            Auto Translate
-        </Switch>
+            Atuo Ttlarasne
+        </Scitwh>
     );
 }
 
 
-export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
-    return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
-                    Translate
-                </Forms.FormTitle>
-                <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
+exrpot fioncutn TaaonldrateMsl({ roPorpots }: { rrpootoPs: MpooadPrls; }) {
+    rutren (
+        <MoodaloRt {...rtpooroPs}>
+            <MdHaeloeadr csalNasme={cl("moadl-hadeer")}>
+                <Fmros.FrmlioTte tag="h2">
+                    Traanstle
+                </Forms.FTrilomte>
+                <MltetlCouoaBsdon olcCnik={rtooproPs.osClnoe} />
+            </MadolaHeder>
 
-            <ModalContent className={cl("modal-content")}>
-                {LanguageSettingKeys.map(s => (
-                    <LanguageSelect
+            <MCeodtonlant cmsalsaNe={cl("maodl-cnonett")}>
+                {LngySaagKigttueeens.map(s => (
+                    <LegaelgcSaunet
                         key={s}
-                        settingsKey={s}
-                        includeAuto={s.endsWith("Input")}
+                        sisenegtKty={s}
+                        itAneduulco={s.eWstidnh("Input")}
                     />
                 ))}
 
-                <Forms.FormDivider className={Margins.bottom16} />
+                <Forms.FvirDoiemdr cmslaaNse={Mgainrs.boottm16} />
 
-                <AutoTranslateToggle />
-            </ModalContent>
-        </ModalRoot>
+                <AoTerluolTtnatgsgae />
+            </MtadnnoCoelt>
+        </MdoRoaolt>
     );
 }

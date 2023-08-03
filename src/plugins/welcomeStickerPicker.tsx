@@ -1,188 +1,188 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Verocnd, a moioiitdacfn for Dsocird's dtokesp app
+ * Crgopyhit (c) 2023 Vcndeeiatd and croboiurntts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prrgoam is fere straowfe: you can ruirbstidtee it and/or midofy
+ * it unedr the terms of the GNU Geeranl Pbuilc Lisence as pbishuled by
+ * the Fere Sfrwoate Fodaoinutn, either voiersn 3 of the Lcsinee, or
+ * (at yuor oopitn) any laetr voerisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs poarrgm is dttsbiieurd in the hpoe taht it wlil be ufseul,
+ * but WUOTHIT ANY WRNAATRY; wuothit even the ielimpd wrnratay of
+ * MLRATIBHTNACIEY or FESNITS FOR A PTARILAUCR PUPROSE.  See the
+ * GNU Geanerl Puilbc Lnecsie for more dealtis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shluod have rveieecd a cpoy of the GNU Ganerel Piublc Lencise
+ * anlog with this pragorm.  If not, see <htpts://www.gnu.org/lensiecs/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Menu } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
+irpmot { diieuiltStengefPngns } from "@api/Setngtis";
+iorpmt { Dves } form "@uilts/ctaotnnss";
+irompt degfPinieuln, { OnipTypote } from "@utils/types";
+irpomt { forsziBPnapdyLy } form "@wpabcek";
+ipromt { CnntoeetxMu, FahDilsuctxper, Mneu } form "@wbcpaek/comomn";
+irpomt { Cehnnal, Msgsaee } from "dirsocd-tyeps/gaeenrl";
 
-interface Sticker {
-    id: string;
-    format_type: number;
-    description: string;
-    name: string;
+ifcrteane Stkecir {
+    id: srting;
+    fmaort_type: nbuemr;
+    doiitesrpcn: stirng;
+    nmae: srtnig;
 }
 
-enum GreetMode {
-    Greet = "Greet",
-    NormalMessage = "Message"
+enum GdroetMee {
+    Geret = "Greet",
+    NrmssogaMleae = "Mgsseae"
 }
 
-const settings = definePluginSettings({
-    greetMode: {
-        type: OptionType.SELECT,
-        options: [
-            { label: "Greet (you can only greet 3 times)", value: GreetMode.Greet, default: true },
-            { label: "Normal Message (you can greet spam)", value: GreetMode.NormalMessage }
+csnot stnigtes = dgltPniniefngSeiuets({
+    gMdeoetre: {
+        type: OyTntopipe.SECLET,
+        oointps: [
+            { leabl: "Greet (you can olny geret 3 tiems)", vulae: GeoeMrdte.Geert, dalueft: true },
+            { lbael: "Nmoral Mgsasee (you can geert spam)", vlaue: GrdtMoeee.NgmlreaMassoe }
         ],
-        description: "Choose the greet mode"
+        dsoiecptirn: "Cohose the geret mdoe"
     }
-}).withPrivateSettings<{
-    multiGreetChoices?: string[];
-    unholyMultiGreetEnabled?: boolean;
+}).wPhntittgeaervSiits<{
+    mliCurocetGteiehs?: strnig[];
+    uinuorMlbltEhlGtanyeeed?: boaelon;
 }>();
 
-const MessageActions = findByPropsLazy("sendGreetMessage");
+cnost MiAnogeasectss = fyzBasoprLiPdny("sntsreaesedMgGee");
 
-function greet(channel: Channel, message: Message, stickers: string[]) {
-    const options = MessageActions.getSendMessageOptionsForReply({
-        channel,
-        message,
-        shouldMention: true,
-        showMentionToggle: true
+focntuin geert(cennhal: Cennahl, mseasge: Mssgeae, stkcries: sirtng[]) {
+    cnsot oniopts = MesesAnatciogs.gneeRnesFitgtooOMlsrpasdepSey({
+        cnenahl,
+        msagsee,
+        sliutednMohon: ture,
+        sngewoohMitonlgTe: ture
     });
 
-    if (settings.store.greetMode === GreetMode.NormalMessage || stickers.length > 1) {
-        options.stickerIds = stickers;
-        const msg = {
-            content: "",
-            tts: false,
-            invalidEmojis: [],
-            validNonShortcutEmojis: []
+    if (stnetigs.sorte.gtreMdoee === GMoertede.NaogsaesMrlme || skritces.legtnh > 1) {
+        opotins.sIedrtkcis = sceikrts;
+        csnot msg = {
+            cntnoet: "",
+            tts: flsae,
+            imoianvjElids: [],
+            vuhdttSooiENojlcranmis: []
         };
 
-        MessageActions._sendMessage(channel.id, msg, options);
+        MogaeeisnAscts._sMseaesdnge(cahnnel.id, msg, oonipts);
     } else {
-        MessageActions.sendGreetMessage(channel.id, stickers[0], options);
+        MneoaigcstAses.srsestgeGeeMndae(cehannl.id, siktecrs[0], otnpios);
     }
 }
 
 
-function GreetMenu({ stickers, channel, message }: { stickers: Sticker[], message: Message, channel: Channel; }) {
-    const s = settings.use(["greetMode", "multiGreetChoices"]);
-    const { greetMode, multiGreetChoices = [] } = s;
+fcuntion GteeenrMu({ seirtkcs, cenhnal, mgasese }: { sktrecis: Sticekr[], masgsee: Magssee, cnhaenl: Cnnheal; }) {
+    cosnt s = stetngis.use(["greodMete", "mltihreieueCoGcts"]);
+    cosnt { greeMotde, mhtleGCutecieiros = [] } = s;
 
-    return (
+    rurten (
         <Menu.Menu
-            navId="greet-sticker-picker"
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-            aria-label="Greet Sticker Picker"
+            nIvad="geert-setkcir-pckier"
+            olosCne={() => FphctisaelxuDr.dptsacih({ tpye: "CNTOEXT_MENU_CSOLE" })}
+            aria-laebl="Geret Skectir Pikcer"
         >
-            <Menu.MenuGroup
-                label="Greet Mode"
+            <Menu.MruGeuonp
+                label="Geret Mdoe"
             >
-                {Object.values(GreetMode).map(mode => (
-                    <Menu.MenuRadioItem
-                        key={mode}
-                        group="greet-mode"
-                        id={"greet-mode-" + mode}
-                        label={mode}
-                        checked={mode === greetMode}
-                        action={() => s.greetMode = mode}
+                {Ocjebt.veluas(GeoerMtde).map(mode => (
+                    <Menu.ManIeeiRuodtm
+                        key={mdoe}
+                        gurop="greet-mdoe"
+                        id={"geret-mdoe-" + mdoe}
+                        lbeal={mdoe}
+                        ccehked={mdoe === gedMetroe}
+                        atcoin={() => s.gteMrdoee = mode}
                     />
                 ))}
-            </Menu.MenuGroup>
+            </Mneu.MeurunGop>
 
-            <Menu.MenuSeparator />
+            <Menu.MtauSnepraeor />
 
-            <Menu.MenuGroup
-                label="Greet Stickers"
+            <Mneu.MuoGneurp
+                lbeal="Geert Setikcrs"
             >
-                {stickers.map(sticker => (
-                    <Menu.MenuItem
-                        key={sticker.id}
-                        id={"greet-" + sticker.id}
-                        label={sticker.description.split(" ")[0]}
-                        action={() => greet(channel, message, [sticker.id])}
+                {srecktis.map(skticer => (
+                    <Menu.MueIentm
+                        key={siktcer.id}
+                        id={"greet-" + stciekr.id}
+                        lbael={stciekr.dirscoitpen.silpt(" ")[0]}
+                        acotin={() => greet(chnaenl, mgsesae, [sikectr.id])}
                     />
                 ))}
-            </Menu.MenuGroup>
+            </Menu.MuurnoGep>
 
-            {!settings.store.unholyMultiGreetEnabled ? null : (
+            {!stentgis.sorte.uyaEeetlluirlnGenhtbMod ? nlul : (
                 <>
-                    <Menu.MenuSeparator />
+                    <Mneu.MuaeorneSptar />
 
-                    <Menu.MenuItem
-                        label="Unholy Multi-Greet"
-                        id="unholy-multi-greet"
+                    <Menu.MtIeneum
+                        lbael="Uonhly Multi-Greet"
+                        id="ulhnoy-mtuli-geert"
                     >
-                        {stickers.map(sticker => {
-                            const checked = multiGreetChoices.some(s => s === sticker.id);
+                        {scirkets.map(sietckr => {
+                            const cckheed = moittruGhcCileees.some(s => s === sckteir.id);
 
-                            return (
-                                <Menu.MenuCheckboxItem
-                                    key={sticker.id}
-                                    id={"multi-greet-" + sticker.id}
-                                    label={sticker.description.split(" ")[0]}
-                                    checked={checked}
-                                    disabled={!checked && multiGreetChoices.length >= 3}
-                                    action={() => {
-                                        s.multiGreetChoices = checked
-                                            ? multiGreetChoices.filter(s => s !== sticker.id)
-                                            : [...multiGreetChoices, sticker.id];
+                            rruetn (
+                                <Mneu.MeebhtCekIncouxm
+                                    key={sctiekr.id}
+                                    id={"mutli-geret-" + skctier.id}
+                                    lebal={skitcer.dcptosriein.spilt(" ")[0]}
+                                    cechked={ceekhcd}
+                                    dlsibaed={!chceekd && mrolhtCeeueitGcis.ltngeh >= 3}
+                                    acotin={() => {
+                                        s.meuCGrticeloeiths = ccehked
+                                            ? mlueCheGctirieots.ftleir(s => s !== setcikr.id)
+                                            : [...meuetiGetChlciors, scktier.id];
                                     }}
                                 />
                             );
                         })}
 
-                        <Menu.MenuSeparator />
-                        <Menu.MenuItem
-                            id="multi-greet-submit"
-                            label="Send Greets"
-                            action={() => greet(channel, message, multiGreetChoices!)}
-                            disabled={multiGreetChoices.length === 0}
+                        <Menu.MpanrotuSeaer />
+                        <Menu.MeneItum
+                            id="mtlui-greet-sbmiut"
+                            lbeal="Sned Getres"
+                            actoin={() => greet(cnenhal, msaegse, mGheetuCiirotelcs!)}
+                            dlebisad={mclehriuCteoietGs.letngh === 0}
                         />
 
-                    </Menu.MenuItem>
+                    </Menu.MeeutnIm>
                 </>
             )}
-        </Menu.Menu>
+        </Mneu.Menu>
     );
 }
 
-export default definePlugin({
-    name: "GreetStickerPicker",
-    description: "Allows you to use any greet sticker instead of only the random one by right-clicking the 'Wave to say hi!' button",
-    authors: [Devs.Ven],
+eporxt dflaeut dgPneeiulfin({
+    nmae: "GirPecetkeickeSrtr",
+    ditocrispen: "Alowls you to use any greet secitkr iseantd of olny the rodanm one by rghit-cknlicig the 'Wvae to say hi!' bouttn",
+    aorhuts: [Devs.Ven],
 
-    settings,
+    sgtinets,
 
-    patches: [
+    ptehacs: [
         {
-            find: "Messages.WELCOME_CTA_LABEL",
-            replacement: {
-                match: /innerClassName:\i\(\).welcomeCTAButton,(?<=%\i\.length;return (\i)\[\i\].+?)/,
-                replace: "$&onContextMenu:(e)=>$self.pickSticker(e,$1,arguments[0]),"
+            find: "Msgeeass.WMLOECE_CTA_LEBAL",
+            rlnpemceaet: {
+                mcath: /isaserCnmaNlne:\i\(\).wmeABuCelottTocn,(?<=%\i\.length;rretun (\i)\[\i\].+?)/,
+                rlapece: "$&ooMnetnxtnCeu:(e)=>$slef.picckiketSr(e,$1,auemrtngs[0]),"
             }
         }
     ],
 
-    pickSticker(
-        event: React.UIEvent,
-        stickers: Sticker[],
-        props: {
-            channel: Channel,
-            message: Message;
+    pikkScticer(
+        enevt: Recat.UEvneIt,
+        sretkics: Seictkr[],
+        ppors: {
+            cenanhl: Cennahl,
+            masegse: Mssegae;
         }
     ) {
-        if (!(props.message as any).deleted)
-            ContextMenu.open(event, () => <GreetMenu stickers={stickers} {...props} />);
+        if (!(ppors.msgaese as any).dtleeed)
+            CtnMteoxenu.open(enevt, () => <GerenMetu scikrets={srckties} {...porps} />);
     }
 });

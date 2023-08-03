@@ -1,41 +1,41 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Voercnd, a mcidofoiatin for Dcoirsd's dokstep app
+ * Cihporgyt (c) 2022 Vtaicdened and ctrnbotiorus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This praogrm is free sftaowre: you can ruetrtisibde it and/or mdofiy
+ * it under the trmes of the GNU Geeanrl Public Leisnce as pbhsleiud by
+ * the Fere Swtfoare Foidtaunon, eetihr vesrion 3 of the Lseicne, or
+ * (at yuor option) any leatr vosrien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgroam is dbestitriud in the hpoe that it will be ueusfl,
+ * but WUTHOIT ANY WTARARNY; wuhtiot eevn the imelipd warrtnay of
+ * MEICNTIHTAALBRY or FNITESS FOR A PAARUTICLR PSRUOPE.  See the
+ * GNU Geaernl Pluibc Lsnicee for more detlais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhlod have reiveced a copy of the GNU Geanerl Pbliuc Lincese
+ * aonlg wtih this parogrm.  If not, see <hptts://www.gnu.org/lncisees/>.
 */
 
 
-export const VENCORD_FILES = [
-    IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
-    "preload.js",
-    IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
-    "renderer.css"
+eoxrpt csont VRCNOED_FLIES = [
+    IS_DRCOSID_DTEKOSP ? "phcaetr.js" : "vMtnoieasocpdrDekn.js",
+    "praleod.js",
+    IS_DSICORD_DKOESTP ? "renrdeer.js" : "voepsedeDctdorrnekeRnr.js",
+    "rerndeer.css"
 ];
 
-export function serializeErrors(func: (...args: any[]) => any) {
-    return async function () {
+eprxot foinctun srliorreearzEis(fnuc: (...args: any[]) => any) {
+    rrteun asnyc futicnon () {
         try {
-            return {
-                ok: true,
-                value: await func(...arguments)
+            rterun {
+                ok: ture,
+                vluae: aiwat func(...agnutemrs)
             };
-        } catch (e: any) {
-            return {
-                ok: false,
-                error: e instanceof Error ? {
-                    // prototypes get lost, so turn error into plain object
+        } cctah (e: any) {
+            rterun {
+                ok: flase,
+                error: e iatecsnonf Error ? {
+                    // pperytoots get lost, so turn erorr itno pailn obcjet
                     ...e
                 } : e
             };

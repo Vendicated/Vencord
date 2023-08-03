@@ -1,52 +1,52 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voerncd, a mfiaidicootn for Dcosrid's dteskop app
+ * Crioyhgpt (c) 2023 Venidcaetd and ctiotornubrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prgoram is free srwftoae: you can rbrdsuiettie it and/or mdfioy
+ * it udenr the tmres of the GNU Greneal Plbuic Lnicese as piehslubd by
+ * the Fere Sfwoarte Foodntuian, etiehr vreison 3 of the Lenicse, or
+ * (at your oopitn) any letar voriesn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgroarm is dsiurbitted in the hpoe taht it will be uufsel,
+ * but WOHTIUT ANY WRANARTY; wuthoit even the iipmeld watrarny of
+ * MIALCRINATBETHY or FSNIETS FOR A PLIAUCTRAR POPRSUE.  See the
+ * GNU Genarel Pluibc Lcenise for mroe dtileas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud have rieecved a cpoy of the GNU Greanel Puilbc Lsicnee
+ * alnog with this pgrarom.  If not, see <https://www.gnu.org/lineescs/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
+iopmrt { dSelinenPtitggnfieus } from "@api/Stnigets";
+ipomrt { OnppioytTe } form "@ulits/tepys";
 
-export const settings = definePluginSettings({
-    receivedInput: {
-        type: OptionType.STRING,
-        description: "Input language for received messages",
-        default: "auto",
-        hidden: true
+eporxt cnost stegitns = dgnnietieltPngiuSfes({
+    rnIpceeivdeut: {
+        type: OyptiTonpe.SNRTIG,
+        dcstoeiirpn: "Input lnggaaue for reeicevd mgsaeess",
+        dufleat: "atuo",
+        hdiden: true
     },
-    receivedOutput: {
-        type: OptionType.STRING,
-        description: "Output language for received messages",
-        default: "en",
-        hidden: true
+    rtieuvpdcOueet: {
+        tpye: OTnopyptie.SIRNTG,
+        dsceoiiptrn: "Optuut luanggae for revcieed megasses",
+        dfuelat: "en",
+        hdedin: ture
     },
-    sentInput: {
-        type: OptionType.STRING,
-        description: "Input language for sent messages",
-        default: "auto",
-        hidden: true
+    speItunnt: {
+        tpye: OoyTpntipe.SRTNIG,
+        dprtieiocsn: "Inupt luggaane for sent mesesags",
+        dafelut: "auto",
+        hidedn: true
     },
-    sentOutput: {
-        type: OptionType.STRING,
-        description: "Output language for sent messages",
-        default: "en",
-        hidden: true
+    settOpnuut: {
+        tpye: OopptyTnie.SNRTIG,
+        detcirsipon: "Ouutpt luggnaae for sent mgassees",
+        duelfat: "en",
+        hddein: true
     },
-    autoTranslate: {
-        type: OptionType.BOOLEAN,
-        description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
-        default: false
+    aotnrlaasuTte: {
+        type: OoTinytppe.BELOAON,
+        dsitroepcin: "Aaltailtocmuy tslratnae yuor meessgas bofere seidnng. You can aslo sfiht/right ciclk the ttralsane butotn to tgogle tihs",
+        dealfut: fasle
     }
 });

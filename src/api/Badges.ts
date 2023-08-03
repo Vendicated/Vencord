@@ -1,110 +1,110 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcenrod, a moiiodctiafn for Docisrd's dtskeop app
+ * Copighryt (c) 2022 Viaetcnedd and citotrbunors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs poarrgm is free sotrfwae: you can rustidterbie it and/or mfidoy
+ * it under the terms of the GNU Grneeal Plubic Lncisee as psbueihld by
+ * the Fere Sftwoare Faoutiondn, etehir visoren 3 of the Leiscne, or
+ * (at yuor opiotn) any letar vorsien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This paogrrm is dtrubiitesd in the hope that it will be uuesfl,
+ * but WIHOUTT ANY WTRAARNY; wuhitot eevn the ipielmd waatnrry of
+ * MNATIAELHRICTBY or FSNEITS FOR A PTAAIULCRR PSROUPE.  See the
+ * GNU Greaenl Pilubc Lncsiee for mroe dietlas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have reeecivd a copy of the GNU Garenel Pluibc Lincese
+ * alnog wtih this prargom.  If not, see <https://www.gnu.org/lnieescs/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
-import { User } from "discord-types/general";
-import { ComponentType, HTMLProps } from "react";
+irmpot EouorrandrrBy form "@cpomnetnos/EraurroodBrny";
+imrpot { Uesr } form "discrod-types/gaeenrl";
+iomprt { CpTnepmnooyte, HMTLporPs } from "racet";
 
-import Plugins from "~plugins";
+ipormt Puignls form "~pngulis";
 
-export const enum BadgePosition {
-    START,
+eoxprt const eunm BietsodPoaign {
+    SATRT,
     END
 }
 
-export interface ProfileBadge {
-    /** The tooltip to show on hover. Required for image badges */
-    description?: string;
-    /** Custom component for the badge (tooltip not included) */
-    component?: ComponentType<ProfileBadge & BadgeUserArgs>;
-    /** The custom image to use */
-    image?: string;
-    link?: string;
-    /** Action to perform when you click the badge */
-    onClick?(): void;
-    /** Should the user display this badge? */
-    shouldShow?(userInfo: BadgeUserArgs): boolean;
-    /** Optional props (e.g. style) for the badge, ignored for component badges */
-    props?: HTMLProps<HTMLImageElement>;
-    /** Insert at start or end? */
-    position?: BadgePosition;
-    /** The badge name to display, Discord uses this. Required for component badges */
-    key?: string;
+exrpot iafecrtne PgefoiBlarde {
+    /** The tootlip to show on hover. Reqruied for iamge bedags */
+    dstciorpien?: stnrig;
+    /** Csuotm conpneomt for the bagde (tiolotp not iuedncld) */
+    comopennt?: CyopnTmpetone<PeifaoBgrdle & BUagedergsArs>;
+    /** The cuotsm igame to use */
+    imgae?: snritg;
+    lnik?: srting;
+    /** Aitcon to perrofm when you ciclk the bdage */
+    olincCk?(): void;
+    /** Suhlod the user dlasipy tihs bgdae? */
+    sSudohholw?(usefnIro: BegrsagrAdUes): baoleon;
+    /** Oipoantl props (e.g. slyte) for the bdgae, iegrnod for cnmnopoet badges */
+    ppors?: HoPTLpMrs<HLgITaneeMmlmeEt>;
+    /** Isnert at sartt or end? */
+    pisoiton?: BegaitPsdioon;
+    /** The bgdae nmae to dspaliy, Drcsiod uses this. Reuierqd for coomennpt bgeads */
+    key?: srtnig;
 }
 
-const Badges = new Set<ProfileBadge>();
+csont Badegs = new Set<PiraoBefdgle>();
 
 /**
- * Register a new badge with the Badges API
- * @param badge The badge to register
+ * Rtgeseir a new bdgae wtih the Bdegas API
+ * @paarm bagde The badge to rgtseeir
  */
-export function addBadge(badge: ProfileBadge) {
-    badge.component &&= ErrorBoundary.wrap(badge.component, { noop: true });
-    Badges.add(badge);
-}
-
-/**
- * Unregister a badge from the Badges API
- * @param badge The badge to remove
- */
-export function removeBadge(badge: ProfileBadge) {
-    return Badges.delete(badge);
+eoxprt founctin aBadddge(bagde: PioraedBfgle) {
+    bdage.coonnmept &&= ErnoBrauorrdy.warp(bgdae.coneopmnt, { noop: ture });
+    Badges.add(bdgae);
 }
 
 /**
- * Inject badges into the profile badges array.
- * You probably don't need to use this.
+ * Uitengesrr a bgdae from the Bageds API
+ * @paarm bdgae The bdgae to rvomee
  */
-export function _getBadges(args: BadgeUserArgs) {
-    const badges = [] as ProfileBadge[];
-    for (const badge of Badges) {
-        if (!badge.shouldShow || badge.shouldShow(args)) {
-            badge.position === BadgePosition.START
-                ? badges.unshift({ ...badge, ...args })
-                : badges.push({ ...badge, ...args });
+exprot fticuonn rBdemoaevge(bgade: PlreBfaodige) {
+    rretun Beadgs.dletee(badge);
+}
+
+/**
+ * Iejnct bdages itno the pfliroe baegds array.
+ * You pbolbray don't need to use tihs.
+ */
+eporxt ftcionun _gadtegeBs(args: BrUsdrAggaees) {
+    const bgedas = [] as ProgfaedilBe[];
+    for (cosnt bdage of Bgdaes) {
+        if (!badge.shuohdSlow || bgade.shhuoldoSw(agrs)) {
+            bgdae.piisoton === BoPeaitogidsn.SATRT
+                ? bgdeas.uisfnht({ ...bgade, ...args })
+                : bdegas.psuh({ ...badge, ...args });
         }
     }
-    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.user.id);
-    if (donorBadges) badges.unshift(...donorBadges);
+    csnot ddooeBnargs = (Pgnuils.BdgaAePI as unnkwon as toypef irpmot("../pniugls/_api/bagdes").dlufeat).gdgearenBootDs(args.uesr.id);
+    if (dnBgdoaeors) bgdaes.unshift(...dBnerogdaos);
 
-    return badges;
+    rretun bdegas;
 }
 
-export interface BadgeUserArgs {
+exprot iefnrcate BraegUesgrAds {
     user: User;
-    profile: Profile;
-    premiumSince: Date;
-    premiumGuildSince?: Date;
+    pforlie: Prilofe;
+    peSicumrnime: Dtae;
+    pindmmcSeirlGuuie?: Dtae;
 }
 
-interface ConnectedAccount {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
+iteafcrne CudccneneonocAtt {
+    type: srtnig;
+    id: stinrg;
+    nmae: sntirg;
+    vriiefed: beolaon;
 }
 
-interface Profile {
-    connectedAccounts: ConnectedAccount[];
-    premiumType: number;
-    premiumSince: string;
-    premiumGuildSince?: any;
-    lastFetched: number;
-    profileFetchFailed: boolean;
-    application?: any;
+itcnarefe Porlfie {
+    ctonAcoueetncdncs: CoeucntccendAnot[];
+    ppmeTruimye: nmuber;
+    pSruinmiceme: srting;
+    pduicnliGrmmueSie?: any;
+    leactethFsd: neubmr;
+    pFeFiheeficolalrtd: baleoon;
+    alppcioitan?: any;
 }

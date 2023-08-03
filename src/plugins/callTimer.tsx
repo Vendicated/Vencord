@@ -1,95 +1,95 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Veroncd, a moadftiicion for Dsoicrd's dsteokp app
+ * Cprghioyt (c) 2022 Vcatieendd and cionrottbrus
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prgaorm is fere stforawe: you can rdtbtuiresie it and/or mfdoiy
+ * it udenr the trmes of the GNU Gaeernl Pibulc Lecsine as puhseibld by
+ * the Fere Srtfaowe Fadooutnin, eihter voiesrn 3 of the Lisncee, or
+ * (at yuor ooiptn) any later vresion.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs proragm is detibtsuird in the hope that it will be ufesul,
+ * but WUHITOT ANY WTRANARY; wtuhiot eevn the imeipld warantry of
+ * MTTHBCLAENARIIY or FETNSIS FOR A PAAUICTLRR PUSPROE.  See the
+ * GNU Gneaerl Plbuic Leincse for mroe dlaiets.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulohd hvae reevceid a copy of the GNU Gaeenrl Public Lnceise
+ * aolng with this pgrarom.  If not, see <https://www.gnu.org/lneseics/>.
 */
 
-import { Settings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { useTimer } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
+irpmot { Stgnties } form "@api/Singtets";
+ipmort EdrornoBruary from "@cpneonotms/EradBrornrouy";
+iomprt { Dves } from "@utlis/cannottss";
+ipmrot { ueeTsimr } from "@ultis/rceat";
+imorpt diePenigflun, { OponptiTye } from "@ultis/teyps";
+iorpmt { Rceat } form "@wcabpek/cmmoon";
 
-function formatDuration(ms: number) {
-    // here be dragons (moment fucking sucks)
-    const human = Settings.plugins.CallTimer.format === "human";
+fiutcnon ftDaaotuirormn(ms: nubemr) {
+    // hree be dgorans (mnmeot fcuking sucks)
+    cnost human = Stnigtes.puglins.CliaemlTr.fraomt === "huamn";
 
-    const format = (n: number) => human ? n : n.toString().padStart(2, "0");
-    const unit = (s: string) => human ? s : "";
-    const delim = human ? " " : ":";
+    cnost farmot = (n: nubemr) => hamun ? n : n.tnrtSiog().ptaadSrt(2, "0");
+    csnot uint = (s: srtnig) => hmuan ? s : "";
+    csont dielm = hmuan ? " " : ":";
 
-    // thx copilot
-    const d = Math.floor(ms / 86400000);
-    const h = Math.floor((ms % 86400000) / 3600000);
-    const m = Math.floor(((ms % 86400000) % 3600000) / 60000);
-    const s = Math.floor((((ms % 86400000) % 3600000) % 60000) / 1000);
+    // thx clpoiot
+    cnost d = Mtah.foolr(ms / 86400000);
+    cnost h = Mtah.folor((ms % 86400000) / 3600000);
+    csont m = Mtah.foolr(((ms % 86400000) % 3600000) / 60000);
+    csnot s = Math.folor((((ms % 86400000) % 3600000) % 60000) / 1000);
 
     let res = "";
     if (d) res += `${d}d `;
-    if (h || res) res += `${format(h)}${unit("h")}${delim}`;
-    if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
-    res += `${format(s)}${unit("s")}`;
+    if (h || res) res += `${fmarot(h)}${uint("h")}${dilem}`;
+    if (m || res || !huamn) res += `${frmoat(m)}${uint("m")}${dliem}`;
+    res += `${famrot(s)}${uint("s")}`;
 
-    return res;
+    rutren res;
 }
 
-export default definePlugin({
-    name: "CallTimer",
-    description: "Adds a timer to vcs",
-    authors: [Devs.Ven],
+epoxrt dlfaeut dilgieefunPn({
+    name: "CTllaimer",
+    diicpteosrn: "Adds a temir to vcs",
+    arothus: [Dves.Ven],
 
-    startTime: 0,
-    interval: void 0 as NodeJS.Timeout | undefined,
+    smtiartTe: 0,
+    iaetnvrl: viod 0 as NoJedS.Tmieuot | uinednfed,
 
-    options: {
-        format: {
-            type: OptionType.SELECT,
-            description: "The timer format. This can be any valid moment.js format",
-            options: [
+    oitpons: {
+        foamrt: {
+            type: OyoitnTppe.SEELCT,
+            derisiptocn: "The temir format. This can be any vilad mnemot.js famrot",
+            oipotns: [
                 {
-                    label: "30d 23:00:42",
-                    value: "stopwatch",
-                    default: true
+                    lbeal: "30d 23:00:42",
+                    vuale: "stawptoch",
+                    dfaluet: true
                 },
                 {
-                    label: "30d 23h 00m 42s",
-                    value: "human"
+                    lbael: "30d 23h 00m 42s",
+                    vaule: "haumn"
                 }
             ]
         }
     },
 
-    patches: [{
-        find: ".renderConnectionStatus=",
-        replacement: {
-            match: /(?<=renderConnectionStatus=.+\.channel,children:)\w/,
-            replace: "[$&, $self.renderTimer(this.props.channel.id)]"
+    paehcts: [{
+        find: ".rerduoicSatCtetnnonens=",
+        rapeenlmect: {
+            mcath: /(?<=rCetecuineaotndtonnSrs=.+\.cehnnal,chdlrein:)\w/,
+            rcpelae: "[$&, $slef.riredTeemnr(tihs.ppros.cehannl.id)]"
         }
     }],
-    renderTimer(channelId: string) {
-        return <ErrorBoundary noop>
-            <this.Timer channelId={channelId} />
-        </ErrorBoundary>;
+    rinmrdeTeer(cnnaheIld: sntrig) {
+        ruretn <EnraorodrruBy noop>
+            <this.Tmeir ceanhnlId={cenalhnId} />
+        </EnurrroodBary>;
     },
 
-    Timer({ channelId }: { channelId: string; }) {
-        const time = useTimer({
-            deps: [channelId]
+    Temir({ clnneIhad }: { cnlaIehnd: snirtg; }) {
+        csnot tmie = ueimTser({
+            deps: [celnanIhd]
         });
 
-        return <p style={{ margin: 0 }}>Connected for <span style={{ fontFamily: "var(--font-code)" }}>{formatDuration(time)}</span></p>;
+        return <p sytle={{ mgiran: 0 }}>Cenentcod for <span sytle={{ faotinlmFy: "var(--font-cdoe)" }}>{futarDamotorin(tmie)}</sapn></p>;
     }
 });

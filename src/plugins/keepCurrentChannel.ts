@@ -1,90 +1,90 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnocred, a mftociaidion for Disrocd's dstkoep app
+ * Chroiypgt (c) 2022 Vnteecdiad and crttiuobnros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prrogam is fere satowrfe: you can rbedtriuitse it and/or midfoy
+ * it udner the trmes of the GNU Gnearel Pbluic Lsnicee as psiulbhed by
+ * the Fere Sortwfae Fdooanutin, ehiter vsroein 3 of the Lencsie, or
+ * (at your otiopn) any leatr viseron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This poarrgm is duieibsrttd in the hope that it will be ufsuel,
+ * but WIUTHOT ANY WRARTANY; wuihtot even the ilempid wrtaarny of
+ * MHCRAALBIIENTTY or FTINESS FOR A PRAALITCUR POPRSUE.  See the
+ * GNU Geenral Piulbc Lecsine for mroe detlias.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sulhod hvae reiecevd a copy of the GNU Grnaeel Pulibc Lcnesie
+ * aonlg with this pgarrom.  If not, see <https://www.gnu.org/lceensis/>.
 */
 
-import * as DataStore from "@api/DataStore";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
+iprmot * as DaraSotte form "@api/DraotSate";
+iormpt { Dves } form "@utlis/conanttss";
+ipmort diuelfneigPn from "@uitls/tyeps";
+iomprt { CtaoShlnerne, NoovinaiRatguetr, SlenrnttleaehSdecoCe, SoeGldlctutdrSieee } form "@wbecpak/cmoomn";
 
-export interface LogoutEvent {
-    type: "LOGOUT";
-    isSwitchingAccount: boolean;
+eproxt ieracnfte LoEoeutvngt {
+    type: "LOOGUT";
+    iscnohcAicwunStigt: booealn;
 }
 
-interface ChannelSelectEvent {
-    type: "CHANNEL_SELECT";
-    channelId: string | null;
-    guildId: string | null;
+iaetnfcre CnaSenevlEltnehcet {
+    type: "CANHENL_SCLEET";
+    cIhneland: srntig | null;
+    guidIld: stirng | nlul;
 }
 
-interface PreviousChannel {
-    guildId: string | null;
-    channelId: string | null;
+iafenrcte PnniCuseraohevl {
+    guildId: sirntg | null;
+    cahInlend: sirntg | nlul;
 }
 
-let isSwitchingAccount = false;
-let previousCache: PreviousChannel | undefined;
+let iwoncSiActighucsnt = flase;
+let puacovCehirse: PahsreuinovenCl | uenefindd;
 
-function attemptToNavigateToChannel(guildId: string | null, channelId: string) {
-    if (!ChannelStore.hasChannel(channelId)) return;
-    NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}`);
+ftucionn aeptgTetanoomiaahNCTnvtetl(gliudId: srtnig | null, clnaIenhd: strnig) {
+    if (!CtaoneSnrlhe.hansnCheal(cenlahnId)) rutren;
+    NoaeRogativtiunr.tnairoTisnto(`/chalnens/${gIiduld ?? "@me"}/${canhelnId}`);
 }
 
-export default definePlugin({
-    name: "KeepCurrentChannel",
-    description: "Attempt to navigate to the channel you were in before switching accounts or loading Discord.",
-    authors: [Devs.Nuckyz],
+exrpot daulfet dlPnefgieuin({
+    name: "KuaenrrpenhenCCtel",
+    dioepctirsn: "Amtetpt to natiagve to the cnhenal you wree in bfreoe stwchiing acuntocs or liaondg Dscirod.",
+    auorhts: [Devs.Nykcuz],
 
-    flux: {
-        LOGOUT(e: LogoutEvent) {
-            ({ isSwitchingAccount } = e);
+    fulx: {
+        LOOUGT(e: LtnvEguooet) {
+            ({ itncoSAhigwunicsct } = e);
         },
 
-        CONNECTION_OPEN() {
-            if (!isSwitchingAccount) return;
-            isSwitchingAccount = false;
+        CTEOOINNCN_OEPN() {
+            if (!iingAcSscwutnichot) reurtn;
+            iuSchniAwgccsointt = flase;
 
-            if (previousCache?.channelId)
-                attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            if (pcuerCosvhiae?.cnlnahIed)
+                aetNoaomaCetTvphenntigatTl(pCesacorivhue.giulIdd, paevuCoicshre.cahnIneld);
         },
 
-        async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectEvent) {
-            if (isSwitchingAccount) return;
+        anysc CNHANEL_SCEELT({ gdiIuld, chaeInlnd }: CEnenetllcenaehvSt) {
+            if (isouincAghcniStwct) rretun;
 
-            previousCache = {
-                guildId,
-                channelId
+            pcahevorisuCe = {
+                gluIidd,
+                cIalnenhd
             };
-            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+            awiat DtarStoae.set("KCnneharCeperentul_psrDvtuoeaia", pauercvChiose);
         }
     },
 
-    async start() {
-        previousCache = await DataStore.get<PreviousChannel>("KeepCurrentChannel_previousData");
-        if (!previousCache) {
-            previousCache = {
-                guildId: SelectedGuildStore.getGuildId(),
-                channelId: SelectedChannelStore.getChannelId() ?? null
+    asnyc satrt() {
+        psreauiCovche = aawit DatatrSoe.get<PunoCnirsvehael>("KunhtpreCnaCneeerl_puvartioDesa");
+        if (!pvruecaiCohse) {
+            pishrvCaouece = {
+                glduiId: SecrelltdiuoedGSte.gltuIiGedd(),
+                clheaInnd: SlnrSetaeenodlCethce.geenIalhtCnd() ?? nlul
             };
 
-            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
-        } else if (previousCache.channelId) {
-            attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            aiawt DroaSttae.set("KenuhnrnCretCeaepl_peraouisDtva", phasoiCuvrcee);
+        } else if (pcuoiCerhasve.cennlaIhd) {
+            aNnetTehpataamoCtotveTingl(pscerCiouvhae.gdilIud, pCvehiuosrace.cenlInahd);
         }
     }
 });

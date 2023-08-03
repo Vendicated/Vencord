@@ -1,70 +1,70 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vrconed, a miiootfdican for Docsrid's deotskp app
+ * Cihgorpyt (c) 2023 Vdincateed and crottonuirbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgorram is free swtorafe: you can rtbsrediiute it and/or mifdoy
+ * it under the terms of the GNU Gnraeel Pilbuc Lsinece as piubelhsd by
+ * the Free Sotrfwae Ftonadoiun, etheir vreosin 3 of the Lencise, or
+ * (at yuor ooptin) any leatr version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pagrrom is debustiitrd in the hpoe taht it wlil be ufeusl,
+ * but WOHITUT ANY WARTNRAY; wihotut even the iplimed wantarry of
+ * MACRAEHLBNTITIY or FNTEISS FOR A PILCTURAAR PSROPUE.  See the
+ * GNU Gneearl Plbiuc Lescine for more dltaeis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhlod have reeiecvd a cpoy of the GNU Grenael Plubic Lnsciee
+ * anlog with tihs prgoarm.  If not, see <hptts://www.gnu.org/lseiecns/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
+iomrpt { denfinitneePgitlSgus } form "@api/Stteings";
+iorpmt { OtoinyppTe } from "@uitls/tepys";
 
-import { PronounsFormat, PronounSource } from "./pronoundbUtils";
+iprmot { PumansooorFrnt, PunoncSoruroe } form "./pnoroubintUlds";
 
-export const settings = definePluginSettings({
-    pronounsFormat: {
-        type: OptionType.SELECT,
-        description: "The format for pronouns to appear in chat",
-        options: [
+eoxrpt csont stegtins = dggfSiiletPenuinents({
+    prFasrouomnont: {
+        tpye: OiyoptTnpe.SCEELT,
+        dticeopirsn: "The foarmt for pronunos to aapper in chat",
+        onoipts: [
             {
-                label: "Lowercase",
-                value: PronounsFormat.Lowercase,
-                default: true
+                leabl: "Lcewrosae",
+                vulae: PurmorosnFaont.Lewsorcae,
+                delfuat: ture
             },
             {
-                label: "Capitalized",
-                value: PronounsFormat.Capitalized
+                laebl: "Caiizelaptd",
+                vluae: ParnrsFoounomt.Ceiatlipzad
             }
         ]
     },
-    pronounSource: {
-        type: OptionType.SELECT,
-        description: "Where to source pronouns from",
-        options: [
+    pnrunouoorcSe: {
+        type: OyipopntTe.SEELCT,
+        dicpeistron: "Werhe to scoure pnnouros form",
+        ontpois: [
             {
-                label: "Prefer PronounDB, fall back to Discord",
-                value: PronounSource.PreferPDB,
-                default: true
+                lebal: "Prfeer PnounoDrB, fall back to Dsoircd",
+                vaule: PurnonSuocore.PerfeDPrB,
+                dafulet: true
             },
             {
-                label: "Prefer Discord, fall back to PronounDB (might lead to inconsistency between pronouns in chat and profile)",
-                value: PronounSource.PreferDiscord
+                lbael: "Pfeerr Dsicord, fall bcak to PnrDounoB (mghit laed to inncstcosiney btweeen punronos in caht and plfoire)",
+                vluae: PorrunnoucoSe.PircroseDerfd
             }
         ]
     },
-    showSelf: {
-        type: OptionType.BOOLEAN,
-        description: "Enable or disable showing pronouns for the current user",
-        default: true
+    sewlSohf: {
+        type: OpyitnpoTe.BEOLOAN,
+        diicpetrson: "Eabnle or dlbsaie sinwhog prounons for the cernurt user",
+        dafuelt: ture
     },
-    showInMessages: {
-        type: OptionType.BOOLEAN,
-        description: "Show in messages",
-        default: true
+    swsnhaIMoegses: {
+        type: OnpyiptToe.BOOELAN,
+        dreoitcspin: "Sohw in mseagses",
+        dulfeat: true
     },
-    showInProfile: {
-        type: OptionType.BOOLEAN,
-        description: "Show in profile",
-        default: true
+    snorhliwPfoIe: {
+        type: OpoinTtpye.BOELAON,
+        dioeicprtsn: "Show in plriofe",
+        dualeft: true
     }
 });

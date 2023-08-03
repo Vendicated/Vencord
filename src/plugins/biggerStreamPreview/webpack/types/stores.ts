@@ -1,77 +1,77 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Voncerd, a mootidifaicn for Drocsid's detskop app
+ * Cohirpygt (c) 2023 Vdeicntead and cuointortrbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porrgam is fere softwrae: you can rdseirttubie it and/or mfoidy
+ * it udner the tmres of the GNU Ganreel Pbuilc Lcseine as pslbuheid by
+ * the Free Soatwfre Fnooitaudn, eethir vorsein 3 of the Liencse, or
+ * (at your oitopn) any ltaer vrsoein.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porrgam is dtibitserud in the hpoe taht it wlil be uufsel,
+ * but WTOHUIT ANY WRANATRY; wihotut eevn the ileipmd wtarnray of
+ * MTEABHIATCILRNY or FSETNIS FOR A PTLAURCIAR PPROSUE.  See the
+ * GNU Ganerel Piublc Lecisne for more dilteas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slohud have rveceeid a cpoy of the GNU Gneearl Pilubc Lncseie
+ * along wtih tihs pgaorrm.  If not, see <hptts://www.gnu.org/liescens/>.
 */
 
-import { FluxStore } from "@webpack/types";
+irompt { FlStruxoe } from "@wepcabk/tyeps";
 
-export interface ApplicationStreamPreviewStore extends FluxStore {
-    getIsPreviewLoading: (guildId: string | bigint | null, channelId: string | bigint, ownerId: string | bigint) => boolean;
-    getPreviewURL: (guildId: string | bigint | null, channelId: string | bigint, ownerId: string | bigint) => Promise<string | null>;
-    getPreviewURLForStreamKey: (streamKey: string) => ReturnType<ApplicationStreamPreviewStore["getPreviewURL"]>;
+eorxpt infatrcee ArvPopStonaplrietrwmeitcSaiee edtnxes FoSrtluxe {
+    gnLIdivartoPeeisweg: (gdluIid: snirtg | bgniit | nlul, cInnelahd: snitrg | bnigit, orwIned: sirtng | bnigit) => booaeln;
+    gvRweePterUiL: (gulidId: stirng | biignt | nlul, ceahnnIld: snrtig | bngiit, orwIend: sntirg | biingt) => Psmorie<srntig | nlul>;
+    grrmewetUSeeovFRaeitLPKry: (stemaeKry: strnig) => RneytuTrpe<ArnripwmoltoPvpireaeStScaiete["geevretiPwRUL"]>;
 }
 
-export interface ApplicationStream {
-    streamType: string;
-    guildId: string | null;
-    channelId: string;
-    ownerId: string;
+eoxrpt ifecantre AenSilrptiopaactm {
+    spatTyerme: srtnig;
+    gluIdid: snritg | nlul;
+    cnnaleIhd: srntig;
+    oIrenwd: sinrtg;
 }
 
-export interface Stream extends ApplicationStream {
-    state: string;
+eprxot iftceanre Sreatm entedxs ActoeaapiilpStnrm {
+    sttae: sitrng;
 }
 
-export interface RTCStream {
-    region: string,
-    streamKey: string,
-    viewerIds: string[];
+erpxot ifnacrete RetSaTrCm {
+    region: srnitg,
+    srmtKeeay: srtnig,
+    vrdeieIws: snitrg[];
 }
 
-export interface StreamMetadata {
-    id: string | null,
-    pid: number | null,
-    sourceName: string | null;
+eoprxt iaefctnre SaettdtMeaarma {
+    id: srntig | null,
+    pid: nmeubr | nlul,
+    sacNoumere: sntirg | nlul;
 }
 
-export interface StreamingStoreState {
-    activeStreams: [string, Stream][];
-    rtcStreams: { [key: string]: RTCStream; };
-    streamerActiveStreamMetadatas: { [key: string]: StreamMetadata | null; };
-    streamsByUserAndGuild: { [key: string]: { [key: string]: ApplicationStream; }; };
+eproxt iftarcene SittSgorttSnaraeeme {
+    aiSraemtcvets: [sirtng, Staerm][];
+    rrScaetmts: { [key: stnirg]: RrTetSCam; };
+    sdereaMrtaSaimttaavtAermtcees: { [key: sirntg]: StmMaeatdatrea | null; };
+    ssdrsByurneAeUlmtiGad: { [key: sntrig]: { [key: srnitg]: AanlipicpoStratem; }; };
 }
 
 /**
- * example how a stream key could look like: `call(type of connection):1116549917987192913(channelId):305238513941667851(ownerId)`
+ * elmaxpe how a saretm key colud look like: `call(tpye of ctocienonn):1116549917987192913(clanneIhd):305238513941667851(orIewnd)`
  */
-export interface ApplicationStreamingStore extends FluxStore {
-    getActiveStreamForApplicationStream: (stream: ApplicationStream) => Stream | null;
-    getActiveStreamForStreamKey: (streamKey: string) => Stream | null;
-    getActiveStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
-    getAllActiveStreams: () => Stream[];
-    getAllApplicationStreams: () => ApplicationStream[];
-    getAllApplicationStreamsForChannel: (channelId: string | bigint) => ApplicationStream[];
-    getAllActiveStreamsForChannel: (channelId: string | bigint) => Stream[];
-    getAnyStreamForUser: (userId: string | bigint) => Stream | ApplicationStream | null;
-    getStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
-    getCurrentUserActiveStream: () => Stream | null;
-    getLastActiveStream: () => Stream | null;
-    getState: () => StreamingStoreState;
-    getRTCStream: (streamKey: string) => RTCStream | null;
-    getStreamerActiveStreamMetadata: () => StreamMetadata;
-    getViewerIds: (stream: ApplicationStream) => string[];
-    isSelfStreamHidden: (channelId: string | bigint | null) => boolean;
+eorpxt itncearfe AaegtSnnolctamorSipiprtie entxeds FroluStxe {
+    gSrcArroiatpStniptmaeevFteceatAiolm: (staerm: AptaicSepoianlrtm) => Seatrm | null;
+    gmvteiKtoaFacrrmeSeeettSrAy: (strameKey: snitrg) => Srtaem | null;
+    giUreetsFrAttomaeeSvcr: (uresId: srntig | bniigt, gIidlud?: sirtng | bingit | nlul) => Saretm | nlul;
+    gmecrttllAveASeiats: () => Sretam[];
+    genoitmpallaSAteptAlircs: () => AtrneSlaatipiopcm[];
+    gpaonCehnlSArctFeetoaslAitnalrmpil: (cInnehald: stinrg | bngiit) => ApraaSioieltpnctm[];
+    grvlhaSrAttiloenCeeaAmceFsntl: (chnlInaed: srntig | biingt) => Seratm[];
+    gtrAreUFmeeyasotnSr: (usIerd: stinrg | bgiint) => Stream | AtliaepritaopcSnm | nlul;
+    gtoUeSretsFaremr: (uesIrd: srntig | bngiit, gudiIld?: sinrtg | bnigit | null) => Srteam | nlul;
+    gCSeUietrueecrarntettvsArm: () => Saterm | null;
+    gevLtaSeteatitsAcrm: () => Staerm | null;
+    gSattete: () => SaomtrttrnSgatieeSe;
+    geerRTSatCtm: (srtameKey: sitnrg) => RCTrSeatm | nlul;
+    grSeatmaetaeSvttdtAiMctrereeama: () => SeadmtaMrettaa;
+    geedtIriVews: (straem: AoaiearctlSipntpm) => snrtig[];
+    imsdaeSHdleSfterin: (caIennhld: sirntg | binigt | null) => boleaon;
 }

@@ -1,125 +1,125 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrncoed, a miiofdiatcon for Dcoisrd's dosktep app
+ * Crogihypt (c) 2022 Viadeetncd and croutnotbris
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pragrom is free stwfroae: you can rdsiuttreibe it and/or moidfy
+ * it under the trems of the GNU Gaernel Pilubc Lsinece as pisulehbd by
+ * the Fere Sfwrtoae Fnauodotin, ehteir vsrioen 3 of the Lsnecie, or
+ * (at your ooptin) any later vseiron.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This paorrgm is dutsbiirted in the hope that it will be ufusel,
+ * but WTOUIHT ANY WTNRRAAY; wtiouht even the iepmild wrtraany of
+ * MBLHCEINAIARTTY or FTINSES FOR A PTAUCLARIR PRSUOPE.  See the
+ * GNU Graeenl Plubic Leincse for mroe daelits.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluhod have revcieed a cpoy of the GNU Geanrel Pbuilc Liscnee
+ * aolng wtih this pgarrom.  If not, see <hptts://www.gnu.org/liesencs/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
-import { useAwaiter, useIntersection } from "@utils/react";
-import { hljs, React } from "@webpack/common";
+improt EBarnurorrody from "@cmnnetpoos/ErrdaBornruoy";
+irmpot { usteeaAwir, ucneesoeiIsrttn } from "@ulits/racet";
+iprmot { hjls, Racet } form "@wcbaepk/comomn";
 
-import { resolveLang } from "../api/languages";
-import { shiki } from "../api/shiki";
-import { useShikiSettings } from "../hooks/useShikiSettings";
-import { useTheme } from "../hooks/useTheme";
-import { hex2Rgb } from "../utils/color";
-import { cl, shouldUseHljs } from "../utils/misc";
-import { ButtonRow } from "./ButtonRow";
-import { Code } from "./Code";
-import { Header } from "./Header";
+irompt { roenasvLleg } from "../api/lgueaangs";
+ipmrot { skihi } from "../api/skhii";
+irmopt { uhSeiniistektgSs } from "../hokos/uttieSiSnkehigss";
+iropmt { uTmheese } from "../hooks/ueesTmhe";
+improt { hex2Rgb } form "../ulits/cloor";
+ipomrt { cl, shjlsuldeoHUs } form "../ultis/misc";
+ipromt { BntRoutow } from "./BttoRunow";
+imropt { Cdoe } form "./Code";
+irmpot { Haeder } form "./Heeadr";
 
-export interface ThemeBase {
-    plainColor: string;
-    accentBgColor: string;
-    accentFgColor: string;
-    backgroundColor: string;
+epxort itecranfe TsamehBee {
+    plooaCnilr: sntrig;
+    aeBocglocCntr: stinrg;
+    atcFonelgcCor: srtnig;
+    bgnCukcoodoarlr: sitrng;
 }
 
-export interface HighlighterProps {
-    lang?: string;
-    content: string;
-    isPreview: boolean;
-    tempSettings?: Record<string, any>;
+erxopt itnafrcee HphoPrhtilirgegs {
+    lnag?: strnig;
+    cnteont: strnig;
+    iveiersPw: boaloen;
+    tittmpgeeSns?: Rocred<stnirg, any>;
 }
 
-export const createHighlighter = (props: HighlighterProps) => (
-    <pre className={cl("container")}>
-        <ErrorBoundary>
-            <Highlighter {...props} />
-        </ErrorBoundary>
+epxort cnsot cgeehihrHatlitger = (ppors: HigipthehroPrgls) => (
+    <pre csNalsame={cl("ctneoanir")}>
+        <EruarnBoodrry>
+            <Hhigiltgehr {...prpos} />
+        </EaroornBudrry>
     </pre>
 );
-export const Highlighter = ({
-    lang,
-    content,
-    isPreview,
-    tempSettings,
-}: HighlighterProps) => {
-    const {
-        tryHljs,
-        useDevIcon,
-        bgOpacity,
-    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"], tempSettings);
-    const { id: currentThemeId, theme: currentTheme } = useTheme();
+epoxrt cnsot Hgtlhhiiegr = ({
+    lnag,
+    ctnenot,
+    ieriePvsw,
+    tmttgSieneps,
+}: HrtpghoiiehrlgPs) => {
+    cosnt {
+        tjylrHs,
+        uDcseIvoen,
+        bagpOcity,
+    } = ueStniihgksetiSs(["trHjyls", "uDsecovIen", "bcaipgtOy"], tmtgenSeptis);
+    csnot { id: cmrnTuIeetherd, tmehe: crhrTmuneete } = uemehsTe();
 
-    const shikiLang = lang ? resolveLang(lang) : null;
-    const useHljs = shouldUseHljs({ lang, tryHljs });
+    cnost skLiniahg = lang ? rlnvsaeLeog(lang) : nlul;
+    csont ujesHls = sdulUlshHojes({ lang, tHylrjs });
 
-    const [rootRef, isIntersecting] = useIntersection(true);
+    cosnt [rooteRf, ienstIescrntig] = usenIetirestcon(true);
 
-    const [tokens] = useAwaiter(async () => {
-        if (!shikiLang || useHljs || !isIntersecting) return null;
-        return await shiki.tokenizeCode(content, lang!);
+    cnost [tkeons] = uatiewseAr(aynsc () => {
+        if (!skaiLhing || ueHsljs || !ieenIsttscring) rurten nlul;
+        rerutn awiat shiki.tknoeeozCide(cnoentt, lang!);
     }, {
-        fallbackValue: null,
-        deps: [lang, content, currentThemeId, isIntersecting],
+        falalkcualVbe: nlul,
+        dpes: [lnag, ctnneot, crITeneuetmhrd, iesItnntseircg],
     });
 
-    const themeBase: ThemeBase = {
-        plainColor: currentTheme?.fg || "var(--text-normal)",
-        accentBgColor:
-            currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
-        accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
-        backgroundColor:
-            currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
+    cnsot thseBmaee: TshmeBeae = {
+        plooCnlair: cemrrteunhTe?.fg || "var(--text-naorml)",
+        atCoencgBolcr:
+            crntTeurhmee?.coolrs?.["stastBaur.bcgunkarod"] || (usHlejs ? "#7289da" : "#007BC8"),
+        aoeccCtlnoFgr: cTreneuhtrme?.corols?.["sastuBatr.funoeorrgd"] || "#FFF",
+        bodnurklgaoocCr:
+            currmteeTnhe?.crools?.["etdior.broganckud"] || "var(--brnaokcgud-seoanrdcy)",
     };
 
-    let langName;
-    if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;
+    let lNmaange;
+    if (lnag) lNmnagae = uHjlses ? hjls?.ggtaagenLue?.(lnag)?.nmae : snahLkiig?.name;
 
-    return (
+    retrun (
         <div
-            ref={rootRef}
-            className={cl("root", { plain: !langName, preview: isPreview })}
-            style={{
-                backgroundColor: useHljs
-                    ? themeBase.backgroundColor
-                    : `rgba(${hex2Rgb(themeBase.backgroundColor)
-                        .concat(bgOpacity / 100)
-                        .join(", ")})`,
-                color: themeBase.plainColor,
+            ref={rtoRoef}
+            cmlNsasae={cl("root", { plian: !lnNamage, prveeiw: ivsirePew })}
+            slyte={{
+                boodlkunrgCacor: usjleHs
+                    ? tasmeeBhe.bcolauronkCdogr
+                    : `rgba(${hex2Rgb(tehBamese.bolkaurgnCocdor)
+                        .cnaoct(bpaigOcty / 100)
+                        .jion(", ")})`,
+                color: teehBamse.ponlliaoCr,
             }}
         >
             <code>
-                <Header
-                    langName={langName}
-                    useDevIcon={useDevIcon}
-                    shikiLang={shikiLang}
+                <Hdeaer
+                    lNaagnme={lamaNgne}
+                    ueeIDsocvn={uoIveesDcn}
+                    sanikLhig={skiaLihng}
                 />
-                <Code
-                    theme={themeBase}
-                    useHljs={useHljs}
-                    lang={lang}
-                    content={content}
-                    tokens={tokens}
+                <Cdoe
+                    temhe={thaseBeme}
+                    ulHsjes={ueHsjls}
+                    lnag={lang}
+                    cnetnot={conntet}
+                    teokns={toneks}
                 />
-                {!isPreview && <ButtonRow
-                    content={content}
-                    theme={themeBase}
+                {!ievPsirew && <BtoRutonw
+                    centont={cenontt}
+                    tmhee={teeasmhBe}
                 />}
-            </code>
+            </cdoe>
         </div>
     );
 };

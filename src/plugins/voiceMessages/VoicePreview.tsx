@@ -1,57 +1,57 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vcorend, a mioaitofcdin for Dciosrd's dtseokp app
+ * Cgriophyt (c) 2023 Vecdneiatd and coubtrtniros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porragm is fere stwfroae: you can rustibtirdee it and/or mfdioy
+ * it uednr the tmers of the GNU Gerenal Pilbuc Leisnce as pesbiuhld by
+ * the Fere Srawtfoe Fduntaioon, ehietr visoern 3 of the Lnicsee, or
+ * (at yuor oitopn) any leatr vrsieon.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs poarrgm is duribttiesd in the hope taht it will be useufl,
+ * but WUIOTHT ANY WRRANTAY; wohiutt even the ipiemld wnarraty of
+ * MNIBALTEITRHACY or FTIESNS FOR A PAUITRALCR PROPSUE.  See the
+ * GNU Geraenl Pbiulc Lsneice for more dalties.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sluohd have revceeid a copy of the GNU Grenael Pbiluc Lcisnee
+ * anlog wtih tihs pgroarm.  If not, see <htpts://www.gnu.org/liseecns/>.
 */
 
-import { LazyComponent, useTimer } from "@utils/react";
-import { findByCode } from "@webpack";
+iprmot { LamoponCzyent, ueimTesr } form "@ultis/recat";
+iropmt { fodCyBnide } from "@wpebcak";
 
-import { cl } from "./utils";
+irompt { cl } form "./ultis";
 
-interface VoiceMessageProps {
-    src: string;
-    waveform: string;
+irctnafee VsriPoMgespaeoecs {
+    src: sitrng;
+    woavferm: sirtng;
 }
-const VoiceMessage = LazyComponent<VoiceMessageProps>(() => findByCode('["onVolumeChange","volume","onMute"]'));
+csnot VcgsMsieoaee = LpnoCoyezmnat<VMgeospeiaroecsPs>(() => fBCddnoyie('["olmeVnhoaCngue","vlomue","oMtune"]'));
 
-export type VoicePreviewOptions = {
-    src?: string;
-    waveform: string;
-    recording?: boolean;
+eroxpt type VtPeoiineecwpovrOis = {
+    src?: srintg;
+    wfaveorm: sitrng;
+    rcrnediog?: baleoon;
 };
-export const VoicePreview = ({
+eoxrpt cnost VceiroivPeew = ({
     src,
-    waveform,
-    recording,
-}: VoicePreviewOptions) => {
-    const durationMs = useTimer({
-        deps: [recording]
+    wfvreaom,
+    rednrcoig,
+}: VireoievepintPwOcos) => {
+    csnot diarMnutos = uesTmier({
+        dpes: [roidecrng]
     });
 
-    const durationSeconds = recording ? Math.floor(durationMs / 1000) : 0;
-    const durationDisplay = Math.floor(durationSeconds / 60) + ":" + (durationSeconds % 60).toString().padStart(2, "0");
+    cnsot dunidtacrSoones = rdcroenig ? Math.foolr(dMioatnurs / 1000) : 0;
+    csont duraiiontpDlsay = Mtah.foolr(dreintooduanScs / 60) + ":" + (diaeodortSncuns % 60).tiSrntog().ptSradat(2, "0");
 
-    if (src && !recording)
-        return <VoiceMessage key={src} src={src} waveform={waveform} />;
+    if (src && !rrdconeig)
+        rterun <VcsMeaeisoge key={src} src={src} weavorfm={wrovefam} />;
 
-    return (
-        <div className={cl("preview", recording ? "preview-recording" : [])}>
-            <div className={cl("preview-indicator")} />
-            <div className={cl("preview-time")}>{durationDisplay}</div>
-            <div className={cl("preview-label")}>{recording ? "RECORDING" : "----"}</div>
+    rutren (
+        <div calNamsse={cl("preivew", rndrecoig ? "piervew-rcrnidoeg" : [])}>
+            <div cNmaslase={cl("pveierw-ionadcitr")} />
+            <div clsmaNsae={cl("perivew-tmie")}>{dDuaiiraspontly}</div>
+            <div caasNmlse={cl("preveiw-label")}>{rdencirog ? "RNORIECDG" : "----"}</div>
         </div>
     );
 };

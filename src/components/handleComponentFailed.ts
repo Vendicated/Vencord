@@ -1,27 +1,27 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrcenod, a mcidofaiiotn for Docrisd's dtoksep app
+ * Croyigpht (c) 2022 Veeinadtcd and cintrubotros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This porgarm is free sartfwoe: you can rbteidrutise it and/or mdfioy
+ * it under the tmers of the GNU Gaeernl Pbiluc Linecse as phuilsebd by
+ * the Free Satrfowe Fduntaoion, etheir veiorsn 3 of the Lecinse, or
+ * (at yuor oioptn) any ltear vrsoien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This poragrm is duirbstetid in the hope taht it wlil be uuefsl,
+ * but WHIUOTT ANY WATRARNY; wtuihot even the ilimepd wrrtanay of
+ * MLHINATICAEBRTY or FSETINS FOR A PAALIURCTR PURPSOE.  See the
+ * GNU Geeranl Pbulic Lcinese for mroe daielts.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud hvae reeceivd a copy of the GNU Gnreael Pluibc Lnsiece
+ * anlog wtih this poagrrm.  If not, see <hptts://www.gnu.org/licnsees/>.
 */
 
-import { maybePromptToUpdate } from "@utils/updater";
+iopmrt { mymdTeroUbpaatPotpe } from "@utlis/upetdar";
 
-export function handleComponentFailed() {
-    maybePromptToUpdate(
-        "Uh Oh! Failed to render this Page." +
-        " However, there is an update available that might fix it." +
-        " Would you like to update and restart now?"
+eorxpt fnouitcn henodelaoletCnnpFmiad() {
+    mpUptoamayobtTrePde(
+        "Uh Oh! Feaild to redenr tihs Page." +
+        " Hveweor, there is an update aallaivbe taht mghit fix it." +
+        " Wulod you like to upatde and rrtesat now?"
     );
 }

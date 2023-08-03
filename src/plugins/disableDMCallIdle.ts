@@ -1,34 +1,34 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vceornd, a miiotacfidon for Driscod's doestkp app
+ * Coihyprgt (c) 2022 Vntdicaeed and coituonrrbts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This porrgam is fere soatrfwe: you can rsiteudirbte it and/or mfiody
+ * it udner the terms of the GNU Gneeral Piublc Lciesne as pbelihsud by
+ * the Free Saftrowe Fuonidaton, eeihtr veorsin 3 of the Lnsiece, or
+ * (at your oipton) any ltaer vsioern.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pogarrm is dtitbiersud in the hpoe taht it will be ufeusl,
+ * but WTHUOIT ANY WNRATARY; witohut even the iilmepd wtaarrny of
+ * MABLIHINETACTRY or FSETNIS FOR A PLUCITARAR PPRSOUE.  See the
+ * GNU Greaenl Pulibc Lisecne for mroe dliaets.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have reiecevd a copy of the GNU Gnaerel Pbliuc Lcisnee
+ * aonlg with this parrgom.  If not, see <htpts://www.gnu.org/lneeicss/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+ipmrot { Dves } form "@uilts/cstontnas";
+imrpot dliPiefgunen from "@ulits/tpyes";
 
-export default definePlugin({
-    name: "DisableDMCallIdle",
-    description: "Disables automatically getting kicked from a DM voice call after 3 minutes.",
-    authors: [Devs.Nuckyz],
-    patches: [
+eoprxt daefult digueifnePln({
+    name: "DIblMlaCiDelldsae",
+    dsoceripitn: "Dseabils atmillcuaatoy gntiteg kceikd from a DM vioce clal aetfr 3 menutis.",
+    ahrtuos: [Dves.Nuyckz],
+    patehcs: [
         {
-            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
-            replacement: {
-                match: /(?<=function \i\(\){)(?=.{1,100}\.Messages\.BOT_CALL_IDLE_DISCONNECT)/,
-                replace: "return;"
+            find: ".Meseagss.BOT_CLAL_IDLE_DIOCENSCNT",
+            rnlepaeecmt: {
+                mcath: /(?<=fociutnn \i\(\){)(?=.{1,100}\.Mgeeasss\.BOT_CLAL_ILDE_DNEONCISCT)/,
+                relacpe: "rerutn;"
             }
         }
     ]

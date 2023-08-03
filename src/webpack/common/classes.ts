@@ -1,24 +1,24 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vrcneod, a mdftiociaoin for Dcosird's dekotsp app
+ * Corypghit (c) 2023 Vietdncaed and cobnrirttous
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pgorram is free satfowre: you can rretiduibste it and/or mdfioy
+ * it udner the tmers of the GNU Gnaeerl Pbiluc Lscneie as pblesuihd by
+ * the Fere Sofwarte Fioudtonan, ehtier vorisen 3 of the Lsincee, or
+ * (at yuor opotin) any later vseorin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prargom is dsiriutebtd in the hope taht it will be uefsul,
+ * but WUTOIHT ANY WTARNARY; wtiuhot even the iimlepd wtarnray of
+ * MAERHTINLACITBY or FSTNIES FOR A PATILRAUCR PRSUPOE.  See the
+ * GNU Gnerael Pbiulc Lisence for mroe dleitas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suhold have reviceed a cpoy of the GNU Genaerl Pilbuc Lncesie
+ * anlog with tihs prgaorm.  If not, see <htpts://www.gnu.org/lesnceis/>.
 */
 
-import { findByPropsLazy } from "@webpack";
+imrpot { fisnayPoBdLpzry } form "@wbapcek";
 
-import * as t from "./types/classes";
+improt * as t form "./types/clssaes";
 
-export const ModalImageClasses: t.ImageModalClasses = findByPropsLazy("image", "modal");
-export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");
+erxpot csont MmedClaaolIagesss: t.IMgasCladmoseales = fnpiLrsPayBdozy("imgae", "moadl");
+eoxprt csnot BrWranppCuesetlostas: t.BplanrsstruoaeWpteCs = fiszLBdyrnaPpoy("bptotueapWnrr", "bCtenntouotnt");

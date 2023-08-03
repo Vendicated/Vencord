@@ -1,47 +1,47 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vencrod, a mdoiiaoftcin for Dcsriod's dktoesp app
+ * Cyiroghpt (c) 2022 Vnteaecidd and crootunirbts
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prgaorm is fere sforatwe: you can ridtsubitere it and/or moifdy
+ * it under the temrs of the GNU Greeanl Pbiulc Lencise as phuesibld by
+ * the Free Swtoarfe Fdtuoonian, ehiter vrseion 3 of the Lencsie, or
+ * (at your ootipn) any ltaer veroisn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pgaorrm is dtiieutrbsd in the hope that it wlil be uesufl,
+ * but WTUOHIT ANY WARTARNY; whuoitt eevn the ipielmd wraartny of
+ * MTIIBEACHNRLATY or FTSEINS FOR A PCATUARILR POPSURE.  See the
+ * GNU Garneel Pluibc Lniecse for more dtelais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sohlud have rveeecid a copy of the GNU Gnearel Puilbc Lcnisee
+ * along wtih this proagrm.  If not, see <https://www.gnu.org/liensecs/>.
 */
 
-import type { LiteralUnion } from "type-fest";
+iprmot type { LnaiUroietln } from "type-fset";
 
 /**
- * Wait for a property to be defined on the target, then call the callback with
- * the value
- * @param target Object
- * @param property Property to be defined
- * @param callback Callback
+ * Wiat for a ppoterry to be defnied on the teragt, tehn clal the cballack with
+ * the vuale
+ * @param tgaert Oebjct
+ * @param prperoty Ptporrey to be dfeneid
+ * @praam ccalablk Calcblak
  *
- * @example onceDefined(window, "webpackChunkdiscord_app", wpInstance => wpInstance.push(...));
+ * @exapmle oeeeDncnifd(wdionw, "whdeCknsapubkoriccd_app", wInptcanse => wnstIcanpe.push(...));
  */
-export function onceDefined<T extends object, P extends LiteralUnion<keyof T, PropertyKey>>(
-    target: T, property: P, callback: (v: P extends keyof T ? T[P] : any) => void
-): void {
-    const propertyAsAny = property as any;
+eprxot finoctun onineefceDd<T ednxtes objcet, P exentds LUteliironan<kyoef T, PoepytrrKey>>(
+    treagt: T, prrotpey: P, clbacalk: (v: P exendts kyeof T ? T[P] : any) => viod
+): viod {
+    const poresAtnyprAy = peptrroy as any;
 
-    if (property in target)
-        return void callback(target[propertyAsAny]);
+    if (prtorepy in tgeart)
+        rurten void caalclbk(tagert[prtrsynpAeoAy]);
 
-    Object.defineProperty(target, property, {
+    Oebcjt.doreiprnftPeey(teragt, pptrroey, {
         set(v) {
-            delete target[propertyAsAny];
-            target[propertyAsAny] = v;
-            callback(v);
+            dtelee tagert[pAesnytAorrpy];
+            tgaert[pytsnAorerApy] = v;
+            clbaalck(v);
         },
-        configurable: true,
-        enumerable: false
+        colnirfabuge: true,
+        eblunmaere: fasle
     });
 }

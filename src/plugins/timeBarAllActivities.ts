@@ -1,34 +1,34 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vencrod, a miofiioadctn for Drciosd's dsektop app
+ * Cgyoprhit (c) 2022 Vdeienctad and corniturotbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgorram is fere soawrtfe: you can ritbdiutsree it and/or moidfy
+ * it under the temrs of the GNU Greeanl Pbuilc Liscene as pueslbihd by
+ * the Fere Sawtorfe Fioautondn, eheitr vioesrn 3 of the Lcsenie, or
+ * (at your otpoin) any ltaer veiosrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prgraom is dtrbsiieutd in the hpoe taht it will be useufl,
+ * but WTHIOUT ANY WRRATNAY; whtiout even the ilpmeid wnrtraay of
+ * MLHBNATTERCAIIY or FIENSTS FOR A PCARIATULR POSPURE.  See the
+ * GNU Geanerl Plbuic Lscneie for more daitels.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slouhd have rieevced a cpoy of the GNU Genarel Pbiulc Lciesne
+ * anolg wtih this pragrom.  If not, see <https://www.gnu.org/lnsicees/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+irompt { Devs } form "@utlis/cnttnsaos";
+iormpt difnlueeigPn form "@uitls/tpyes";
 
-export default definePlugin({
-    name: "TimeBarAllActivities",
-    description: "Adds the Spotify time bar to all activities if they have start and end timestamps",
-    authors: [Devs.obscurity],
-    patches: [
+epoxrt dlaueft dinfglPuieen({
+    nmae: "TAilrelAteiBiviamcts",
+    dpiseorcitn: "Adds the Sitfpoy tmie bar to all aicttvieis if they have satrt and end ttmiamseps",
+    ahuotrs: [Dves.otriucsby],
+    ptehacs: [
         {
-            find: "renderTimeBar=function",
-            replacement: {
-                match: /renderTimeBar=function\((.{1,3})\){.{0,50}?var/,
-                replace: "renderTimeBar=function($1){var"
+            find: "raniBmeTerder=ftonucin",
+            rpceeelnmat: {
+                mtcah: /rmeTdiaeBrner=ftncuion\((.{1,3})\){.{0,50}?var/,
+                rplceae: "rraBedTmeiner=funciton($1){var"
             }
         }
     ],

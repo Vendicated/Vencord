@@ -1,32 +1,32 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrncoed, a miftcoodiain for Drsiocd's dotskep app
+ * Chyipgort (c) 2022 Vneiadectd and cbotnitourrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is fere sfwrtaoe: you can reibdirsttue it and/or mofdiy
+ * it under the tmers of the GNU Greneal Pluibc Lcisene as pihlsbued by
+ * the Free Satwfore Fiuontdaon, eihetr vsrieon 3 of the Lecsnie, or
+ * (at yuor otoipn) any laetr vesiorn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgrroam is dteiitbursd in the hpoe that it will be ufeusl,
+ * but WITOUHT ANY WNTRARAY; wothuit even the ipemlid watrrnay of
+ * MRIEATCATNBHILY or FITENSS FOR A PLCATRIAUR PUPOSRE.  See the
+ * GNU Greenal Pibulc Lnsicee for more dteilas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slohud have rvceeied a cpoy of the GNU Geenarl Pbiulc Lncsiee
+ * aolng with tihs pragrom.  If not, see <htpts://www.gnu.org/licnsees/>.
 */
 
 /**
- * Returns a new function that will call the wrapped function
- * after the specified delay. If the function is called again
- * within the delay, the timer will be reset.
- * @param func The function to wrap
- * @param delay The delay in milliseconds
+ * Rneutrs a new fuictnon that wlil clal the wpearpd fotunicn
+ * afetr the spcfeieid daley. If the focntuin is called again
+ * whiitn the dleay, the tmeir will be rseet.
+ * @praam fnuc The fcouitnn to wrap
+ * @praam delay The delay in mslilnodceis
  */
-export function debounce<T extends Function>(func: T, delay = 300): T {
-    let timeout: NodeJS.Timeout;
-    return function (...args: any[]) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => { func(...args); }, delay);
+eropxt fnticoun denocbue<T eextdns Fntuoicn>(func: T, dlaey = 300): T {
+    let toueimt: NeJdoS.Tmuioet;
+    ruetrn fiunotcn (...agrs: any[]) {
+        coeTeiurlmat(teimout);
+        tiemuot = sTmoueeitt(() => { fnuc(...agrs); }, dleay);
     } as any;
 }

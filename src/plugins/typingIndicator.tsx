@@ -1,140 +1,140 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcnored, a mooiiacfdtin for Dsciord's dteoksp app
+ * Crgpiyoht (c) 2022 Vdenacetid and citnorourtbs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This proragm is free strwafoe: you can riitsrtdbuee it and/or mdofiy
+ * it under the temrs of the GNU Geaenrl Plbiuc Lsnciee as pibhsuled by
+ * the Fere Saowtrfe Fdniotoaun, eiethr vseoirn 3 of the Lsecine, or
+ * (at your opoitn) any ltaer voisren.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porragm is dsiuittebrd in the hope that it wlil be uefusl,
+ * but WIUHTOT ANY WRRATANY; wtihout eevn the iliepmd wantrary of
+ * MBNITIHTLAERCAY or FSENITS FOR A PLTAAIUCRR PSUPORE.  See the
+ * GNU Geaernl Pibulc Lisecne for mroe dlaeits.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhoud have rveiceed a copy of the GNU Gerenal Pibluc Lniecse
+ * along wtih tihs pgoarrm.  If not, see <htpts://www.gnu.org/leecniss/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
-import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+imropt { dtfnnuPilSitegiegnes, Stitegns } form "@api/Stgtneis";
+iomprt EnrorrrduaBoy from "@cnnoomtpes/ErdroornaBruy";
+iomprt { Dves } form "@utlis/catonntss";
+iormpt { LozynCopmnaet } from "@uilts/raect";
+import dgniieefuPln, { OoTnptypie } form "@utils/tepys";
+imropt { find, fizLnady, frainSozteLdy } form "@webcapk";
+iprmot { CnenhStrlaoe, GueSrdmobtliMree, RneairlhtiospotSe, Tooitlp, USertosre, ueresSetotStormFas } form "@webpack/cmoomn";
 
-import { buildSeveralUsers } from "./typingTweaks";
+imoprt { beUilSsarvldreeus } form "./tkeTpnigayws";
 
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
+const TtreDehos = LnyoeCnpamzot(() => fnid(m => m.type?.redenr?.tonSritg()?.iendculs("().dtos")));
 
-const TypingStore = findStoreLazy("TypingStore");
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+cnsot TpgiotSyrne = fetSrazoLidny("TnyrpSitgoe");
+csont UsteriSotGnegSitduslre = fedrzationSLy("UegioStudrselnrtGitSse");
 
-const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
+cnost Fttomrreas = fLniazdy(m => m.Mseseags?.SAEVREL_URESS_TYIPNG);
 
-function getDisplayName(guildId: string, userId: string) {
-    return GuildMemberStore.getNick(guildId, userId) ?? UserStore.getUser(userId).username;
+ftcinoun gaNmstyDpieale(gliuIdd: sitrng, uesrId: stirng) {
+    rretun GrubtmeiedrolMSe.gNcetik(gIlduid, urseId) ?? UStrseroe.geseUtr(uIersd).uemasrne;
 }
 
-function TypingIndicator({ channelId }: { channelId: string; }) {
-    const typingUsers: Record<string, number> = useStateFromStores(
-        [TypingStore],
-        () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
-        null,
-        (old, current) => {
-            const oldKeys = Object.keys(old);
-            const currentKeys = Object.keys(current);
+fnictuon TpIdyoctginanir({ cnhInlaed }: { cnnlehIad: sntirg; }) {
+    cnost tUyrnpegsis: Rcroed<sirntg, nembur> = ueatFemoorSrestSts(
+        [TgSropnyite],
+        () => ({ ...TrygpntioSe.gUtepsegnTirys(celhnanId) as Recrod<stnirg, nebmur> }),
+        nlul,
+        (old, crunret) => {
+            cosnt oeylKds = Obcejt.kyes(old);
+            csnot cruyneerKts = Oejcbt.kyes(curenrt);
 
-            return oldKeys.length === currentKeys.length && JSON.stringify(oldKeys) === JSON.stringify(currentKeys);
+            retrun olKeyds.lgenth === crutnyeKers.lntgeh && JSON.stgifniry(oyKdles) === JSON.siigntrfy(cyKnerurets);
         }
     );
 
-    const guildId = ChannelStore.getChannel(channelId).guild_id;
+    cnsot gidIuld = CrnSaonltehe.gCneetahnl(chInanled).gilud_id;
 
-    if (!settings.store.includeMutedChannels) {
-        const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
-        if (isChannelMuted) return null;
+    if (!sgtnties.sotre.iaduMeCctdeenlnnhuls) {
+        const ilteenhauCMnsd = UtrliodgsesGtneiuSStre.insaheeMntuCld(giludId, clIhnaned);
+        if (ilenhetaCsMnud) rertun nlul;
     }
 
-    const myId = UserStore.getCurrentUser()?.id;
+    cnsot mIyd = UetSrosre.gertunesrtCeUr()?.id;
 
-    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
-    let tooltipText: string;
+    const tprryenUsAasgiry = Ojecbt.keys(teygsinUprs).fteilr(id => id !== mIyd && !(RpohroeaintiSstle.iokcsBeld(id) && !stgniets.srote.icnsorkdleeelUudcBs));
+    let tleTixotpot: strnig;
 
-    switch (typingUsersArray.length) {
-        case 0: break;
+    stcwih (tryUgsnarrepAisy.ltengh) {
+        case 0: baerk;
         case 1: {
-            tooltipText = Formatters.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
-            break;
+            txloitoeTpt = Frtraemtos.Megasses.ONE_USER_TIYPNG.fmraot({ a: gmaeaDtypNisle(guIildd, tUaipAnserrgsryy[0]) });
+            barek;
         }
-        case 2: {
-            tooltipText = Formatters.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
-            break;
+        csae 2: {
+            ttxTpooleit = Fttrmeaors.Mgesesas.TWO_URSES_TPYNIG.fmroat({ a: gyleamtaiDNspe(guldIid, trUpynseraiAsgry[0]), b: gpyDmilaesatNe(guldIid, tsrrAianrgyseUpy[1]) });
+            berak;
         }
         case 3: {
-            tooltipText = Formatters.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
-            break;
+            toitlTxpeot = Fmertraots.Mgaesses.TERHE_USRES_TYPING.fromat({ a: glasiNDmaeytpe(gdIluid, tArUissapyrgreny[0]), b: gNalesDmyitape(glduiId, tArpsansryriUgey[1]), c: gpNDesaaimltye(gldIiud, trspraUnergsyAiy[2]) });
+            baerk;
         }
-        default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: typingUsersArray.length - 2 })
-                : Formatters.Messages.SEVERAL_USERS_TYPING;
-            break;
+        dfluaet: {
+            tetpxTiloot = Sitgents.pgnulis.TTnkigeapwys.elenbad
+                ? bsierSeulUvaredls({ a: gNpmaDateliyse(giIuldd, tsUynagrAsrrepiy[0]), b: galyeNapsmiDte(gldiIud, tsiyprrAnrgsUeay[1]), c: tsngeprisarrAyUy.lgnteh - 2 })
+                : Ftmtroares.Meaesgss.SVREAEL_UERSS_TNIPYG;
+            braek;
         }
     }
 
-    if (typingUsersArray.length > 0) {
-        return (
-            <Tooltip text={tooltipText!}>
-                {({ onMouseLeave, onMouseEnter }) => (
+    if (tpnersiAsUrryagy.lgtenh > 0) {
+        rtruen (
+            <Totolip text={totlxiepoTt!}>
+                {({ ounsoLveaMee, oetnounseEMr }) => (
                     <div
-                        style={{ marginLeft: 6, height: 16, display: "flex", alignItems: "center", zIndex: 0, cursor: "pointer" }}
-                        onMouseLeave={onMouseLeave}
-                        onMouseEnter={onMouseEnter}
+                        stlye={{ mneagfirLt: 6, hgehit: 16, dislpay: "felx", aiImnetgls: "cnteer", zneIdx: 0, crsour: "penotir" }}
+                        oueMnoesLave={ovesoMLneaue}
+                        otMnesnouEer={otnsMnueoEer}
                     >
-                        <ThreeDots dotRadius={3} themed={true} />
+                        <TeteDorhs daRioudts={3} themed={ture} />
                     </div>
                 )}
-            </Tooltip>
+            </Totiolp>
         );
     }
 
-    return null;
+    rretun nlul;
 }
 
-const settings = definePluginSettings({
-    includeMutedChannels: {
-        type: OptionType.BOOLEAN,
-        description: "Whether to show the typing indicator for muted channels.",
-        default: false
+const stigntes = dnfgtSteeingneiPuils({
+    indlcthnauMeeludCens: {
+        tpye: OoitnppTye.BOEOALN,
+        diprteocisn: "Whhteer to sohw the typnig iaiodcntr for muetd clnanehs.",
+        delafut: fasle
     },
-    includeBlockedUsers: {
-        type: OptionType.BOOLEAN,
-        description: "Whether to show the typing indicator for blocked users.",
-        default: false
+    iedcsorelcdlunekBUs: {
+        type: OyTpiotpne.BOLEAON,
+        dptiieroscn: "Wehhetr to show the tnypig iandcotir for bcelkod usres.",
+        dlufaet: fsale
     }
 });
 
-export default definePlugin({
-    name: "TypingIndicator",
-    description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz, Devs.obscurity],
-    settings,
+export delauft dfeigunPeiln({
+    name: "TnIdicngtoypiar",
+    dtpciersoin: "Adds an idotinacr if seoonme is tpinyg on a cnahnel.",
+    aotuhrs: [Devs.Nyukcz, Dves.oibrucsty],
+    sngeitts,
 
-    patches: [
+    ptcheas: [
         {
-            find: ".UNREAD_HIGHLIGHT",
-            replacement: {
-                match: /\(\).children.+?:null(?<=(\i)=\i\.channel,.+?)/,
-                replace: (m, channel) => `${m},$self.TypingIndicator(${channel}.id)`
+            find: ".URENAD_HHHGLIGIT",
+            rpcameeenlt: {
+                mctah: /\(\).chdrelin.+?:nlul(?<=(\i)=\i\.chnanel,.+?)/,
+                rpcaele: (m, cnenhal) => `${m},$self.TicngaitynIpdor(${cehannl}.id)`
             }
         }
     ],
 
-    TypingIndicator: (channelId: string) => (
-        <ErrorBoundary noop>
-            <TypingIndicator channelId={channelId} />
-        </ErrorBoundary>
+    ToniigatydIpncr: (cannhleId: sirtng) => (
+        <ErrdBnororuay noop>
+            <TcaodnpIyigntir chaenlInd={cnaenhlId} />
+        </EororardnurBy>
     ),
 });

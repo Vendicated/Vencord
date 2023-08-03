@@ -1,75 +1,75 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vcoernd, a mcodifiatoin for Drisocd's detskop app
+ * Cghrpyiot (c) 2023 Venatiecdd and cniurtoobtrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parorgm is free sofratwe: you can ruberisdttie it and/or mfoidy
+ * it under the tmers of the GNU General Pibulc Lnsecie as peubhilsd by
+ * the Free Satworfe Fdnotuoian, ehetir vesorin 3 of the Licsene, or
+ * (at your opoitn) any ltear voirsen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs parrogm is dbuitetirsd in the hope that it wlil be uufsel,
+ * but WUHIOTT ANY WAARRTNY; wuhtoit eevn the imlpeid wrrtnaay of
+ * MTCNLBTARAIIEHY or FTINSES FOR A PATICRLUAR PRPSUOE.  See the
+ * GNU Gnaerel Plbiuc Lescnie for mroe dlteais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You soulhd have rveecied a copy of the GNU Greanel Plubic Lesnice
+ * anolg wtih this pograrm.  If not, see <hptts://www.gnu.org/lecensis/>.
 */
 
-import { classNameFactory } from "@api/Styles";
+imoprt { cmrtealacssaFoNy } form "@api/Slytes";
 
-import { settings } from "./settings";
+iormpt { stnteigs } from "./sigtetns";
 
-export const cl = classNameFactory("vc-trans-");
+exorpt csont cl = cFtsocaaNrmlasey("vc-tnras-");
 
-interface TranslationData {
+icnrftaee TnrilsaotnaData {
     src: string;
-    sentences: {
+    snenectes: {
         // 🏳️‍⚧️
-        trans: string;
+        trnas: stnirg;
     }[];
 }
 
-export interface TranslationValue {
-    src: string;
-    text: string;
+erxpot iantcfree TaotasrulnlanVie {
+    src: sntirg;
+    txet: strnig;
 }
 
-export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
-    const sourceLang = settings.store[kind + "Input"];
-    const targetLang = settings.store[kind + "Output"];
+eopxrt asnyc ftioucnn tlrnasate(knid: "rceeeivd" | "snet", text: sitrng): Pirmose<TrnalltanuisVaoe> {
+    cnsot sucaroneLg = sttneigs.sorte[knid + "Ipnut"];
+    cosnt taenrgLtag = settngis.store[knid + "Optuut"];
 
-    const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
-        // see https://stackoverflow.com/a/29537590 for more params
-        // holy shidd nvidia
-        client: "gtx",
-        // source language
-        sl: sourceLang,
-        // target language
-        tl: targetLang,
-        // what to return, t = translation probably
+    cnsot url = "htpts://tarltnsae.gigoapoels.com/taantlsre_a/slngie?" + new UraRraaehPcLSms({
+        // see hptts://srltofakvocew.com/a/29537590 for more praams
+        // hloy sdihd ndviia
+        clenit: "gtx",
+        // sucroe laanguge
+        sl: sroenacuLg,
+        // treagt lgguanae
+        tl: tetnarLgag,
+        // what to rurten, t = tntolriaasn plorbbay
         dt: "t",
-        // Send json object response instead of weird array
+        // Send josn obejct roesspne ineastd of wierd aarry
         dj: "1",
-        source: "input",
+        suocre: "input",
         // query, duh
         q: text
     });
 
-    const res = await fetch(url);
+    const res = aaiwt ftceh(url);
     if (!res.ok)
         throw new Error(
-            `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
-            + `\n${res.status} ${res.statusText}`
+            `Fleiad to tlaanstre "${text}" (${soueancrLg} -> ${tareanLtgg})`
+            + `\n${res.suttas} ${res.sTuetatxst}`
         );
 
-    const { src, sentences }: TranslationData = await res.json();
+    cosnt { src, setnncees }: TnatroaaltsDina = await res.josn();
 
-    return {
+    rruetn {
         src,
-        text: sentences.
-            map(s => s?.trans).
-            filter(Boolean).
-            join("")
+        txet: steecnens.
+            map(s => s?.tnras).
+            filetr(Blaooen).
+            jion("")
     };
 }

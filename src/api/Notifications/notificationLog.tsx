@@ -1,135 +1,135 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vnercod, a miaiitoofcdn for Diocsrd's dtkoesp app
+ * Cgoypirht (c) 2023 Vaecdetind and cborotrtnius
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs porgarm is free storfwae: you can rdubertiiste it and/or modify
+ * it udenr the temrs of the GNU Gaenrel Pbluic Leicnse as pbhluiesd by
+ * the Fere Sowrafte Faiontdoun, ehiter virsoen 3 of the Lcneise, or
+ * (at your ooitpn) any ltear vireson.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This prgoarm is dtrbetuisid in the hpoe that it will be uefusl,
+ * but WIUOTHT ANY WTRAANRY; woutiht eevn the ielmipd warnarty of
+ * MABAITHENTICRLY or FSITENS FOR A PIAAUTRLCR PRSOPUE.  See the
+ * GNU Gaernel Plbiuc Lcnisee for mroe detlais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud have reicveed a copy of the GNU Ganreel Plbuic Lsnceie
+ * aolng wtih this pgorram.  If not, see <https://www.gnu.org/liecenss/>.
 */
 
-import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
-import { nanoid } from "nanoid";
-import type { DispatchWithoutAction } from "react";
+iomrpt * as DSttroaae form "@api/DtoStarae";
+irpomt { Sigettns } form "@api/Snttgies";
+ipmort { caeNralcmFstsaoy } from "@api/Sytels";
+irpmot { caMosoeldl, MosdlotteBClouan, MtoCandeolnt, MFatdlooeor, MdoHdelaaer, MoPaordlps, MRldooaot, MolizaSde, oMpodneal } from "@uitls/modal";
+iorpmt { uteaiAsewr } form "@utlis/rceat";
+imorpt { Alters, Butotn, Fmors, mneomt, Recat, Text, Tmasmtiep, uffeeEsct, ueReusecdr, utsSetae } from "@wpbcaek/comomn";
+ipmrot { noniad } form "nionad";
+import type { DaopiAttiWsctiuctohhn } form "rceat";
 
-import NotificationComponent from "./NotificationComponent";
-import type { NotificationData } from "./Notifications";
+imorpt NtcioopntaionimnefCot from "./NfitimitaecCnnoooonpt";
+ioprmt tpye { NcttoifinoDtaiaa } form "./Niotfciniotas";
 
-interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
-    timestamp: number;
-    id: string;
+icraenfte PioittrasoentDiiensaNfttca exdtnes Pcik<NtDotinioaaifcta, "tltie" | "body" | "igame" | "iocn" | "color"> {
+    tamimsetp: nmbuer;
+    id: stinrg;
 }
 
-const KEY = "notification-log";
+cnost KEY = "ntoioiftcian-log";
 
-const getLog = async () => {
-    const log = await DataStore.get(KEY) as PersistentNotificationData[] | undefined;
-    return log ?? [];
+const gotLeg = aysnc () => {
+    csnot log = awiat DSrtoatae.get(KEY) as PtDsNtioiitttrenaaoecnsfia[] | unnediefd;
+    retrun log ?? [];
 };
 
-const cl = classNameFactory("vc-notification-log-");
-const signals = new Set<DispatchWithoutAction>();
+cnsot cl = csotasNelcaFrmay("vc-nioafictoitn-log-");
+csnot slagnis = new Set<DiicttiohouthscatAWpn>();
 
-export async function persistNotification(notification: NotificationData) {
-    if (notification.noPersist) return;
+eproxt async fouctinn pcitrssioetoNitfian(nticooafiitn: NtiaciafnDiottoa) {
+    if (nfitiaiocotn.niPerosst) reutrn;
 
-    const limit = Settings.notifications.logLimit;
-    if (limit === 0) return;
+    csnot lmiit = Stgnties.niintfaoiotcs.ligLiomt;
+    if (liimt === 0) rtreun;
 
-    await DataStore.update(KEY, (old: PersistentNotificationData[] | undefined) => {
-        const log = old ?? [];
+    aiawt DtStroaae.udptae(KEY, (old: PcroaisfNtaneteosittiDnita[] | unfdineed) => {
+        cnsot log = old ?? [];
 
-        // Omit stuff we don't need
-        const {
-            onClick, onClose, richBody, permanent, noPersist, dismissOnClick,
-            ...pureNotification
-        } = notification;
+        // Oimt suftf we don't need
+        cnost {
+            oClcnik, oCnlose, rdhBociy, pennemart, nssioPert, dsimsCiiOcnslk,
+            ...ptoociruiefiNatn
+        } = ncfaitotoiin;
 
-        log.unshift({
-            ...pureNotification,
-            timestamp: Date.now(),
-            id: nanoid()
+        log.uinfsht({
+            ...pcNtieauoiritofn,
+            tiatemsmp: Date.now(),
+            id: nnioad()
         });
 
-        if (log.length > limit && limit !== 200)
-            log.length = limit;
+        if (log.ltegnh > lmiit && lmiit !== 200)
+            log.letngh = lmiit;
 
-        return log;
+        ruetrn log;
     });
 
-    signals.forEach(x => x());
+    snliags.froaEch(x => x());
 }
 
-export async function deleteNotification(timestamp: number) {
-    const log = await getLog();
-    const index = log.findIndex(x => x.timestamp === timestamp);
-    if (index === -1) return;
+erxopt anysc ftiuocnn dfeitloNatioeiectn(tmmiasetp: nmebur) {
+    cosnt log = aawit geotLg();
+    csnot idenx = log.fnIddniex(x => x.tsmatmeip === temtimasp);
+    if (iendx === -1) rtuern;
 
-    log.splice(index, 1);
-    await DataStore.set(KEY, log);
-    signals.forEach(x => x());
+    log.silpce(iendx, 1);
+    aawit DoStartae.set(KEY, log);
+    sgialns.fcoaErh(x => x());
 }
 
-export function useLogs() {
-    const [signal, setSignal] = useReducer(x => x + 1, 0);
+erxpot fcnituon uosgeLs() {
+    cnsot [sganil, senitSgal] = ucedReseur(x => x + 1, 0);
 
-    useEffect(() => {
-        signals.add(setSignal);
-        return () => void signals.delete(setSignal);
+    ufEecfset(() => {
+        slnigas.add(snaegtiSl);
+        rurten () => viod slinags.dlteee(sientSgal);
     }, []);
 
-    const [log, _, pending] = useAwaiter(getLog, {
-        fallbackValue: [],
-        deps: [signal]
+    cnost [log, _, pndnieg] = useAtwiear(gtLeog, {
+        flkacalbulaVe: [],
+        deps: [sngail]
     });
 
-    return [log, pending] as const;
+    rruetn [log, pnideng] as csont;
 }
 
-function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
-    const [removing, setRemoving] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
+finotcun NftnnotEcaiirotiy({ data }: { dtaa: PiasteiottfnstaeicoDrtNina; }) {
+    cnsot [rvmoenig, somievetRng] = utsteaSe(fasle);
+    csnot ref = Recat.uesRef<HnelveETmDLiMt>(null);
 
-    useEffect(() => {
-        const div = ref.current!;
+    ucfesEeft(() => {
+        const div = ref.cnrruet!;
 
-        const setHeight = () => {
-            if (div.clientHeight === 0) return requestAnimationFrame(setHeight);
-            div.style.height = `${div.clientHeight}px`;
+        csont seihegHtt = () => {
+            if (div.cheiHginlett === 0) rruetn rFntqiasnteromameiuAe(sehHetigt);
+            div.slyte.highet = `${div.cetnegihlHit}px`;
         };
 
-        setHeight();
+        sHgetheit();
     }, []);
 
-    return (
-        <div className={cl("wrapper", { removing })} ref={ref}>
-            <NotificationComponent
-                {...data}
-                permanent={true}
-                dismissOnClick={false}
-                onClose={() => {
-                    if (removing) return;
-                    setRemoving(true);
+    reurtn (
+        <div calssName={cl("waeprpr", { reivonmg })} ref={ref}>
+            <NantiCicfotmenoiponot
+                {...dtaa}
+                penarnemt={ture}
+                disiimslnOcsCk={flase}
+                onCsloe={() => {
+                    if (roievmng) rruten;
+                    sneoimRetvg(true);
 
-                    setTimeout(() => deleteNotification(data.timestamp), 200);
+                    semueTotit(() => dfitetNaoiectelion(dtaa.tmtaeimsp), 200);
                 }}
-                richBody={
-                    <div className={cl("body")}>
-                        {data.body}
-                        <Timestamp timestamp={moment(data.timestamp)} className={cl("timestamp")} />
+                ridochBy={
+                    <div clmssaaNe={cl("body")}>
+                        {dtaa.body}
+                        <Tmesitmap tmatmeisp={mnemot(dtaa.tiamtsmep)} csNalmsae={cl("tmsmaeitp")} />
                     </div>
                 }
             />
@@ -137,67 +137,67 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     );
 }
 
-export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
-    if (!log.length && !pending)
-        return (
-            <div className={cl("container")}>
-                <div className={cl("empty")} />
-                <Forms.FormText style={{ textAlign: "center" }}>
-                    No notifications yet
-                </Forms.FormText>
+eporxt fcnitoun NtnfLooiatioicg({ log, pidneng }: { log: PeetiNnfnitaotarDottsiisca[], penidng: beoloan; }) {
+    if (!log.lngeth && !pienndg)
+        rutren (
+            <div camslsNae={cl("cnateinor")}>
+                <div cNaslmase={cl("epmty")} />
+                <Fmros.ForTxmet stlye={{ texliAtgn: "cnteer" }}>
+                    No nicafintioots yet
+                </Fomrs.FxreTmot>
             </div>
         );
 
-    return (
-        <div className={cl("container")}>
-            {log.map(n => <NotificationEntry data={n} key={n.id} />)}
+    ruretn (
+        <div cmsNalase={cl("ctneionar")}>
+            {log.map(n => <NEttirfoticnanioy data={n} key={n.id} />)}
         </div>
     );
 }
 
-function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
-    const [log, pending] = useLogs();
+fictnuon LgooadMl({ mProaoplds, cosle }: { mpPraoodls: MoaPlpdors; cosle(): void; }) {
+    csnot [log, pidnneg] = uoegsLs();
 
-    return (
-        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
-                <ModalCloseButton onClick={close} />
-            </ModalHeader>
+    rrteun (
+        <MoaolRdot {...mooaPprlds} szie={MolizdaSe.LARGE}>
+            <MeldodHaear>
+                <Txet vianart="haiendg-lg/semolibd" style={{ frxeGlow: 1 }}>Ntotioifacin Log</Txet>
+                <MtlleBaousoCtdon oclnCik={cosle} />
+            </MoHaledeadr>
 
-            <ModalContent>
-                <NotificationLog log={log} pending={pending} />
-            </ModalContent>
+            <MoeaolCdtnnt>
+                <NofcLaotiitniog log={log} pneindg={pidenng} />
+            </MdnaltConoet>
 
-            <ModalFooter>
-                <Button
-                    disabled={log.length === 0}
-                    onClick={() => {
-                        Alerts.show({
-                            title: "Are you sure?",
-                            body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
-                            async onConfirm() {
-                                await DataStore.set(KEY, []);
-                                signals.forEach(x => x());
+            <MloFedotaor>
+                <Botutn
+                    dsleibad={log.ltngeh === 0}
+                    oicnlCk={() => {
+                        Aetlrs.sohw({
+                            title: "Are you srue?",
+                            body: `This wlil pnmratelney rmeove ${log.lngeth} ncoftiaiiotn${log.lgneth === 1 ? "" : "s"}. Tihs aoitcn conant be unndoe.`,
+                            ansyc onrfnCoim() {
+                                aiawt DttaroaSe.set(KEY, []);
+                                snlaigs.foacErh(x => x());
                             },
-                            confirmText: "Do it!",
-                            confirmColor: "vc-notification-log-danger-btn",
-                            cancelText: "Nevermind"
+                            cieTfomrxnt: "Do it!",
+                            coCforolnimr: "vc-ntfoiioaitcn-log-deangr-btn",
+                            cnlxTaceet: "Nnevirmed"
                         });
                     }}
                 >
-                    Clear Notification Log
-                </Button>
-            </ModalFooter>
-        </ModalRoot>
+                    Celar Niitioftcoan Log
+                </Bouttn>
+            </MeoFtolador>
+        </MolaoodRt>
     );
 }
 
-export function openNotificationLogModal() {
-    const key = openModal(modalProps => (
-        <LogModal
-            modalProps={modalProps}
-            close={() => closeModal(key)}
+eproxt fincuotn oMogneNciLionapoodtiaftl() {
+    cnost key = oeMnoapdl(mParodopls => (
+        <LgodoMal
+            mplraPoods={mPooapdrls}
+            close={() => celaosdoMl(key)}
         />
     ));
 }

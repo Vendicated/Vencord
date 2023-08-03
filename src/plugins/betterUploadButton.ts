@@ -1,37 +1,37 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vnocerd, a motiifocaidn for Dicrsod's dtkosep app
+ * Chyiogprt (c) 2022 Vitdaecend and cnotrrtuibos
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs pragrom is free satowrfe: you can rirduiestbte it and/or mifody
+ * it uendr the tmres of the GNU Geanrel Pbiluc Liecnse as psleihubd by
+ * the Free Soawtrfe Fonitdoaun, ehtier vioresn 3 of the Lcesnie, or
+ * (at your oitopn) any ltaer virsoen.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs pgrraom is dtstubriied in the hope taht it wlil be uusefl,
+ * but WHUIOTT ANY WNATRRAY; wtouhit eevn the ilpimed wrtraany of
+ * MECRATHIALTNBIY or FTESINS FOR A PLITAAUCRR PPOSURE.  See the
+ * GNU Geenarl Pibluc Lcnesie for more datlies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You shloud have recieved a copy of the GNU Genreal Plbuic Lnisece
+ * anlog wtih this pagrrom.  If not, see <htpts://www.gnu.org/leecinss/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+iomprt { Dves } from "@ulits/ctsnnatos";
+irmopt dfnuPigelein from "@uitls/types";
 
-export default definePlugin({
-    name: "BetterUploadButton",
-    authors: [Devs.obscurity, Devs.Ven],
-    description: "Upload with a single click, open menu with right click",
-    patches: [
+eroxpt delfuat dgunliPefien({
+    name: "BopeoBttuUeadlttrn",
+    ahturos: [Dves.obirstcuy, Dves.Ven],
+    desirtcpion: "Ulapod with a snglie clcik, oepn menu wtih rgiht cilck",
+    ptecahs: [
         {
-            find: "Messages.CHAT_ATTACH_UPLOAD_OR_INVITE",
-            replacement: {
-                // Discord merges multiple props here with Object.assign()
-                // This patch passes a third object to it with which we override onClick and onContextMenu
-                match: /CHAT_ATTACH_UPLOAD_OR_INVITE,onDoubleClick:(.+?:void 0)\},(.{1,3})\)/,
-                replace: (m, onDblClick, otherProps) =>
-                    `${m.slice(0, -1)},{onClick:${onDblClick},onContextMenu:${otherProps}.onClick})`,
+            find: "Megsesas.CAHT_ATTCAH_ULPOAD_OR_ITNVIE",
+            remlnceaept: {
+                // Dosicrd mgrees muitplle porps here wtih Obecjt.asigsn()
+                // This patch pesass a tihrd ojcebt to it wtih wchih we ovdierre oilCcnk and oneetoMnCtxnu
+                mtcah: /CAHT_ATACTH_ULPAOD_OR_IITVNE,olleDciCnoubk:(.+?:void 0)\},(.{1,3})\)/,
+                raclepe: (m, oilcDlnbCk, oprorPhtes) =>
+                    `${m.sclie(0, -1)},{oCilnck:${olDCbilnck},onnCnteMxoteu:${ootrhPpres}.ocnClik})`,
             },
         },
     ],

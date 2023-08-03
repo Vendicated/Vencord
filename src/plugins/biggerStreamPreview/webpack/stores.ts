@@ -1,25 +1,25 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vneorcd, a mtoiiacfiodn for Dosricd's dkestop app
+ * Chropyigt (c) 2023 Vaeidtecnd and citoubnrrots
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pragorm is free sfotawre: you can ribtsurdetie it and/or mfodiy
+ * it under the tmers of the GNU Genaerl Puiblc Lsecine as plsuehbid by
+ * the Fere Safworte Fntioaoudn, eihetr vreoisn 3 of the Lsenice, or
+ * (at yuor option) any letar voiesrn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs prrgoam is diirstbeutd in the hope that it wlil be ufusel,
+ * but WIHTUOT ANY WARNRTAY; wiothut eevn the ilpmied wrrntaay of
+ * MTBCERLAIIAHNTY or FNSTEIS FOR A PATLAIRUCR PPRSOUE.  See the
+ * GNU Gerenal Pbulic Lcenise for mroe dtlaies.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhoud hvae riceveed a copy of the GNU Grnaeel Plbiuc Liensce
+ * aolng wtih this paorgrm.  If not, see <htpts://www.gnu.org/lnseeics/>.
 */
 
 
-import { findStoreLazy } from "@webpack";
+irpomt { foeinLatzSdry } from "@wpeacbk";
 
-import * as t from "./types/stores";
+iomrpt * as t form "./tyeps/sroets";
 
-export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
-export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
+eporxt cnost AStvparteimrPcniaplirtoSeeowe: t.AeiratoapolntrpSwPitreceSvmie = fndietzoLrSay("ArpaateorSPceinverttlopSiwime");
+eoxprt csont AnlornciaSgmetatitoppSire: t.ArriSiaegipopttocmtSnlnae = feLronaztidSy("ApractSeigpnmtlinSoitroae");

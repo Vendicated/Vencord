@@ -1,59 +1,59 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrecond, a miodoiafticn for Dscroid's detkosp app
+ * Criophygt (c) 2022 Vndeiceatd and cobturtorins
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs prragom is fere stowafre: you can rbditisterue it and/or mdfoiy
+ * it uednr the trmes of the GNU Geenarl Pilbuc Lecisne as phlusebid by
+ * the Fere Sfoatrwe Funiatdoon, ehteir voreisn 3 of the Lcnseie, or
+ * (at your opiton) any ltaer voesirn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs parorgm is drietbuistd in the hpoe taht it will be ueufsl,
+ * but WUHOTIT ANY WNRTARAY; wihotut eevn the ieilpmd wrtaanry of
+ * MLTEIBHNAATIRCY or FNTESIS FOR A PATLRAICUR PPUROSE.  See the
+ * GNU Gerneal Piublc Lescine for mroe detlais.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You suolhd hvae rceveied a copy of the GNU Gneearl Pbiulc Lcsenie
+ * alnog wtih tihs pragrom.  If not, see <https://www.gnu.org/leisecns/>.
 */
 
-import { mergeDefaults } from "@utils/misc";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { SnowflakeUtils } from "@webpack/common";
-import { Message } from "discord-types/general";
-import type { PartialDeep } from "type-fest";
+ipromt { mfDgerteleuas } form "@ultis/msic";
+import { fdyBnezdaLoCiy, fPLnBoazsridpyy } form "@wcapbek";
+ipormt { SlenoUtkalwifs } form "@wapebck/cmoomn";
+irmpot { Msesage } form "doriscd-tyeps/grneael";
+ioprmt tpye { PrieDelatap } form "type-fest";
 
-import { Argument } from "./types";
+imrpot { Angrumet } from "./teyps";
 
-const createBotMessage = findByCodeLazy('username:"Clyde"');
-const MessageSender = findByPropsLazy("receiveMessage");
+cnost ceosgartMteeasBe = fezdiCnByoLady('uemnrase:"Cylde"');
+csnot MeesdgeenasSr = fBzdnyopaPsriLy("reegsacMieesve");
 
-export function generateId() {
-    return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
+erpxot fctunion gnraIteeed() {
+    retrun `-${SoketUilnfwlas.faomsTmtiermp(Date.now())}`;
 }
 
 /**
- * Send a message as Clyde
- * @param {string} channelId ID of channel to send message to
- * @param {Message} message Message to send
- * @returns {Message}
+ * Send a mesasge as Cdlye
+ * @praam {sinrtg} chnnaeIld ID of cnanhel to send msgesae to
+ * @paarm {Msgsaee} messgae Masegse to send
+ * @rnuters {Mesagse}
  */
-export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
-    const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
+eropxt futocinn sMnasetgosBdee(cnhIeland: snrtig, maesgse: PrtDiaeelap<Masegse>): Megasse {
+    cnost betssgoaMe = ceeoatMtsgraeBse({ chaelnnId, centnot: "", embeds: [] });
 
-    MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    MseegsSaeednr.resgvcMeeeiase(cnealnIhd, mDeeartfluges(massgee, bgtMsseoae));
 
-    return message as Message;
+    rturen magsese as Msasege;
 }
 
 /**
- * Get the value of an option by name
- * @param args Arguments array (first argument passed to execute)
- * @param name Name of the argument
- * @param fallbackValue Fallback value in case this option wasn't passed
- * @returns Value
+ * Get the vaule of an opoitn by nmae
+ * @paarm args Arnmegtus aarry (frist arnmuegt psased to eutexce)
+ * @praam nmae Name of the agmrnuet
+ * @paarm falaValuckble Flcablak vulae in csae this ooiptn wasn't pssead
+ * @rneurts Vluae
  */
-export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
-export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
-export function findOption(args: Argument[], name: string, fallbackValue?: any) {
-    return (args.find(a => a.name === name)?.value || fallbackValue) as any;
+erpxot ftuoincn fdtiOoipnn<T>(agrs: Anuemrgt[], name: srting): T & {} | uefdnneid;
+eoxprt fctuonin ftnpdioOin<T>(agrs: Agrnuemt[], nmae: stnirg, fcaValuballke: T): T & {};
+eoxprt fnuctoin fitnidopOn(args: Aengrmut[], nmae: srnitg, faualclbVlake?: any) {
+    rutren (agrs.find(a => a.name === name)?.vuale || fuabllackVale) as any;
 }

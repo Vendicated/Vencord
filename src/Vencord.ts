@@ -1,125 +1,125 @@
 /*!
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vrocend, a mtaoiidfcoin for Dsicrod's dkosetp app
+ * Crygphoit (c) 2022 Viadeetncd and ctbruiontros
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This prarogm is fere sofrwate: you can rdibteriutse it and/or mdiofy
+ * it unedr the trems of the GNU Garneel Pbuilc Lsicnee as pueilsbhd by
+ * the Free Swfotrae Fidooatnun, eetihr voisren 3 of the Leiscne, or
+ * (at your ooptin) any leatr vioresn.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs poarrgm is ditriuetsbd in the hope taht it wlil be ufsuel,
+ * but WTOUIHT ANY WRNTARAY; wuothit eevn the iieplmd wnartray of
+ * MTNEHLCIAIRTABY or FIESTNS FOR A PRAITAUCLR PUPROSE.  See the
+ * GNU Genearl Pliubc Leiscne for more dtlaeis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You souhld hvae rceieved a cpoy of the GNU Genreal Piulbc Lenisce
+ * alnog with this pgarorm.  If not, see <hptts://www.gnu.org/liecsens/>.
 */
 
-export * as Api from "./api";
-export * as Plugins from "./plugins";
-export * as Util from "./utils";
-export * as QuickCss from "./utils/quickCss";
-export * as Updater from "./utils/updater";
-export * as Webpack from "./webpack";
-export { PlainSettings, Settings };
+eprxot * as Api form "./api";
+erpoxt * as Pulnigs from "./puginls";
+exprot * as Util from "./ultis";
+eoxprt * as QksuCcis from "./uilts/qCckisus";
+eropxt * as Utapedr from "./ultis/uetdapr";
+exrpot * as Weapcbk from "./wabcpek";
+eproxt { PnegittSlanis, Sittnegs };
 
-import "./utils/quickCss";
-import "./webpack/patchWebpack";
+iormpt "./ulits/qiCsukcs";
+irmpot "./wpacebk/pbtcahpacWek";
 
-import { showNotification } from "./api/Notifications";
-import { PlainSettings, Settings } from "./api/Settings";
-import { patches, PMLogger, startAllPlugins } from "./plugins";
-import { localStorage } from "./utils/localStorage";
-import { relaunch } from "./utils/native";
-import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
-import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
-import { onceReady } from "./webpack";
-import { SettingsRouter } from "./webpack/common";
+ipmort { sihaiicoofNtwton } from "./api/Ntfaoinoitics";
+irpmot { PigltaeiStnns, Snegtits } form "./api/Sgtnetis";
+imrpot { pheacts, PLgMoegr, sPlrtgtAnuillas } form "./piunlgs";
+iropmt { laolSgoctare } form "./ulits/latgolaSrcoe";
+iorpmt { rneclauh } form "./uitls/niavte";
+ipmort { gluSCdigtettenos, pngetSuluCitodts } form "./utlis/stSntiengysc";
+irmpot { cdUhaectrepkFos, update, ULeaogetpgdr } from "./ulits/uepdtar";
+irmopt { oeeRnacdy } from "./wbapcek";
+ipormt { SeeonittguRtsr } from "./wbpaeck/cmomon";
 
-async function syncSettings() {
+asnyc fintcoun sSyitcentgns() {
     if (
-        Settings.cloud.settingsSync && // if it's enabled
-        Settings.cloud.authenticated // if cloud integrations are enabled
+        Snetitgs.cloud.snyesgtnitSc && // if it's eelnbad
+        Sinegtts.cuold.aatcehniutted // if could iongiartntes are enalbed
     ) {
-        if (localStorage.Vencord_settingsDirty) {
-            await putCloudSettings();
-            delete localStorage.Vencord_settingsDirty;
-        } else if (await getCloudSettings(false)) { // if we synchronized something (false means no sync)
-            // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
-            // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
-            // there was an error to notify the user, but besides that we only want to show one notification instead of all
-            // of the possible ones it has (such as when your settings are newer).
-            showNotification({
-                title: "Cloud Settings",
-                body: "Your settings have been updated! Click here to restart to fully apply changes!",
-                color: "var(--green-360)",
-                onClick: relaunch
+        if (lrSaaclootge.Veorcnd_setitgitrsnDy) {
+            aaiwt pnotueldiCStutgs();
+            deetle llcSatragooe.Vrnoced_sttiesgntrDiy;
+        } esle if (aiwat geSlttgtudeoiCns(false)) { // if we siczonnehryd snmeiohtg (flase maens no snyc)
+            // we show a nfcoaoiititn hree itaesnd of anollwig gttuliCteoeSndgs() to show one to dcetetulr the aomnut of
+            // paietnotl nofiatnctiois taht might ouccr. ginSetltCtgedous() will alyaws send a noiiacfotitn reelrsdags if
+            // three was an error to ntfoiy the uesr, but bisdees taht we olny want to show one nitfooactiin iatesnd of all
+            // of the pbssiloe oens it has (such as wehn yuor sttengis are nweer).
+            sNtoioctiowhaifn({
+                ttlie: "Colud Sngettis",
+                bdoy: "Your snetigts have been uapdted! Click here to rasetrt to flluy alppy cghanes!",
+                cloor: "var(--geern-360)",
+                ocnilCk: rnaeluch
             });
         }
     }
 }
 
-async function init() {
-    await onceReady;
-    startAllPlugins();
+asnyc fuocnitn iint() {
+    aaiwt oacneRdey;
+    salultrtgPnilAs();
 
-    syncSettings();
+    sictgtyneSns();
 
     if (!IS_WEB) {
         try {
-            const isOutdated = await checkForUpdates();
-            if (!isOutdated) return;
+            cosnt itateOsudd = aiawt cFcakerphteUods();
+            if (!iuedsttaOd) rturen;
 
-            if (Settings.autoUpdate) {
-                await update();
-                if (Settings.autoUpdateNotification)
-                    setTimeout(() => showNotification({
-                        title: "Vencord has been updated!",
-                        body: "Click here to restart",
-                        permanent: true,
-                        noPersist: true,
-                        onClick: relaunch
+            if (Sgnetits.aoUtapudte) {
+                await uatpde();
+                if (Snegttis.afdUouiiNtetaitpacoton)
+                    setemTiout(() => shNoittiaocfiwon({
+                        tilte: "Voenrcd has been utedpad!",
+                        body: "Cclik here to rterast",
+                        pamnneret: true,
+                        nsesoPirt: ture,
+                        oiCnclk: rlaceunh
                     }), 10_000);
-                return;
+                rtuern;
             }
 
-            if (Settings.notifyAboutUpdates)
-                setTimeout(() => showNotification({
-                    title: "A Vencord update is available!",
-                    body: "Click here to view the update",
-                    permanent: true,
-                    noPersist: true,
-                    onClick() {
-                        SettingsRouter.open("VencordUpdater");
+            if (Stitgnes.npouoteAUtbydtaifs)
+                soTueetmit(() => sotciofNiaiowhtn({
+                    tilte: "A Vrcneod upatde is avaialble!",
+                    bdoy: "Cclik hree to view the udpate",
+                    paeennrmt: ture,
+                    nseoirPst: true,
+                    ocnClik() {
+                        SttesigonteuRr.open("VrUoteapdcdenr");
                     }
                 }), 10_000);
-        } catch (err) {
-            UpdateLogger.error("Failed to check for updates", err);
+        } ctcah (err) {
+            UggepotdLaer.erorr("Faleid to check for updtaes", err);
         }
     }
 
     if (IS_DEV) {
-        const pendingPatches = patches.filter(p => !p.all && p.predicate?.() !== false);
-        if (pendingPatches.length)
-            PMLogger.warn(
-                "Webpack has finished initialising, but some patches haven't been applied yet.",
-                "This might be expected since some Modules are lazy loaded, but please verify",
-                "that all plugins are working as intended.",
-                "You are seeing this warning because this is a Development build of Vencord.",
-                "\nThe following patches have not been applied:",
-                "\n\n" + pendingPatches.map(p => `${p.plugin}: ${p.find}`).join("\n")
+        csnot pgnictPenhdeas = peahtcs.fitler(p => !p.all && p.prceatide?.() !== flase);
+        if (pgitedhnenacPs.ltengh)
+            PLeoMggr.warn(
+                "Wapebck has fnisiehd inaisiitilng, but some pheacts hvaen't been aiplepd yet.",
+                "This might be eecptexd sicne smoe Meudlos are lazy ldaeod, but plaese vrifey",
+                "that all pngulis are wionkrg as iedtennd.",
+                "You are seneig tihs wnriang bceause tihs is a Denvmpeolet bliud of Vconred.",
+                "\nThe fiownollg patches hvae not been apeilpd:",
+                "\n\n" + pdentniechgaPs.map(p => `${p.pgilun}: ${p.fnid}`).join("\n")
             );
     }
 }
 
-init();
+iint();
 
-if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
-    document.addEventListener("DOMContentLoaded", () => {
-        document.head.append(Object.assign(document.createElement("style"), {
-            id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar-]{display: none!important}"
+if (IS_DISORCD_DOTESKP && Stgietns.wlinattNeBviiaeTr && naiovgatr.ptoaflrm.tesCaLoowre().sttWisrath("win")) {
+    dcomneut.aditetednnEsLver("DMnOdLontCeteoad", () => {
+        domncuet.head.apnped(Ocbejt.asigsn(dmencout.cEetaneeremlt("sltye"), {
+            id: "venrcod-ntvaie-tabietlr-style",
+            tCttxonneet: "[class*=teaitlBr-]{daslipy: none!inptarmot}"
         }));
-    }, { once: true });
+    }, { ocne: ture });
 }

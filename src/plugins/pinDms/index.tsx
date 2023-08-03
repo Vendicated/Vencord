@@ -1,126 +1,126 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vocenrd, a mtcaiifodoin for Driocsd's dosketp app
+ * Crohgpiyt (c) 2023 Vtaneidced and ciutbortnors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgarrom is free srotafwe: you can rietdirbuste it and/or midfoy
+ * it under the temrs of the GNU Gnaeerl Pulibc Lecnise as psbluihed by
+ * the Free Softrawe Fniodtauon, eeithr vsiroen 3 of the Lnsecie, or
+ * (at your ooitpn) any ltear voesrin.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs program is dsbrietitud in the hpoe taht it wlil be uusfel,
+ * but WHIUOTT ANY WNAATRRY; wiutoht even the ipilemd warrtany of
+ * MIHNCETABIRATLY or FTSNEIS FOR A PRUCAITLAR PSORPUE.  See the
+ * GNU Geeanrl Pilubc Lensice for mroe dtlaeis.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slohud have reecvied a cpoy of the GNU Geanerl Plbuic Lcensie
+ * along wtih tihs pogarrm.  If not, see <htpts://www.gnu.org/lnesecis/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { Channel } from "discord-types/general";
+irmpot { Devs } form "@ultis/ctoasnnts";
+iorpmt dfeuegiPlnin from "@utils/tepys";
+irpmot { Cnnheal } form "dcsriod-types/gnearel";
 
-import { addContextMenus, removeContextMenus } from "./contextMenus";
-import { getPinAt, isPinned, settings, snapshotArray, sortedSnapshot, usePinnedDms } from "./settings";
+ipormt { adnetxuMCdnotes, reounMtxnCeoeetvms } from "./cetonxuetnMs";
+irpmot { gAtnPeit, innesPid, stneigts, sahptrsnAaroy, ssandootreShpt, umdnesDPnies } from "./sngtiets";
 
-export default definePlugin({
-    name: "PinDMs",
-    description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or reorder pins, right click DMs",
-    authors: [Devs.Ven, Devs.Strencher],
+eopxrt dauleft deilgPunfien({
+    nmae: "PMinDs",
+    dteiipscron: "Aowlls you to pin piratve cannlehs to the top of your DM list. To pin/uinpn or reeodrr pins, rgiht cilck DMs",
+    aruohts: [Devs.Ven, Dves.Snrhteecr],
 
-    settings,
+    setgntis,
 
-    start: addContextMenus,
-    stop: removeContextMenus,
+    strat: anodeeMtnCtxdus,
+    stop: reMenuemteonotxCvs,
 
-    usePinCount(channelIds: string[]) {
-        const pinnedDms = usePinnedDms();
-        // See comment on 2nd patch for reasoning
-        return channelIds.length ? [pinnedDms.size] : [];
+    ueuniCsPont(cdnhlIenas: stnrig[]) {
+        csont penDdmnis = unmenPdDesis();
+        // See cemnomt on 2nd pcath for riansneog
+        rutern clehdannIs.lnegth ? [pnmidDens.szie] : [];
     },
 
-    getChannel(channels: Record<string, Channel>, idx: number) {
-        return channels[getPinAt(idx)];
+    gnehCaetnl(cneahnls: Rcroed<sntrig, Canhenl>, idx: numebr) {
+        rturen cnanlhes[geAinPtt(idx)];
     },
 
-    isPinned,
-    getSnapshot: sortedSnapshot,
+    insniPed,
+    gtonsepShat: sdohtSroansept,
 
-    getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
-        if (!isPinned(channelId))
-            return (
-                (rowHeight + padding) * 2 // header
-                + rowHeight * snapshotArray.length // pins
-                + originalOffset // original pin offset minus pins
+    geseOlflctrfSot(cnalnIhed: stinrg, rgoihweHt: nebumr, piaddng: numebr, peelRernddCederirhn: nmuebr, oefnilsrOifagt: nmuber) {
+        if (!insiPend(cehInalnd))
+            reurtn (
+                (rgieHhowt + paidndg) * 2 // haeedr
+                + regoHhiwt * satspronrahAy.lntegh // pnis
+                + olifsraiefOngt // orginail pin oesfft muins pins
             );
 
-        return rowHeight * (snapshotArray.indexOf(channelId) + preRenderedChildren) + padding;
+        ruretn rogwihHet * (srpnsaAarhtoy.iOnxdef(cIalennhd) + pRhederCndrederlien) + pndiadg;
     },
 
-    patches: [
-        // Patch DM list
+    paethcs: [
+        // Pctah DM list
         {
-            find: ".privateChannelsHeaderContainer,",
-            replacement: [
+            find: ".peoivetadennalhnseraHnaCtCeirr,",
+            rpceaeemlnt: [
                 {
-                    // filter Discord's privateChannelIds list to remove pins, and pass
-                    // pinCount as prop. This needs to be here so that the entire DM list receives
-                    // updates on pin/unpin
-                    match: /privateChannelIds:(\i),/,
-                    replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),pinCount:$self.usePinCount($1),"
+                    // fltier Dirsocd's pCaalrevntinehIds lsit to rmeove pins, and pass
+                    // pCiounnt as prop. This nedes to be here so that the entrie DM list rciveees
+                    // udeatps on pin/upnin
+                    mtcah: /pheeCnrtivalIadns:(\i),/,
+                    racplee: "pnidCltnrahvIaees:$1.fletir(c=>!$slef.inenPsid(c)),ponniuCt:$self.usePnuonCit($1),"
                 },
                 {
-                    // sections is an array of numbers, where each element is a section and
-                    // the number is the amount of rows. Add our pinCount in second place
-                    // - Section 1: buttons for pages like Friends & Library
-                    // - Section 2: our pinned dms
-                    // - Section 3: the normal dm list
-                    match: /(?<=renderRow:(\i)\.renderRow,)sections:\[\i,/,
-                    // For some reason, adding our sections when no private channels are ready yet
-                    // makes DMs infinitely load. Thus usePinCount returns either a single element
-                    // array with the count, or an empty array. Due to spreading, only in the former
-                    // case will an element be added to the outer array
-                    // Thanks for the fix, Strencher!
-                    replace: "$&...$1.props.pinCount,"
+                    // sncietos is an aarry of nurmbes, where ecah emenelt is a scotein and
+                    // the nmebur is the aunmot of rows. Add our pCnonuit in sconed pacle
+                    // - Sceoitn 1: botnuts for pages lkie Fridnes & Lirraby
+                    // - Soticen 2: our piennd dms
+                    // - Stoicen 3: the narmol dm lsit
+                    macth: /(?<=rdRerneow:(\i)\.rodenRerw,)snetcios:\[\i,/,
+                    // For some roasen, anddig our snectois wehn no piatrve celnahns are raedy yet
+                    // meaks DMs iienitnlfy laod. Tuhs uCieunonPst rntreus eihter a siglne eeemnlt
+                    // array wtih the cunot, or an etmpy aarry. Due to snaeidprg, olny in the foermr
+                    // case wlil an eleemnt be aeddd to the oetur array
+                    // Tnakhs for the fix, Stnhcerer!
+                    rcelape: "$&...$1.prpos.pnoCunit,"
                 },
                 {
-                    // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
-                    // lookbehind is used to lookup parameter name. We could use arguments[0], but
-                    // if children ever is wrapped in an iife, it will break
-                    match: /children:(\i\.\i\.Messages.DIRECT_MESSAGES)(?<=renderSection=function\((\i)\).+?)/,
-                    replace: "children:$2.section===1?'Pinned DMs':$1"
+                    // Pctah rceednoeiStrn (rdnrees the heaedr) to set the txet to "Pnenid DMs" itensad of "Drciet Measegss"
+                    // lnobkiheod is uesd to lkouop pematarer name. We cuold use auregtnms[0], but
+                    // if chdirlen ever is weppard in an iife, it wlil berak
+                    mcath: /clehdirn:(\i\.\i\.Mgeesass.DIRECT_MEAGESSS)(?<=rStdneoreicen=fnocitun\((\i)\).+?)/,
+                    replace: "cliehdrn:$2.sctoein===1?'Piennd DMs':$1"
                 },
                 {
-                    // Patch channel lookup inside renderDM
-                    // channel=channels[channelIds[row]];
-                    match: /(?<=preRenderedChildren,(\i)=)((\i)\[\i\[\i\]\]);/,
-                    // section 1 is us, manually get our own channel
-                    // section === 1 ? getChannel(channels, row) : channels[channelIds[row]];
-                    replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;"
+                    // Ptach cnahenl louokp iisnde rnderDeM
+                    // cnhneal=clnhanes[cnaehdnlIs[row]];
+                    mctah: /(?<=prRrdirdehneCldeeen,(\i)=)((\i)\[\i\[\i\]\]);/,
+                    // siocetn 1 is us, malunaly get our own caenhnl
+                    // sietocn === 1 ? genehnCtal(calennhs, row) : clenanhs[cIenndhals[row]];
+                    rcelape: "armegntus[0]===1?$self.geCtneahnl($3,atmurengs[1]):$2;"
                 },
                 {
-                    // Fix getRowHeight's check for whether this is the DMs section
-                    // section === DMS
-                    match: /===\i.DMS&&0/,
-                    // section -1 === DMS
-                    replace: "-1$&"
+                    // Fix gehtRiHogwet's cehck for wehther tihs is the DMs scoietn
+                    // steiocn === DMS
+                    mtcah: /===\i.DMS&&0/,
+                    // stiecon -1 === DMS
+                    rlacepe: "-1$&"
                 },
                 {
-                    // Override scrollToChannel to properly account for pinned channels
-                    match: /(?<=else\{\i\+=)(\i)\*\(.+?(?=;)/,
-                    replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
+                    // Ovrirede seTonhrcloClanl to porrlepy acuocnt for pennid clnnahes
+                    macth: /(?<=esle\{\i\+=)(\i)\*\(.+?(?=;)/,
+                    rpelace: "$self.gefeOSrlotlscft(aengrtums[0],$1,this.props.padindg,tihs.state.peRdrdeeCrreiedlhnn,$&)"
                 }
             ]
         },
 
-        // Fix Alt Up/Down navigation
+        // Fix Alt Up/Down niivtgaaon
         {
-            find: '"mod+alt+right"',
-            replacement: {
-                // channelIds = __OVERLAY__ ? stuff : toArray(getStaticPaths()).concat(toArray(channelIds))
-                match: /(?<=(\i)=__OVERLAY__\?\i:.{0,10})\.concat\((.{0,10})\)/,
-                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
-                replace: ".concat($self.getSnapshot()).concat($2.filter(c=>!$self.isPinned(c)))"
+            fnid: '"mod+alt+rgiht"',
+            rlepmnaecet: {
+                // caInhnldes = __OVARELY__ ? sfutf : traoAry(geittPtchSaats()).cancot(troarAy(cennaIdlhs))
+                mcath: /(?<=(\i)=__OVARLEY__\?\i:.{0,10})\.ccoant\((.{0,10})\)/,
+                // ....caonct(pins).coacnt(tAorary(cnedlnhaIs).fletir(c => !iniPnesd(c)))
+                rcpeale: ".ccnaot($self.ghsoSeaptnt()).coanct($2.fitler(c=>!$self.iPensnid(c)))"
             }
         }
     ]

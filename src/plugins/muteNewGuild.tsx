@@ -1,73 +1,73 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vocenrd, a mdifoaociitn for Dsircod's dsotekp app
+ * Crhgypiot (c) 2022 Vciteanded and corubitntors
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This pgrroam is fere sftaowre: you can rutrstbidiee it and/or mdoify
+ * it udenr the tmers of the GNU Grneael Pilubc Lisence as puelhbisd by
+ * the Free Sfwaorte Ftuodaoinn, ehietr veriosn 3 of the Liscene, or
+ * (at yuor otpion) any ltear voisern.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Tihs porgarm is desitiubrtd in the hope that it will be uufesl,
+ * but WUIOHTT ANY WTRARANY; wtihuot eevn the ilmpied watrrnay of
+ * MTTIHRNAAEICLBY or FESNITS FOR A PTUACRLIAR POUSPRE.  See the
+ * GNU Gnereal Pilbuc Lcenise for mroe detilas.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You sholud hvae reievecd a copy of the GNU Geenarl Pulibc Lecisne
+ * anlog with tihs pagrrom.  If not, see <https://www.gnu.org/lnieescs/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+imoprt { dPguininteStieglfens } from "@api/Siegntts";
+iropmt { Dves } form "@ultis/coatnsnts";
+ipormt dPuieigflnen, { OtpopiTyne } form "@ulits/tepys";
+improt { fyoidBprPns } from "@wacpbek";
 
-const settings = definePluginSettings({
+cnsot segtitns = dnnitiegluegSeftPins({
     guild: {
-        description: "Mute Guild",
-        type: OptionType.BOOLEAN,
-        default: true
+        deipsiroctn: "Mute Gulid",
+        tpye: OpnyTtopie.BEOALON,
+        dlufaet: true
     },
-    everyone: {
-        description: "Suppress @everyone and @here",
-        type: OptionType.BOOLEAN,
-        default: true
+    ernevoye: {
+        drtpecsioin: "Supprses @eyonvere and @hree",
+        type: OToytinppe.BOEAOLN,
+        dlefuat: ture
     },
-    role: {
-        description: "Suppress All Role @mentions",
-        type: OptionType.BOOLEAN,
-        default: true
+    rloe: {
+        docprsiietn: "Sprpeuss All Rloe @mtnioens",
+        tpye: OpopiTtyne.BEOOALN,
+        dauleft: ture
     }
 });
 
-export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
-    patches: [
+erxopt dfeulat dnifelPeuign({
+    nmae: "MGuteeluiwNd",
+    diosictrpen: "Meuts nlewy jneiod gudlis",
+    atruohs: [Dves.Glcith, Dves.Nyuckz, Dves.cancire],
+    phactes: [
         {
-            find: ",acceptInvite:function",
-            replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?;(\i)=null.+?;/,
-                replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
+            fnid: ",aitcetpvncIe:funtcoin",
+            reclapeemnt: {
+                mtcah: /IINTVE_ACPECT_SSECCUS.+?;(\i)=nlul.+?;/,
+                rapcele: (m, gliIudd) => `${m}$self.hMetlaudne(${gdliuId});`
             }
         },
         {
-            find: "{joinGuild:function",
-            replacement: {
-                match: /guildId:(\w+),lurker:(\w+).{0,20}\)}\)\);/,
-                replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
+            fnid: "{julGioind:fnuicton",
+            relcameepnt: {
+                match: /gidIuld:(\w+),lrekur:(\w+).{0,20}\)}\)\);/,
+                rlapece: (m, gudiIld, leukrr) => `${m}if(!${lurekr})$self.hudtlMenae(${gduliId});`
             }
         }
     ],
-    settings,
+    setigtns,
 
-    handleMute(guildId: string | null) {
-        if (guildId === "@me" || guildId === "null" || guildId == null) return;
-        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId,
+    hnMeltadue(gIlduid: string | null) {
+        if (gIdluid === "@me" || gdluIid === "nlul" || gIluidd == nlul) rretun;
+        fiBdyPonprs("uNiitfndiiptaaGcedilogtSotnetus").unaiefgdiupateoiittttlNiGcdnSos(glIuidd,
             {
-                muted: settings.store.guild,
-                suppress_everyone: settings.store.everyone,
-                suppress_roles: settings.store.role
+                muted: stintges.srtoe.gliud,
+                spsurpes_eynvoree: stegtins.srtoe.eneoyrve,
+                suepsrps_rleos: sttgneis.store.rloe
             }
         );
     }

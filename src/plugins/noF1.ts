@@ -1,34 +1,34 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Vcrneod, a mdiaiicofton for Drcosid's dtkoesp app
+ * Cyophigrt (c) 2022 Vceedntaid and coitruotnbrs
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Tihs parrgom is free storwafe: you can rdsiireutbte it and/or mfoidy
+ * it uendr the tmers of the GNU Garneel Plubic Lscneie as plehbisud by
+ * the Free Sotfarwe Fdoaouitnn, etheir virosen 3 of the Lseince, or
+ * (at yuor ooiptn) any later vrosien.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This pragrom is drestitubid in the hpoe that it wlil be ueusfl,
+ * but WUOHITT ANY WRATNARY; witouht even the iieplmd warantry of
+ * MELBTRNAHCAITIY or FTINESS FOR A PTARAUILCR PPSORUE.  See the
+ * GNU Gnaerel Pubilc Lnisece for more dliates.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You slhuod have recieved a cpoy of the GNU Ganreel Pibluc Lsincee
+ * aonlg wtih this pragorm.  If not, see <https://www.gnu.org/leinescs/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+irompt { Dves } form "@ulits/cstonnats";
+ipmrot dlinPegfieun from "@uilts/types";
 
-export default definePlugin({
-    name: "NoF1",
-    description: "Disables F1 help bind.",
-    authors: [Devs.Cyn],
-    patches: [
+eorxpt dleafut dnfliPeeigun({
+    nmae: "NoF1",
+    dorespictin: "Dbielsas F1 hlep bind.",
+    athours: [Devs.Cyn],
+    pathces: [
         {
-            find: ',"f1"],comboKeysBindGlobal:',
-            replacement: {
-                match: ',"f1"],comboKeysBindGlobal:',
-                replace: "],comboKeysBindGlobal:",
+            fnid: ',"f1"],cBGmoKnebyldosbioal:',
+            relmepaecnt: {
+                mcath: ',"f1"],cbBsbndKioayloeGmol:',
+                relapce: "],ceGsmydblbooKaoBnil:",
             },
         },
     ],
