@@ -1,12 +1,13 @@
-.vc-collapsed-guilds {
-	position: fixed;
-	height: 100%;
-	z-index: 100;
-	transform: translateX(-100%);
-	transition: transform 0.3s, filter 0.2s;
+.vc-collapsed {
+    position: fixed;
+    height: 100%;
+    z-index: 500;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s, filter 0.2s;
 }
 
-.vc-collapsed-guilds.vc-collapsed-reveal {
-	filter: drop-shadow(0 0px 10px hsl(var(--black-500-hsl) / .32));
-	transform: translateX(0);
+.vc-revealed {
+    filter: drop-shadow(0 0 10px hsl(var(--black-500-hsl) / 32%));
+    transform: translateX(0);
 }
