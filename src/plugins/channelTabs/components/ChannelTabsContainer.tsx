@@ -39,7 +39,7 @@ const cl = (name: string) => `vc-channeltabs-${name}`;
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState(props.userId);
-    const [waitingForDataStore, setWaiting] = useState(settings.store.onStartup === "remember");
+    const [ready, setReady] = useState(false);
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
     const _update = useForceUpdater();
@@ -49,9 +49,6 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     }, [userId]);
 
     const ref = useRef<HTMLDivElement>(null);
-    // TODO: find a way to not set this every rerender
-    if (ref.current)
-        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
 
     useEffect(() => {
         setUpdaterFunction(update);
@@ -59,8 +56,10 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
             const { id } = UserStore.getCurrentUser();
             if (id === userId && openTabs.length) return;
             setUserId(id);
-            openStartupTabs({ ...props, userId: id }, setWaiting);
+
+            openStartupTabs({ ...props, userId: id }, setReady);
         };
+
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
         document.addEventListener("keydown", handleKeybinds);
         return () => {
@@ -69,9 +68,13 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         };
     }, []);
 
-    if (!userId) return null;
+    useEffect(() => {
+        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current?.clientHeight;
+    }, [ready, showBookmarkBar]);
+
+    if (!ready) return null;
     handleChannelSwitch(props);
-    if (!waitingForDataStore) saveTabs(userId);
+    saveTabs(userId);
 
     return <div
         className={cl("container")}

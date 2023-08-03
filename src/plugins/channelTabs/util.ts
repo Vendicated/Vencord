@@ -284,7 +284,7 @@ function setOpenTab(id: number) {
     openTabHistory.push(id);
 }
 
-function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, setWaiting: (v: boolean) => void) {
+function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, setReady: (v: boolean) => void) {
     const { userId } = props;
     persistedTabs ??= DataStore.get("ChannelTabs_openChannels_v2");
     replaceArray(openTabs);
@@ -296,7 +296,6 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, set
 
     switch (channelTabsSettings.store.onStartup) {
         case "remember": {
-            setWaiting(true);
             persistedTabs.then(tabs => {
                 const t = tabs?.[userId];
                 if (!t) {
@@ -307,9 +306,8 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, set
                 t.openTabs.forEach(tab => createTab(tab));
                 currentlyOpenTab = openTabs[t.openTabIndex]?.id ?? 0;
 
-                setWaiting(false);
+                setReady(true);
                 moveToTab(currentlyOpenTab);
-                update();
             });
             break;
         }
@@ -318,7 +316,11 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, set
             if (!tabs) break;
             tabs.forEach(t => createTab(t));
             setOpenTab(0);
+            setReady(true);
             break;
+        }
+        default: {
+            setReady(true);
         }
     }
 
