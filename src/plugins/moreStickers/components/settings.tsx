@@ -128,6 +128,12 @@ export const Settings = () => {
             {tab === SettingsTabsKey.ADD_STICKER_PACK_URL &&
                 <div className="section">
                     <Forms.FormTitle tag="h5">Add Sticker Pack from URL</Forms.FormTitle>
+                    <Forms.FormText>
+                        <p>
+                            Currently LINE stickers supported only. <br />
+                            Telegram stickers support is planned, but due to the lack of a public API, it is most likely to be provided by sticker pack files instead of adding by URL.
+                        </p>
+                    </Forms.FormText>
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
                         justifyContent: "center"
