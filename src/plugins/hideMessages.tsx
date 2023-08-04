@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/Settings";
 import { MessageInvisible, MessageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { Button, ChannelStore } from "@webpack/common";
 
 let style: HTMLStyleElement;
 
@@ -74,16 +74,20 @@ const settings = definePluginSettings({
         default: true,
         onChange: buildCss
     },
-    showClearHiddenMessagesButton: {
-        type: OptionType.BOOLEAN,
-        description: "Shows a button in the toolbar to clear hidden messages",
-        default: true
-    },
     saveHiddenMessages: {
         type: OptionType.BOOLEAN,
         description: "Persist restarts",
         default: false
-    }
+    },
+    clearHiddenMessages: {
+        type: OptionType.COMPONENT,
+        description: "Clear hidden messages",
+        component: () => (
+            <Button onClick={clearHiddenMessages}>
+                Clear hidden messages
+            </Button>
+        )
+    },
 });
 
 export default definePlugin({
