@@ -174,7 +174,7 @@ function ThemesTab() {
             if (settings.enabledThemes.includes(fileName)) return;
             settings.enabledThemes = [...settings.enabledThemes, fileName];
         } else {
-            settings.enabledThemes = [...settings.enabledThemes.filter(f => f !== fileName)];
+            settings.enabledThemes = settings.enabledThemes.filter(f => f !== fileName);
         }
     }
 
@@ -184,21 +184,20 @@ function ThemesTab() {
         if (!e.currentTarget?.files?.length) return;
         const { files } = e.currentTarget;
 
-        const decoder = new TextDecoder("utf-8");
-
-        const uploads: Array<Promise<void>> = [];
-        for (const file of files) {
+        const uploads = Array.from(files, file => {
             const { name } = file;
-            if (!name.endsWith(".css")) continue;
+            if (!name.endsWith(".css")) return;
 
-            const buffer = await file.arrayBuffer();
-            if (!buffer) continue;
-
-            const text = decoder.decode(buffer);
-            if (!text) continue;
-
-            uploads.push(VencordNative.themes.uploadTheme(name, text));
-        }
+            return new Promise<void>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    VencordNative.themes.uploadTheme(name, reader.result as string)
+                        .then(resolve)
+                        .catch(reject);
+                };
+                reader.readAsText(file);
+            });
+        });
 
         await Promise.all(uploads);
         refreshLocalThemes();
@@ -215,7 +214,7 @@ function ThemesTab() {
                         </Link>
                         <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                     </div>
-                    <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .css file into your themes folder.</Forms.FormText>
+                    <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
