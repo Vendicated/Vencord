@@ -29,9 +29,9 @@ import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
+import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
-import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 mkdirSync(THEMES_DIR, { recursive: true });
