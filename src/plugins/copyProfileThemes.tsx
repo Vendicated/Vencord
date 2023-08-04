@@ -42,11 +42,7 @@ const fetchProfileTheme = async (id, guildId = null) => {
         themeString += `\nGuild Primary: #${guildProfile.themeColors[0].toString(16)} Guild Secondary: #${guildProfile.themeColors[1].toString(16)}`;
     }
 
-    if (themeString === "") {
-        return "No theme colours found...";
-    }
-
-    return themeString;
+    return themeString || "No theme...";
 };
 
 
