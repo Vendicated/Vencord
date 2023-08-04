@@ -41,7 +41,7 @@ interface Props {
     author?: ReactNode;
 }
 
-export function SettingsCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
+export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     return (
         <div
             className={cl("card", { "card-disabled": disabled })}

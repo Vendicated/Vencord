@@ -29,7 +29,7 @@ import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea
 import { UserThemeHeader } from "ipcMain/userThemes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
-import { SettingsCard } from "./SettingsCard";
+import { AddonCard } from "./AddonCard";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -103,7 +103,7 @@ interface ThemeCardProps {
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
     return (
-        <SettingsCard
+        <AddonCard
             name={theme.name}
             description={theme.description}
             author={theme.author}

@@ -23,7 +23,7 @@ import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import { SettingsCard } from "@components/VencordSettings/SettingsCard";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
@@ -150,7 +150,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <SettingsCard
+        <AddonCard
             name={plugin.name}
             description={plugin.description}
             isNew={isNew}
