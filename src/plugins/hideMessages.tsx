@@ -26,7 +26,7 @@ import { Button, ChannelStore } from "@webpack/common";
 
 let style: HTMLStyleElement;
 
-const KEY = "HideMessages_H2s";
+const KEY = "HideMessages_HiddenIds";
 
 let hiddenMessages = new Set<string>();
 const getHiddenMessages = async () => {
@@ -45,8 +45,6 @@ const clearHiddenMessages = () => saveHiddenMessages(new Set<string>());
 function buildCss() {
     const elements = [...hiddenMessages].map(messageKey => {
         const [channel_id, message_id] = JSON.parse(messageKey);
-        console.log(JSON.parse(messageKey));
-        console.log(channel_id, message_id);
         return settings.store.hideEntireMessage ? `#chat-messages-${channel_id}-${message_id}` : `#message-content-${message_id}`;
     }).join(",");
     style.textContent = settings.store.hideEntireMessage ? `
@@ -93,7 +91,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "HideMessages",
     description: "Hide messages via a hover button",
-    authors: [Devs.Ven],
+    authors: [Devs.Ushie],
     dependencies: ["MessagePopoverAPI"],
     settings,
 
