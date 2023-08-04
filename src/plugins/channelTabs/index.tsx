@@ -77,7 +77,6 @@ export default definePlugin({
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                // tried to use lookarounds /\i\.Fragment,{(?<=\?void 0:(\i)\.channelId.{0,120})/ and patch times were consistently >30ms
                 match: /(\?void 0:(\i)\.channelId.{0,120})\i\.Fragment,{/,
                 replace: "$1$self.render,{currentChannel:$2,"
             }

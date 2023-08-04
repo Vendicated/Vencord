@@ -17,14 +17,14 @@
 */
 
 import { Margins } from "@utils/margins.js";
+import { classes } from "@utils/misc.jsx";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, showToast, TextInput, useState } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, TextInput, useState } from "@webpack/common";
 
-import { Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
-import { bookmarkName } from "./BookmarkContainer";
+import { bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 
-const { closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
+const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
 
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
@@ -52,10 +52,10 @@ export function BasicContextMenu() {
     </Menu.Menu>;
 }
 
-function EditModal({ modalProps, originalName, channelId, onSave }) {
-    const [name, setName] = useState(originalName);
-    const channel = ChannelStore.getChannel(channelId);
-    const placeholder = bookmarkName(channel);
+function EditModal({ modalProps, bookmark, onSave }) {
+    const [name, setName] = useState(bookmark.name);
+    const [color, setColor] = useState("bookmarks" in bookmark ? bookmark.iconColor : "should never happen");
+    const placeholder = bookmarkPlaceholderName(bookmark);
 
     return <ModalRoot {...modalProps}>
         <ModalHeader>
@@ -68,9 +68,22 @@ function EditModal({ modalProps, originalName, channelId, onSave }) {
                 placeholder={placeholder}
                 onChange={v => setName(v)}
             />
-            <Button
+            {"bookmarks" in bookmark && <Select
+                options={
+                    Object.entries(bookmarkFolderColors).map(([name, value]) => ({
+                        label: name,
+                        value,
+                        default: bookmark.iconColor === value
+                    }))
+                }
+                isSelected={v => color === v}
+                select={setColor}
+                serialize={String}
                 className={Margins.top16}
-                onClick={() => onSave(name || bookmarkName(channel))}
+            />}
+            <Button
+                className={classes(Margins.top20, Margins.bottom20)}
+                onClick={() => onSave(name || placeholder, color)}
             >Save</Button>
         </ModalContent>
     </ModalRoot>;
@@ -91,13 +104,15 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 id="edit-bookmark"
                 label="Edit Bookmark"
                 action={() => {
-                    if ("bookmarks" in bookmark) return showToast("TODO");
                     const key = openModal(modalProps =>
                         <EditModal
                             modalProps={modalProps}
-                            originalName={bookmark.name}
-                            channelId={bookmark.channelId}
-                            onSave={name => methods.editBookmark(index, { name }, key)}
+                            bookmark={bookmark}
+                            onSave={(name, color) => {
+                                methods.editBookmark(index, { name }, key);
+                                if (color) methods.editBookmark(index, { iconColor: color });
+                            }
+                            }
                         />
                     );
                 }}

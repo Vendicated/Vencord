@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import { closeModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
-import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, useState } from "@webpack/common";
+import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, UserStore, useState } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components/ChannelTabsContainer";
 
@@ -54,24 +54,24 @@ interface BookmarkFolder {
 }
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
-    addBookmark: (bookmark: Bookmark, folderIndex?: number) => void;
+    addBookmark: (bookmark: Omit<Bookmark, "name">, folderIndex?: number) => void;
     addFolder: () => void;
-    editBookmark: (index: number, bookmark: { name: string; }, modalKey?) => void;
+    editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
     deleteBookmark: (index: number) => void;
 }];
 
 const logger = new Logger("ChannelTabs");
 
-const bookmarkFolderColors = [
-    "var(--red-500)",
-    "var(--blue-500)",
-    "var(--yellow-500)",
-    "var(--green-500)",
-    "var(--background-primary)",
-    "var(--white-500)",
-    "var(--orange-500)",
-    "var(--guild-boosting-pink)"
-] as const;
+export const bookmarkFolderColors = {
+    "Red": "var(--red-400)",
+    "Blue": "var(--blue-500)",
+    "Yellow": "var(--yellow-300)",
+    "Green": "var(--green-400)",
+    "Black": "var(--background-primary)",
+    "White": "var(--white-500)",
+    "Orange": "var(--orange-400)",
+    "Pink": "var(--guild-boosting-pink)"
+} as const;
 
 export const channelTabsSettings = definePluginSettings({
     onStartup: {
@@ -135,6 +135,19 @@ let persistedTabs: Promise<PersistedTabs | undefined>;
 let update = (save = true) => {
     logger.warn("Update function not set");
 };
+
+function bookmarkPlaceholderName(bookmark: Omit<Bookmarks[number], "name">) {
+    if ("bookmarks" in bookmark) return "Folder";
+
+    // @ts-ignore
+    const channel = ChannelStore.getChannel(bookmark.channelId);
+    if (!channel) return "Bookmark";
+    if (channel.name) return `#${channel.name}`;
+    // TODO: do group dm's without a name set actually not have a name or is it the particiapnts?
+    if (channel.recipients) return UserStore.getUser(channel.recipients?.[0])?.username
+        ?? "Unknown User";
+    return "Bookmark";
+}
 
 // Takes BasicChannelTabsProps on creation but ChannelTabsProps when restoring existing tabs
 function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true) {
@@ -374,9 +387,10 @@ function useBookmarks(userId: string): UseBookmark {
             if (folderIndex && !("bookmarks" in bookmarks[userId][folderIndex]))
                 return logger.error("Attempted to add bookmark to non-folder " + folderIndex, bookmarks);
 
+            const name = bookmarkPlaceholderName(bookmark);
             if (folderIndex)
-                (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.push(bookmark);
-            else bookmarks[userId].push(bookmark);
+                (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.push({ ...bookmark, name });
+            else bookmarks[userId].push({ ...bookmark, name });
             setBookmarks({
                 ...bookmarks
             });
@@ -385,7 +399,7 @@ function useBookmarks(userId: string): UseBookmark {
             if (!bookmarks) return;
             bookmarks[userId].push({
                 name: "Folder",
-                iconColor: bookmarkFolderColors[4], // var(--background-primary)
+                iconColor: bookmarkFolderColors.Black,
                 bookmarks: []
             });
             setBookmarks({
@@ -393,7 +407,10 @@ function useBookmarks(userId: string): UseBookmark {
             });
         },
         editBookmark(index, newBookmark, modalKey) {
-            bookmarks[userId][index].name = newBookmark.name;
+            if (!bookmarks) return;
+            Object.entries(newBookmark).forEach(([k, v]) => {
+                bookmarks[userId][index][k] = v;
+            });
             setBookmarks({
                 ...bookmarks
             });
@@ -414,7 +431,7 @@ function useBookmarks(userId: string): UseBookmark {
 }
 
 export const ChannelTabsUtils = {
-    closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
+    bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
     handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
     saveTabs, openStartupTabs, setUpdaterFunction, switchChannel, toggleCompactTab, useBookmarks
 };
