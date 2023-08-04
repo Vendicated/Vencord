@@ -31,6 +31,7 @@ import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
+import { makeLinksOpenExternally } from "./utils/externalLinks";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 mkdirSync(THEMES_DIR, { recursive: true });
@@ -143,5 +144,8 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
             sandbox: false
         }
     });
+
+    makeLinksOpenExternally(win);
+
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
 });
