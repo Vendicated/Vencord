@@ -119,6 +119,7 @@ export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonEl
     size?: string;
     /** Button.BorderColors.BLACK */
     borderColor?: string;
+    hover?: string;
 
     wrapperClassName?: string;
     className?: string;
