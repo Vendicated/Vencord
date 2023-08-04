@@ -47,9 +47,14 @@ function buildCss() {
         const [channel_id, message_id] = JSON.parse(messageKey);
         console.log(JSON.parse(messageKey));
         console.log(channel_id, message_id);
-        return settings.store.hideContentOnly ? `#message-content-${message_id}` : `#chat-messages-${channel_id}-${message_id}`;
+        return settings.store.hideEntireMessage ? `#chat-messages-${channel_id}-${message_id}` : `#message-content-${message_id}`;
     }).join(",");
-    style.textContent = settings.store.hideContentOnly ? `
+    style.textContent = settings.store.hideEntireMessage ? `
+    :is(${elements}) {
+        /* important is not necessary, but add it to make sure bad themes won't break it */
+        display: none !important;
+    }
+    ` : `
     :is(${elements}) span, :is(${elements}) code, :is(${elements}) ul  {
         /* important is not necessary, but add it to make sure bad themes won't break it */
         display: none !important;
@@ -59,19 +64,14 @@ function buildCss() {
         color: var(--text-muted);
         font-size: 80%;
     }
-    ` : `
-    :is(${elements}) {
-        /* important is not necessary, but add it to make sure bad themes won't break it */
-        display: none !important;
-    }
     `;
 }
 
 const settings = definePluginSettings({
-    hideContentOnly: {
+    hideEntireMessage: {
         type: OptionType.BOOLEAN,
-        description: "Only hide message content instead of entire message box",
-        default: true,
+        description: "Hide the entire message box instead of just the message content",
+        default: false,
         onChange: buildCss
     },
     saveHiddenMessages: {
