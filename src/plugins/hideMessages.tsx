@@ -42,8 +42,9 @@ const saveHiddenMessages = async (ids: Set<string>) => {
 const clearHiddenMessages = () => saveHiddenMessages(new Set<string>());
 
 
-function buildCss() {
-    const elements = [...hiddenMessages].map(messageKey => {
+async function buildCss() {
+    const ids = await getHiddenMessages();
+    const elements = [...ids].map(messageKey => {
         const [channel_id, message_id] = JSON.parse(messageKey);
         return settings.store.hideEntireMessage ? `#chat-messages-${channel_id}-${message_id}` : `#message-content-${message_id}`;
     }).join(",");
@@ -81,7 +82,10 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Clear hidden messages",
         component: () => (
-            <Button onClick={clearHiddenMessages}>
+            <Button onClick={() => {
+                clearHiddenMessages();
+                buildCss();
+            }}>
                 Clear hidden messages
             </Button>
         )
