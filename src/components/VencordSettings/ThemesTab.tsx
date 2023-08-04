@@ -22,13 +22,13 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
-import { classes, intersperse } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, Text, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
-import type { ComponentType, ReactNode, Ref, SyntheticEvent } from "react";
+import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -102,47 +102,14 @@ interface ThemeCardProps {
 }
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
-    function renderLinks() {
-        const links: ReactNode[] = [];
-
-        if (theme.website) {
-            links.push(<Link href={theme.website}>Website</Link>);
-        }
-
-        if (theme.invite) {
-            links.push(
-                <Link
-                    href={`https://discord.gg/${theme.invite}`}
-                    onClick={async e => {
-                        e.preventDefault();
-                        const { invite } = await InviteActions.resolveInvite(theme.invite, "Desktop Modal");
-                        if (!invite) return showToast("Invalid or expired invite");
-
-                        FluxDispatcher.dispatch({
-                            type: "INVITE_MODAL_OPEN",
-                            invite,
-                            code: theme.invite,
-                            context: "APP"
-                        });
-                    }}
-                >
-                    Discord Server
-                </Link>
-            );
-        }
-
-        // Add commas between links
-        return intersperse(links, <span style={{ whiteSpace: "pre-wrap" }}>{", "}</span>);
-    }
-
-
     return (
         <div className={cl("card")} data-dnd-name={theme.fileName}>
             <Flex flexDirection="row" style={{ justifyContent: "space-between" }}>
                 <div style={{ display: "grid" }}>
                     <Text tag="h2" variant="text-md/bold" className={cl("card-text")}>{theme.name}</Text>
-                    <Text variant="text-sm/medium" className={cl("card-text")}>By {theme.author}</Text>
+                    <Text variant="text-sm/medium" className={cl("card-text", "author")}>{theme.author}</Text>
                 </div>
+
                 <Flex flexDirection="row" style={{ gap: "1em" }}>
                     <Switch checked={enabled} onChange={onChange} />
                     {IS_WEB && (
@@ -152,10 +119,31 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
                     )}
                 </Flex>
             </Flex>
+
             <div style={{ display: "grid" }}>
                 <Text variant="text-sm/normal" className={cl("card-text")}>{theme.description}</Text>
-                <Flex flexDirection="row" style={{ gap: 0 }}>
-                    {renderLinks()}
+                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
+                    {!!theme.website && <Link href={theme.website}>Website</Link>}
+                    {!!(theme.website && theme.invite) && " • "}
+                    {!!theme.invite && (
+                        <Link
+                            href={`https://discord.gg/${theme.invite}`}
+                            onClick={async e => {
+                                e.preventDefault();
+                                const { invite } = await InviteActions.resolveInvite(theme.invite, "Desktop Modal");
+                                if (!invite) return showToast("Invalid or expired invite");
+
+                                FluxDispatcher.dispatch({
+                                    type: "INVITE_MODAL_OPEN",
+                                    invite,
+                                    code: theme.invite,
+                                    context: "APP"
+                                });
+                            }}
+                        >
+                            Discord Server
+                        </Link>
+                    )}
                 </Flex>
             </div>
         </div>
@@ -265,7 +253,13 @@ function ThemesTab() {
                                 onClick={refreshLocalThemes}
                                 size={Button.Sizes.SMALL}
                             >
-                                Refresh Theme List
+                                Load missing Themes
+                            </Button>
+                            <Button
+                                onClick={() => VencordNative.quickCss.openEditor()}
+                                size={Button.Sizes.SMALL}
+                            >
+                                Edit QuickCSS
                             </Button>
                         </>
                     </Card>
@@ -305,36 +299,9 @@ function ThemesTab() {
         return (
             <>
                 <Card className="vc-settings-card vc-text-selectable">
-                    <Forms.FormTitle tag="h5">Paste links to .theme.css files here</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
-                    <Forms.FormText>Make sure to use the raw links or github.io links!</Forms.FormText>
-                    <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
-                    <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                    <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
-                        <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
-                            BetterDiscord Themes
-                        </Link>
-                        <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
-                    </div>
-                    <Forms.FormText>If using the BD site, click on "Source" somewhere below the Download button</Forms.FormText>
-                    <Forms.FormText>In the GitHub repository of your theme, find X.theme.css, click on it, then click the "Raw" button</Forms.FormText>
-                    <Forms.FormText>
-                        If the theme has configuration that requires you to edit the file:
-                        <ul>
-                            <li>• Make a <Link href="https://github.com/signup">GitHub</Link> account</li>
-                            <li>• Click the fork button on the top right</li>
-                            <li>• Edit the file</li>
-                            <li>• Use the link to your own repository instead</li>
-                            <li>OR</li>
-                            <li>• Paste the contents of the edited theme file into the QuickCSS editor</li>
-                        </ul>
-                        <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom16} />
-                        <Button
-                            onClick={() => VencordNative.quickCss.openEditor()}
-                            size={Button.Sizes.SMALL}>
-                            Open QuickCSS File
-                        </Button>
-                    </Forms.FormText>
+                    <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
                 </Card>
 
                 <Forms.FormSection title="Online Themes" tag="h5">
