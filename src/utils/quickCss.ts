@@ -66,10 +66,11 @@ async function initThemes() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initThemes();
+
     toggle(Settings.useQuickCss);
     addSettingsListener("useQuickCss", toggle);
 
-    initThemes();
     addSettingsListener("themeLinks", initThemes);
     addSettingsListener("enabledThemes", initThemes);
 
