@@ -23,7 +23,7 @@ import monacoHtml from "~fileContent/../src/components/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { getTheme, Theme } from "../src/utils/discord";
-import { getThemeInfo } from "../src/ipcMain/userThemes";
+import { getThemeInfo } from "../src/main/themes";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -70,6 +70,7 @@ window.VencordNative = {
         addChangeListener(cb) {
             cssListeners.add(cb);
         },
+        addThemeChangeListener: NOOP,
         openFile: NOOP_ASYNC,
         async openEditor() {
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
@@ -94,5 +95,7 @@ window.VencordNative = {
         get: () => localStorage.getItem("VencordSettings") || "{}",
         set: async (s: string) => localStorage.setItem("VencordSettings", s),
         getSettingsDir: async () => "LocalStorage"
-    }
+    },
+
+    pluginHelpers: {} as any,
 };
