@@ -37,7 +37,7 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
                     cb({ statusCode: 403 });
                     return;
                 }
-                cb(safeUrl);
+                cb(safeUrl.replace(/\?v=\d+$/, ""));
                 return;
             }
             switch (url) {

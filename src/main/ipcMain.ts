@@ -62,6 +62,7 @@ async function listThemes(): Promise<UserThemeHeader[]> {
 }
 
 function getThemeData(fileName: string) {
+    fileName = fileName.replace(/\?v=\d+$/, "");
     const safePath = ensureSafePath(THEMES_DIR, fileName);
     if (!safePath) return Promise.reject(`Unsafe path ${fileName}`);
     return readFile(safePath, "utf-8");
