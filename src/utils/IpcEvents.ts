@@ -18,6 +18,7 @@
 
 export const enum IpcEvents {
     QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
+    THEME_UPDATE = "VencordThemeUpdate",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
     UPLOAD_THEME = "VencordUploadTheme",

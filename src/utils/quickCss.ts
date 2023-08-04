@@ -72,4 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initThemes();
     addSettingsListener("themeLinks", initThemes);
     addSettingsListener("enabledThemes", initThemes);
+
+    if (!IS_WEB)
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
 });

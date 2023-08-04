@@ -29,7 +29,7 @@ import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { getThemeInfo, stripBOM, UserThemeHeader } from "../ipcMain/userThemes";
+import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
@@ -124,6 +124,10 @@ export function initIpc(mainWindow: BrowserWindow) {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
     });
+
+    watch(THEMES_DIR, { persistent: false }, debounce(() => {
+        mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
+    }));
 }
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {

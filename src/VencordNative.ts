@@ -19,7 +19,7 @@
 import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
-import type { UserThemeHeader } from "ipcMain/userThemes";
+import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
@@ -57,6 +57,10 @@ export default {
 
         addChangeListener(cb: (newCss: string) => void) {
             ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => cb(css));
+        },
+
+        addThemeChangeListener(cb: () => void) {
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, cb);
         },
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
