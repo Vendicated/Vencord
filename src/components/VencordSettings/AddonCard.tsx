@@ -24,7 +24,7 @@ import { Switch } from "@components/Switch";
 import { Text } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
-const cl = classNameFactory("vc-settings-addon-");
+const cl = classNameFactory("vc-addon-");
 
 interface Props {
     name: ReactNode;

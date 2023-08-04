@@ -1,4 +1,4 @@
-.vc-settings-addon-card {
+.vc-addon-card {
     background-color: var(--background-secondary-alt);
     color: var(--interactive-active);
     border-radius: 8px;
@@ -10,17 +10,17 @@
     transition-property: box-shadow, transform, background, opacity;
 }
 
-.vc-settings-addon-card-disabled {
+.vc-addon-card-disabled {
     opacity: 0.6;
 }
 
-.vc-settings-addon-card:hover {
+.vc-addon-card:hover {
     background-color: var(--background-tertiary);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
 
-.vc-settings-addon-header {
+.vc-addon-header {
     margin-top: auto;
     display: flex;
     width: 100%;
@@ -30,7 +30,7 @@
     margin-bottom: 0.5em;
 }
 
-.vc-settings-addon-note {
+.vc-addon-note {
     height: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -42,11 +42,11 @@
     box-orient: vertical;
 }
 
-.vc-settings-addon-name-author {
+.vc-addon-name-author {
     width: 100%;
 }
 
-.vc-settings-addon-name {
+.vc-addon-name {
     display: flex;
     width: 100%;
     align-items: center;
@@ -54,10 +54,10 @@
     gap: 8px;
 }
 
-.vc-settings-addon-author {
+.vc-addon-author {
     font-size: 0.8em;
 }
 
-.vc-settings-addon-author::before {
+.vc-addon-author::before {
     content: "by ";
 }
