@@ -39,6 +39,9 @@ const saveHiddenMessages = async (ids: Set<string>) => {
     await set(KEY, ids);
 };
 
+const clearHiddenMessages = () => saveHiddenMessages(new Set<string>());
+
+
 function buildCss() {
     const elements = [...hiddenMessages].map(messageKey => {
         const [channel_id, message_id] = JSON.parse(messageKey);
@@ -92,7 +95,7 @@ export default definePlugin({
 
     async start() {
         if (!settings.store.saveHiddenMessages)
-            hiddenMessages.clear();
+            clearHiddenMessages();
         style = document.createElement("style");
         style.id = "VencordHideMessages";
         document.head.appendChild(style);
@@ -118,7 +121,7 @@ export default definePlugin({
     stop() {
         style.remove();
         if (!settings.store.saveHiddenMessages)
-            hiddenMessages.clear();
+            clearHiddenMessages();
         removeButton("HideMessages");
     },
 
