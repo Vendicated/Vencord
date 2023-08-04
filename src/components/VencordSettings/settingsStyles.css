@@ -1,6 +1,6 @@
 .vc-settings-tab-bar {
     margin-top: 20px;
-    margin-bottom: -2px;
+    margin-bottom: 10px;
     border-bottom: 2px solid var(--background-modifier-accent);
 }
 
@@ -43,6 +43,7 @@
     color: var(--text-normal) !important;
     padding: 0.5em;
     border: 1px solid var(--background-modifier-accent);
+    max-height: unset;
 }
 
 .vc-cloud-settings-sync-grid {

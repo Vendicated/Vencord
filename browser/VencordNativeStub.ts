@@ -23,6 +23,7 @@ import monacoHtml from "~fileContent/../src/components/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { getTheme, Theme } from "../src/utils/discord";
+import { getThemeInfo } from "../src/main/themes";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -34,8 +35,20 @@ const NOOP_ASYNC = async () => { };
 
 const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
+const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
+
 // probably should make this less cursed at some point
 window.VencordNative = {
+    themes: {
+        uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
+        deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
+        getThemesDir: async () => "",
+        getThemesList: () => DataStore.entries(themeStore).then(entries =>
+            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
+        ),
+        getThemeData: (fileName: string) => DataStore.get(fileName, themeStore)
+    },
+
     native: {
         getVersions: () => ({}),
         openExternal: async (url) => void open(url, "_blank")
@@ -57,6 +70,7 @@ window.VencordNative = {
         addChangeListener(cb) {
             cssListeners.add(cb);
         },
+        addThemeChangeListener: NOOP,
         openFile: NOOP_ASYNC,
         async openEditor() {
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
@@ -81,5 +95,7 @@ window.VencordNative = {
         get: () => localStorage.getItem("VencordSettings") || "{}",
         set: async (s: string) => localStorage.setItem("VencordSettings", s),
         getSettingsDir: async () => "LocalStorage"
-    }
+    },
+
+    pluginHelpers: {} as any,
 };

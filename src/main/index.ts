@@ -19,8 +19,8 @@
 import { app, protocol, session } from "electron";
 import { join } from "path";
 
-import { getSettings } from "./ipcMain";
-import { IS_VANILLA } from "./utils/constants";
+import { ensureSafePath, getSettings } from "./ipcMain";
+import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
 if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
@@ -30,6 +30,16 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
         protocol.registerFileProtocol("vencord", ({ url: unsafeUrl }, cb) => {
             let url = unsafeUrl.slice("vencord://".length);
             if (url.endsWith("/")) url = url.slice(0, -1);
+            if (url.startsWith("/themes/")) {
+                const theme = url.slice("/themes/".length);
+                const safeUrl = ensureSafePath(THEMES_DIR, theme);
+                if (!safeUrl) {
+                    cb({ statusCode: 403 });
+                    return;
+                }
+                cb(safeUrl.replace(/\?v=\d+$/, ""));
+                return;
+            }
             switch (url) {
                 case "renderer.js.map":
                 case "vencordDesktopRenderer.js.map":
@@ -75,7 +85,7 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
                 const csp = parsePolicy(headers[header][0]);
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                    csp[directive] = ["*", "blob:", "data:", "'unsafe-inline'"];
+                    csp[directive] = ["*", "blob:", "data:", "vencord:", "'unsafe-inline'"];
                 }
                 // TODO: Restrict this to only imported packages with fixed version.
                 // Perhaps auto generate with esbuild
