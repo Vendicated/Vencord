@@ -20,16 +20,16 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, Text, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "ipcMain/userThemes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
+import { SettingsCard } from "./SettingsCard";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -103,25 +103,20 @@ interface ThemeCardProps {
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
     return (
-        <div className={cl("card")} data-dnd-name={theme.fileName}>
-            <Flex flexDirection="row" style={{ justifyContent: "space-between" }}>
-                <div style={{ display: "grid" }}>
-                    <Text tag="h2" variant="text-md/bold" className={cl("card-text")}>{theme.name}</Text>
-                    <Text variant="text-sm/medium" className={cl("card-text", "author")}>{theme.author}</Text>
-                </div>
-
-                <Flex flexDirection="row" style={{ gap: "1em" }}>
-                    <Switch checked={enabled} onChange={onChange} />
-                    {IS_WEB && (
-                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
-                            <TrashIcon />
-                        </div>
-                    )}
-                </Flex>
-            </Flex>
-
-            <div style={{ display: "grid" }}>
-                <Text variant="text-sm/normal" className={cl("card-text")}>{theme.description}</Text>
+        <SettingsCard
+            name={theme.name}
+            description={theme.description}
+            author={theme.author}
+            enabled={enabled}
+            setEnabled={onChange}
+            infoButton={
+                IS_WEB && (
+                    <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
+                        <TrashIcon />
+                    </div>
+                )
+            }
+            footer={
                 <Flex flexDirection="row" style={{ gap: "0.2em" }}>
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && " • "}
@@ -145,8 +140,8 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
                         </Link>
                     )}
                 </Flex>
-            </div>
-        </div>
+            }
+        />
     );
 }
 
