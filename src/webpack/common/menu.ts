@@ -16,32 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/proxyLazy";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModule, mapMangledModuleLazy } from "../webpack";
+import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/menu";
 
-export const Menu: t.Menu = proxyLazy(() => {
-    const hasDeobfuscator = Vencord.Settings.plugins.MenuItemDeobfuscatorAPI.enabled;
-    const menuItems = ["MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem", "MenuRadioItem", "MenuControlItem"];
+export let Menu = {} as t.Menu;
 
-    const map = mapMangledModule("♫ ⊂(｡◕‿‿◕｡⊂) ♪", {
-        ContextMenu: filters.byCode("getContainerProps"),
-        ...Object.fromEntries((hasDeobfuscator ? menuItems : []).map(s => [s, (m: any) => m.name === s]))
-    }) as t.Menu;
-
-    if (!hasDeobfuscator) {
-        for (const m of menuItems)
-            Object.defineProperty(map, m, {
-                get() {
-                    throw new Error("MenuItemDeobfuscator must be enabled to use this.");
-                }
-            });
-    }
-
-    return map;
-});
+waitFor("MenuItem", m => Menu = m);
 
 export const ContextMenu: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
     open: filters.byCode("stopPropagation"),

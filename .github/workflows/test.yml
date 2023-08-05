@@ -15,7 +15,7 @@ jobs:
             - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 18
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
               with:
                   node-version: 18
                   cache: "pnpm"
@@ -26,5 +26,8 @@ jobs:
             - name: Lint & Test if desktop version compiles
               run: pnpm test
 
-            - name: Lint & Test if web version compiles
-              run: pnpm testWeb
+            - name: Test if web version compiles
+              run: pnpm buildWeb
+
+            - name: Test if plugin structure is valid
+              run: pnpm generatePluginJson

@@ -104,6 +104,6 @@ export default definePlugin({
 
     stop() {
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null }); // clear status
-        ws.close(); // close WebSocket
+        ws?.close(); // close WebSocket
     }
 });

@@ -1,5 +1,4 @@
 .shc-lock-screen-outer-container {
-    background-color: var(--background-primary);
     overflow: hidden scroll;
     flex: 1 1 auto;
     height: 100%;
@@ -34,21 +33,20 @@
     margin: inherit;
 }
 
-.shc-lock-screen-heading-nsfw-icon > path {
-    fill: var(--text-normal);
-    fill-rule: evenodd;
+.shc-lock-screen-heading-nsfw-icon {
+    color: var(--text-normal);
 }
 
 .shc-lock-screen-topic-container {
     color: var(--text-normal);
-    background-color: var(--background-secondary);
+    background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
 }
 
 .shc-lock-screen-tags-container {
-    background-color: var(--background-secondary);
+    background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
@@ -84,9 +82,9 @@
 }
 
 .shc-lock-screen-default-emoji-container > [class^="emojiContainer"] {
-    background-color: var(--background-secondary);
+    background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 8px;
-    padding: 3px 4px;
+    padding: 5px 6px;
     margin-left: 5px;
 }
 
@@ -94,13 +92,44 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: var(--background-secondary);
+    background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
     padding: 10px;
     max-width: 70vw;
 }
 
+.shc-lock-screen-allowed-users-and-roles-container-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn {
+    all: unset;
+    margin-left: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-toggle-btn > svg {
+    color: var(--text-normal);
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn {
+    all: unset;
+    margin-right: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn > svg {
+    color: var(--text-normal);
+}
+
 .shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
     margin-left: 10px;
     flex-wrap: wrap;
+    justify-content: center;
 }

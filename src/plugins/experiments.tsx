@@ -16,8 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
@@ -72,7 +75,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser().id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
                 },
                 {
                     match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
@@ -86,6 +89,13 @@ export default definePlugin({
             replacement: {
                 match: /"staging"===window\.GLOBAL_ENV\.RELEASE_CHANNEL/,
                 replace: "true"
+            }
+        },
+        {
+            find: 'H1,title:"Experiments"',
+            replacement: {
+                match: 'title:"Experiments",children:[',
+                replace: "$&$self.WarningCard(),"
             }
         }
     ],
@@ -109,5 +119,19 @@ export default definePlugin({
                 </Forms.FormText>
             </React.Fragment>
         );
-    }
+    },
+
+    WarningCard: ErrorBoundary.wrap(() => (
+        <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
+            <Forms.FormTitle tag="h2">Hold on!!</Forms.FormTitle>
+
+            <Forms.FormText>
+                Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.
+            </Forms.FormText>
+
+            <Forms.FormText className={Margins.top8}>
+                Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
+            </Forms.FormText>
+        </ErrorCard>
+    ), { noop: true })
 });

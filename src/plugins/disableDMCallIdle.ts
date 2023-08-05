@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "DisableDMCallIdle",
-    description: "Disables automatically getting kicked from a DM voice call after 5 minutes.",
+    description: "Disables automatically getting kicked from a DM voice call after 3 minutes.",
     authors: [Devs.Nuckyz],
     patches: [
         {

@@ -16,12 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "../suppressExperimentalWarnings.js";
+import "../checkNodeVersion.js";
+
 import { exec, execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
+// wtf is this assert syntax
+import PackageJSON from "../../package.json" assert { type: "json" };
+
+export const VERSION = PackageJSON.version;
+export const BUILD_TIMESTAMP = Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
@@ -48,9 +56,9 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {import("esbuild").Plugin}
+ * @type {(kind: "web" | "discordDesktop" | "vencordDesktop") => import("esbuild").Plugin}
  */
-export const globPlugins = {
+export const globPlugins = kind => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
@@ -62,7 +70,7 @@ export const globPlugins = {
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
             let code = "";
             let plugins = "\n";
             let i = 0;
@@ -70,14 +78,17 @@ export const globPlugins = {
                 if (!existsSync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
-                    if (file.startsWith(".")) continue;
+                    if (file.startsWith("_") || file.startsWith(".")) continue;
                     if (file === "index.ts") continue;
+
                     const fileBits = file.split(".");
                     if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1))) {
                         const mod = fileBits.at(-2);
                         if (mod === "dev" && !watch) continue;
-                        if (mod === "web" && !isWeb) continue;
-                        if (mod === "desktop" && isWeb) continue;
+                        if (mod === "web" && kind === "discordDesktop") continue;
+                        if (mod === "desktop" && kind === "web") continue;
+                        if (mod === "discordDesktop" && kind !== "discordDesktop") continue;
+                        if (mod === "vencordDesktop" && kind !== "vencordDesktop") continue;
                     }
 
                     const mod = `p${i}`;
@@ -93,7 +104,7 @@ export const globPlugins = {
             };
         });
     }
-};
+});
 
 /**
  * @type {import("esbuild").Plugin}
@@ -193,7 +204,7 @@ export const commonOpts = {
     legalComments: "linked",
     banner,
     plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote"],
+    external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",

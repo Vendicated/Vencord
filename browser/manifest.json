@@ -21,7 +21,8 @@
         {
             "run_at": "document_start",
             "matches": ["*://*.discord.com/*"],
-            "js": ["content.js"]
+            "js": ["content.js"],
+            "all_frames": true
         }
     ],
 
@@ -40,12 +41,5 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
-    },
-
-    "browser_specific_settings": {
-        "gecko": {
-            "id": "vencord-firefox@vendicated.dev",
-            "strict_min_version": "109.0"
-        }
     }
 }

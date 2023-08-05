@@ -1,0 +1,17 @@
+.vc-bf-folder-sidebar [class*="wrapper-"] > [class*="listItem-"]:first-of-type,
+.vc-bf-folder-sidebar [class*="unreadMentionsIndicator"] {
+    display: none;
+}
+
+.vc-bf-folder-sidebar [class*="expandedFolderBackground-"] {
+    background-color: transparent;
+}
+
+.vc-bf-folder-sidebar {
+    display: flex;
+}
+
+.vc-bf-fullscreen {
+    width: 0 !important;
+    visibility: hidden;
+}

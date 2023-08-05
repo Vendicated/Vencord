@@ -62,7 +62,7 @@
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "arrow-parens": ["error", "as-needed"],
         "eol-last": ["error", "always"],
-        "func-call-spacing": ["error", "never"],
+        "@typescript-eslint/func-call-spacing": ["error", "never"],
         "no-multi-spaces": "error",
         "no-trailing-spaces": "error",
         "no-whitespace-before-property": "error",

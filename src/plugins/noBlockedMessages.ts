@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -37,16 +37,19 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: "displayName=\"MessageStore\"",
+        ...[
+            'displayName="MessageStore"',
+            'displayName="ReadStateStore"'
+        ].map(find => ({
+            find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=MESSAGE_CREATE:function\((\w)\){var \w=\w\.channelId,\w=\w\.message,\w=\w\.isPushNotification,\w=\w\.\w\.getOrCreate\(\w\));/,
-                    replace: ";if($self.isBlocked(n))return;"
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
-        }
+        }))
     ],
     options: {
         ignoreBlockedMessages: {

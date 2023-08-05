@@ -17,11 +17,12 @@
 */
 
 import { addAccessory } from "@api/MessageAccessories";
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
-import { classes, LazyComponent } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findByCode, findByPropsLazy } from "@webpack";
 import {
@@ -51,7 +52,7 @@ const SearchResultClasses = findByPropsLazy("message", "searchResult");
 let AutoModEmbed: React.ComponentType<any> = () => null;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
-const tenorRegex = /https:\/\/(?:www.)?tenor\.com/;
+const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
 interface Attachment {
     height: number;
@@ -91,6 +92,26 @@ const settings = definePluginSettings({
                 default: true
             }
         ]
+    },
+    listMode: {
+        description: "Whether to use ID list as blacklist or whitelist",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Blacklist",
+                value: "blacklist",
+                default: true
+            },
+            {
+                label: "Whitelist",
+                value: "whitelist"
+            }
+        ]
+    },
+    idList: {
+        description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
+        type: OptionType.STRING,
+        default: ""
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
@@ -216,6 +237,13 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             continue;
         }
 
+        const { listMode, idList } = settings.store;
+
+        const isListed = [guildID, channelID, message.author.id].some(id => id && idList.includes(id));
+
+        if (listMode === "blacklist" && isListed) continue;
+        if (listMode === "whitelist" && !isListed) continue;
+
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
             linkedMessage ??= MessageStore.getMessage(channelID, messageID);
@@ -224,6 +252,8 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             } else {
                 const msg = { ...message } as any;
                 delete msg.embeds;
+                delete msg.interaction;
+
                 messageFetchQueue.push(() => fetchMessage(channelID, messageID)
                     .then(m => m && FluxDispatcher.dispatch({
                         type: "MESSAGE_UPDATE",
@@ -264,7 +294,7 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
             color: "var(--background-secondary)",
             author: {
                 name: <Text variant="text-xs/medium" tag="span">
-                    <span>{isDM ? "Direct Message - " : (guild as Guild).name + " - "}</span>,
+                    <span>{isDM ? "Direct Message - " : (guild as Guild).name + " - "}</span>
                     {isDM
                         ? Parser.parse(`<@${dmReceiver.id}>`)
                         : Parser.parse(`<#${channel.id}>`)
@@ -302,7 +332,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 {isDM
                     ? parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
                     : parse(`<#${channel.id}>`)
-                },
+                }
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
@@ -332,7 +362,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
-    authors: [Devs.TheSun, Devs.Ven],
+    authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
         {
@@ -360,7 +390,9 @@ export default definePlugin({
 
             return (
                 <ErrorBoundary>
-                    <MessageEmbedAccessory message={props.message} />
+                    <MessageEmbedAccessory
+                        message={props.message}
+                    />
                 </ErrorBoundary>
             );
         }, 4 /* just above rich embeds */);

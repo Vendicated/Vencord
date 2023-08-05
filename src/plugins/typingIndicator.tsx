@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
+import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "./typingTweaks";
 
@@ -57,9 +57,9 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         if (isChannelMuted) return null;
     }
 
-    delete typingUsers[UserStore.getCurrentUser().id];
+    const myId = UserStore.getCurrentUser()?.id;
 
-    const typingUsersArray = Object.keys(typingUsers);
+    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
@@ -89,7 +89,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             <Tooltip text={tooltipText!}>
                 {({ onMouseLeave, onMouseEnter }) => (
                     <div
-                        style={{ marginLeft: 6, zIndex: 0, cursor: "pointer" }}
+                        style={{ marginLeft: 6, height: 16, display: "flex", alignItems: "center", zIndex: 0, cursor: "pointer" }}
                         onMouseLeave={onMouseLeave}
                         onMouseEnter={onMouseEnter}
                     >
@@ -108,13 +108,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
         default: false
+    },
+    includeBlockedUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for blocked users.",
+        default: false
     }
 });
 
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.obscurity],
     settings,
 
     patches: [

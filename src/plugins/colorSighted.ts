@@ -27,10 +27,15 @@ export default definePlugin({
         {
             find: "Masks.STATUS_ONLINE",
             replacement: {
-                // we can use global replacement here - these are specific to the status icons and are used nowhere else,
-                // so it keeps the patch and plugin small and simple
                 match: /Masks\.STATUS_(?:IDLE|DND|STREAMING|OFFLINE)/g,
                 replace: "Masks.STATUS_ONLINE"
+            }
+        },
+        {
+            find: ".AVATAR_STATUS_MOBILE_16;",
+            replacement: {
+                match: /(\.fromIsMobile,.+?)\i.status/,
+                replace: (_, rest) => `${rest}"online"`
             }
         }
     ]
