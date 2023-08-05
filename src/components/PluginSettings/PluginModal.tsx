@@ -36,11 +36,11 @@ import {
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
+    SettingListComponent,
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
-    SettingTextComponent,
-    SettingListComponent
+    SettingTextComponent
 } from "./components";
 import hideBotTagStyle from "./userPopoutHideBotTag.css?managed";
 
