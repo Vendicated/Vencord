@@ -21,8 +21,8 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { NavigationRouter } from "@webpack/common";
-import { Settings } from "Vencord";
 import { Message } from "discord-types/general";
+import { Settings } from "Vencord";
 const Kangaroo = findByPropsLazy("jumpToMessage");
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -62,11 +62,11 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (!message.content) return;
-            let keywordarray = Settings.plugins.keywordPinger.keywords.replaceall(" ", "").toLowerCase().split(",");
+            const keywordarray = Settings.plugins.keywordPinger.keywords.replaceall(" ", "").toLowerCase().split(",");
             for (let i = 0; i < keywordarray.length; i++) {
                 const element = keywordarray[i];
                 if (message.content.toLowerCase().match(new RegExp("\\b" + element + "\\b"))) {
-                    let messageId = message.id;
+                    const messageId = message.id;
                     showNotification({
                         title: `someone said ${element}`,
                         body: `Click here to view the ${element}`,
