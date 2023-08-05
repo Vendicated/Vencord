@@ -33,6 +33,13 @@ export interface FluxDispatcher {
     wait(callback: () => void): void;
 }
 
+interface ASTNode {
+    content: string | ASTNode[];
+    type: string;
+}
+type MarkdownRules = Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>;
+type ReactParser = (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[];
+type ASTParser = (content: string, inline?: boolean, state?: Record<string, any>) => ASTNode[];
 export type Parser = Record<
     | "parse"
     | "parseTopic"
@@ -43,8 +50,13 @@ export type Parser = Record<
     | "parseAutoModerationSystemMessage"
     | "parseForumPostGuidelines"
     | "parseForumPostMostRecentMessage",
-    (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
-> & Record<"defaultRules" | "guildEventRules", Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>>;
+    ReactParser
+> & Record<"defaultRules" | "guildEventRules", MarkdownRules>
+& Record<"defaultReactRuleOptions", Record<"enableBuildOverrides", false>>
+& Record<"reactParserFor", (rules: MarkdownRules) => ReactParser>
+& Record<"astParserFor", (rules: MarkdownRules) => ASTParser>
+& Record<"createReactRules", (options: Record<string, any>) => Record<string, Record<"react", () => ReactNode[]>>>
+& Record<"combineAndInjectMentionRule", (rules: MarkdownRules, options: Record<string, any>[]) => MarkdownRules>;
 
 export interface Alerts {
     show(alert: {

@@ -20,6 +20,7 @@ import * as $Badges from "./Badges";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
+import * as $Markdown from "./Markdown";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -97,15 +98,17 @@ export const Settings = $Settings;
 export const SettingsStore = $SettingsStore;
 /**
  * An API allowing you to dynamically load styles
- * a
  */
 export const Styles = $Styles;
 /**
  * An API allowing you to display notifications
  */
 export const Notifications = $Notifications;
-
 /**
- * An api allowing you to patch and add/remove items to/from context menus
+ * An API allowing you to patch and add/remove items to/from context menus
  */
 export const ContextMenu = $ContextMenu;
+/**
+ * An API allowing you to add markdown rules
+ */
+export const Markdown = $Markdown;
