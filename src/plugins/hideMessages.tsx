@@ -41,7 +41,6 @@ const saveHiddenMessages = async (ids: Set<string>) => {
 
 const clearHiddenMessages = () => saveHiddenMessages(new Set<string>());
 
-
 async function buildCss() {
     const ids = await getHiddenMessages();
     const elements = [...ids].map(messageKey => {
@@ -110,6 +109,8 @@ export default definePlugin({
         buildCss();
 
         addButton("HideMessages", msg => {
+            if (!msg.content.length && !settings.store.hideEntireMessage) return null;
+
             const message = [msg.channel_id, msg.id];
             const messageKey = JSON.stringify(message);
             const isHidden = hiddenMessages.has(messageKey);
