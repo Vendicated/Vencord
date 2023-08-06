@@ -66,7 +66,7 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
 
     const ref = useRef<HTMLDivElement>(null);
     const [, drag] = useDrag(() => ({
-        type: "vc_ChannelTab",
+        type: "vc_Bookmark",
         item: () => {
             return { index };
         },
@@ -75,7 +75,7 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
         }),
     }));
     const [, drop] = useDrop(() => ({
-        accept: "vc_ChannelTab",
+        accept: "vc_Bookmark",
         hover: item => {
             if (!ref.current) return;
 
