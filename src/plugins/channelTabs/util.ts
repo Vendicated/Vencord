@@ -19,7 +19,6 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { closeModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
 import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, UserStore, useState } from "@webpack/common";
@@ -42,12 +41,12 @@ interface PersistedTabs {
     };
 }
 
-interface Bookmark {
+export interface Bookmark {
     channelId: string;
     guildId: string;
     name: string;
 }
-interface BookmarkFolder {
+export interface BookmarkFolder {
     bookmarks: Bookmark[];
     name: string;
     iconColor: string;
@@ -55,9 +54,9 @@ interface BookmarkFolder {
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
     addBookmark: (bookmark: Omit<Bookmark, "name">, folderIndex?: number) => void;
-    addFolder: () => void;
+    addFolder: () => number;
     editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
-    deleteBookmark: (index: number) => void;
+    deleteBookmark: (index: number, folderIndex?: number) => void;
 }];
 
 const logger = new Logger("ChannelTabs");
@@ -136,7 +135,7 @@ let update = (save = true) => {
     logger.warn("Update function not set");
 };
 
-function bookmarkPlaceholderName(bookmark: Omit<Bookmarks[number], "name">) {
+function bookmarkPlaceholderName(bookmark: Omit<Bookmark | BookmarkFolder, "name">) {
     if ("bookmarks" in bookmark) return "Folder";
 
     // @ts-ignore
@@ -384,11 +383,11 @@ function useBookmarks(userId: string): UseBookmark {
         addBookmark: (bookmark, folderIndex) => {
             if (!bookmarks) return;
 
-            if (folderIndex && !("bookmarks" in bookmarks[userId][folderIndex]))
+            if (typeof folderIndex === "number" && !("bookmarks" in bookmarks[userId][folderIndex]))
                 return logger.error("Attempted to add bookmark to non-folder " + folderIndex, bookmarks);
 
             const name = bookmarkPlaceholderName(bookmark);
-            if (folderIndex)
+            if (typeof folderIndex === "number")
                 (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.push({ ...bookmark, name });
             else bookmarks[userId].push({ ...bookmark, name });
             setBookmarks({
@@ -397,7 +396,7 @@ function useBookmarks(userId: string): UseBookmark {
         },
         addFolder() {
             if (!bookmarks) return;
-            bookmarks[userId].push({
+            const length = bookmarks[userId].push({
                 name: "Folder",
                 iconColor: bookmarkFolderColors.Black,
                 bookmarks: []
@@ -405,8 +404,9 @@ function useBookmarks(userId: string): UseBookmark {
             setBookmarks({
                 ...bookmarks
             });
+            return length - 1;
         },
-        editBookmark(index, newBookmark, modalKey) {
+        editBookmark(index, newBookmark) {
             if (!bookmarks) return;
             Object.entries(newBookmark).forEach(([k, v]) => {
                 bookmarks[userId][index][k] = v;
@@ -414,13 +414,14 @@ function useBookmarks(userId: string): UseBookmark {
             setBookmarks({
                 ...bookmarks
             });
-            if (modalKey) closeModal(modalKey);
         },
-        deleteBookmark(index) {
+        deleteBookmark(index, folderIndex) {
             if (!bookmarks) return;
-            if (index === -1 || index > (bookmarks[userId].length - 1))
+            if (index < 0 || index > (bookmarks[userId].length - 1))
                 return logger.error("Attempted to delete bookmark at index " + index, bookmarks);
-            bookmarks[userId].splice(index, 1);
+
+            if (typeof folderIndex === "number") (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.splice(index, 1);
+            else bookmarks[userId].splice(index, 1);
             setBookmarks({
                 ...bookmarks
             });

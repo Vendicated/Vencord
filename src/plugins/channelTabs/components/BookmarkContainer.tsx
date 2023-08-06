@@ -20,7 +20,7 @@ import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { Avatar, ChannelStore, ContextMenu, GuildStore, showToast, Text, UserStore } from "@webpack/common";
 
-import { BasicChannelTabsProps, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
 import { QuestionIcon } from "./ChannelTab";
 import { BookmarkContextMenu } from "./ContextMenus";
 
@@ -30,7 +30,7 @@ const cl = (name: string) => `vc-channeltabs-${name}`;
 const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
 const FolderIcon = LazyComponent(() => findByCode("M20 7H12L10.553 5.106C10.214"));
 
-function BookmarkIcon({ bookmark }: { bookmark: Bookmarks[number]; }) {
+function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
     if ("bookmarks" in bookmark) return <FolderIcon height={16} width={16} color={bookmark.iconColor} />;
 
     const channel = ChannelStore.getChannel(bookmark.channelId);
@@ -66,7 +66,10 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
 
     return <div
         className={cl("bookmark")}
-        onClick={() => "bookmarks" in bookmark ? showToast("TODO") : switchChannel(bookmark)}
+        onClick={() => "bookmarks" in bookmark
+            ? showToast(bookmark.bookmarks.map(b => b.name).join(", ") || "TODO")
+            : switchChannel(bookmark)
+        }
         onContextMenu={e => ContextMenu.open(e, () =>
             <BookmarkContextMenu index={index} bookmarks={bookmarks} methods={methods} />
         )}
@@ -78,18 +81,29 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
 
 export default function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { guildId, channelId, userId } = props;
-    const channel = ChannelStore.getChannel(channelId);
     const [bookmarks, methods] = useBookmarks(userId);
-    const isCurrentChannelBookmarked = bookmarks ? bookmarks.some(b =>
-        // TODO: folders
-        !("bookmarks" in b) && b.channelId === channelId
-    ) : false;
+    let isCurrentChannelBookmarked = false, currentChannelFolderIndex = -1;
+    bookmarks?.forEach((bookmark, i) => {
+        if ("bookmarks" in bookmark) {
+            if (bookmark.bookmarks.some(b => b.channelId === channelId)) {
+                isCurrentChannelBookmarked = true;
+                currentChannelFolderIndex = i;
+            }
+        }
+        else if (bookmark.channelId === channelId) isCurrentChannelBookmarked = true;
+    });
 
     return <div className={cl("inner-container")}>
         <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
-            ? methods.deleteBookmark(
-                bookmarks!.findIndex(b => !("bookmarks" in b) && b.channelId === channelId)
-            )
+            ? currentChannelFolderIndex === -1
+                ? methods.deleteBookmark(
+                    bookmarks!.findIndex(b => !("bookmarks" in b) && b.channelId === channelId)
+                )
+                : methods.deleteBookmark(
+                    (bookmarks![currentChannelFolderIndex] as BookmarkFolder).bookmarks
+                        .findIndex(b => b.channelId === channelId),
+                    currentChannelFolderIndex
+                )
             : methods.addBookmark({
                 guildId,
                 channelId

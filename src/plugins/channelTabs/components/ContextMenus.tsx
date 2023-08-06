@@ -18,11 +18,11 @@
 
 import { Margins } from "@utils/margins.js";
 import { classes } from "@utils/misc.jsx";
-import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
+import { closeModal, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, TextInput, useState } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
-import { bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 
 const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
 
@@ -54,36 +54,74 @@ export function BasicContextMenu() {
 
 function EditModal({ modalProps, bookmark, onSave }) {
     const [name, setName] = useState(bookmark.name);
-    const [color, setColor] = useState("bookmarks" in bookmark ? bookmark.iconColor : "should never happen");
+    const [color, setColor] = useState(bookmark.iconColor);
     const placeholder = bookmarkPlaceholderName(bookmark);
 
     return <ModalRoot {...modalProps}>
         <ModalHeader>
-            <Forms.FormText variant="heading-lg/semibold">Edit Bookmark</Forms.FormText>
+            <Text variant="heading-lg/semibold">Edit Bookmark</Text>
         </ModalHeader>
         <ModalContent>
-            <Forms.FormTitle className={Margins.top20}>Bookmark Name</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top16}>Bookmark Name</Forms.FormTitle>
             <TextInput
                 value={name === placeholder ? undefined : name}
                 placeholder={placeholder}
                 onChange={v => setName(v)}
             />
-            {"bookmarks" in bookmark && <Select
-                options={
-                    Object.entries(bookmarkFolderColors).map(([name, value]) => ({
-                        label: name,
-                        value,
-                        default: bookmark.iconColor === value
-                    }))
-                }
-                isSelected={v => color === v}
-                select={setColor}
-                serialize={String}
-                className={Margins.top16}
-            />}
+            {"bookmarks" in bookmark && <>
+                <Forms.FormTitle className={Margins.top16}>Folder Color</Forms.FormTitle>
+                <Select
+                    options={
+                        Object.entries(bookmarkFolderColors).map(([name, value]) => ({
+                            label: name,
+                            value,
+                            default: bookmark.iconColor === value
+                        }))
+                    }
+                    isSelected={v => color === v}
+                    select={setColor}
+                    serialize={String}
+                />
+            </>}
             <Button
                 className={classes(Margins.top20, Margins.bottom20)}
                 onClick={() => onSave(name || placeholder, color)}
+            >Save</Button>
+        </ModalContent>
+    </ModalRoot>;
+}
+
+function AddToFolderModal({ modalProps, bookmarks, onSave }: {
+    modalProps: any,
+    bookmarks: Bookmarks,
+    onSave: (folderIndex: number) => void;
+}) {
+    const [folderIndex, setIndex] = useState(-1);
+
+    return <ModalRoot {...modalProps}>
+        <ModalHeader>
+            <Text variant="heading-lg/semibold">Add Bookmark to Folder</Text>
+        </ModalHeader>
+        <ModalContent>
+            <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
+            <Select
+                options={[{
+                    label: "Create one",
+                    value: -1,
+                    default: true
+                }, ...Object.entries(bookmarks).map(([index, bookmark]) => ({
+                    label: bookmark.name,
+                    value: parseInt(index, 10),
+                    _isFolder: "bookmarks" in bookmark
+                })).filter(v => v._isFolder).map(({ label, value }) => ({ label, value }))
+                ]}
+                isSelected={v => v === folderIndex}
+                select={setIndex}
+                serialize={String}
+            />
+            <Button
+                className={classes(Margins.top20, Margins.bottom20)}
+                onClick={() => onSave(folderIndex)}
             >Save</Button>
         </ModalContent>
     </ModalRoot>;
@@ -109,8 +147,9 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                             modalProps={modalProps}
                             bookmark={bookmark}
                             onSave={(name, color) => {
-                                methods.editBookmark(index, { name }, key);
+                                methods.editBookmark(index, { name });
                                 if (color) methods.editBookmark(index, { iconColor: color });
+                                closeModal(key);
                             }
                             }
                         />
@@ -128,7 +167,24 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 id="add-to-folder"
                 label="Add Bookmark to Folder"
                 disabled={"bookmarks" in bookmark}
-                action={() => methods.addFolder()}
+                action={() => {
+                    const key = openModal(modalProps =>
+                        <AddToFolderModal
+                            modalProps={modalProps}
+                            bookmarks={bookmarks}
+                            onSave={index => {
+                                if (index === -1) {
+                                    const folderIndex = methods.addFolder();
+                                    methods.addBookmark(bookmark as Bookmark, folderIndex);
+                                }
+                                else methods.addBookmark(bookmark as Bookmark, index);
+                                methods.deleteBookmark(bookmarks.indexOf(bookmark));
+                                closeModal(key);
+                            }
+                            }
+                        />
+                    );
+                }}
             />
         </Menu.MenuGroup>
         <Menu.MenuGroup>
