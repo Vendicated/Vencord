@@ -22,10 +22,8 @@ import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { Flex } from "@components/Flex";
-import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import { Switch } from "@components/Switch";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
@@ -152,24 +150,23 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex className={cl("card", { "card-disabled": disabled })} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <div className={cl("card-header")}>
-                <Text variant="text-md/bold" className={cl("name")}>
-                    {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
-                </Text>
+        <AddonCard
+            name={plugin.name}
+            description={plugin.description}
+            isNew={isNew}
+            enabled={isEnabled()}
+            setEnabled={toggleEnabled}
+            disabled={disabled}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            infoButton={
                 <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
                     {plugin.options
                         ? <CogWheel />
                         : <InfoIcon width="24" height="24" />}
                 </button>
-                <Switch
-                    checked={isEnabled()}
-                    onChange={toggleEnabled}
-                    disabled={disabled}
-                />
-            </div>
-            <Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>
-        </Flex >
+            }
+        />
     );
 }
 
