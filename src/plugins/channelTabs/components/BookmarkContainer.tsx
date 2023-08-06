@@ -18,7 +18,7 @@
 
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Avatar, ChannelStore, ContextMenu, GuildStore, showToast, Text, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, GuildStore, showToast, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
 import { QuestionIcon } from "./ChannelTab";
@@ -64,8 +64,34 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
 function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const bookmark = bookmarks[index];
 
+    const ref = useRef<HTMLDivElement>(null);
+    const [, drag] = useDrag(() => ({
+        type: "vc_ChannelTab",
+        item: () => {
+            return { index };
+        },
+        collect: monitor => ({
+            isDragging: !!monitor.isDragging()
+        }),
+    }));
+    const [, drop] = useDrop(() => ({
+        accept: "vc_ChannelTab",
+        hover: item => {
+            if (!ref.current) return;
+
+            const dragIndex = item.index;
+            const hoverIndex = index;
+            if (dragIndex === hoverIndex) return;
+
+            methods.moveDraggedBookmarks(dragIndex, hoverIndex);
+            item.index = hoverIndex;
+        },
+    }), []);
+    drag(drop(ref));
+
     return <div
         className={cl("bookmark")}
+        ref={ref}
         onClick={() => "bookmarks" in bookmark
             ? showToast(bookmark.bookmarks.map(b => b.name).join(", ") || "TODO")
             : switchChannel(bookmark)
@@ -82,6 +108,7 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
 export default function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { guildId, channelId, userId } = props;
     const [bookmarks, methods] = useBookmarks(userId);
+
     let isCurrentChannelBookmarked = false, currentChannelFolderIndex = -1;
     bookmarks?.forEach((bookmark, i) => {
         if ("bookmarks" in bookmark) {

@@ -55,8 +55,9 @@ export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
     addBookmark: (bookmark: Omit<Bookmark, "name">, folderIndex?: number) => void;
     addFolder: () => number;
-    editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
     deleteBookmark: (index: number, folderIndex?: number) => void;
+    editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
+    moveDraggedBookmarks: (index1: number, index2: number) => void;
 }];
 
 const logger = new Logger("ChannelTabs");
@@ -422,6 +423,16 @@ function useBookmarks(userId: string): UseBookmark {
 
             if (typeof folderIndex === "number") (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.splice(index, 1);
             else bookmarks[userId].splice(index, 1);
+            setBookmarks({
+                ...bookmarks
+            });
+        },
+        moveDraggedBookmarks(index1, index2) {
+            if (index1 < 0 || index2 > bookmarks[userId].length)
+                return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, bookmarks);
+
+            const firstItem = bookmarks[userId].splice(index1, 1)[0];
+            bookmarks[userId].splice(index2, 0, firstItem);
             setBookmarks({
                 ...bookmarks
             });

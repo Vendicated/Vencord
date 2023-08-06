@@ -19,7 +19,7 @@
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react.jsx";
 import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
@@ -33,8 +33,6 @@ const enum ChannelTypes {
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
 const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy("themeColor:null==");
-const useDrag = findByCodeLazy(".disconnectDragSource(");
-const useDrop = findByCodeLazy(".disconnectDropTarget(");
 
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
