@@ -76,12 +76,22 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
     }));
     const [, drop] = useDrop(() => ({
         accept: "vc_Bookmark",
-        hover: item => {
+        hover: (item, monitor) => {
             if (!ref.current) return;
 
             const dragIndex = item.index;
             const hoverIndex = index;
             if (dragIndex === hoverIndex) return;
+
+            const hoverBoundingRect = ref.current?.getBoundingClientRect();
+            const hoverMiddleX =
+                (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+            const clientOffset = monitor.getClientOffset();
+            const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+            if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
+                || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+                return;
+            }
 
             methods.moveDraggedBookmarks(dragIndex, hoverIndex);
             item.index = hoverIndex;

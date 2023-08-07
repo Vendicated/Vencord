@@ -221,12 +221,22 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }));
     const [, drop] = useDrop(() => ({
         accept: "vc_ChannelTab",
-        hover: item => {
+        hover: (item, monitor) => {
             if (!ref.current) return;
 
             const dragIndex = item.index;
             const hoverIndex = index;
             if (dragIndex === hoverIndex) return;
+
+            const hoverBoundingRect = ref.current?.getBoundingClientRect();
+            const hoverMiddleX =
+                (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+            const clientOffset = monitor.getClientOffset();
+            const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+            if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
+                || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+                return;
+            }
 
             moveDraggedTabs(dragIndex, hoverIndex);
             item.index = hoverIndex;
