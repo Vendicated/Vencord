@@ -41,6 +41,7 @@ interface PanelButtonProps {
     onClick: (event: MouseEvent<HTMLElement>) => void;
     tooltipClassName?: string;
     disabled?: boolean;
+    shouldShow?: boolean;
 }
 const PanelButton = LazyComponent<PanelButtonProps>(() => findByCode("Masks.PANEL_BUTTON"));
 
@@ -79,6 +80,7 @@ export default definePlugin({
 
     patches: [
         {
+            // Pass microphone stream to RNNoise
             find: "window.webkitAudioContext",
             replacement: {
                 match: /(?<=\i\.acquire=function\((\i)\)\{return )navigator\.mediaDevices\.getUserMedia\(\1\)(?=\})/,
@@ -86,6 +88,7 @@ export default definePlugin({
             },
         },
         {
+            // Noise suppression button in call modal
             find: "renderNoiseCancellation()",
             replacement: {
                 match: /(?<=(\i)\.jsxs?.{0,70}children:\[)(?=\i\?\i\.renderNoiseCancellation\(\))/,
@@ -93,6 +96,15 @@ export default definePlugin({
             },
         },
         {
+            // Give noise suppression component a "shouldShow" prop
+            find: "Masks.PANEL_BUTTON",
+            replacement: {
+                match: /(?<==(\i)\.tooltipForceOpen.{0,100})(?=tooltipClassName:)/,
+                replace: (_, props) => `shouldShow: ${props}.shouldShow,`
+            }
+        },
+        {
+            // Noise suppression option in voice settings
             find: "Messages.USER_SETTINGS_NOISE_CANCELLATION_KRISP",
             replacement: [{
                 match: /(?<=(\i)=\i\?\i\.KRISP:\i.{1,20}?;)/,
@@ -156,6 +168,7 @@ export default definePlugin({
                     {...props}
                     tooltipText="Noise Suppression powered by RNNoise"
                     tooltipClassName={cl("tooltip")}
+                    shouldShow={!isShown}
                     icon={() => <SupressionIcon enabled={isEnabled} />}
                 />
             )}
