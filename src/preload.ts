@@ -25,10 +25,12 @@ import VencordNative from "./VencordNative";
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
+const isVesktopOrInsane = !process.env.DISCORD_PRELOAD;
+
 // Discord
 if (location.protocol !== "data:") {
     // #region cssInsert
-    const rendererCss = join(__dirname, "renderer.css");
+    const rendererCss = join(__dirname, isVesktopOrInsane ? "vencordDesktopRenderer.css" : "renderer.css");
 
     const style = document.createElement("style");
     style.id = "vencord-css-core";
