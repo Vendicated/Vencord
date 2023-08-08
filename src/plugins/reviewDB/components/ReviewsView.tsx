@@ -60,9 +60,9 @@ export default function ReviewsView({
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
-            if (settings.store.hideBlockedUsers) {
+            if (settings.store.hideBlockedUsers)
                 data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
-            }
+
             scrollToTop?.();
             onFetchReviews(data!);
         }
