@@ -41,14 +41,12 @@ export default definePlugin({
     authors: [Devs.udiagod],
     dependencies: ["MessagePopoverAPI"],
 
-    QuoteIcon: () => <QuoteIcon />,
-
     async start() {
         addButton("Quote", message => {
             return message?.type === 0 && message?.content?.length > 0
                 ? {
                     label: "Quote",
-                    icon: this.QuoteIcon,
+                    icon: QuoteIcon,
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
                     onClick: async () => {
