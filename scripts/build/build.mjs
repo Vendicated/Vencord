@@ -40,8 +40,6 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    minify: true,
-    bundle: true,
     external: ["electron", ...commonOpts.external],
     define: defines,
 };
