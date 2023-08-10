@@ -1,0 +1,13 @@
+diff --git a/src/index.js b/src/index.js
+index e8a8ee34fbafe310c75e752d59ba3a56109d67f1..6aecfe40f863823c8b115bca00537fcd78934137 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -95,7 +95,7 @@ function create(ctx) {
+         ?? [Array.isArray(options.text) ? options.text.join("\n") : options.text];
+ 
+     /** @type {string} */
+-    const src = ctx.sourceCode.getText();
++    const src = ctx.getSourceCode().getText();
+     const srcHeader = findHeader(src, syntax);
+     const headers = rawHeaders.map((raw) => makeComment(raw, syntax, decor));
+     const trailingLines = "\n".repeat(src.slice(srcHeader.length).trim() ? 1 + newlines : 1);

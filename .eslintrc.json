@@ -4,7 +4,7 @@
     "ignorePatterns": ["dist", "browser"],
     "plugins": [
         "@typescript-eslint",
-        "header",
+        "simple-header",
         "simple-import-sort",
         "unused-imports",
         "path-alias"
@@ -26,35 +26,12 @@
         // Since it's only been a month and Vencord has already been stolen
         // by random skids who rebranded it to "AlphaCord" and erased all license
         // information
-        "header/header": [
-            2,
-            "block",
-            [
-                {
-                    "pattern": "!?",
-                    "template": " "
-                },
-                " * Vencord, a modification for Discord's desktop app",
-                {
-                    "pattern": " \\* Copyright \\(c\\) \\d{4}",
-                    "template": " * Copyright (c) 2023 Vendicated and contributors"
-                },
-                " *",
-                " * This program is free software: you can redistribute it and/or modify",
-                " * it under the terms of the GNU General Public License as published by",
-                " * the Free Software Foundation, either version 3 of the License, or",
-                " * (at your option) any later version.",
-                " *",
-                " * This program is distributed in the hope that it will be useful,",
-                " * but WITHOUT ANY WARRANTY; without even the implied warranty of",
-                " * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
-                " * GNU General Public License for more details.",
-                " *",
-                " * You should have received a copy of the GNU General Public License",
-                " * along with this program.  If not, see <https://www.gnu.org/licenses/>.",
-                ""
-            ],
-            2
+        "simple-header/header": [
+            "error",
+            {
+                "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
+                "templates": { "author": [".*", "Vendicated and contributors"] }
+            }
         ],
         "quotes": ["error", "double", { "avoidEscape": true }],
         "jsx-quotes": ["error", "prefer-double"],

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { shikiOnigasmSrc, shikiWorkerSrc } from "@utils/dependencies";
 import { WorkerClient } from "@vap/core/ipc";
 import type { IShikiTheme, IThemedToken } from "@vap/shiki";

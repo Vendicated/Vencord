@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export const defaultRules = [
     "action_object_map",
     "action_type_map",

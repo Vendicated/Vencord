@@ -1,9 +1,16 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 patchedDependencies:
   eslint-plugin-path-alias@1.0.0:
     hash: m6sma4g6bh67km3q6igf6uxaja
     path: patches/eslint-plugin-path-alias@1.0.0.patch
+  eslint-plugin-simple-header@1.0.1:
+    hash: ej6cxkrs2np2767qe2tatjdt54
+    path: patches/eslint-plugin-simple-header@1.0.1.patch
   eslint@8.28.0:
     hash: 7wc6icvgtg3uswirb5tpsbjnbe
     path: patches/eslint@8.28.0.patch
@@ -15,6 +22,9 @@ dependencies:
   '@vap/shiki':
     specifier: 0.10.5
     version: 0.10.5
+  eslint-plugin-simple-header:
+    specifier: ^1.0.1
+    version: 1.0.1(patch_hash=ej6cxkrs2np2767qe2tatjdt54)
   fflate:
     specifier: ^0.7.4
     version: 0.7.4
@@ -65,9 +75,6 @@ devDependencies:
   eslint-import-resolver-alias:
     specifier: ^1.1.2
     version: 1.1.2
-  eslint-plugin-header:
-    specifier: ^3.1.1
-    version: 3.1.1(eslint@8.28.0)
   eslint-plugin-path-alias:
     specifier: ^1.0.0
     version: 1.0.0(patch_hash=m6sma4g6bh67km3q6igf6uxaja)(eslint@8.28.0)
@@ -1446,17 +1453,6 @@ packages:
         optional: true
     dev: true
 
-  /eslint-plugin-header@3.1.1(eslint@8.28.0):
-    resolution: {integrity: sha512-9vlKxuJ4qf793CmeeSrZUvVClw6amtpghq3CuWcB5cUNnWHQhgcqy5eF8oVKFk1G3Y/CbchGfEaw3wiIJaNmVg==}
-    peerDependencies:
-      eslint: '>=7.7.0'
-    peerDependenciesMeta:
-      eslint:
-        optional: true
-    dependencies:
-      eslint: 8.28.0(patch_hash=7wc6icvgtg3uswirb5tpsbjnbe)
-    dev: true
-
   /eslint-plugin-path-alias@1.0.0(patch_hash=m6sma4g6bh67km3q6igf6uxaja)(eslint@8.28.0):
     resolution: {integrity: sha512-FXus57yC+Zd3sMv46pbloXYwFeNVNHJqlACr9V68FG/IzGFBBokGJpmjDbEjpt8ZCeVSndUubeDWWl2A8sCNVQ==}
     peerDependencies:
@@ -1470,6 +1466,11 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+    patched: true
+
+  /eslint-plugin-simple-header@1.0.1(patch_hash=ej6cxkrs2np2767qe2tatjdt54):
+    resolution: {integrity: sha512-vpTMgF7bOIflnczDmbfTKtYhjTsPLTTjv/whkh1rXtu4Jp2NtvJr57gJB8QOzNjXyh34/D/LA2NY7tZsebKoZg==}
+    dev: false
     patched: true
 
   /eslint-plugin-simple-import-sort@10.0.0(eslint@8.28.0):
