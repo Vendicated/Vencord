@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { insertTextIntoChatInputBox } from "@utils/discord";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { ChannelStore } from "@webpack/common";
 
@@ -33,7 +33,7 @@ function QuoteIcon() {
             <path d="m31.2 0h-7.2l-4.8 9.6v14.4h14.4v-14.4h-7.2zm-19.2 0h-7.2l-4.8 9.6v14.4h14.4v-14.4h-7.2z" />
         </svg>
     );
-};
+}
 
 export default definePlugin({
     name: "Quote",
