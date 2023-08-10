@@ -53,6 +53,8 @@
 }
 
 .vc-permviewer-perms-container {
+    box-sizing: border-box;
+    height: 100%;
     display: grid;
     grid-template-columns: 1fr 2fr;
     grid-template-areas: "list permissions";

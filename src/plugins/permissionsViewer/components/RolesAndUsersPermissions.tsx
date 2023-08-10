@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
@@ -99,7 +99,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                 {selectedItem && (
                     <div className={cl("perms-container")}>
-                        <div className={cl("perms-list")}>
+                        <ScrollerThin className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
                                 const role = roles[permission.id ?? ""];
@@ -156,8 +156,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </button>
                                 );
                             })}
-                        </div>
-                        <div className={cl("perms-perms")}>
+                        </ScrollerThin>
+                        <ScrollerThin className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
                                 <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
@@ -184,7 +184,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </Tooltip>
                                 </div>
                             ))}
-                        </div>
+                        </ScrollerThin>
                     </div>
                 )}
             </ModalContent>
