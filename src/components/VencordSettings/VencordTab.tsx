@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";

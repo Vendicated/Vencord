@@ -335,7 +335,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "HypedDomi",
         id: 354191516979429376n
     },
-    Lumap: {
+    Rini: {
+        name: "Rini",
+        id: 1079479184478441643n
+    },
+      Lumap: {
         name: "lumap",
         id: 635383782576357407n
     }
