@@ -13,6 +13,7 @@
     align-items: center;
     font-size: 1.1em;
     margin-bottom: 1em;
+    gap: 0.5em;
 }
 
 .vc-rnnoise-popout-desc {

@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
-import { FluxDispatcher, Popout, Toasts } from "@webpack/common";
+import { FluxDispatcher, Popout, Toasts, React } from "@webpack/common";
 import { MouseEvent, ReactNode } from "react";
 
 import { SupressionIcon } from "./icons";
@@ -45,30 +45,66 @@ interface PanelButtonProps {
     shouldShow?: boolean;
 }
 const PanelButton = LazyComponent<PanelButtonProps>(() => findByCode("Masks.PANEL_BUTTON"));
+const enum SpinnerType {
+    SpinningCircle = "spinningCircle",
+    ChasingDots = "chasingDots",
+    LowMotion = "lowMotion",
+    PulsingEllipsis = "pulsingEllipsis",
+    WanderingCubes = "wanderingCubes",
+}
+export interface SpinnerProps {
+    type: SpinnerType;
+    animated?: boolean;
+    className?: string;
+    itemClassName?: string;
+}
+const Spinner = LazyComponent<SpinnerProps>(() => findByCode(".spinningCircleInner"));
+
+function createExternalStore<S>(init: () => S) {
+    const subscribers = new Set<() => void>();
+    let state = init();
+
+    return {
+        get: () => state,
+        set: (newStateGetter: (oldState: S) => S) => {
+            console.log('wtf');
+            state = newStateGetter(state);
+            for (const cb of subscribers) cb();
+        },
+        use: () => {
+            return React.useSyncExternalStore<S>((onStoreChange) => {
+                subscribers.add(onStoreChange);
+                return () => subscribers.delete(onStoreChange);
+            }, () => state);
+        },
+    } as const;
+}
 
 const cl = classNameFactory("vc-rnnoise-");
+
+const loadedStore = createExternalStore(() => ({
+    isLoaded: false,
+    isLoading: false,
+    isError: false,
+}));
 const getRnnoiseWasm = makeLazy(() => {
-    Toasts.show({
-        id: Toasts.genId(),
-        type: Toasts.Type.MESSAGE,
-        message: "Loading RNNoise, your mic might be silent for a few seconds...",
-    });
+    loadedStore.set(s => ({ ...s, isLoading: true }));
     return loadRnnoise({
         url: rnnoiseWasmSrc(),
         simdUrl: rnnoiseWasmSrc(true),
-    }).then(wasm => {
-        Toasts.show({
-            id: Toasts.genId(),
-            type: Toasts.Type.SUCCESS,
-            message: "RNNoise loaded, noise suppression is now enabled!",
-        });
-        return wasm;
-    }).catch(() => {
-        Toasts.show({
-            id: Toasts.genId(),
-            type: Toasts.Type.FAILURE,
-            message: "Failed to load RNNoise, noise suppression won't work",
-        });
+    }).then(buffer => {
+        // Check WASM magic number cus fetch doesnt throw on 4XX or 5XX
+        if (new DataView(buffer.slice(0, 4)).getUint32(0) !== 0x0061736D) throw buffer;
+
+        loadedStore.set(s => ({ ...s, isLoaded: true }));
+        return buffer;
+    }).catch((error) => {
+        if (error instanceof ArrayBuffer) error = new TextDecoder().decode(error);
+        logger.error("Failed to load RNNoise WASM:", error);
+        loadedStore.set(s => ({ ...s, isError: true }));
+        return null;
+    }).finally(() => {
+        loadedStore.set(s => ({ ...s, isLoading: false }));
     });
 });
 
@@ -81,11 +117,15 @@ const setEnabled = (enabled: boolean) => {
 
 function NoiseSupressionPopout() {
     const { isEnabled } = settings.use();
+    const { isLoading, isError } = loadedStore.use();
+    const isWorking = isEnabled && !isError;
 
     return <div className={cl("popout")}>
         <div className={cl("popout-heading")}>
             <span>Noise Supression</span>
-            <Switch checked={isEnabled} onChange={setEnabled} />
+            <div style={{ flex: 1 }} />
+            {isLoading && <Spinner type={SpinnerType.PulsingEllipsis} />}
+            <Switch checked={isWorking} onChange={setEnabled} disabled={isError} />
         </div>
         <div className={cl("popout-desc")}>
             Enable AI noise suppression! Make some noise&mdash;like becoming an air conditioner, or a vending machine fan&mdash;while speaking. Your friends will hear nothing but your beautiful voice ✨
@@ -179,6 +219,7 @@ export default definePlugin({
     },
     NoiseSupressionButton(): ReactNode {
         const { isEnabled } = settings.use();
+        const { isLoading, isError } = loadedStore.use();
 
         return <Popout
             key="rnnoise-popout"
@@ -196,7 +237,12 @@ export default definePlugin({
                     tooltipText="Noise Suppression powered by RNNoise"
                     tooltipClassName={cl("tooltip")}
                     shouldShow={!isShown}
-                    icon={() => <SupressionIcon enabled={isEnabled} />}
+                    icon={() => <div style={{
+                        color: isError ? 'var(--status-danger)' : 'inherit',
+                        opacity: isLoading ? 0.5 : 1,
+                    }}>
+                        <SupressionIcon enabled={isEnabled} />
+                    </div>}
                 />
             )}
         </Popout>;
