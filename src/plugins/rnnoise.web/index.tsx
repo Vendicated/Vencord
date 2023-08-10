@@ -67,7 +67,6 @@ function createExternalStore<S>(init: () => S) {
     return {
         get: () => state,
         set: (newStateGetter: (oldState: S) => S) => {
-            console.log("wtf");
             state = newStateGetter(state);
             for (const cb of subscribers) cb();
         },
