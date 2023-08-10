@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export const VENCORD_FILES = [
     IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
     "preload.js",
