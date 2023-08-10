@@ -226,7 +226,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         </Forms.FormSection>
                     </div>
                 )}
-                <Forms.FormSection>
+                <Forms.FormSection className={Margins.bottom16}>
                     <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
