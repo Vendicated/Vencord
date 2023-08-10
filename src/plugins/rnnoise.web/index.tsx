@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
-import { FluxDispatcher, Popout, Toasts, React } from "@webpack/common";
+import { FluxDispatcher, Popout, React } from "@webpack/common";
 import { MouseEvent, ReactNode } from "react";
 
 import { SupressionIcon } from "./icons";
@@ -67,12 +67,12 @@ function createExternalStore<S>(init: () => S) {
     return {
         get: () => state,
         set: (newStateGetter: (oldState: S) => S) => {
-            console.log('wtf');
+            console.log("wtf");
             state = newStateGetter(state);
             for (const cb of subscribers) cb();
         },
         use: () => {
-            return React.useSyncExternalStore<S>((onStoreChange) => {
+            return React.useSyncExternalStore<S>(onStoreChange => {
                 subscribers.add(onStoreChange);
                 return () => subscribers.delete(onStoreChange);
             }, () => state);
@@ -98,7 +98,7 @@ const getRnnoiseWasm = makeLazy(() => {
 
         loadedStore.set(s => ({ ...s, isLoaded: true }));
         return buffer;
-    }).catch((error) => {
+    }).catch(error => {
         if (error instanceof ArrayBuffer) error = new TextDecoder().decode(error);
         logger.error("Failed to load RNNoise WASM:", error);
         loadedStore.set(s => ({ ...s, isError: true }));
@@ -238,7 +238,7 @@ export default definePlugin({
                     tooltipClassName={cl("tooltip")}
                     shouldShow={!isShown}
                     icon={() => <div style={{
-                        color: isError ? 'var(--status-danger)' : 'inherit',
+                        color: isError ? "var(--status-danger)" : "inherit",
                         opacity: isLoading ? 0.5 : 1,
                     }}>
                         <SupressionIcon enabled={isEnabled} />
