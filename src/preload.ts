@@ -51,9 +51,9 @@ if (location.protocol !== "data:") {
     }
     // #endregion
 
-    if (process.env.DISCORD_PRELOAD) {
+    if (IS_DISCORD_DESKTOP) {
         webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-        require(process.env.DISCORD_PRELOAD);
+        require(process.env.DISCORD_PRELOAD!);
     }
 } // Monaco popout
 else {
