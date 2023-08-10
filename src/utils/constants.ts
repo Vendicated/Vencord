@@ -339,7 +339,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Rini",
         id: 1079479184478441643n
     },
-        Lumap: {
+    Lumap: {
         name: "lumap",
         id: 635383782576357407n
     }
