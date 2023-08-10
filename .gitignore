@@ -10,6 +10,13 @@ vencord_installer
 .idea
 # editor: macOS Finder
 .DS_Store
+# editor: Visual Studio Code / VSCodium
+.vscode/*.local.json
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json
+!.vscode/*.shared.json
+!.vscode/extensions.json
 
 # unused artifacts: npm
 package-lock.json
