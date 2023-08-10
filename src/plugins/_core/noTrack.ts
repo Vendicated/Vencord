@@ -55,7 +55,7 @@ export default definePlugin({
         {
             find: ".installedLogHooks)",
             replacement: {
-                match: /if\(\w\.getDebugLogging\(\)&&!\w.installedLogHooks\)/,
+                match: /if\(\i\.getDebugLogging\(\)&&!\i.installedLogHooks\)/,
                 replace: "if(false)"
             }
         },
