@@ -48,6 +48,11 @@ export const settings = definePluginSettings({
         description: "Hide timestamps on reviews",
         default: false,
     },
+    hideBlockedUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Hide reviews from blocked users",
+        default: true,
+    },
     website: {
         type: OptionType.COMPONENT,
         description: "ReviewDB website",
