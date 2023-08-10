@@ -23,7 +23,7 @@ import { EmojiStore } from "@webpack/common";
 import { zipSync } from "fflate";
 
 export default definePlugin({
-    name: "zipServerEmojis",
+    name: "ZipServerEmojis",
     description: "Adds a /zip-server-emojis slash command to download every emoji of a server as a zip file",
     authors: [Devs.Lumap],
     dependencies: ["CommandsAPI"],
