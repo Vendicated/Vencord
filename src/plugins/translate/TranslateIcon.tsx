@@ -51,7 +51,7 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
                 <div style={{ display: "flex" }}>
                     <Button
                         aria-haspopup="dialog"
-                        aria-label=""
+                        aria-label="Open Translate Modal"
                         size=""
                         look={ButtonLooks.BLANK}
                         onMouseEnter={onMouseEnter}

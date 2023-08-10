@@ -146,7 +146,7 @@ export default definePlugin({
                     <div style={{ display: "flex" }}>
                         <Button
                             aria-haspopup="dialog"
-                            aria-label=""
+                            aria-label="Insert Timestamp"
                             size=""
                             look={ButtonLooks.BLANK}
                             onMouseEnter={onMouseEnter}
