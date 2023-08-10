@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { PermissionValue } from "./RolesAndUsersPermissions";
+
 export function PermissionDeniedIcon() {
     return (
         <svg
@@ -25,6 +27,21 @@ export function PermissionDeniedIcon() {
         >
             <title>Denied</title>
             <path fill="var(--status-danger)" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+        </svg>
+    );
+}
+
+export function PermissionPassthroughIcon() {
+    return (
+        <svg
+            height="24"
+            width="24"
+            viewBox="0 0 16 16"
+        >
+            <g>
+                <title>Not overwritten</title>
+                <polygon fill="var(--text-normal)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
+            </g>
         </svg>
     );
 }
@@ -42,17 +59,10 @@ export function PermissionAllowedIcon() {
     );
 }
 
-export function PermissionDefaultIcon() {
-    return (
-        <svg
-            height="24"
-            width="24"
-            viewBox="0 0 16 16"
-        >
-            <g>
-                <title>Not overwritten</title>
-                <polygon fill="var(--text-normal)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
-            </g>
-        </svg>
-    );
+export function PermissionIcon({ permissionValue }: { permissionValue: PermissionValue; }) {
+    switch (permissionValue) {
+        case PermissionValue.Deny: return PermissionDeniedIcon();
+        case PermissionValue.Allow: return PermissionAllowedIcon();
+        case PermissionValue.Passthrough: return PermissionPassthroughIcon();
+    }
 }

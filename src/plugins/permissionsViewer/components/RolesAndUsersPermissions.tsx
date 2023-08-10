@@ -26,12 +26,18 @@ import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
-import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
+import { PermissionIcon } from "./icons";
 
 export const enum PermissionType {
     Role = 0,
     User = 1,
     Owner = 2
+}
+
+export const enum PermissionValue {
+    Deny = "DENY",
+    Passthrough = "PASSTHROUGH",
+    Allow = "ALLOW",
 }
 
 export interface RoleOrUserPermission {
@@ -158,32 +164,34 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                             })}
                         </ScrollerThin>
                         <ScrollerThin className={cl("perms-perms")}>
-                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
-                                <div className={cl("perms-perms-item")}>
+                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => {
+                                return <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
-                                        {(() => {
+                                        <PermissionIcon permissionValue={(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
+                                            const permissionValue = permissions !== undefined
+                                                ? permissions === 0n ? PermissionValue.Passthrough
+                                                    : (permissions & bit) === bit ? PermissionValue.Allow : PermissionValue.Deny
+                                                : undefined;
+                                            const overwriteValue = overwriteAllow !== undefined || overwriteDeny !== undefined
+                                                ? overwriteAllow !== undefined && (overwriteAllow & bit) === bit ? PermissionValue.Allow
+                                                    : overwriteDeny !== undefined && (overwriteDeny & bit) === bit ? PermissionValue.Deny
+                                                        : PermissionValue.Passthrough
+                                                : undefined;
+                                            const computedPermissionValue = overwriteValue !== undefined && overwriteValue !== PermissionValue.Passthrough
+                                                ? overwriteValue
+                                                : permissionValue;
 
-                                            if (permissions)
-                                                return (permissions & bit) === bit
-                                                    ? PermissionAllowedIcon()
-                                                    : PermissionDeniedIcon();
-
-                                            if (overwriteAllow && (overwriteAllow & bit) === bit)
-                                                return PermissionAllowedIcon();
-                                            if (overwriteDeny && (overwriteDeny & bit) === bit)
-                                                return PermissionDeniedIcon();
-
-                                            return PermissionDefaultIcon();
-                                        })()}
+                                            return computedPermissionValue ?? PermissionValue.Passthrough;
+                                        })()} />
                                     </div>
                                     <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
 
                                     <Tooltip text={getPermissionDescription(permissionName) || "No Description"}>
                                         {props => <InfoIcon {...props} />}
                                     </Tooltip>
-                                </div>
-                            ))}
+                                </div>;
+                            })}
                         </ScrollerThin>
                     </div>
                 )}
