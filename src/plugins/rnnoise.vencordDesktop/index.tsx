@@ -25,10 +25,11 @@ import { loadRnnoise, RnnoiseWorkletNode } from "@sapphi-red/web-noise-suppresso
 import { Devs } from "@utils/constants";
 import { rnnoiseWasmSrc, rnnoiseWorkletSrc } from "@utils/dependencies";
 import { makeLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
-import { FluxDispatcher, Popout } from "@webpack/common";
+import { FluxDispatcher, Popout, Toasts } from "@webpack/common";
 import { MouseEvent, ReactNode } from "react";
 
 import { SupressionIcon } from "./icons";
@@ -46,11 +47,32 @@ interface PanelButtonProps {
 const PanelButton = LazyComponent<PanelButtonProps>(() => findByCode("Masks.PANEL_BUTTON"));
 
 const cl = classNameFactory("vc-rnnoise-");
-const getRnnoiseWasm = makeLazy(() => loadRnnoise({
-    url: rnnoiseWasmSrc(),
-    simdUrl: rnnoiseWasmSrc(true),
-}));
+const getRnnoiseWasm = makeLazy(() => {
+    Toasts.show({
+        id: Toasts.genId(),
+        type: Toasts.Type.MESSAGE,
+        message: "Loading RNNoise, your mic might be silent for a few seconds...",
+    });
+    return loadRnnoise({
+        url: rnnoiseWasmSrc(),
+        simdUrl: rnnoiseWasmSrc(true),
+    }).then(wasm => {
+        Toasts.show({
+            id: Toasts.genId(),
+            type: Toasts.Type.SUCCESS,
+            message: "RNNoise loaded, noise suppression is now enabled!",
+        });
+        return wasm;
+    }).catch(() => {
+        Toasts.show({
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            message: "Failed to load RNNoise, noise suppression won't work",
+        });
+    });
+});
 
+const logger = new Logger("RNNoise");
 const settings = definePluginSettings({}).withPrivateSettings<{ isEnabled: boolean; }>();
 const setEnabled = (enabled: boolean) => {
     settings.store.isEnabled = enabled;
@@ -66,7 +88,7 @@ function NoiseSupressionPopout() {
             <Switch checked={isEnabled} onChange={setEnabled} />
         </div>
         <div className={cl("popout-desc")}>
-            Enable AI noise suppression! Make some noise&mdash;like becoming an air conditioner, or a laptop fan&mdash;while speaking. Your friends will hear nothing but your beautiful voice ✨
+            Enable AI noise suppression! Make some noise&mdash;like becoming an air conditioner, or a vending machine fan&mdash;while speaking. Your friends will hear nothing but your beautiful voice ✨
         </div>
     </div>;
 }
@@ -128,6 +150,11 @@ export default definePlugin({
         await audioCtx.audioWorklet.addModule(rnnoiseWorkletSrc);
 
         const rnnoiseWasm = await getRnnoiseWasm();
+        if (!rnnoiseWasm) {
+            logger.warn("Failed to load RNNoise, noise suppression won't work");
+            return stream;
+        }
+
         const rnnoise = new RnnoiseWorkletNode(audioCtx, {
             wasmBinary: rnnoiseWasm,
             maxChannels: 1,
