@@ -170,7 +170,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 const overwriteValue = getOverwriteValue(bit, overwriteAllow, overwriteDeny);
                                 const computedPermissionValue = getComputedPermissionValue(overwriteValue, permissionValue);
 
-                                return <div className={cl("perms-perms-item")}>
+                                return <div className={cl("perms-perms-item")}
+                                    data-vc-permviewer-permission-value={permissionValue}
+                                    data-vc-permviewer-overwrite-value={overwriteValue}
+                                >
                                     <div className={cl("perms-perms-item-icon")}>
                                         <PermissionIcon permissionValue={computedPermissionValue ?? PermissionValue.Passthrough} />
                                     </div>
