@@ -44,6 +44,7 @@ if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
                 case "renderer.js.map":
                 case "vencordDesktopRenderer.js.map":
                 case "preload.js.map":
+                case "vencordDesktopPreload.js.map":
                 case "patcher.js.map":
                 case "vencordDesktopMain.js.map":
                     cb(join(__dirname, url));
