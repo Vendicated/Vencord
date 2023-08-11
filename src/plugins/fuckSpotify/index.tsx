@@ -7,10 +7,11 @@
 import "./fuckspotify.css";
 
 import { addAccessory } from "@api/MessageAccessories";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 async function youtuberify(link: string): Promise<string | undefined> {
@@ -20,8 +21,32 @@ async function youtuberify(link: string): Promise<string | undefined> {
     return await fetch(`https://youtuber.exhq.workers.dev/${link}`).then(it => it.text());
 }
 
+const settings = definePluginSettings({
+    useInvidious: {
+        description: "use invidious instance instead of youtube",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    invidiousLink: {
+        description: "Ignore bots",
+        type: OptionType.STRING,
+        default: "vid.puffyan.us"
+    },
+});
+
+function replaceYouTubeURL(originalURL: string, newDomain: string): string {
+    const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com/i;
+    console.log(originalURL);
+    if (youtubeRegex.test(originalURL)) {
+        const replacedURL = originalURL.replace(youtubeRegex, newDomain);
+        return "https://" + replacedURL;
+    } else {
+        throw new Error('The provided URL is not a YouTube link.');
+    }
+}
+
 export default definePlugin({
-    name: "fuck spotify",
+    name: "fuckSpotify",
     description: "i dont like spotify",
     authors: [Devs.echo],
     dependencies: ["MessageAccessoriesAPI"],
@@ -34,7 +59,7 @@ export default definePlugin({
             }]
         }
     ],
-
+    settings,
 
     start() {
         const Comp = (props: Record<string, any>) => {
@@ -46,7 +71,10 @@ export default definePlugin({
                 if (!link) {
                     return;
                 }
-                const theinfo = await youtuberify(link);
+                let theinfo = await youtuberify(link);
+                if (settings.store.useInvidious) {
+                    theinfo = replaceYouTubeURL(theinfo!, settings.store.invidiousLink);
+                }
                 return theinfo;
             }, {
                 fallbackValue: null,
