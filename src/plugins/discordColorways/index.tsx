@@ -19,6 +19,7 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Button } from "@webpack/common";
 
 export default definePlugin({
     name: "DiscordColorways",
@@ -39,7 +40,7 @@ export default definePlugin({
                 else if (key === "children") {
                     node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
                 } else if (key === "innertext") {
-                    node.innerText = props[key];
+                    node.textContent = props[key];
                 } else {
                     node.setAttribute(key === "className" ? "class" : key, props[key]);
                 }
@@ -63,7 +64,7 @@ export default definePlugin({
 
                         if (i + 1 == Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
                             if (document.getElementById("activeColorwayCSS")) {
-                                document.getElementById("activeColorwayCSS")!.innerText = colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import;
+                                document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import;
                             } else {
                                 document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import }));
                             }
@@ -75,6 +76,8 @@ export default definePlugin({
                     });
             });
         }
+        Vencord.Api.ServerList.addServerListElement(Vencord.Api.ServerList.ServerListRenderPosition.Above, () => {return <Button>test</Button>; });
+        Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above);
     },
     commands: [
         {
@@ -100,7 +103,7 @@ export default definePlugin({
                         else if (key === "children") {
                             node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
                         } else if (key === "innertext") {
-                            node.innerText = props[key];
+                            node.textContent = props[key];
                         } else {
                             node.setAttribute(key === "className" ? "class" : key, props[key]);
                         }
@@ -135,7 +138,7 @@ export default definePlugin({
                                 }
                                 Vencord.Settings.plugins.DiscordColorways.activeColorway = word;
                                 if (document.getElementById("activeColorwayCSS")) {
-                                    document.getElementById("activeColorwayCSS")!.innerText = colorways.filter(colorway => colorway.name === word)[0].import;
+                                    document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === word)[0].import;
                                 } else {
                                     document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === word)[0].import }));
                                 }
