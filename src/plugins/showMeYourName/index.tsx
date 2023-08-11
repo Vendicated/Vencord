@@ -71,7 +71,7 @@ export default definePlugin({
         try {
             let { username } = message.author;
             if (settings.store.displayNames)
-                username = message.author.globalName ?? username;
+                username = message.author["globalName"] ?? username; // TODO once globalName is added to User, change this
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
