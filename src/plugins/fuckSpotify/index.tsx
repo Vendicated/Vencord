@@ -28,7 +28,7 @@ const settings = definePluginSettings({
         default: false
     },
     invidiousLink: {
-        description: "Ignore bots",
+        description: "your invidious instance's domain",
         type: OptionType.STRING,
         default: "vid.puffyan.us"
     },
@@ -36,7 +36,6 @@ const settings = definePluginSettings({
 
 function replaceYouTubeURL(originalURL: string, newDomain: string): string {
     const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com/i;
-    console.log(originalURL);
     if (youtubeRegex.test(originalURL)) {
         const replacedURL = originalURL.replace(youtubeRegex, newDomain);
         return "https://" + replacedURL;
