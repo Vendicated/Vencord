@@ -17,13 +17,14 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import  definePlugin, { OptionType } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
-
+import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
 const settings = definePluginSettings({
     quantity: {
         description: "Amount of cats",
         type: OptionType.SLIDER,
+        restartNeeded: true,
         markers: makeRange(1, 10, 1),
         default: 1,
     },
@@ -38,7 +39,7 @@ export default definePlugin({
 
     start() {
 
-        for(var i = 0; i < Settings.plugins.oneko.quantity; i++) {
+        for(var i = 0; i < settings.store.quantity; i++) {
             fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/main/oneko.js")
                 .then(x => x.text())
                 .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
@@ -53,6 +54,6 @@ export default definePlugin({
     stop() {
         clearInterval(window.onekoInterval);
         delete window.onekoInterval;
-        document.getElementById("oneko")?.remove();
+        document.querySelectorAll("#oneko").forEach((oneko => oneko.remove()))
     }
 });
