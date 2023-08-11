@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -92,7 +92,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
     start() {
         addDeleteStyle();
@@ -183,7 +183,7 @@ export default definePlugin({
                     ignoreSelf && msg.author?.id === myId ||
                     ignoreUsers.includes(msg.author?.id) ||
                     ignoreChannels.includes(msg.channel_id) ||
-                    ignoreGuilds.includes(msg.guild_id);
+                    ignoreGuilds.includes(ChannelStore.getChannel(msg.channel_id)?.guild_id);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
