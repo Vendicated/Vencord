@@ -38,17 +38,14 @@ export default definePlugin({
     settings,
 
     start() {
-
-        for(var i = 0; i < settings.store.quantity; i++) {
-            fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/a0b6ac9adfebddca85cfcb1852ccbf43e60357af/oneko.js")
-                .then(x => x.text())
-                .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
-                .then(px => px.replace('nekoPosX = 32',"nekoPosX = Math.random() * window.innerWidth"))
-                .then(py => py.replace('nekoPosY = 32',"nekoPosY = Math.random() * window.innerHeight"))
-                .then(prx => prx.replaceAll("${nekoPosX - 16}px","${nekoPosX - 16 + " + `${Math.random() * (32 - -32) + -32}` + "}px"))
-                .then(pry => pry.replaceAll("${nekoPosY - 16}px","${nekoPosY - 16 + " + `${Math.random() * (32 - -32) + -32}` + "}px"))
-                .then(eval)
-        };
+        fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/a0b6ac9adfebddca85cfcb1852ccbf43e60357af/oneko.js")
+            .then(x => x.text())
+            .then(edit => edit.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
+            .replace('nekoPosX = 32',"nekoPosX = Math.random() * window.innerWidth")
+            .replace('nekoPosY = 32',"nekoPosY = Math.random() * window.innerHeight")
+            .replaceAll("${nekoPosX - 16}px","${nekoPosX - 16 + " + `${Math.random() * (32 - -32) + -32}` + "}px")
+            .replaceAll("${nekoPosY - 16}px","${nekoPosY - 16 + " + `${Math.random() * (32 - -32) + -32}` + "}px"))
+            .then(code => {for(var i = 0; i < settings.store.quantity; i++) {eval(code)}})
     },
 
     stop() {
