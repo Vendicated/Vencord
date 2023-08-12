@@ -52,7 +52,6 @@ function MemberCount() {
     return (
         <Flex id="vc-membercount" style={{
             marginTop: "1em",
-            marginBottom: "-.5em",
             paddingInline: "1em",
             justifyContent: "center",
             alignContent: "center",
