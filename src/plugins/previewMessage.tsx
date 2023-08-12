@@ -20,12 +20,8 @@ import { sendBotMessage } from "@api/Commands";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, SelectedChannelStore, Tooltip } from "@webpack/common";
-
-const DraftStore = findStoreLazy("DraftStore");
+import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, SelectedChannelStore, Tooltip } from "@webpack/common";
 const DRAFT_TYPE = 0;
-
 
 interface Props {
     type: {
@@ -35,21 +31,19 @@ interface Props {
 
 export function PreviewButton(chatBoxProps: Props) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
+    const channelId = SelectedChannelStore.getChannelId();
+    const draft = DraftStore.getDraft(channelId, DRAFT_TYPE);
+    if (!draft) return null;
 
     return (
         <Tooltip text="Preview Message">
-            {(tooltipProps: any) => (
+            {tooltipProps => (
                 <Button
                     {...tooltipProps}
-                    onClick={() => {
-                        const channelId = SelectedChannelStore.getChannelId();
-                        const draft = DraftStore.getDraft(channelId, DRAFT_TYPE);
-                        if (!draft) return;
-                        sendBotMessage(channelId, {
-                            content: draft,
-                        });
-                    }}
-                    disabled={DraftStore.getDraft(SelectedChannelStore.getChannelId(), DRAFT_TYPE).length === 0}
+                    onClick={
+                        () =>
+                            sendBotMessage(channelId, { content: draft, })
+                    }
                     size=""
                     look={ButtonLooks.BLANK}
                     innerClassName={ButtonWrapperClasses.button}
@@ -80,5 +74,4 @@ export default definePlugin({
     ],
 
     previewIcon: ErrorBoundary.wrap(PreviewButton, { noop: true }),
-
 });

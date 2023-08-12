@@ -148,3 +148,43 @@ export class EmojiStore extends FluxStore {
         get favoriteEmojisWithoutFetchingLatest(): Emoji[];
     };
 }
+
+export enum DraftType {
+    ChannelMessage = 0,
+    ThreadSettings = 1,
+    FirstThreadMessage = 2,
+    ApplicationLauncherCommand = 3
+}
+
+export interface DraftObject {
+    channelId: string;
+    timestamp: number;
+    draft: string;
+}
+
+type OuterDraft<T> = {
+    [userId: string]: {
+        [channelId: string]: T;
+    };
+};
+
+export type DraftState = OuterDraft<{
+    [key in DraftType]: Omit<DraftObject, "channelId">;
+}>;
+
+export type DraftLocalVars = {
+    drafts: DraftState;
+    getMaxDraftSize(): number;
+};
+
+
+export class DraftStore {
+    getDraft(channelId: string, type: DraftType): string;
+    getRecentlyEditedDrafts(type: DraftType): DraftObject[];
+    getState(): DraftState;
+    // idk what this does. never gets called :|
+    getThreadDraftWithParentMessageId?(arg: unknown): unknown;
+    getThreadSettings(channelId: string): unknown | null;
+    initialize(): void;
+    __getLocalVars(): DraftLocalVars;
+}

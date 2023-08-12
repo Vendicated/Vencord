@@ -52,6 +52,7 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 
 export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
+export let DraftStore: t.DraftStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
@@ -76,6 +77,7 @@ export const useStateFromStores: <T>(
 ) => T
     = findByCodeLazy("useStateFromStores");
 
+waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
 waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
