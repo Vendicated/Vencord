@@ -46,15 +46,34 @@ async function initThemes() {
         document.documentElement.appendChild(themesStyle);
     }
 
-    const { themeLinks } = Settings;
-    const links = themeLinks.map(link => `@import url("${link.trim()}");`).join("\n");
-    themesStyle.textContent = links;
+    const { themeLinks, enabledThemes } = Settings;
+
+    const links: string[] = [...themeLinks];
+
+    if (IS_WEB) {
+        for (const theme of enabledThemes) {
+            const themeData = await VencordNative.themes.getThemeData(theme);
+            if (!themeData) continue;
+            const blob = new Blob([themeData], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
+    } else {
+        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
+        links.push(...localThemes);
+    }
+
+    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initThemes();
+
     toggle(Settings.useQuickCss);
     addSettingsListener("useQuickCss", toggle);
 
-    initThemes();
     addSettingsListener("themeLinks", initThemes);
+    addSettingsListener("enabledThemes", initThemes);
+
+    if (!IS_WEB)
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
 });
