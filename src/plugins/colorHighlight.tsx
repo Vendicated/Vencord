@@ -109,7 +109,7 @@ export default definePlugin({
     patches: [{
         find: ".Messages.MESSAGE_EDITED,",
         replacement: {
-            match: /var \i,\i,\i=(\i)/gm,
+            match: /var \i,\i,\i=(\i)/,
             replace: "try {if ($1) $1.content = $self.replaceMessageContent($1); } catch {};$&"
         }
     }],
