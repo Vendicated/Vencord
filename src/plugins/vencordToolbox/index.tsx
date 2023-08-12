@@ -19,6 +19,7 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/react";
@@ -65,6 +66,15 @@ function VencordPopout(onClose: () => void) {
                 id="vc-toolbox-notifications"
                 label="Open Notification Log"
                 action={openNotificationLogModal}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-toolbox-quickcss-toggle"
+                checked={Settings.useQuickCss}
+                label={"Enable QuickCSS"}
+                action={() => {
+                    Settings.useQuickCss = !Settings.useQuickCss;
+                    onClose();
+                }}
             />
             <Menu.MenuItem
                 id="vc-toolbox-quickcss"
