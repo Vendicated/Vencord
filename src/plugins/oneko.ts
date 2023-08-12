@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 const settings = definePluginSettings({
     quantity: {
         description: "Amount of cats",
-        type: OptionType.SLIDER,
+        type: OptionType.SLIDER, // "y566666666444t" - My cat Coraline, stepping on my keyboard -- Korbo
         restartNeeded: true,
         markers: makeRange(1, 10, 1),
         default: 1,
@@ -40,7 +40,7 @@ export default definePlugin({
     start() {
 
         for(var i = 0; i < settings.store.quantity; i++) {
-            fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/main/oneko.js")
+            fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/a0b6ac9adfebddca85cfcb1852ccbf43e60357af/oneko.js")
                 .then(x => x.text())
                 .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
                 .then(px => px.replace('nekoPosX = 32',"nekoPosX = Math.random() * window.innerWidth"))
