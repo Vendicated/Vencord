@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "84a1b4e11d634dbfa1e5dd97a96de3ad",
             replacement: {
-                match: /84a1b4e11d634dbfa1e5dd97a96de3ad.mp3/,
+                match: "84a1b4e11d634dbfa1e5dd97a96de3ad.mp3",
                 replace: "b9411af07f154a6fef543e7e442e4da9.mp3",
             },
         },
