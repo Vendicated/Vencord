@@ -68,7 +68,8 @@ export default definePlugin({
             find: ".USER_PROFILE_ACTIVITY",
             replacement: [
                 {
-                    match: /getGlobalName\(\i\);(?<=displayProfile.{0,200})/,
+                    /* FIXME: old name is getGlobalName, new name is getName. Remove optional Global once stable has also migrated */
+                    match: /\.get(?:Global)?Name\(\i\);(?<=displayProfile.{0,200})/,
                     replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
                 },
                 PRONOUN_TOOLTIP_PATCH

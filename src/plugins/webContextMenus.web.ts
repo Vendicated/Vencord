@@ -86,7 +86,7 @@ export default definePlugin({
                 },
                 // Fix silly Discord calling the non web support copy
                 {
-                    match: /\w\.default\.copy/,
+                    match: /\i\.\i\.copy/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
                 }
             ]
@@ -102,7 +102,7 @@ export default definePlugin({
                     replace: "if(null=="
                 },
                 {
-                    match: /return\s*?\[\i\.default\.canCopyImage\(\)/,
+                    match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
                     replace: "return [true"
                 },
                 {
@@ -158,7 +158,7 @@ export default definePlugin({
                 },
                 {
                     // Change calls to DiscordNative.clipboard to us instead
-                    match: /\b\i\.default\.(copy|cut|paste)/g,
+                    match: /\b\i\.\i\.(copy|cut|paste)/g,
                     replace: "$self.$1"
                 }
             ]

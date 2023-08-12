@@ -34,7 +34,7 @@ export default definePlugin({
             },
         },
         {
-            find: 'preload:"none","aria',
+            find: ".embedGallerySide",
             replacement: {
                 match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
                 replace:
