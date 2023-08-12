@@ -34,7 +34,7 @@ const fetchProfileTheme = async (id, guildId = null) => {
 
     let themeString = "";
 
-    if (userProfile && userProfile.themeColors && userProfile.themeColors.length >= 2) {
+    if (userProfile?.themeColors?.length >= 2) {
         themeString += `User Primary: #${userProfile.themeColors[0].toString(16)} User Secondary: #${userProfile.themeColors[1].toString(16)}`;
     }
 
