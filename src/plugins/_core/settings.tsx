@@ -62,14 +62,14 @@ export default definePlugin({
         replacement: {
             get match() {
                 switch (Settings.plugins.Settings.settingsLocation) {
-                    case "top": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.USER_SETTINGS\}/;
-                    case "aboveNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.BILLING_SETTINGS\}/;
-                    case "belowNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.APP_SETTINGS\}/;
-                    case "belowActivity": return /(?<=\{section:(.{1,2})\.ID\.DIVIDER},)\{section:"changelog"/;
-                    case "bottom": return /\{section:(.{1,2})\.ID\.CUSTOM,\s*element:.+?}/;
+                    case "top": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
+                    case "aboveNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
+                    case "belowNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
+                    case "belowActivity": return /(?<=\{section:(\i)\.ID\.DIVIDER},)\{section:"changelog"/;
+                    case "bottom": return /\{section:(\i)\.ID\.CUSTOM,\s*element:.+?}/;
                     case "aboveActivity":
                     default:
-                        return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/;
+                        return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
