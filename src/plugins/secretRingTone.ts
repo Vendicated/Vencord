@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "SecretRingToneEnabler",
-    description: "Always play the secret version of the discord ringtone.",
+    description: "Always play the secret version of the discord ringtone",
     authors: [Devs.AndrewDLO],
     patches: [
         {
