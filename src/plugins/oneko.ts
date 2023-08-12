@@ -28,6 +28,18 @@ const settings = definePluginSettings({
         markers: makeRange(1, 10, 1),
         default: 1,
     },
+    skinEnabled: {
+        description: "Use custom skin",
+        type: OptionType.BOOLEAN,
+        restartNeeded: true,
+        default: false
+    },
+    skin: {
+        description: "Skin image URL",
+        type: OptionType.STRING,
+        restartNeeded: true,
+        disabled: () => settings.store.skin === false,
+    },
 });
 
 export default definePlugin({
@@ -40,7 +52,7 @@ export default definePlugin({
     start() {
         fetch("https://raw.githubusercontent.com/Korbaux/oneko.js/a0b6ac9adfebddca85cfcb1852ccbf43e60357af/oneko.js")
             .then(x => x.text())
-            .then(edit => {for(var i = 0; i < settings.store.quantity; i++) {eval(edit.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
+            .then(edit => {for(var i = 0; i < settings.store.quantity; i++) {eval(edit.replace("./oneko.gif", settings.store.skinEnabled ? settings.store.skin : "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
             .replace('nekoPosX = 32',"nekoPosX = Math.random() * window.innerWidth")
             .replace('nekoPosY = 32',"nekoPosY = Math.random() * window.innerHeight")
             .replaceAll("${nekoPosX - 16}px","${nekoPosX - 16 + " + `${Math.random() * (32 - -32) + -32}` + "}px")
