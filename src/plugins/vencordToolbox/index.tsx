@@ -19,6 +19,7 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/react";
@@ -26,7 +27,6 @@ import definePlugin from "@utils/types";
 import { findByCode } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
-import { Settings } from "Vencord";
 
 const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
 
@@ -67,15 +67,19 @@ function VencordPopout(onClose: () => void) {
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
+            <Menu.MenuCheckboxItem
+                id="vc-toolbox-quickcss-toggle"
+                checked={Settings.useQuickCss}
+                label={"Enable QuickCSS"}
+                action={() => {
+                    Settings.useQuickCss = !Settings.useQuickCss;
+                    onClose();
+                }}
+            />
             <Menu.MenuItem
                 id="vc-toolbox-quickcss"
                 label="Open QuickCSS"
                 action={() => VencordNative.quickCss.openEditor()}
-            />
-            <Menu.MenuItem
-                id="vc-toolbox-quickcss-toggle"
-                label={Settings.useQuickCss ? "Disable QuickCSS" : "Enable QuickCSS"}
-                action={() => Settings.useQuickCss = !Settings.useQuickCss}
             />
             {...pluginEntries}
         </Menu.Menu>
