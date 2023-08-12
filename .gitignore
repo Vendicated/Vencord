@@ -1,24 +1,37 @@
-dist
-node_modules
-
+# artifacts
 *.exe
+dist
+# artifacts: npm/pnpm
+node_modules
+# artifacts: Vencord
 vencord_installer
 
+# editor: IntelliJ IDEA
 .idea
+# editor: macOS Finder
 .DS_Store
 
-yarn.lock
+# unused artifacts: npm
 package-lock.json
+# unused artifacts: Yarn
+yarn.lock
 
+# logs
 *.log
+
+# unused logs: Lerna
+lerna-debug.log*
+# unused logs: npm
 npm-debug.log*
+# logs: pnpm
+.pnpm-debug.log*
+# unused logs: TypeScript
+*.tsbuildinfo
+# unused logs: Yarn
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-*.tsbuildinfo
 
-src/userplugins
-
+# misc: Vencord
 ExtensionCache/
 settings/
+src/userplugins
