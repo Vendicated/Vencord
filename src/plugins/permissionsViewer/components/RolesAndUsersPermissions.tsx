@@ -22,11 +22,11 @@ import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenuApi, FluxDispatcher, Fragment, GuildMemberStore, GuildStore, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Fragment, GuildMemberStore, GuildStore, Menu, PermissionsBits, ScrollerThin, Switch, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
-import { cl, getComputedPermissionValue, getOverwriteValue, getPermissionDescription, getPermissionString as getPermissionTitle, getPermissionValue } from "../utils";
+import { cl, getComputedPermissionValue, getOverwriteValue, getPermissionDescription, getPermissionString as getPermissionTitle, getPermissionValue, isOverwriteValueRelevant, isPermissionValueRelevant } from "../utils";
 import { PermissionIcon } from "./icons";
 
 export const enum PermissionType {
@@ -67,7 +67,11 @@ function PermissionItem({ permissionName, permissionValue, overwriteValue, ...pr
 } & React.HTMLAttributes<any>) {
     const computedPermissionValue = getComputedPermissionValue(overwriteValue, permissionValue);
 
-    return (<div {...props} className={classes(props.className, cl("perm-item"))}
+    return (<div {...props}
+        className={classes(props.className, cl(
+            "perm-item",
+            !isPermissionValueRelevant(permissionValue) && !isOverwriteValueRelevant(overwriteValue) ? "perm-is-irrelevant" : undefined,
+        ))}
         data-vc-permviewer-perm-name={permissionName}
         data-vc-permviewer-perm-value={permissionValue}
         data-vc-permviewer-perm-overwrite-value={overwriteValue}
@@ -107,6 +111,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
     const [selectedItemIndex, selectItem] = useState(0);
     const selectedItem = permissions[selectedItemIndex];
+
+    const [irrelevantPermissionsHidden, setIrrelevantPermissionsHidden] =
+        useState(settings.store.irrelevantPermissionsHiddenByDefault);
 
     const roles = GuildStore.getRoles(guild.id);
 
@@ -188,7 +195,18 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 );
                             })}
                         </ScrollerThin>
-                        <ScrollerThin className={cl("perms-perms")}>
+                        <ScrollerThin className={cl(
+                            "perms-perms",
+                            irrelevantPermissionsHidden ? "perms-perms-hide-irrelevant-permissions" : undefined
+                        )}>
+                            <div className={cl("perms-perms-settings")}>
+                                <Switch className={cl("perms-perms-settings-setting")}
+                                    key="vc-permviewer-hide-irrelevant-permissions"
+                                    value={irrelevantPermissionsHidden}
+                                    onChange={v => setIrrelevantPermissionsHidden(v)}
+                                    hideBorder={true}
+                                >Hide irrelevant permissions</Switch>
+                            </div>
                             <div className={cl("perms-perms-items")}>
                                 {Object.entries(PermissionsBits).map(([permissionName, permissionBit]) => {
                                     const { overwriteAllow, overwriteDeny, permissions } = selectedItem;

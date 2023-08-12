@@ -140,6 +140,10 @@
     column-gap: var(--vc-permviewer-perm-item-column-gap);
 }
 
+.vc-permviewer-perms-perms-hide-irrelevant-permissions .vc-permviewer-perm-is-irrelevant {
+    display: none;
+}
+
 .vc-permviewer-perm-item-icon {
     grid-column: vc-permviewer-perm-item-icon;
     grid-row: vc-permviewer-perm-item-icon;

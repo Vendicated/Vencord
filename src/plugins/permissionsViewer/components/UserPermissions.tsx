@@ -104,8 +104,8 @@ function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: G
                     guildMember.nick || UserStore.getUser(guildMember.userId).username
                 )
             }
-            onDropDownClick={state => settings.store.defaultPermissionsDropdownState = !state}
-            defaultState={settings.store.defaultPermissionsDropdownState}
+            onDropDownClick={state => settings.store.permissionsDropdownOpenByDefault = !state}
+            defaultState={settings.store.permissionsDropdownOpenByDefault}
             buttons={[
                 (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (
