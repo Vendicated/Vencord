@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -11,7 +11,7 @@
         "type": "git",
         "url": "git+https://github.com/Vendicated/Vencord.git"
     },
-    "license": "GPL-3.0",
+    "license": "GPL-3.0-or-later",
     "author": "Vendicated",
     "directories": {
         "doc": "docs"
@@ -33,6 +33,7 @@
     "dependencies": {
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
+        "eslint-plugin-simple-header": "^1.0.1",
         "fflate": "^0.7.4",
         "nanoid": "^4.0.2",
         "virtual-merge": "^1.0.1"
@@ -51,7 +52,6 @@
         "esbuild": "^0.15.18",
         "eslint": "^8.28.0",
         "eslint-import-resolver-alias": "^1.1.2",
-        "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-path-alias": "^1.0.0",
         "eslint-plugin-simple-import-sort": "^10.0.0",
         "eslint-plugin-unused-imports": "^2.0.0",
@@ -69,7 +69,8 @@
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
-            "eslint@8.28.0": "patches/eslint@8.28.0.patch"
+            "eslint@8.28.0": "patches/eslint@8.28.0.patch",
+            "eslint-plugin-simple-header@1.0.1": "patches/eslint-plugin-simple-header@1.0.1.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [

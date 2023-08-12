@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Review, ReviewDBUser } from "./entities";
 import { settings } from "./settings";
 import { authorize, showToast } from "./utils";
