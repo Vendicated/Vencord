@@ -21,7 +21,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
-import { DraftType } from "@webpack/types";
 
 interface Props {
     type: {
@@ -31,7 +30,7 @@ interface Props {
 
 function getDraft() {
     const channelId = SelectedChannelStore.getChannelId();
-    const draft = DraftStore.getDraft(channelId, DraftType.ChannelMessage);
+    const draft = DraftStore.getDraft(channelId, 0);
     return { draft, channelId, };
 }
 
