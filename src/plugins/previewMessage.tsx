@@ -28,15 +28,15 @@ interface Props {
     };
 }
 
-function getDraft() {
-    const channelId = SelectedChannelStore.getChannelId();
+function getDraft(channelId: string) {
     const draft = DraftStore.getDraft(channelId, 0);
-    return { draft, channelId, };
+    return draft;
 }
 
 export function PreviewButton(chatBoxProps: Props) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
-    const { draft, channelId } = getDraft();
+    const channelId = SelectedChannelStore.getChannelId();
+    const draft = getDraft(channelId);
 
     if (!draft) return null;
 
@@ -45,10 +45,14 @@ export function PreviewButton(chatBoxProps: Props) {
             {tooltipProps => (
                 <Button
                     {...tooltipProps}
-                    onClick={
-                        () =>
-                            sendBotMessage(channelId, { content: draft, author: UserStore.getCurrentUser() })
-                    }
+                    onClick={() =>
+                        sendBotMessage(
+                            channelId,
+                            {
+                                content: getDraft(channelId),
+                                author: UserStore.getCurrentUser()
+                            }
+                        )}
                     size=""
                     look={ButtonLooks.BLANK}
                     innerClassName={ButtonWrapperClasses.button}

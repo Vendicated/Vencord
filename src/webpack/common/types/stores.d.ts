@@ -149,12 +149,11 @@ export class EmojiStore extends FluxStore {
     };
 }
 
-export enum DraftType {
-    ChannelMessage = 0,
-    ThreadSettings = 1,
-    FirstThreadMessage = 2,
-    ApplicationLauncherCommand = 3
-}
+type DraftType = 0 | 1 | 2 | 3;
+// ChannelMessage = 0,
+// ThreadSettings = 1,
+// FirstThreadMessage = 2,
+// ApplicationLauncherCommand = 3
 
 export interface DraftObject {
     channelId: string;
@@ -162,21 +161,13 @@ export interface DraftObject {
     draft: string;
 }
 
-type OuterDraft<T> = {
+interface DraftState {
     [userId: string]: {
-        [channelId: string]: T;
-    };
-};
-
-export type DraftState = OuterDraft<{
-    [key in DraftType]: Omit<DraftObject, "channelId">;
-}>;
-
-export type DraftLocalVars = {
-    drafts: DraftState;
-    getMaxDraftSize(): number;
-};
-
+        [channelId: string]: {
+            [key in DraftType]?: Omit<DraftObject, "channelId">;
+        } | undefined;
+    } | undefined;
+}
 
 export class DraftStore {
     getDraft(channelId: string, type: DraftType): string;
@@ -186,5 +177,5 @@ export class DraftStore {
     getThreadDraftWithParentMessageId?(arg: unknown): unknown;
     getThreadSettings(channelId: string): unknown | null;
     initialize(): void;
-    __getLocalVars(): DraftLocalVars;
+    __getLocalVars(): { drafts: DraftState; getMaxDraftSize(): number; };
 }
