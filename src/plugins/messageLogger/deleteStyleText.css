@@ -4,7 +4,7 @@
 }
 
 /* Bot "thinking" text highlighting */
-.messagelogger-deleted [class*="colorStandard-"] :is(div) {
+div.messagelogger-deleted [class*="colorStandard-"] {
     color: #f04747 !important;
 }
 
