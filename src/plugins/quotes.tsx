@@ -43,7 +43,7 @@ export default definePlugin({
 
     async start() {
         addButton("Quote", message => {
-            return message?.type === 0 && message?.content?.length > 0
+            return message?.content?.length
                 ? {
                     label: "Quote",
                     icon: QuoteIcon,
