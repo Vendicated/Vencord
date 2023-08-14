@@ -245,9 +245,7 @@ function handleKeybinds(e: KeyboardEvent) {
         closeTab(currentlyOpenTab);
     }
     else if (["T", "t"].includes(e.key) && e.ctrlKey && e.shiftKey) {
-        if (!closedTabs.length) return;
-        const tab = closedTabs.pop()!;
-        createTab(tab, true);
+        reopenClosedTab();
     }
 }
 
@@ -276,25 +274,6 @@ function moveToTab(id: number) {
     else if (tab.channelId !== SelectedChannelStore.getChannelId() || tab.guildId !== SelectedGuildStore.getGuildId())
         NavigationRouter.transitionToGuild(tab.guildId, tab.channelId);
     else update();
-}
-
-const saveTabs = async (userId: string) => {
-    if (!userId) return;
-
-    DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => {
-        return {
-            ...(old ?? {}),
-            [userId]: { openTabs, openTabIndex: openTabs.findIndex(t => t.id === currentlyOpenTab) }
-        };
-    });
-};
-
-function setOpenTab(id: number) {
-    const i = openTabs.findIndex(v => v.id === id);
-    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
-
-    currentlyOpenTab = id;
-    openTabHistory.push(id);
 }
 
 function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, setReady: (v: boolean) => void) {
@@ -340,6 +319,31 @@ function openStartupTabs(props: BasicChannelTabsProps & { userId: string; }, set
     if (!openTabs.length) createTab({ channelId: props.channelId, guildId: props.guildId }, true, undefined, false);
     for (let i = 0; i < openTabHistory.length; i++) openTabHistory.pop();
     moveToTab(currentlyOpenTab);
+}
+
+function reopenClosedTab() {
+    if (!closedTabs.length) return;
+    const tab = closedTabs.pop()!;
+    createTab(tab, true);
+}
+
+const saveTabs = async (userId: string) => {
+    if (!userId) return;
+
+    DataStore.update<PersistedTabs>("ChannelTabs_openChannels_v2", old => {
+        return {
+            ...(old ?? {}),
+            [userId]: { openTabs, openTabIndex: openTabs.findIndex(t => t.id === currentlyOpenTab) }
+        };
+    });
+};
+
+function setOpenTab(id: number) {
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
+    currentlyOpenTab = id;
+    openTabHistory.push(id);
 }
 
 function setUpdaterFunction(fn: () => void) {
@@ -443,7 +447,7 @@ function useBookmarks(userId: string): UseBookmark {
 }
 
 export const ChannelTabsUtils = {
-    bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, handleChannelSwitch,
-    handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
-    saveTabs, openStartupTabs, setUpdaterFunction, switchChannel, toggleCompactTab, useBookmarks
+    bookmarkPlaceholderName, closeOtherTabs, closeTab, closedTabs, closeTabsToTheRight, createTab,
+    handleChannelSwitch, handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
+    openStartupTabs, reopenClosedTab, saveTabs, setUpdaterFunction, switchChannel, toggleCompactTab, useBookmarks
 };

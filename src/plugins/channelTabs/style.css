@@ -78,11 +78,6 @@
     border-radius: 9999px;
 }
 
-.vc-channeltabs-bookmark:hover {
-    background: var(--bg-overlay-hover);
-    background-color: var(--background-modifier-hover);
-}
-
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
     margin-left: 0.25rem;
 }
@@ -121,7 +116,8 @@
     background-color: var(--background-modifier-selected);
 }
 
-.vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
+.vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected),
+.vc-channeltabs-bookmark:hover  {
     background: var(--bg-overlay-hover);
     background-color: var(--background-modifier-hover);
 }

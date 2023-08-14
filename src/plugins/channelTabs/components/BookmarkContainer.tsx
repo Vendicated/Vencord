@@ -31,7 +31,11 @@ const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
 const FolderIcon = LazyComponent(() => findByCode("M20 7H12L10.553 5.106C10.214"));
 
 function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
-    if ("bookmarks" in bookmark) return <FolderIcon height={16} width={16} color={bookmark.iconColor} />;
+    if ("bookmarks" in bookmark) return <FolderIcon
+        height={16}
+        width={16}
+        color={bookmark.iconColor}
+    />;
 
     const channel = ChannelStore.getChannel(bookmark.channelId);
     const guild = GuildStore.getGuild(bookmark.guildId);

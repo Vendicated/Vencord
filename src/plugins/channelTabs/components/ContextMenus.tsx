@@ -24,7 +24,7 @@ import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore
 
 import { Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 
-const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab } = ChannelTabsUtils;
+const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab, reopenClosedTab } = ChannelTabsUtils;
 
 const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
@@ -203,7 +203,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
 
 export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
-    const { openTabs } = ChannelTabsUtils;
+    const { openTabs, closedTabs } = ChannelTabsUtils;
     const [compact, setCompact] = useState(tab.compact);
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
@@ -230,7 +230,6 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                 action={() => {
                     setCompact(compact => !compact);
                     toggleCompactTab(tab.id);
-                    // FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
                 }}
             />
         </Menu.MenuGroup>
@@ -253,6 +252,13 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                 label="Close Tabs to the Right"
                 disabled={openTabs.indexOf(tab) === openTabs.length - 1}
                 action={() => closeTabsToTheRight(tab.id)}
+            />
+            <Menu.MenuItem
+                key="reopen-closed-tab"
+                id="reopen-closed-tab"
+                label="Reopen Closed Tab"
+                disabled={!(closedTabs.length)}
+                action={() => reopenClosedTab()}
             />
         </Menu.MenuGroup>}
         <Menu.MenuGroup>
