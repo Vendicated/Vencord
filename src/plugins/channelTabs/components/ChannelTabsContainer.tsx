@@ -61,10 +61,11 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         };
 
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
-        document.addEventListener("keydown", handleKeybinds);
+        // TODO: fix conflicts with discord's keybinds
+        // document.addEventListener("keydown", handleKeybinds);
         return () => {
             FluxDispatcher.unsubscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
-            document.removeEventListener("keydown", handleKeybinds);
+            // document.removeEventListener("keydown", handleKeybinds);
         };
     }, []);
 

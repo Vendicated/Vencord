@@ -151,30 +151,30 @@ export default definePlugin({
         ChannelTabsUtils.createTab(tab, false, message.id);
     },
 
-    settingsAboutComponent: () => {
-        // @ts-ignore
-        const { FormTitle, FormSection, FormText, KeyCombo } = Forms;
-        return <>
-            <FormTitle tag="h3">Keybinds</FormTitle>
-            <Flex flexDirection="row">
-                <FormSection>
-                    <FormTitle>Switch between tabs</FormTitle>
-                    <KeyCombo shortcut="mod+tab" />
-                    <KeyCombo shortcut="mod+shift+tab" />
-                </FormSection>
-                <FormSection>
-                    <FormTitle>Open and close tabs</FormTitle>
-                    <KeyCombo shortcut="mod+n" />
-                    <KeyCombo shortcut="mod+w" />
-                </FormSection>
-                <FormSection>
-                    <Forms.FormTitle>Reopen a recently closed tab</Forms.FormTitle>
-                    <KeyCombo shortcut="mod+shift+t" />
-                </FormSection>
-            </Flex>
-            <FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</FormText>
-        </>;
-    },
+    // settingsAboutComponent: () => {
+    //     // @ts-ignore
+    //     const { FormTitle, FormSection, FormText, KeyCombo } = Forms;
+    //     return <>
+    //         <FormTitle tag="h3">Keybinds</FormTitle>
+    //         <Flex flexDirection="row">
+    //             <FormSection>
+    //                 <FormTitle>Switch between tabs</FormTitle>
+    //                 <KeyCombo shortcut="mod+tab" />
+    //                 <KeyCombo shortcut="mod+shift+tab" />
+    //             </FormSection>
+    //             <FormSection>
+    //                 <FormTitle>Open and close tabs</FormTitle>
+    //                 <KeyCombo shortcut="mod+n" />
+    //                 <KeyCombo shortcut="mod+w" />
+    //             </FormSection>
+    //             <FormSection>
+    //                 <Forms.FormTitle>Reopen a recently closed tab</Forms.FormTitle>
+    //                 <KeyCombo shortcut="mod+shift+t" />
+    //             </FormSection>
+    //         </Flex>
+    //         <FormText>You can also Ctrl+click on the Jump button of a search result to open it in a new tab</FormText>
+    //     </>;
+    // },
 
     util: ChannelTabsUtils,
 });
