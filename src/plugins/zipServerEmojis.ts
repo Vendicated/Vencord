@@ -19,7 +19,7 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { EmojiStore } from "@webpack/common";
+import { EmojiStore, GuildStore } from "@webpack/common";
 import { zipSync } from "fflate";
 
 export default definePlugin({
@@ -47,9 +47,6 @@ export default definePlugin({
                         content: "Server ID is invalid",
                     });
                 }
-                sendBotMessage(cmdCtx.channel.id, {
-                    content: "This shouldn't take long...",
-                });
 
                 const fetchEmojis = async e => {
                     const filename = e.id + (e.animated ? ".gif" : ".png");
@@ -60,18 +57,21 @@ export default definePlugin({
 
                 Promise.all(emojiPromises)
                     .then(results => {
+                        sendBotMessage(cmdCtx.channel.id, {
+                            content: `Successfully zipped emojis from **${GuildStore.getGuild(opts[0].value).name}**!`,
+                        });
                         const emojis = zipSync(Object.fromEntries(results.map(({ file, filename }) => [filename, file])));
                         const blob = new Blob([emojis], { type: "application/zip" });
                         const link = document.createElement("a");
                         link.href = URL.createObjectURL(blob);
-                        link.download = "emojis.zip";
+                        link.download = `emojis-${opts[0].value}.zip`;
                         link.click();
                         link.remove();
                     })
                     .catch(error => {
                         console.error(error);
                         sendBotMessage(cmdCtx.channel.id, {
-                            content: `Something went wrong: ${error}`,
+                            content: `Something went wrong when zipping that server's emojis: ${error}`,
                         });
                     });
             },
