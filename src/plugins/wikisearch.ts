@@ -59,7 +59,7 @@ export default definePlugin({
                 if (Settings.plugins.Wikisearch.fancyEmbed === false) {
                     const data = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${word}&limit=1&namespace=0&format=json&origin=*`).then(response => response.json())
                         .catch(err => {
-                            console.log(err);
+                            new Logger("WikiSearch").error("Failed to lookup", word, err);
                             sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
                             return null;
                         });
