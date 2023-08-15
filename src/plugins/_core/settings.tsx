@@ -19,7 +19,6 @@
 import { addContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, SettingsRouter } from "@webpack/common";
 
@@ -63,19 +62,14 @@ export default definePlugin({
         replacement: {
             get match() {
                 switch (Settings.plugins.Settings.settingsLocation) {
-                    case "top": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.USER_SETTINGS\}/;
-                    case "aboveNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.BILLING_SETTINGS\}/;
-                    case "belowNitro": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.APP_SETTINGS\}/;
-                    case "aboveActivity": return /\{section:(.{1,2})\.ID\.HEADER,\s*label:(.{1,2})\..{1,2}\.Messages\.ACTIVITY_SETTINGS\}/;
-                    case "belowActivity": return /(?<=\{section:(.{1,2})\.ID\.DIVIDER},)\{section:"changelog"/;
-                    case "bottom": return /\{section:(.{1,2})\.ID\.CUSTOM,\s*element:.+?}/;
-                    default: {
-                        new Logger("Settings").error(
-                            new Error("No switch case matched????? Don't mess with the settings, silly")
-                        );
-                        // matches nothing
-                        return /(?!a)a/;
-                    }
+                    case "top": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
+                    case "aboveNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
+                    case "belowNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
+                    case "belowActivity": return /(?<=\{section:(\i)\.ID\.DIVIDER},)\{section:"changelog"/;
+                    case "bottom": return /\{section:(\i)\.ID\.CUSTOM,\s*element:.+?}/;
+                    case "aboveActivity":
+                    default:
+                        return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
@@ -88,48 +82,57 @@ export default definePlugin({
         return [
             {
                 section: ID.HEADER,
-                label: "Vencord"
+                label: "Vencord",
+                className: "vc-settings-header"
             },
             {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: require("@components/VencordSettings/VencordTab").default
+                element: require("@components/VencordSettings/VencordTab").default,
+                className: "vc-settings"
             },
             {
                 section: "VencordPlugins",
                 label: "Plugins",
                 element: require("@components/VencordSettings/PluginsTab").default,
+                className: "vc-plugins"
             },
             {
                 section: "VencordThemes",
                 label: "Themes",
                 element: require("@components/VencordSettings/ThemesTab").default,
+                className: "vc-themes"
             },
             !IS_WEB && {
                 section: "VencordUpdater",
                 label: "Updater",
                 element: require("@components/VencordSettings/UpdaterTab").default,
+                className: "vc-updater"
             },
             {
                 section: "VencordCloud",
                 label: "Cloud",
                 element: require("@components/VencordSettings/CloudTab").default,
+                className: "vc-cloud"
             },
             {
                 section: "VencordSettingsSync",
                 label: "Backup & Restore",
                 element: require("@components/VencordSettings/BackupAndRestoreTab").default,
+                className: "vc-backup-restore"
             },
             IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
                 element: require("@components/VencordSettings/PatchHelperTab").default,
+                className: "vc-patch-helper"
             },
             // TODO: make this use customSections
             IS_VENCORD_DESKTOP && {
                 section: "VencordDesktop",
                 label: "Desktop Settings",
                 element: VencordDesktop.Components.Settings,
+                className: "vc-desktop-settings"
             },
             ...this.customSections.map(func => func(ID)),
             {
