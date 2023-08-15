@@ -33,7 +33,7 @@ export default LazyComponent(() => {
     // this is terrible, blame mantika
     const p = filters.byProps;
     const [
-        { cozyMessage, buttons, message, groupStart },
+        { cozyMessage, buttons, message, buttonsInner, groupStart },
         { container, isHeader },
         { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
@@ -134,7 +134,7 @@ export default LazyComponent(() => {
                     <div className={classes(container, isHeader, buttons)} style={{
                         padding: "0px",
                     }}>
-                        <div className={buttonClasses.wrapper} >
+                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                             <ReportButton onClick={reportRev} />
 
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (
