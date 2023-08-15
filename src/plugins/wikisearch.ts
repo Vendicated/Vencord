@@ -21,7 +21,7 @@ import { Logger } from "@utils/Logger";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { RestAPI } from "@webpack/common";
-import { Settings } from "Vencord";
+import { Settings } from "@api/settings";
 
 export default definePlugin({
     name: "Wikisearch",
