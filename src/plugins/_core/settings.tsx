@@ -127,13 +127,6 @@ export default definePlugin({
                 element: require("@components/VencordSettings/PatchHelperTab").default,
                 className: "vc-patch-helper"
             },
-            // TODO: make this use customSections
-            IS_VENCORD_DESKTOP && {
-                section: "VencordDesktop",
-                label: "Desktop Settings",
-                element: VencordDesktop.Components.Settings,
-                className: "vc-desktop-settings"
-            },
             ...this.customSections.map(func => func(ID)),
             {
                 section: ID.DIVIDER
@@ -175,7 +168,7 @@ export default definePlugin({
     get additionalInfo() {
         if (IS_DEV) return " (Dev)";
         if (IS_WEB) return " (Web)";
-        if (IS_VENCORD_DESKTOP) return ` (VencordDesktop v${VencordDesktopNative.app.getVersion()})`;
+        if (IS_VESKTOP) return ` (Vesktop v${VesktopNative.app.getVersion()})`;
         if (IS_STANDALONE) return " (Standalone)";
         return "";
     },

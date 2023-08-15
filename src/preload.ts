@@ -28,7 +28,7 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 // Discord
 if (location.protocol !== "data:") {
     // #region cssInsert
-    const rendererCss = join(__dirname, IS_VENCORD_DESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
+    const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
     const style = document.createElement("style");
     style.id = "vencord-css-core";
