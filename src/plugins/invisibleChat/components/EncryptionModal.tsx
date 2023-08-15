@@ -35,7 +35,7 @@ function EncModal(props: ModalProps) {
     const [password, setPassword] = React.useState("password");
     const [noCover, setNoCover] = React.useState(false);
 
-    const isValid = secret && (noCover || (cover && /\w \w/.test(cover)));
+    const isValid = secret && (noCover || (cover && cover.trim().split(" ").length > 1));
 
     return (
         <ModalRoot {...props}>
