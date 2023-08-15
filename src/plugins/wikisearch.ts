@@ -17,11 +17,11 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Logger } from "@utils/Logger";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { RestAPI } from "@webpack/common";
-import { Settings } from "@api/Settings";
 
 export default definePlugin({
     name: "Wikisearch",
