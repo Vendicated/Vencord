@@ -21,6 +21,8 @@ import { access, readFile } from "fs/promises";
 import { join } from "path";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
+import { getPluginTarget } from "./utils.mjs";
+
 interface Dev {
     name: string;
     id: string;
@@ -157,11 +159,10 @@ async function parseFile(fileName: string) {
 
         if (!data.name || !data.description || !data.authors) throw fail("name, description or authors are missing");
 
-        const fileBits = fileName.split(".");
-        if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1)!)) {
-            const mod = fileBits.at(-2)!;
-            if (!["web", "discordDesktop", "vencordDesktop", "dev"].includes(mod)) throw fail(`invalid target ${fileBits.at(-2)}`);
-            data.target = mod as any;
+        const target = getPluginTarget(fileName);
+        if (target) {
+            if (!["web", "discordDesktop", "vencordDesktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
+            data.target = target as any;
         }
 
         return data;

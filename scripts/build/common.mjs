@@ -27,6 +27,7 @@ import { promisify } from "util";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };
+import { getPluginTarget } from "../utils.mjs";
 
 export const VERSION = PackageJSON.version;
 export const BUILD_TIMESTAMP = Date.now();
@@ -81,14 +82,13 @@ export const globPlugins = kind => ({
                     if (file.startsWith("_") || file.startsWith(".")) continue;
                     if (file === "index.ts") continue;
 
-                    const fileBits = file.split(".");
-                    if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1))) {
-                        const mod = fileBits.at(-2);
-                        if (mod === "dev" && !watch) continue;
-                        if (mod === "web" && kind === "discordDesktop") continue;
-                        if (mod === "desktop" && kind === "web") continue;
-                        if (mod === "discordDesktop" && kind !== "discordDesktop") continue;
-                        if (mod === "vencordDesktop" && kind !== "vencordDesktop") continue;
+                    const target = getPluginTarget(file);
+                    if (target) {
+                        if (target === "dev" && !watch) continue;
+                        if (target === "web" && kind === "discordDesktop") continue;
+                        if (target === "desktop" && kind === "web") continue;
+                        if (target === "discordDesktop" && kind !== "discordDesktop") continue;
+                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue;
                     }
 
                     const mod = `p${i}`;
