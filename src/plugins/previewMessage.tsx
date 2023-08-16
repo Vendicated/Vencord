@@ -70,7 +70,7 @@ export function PreviewButton(chatBoxProps: Props) {
 
 export default definePlugin({
     name: "PreviewMessage",
-    description: "Lets you preview your message before sending it.",
+    description: "Lets you preview your message before sending it",
     authors: [Devs.Aria],
     patches: [
         {
