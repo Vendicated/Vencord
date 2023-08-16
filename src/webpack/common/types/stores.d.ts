@@ -169,7 +169,7 @@ interface DraftState {
     } | undefined;
 }
 
-export class DraftStore {
+export class DraftStore extends Store {
     getDraft(channelId: string, type: DraftType): string;
     getRecentlyEditedDrafts(type: DraftType): DraftObject[];
     getState(): DraftState;
