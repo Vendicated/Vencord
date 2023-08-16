@@ -22,16 +22,14 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
 
+const DRAFT_TYPE_CHANNEL_MESSAGE = 0;
 interface Props {
     type: {
         analyticsName: string;
     };
 }
 
-function getDraft(channelId: string) {
-    const draft = DraftStore.getDraft(channelId, 0);
-    return draft;
-}
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DRAFT_TYPE_CHANNEL_MESSAGE);
 
 export function PreviewButton(chatBoxProps: Props) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
