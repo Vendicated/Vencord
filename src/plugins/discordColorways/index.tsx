@@ -28,6 +28,18 @@ import style from "./style.css?managed";
 
 var colorways = [];
 
+if (!Settings.plugins.DiscordColorways.colorwaySourceFiles) {
+    Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
+}
+
+function findByMatchingProperties(set, properties) {
+    return set.filter(function (entry) {
+        return Object.keys(properties).every(function (key) {
+            return entry[key] === properties[key];
+        });
+    });
+}
+
 const createElement = (type, props, ...children) => {
     if (typeof type === "function") return type({ ...props, children: [].concat() });
 
@@ -50,13 +62,14 @@ const createElement = (type, props, ...children) => {
 };
 
 const refreshColorways = () => {
-    colorways = [];
     Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
         fetch(colorwayList)
             .then(response => response.json())
             .then(data => {
                 data.colorways?.map(color => {
-                    colorways.push(color);
+                    if (!findByMatchingProperties(colorways, color)) {
+                        colorways.push(color);
+                    }
                 });
             })
             .catch(err => {
@@ -65,25 +78,6 @@ const refreshColorways = () => {
             });
     });
 };
-
-const refreshColorwaysPromised = new Promise((resolve, reject) => {
-    colorways = [];
-    Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
-        fetch(colorwayList)
-            .then(response => response.json())
-            .then(data => {
-                data.colorways?.map(color => {
-                    colorways.push(color);
-                });
-                if (i + 1 === colorwayList.length) { resolve(colorways); }
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-                reject(err);
-            });
-    });
-});
 
 
 const ColorwaysButton = () => (
@@ -148,9 +142,6 @@ export default definePlugin({
     start: () => {
         enableStyle(style);
         addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
-        if (!Settings.plugins.DiscordColorways.colorwaySourceFiles) {
-            Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
-        }
         refreshColorways();
 
         if (Settings.plugins.DiscordColorways.activeColorway) {
