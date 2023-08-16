@@ -17,6 +17,7 @@
 */
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -50,7 +51,7 @@ const createElement = (type, props, ...children) => {
 
 const refreshColorways = () => {
     colorways = [];
-    Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
+    Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
         fetch(colorwayList)
             .then(response => response.json())
             .then(data => {
@@ -65,11 +66,30 @@ const refreshColorways = () => {
     });
 };
 
+const refreshColorwaysPromised = new Promise((resolve, reject) => {
+    colorways = [];
+    Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
+        fetch(colorwayList)
+            .then(response => response.json())
+            .then(data => {
+                data.colorways?.map(color => {
+                    colorways.push(color);
+                });
+                if (i + 1 === colorwayList.length) { resolve(colorways); }
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+                reject(err);
+            });
+    });
+});
+
 
 const ColorwaysButton = () => (
-    <div className="ColorwaySelectorBtnContainer" onClick={refreshColorways}>
-        <div className="ColorwaySelectorBtn" onClick={() => openModal(props => <SelectorModal modalProps={props} />)}><div className="colorwaySelectorIcon"></div></div>
-    </div>
+    <div className="ColorwaySelectorBtnContainer">
+        <div className="ColorwaySelectorBtn" onClick={() => { refreshColorways(); openModal(props => <SelectorModal modalProps={props} />); }}><div className="colorwaySelectorIcon"></div></div>
+    </div >
 );
 
 
@@ -82,16 +102,16 @@ function SelectorModal({ modalProps }: { modalProps: ModalProps; }) {
                     <div className="discordColorway" id="colorway-refreshcolorway" onClick={refreshColorways}><div className="colorwayRefreshIcon"></div></div>
                     {colorways.map((color, ind) => {
                         // eslint-disable-next-line no-unneeded-ternary
-                        return <div className={Vencord.Settings.plugins.DiscordColorways.activeColorway === color.name ? "discordColorway active" : "discordColorway"} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false} onClick={e => {
+                        return <div className={Settings.plugins.DiscordColorways.activeColorway === color.name ? "discordColorway active" : "discordColorway"} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false} onClick={e => {
                             document.querySelector(".discordColorway.active")?.classList.remove("active");
-                            if (Vencord.Settings.plugins.DiscordColorways.activeColorway === color.name) {
+                            if (Settings.plugins.DiscordColorways.activeColorway === color.name) {
                                 if (document.getElementById("activeColorwayCSS")) {
                                     document.getElementById("activeColorwayCSS")?.remove();
-                                    Vencord.Settings.plugins.DiscordColorways.activeColorway = null;
+                                    Settings.plugins.DiscordColorways.activeColorway = null;
                                     e.target.className = "discordColorway";
                                 }
                             } else {
-                                Vencord.Settings.plugins.DiscordColorways.activeColorway = color.name;
+                                Settings.plugins.DiscordColorways.activeColorway = color.name;
                                 if (document.getElementById("activeColorwayCSS")) {
                                     document.getElementById("activeColorwayCSS")!.textContent = color.import;
                                 } else {
@@ -128,13 +148,13 @@ export default definePlugin({
     start: () => {
         enableStyle(style);
         addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
-        if (!Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles) {
-            Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
+        if (!Settings.plugins.DiscordColorways.colorwaySourceFiles) {
+            Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
         }
         refreshColorways();
 
-        if (Vencord.Settings.plugins.DiscordColorways.activeColorway) {
-            Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
+        if (Settings.plugins.DiscordColorways.activeColorway) {
+            Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
                 fetch(colorwayList)
                     .then(response => response.json())
                     .then(data => {
@@ -142,11 +162,11 @@ export default definePlugin({
                         if (!data.colorways?.length) return;
                         data.colorways?.forEach(color => colorways.push(color));
 
-                        if (i + 1 === Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
+                        if (i + 1 === Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
                             if (document.getElementById("activeColorwayCSS")) {
-                                document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import;
+                                document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === Settings.plugins.DiscordColorways.activeColorway)[0].import;
                             } else {
-                                document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import }));
+                                document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === Settings.plugins.DiscordColorways.activeColorway)[0].import }));
                             }
                         }
                     })
@@ -163,7 +183,6 @@ export default definePlugin({
         if (document.getElementById("activeColorwayCSS")) {
             document.getElementById("activeColorwayCSS")?.remove();
             console.log("Disabled Colorway.");
-            Vencord.Settings.plugins.DiscordColorways.activeColorway = null;
         } else {
             console.log("No Active Colorway.");
         }
