@@ -169,7 +169,7 @@ interface DraftState {
     } | undefined;
 }
 
-export class DraftStore extends Store {
+export class DraftStore extends FluxStore {
     getDraft(channelId: string, type: DraftType): string;
     getRecentlyEditedDrafts(type: DraftType): DraftObject[];
     getState(): DraftState;
