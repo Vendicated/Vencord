@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function relaunch() {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.app.relaunch();
-    else
-        window.VesktopNative.app.relaunch();
-}
+/**
+ * @param {string} filePath
+ * @returns {string | null}
+ */
+export function getPluginTarget(filePath) {
+    const pathParts = filePath.split(/[/\\]/);
+    if (/^index\.tsx?$/.test(filePath.at(-1))) pathParts.pop();
 
-export function showItemInFolder(path: string) {
-    if (IS_DISCORD_DESKTOP)
-        window.DiscordNative.fileManager.showItemInFolder(path);
-    else
-        window.VesktopNative.fileManager.showItemInFolder(path);
+    const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
+    const identiferBits = identifier.split(".");
+    return identiferBits.length === 1 ? null : identiferBits.at(-1);
 }
