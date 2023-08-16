@@ -17,16 +17,40 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button } from "@webpack/common";
+
+import style from "./style.css?managed";
+
+
+const ColorwaysButton = () => (
+    <div style={{ marginBottom: "8px", width: "72px", height: "48px", display: "flex", justifyContent: "center" }}>
+        <div className="ColorwaySelectorBtn" onClick={() => openModal(props => <Modal modalProps={props} />)}><div className="colorwaySelectorIcon"></div></div>
+    </div>
+);
+
+
+function Modal({ modalProps }: { modalProps: ModalProps; }) {
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalContent>
+                helo
+            </ModalContent>
+        </ModalRoot>
+    );
+}
 
 export default definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord (Official Colorways only for now).",
     authors: [Devs.DaBluLite],
-    dependencies: ["CommandsAPI"],
-    start: async () => {
+    dependencies: ["CommandsAPI", "ServerListAPI"],
+    start: () => {
+        enableStyle(style);
+        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
         if (!Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles) {
             Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
         }
@@ -76,8 +100,17 @@ export default definePlugin({
                     });
             });
         }
-        Vencord.Api.ServerList.addServerListElement(Vencord.Api.ServerList.ServerListRenderPosition.Above, () => {return <Button>test</Button>; });
-        Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above);
+    },
+    stop: () => {
+        disableStyle(style);
+        removeServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
+        if (document.getElementById("activeColorwayCSS")) {
+            document.getElementById("activeColorwayCSS")?.remove();
+            console.log("Disabled Colorway.");
+            Vencord.Settings.plugins.DiscordColorways.activeColorway = null;
+        } else {
+            console.log("No Active Colorway.");
+        }
     },
     commands: [
         {
