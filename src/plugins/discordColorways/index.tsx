@@ -16,28 +16,105 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { Text } from "@webpack/common";
 
 import style from "./style.css?managed";
 
+var colorways = [];
+
+const createElement = (type, props, ...children) => {
+    if (typeof type === "function") return type({ ...props, children: [].concat() });
+
+    const node = document.createElement(type || "div");
+
+    for (const key of Object.keys(props)) {
+        if (key.indexOf("on") === 0) node.addEventListener(key.slice(2).toLowerCase(), props[key]);
+        else if (key === "children") {
+            node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
+        } else if (key === "innertext") {
+            node.textContent = props[key];
+        } else {
+            node.setAttribute(key === "className" ? "class" : key, props[key]);
+        }
+    }
+
+    if (children.length) node.append(...children);
+
+    return node;
+};
+
+const refreshColorways = () => {
+    colorways = [];
+    Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
+        fetch(colorwayList)
+            .then(response => response.json())
+            .then(data => {
+                data.colorways?.map(color => {
+                    colorways.push(color);
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+    });
+};
+
 
 const ColorwaysButton = () => (
-    <div style={{ marginBottom: "8px", width: "72px", height: "48px", display: "flex", justifyContent: "center" }}>
-        <div className="ColorwaySelectorBtn" onClick={() => openModal(props => <Modal modalProps={props} />)}><div className="colorwaySelectorIcon"></div></div>
+    <div className="ColorwaySelectorBtnContainer" onClick={refreshColorways}>
+        <div className="ColorwaySelectorBtn" onClick={() => openModal(props => <SelectorModal modalProps={props} />)}><div className="colorwaySelectorIcon"></div></div>
     </div>
 );
 
 
-function Modal({ modalProps }: { modalProps: ModalProps; }) {
+function SelectorModal({ modalProps }: { modalProps: ModalProps; }) {
     return (
-        <ModalRoot {...modalProps}>
-            <ModalContent>
-                helo
+        <ModalRoot {...modalProps} className="colorwaySelectorModal">
+            <ModalContent className="colorwaySelectorModalContent">
+                <Text variant="eyebrow" tag="h2">Colorways</Text>
+                <div className="ColorwaySelectorWrapper">
+                    <div className="discordColorway" id="colorway-refreshcolorway" onClick={refreshColorways}><div className="colorwayRefreshIcon"></div></div>
+                    {colorways.map((color, ind) => {
+                        // eslint-disable-next-line no-unneeded-ternary
+                        return <div className={Vencord.Settings.plugins.DiscordColorways.activeColorway === color.name ? "discordColorway active" : "discordColorway"} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false} onClick={e => {
+                            document.querySelector(".discordColorway.active")?.classList.remove("active");
+                            if (Vencord.Settings.plugins.DiscordColorways.activeColorway === color.name) {
+                                if (document.getElementById("activeColorwayCSS")) {
+                                    document.getElementById("activeColorwayCSS")?.remove();
+                                    Vencord.Settings.plugins.DiscordColorways.activeColorway = null;
+                                    e.target.className = "discordColorway";
+                                }
+                            } else {
+                                Vencord.Settings.plugins.DiscordColorways.activeColorway = color.name;
+                                if (document.getElementById("activeColorwayCSS")) {
+                                    document.getElementById("activeColorwayCSS")!.textContent = color.import;
+                                } else {
+                                    document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: color.import }));
+                                }
+                                e.target.className = "discordColorway active";
+                            }
+                        }}>
+                            <div className="colorwayCheckIconContainer">
+                                <div className="colorwayCheckIcon"></div>
+                            </div>
+                            <div className="colorwayInfoIconContainer">
+                                <div className="colorwayInfoIcon"></div>
+                            </div>
+                            <div className="discordColorwayPreviewColorContainer">
+                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.accent }}></div>
+                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.primary }}></div>
+                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.secondary }}></div>
+                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.tertiary }}></div>
+                            </div>
+                        </div>;
+                    })}
+                </div>
             </ModalContent>
         </ModalRoot>
     );
@@ -54,30 +131,9 @@ export default definePlugin({
         if (!Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles) {
             Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
         }
-        const createElement = (type, props, ...children) => {
-            if (typeof type === "function") return type({ ...props, children: [].concat() });
+        refreshColorways();
 
-            const node = document.createElement(type || "div");
-
-            for (const key of Object.keys(props)) {
-                if (key.indexOf("on") === 0) node.addEventListener(key.slice(2).toLowerCase(), props[key]);
-                else if (key === "children") {
-                    node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
-                } else if (key === "innertext") {
-                    node.textContent = props[key];
-                } else {
-                    node.setAttribute(key === "className" ? "class" : key, props[key]);
-                }
-            }
-
-            if (children.length) node.append(...children);
-
-            return node;
-        };
         if (Vencord.Settings.plugins.DiscordColorways.activeColorway) {
-
-            var colorways = [];
-
             Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
                 fetch(colorwayList)
                     .then(response => response.json())
@@ -86,7 +142,7 @@ export default definePlugin({
                         if (!data.colorways?.length) return;
                         data.colorways?.forEach(color => colorways.push(color));
 
-                        if (i + 1 == Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
+                        if (i + 1 === Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
                             if (document.getElementById("activeColorwayCSS")) {
                                 document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === Vencord.Settings.plugins.DiscordColorways.activeColorway)[0].import;
                             } else {
@@ -111,125 +167,5 @@ export default definePlugin({
         } else {
             console.log("No Active Colorway.");
         }
-    },
-    commands: [
-        {
-            name: "applyColorway",
-            description: "Applies colorway using a name",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "colorway",
-                    description: "Colorway Name",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: true
-                },
-            ],
-            execute: (_, ctx) => {
-                const createElement = (type, props, ...children) => {
-                    if (typeof type === "function") return type({ ...props, children: [].concat() });
-
-                    const node = document.createElement(type || "div");
-
-                    for (const key of Object.keys(props)) {
-                        if (key.indexOf("on") === 0) node.addEventListener(key.slice(2).toLowerCase(), props[key]);
-                        else if (key === "children") {
-                            node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
-                        } else if (key === "innertext") {
-                            node.textContent = props[key];
-                        } else {
-                            node.setAttribute(key === "className" ? "class" : key, props[key]);
-                        }
-                    }
-
-                    if (children.length) node.append(...children);
-
-                    return node;
-                };
-
-
-                const word = findOption(_, "colorway", "");
-
-                if (!word) {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "No colorway was defined!"
-                    });
-                }
-
-                var colorways = [];
-
-                Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
-                    fetch(colorwayList)
-                        .then(response => response.json())
-                        .then(data => {
-                            data.colorways?.forEach(color => colorways.push(color));
-
-                            if (i + 1 == Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
-                                if (!data.colorways?.length || !colorways.filter(colorway => colorway.name === word)[0]) {
-                                    console.log(data);
-                                    return sendBotMessage(ctx.channel.id, { content: "Colorway does not exist" });
-                                }
-                                Vencord.Settings.plugins.DiscordColorways.activeColorway = word;
-                                if (document.getElementById("activeColorwayCSS")) {
-                                    document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === word)[0].import;
-                                } else {
-                                    document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === word)[0].import }));
-                                }
-                                sendBotMessage(ctx.channel.id, { content: "Applying Colorway: " + word + "..." });
-                            }
-                        })
-                        .catch(err => {
-                            console.log(err);
-                            sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                            return null;
-                        });
-                });
-            }
-        },
-        {
-            name: "disableColorway",
-            description: "Applies colorway using a name",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            execute: (_, ctx) => {
-                if (document.getElementById("activeColorwayCSS")) {
-                    document.getElementById("activeColorwayCSS")?.remove();
-                    sendBotMessage(ctx.channel.id, { content: "Disabled Colorway." });
-                    Vencord.Settings.plugins.DiscordColorways.activeColorway = null;
-                } else {
-                    sendBotMessage(ctx.channel.id, { content: "No Active Colorway." });
-                }
-            },
-        },
-        {
-            name: "listAllColorways",
-            description: "Lists Colorways from all Source Files.",
-            inputType: ApplicationCommandInputType.BUILT_IN,
-            execute: (_, ctx) => {
-                let colorwaysString = "List of all Colorways:\n";
-
-                Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
-                    fetch(colorwayList)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.colorways?.length || !data) {
-                                return sendBotMessage(ctx.channel.id, { content: "Couldn't find any colorways" });
-                            }
-
-                            data.colorways.forEach(colorway => {
-                                colorwaysString += "* " + colorway.name + "\n";
-                            });
-
-                            if (i + 1 == Vencord.Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
-                                sendBotMessage(ctx.channel.id, { content: colorwaysString });
-                            }
-                        })
-                        .catch(err => {
-                            console.log(err);
-                            sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                            return null;
-                        });
-                });
-            },
-        }
-    ]
+    }
 });

@@ -24,3 +24,196 @@
     background-color: var(--brand-experiment);
     border-radius: 16px;
 }
+
+.discordColorway {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    transition: .1s;
+    box-shadow: inset 0 0 0 1px var(--interactive-normal);
+}
+
+.discordColorway:hover {
+    box-shadow: inset 0 0 0 1px var(--interactive-active);
+}
+
+.discordColorwayPreviewColorContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow: hidden;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    pointer-events: none;
+}
+
+.discordColorway.active {
+    box-shadow: inset 0 0 0 2px var(--brand-500), inset 0 0 0 4px var(--background-primary);
+}
+
+.discordColorway.active .discordColorwayPreviewColorContainer {
+    width: 52px;
+    height: 52px;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
+    width: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
+    height: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
+    height: 100%;
+    width: 100%;
+}
+
+.discordColorwayPreviewColor {
+    width: 50%;
+    height: 50%;
+}
+
+.discordColorway.active>.discordColorwayPreviewColor {
+    width: 30px;
+    height: 30px;
+}
+
+.ColorwaySelectorWrapper {
+    position: relative;
+    display: flex;
+    gap: 16px 24px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.ColorwaySelectorWrapper::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    width: 100%;
+    height: 1px;
+    background-color: var(--interactive-muted);
+    left: 0;
+    border-radius: 4px;
+}
+
+.colorwaySelectorModal {
+    overflow: visible !important;
+    width: 100%;
+    max-width: 564px;
+    padding: 20px 16px !important;
+    padding-right: 16px !important;
+}
+
+.colorwaySelectorModalContent {
+    padding: 0 !important;
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 564px;
+}
+
+.ColorwaySelectorBtnContainer {
+    position: relative;
+    margin: 0 0 8px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 72px;
+}
+
+.colorwayCheckIconContainer {
+    height: 20px;
+    width: 20px;
+    background-color: var(--brand-500);
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 50%;
+    opacity: 0;
+    z-index: +1;
+}
+
+.discordColorway.active .colorwayCheckIconContainer {
+    opacity: 1;
+}
+
+.colorwayCheckIcon {
+    height: 20px;
+    width: 20px;
+    background-color: var(--white-500);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' aria-hidden='true' role='img' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath fill='var(--white-500)' fill-rule='evenodd' clip-rule='evenodd' d='M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z'%3E%3C/path%3E%3C/svg%3E");
+    -webkit-mask-size: 18px;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.colorwayInfoIconContainer {
+    height: 20px;
+    width: 20px;
+    background-color: var(--brand-500);
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    opacity: 0;
+    z-index: +1;
+}
+
+.colorwayInfoIconContainer:hover {
+    background-color: var(--brand-700);
+}
+
+.discordColorway:hover .colorwayInfoIconContainer {
+    opacity: 1;
+    transition: .15s;
+}
+
+.colorwayInfoIcon {
+    height: 20px;
+    width: 20px;
+    background-color: var(--white-500);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-info' viewBox='0 0 16 16'%3E%3Cpath d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z'/%3E%3C/svg%3E");
+    -webkit-mask-size: 18px;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+#colorway-refreshcolorway>.colorwayRefreshIcon {
+    height: 60px;
+    width: 60px;
+    background-color: var(--modal-background);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='24' height='24' viewBox='0 0 24 24' fill='var(--white-500)'%3E%3Cg id='Frame_-_24px'%3E%3Crect y='0' fill='none' width='24' height='24'%3E%3C/rect%3E%3C/g%3E%3Cg id='Filled_Icons'%3E%3Cg%3E%3Cpath fill='var(--white-500)' d='M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z'%3E%3C/path%3E%3Cpath fill='var(--white-500)' d='M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-size: 24px;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    pointer-events: none;
+}
+
+#colorway-refreshcolorway,
+#colorway-createcolorway,
+#colorway-settings {
+    background-color: var(--interactive-normal);
+    box-shadow: none;
+    transition: .1s;
+}
+
+#colorway-refreshcolorway:hover,
+#colorway-createcolorway:hover,
+#colorway-settings:hover {
+    background-color: var(--interactive-hover);
+}
