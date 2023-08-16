@@ -27,6 +27,13 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
+export enum DraftType {
+    ChannelMessage = 0,
+    ThreadSettings = 1,
+    FirstThreadMessage = 2,
+    ApplicationLauncherCommand = 3
+}
+
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };

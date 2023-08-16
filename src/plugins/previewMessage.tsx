@@ -20,16 +20,15 @@ import { sendBotMessage } from "@api/Commands";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
 
-const DRAFT_TYPE_CHANNEL_MESSAGE = 0;
 interface Props {
     type: {
         analyticsName: string;
     };
 }
 
-const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DRAFT_TYPE_CHANNEL_MESSAGE);
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
 
 export function PreviewButton(chatBoxProps: Props) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
