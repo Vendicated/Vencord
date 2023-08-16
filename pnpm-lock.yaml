@@ -9,6 +9,9 @@ patchedDependencies:
     path: patches/eslint@8.46.0.patch
 
 dependencies:
+  '@sapphi-red/web-noise-suppressor':
+    specifier: 0.3.3
+    version: 0.3.3
   '@vap/core':
     specifier: 0.0.12
     version: 0.0.12
@@ -512,6 +515,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@sapphi-red/web-noise-suppressor@0.3.3:
+    resolution: {integrity: sha512-gAC33DCXYwNTI/k1PxOVHmbbzakUSMbb/DHpoV6rn4pKZtPI1dduULSmAAm/y1ipgIlArnk2JcnQzw4n2tCZHw==}
+    dev: false
 
   /@types/diff@5.0.3:
     resolution: {integrity: sha512-amrLbRqTU9bXMCc6uX0sWpxsQzRIo9z6MJPkH1pkez/qOxuqSZVuryJAWoBRq94CeG8JxY+VK4Le9HtjQR5T9A==}

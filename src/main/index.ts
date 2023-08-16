@@ -23,7 +23,7 @@ import { ensureSafePath, getSettings } from "./ipcMain";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
-if (IS_VENCORD_DESKTOP || !IS_VANILLA) {
+if (IS_VESKTOP || !IS_VANILLA) {
     app.whenReady().then(() => {
         // Source Maps! Maybe there's a better way but since the renderer is executed
         // from a string I don't think any other form of sourcemaps would work
