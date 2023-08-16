@@ -36,7 +36,7 @@ declare global {
     export var IS_DEV: boolean;
     export var IS_STANDALONE: boolean;
     export var IS_DISCORD_DESKTOP: boolean;
-    export var IS_VENCORD_DESKTOP: boolean;
+    export var IS_VESKTOP: boolean;
     export var VERSION: string;
     export var BUILD_TIMESTAMP: number;
 
@@ -58,8 +58,8 @@ declare global {
      * If you really must use it, mark your plugin as Desktop App only by naming it Foo.desktop.ts(x)
      */
     export var DiscordNative: any;
-    export var VencordDesktop: any;
-    export var VencordDesktopNative: any;
+    export var Vesktop: any;
+    export var VesktopNative: any;
 
     interface Window {
         webpackChunkdiscord_app: {
