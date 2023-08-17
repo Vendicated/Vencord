@@ -19,7 +19,8 @@
 import "./checkNodeVersion.js";
 
 import { execFileSync, execSync } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createWriteStream } from "node:fs";
+import { access, constants as fsConstants, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 import { finished } from "node:stream/promises";
@@ -50,16 +51,35 @@ async function ensureBinary() {
     const filename = getFilename();
     console.log("Downloading " + filename);
 
-    mkdirSync(FILE_DIR, { recursive: true });
+    await mkdir(FILE_DIR, { recursive: true });
 
     const downloadName = join(FILE_DIR, filename);
     const outputFile = process.platform === "darwin"
         ? join(FILE_DIR, "VencordInstaller")
         : downloadName;
 
-    const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
-        ? readFileSync(ETAG_FILE, "utf-8")
-        : null;
+    const etag = await (async () => {
+        try {
+            await access(outputFile, fsConstants.F_OK);
+        } catch (e) {
+            const { code, path }: Partial<{ code: string; path: string; }> = e;
+            if (e instanceof Error && code === "ENOENT" && path !== undefined) {
+                console.log("Installer not found at: %s", path);
+                return null;
+            }
+            throw e;
+        }
+        try {
+            return await readFile(ETAG_FILE, "utf-8");
+        } catch (e) {
+            const { code, path }: Partial<{ code: string; path: string; }> = e;
+            if (e instanceof Error && code === "ENOENT" && path !== undefined) {
+                console.log("Installer ETag not found at: %s", path);
+                return null;
+            }
+            throw e;
+        }
+    })();
 
     const headers: HeadersInit = {
         "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
@@ -79,7 +99,7 @@ async function ensureBinary() {
     const resEtag = res.headers.get("etag");
     if (resEtag === null)
         throw new Error(`Unknown ETag for installer: ${res.status} ${res.statusText}`);
-    writeFileSync(ETAG_FILE, resEtag);
+    await writeFile(ETAG_FILE, resEtag);
 
     if (process.platform === "darwin") {
         console.log("Unzipping...");
@@ -90,7 +110,7 @@ async function ensureBinary() {
             filter: f => f.name === INSTALLER_PATH_DARWIN
         })[INSTALLER_PATH_DARWIN];
 
-        writeFileSync(outputFile, bytes, { mode: 0o755 });
+        await writeFile(outputFile, bytes, { mode: 0o755 });
 
         console.log("Overriding security policy for installer binary (this is required to run it)");
         console.log("xattr might error, that's okay");
@@ -130,6 +150,7 @@ console.log("Now running Installer...");
 
 execFileSync(installerBin, {
     stdio: "inherit",
+    encoding: "buffer",
     env: {
         ...process.env,
         VENCORD_USER_DATA_DIR: BASE_DIR,
