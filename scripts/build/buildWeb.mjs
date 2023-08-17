@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import esbuild from "esbuild";
 import { zip } from "fflate";
 import { readFileSync } from "fs";
