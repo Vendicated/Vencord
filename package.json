@@ -29,7 +29,7 @@
         "lint": "pnpm run lint-user --ignore-pattern src/userplugins",
         "lint:fix": "pnpm run lint-user:fix --ignore-pattern src/userplugins",
         "lint-styles": "pnpm run lint-styles-user --ignore-pattern src/userplugins",
-        "lint-user": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint-user": "eslint . --ext .js,.jsx,.mjs,.mjsx,.mts,.mtsx,.ts,.tsx",
         "lint-user:fix": "pnpm run lint-user --fix",
         "lint-styles-user": "stylelint \"src/**/*.css\"",
         "test": "pnpm run buildStandalone && pnpm run lint && pnpm run lint-styles && pnpm run testTsc && pnpm run generatePluginJson",
