@@ -20,7 +20,7 @@
         "build": "node scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
-        "inject": "node scripts/runInstaller.mjs",
+        "inject": "tsx scripts/runInstaller.mts",
         "lint": "pnpm run lint-user --ignore-pattern src/userplugins",
         "lint:fix": "pnpm run lint --fix",
         "lint-styles": "pnpm run lint-user-styles --ignore-pattern src/userplugins",
@@ -30,7 +30,7 @@
         "test": "pnpm run build && pnpm run lint && pnpm run lint-styles && pnpm run testTsc && pnpm run generatePluginJson",
         "testTsc": "tsc --noEmit",
         "testWeb": "pnpm run lint && pnpm run buildWeb && pnpm run testTsc",
-        "uninject": "node scripts/runInstaller.mjs",
+        "uninject": "tsx scripts/runInstaller.mts",
         "watch": "node scripts/build/build.mjs --watch"
     },
     "dependencies": {
