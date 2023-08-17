@@ -23,6 +23,7 @@ import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync }
 import { dirname, join } from "path";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
+import type * as streamWeb from "stream/web";
 import { fileURLToPath } from "url";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
@@ -60,12 +61,13 @@ async function ensureBinary() {
         ? readFileSync(ETAG_FILE, "utf-8")
         : null;
 
-    const res = await fetch(BASE_URL + filename, {
-        headers: {
-            "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
-            "If-None-Match": etag
-        }
-    });
+    const headers: HeadersInit = {
+        "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
+    };
+    if (etag !== null) {
+        headers["If-None-Match"] = etag;
+    }
+    const res = await fetch(BASE_URL + filename, { headers });
 
     if (res.status === 304) {
         console.log("Up to date, not redownloading!");
@@ -74,7 +76,10 @@ async function ensureBinary() {
     if (!res.ok)
         throw new Error(`Failed to download installer: ${res.status} ${res.statusText}`);
 
-    writeFileSync(ETAG_FILE, res.headers.get("etag"));
+    const resEtag = res.headers.get("etag");
+    if (resEtag === null)
+        throw new Error(`Unknown ETag for installer: ${res.status} ${res.statusText}`);
+    writeFileSync(ETAG_FILE, resEtag);
 
     if (process.platform === "darwin") {
         console.log("Unzipping...");
@@ -99,8 +104,13 @@ async function ensureBinary() {
         logAndRun(`sudo spctl --add '${outputFile}' --label "Vencord Installer"`);
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
+        // Type cast because `ReadableStream` is a different type.
+        const bodyWebStream = res.body as streamWeb.ReadableStream<Uint8Array> | null;
+        if (bodyWebStream === null) {
+            throw new Error(`Failed to read installer body: ${res.status} ${res.statusText}`);
+        }
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
-        const body = Readable.fromWeb(res.body);
+        const body = Readable.fromWeb(bodyWebStream);
         await finished(body.pipe(createWriteStream(outputFile, {
             mode: 0o755,
             autoClose: true
