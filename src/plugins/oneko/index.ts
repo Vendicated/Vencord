@@ -16,17 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import  definePlugin, { OptionType } from "@utils/types";
+import "./oneko-element.js";
+
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
-import * as oneko from "./oneko-element.js";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+
 const settings = definePluginSettings({
     speed: {
         description: "Speed of cat",
         type: OptionType.SLIDER, // "y566666666444t" - My cat Coraline, stepping on my keyboard -- Korbo
         restartNeeded: true,
-        markers: makeRange(10, 20, 1),
+        markers: makeRange(10, 50, 5),
         default: 10,
     },
 });
@@ -39,14 +41,14 @@ export default definePlugin({
     settings,
 
     start() {
-        let nekoEl = document.createElement('o-neko');
-        nekoEl.setAttribute('speed', settings.store.speed);
-        nekoEl.setAttribute('x', Math.random() * window.innerWidth);
-        nekoEl.setAttribute('y', Math.random() * window.innerHeight);
+        const nekoEl = document.createElement("o-neko");
+        nekoEl.setAttribute("speed", settings.store.speed);
+        nekoEl.setAttribute("x", Math.random() * window.innerWidth);
+        nekoEl.setAttribute("y", Math.random() * window.innerHeight);
         document.body.appendChild(nekoEl);
     },
 
     stop() {
-        document.querySelectorAll("o-neko").forEach((oneko => oneko.remove()))
+        document.querySelectorAll("o-neko").forEach((oneko => oneko.remove()));
     }
 });
