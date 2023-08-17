@@ -58,7 +58,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VENCORD_DESKTOP: false
+            IS_VESKTOP: false
         }
     }),
     esbuild.build({
@@ -78,7 +78,7 @@ await Promise.all([
             ...defines,
             IS_WEB: false,
             IS_DISCORD_DESKTOP: true,
-            IS_VENCORD_DESKTOP: false
+            IS_VESKTOP: false
         }
     }),
     esbuild.build({
@@ -90,7 +90,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VENCORD_DESKTOP: false
+            IS_VESKTOP: false
         }
     }),
 
@@ -104,7 +104,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VENCORD_DESKTOP: true
+            IS_VESKTOP: true
         }
     }),
     esbuild.build({
@@ -124,7 +124,7 @@ await Promise.all([
             ...defines,
             IS_WEB: false,
             IS_DISCORD_DESKTOP: false,
-            IS_VENCORD_DESKTOP: true
+            IS_VESKTOP: true
         }
     }),
     esbuild.build({
@@ -136,7 +136,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VENCORD_DESKTOP: true
+            IS_VESKTOP: true
         }
     }),
 ]).catch(err => {
