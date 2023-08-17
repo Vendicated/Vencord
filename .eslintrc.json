@@ -4,10 +4,10 @@
     "ignorePatterns": ["dist", "browser"],
     "plugins": [
         "@typescript-eslint",
+        "path-alias",
         "simple-header",
         "simple-import-sort",
-        "unused-imports",
-        "path-alias"
+        "unused-imports"
     ],
     "settings": {
         "import/resolver": {
@@ -33,13 +33,13 @@
                 "templates": { "author": [".*", "Vendicated and contributors"] }
             }
         ],
+
         "quotes": ["error", "double", { "avoidEscape": true }],
         "jsx-quotes": ["error", "prefer-double"],
         "no-mixed-spaces-and-tabs": "error",
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "arrow-parens": ["error", "as-needed"],
         "eol-last": ["error", "always"],
-        "@typescript-eslint/func-call-spacing": ["error", "never"],
         "no-multi-spaces": "error",
         "no-trailing-spaces": "error",
         "no-whitespace-before-property": "error",
@@ -85,11 +85,13 @@
         "prefer-const": "error",
         "prefer-spread": "error",
 
+        "@typescript-eslint/func-call-spacing": ["error", "never"],
+
+        "path-alias/no-relative": "error",
+
         "simple-import-sort/imports": "error",
         "simple-import-sort/exports": "error",
 
-        "unused-imports/no-unused-imports": "error",
-
-        "path-alias/no-relative": "error"
+        "unused-imports/no-unused-imports": "error"
     }
 }
