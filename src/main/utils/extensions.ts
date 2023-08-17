@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { constants as fsConstants } from "node:fs";
+import { access, mkdir, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { session } from "electron";
 import { unzip } from "fflate";
-import { constants as fsConstants } from "fs";
-import { access, mkdir, rm, writeFile } from "fs/promises";
-import { join } from "path";
 
 import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";

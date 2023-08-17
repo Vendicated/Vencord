@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { join } from "node:path";
+
 import { app, protocol, session } from "electron";
-import { join } from "path";
 
 import { ensureSafePath, getSettings } from "./ipcMain";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";

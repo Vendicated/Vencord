@@ -18,12 +18,12 @@
 
 import "./checkNodeVersion.js";
 
-import { execFileSync, execSync } from "child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { Readable } from "stream";
-import { finished } from "stream/promises";
-import { fileURLToPath } from "url";
+import { execFileSync, execSync } from "node:child_process";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { Readable } from "node:stream";
+import { finished } from "node:stream/promises";
+import { fileURLToPath } from "node:url";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
 const INSTALLER_PATH_DARWIN = "VencordInstaller.app/Contents/MacOS/VencordInstaller";

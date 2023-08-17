@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { readFile } from "node:fs/promises";
+import { request } from "node:https";
+import { basename, normalize } from "node:path";
+
 import { IpcEvents } from "@utils/IpcEvents";
 import { app, ipcMain } from "electron";
-import { readFile } from "fs/promises";
-import { request } from "https";
-import { basename, normalize } from "path";
 
 // #region OpenInApp
 // These links don't support CORS, so this has to be native

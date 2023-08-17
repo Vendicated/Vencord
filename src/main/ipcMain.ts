@@ -19,13 +19,14 @@
 import "./updater";
 import "./ipcPlugins";
 
+import { mkdirSync, readFileSync, watch } from "node:fs";
+import { open, readdir, readFile, writeFile } from "node:fs/promises";
+import { join, normalize } from "node:path";
+
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell } from "electron";
-import { mkdirSync, readFileSync, watch } from "fs";
-import { open, readdir, readFile, writeFile } from "fs/promises";
-import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 

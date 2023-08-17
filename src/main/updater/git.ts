@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { execFile as cpExecFile } from "node:child_process";
+import { join } from "node:path";
+import { promisify } from "node:util";
+
 import { IpcEvents } from "@utils/IpcEvents";
-import { execFile as cpExecFile } from "child_process";
 import { ipcMain } from "electron";
-import { join } from "path";
-import { promisify } from "util";
 
 import { serializeErrors } from "./common";
 

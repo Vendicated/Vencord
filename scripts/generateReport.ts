@@ -21,7 +21,8 @@
 // eslint-disable-next-line spaced-comment
 /// <reference types="../src/modules" />
 
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
+
 import pup, { JSHandle } from "puppeteer-core";
 
 for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {

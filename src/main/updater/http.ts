@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { VENCORD_USER_AGENT } from "@utils/constants";
 import { IpcEvents } from "@utils/IpcEvents";
 import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
-import { join } from "path";
 
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";

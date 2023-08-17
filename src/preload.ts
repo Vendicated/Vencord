@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { readFileSync, watch } from "node:fs";
+import { join } from "node:path";
+
 import { debounce } from "@utils/debounce";
 import { contextBridge, webFrame } from "electron";
-import { readFileSync, watch } from "fs";
-import { join } from "path";
 
 import VencordNative from "./VencordNative";
 

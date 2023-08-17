@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import https from "https";
+import https from "node:https";
 
 export function get(url: string, options: https.RequestOptions = {}) {
     return new Promise<Buffer>((resolve, reject) => {

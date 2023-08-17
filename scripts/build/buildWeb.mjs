@@ -17,11 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { readFileSync } from "node:fs";
+import { appendFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import esbuild from "esbuild";
 import { zip } from "fflate";
-import { readFileSync } from "fs";
-import { appendFile, mkdir, readFile, rm, writeFile } from "fs/promises";
-import { join } from "path";
 
 import { commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
 

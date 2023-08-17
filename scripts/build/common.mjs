@@ -19,11 +19,11 @@
 import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
-import { exec, execSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
-import { readdir, readFile } from "fs/promises";
-import { join, relative } from "path";
-import { promisify } from "util";
+import { exec, execSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { readdir, readFile } from "node:fs/promises";
+import { join, relative } from "node:path";
+import { promisify } from "node:util";
 
 // wtf is this assert syntax
 import PackageJSON from "../../package.json" assert { type: "json" };

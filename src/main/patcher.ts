@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { dirname, join } from "node:path";
+
 import { onceDefined } from "@utils/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
-import { dirname, join } from "path";
 
 import { getSettings, initIpc } from "./ipcMain";
 import { IS_VANILLA } from "./utils/constants";
