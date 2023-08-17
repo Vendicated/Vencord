@@ -7,6 +7,7 @@
         "path-alias",
         "simple-header",
         "simple-import-sort",
+        "unicorn",
         "unused-imports"
     ],
     "settings": {
@@ -91,6 +92,8 @@
 
         "simple-import-sort/imports": "error",
         "simple-import-sort/exports": "error",
+
+        "unicorn/prefer-node-protocol": "error",
 
         "unused-imports/no-unused-imports": "error"
     }

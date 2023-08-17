@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 patchedDependencies:
   eslint-plugin-path-alias@1.0.0:
     hash: m6sma4g6bh67km3q6igf6uxaja
@@ -77,6 +81,9 @@ devDependencies:
   eslint-plugin-simple-import-sort:
     specifier: ^10.0.0
     version: 10.0.0(eslint@8.46.0)
+  eslint-plugin-unicorn:
+    specifier: ^48.0.1
+    version: 48.0.1(eslint@8.46.0)
   eslint-plugin-unused-imports:
     specifier: ^2.0.0
     version: 2.0.0(@typescript-eslint/eslint-plugin@5.59.1)(eslint@8.46.0)
@@ -122,8 +129,8 @@ packages:
       '@babel/highlight': 7.18.6
     dev: true
 
-  /@babel/helper-validator-identifier@7.19.1:
-    resolution: {integrity: sha512-awrNfaMtnHUr653GgGEs++LlAvW6w+DcPrOliSMXWCKo597CwL5Acf/wWdNkf/tfEQE3mjkeD1YOVZOUV/od1w==}
+  /@babel/helper-validator-identifier@7.22.5:
+    resolution: {integrity: sha512-aJXu+6lErq8ltp+JhkJUfk1MTGyuA4v7f3pA+BJ5HLfNC6nAQ0Cpi9uOquUj8Hehg0aUiHzWQbOVJGao6ztBAQ==}
     engines: {node: '>=6.9.0'}
     dev: true
 
@@ -131,7 +138,7 @@ packages:
     resolution: {integrity: sha512-u7stbOuYjaPezCuLj29hNW1v64M2Md2qupEKP1fHc7WdOA3DgLh37suiSrZYY7haUB7iBeQZ9P1uiRF359do3g==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/helper-validator-identifier': 7.19.1
+      '@babel/helper-validator-identifier': 7.22.5
       chalk: 2.4.2
       js-tokens: 4.0.0
     dev: true
@@ -911,6 +918,11 @@ packages:
       ieee754: 1.2.1
     dev: true
 
+  /builtin-modules@3.3.0:
+    resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
+    engines: {node: '>=6'}
+    dev: true
+
   /cache-base@1.0.1:
     resolution: {integrity: sha512-AKcdTnFSWATd5/GCPRxr2ChwIJ85CeyrEyjRHlKxQ56d4XJMGym0uAiKn0xbLOGOl3+yRpOTi484dVCEc5AUzQ==}
     engines: {node: '>=0.10.0'}
@@ -975,6 +987,11 @@ packages:
       mitt: 3.0.0
     dev: true
 
+  /ci-info@3.8.0:
+    resolution: {integrity: sha512-eXTggHWSooYhq49F2opQhuHWgzucfF2YgODK4e1566GQs5BIfP30B0oenwBJHfWxAs2fyPB1s7Mg949zLf61Yw==}
+    engines: {node: '>=8'}
+    dev: true
+
   /class-utils@0.3.6:
     resolution: {integrity: sha512-qOhPa/Fj7s6TY8H8esGu5QNpMMQxz79h+urzrNYN6mn+9BnxlDGf5QZ+XeCDsxSjPqsSR56XOZOJmpeurnLMeg==}
     engines: {node: '>=0.10.0'}
@@ -983,6 +1000,13 @@ packages:
       define-property: 0.2.5
       isobject: 3.0.1
       static-extend: 0.1.2
+    dev: true
+
+  /clean-regexp@1.0.0:
+    resolution: {integrity: sha512-GfisEZEJvzKrmGWkvfhgzcz/BllN1USeqD2V6tg14OAOgaCD2Z/PUEuxnAZ/nPvmaHRG7a8y77p1T/IRQ4D1Hw==}
+    engines: {node: '>=4'}
+    dependencies:
+      escape-string-regexp: 1.0.5
     dev: true
 
   /cliui@8.0.1:
@@ -1496,6 +1520,33 @@ packages:
         optional: true
     dependencies:
       eslint: 8.46.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)
+    dev: true
+
+  /eslint-plugin-unicorn@48.0.1(eslint@8.46.0):
+    resolution: {integrity: sha512-FW+4r20myG/DqFcCSzoumaddKBicIPeFnTrifon2mWIzlfyvzwyqZjqVP7m4Cqr/ZYisS2aiLghkUWaPg6vtCw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      eslint: '>=8.44.0'
+    peerDependenciesMeta:
+      eslint:
+        optional: true
+    dependencies:
+      '@babel/helper-validator-identifier': 7.22.5
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.46.0)
+      ci-info: 3.8.0
+      clean-regexp: 1.0.0
+      eslint: 8.46.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)
+      esquery: 1.5.0
+      indent-string: 4.0.0
+      is-builtin-module: 3.2.1
+      jsesc: 3.0.2
+      lodash: 4.17.21
+      pluralize: 8.0.0
+      read-pkg-up: 7.0.1
+      regexp-tree: 0.1.27
+      regjsparser: 0.10.0
+      semver: 7.5.4
+      strip-indent: 3.0.0
     dev: true
 
   /eslint-plugin-unused-imports@2.0.0(@typescript-eslint/eslint-plugin@5.59.1)(eslint@8.46.0):
@@ -2027,6 +2078,13 @@ packages:
     resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==}
     dev: true
 
+  /is-builtin-module@3.2.1:
+    resolution: {integrity: sha512-BSLE3HnV2syZ0FK0iMA/yUGplUeMmNz4AW5fnTunbCIqZi4vG3WjJT9FHMy5D69xmAYBHXQhJdALdpwVxV501A==}
+    engines: {node: '>=6'}
+    dependencies:
+      builtin-modules: 3.3.0
+    dev: true
+
   /is-core-module@2.12.0:
     resolution: {integrity: sha512-RECHCBCd/viahWmwj6enj19sKbHfJrddi/6cBDsNTKbNq0f7VeaUkBo60BqzvPqo/W54ChS62Z5qyun7cfOMqQ==}
     dependencies:
@@ -2164,6 +2222,17 @@ packages:
       argparse: 2.0.1
     dev: true
 
+  /jsesc@0.5.0:
+    resolution: {integrity: sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA==}
+    hasBin: true
+    dev: true
+
+  /jsesc@3.0.2:
+    resolution: {integrity: sha512-xKqzzWXDttJuOcawBt4KnKHHIf5oQ/Cxax+0PWFG+DFDgHNAdi+TXECADI+RYiFUMmx8792xsMbbgXj4CwnP4g==}
+    engines: {node: '>=6'}
+    hasBin: true
+    dev: true
+
   /json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
     dev: true
@@ -2244,6 +2313,10 @@ packages:
 
   /lodash.truncate@4.4.2:
     resolution: {integrity: sha512-jttmRe7bRse52OsWIMDLaXxWqRAmtIUccAQ3garviCqJjafXOfNMO0yMfNpdD6zbGaTU0P5Nz7e7gAT6cKmJRw==}
+    dev: true
+
+  /lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
     dev: true
 
   /lru-cache@6.0.0:
@@ -2570,6 +2643,11 @@ packages:
     engines: {node: '>=8.6'}
     dev: true
 
+  /pluralize@8.0.0:
+    resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
+    engines: {node: '>=4'}
+    dev: true
+
   /postcss-media-query-parser@0.2.3:
     resolution: {integrity: sha512-3sOlxmbKcSHMjlUXQZKQ06jOswE7oVkXPxmZdoB1r5l0q6gTFTQSHxNxOrCccElbW7dxNytifNEo8qidX2Vsig==}
     dev: true
@@ -2715,6 +2793,18 @@ packages:
       safe-regex: 1.1.0
     dev: true
 
+  /regexp-tree@0.1.27:
+    resolution: {integrity: sha512-iETxpjK6YoRWJG5o6hXLwvjYAoW+FEZn9os0PD/b6AP6xQwsa/Y7lCVgIixBbUPMfhu+i2LtdeAqVTgGlQarfA==}
+    hasBin: true
+    dev: true
+
+  /regjsparser@0.10.0:
+    resolution: {integrity: sha512-qx+xQGZVsy55CH0a1hiVwHmqjLryfh7wQyF5HO07XJ9f7dQMY/gPQHhlyDkIzJKC+x2fUCpCcUODUUUFrm7SHA==}
+    hasBin: true
+    dependencies:
+      jsesc: 0.5.0
+    dev: true
+
   /require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
     engines: {node: '>=0.10.0'}
@@ -2789,6 +2879,14 @@ packages:
 
   /semver@7.5.0:
     resolution: {integrity: sha512-+XC0AD/R7Q2mPSRuy2Id0+CGTZ98+8f+KvwirxOKIEyid+XSx6HbC63p+O4IndTHuX5Z+JxQ0TghCkO5Cg/2HA==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      lru-cache: 6.0.0
+    dev: true
+
+  /semver@7.5.4:
+    resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -3376,7 +3474,3 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
