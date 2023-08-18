@@ -14,6 +14,7 @@ For a friendly introduction to plugins, see [Megu's Plugin Guide!](docs/2_PLUGIN
 -   Try to follow the formatting in the rest of the project and stay consistent
 -   Follow the file naming convention. File names should usually be camelCase, unless they export a Class
     or React Component, in which case they should be PascalCase
+-   Do not use the `node` scheme for builtin Node module imports unless necessary
 
 ## Contributing a Plugin
 
