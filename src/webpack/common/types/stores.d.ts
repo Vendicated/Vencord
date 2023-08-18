@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DraftType } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
@@ -147,4 +148,27 @@ export class EmojiStore extends FluxStore {
         unicodeAliases: Record<string, string>;
         get favoriteEmojisWithoutFetchingLatest(): Emoji[];
     };
+}
+
+export interface DraftObject {
+    channelId: string;
+    timestamp: number;
+    draft: string;
+}
+
+interface DraftState {
+    [userId: string]: {
+        [channelId: string]: {
+            [key in DraftType]?: Omit<DraftObject, "channelId">;
+        } | undefined;
+    } | undefined;
+}
+
+
+export class DraftStore extends FluxStore {
+    getDraft(channelId: string, type: DraftType): string;
+    getRecentlyEditedDrafts(type: DraftType): DraftObject[];
+    getState(): DraftState;
+    getThreadDraftWithParentMessageId?(arg: any): any;
+    getThreadSettings(channelId: string): any | null;
 }
