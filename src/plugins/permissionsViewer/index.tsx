@@ -171,9 +171,9 @@ export default definePlugin({
 
     UserPermissions: (guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} />,
 
-    userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
-    channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
-    guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
+    userContextMenuPatch: makeContextMenuPatch("user-profile", MenuItemParentType.User),
+    channelContextMenuPatch: makeContextMenuPatch("mark-channel-read", MenuItemParentType.Channel),
+    guildContextMenuPatch: makeContextMenuPatch("mark-guild-read", MenuItemParentType.Guild),
 
     start() {
         addContextMenuPatch("user-context", this.userContextMenuPatch);
