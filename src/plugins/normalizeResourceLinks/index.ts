@@ -15,8 +15,8 @@ export default definePlugin({
         {
             find: ".Messages.COPY_MESSAGE_LINK,",
             replacement: {
-                match: /(\.concat\()(location\.host)(\))/,
-                replace: "$1$self.normalizeResourceHost($2)$3",
+                match: /\.concat\(location\.host\)/,
+                replace: ".concat(self.normalizeResourceHost(location.host))",
             },
         },
     ],
