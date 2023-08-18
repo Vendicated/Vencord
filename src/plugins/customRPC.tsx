@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
@@ -262,7 +262,7 @@ const settings = definePluginSettings({
 
 function onChange() {
     setRpc(true);
-    setRpc();
+    if (Settings.plugins.CustomRPC.enabled) setRpc();
 }
 
 function isStreamLinkDisabled() {
