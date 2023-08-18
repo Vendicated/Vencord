@@ -169,9 +169,6 @@ export class DraftStore extends FluxStore {
     getDraft(channelId: string, type: DraftType): string;
     getRecentlyEditedDrafts(type: DraftType): DraftObject[];
     getState(): DraftState;
-    // idk what this does. never gets called :|
-    getThreadDraftWithParentMessageId?(arg: unknown): unknown;
-    getThreadSettings(channelId: string): unknown | null;
-    initialize(): void;
-    __getLocalVars(): { drafts: DraftState; getMaxDraftSize(): number; };
+    getThreadDraftWithParentMessageId?(arg: any): any;
+    getThreadSettings(channelId: string): any | null;
 }
