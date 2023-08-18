@@ -19,6 +19,7 @@
 // eslint-disable-next-line path-alias/no-relative
 import { findByPropsLazy, waitFor } from "../webpack";
 
+export let Fragment: typeof React.Fragment;
 export let React: typeof import("react");
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;
@@ -31,5 +32,5 @@ export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/cli
 
 waitFor("useState", m => {
     React = m;
-    ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = React);
+    ({ Fragment, useEffect, useState, useMemo, useRef, useReducer, useCallback } = React);
 });
