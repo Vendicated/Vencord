@@ -213,13 +213,15 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     const permissionValue = getPermissionValue(permissionBit, permissions);
                                     const overwriteValue = getOverwriteValue(permissionBit, overwriteAllow, overwriteDeny);
 
-                                    return <Fragment key={permissionName}>
-                                        <PermissionItem className={cl("perms-perms-items-item")}
-                                            permissionName={permissionName}
-                                            permissionValue={permissionValue}
-                                            overwriteValue={overwriteValue}
-                                        />
-                                    </Fragment>;
+                                    return irrelevantPermissionsHidden && !isPermissionValueRelevant(permissionValue) && !isOverwriteValueRelevant(overwriteValue)
+                                        ? <Fragment key={permissionName} />
+                                        : <Fragment key={permissionName}>
+                                            <PermissionItem className={cl("perms-perms-items-item")}
+                                                permissionName={permissionName}
+                                                permissionValue={permissionValue}
+                                                overwriteValue={overwriteValue}
+                                            />
+                                        </Fragment>;
                                 })}
                             </div>
                         </ScrollerThin>
