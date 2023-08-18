@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { app, autoUpdater } from "electron";
+import { app } from "electron";
 import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "fs";
 import { basename, dirname, join } from "path";
 
@@ -80,20 +80,22 @@ function patchLatest() {
 // Windows Host Updates install to a new folder app-{HOST_VERSION}, so we
 // need to reinject
 function patchUpdater() {
-    try {
-        const autoStartScript = join(require.main!.filename, "..", "autoStart", "win32.js");
-        const { update } = require(autoStartScript);
+    // Array of autoStart paths to try
+    const autoStartPaths = [
+        join(require.main!.filename, "..", "autoStart", "win32.js"), // Vanilla
+        join(require.main!.filename, "..", "autoStart.js") // OpenAsar
+    ];
 
-        require.cache[autoStartScript]!.exports.update = function () {
-            update.apply(this, arguments);
-            patchLatest();
-        };
-    } catch {
-        // OpenAsar uses electrons autoUpdater on Windows
-        const { quitAndInstall } = autoUpdater;
-        autoUpdater.quitAndInstall = function () {
-            patchLatest();
-            quitAndInstall.call(this);
-        };
+    for (const path of autoStartPaths) {
+        try {
+            const { update } = require(path);
+
+            require.cache[path]!.exports.update = function () {
+                update.apply(this, arguments);
+                patchLatest();
+            };
+        } catch {
+            // Ignore as non-critical
+        }
     }
 }
