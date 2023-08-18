@@ -16,12 +16,11 @@ export default definePlugin({
             find: ".Messages.COPY_MESSAGE_LINK,",
             replacement: {
                 match: /(\.concat\()(location\.host)(\))/,
-                replace:
-                    "$1$self.normalizeResourceHost($2)$3",
+                replace: "$1$self.normalizeResourceHost($2)$3",
             },
         },
     ],
     normalizeResourceHost(host: string) {
-        return host.replace(/(^|[^a-z-])(canary\.|ptb\.)(discord.com)$/, "$1$3");
+        return host.replace(/(^|\b)(canary\.|ptb\.)(discord.com)$/, "$1$3");
     },
 });
