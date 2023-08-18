@@ -17,7 +17,7 @@ export default definePlugin({
             replacement: {
                 match: /(\.concat\()(location\.host)(\))/,
                 replace:
-                    "$1Vencord.Plugins.plugins.NormalizeResourceLinks.normalizeResourceHost($2)$3",
+                    "$1$self.normalizeResourceHost($2)$3",
             },
         },
     ],
