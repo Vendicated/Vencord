@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./fuckspotify.css";
+import "./youtify.css";
 
 import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
@@ -40,13 +40,13 @@ function replaceYouTubeURL(originalURL: string, newDomain: string): string {
         const replacedURL = originalURL.replace(youtubeRegex, newDomain);
         return "https://" + replacedURL;
     } else {
-        throw new Error('The provided URL is not a YouTube link.');
+        throw new Error("The provided URL is not a YouTube link.");
     }
 }
 
 export default definePlugin({
-    name: "fuckSpotify",
-    description: "i dont like spotify",
+    name: "youtify",
+    description: "gives you the youtube linnk of a spotify song",
     authors: [Devs.echo],
     dependencies: ["MessageAccessoriesAPI"],
     patches: [
@@ -71,8 +71,8 @@ export default definePlugin({
                     return;
                 }
                 let theinfo = await youtuberify(link);
-                if (settings.store.useInvidious) {
-                    theinfo = replaceYouTubeURL(theinfo!, settings.store.invidiousLink);
+                if (theinfo && settings.store.useInvidious) {
+                    theinfo = replaceYouTubeURL(theinfo, settings.store.invidiousLink);
                 }
                 return theinfo;
             }, {
