@@ -151,7 +151,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
 }
 
 export function formatPronouns(pronouns: string): string {
-    let formattedPronouns;
+    let formattedPronouns: string;
     if (pronouns.includes("/")) {
         formattedPronouns = pronouns.split("/").map(x => PronounMapping[x].split(/[\/ ]/)[0]).join("/");
     } else {
