@@ -24,6 +24,7 @@ import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
@@ -39,6 +40,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
+    },
+    showVoiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Show a user's voice activity in dm list and member list",
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -68,6 +75,7 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     );
 });
 
+
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows whether a User is currently in a voice channel somewhere in their profile",
@@ -94,6 +102,25 @@ export default definePlugin({
         );
     },
 
+    patchMemberList: ({ user }: UserProps) => {
+        if (!settings.store.showVoiceActivity) return null;
+
+        return (
+            <ErrorBoundary noop>
+                {settings.store.showVoiceActivity && <VoiceActivityIcon user={user} />}
+            </ErrorBoundary>
+
+        );
+    },
+    patchDmList: ({ user }: UserProps) => {
+        if (!settings.store.showVoiceActivity) return null;
+        return (
+            <ErrorBoundary noop >
+                <VoiceActivityIcon user={user} />
+            </ErrorBoundary >
+        );
+    },
+
     patches: [
         {
             find: ".showCopiableUsername",
@@ -109,6 +136,20 @@ export default definePlugin({
                 match: /\(\)\.body.+?displayProfile:\i}\),/,
                 // paste my fancy custom button below the username
                 replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+        {
+            find: "PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP.",
+            replacement: {
+                match: /\w{2}\(\{selected:\w/,
+                replace: "$&,children:[$self.patchMemberList(this.props)]",
+            }
+        },
+        {
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /(\w)=this\.props.*\w\?\(0,\w\.jsx\)\(\w{2},\{\}\):null,/,
+                replace: "$&$self.patchDmList($1.props),",
             }
         }
     ],
