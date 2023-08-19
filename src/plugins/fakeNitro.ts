@@ -745,7 +745,7 @@ export default definePlugin({
                     return { cancel: true };
                 } else {
                     extra.stickers!.length = 0;
-                    messageObj.content += ` ${link}`;
+                    messageObj.content += ` ${link}`;// &name=${encodeURIComponent(sticker.name)}
                 }
             }
 
@@ -759,15 +759,13 @@ export default definePlugin({
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                     const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                        size: Settings.plugins.FakeNitro.emojiSize,
-                        name: encodeURIComponent(emoji.name)
+                        size: Settings.plugins.FakeNitro.emojiSize
                     }));
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
-
             return { cancel: false };
         });
 
@@ -786,8 +784,7 @@ export default definePlugin({
                 if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
 
                 const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                    size: Settings.plugins.FakeNitro.emojiSize,
-                    name: encodeURIComponent(emoji.name)
+                    size: Settings.plugins.FakeNitro.emojiSize
                 }));
                 return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
