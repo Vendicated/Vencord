@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -35,7 +34,7 @@ export default definePlugin({
             },
         },
         {
-            find: 'preload:"none","aria',
+            find: ".embedGallerySide",
             replacement: {
                 match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
                 replace:
