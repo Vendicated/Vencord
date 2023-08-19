@@ -745,7 +745,7 @@ export default definePlugin({
                     return { cancel: true };
                 } else {
                     extra.stickers!.length = 0;
-                    messageObj.content += ` ${link}&name=${encodeURIComponent(sticker.name)}`;
+                    messageObj.content += ` ${link}`;
                 }
             }
 
