@@ -22,7 +22,7 @@
  */
 export function getPluginTarget(filePath) {
     const pathParts = filePath.split(/[/\\]/);
-    if (/^index\.tsx?$/.test(filePath.at(-1))) pathParts.pop();
+    if (/^index\.tsx?$/.test(pathParts.at(-1))) pathParts.pop();
 
     const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
     const identiferBits = identifier.split(".");
