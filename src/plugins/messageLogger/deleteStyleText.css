@@ -3,6 +3,11 @@
     color: #f04747 !important;
 }
 
+/* Bot "thinking" text highlighting */
+.messagelogger-deleted [class*="colorStandard-"] {
+    color: #f04747 !important;
+}
+
 /* Embed highlighting */
 .messagelogger-deleted article :is(div, span, h1, h2, h3, p) {
     color: #f04747 !important;
