@@ -336,7 +336,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={false}
+        compact={!!document.querySelector("[class*=compact-]")}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
