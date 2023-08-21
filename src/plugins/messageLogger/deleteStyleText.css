@@ -19,5 +19,5 @@
 }
 
 .messagelogger-deleted button[class*="colorRed"] > .contents > .content {
-    color: var(--white-500);
+    color: var(--white-500) !important;
 }
