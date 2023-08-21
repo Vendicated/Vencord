@@ -17,3 +17,7 @@
     color: #be3535 !important;
     text-decoration: underline;
 }
+
+.messagelogger-deleted button[class*="colorRed"] > .contents > .content {
+    color: var(--white-500);
+}
