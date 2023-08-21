@@ -80,6 +80,38 @@ const Year1ThreeQuarterBadge: ProfileBadge = {
     shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 1 Year & Three Quarters"),
     link: STORE_URL
 };
+const Year2Badge: ProfileBadge = {
+    description: "7TV Subscriber - 2 Years",
+    image: "https://cdn.7tv.app/badge/64dfeec02040c6754787d929/3x",
+    position: BadgePosition.START,
+    props: BADGE_PROPS,
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Years"),
+    link: STORE_URL
+};
+const Year2QuarterBadge: ProfileBadge = {
+    description: "7TV Subscriber - 2 Years & a Quarter",
+    image: "https://cdn.7tv.app/badge/64dff4652040c6754787d92a/3x",
+    position: BadgePosition.START,
+    props: BADGE_PROPS,
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Years & a Quarter"),
+    link: STORE_URL
+};
+const Year2HalfBadge: ProfileBadge = {
+    description: "7TV Subscriber - 2 Years & a Half",
+    image: "https://cdn.7tv.app/badge/64dff95e2040c6754787d92f/3x",
+    position: BadgePosition.START,
+    props: BADGE_PROPS,
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Years & a Half"),
+    link: STORE_URL
+};
+const Year2ThreeQuarterBadge: ProfileBadge = {
+    description: "7TV Subscriber - 2 Years & three Quarters",
+    image: "https://cdn.7tv.app/badge/64dff9c32040c6754787d930/3x",
+    position: BadgePosition.START,
+    props: BADGE_PROPS,
+    shouldShow: ({ user }) => hasBadge(user.id, "7TV Subscriber - 2 Years & three Quarters"),
+    link: STORE_URL
+};
 
 const FounderBadge: ProfileBadge = {
     description: "7TV Founder",
@@ -147,6 +179,10 @@ export const SevenTVBadges = [
     Year1HalfBadge,
     XMASBadge,
     Year1ThreeQuarterBadge,
+    Year2Badge,
+    Year2QuarterBadge,
+    Year2HalfBadge,
+    Year2ThreeQuarterBadge,
     ModeratorBadge,
     AdminBadge
 ];
