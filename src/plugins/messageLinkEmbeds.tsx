@@ -18,6 +18,7 @@
 
 import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -336,7 +337,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={!!document.querySelector("[class*=compact-]")}
+        compact={getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")?.getSetting() || false}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
@@ -363,7 +364,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI"],
+    dependencies: ["MessageAccessoriesAPI", "SettingsStoreAPI"],
     patches: [
         {
             find: ".embedCard",
