@@ -163,13 +163,13 @@ export default definePlugin({
         {
             find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
             replacement: {
-                match: /showBorder:.{0,60}}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
-                replace: (m, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember}),`
+                match: /showBorder:(.{0,60})}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
+                replace: (m, showBorder, guild, guildMember) => `${m}$self.UserPermissions(${showBorder},${guild},${guildMember}),`
             }
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} />,
+    UserPermissions: (showBorder: boolean, guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions showBorder={showBorder} guild={guild} guildMember={guildMember} />,
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
     channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
