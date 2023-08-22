@@ -20,24 +20,28 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Text } from "@webpack/common";
+import { Button, Text, useState } from "@webpack/common";
 
 import style from "./style.css?managed";
 
-var colorways = [];
+interface Colorway {
+    name: string,
+    import: string,
+    accent: string,
+    primary: string,
+    secondary: string,
+    tertiary: string,
+    original: boolean,
+    author: string,
+    authorID: string,
+    colors: string[],
+    isGradient: boolean;
+}
 
 if (!Settings.plugins.DiscordColorways.colorwaySourceFiles) {
     Settings.plugins.DiscordColorways.colorwaySourceFiles = ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"];
-}
-
-function findByMatchingProperties(set, properties) {
-    return set.filter(function (entry) {
-        return Object.keys(properties).every(function (key) {
-            return entry[key] === properties[key];
-        });
-    });
 }
 
 const createElement = (type, props, ...children) => {
@@ -61,70 +65,109 @@ const createElement = (type, props, ...children) => {
     return node;
 };
 
-const refreshColorways = () => {
-    Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
-        fetch(colorwayList)
-            .then(response => response.json())
-            .then(data => {
-                data.colorways?.map(color => {
-                    if (!findByMatchingProperties(colorways, color)) {
-                        colorways.push(color);
-                    }
-                });
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-    });
-};
-
-
 const ColorwaysButton = () => (
     <div className="ColorwaySelectorBtnContainer">
-        <div className="ColorwaySelectorBtn" onClick={() => { refreshColorways(); openModal(props => <SelectorModal modalProps={props} />); }}><div className="colorwaySelectorIcon"></div></div>
+        <div className="ColorwaySelectorBtn" onClick={() => {
+            var colorways = new Array<Colorway>;
+            Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach(colorwayList => {
+                fetch(colorwayList)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data) return;
+                        if (!data.colorways?.length) return;
+                        data.colorways.map((color: Colorway) => {
+                            colorways.push(color);
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        return null;
+                    });
+            });
+            openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} />);
+        }}><div className="colorwaySelectorIcon"></div></div>
     </div >
 );
 
+function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader><Text variant="heading-lg/semibold" tag="h1">Create Colorway</Text></ModalHeader>
+            <ModalContent><Text variant="heading-md/normal" tag="h1">Coming soon...</Text></ModalContent>
+            <ModalFooter>
+                <Button style={{ marginLeft: 8 }} color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED}>Copy Current Colors</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED}>Enter Colorway ID</Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
 
-function SelectorModal({ modalProps }: { modalProps: ModalProps; }) {
+function SelectorModal({ modalProps, colorwayProps }: { modalProps: ModalProps, colorwayProps: Colorway[]; }) {
+    const [currentColorway, setCurrentColorway] = useState(Settings.plugins.DiscordColorways.activeColorwayID);
+    const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
             <ModalContent className="colorwaySelectorModalContent">
                 <Text variant="eyebrow" tag="h2">Colorways</Text>
                 <div className="ColorwaySelectorWrapper">
-                    <div className="discordColorway" id="colorway-refreshcolorway" onClick={refreshColorways}><div className="colorwayRefreshIcon"></div></div>
+                    <div className="discordColorway" id="colorway-refreshcolorway" onClick={() => {
+                        var colorwaysArr = new Array<Colorway>;
+                        Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
+                            fetch(colorwayList)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (!data) return;
+                                    if (!data.colorways?.length) return;
+                                    data.colorways.map((color: Colorway) => {
+                                        colorwaysArr.push(color);
+                                    });
+                                    if (i + 1 === Settings.plugins.DiscordColorways.colorwaySourceFiles) {
+                                        setColorways(colorwaysArr);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    return null;
+                                });
+                        });
+                    }}><div className="colorwayRefreshIcon"></div></div>
+                    <div className="discordColorway" id="colorway-createcolorway" onClick={() => { openModal(props => <CreatorModal modalProps={props} />); }}><div className="colorwayCreateIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
+                    </div></div>
                     {colorways.map((color, ind) => {
+                        var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
                         // eslint-disable-next-line no-unneeded-ternary
-                        return <div className={Settings.plugins.DiscordColorways.activeColorway === color.name ? "discordColorway active" : "discordColorway"} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false} onClick={e => {
-                            document.querySelector(".discordColorway.active")?.classList.remove("active");
-                            if (Settings.plugins.DiscordColorways.activeColorway === color.name) {
-                                if (document.getElementById("activeColorwayCSS")) {
-                                    document.getElementById("activeColorwayCSS")?.remove();
-                                    Settings.plugins.DiscordColorways.activeColorway = null;
-                                    e.target.className = "discordColorway";
-                                }
-                            } else {
-                                Settings.plugins.DiscordColorways.activeColorway = color.name;
-                                if (document.getElementById("activeColorwayCSS")) {
-                                    document.getElementById("activeColorwayCSS")!.textContent = color.import;
-                                } else {
-                                    document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: color.import }));
-                                }
-                                e.target.className = "discordColorway active";
-                            }
-                        }}>
+                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false}>
                             <div className="colorwayCheckIconContainer">
-                                <div className="colorwayCheckIcon"></div>
+                                <div className="colorwayCheckIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                </div>
                             </div>
-                            <div className="colorwayInfoIconContainer">
-                                <div className="colorwayInfoIcon"></div>
+                            <div className="colorwayInfoIconContainer" onClick={() => { }}>
+                                <div className="colorwayInfoIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                </div>
                             </div>
-                            <div className="discordColorwayPreviewColorContainer">
-                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.accent }}></div>
-                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.primary }}></div>
-                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.secondary }}></div>
-                                <div className="discordColorwayPreviewColor" style={{ backgroundColor: color.tertiary }}></div>
+                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                if (Settings.plugins.DiscordColorways.activeColorwayID === color.name) {
+                                    if (document.getElementById("activeColorwayCSS")) {
+                                        document.getElementById("activeColorwayCSS")?.remove();
+                                        Settings.plugins.DiscordColorways.activeColorwayID = null;
+                                        Settings.plugins.DiscordColorways.activeColorway = null;
+                                    }
+                                } else {
+                                    Settings.plugins.DiscordColorways.activeColorwayID = color.name;
+                                    Settings.plugins.DiscordColorways.activeColorway = color.import;
+                                    if (document.getElementById("activeColorwayCSS")) {
+                                        document.getElementById("activeColorwayCSS")!.textContent = color.import;
+                                    } else {
+                                        document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: color.import }));
+                                    }
+                                }
+                                setCurrentColorway(Settings.plugins.DiscordColorways.activeColorwayID);
+                            }}>
+                                {colors.map(colorItm => {
+                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                })}
                             </div>
                         </div>;
                     })}
@@ -138,34 +181,15 @@ export default definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord (Official Colorways only for now).",
     authors: [Devs.DaBluLite],
-    dependencies: ["CommandsAPI", "ServerListAPI"],
+    dependencies: ["ServerListAPI"],
     start: () => {
         enableStyle(style);
         addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
-        refreshColorways();
 
-        if (Settings.plugins.DiscordColorways.activeColorway) {
-            Settings.plugins.DiscordColorways.colorwaySourceFiles.forEach((colorwayList, i) => {
-                fetch(colorwayList)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data) return;
-                        if (!data.colorways?.length) return;
-                        data.colorways?.forEach(color => colorways.push(color));
-
-                        if (i + 1 === Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
-                            if (document.getElementById("activeColorwayCSS")) {
-                                document.getElementById("activeColorwayCSS")!.textContent = colorways.filter(colorway => colorway.name === Settings.plugins.DiscordColorways.activeColorway)[0].import;
-                            } else {
-                                document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: colorways.filter(colorway => colorway.name === Settings.plugins.DiscordColorways.activeColorway)[0].import }));
-                            }
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        return null;
-                    });
-            });
+        if (document.getElementById("activeColorwayCSS")) {
+            document.getElementById("activeColorwayCSS")!.textContent = Settings.plugins.DiscordColorways.activeColorway;
+        } else {
+            document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: Settings.plugins.DiscordColorways.activeColorway }));
         }
     },
     stop: () => {
