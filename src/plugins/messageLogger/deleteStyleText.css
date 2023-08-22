@@ -18,6 +18,6 @@
     text-decoration: underline;
 }
 
-.messagelogger-deleted button[class*="colorRed"] > .contents > .content {
+.messagelogger-deleted button[class*="colorRed"] [class*="contents"] > :is(div) {
     color: var(--white-500) !important;
 }
