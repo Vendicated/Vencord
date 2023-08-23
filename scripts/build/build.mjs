@@ -19,13 +19,13 @@
 
 import esbuild from "esbuild";
 
-import { commonOpts, globPlugins, isStandalone, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone,
     IS_DEV: JSON.stringify(watch),
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP: Date.now(),
+    BUILD_TIMESTAMP,
 };
 if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimise

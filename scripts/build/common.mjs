@@ -30,7 +30,8 @@ import PackageJSON from "../../package.json" assert { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
 
 export const VERSION = PackageJSON.version;
-export const BUILD_TIMESTAMP = Date.now();
+// https://reproducible-builds.org/docs/source-date-epoch/
+export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();

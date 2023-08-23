@@ -24,7 +24,7 @@ import { readFileSync } from "fs";
 import { appendFile, mkdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -47,7 +47,7 @@ const commonOptions = {
         IS_DISCORD_DESKTOP: "false",
         IS_VESKTOP: "false",
         VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP: Date.now(),
+        BUILD_TIMESTAMP,
     }
 };
 
