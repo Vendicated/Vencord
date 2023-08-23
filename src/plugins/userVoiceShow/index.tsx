@@ -24,7 +24,7 @@ import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import VoiceActivityIcon from "./components/VoiceActivityIcon";
+import VoiceActivityIcon, { VoiceActivityClassFactory as vaCl } from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
@@ -117,7 +117,9 @@ export default definePlugin({
         if (!settings.store.showVoiceActivity) return null;
         return (
             <ErrorBoundary noop >
-                <VoiceActivityIcon user={user} />
+                <div className={vaCl("iconContainer")}>
+                    <VoiceActivityIcon user={user} />
+                </div>
             </ErrorBoundary >
         );
     },
