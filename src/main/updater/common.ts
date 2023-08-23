@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export const VENCORD_FILES = [
     IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
-    "preload.js",
+    IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js",
     IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
-    "renderer.css"
+    IS_DISCORD_DESKTOP ? "renderer.css" : "vencordDesktopRenderer.css",
 ];
 
 export function serializeErrors(func: (...args: any[]) => any) {

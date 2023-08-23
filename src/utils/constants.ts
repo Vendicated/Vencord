@@ -265,7 +265,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Dziurwa: {
         name: "Dziurwa",
-        id: 787017887877169173n
+        id: 1034579679526526976n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -333,12 +333,28 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     rad: {
         name: "rad",
-        id: 113027285765885952n
+        id: 610945092504780823n
+    },
+    AndrewDLO: {
+        name: "Andrew-DLO",
+        id: 434135504792059917n
     },
     HypedDomi: {
         name: "HypedDomi",
         id: 354191516979429376n
-    }
+    },
+    Rini: {
+        name: "Rini",
+        id: 1079479184478441643n
+    },
+    Arrow: {
+        name: "arrow",
+        id: 958158495302176778n
+    },
+    bb010g: {
+        name: "bb010g",
+        id: 72791153467990016n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

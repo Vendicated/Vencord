@@ -19,7 +19,7 @@
 import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React, UserStore } from "@webpack/common";
+import { Forms, React, RelationshipStore, UserStore } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
 import { Review } from "../entities";
@@ -60,6 +60,9 @@ export default function ReviewsView({
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
+            if (settings.store.hideBlockedUsers)
+                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+
             scrollToTop?.();
             onFetchReviews(data!);
         }
