@@ -64,6 +64,18 @@
     color: #fff;
 }
 
+.vc-uvs-iconContainer {
+    margin-left: auto;
+}
+
+.vc-uvs-iconContainer .vc-uvs-icon {
+    margin-right: 8px;
+}
+
+.vc-uvs-iconContainer .vc-uvs-iconLive {
+    margin-right: 8px;
+}
+
 .vc-uvs-iconLocked {
     background-color: var(--button-danger-background);
 }
