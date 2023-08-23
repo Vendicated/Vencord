@@ -27,7 +27,7 @@ import { User } from "discord-types/general";
 
 const CONNECT = 1n << 20n;
 
-export const Icons = {
+const Icons = {
     CallJoin: findByCodeLazy("M11 5V3C16.515 3 21 7.486"),
     People: findByCodeLazy("M14 8.00598C14 10.211 12.206 12.006"),
     Speaker: findByCodeLazy("M11.383 3.07904C11.009 2.92504 10.579 3.01004"),
@@ -36,6 +36,9 @@ export const Icons = {
     Video: findByCodeLazy("M21.526 8.149C21.231 7.966 20.862 7.951"),
     Stage: findByCodeLazy("M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5"),
 };
+
+const VoiceStateStore = findStoreLazy("VoiceStateStore");
+const transitionTo: (path: string) => null = findByCodeLazy("transitionTo -");
 
 function groupDMName(members: any[]): string {
     if (members.length === 1) {
@@ -53,19 +56,18 @@ function groupDMName(members: any[]): string {
 
 const cl = classNameFactory("vc-uvs-");
 
+export const VoiceActivityClassFactory = cl;
+
 interface VoiceActivityIconProps {
     user: User;
 }
 
 export default ({ user }: VoiceActivityIconProps) => {
-    const VoiceStateStore = findStoreLazy("VoiceStateStore");
-    const transitionTo: (path: string) => null = findByCodeLazy("transitionTo -");
-
     let channelPath: string;
     let text: string;
     let subtext: string;
     let TooltipIcon: React.FunctionComponent<{ width: string; height: string; className: string; }>;
-    let className = "icon";
+    let className = cl("icon");
 
     console.log({ user });
     if (!user?.id) return null;
@@ -80,7 +82,7 @@ export default ({ user }: VoiceActivityIconProps) => {
     const guild = GuildStore.getGuild(channel.guild_id);
 
     if (channel.id === currentUserVoiceState?.channelId)
-        className = cl("icon", "iconCurrentCall");
+        className = `${cl("icon")} ${cl("iconCurrentCall")}`;
     if (voiceState.selfStream) className = cl("iconLive");
 
     if (guild) {
@@ -114,7 +116,7 @@ export default ({ user }: VoiceActivityIconProps) => {
     else if (voiceState.selfVideo) Icon = Icons.Video;
 
     const canConnect = PermissionStore.can(CONNECT, channel);
-    if (!canConnect) className = cl(className, "iconLocked");
+    if (!canConnect) className = `${className} ${cl("iconLocked")}`;
 
     return (
         <div className={className} onClick={e => {
@@ -134,7 +136,7 @@ export default ({ user }: VoiceActivityIconProps) => {
                     </div>
                 </div>
             }>
-                {(props: any) => !voiceState.selfStream ? <Icon {...props} width="14" height="14" /> : <div {...props}>Live</div>}
+                {tooltipProps => !voiceState.selfStream ? <Icon {...tooltipProps} width="14" height="14" /> : <div {...tooltipProps}>Live</div>}
             </Tooltip>
         </div>
     );
