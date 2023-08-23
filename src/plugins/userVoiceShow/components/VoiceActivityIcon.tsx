@@ -69,7 +69,6 @@ export default ({ user }: VoiceActivityIconProps) => {
     let TooltipIcon: React.FunctionComponent<{ width: string; height: string; className: string; }>;
     let className = cl("icon");
 
-    console.log({ user });
     if (!user?.id) return null;
 
     const voiceState = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(user.id));
