@@ -34,12 +34,14 @@ export const VERSION = PackageJSON.version;
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
+export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 export const banner = {
     js: `
 // Vencord ${gitHash}
 // Standalone: ${isStandalone}
 // Platform: ${isStandalone === "false" ? process.platform : "Universal"}
+// Updater disabled: ${updaterDisabled}
 `.trim()
 };
 

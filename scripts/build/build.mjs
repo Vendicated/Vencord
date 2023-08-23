@@ -19,11 +19,12 @@
 
 import esbuild from "esbuild";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone,
     IS_DEV: JSON.stringify(watch),
+    UPDATER_DISABLED: updaterDisabled,
     VERSION: JSON.stringify(VERSION),
     BUILD_TIMESTAMP,
 };

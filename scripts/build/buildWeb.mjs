@@ -46,6 +46,7 @@ const commonOptions = {
         IS_DEV: JSON.stringify(watch),
         IS_DISCORD_DESKTOP: "false",
         IS_VESKTOP: "false",
+        UPDATER_DISABLED: "true",
         VERSION: JSON.stringify(VERSION),
         BUILD_TIMESTAMP,
     }
