@@ -40,8 +40,6 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    minify: true,
-    bundle: true,
     external: ["electron", ...commonOpts.external],
     define: defines,
 };
@@ -50,16 +48,7 @@ const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.j
 const sourcemap = watch ? "inline" : "external";
 
 await Promise.all([
-    // common preload
-    esbuild.build({
-        ...nodeCommonOpts,
-        entryPoints: ["src/preload.ts"],
-        outfile: "dist/preload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
-        sourcemap,
-    }),
-
-    // Discord Desktop main & renderer
+    // Discord Desktop main & renderer & preload
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
@@ -69,7 +58,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VENCORD_DESKTOP: false
+            IS_VESKTOP: false
         }
     }),
     esbuild.build({
@@ -89,11 +78,23 @@ await Promise.all([
             ...defines,
             IS_WEB: false,
             IS_DISCORD_DESKTOP: true,
-            IS_VENCORD_DESKTOP: false
+            IS_VESKTOP: false
+        }
+    }),
+    esbuild.build({
+        ...nodeCommonOpts,
+        entryPoints: ["src/preload.ts"],
+        outfile: "dist/preload.js",
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
+        sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
         }
     }),
 
-    // Vencord Desktop main & renderer
+    // Vencord Desktop main & renderer & preload
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
@@ -103,7 +104,7 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VENCORD_DESKTOP: true
+            IS_VESKTOP: true
         }
     }),
     esbuild.build({
@@ -123,7 +124,19 @@ await Promise.all([
             ...defines,
             IS_WEB: false,
             IS_DISCORD_DESKTOP: false,
-            IS_VENCORD_DESKTOP: true
+            IS_VESKTOP: true
+        }
+    }),
+    esbuild.build({
+        ...nodeCommonOpts,
+        entryPoints: ["src/preload.ts"],
+        outfile: "dist/vencordDesktopPreload.js",
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
+        sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
         }
     }),
 ]).catch(err => {

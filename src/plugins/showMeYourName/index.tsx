@@ -40,6 +40,11 @@ const settings = definePluginSettings({
             { label: "Username only", value: "user" },
         ],
     },
+    displayNames: {
+        type: OptionType.BOOLEAN,
+        description: "Use display names in place of usernames",
+        default: false
+    },
     inReplies: {
         type: OptionType.BOOLEAN,
         default: false,
@@ -50,7 +55,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.dzshn],
+    authors: [Devs.dzshn, Devs.TheKodeToad],
     patches: [
         {
             find: ".withMentionPrefix",
@@ -63,9 +68,11 @@ export default definePlugin({
     settings,
 
     renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
-        if (message.interaction) return author?.nick;
         try {
-            const { username } = message.author;
+            let { username } = message.author;
+            if (settings.store.displayNames)
+                username = (message.author as any).globalName || username;
+
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
             if (username === nick || isRepliedMessage && !settings.store.inReplies)

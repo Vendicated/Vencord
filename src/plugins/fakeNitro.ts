@@ -313,7 +313,7 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /((\i)=\i\.node,\i=\i\.emojiSourceDiscoverableGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
+                match: /((\i)=\i\.node,\i=\i\.expressionSourceGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
                 replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
             }
         }
@@ -565,7 +565,11 @@ export default definePlugin({
 
         switch (embed.type) {
             case "image": {
-                if (!settings.store.transformCompoundSentence && !contentItems.includes(embed.url!) && !contentItems.includes(embed.image!.proxyURL)) return false;
+                if (
+                    !settings.store.transformCompoundSentence
+                    && !contentItems.includes(embed.url!)
+                    && !contentItems.includes(embed.image?.proxyURL!)
+                ) return false;
 
                 if (settings.store.transformEmojis) {
                     if (fakeNitroEmojiRegex.test(embed.url!)) return true;
