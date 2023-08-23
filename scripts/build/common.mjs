@@ -33,7 +33,7 @@ export const VERSION = PackageJSON.version;
 export const BUILD_TIMESTAMP = Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
-export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 export const banner = {
     js: `
 // Vencord ${gitHash}
@@ -133,11 +133,14 @@ export const gitRemotePlugin = {
             namespace: "git-remote", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
+            let remote = process.env.VENCORD_REMOTE;
+            if (!remote) {
             const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
-            const remote = res.stdout.trim()
-                .replace("https://github.com/", "")
-                .replace("git@github.com:", "")
-                .replace(/.git$/, "");
+                remote = res.stdout.trim()
+                    .replace("https://github.com/", "")
+                    .replace("git@github.com:", "")
+                    .replace(/.git$/, "");
+            }
 
             return { contents: `export default "${remote}"` };
         });
