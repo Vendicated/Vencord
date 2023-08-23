@@ -27,10 +27,10 @@ export default definePlugin({
     patches: [{
         find: ".USER_PROFILE_MEMBER_SINCE",
         replacement: [{
-            match: /children:(\(.*?(\i\.\i\.extractTimestamp\(\i\)).*?)\}/,
+            match: /children:(\(.+?(\i\.\i\.extractTimestamp\(\i\)).+?)\}/,
             replace: "children:$self.addTooltip($1, $2)}"
         }, {
-            match: /children:(\(.*?(\i\.joinedAt).*?)\}/,
+            match: /children:(\(.+?(\i\.joinedAt).+?)\}/,
             replace: "children:$self.addTooltip($1, $2)}"
         }]
     }],
