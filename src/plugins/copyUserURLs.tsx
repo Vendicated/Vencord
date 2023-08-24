@@ -20,7 +20,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, Clipboard, Toasts } from "@webpack/common";
+import { Clipboard, Menu, Toasts } from "@webpack/common";
 import type { Channel, User } from "discord-types/general";
 
 interface UserContextProps {
@@ -30,27 +30,27 @@ interface UserContextProps {
 }
 
 const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => () => {
-	function copyUserURL() {
-		Clipboard.copy(`<https://discord.com/users/${user.id}>`);
-		Toasts.show({
-			message: "Copied to Clipboard!",
-			type: Toasts.Type.SUCCESS,
-			id: Toasts.genId(),
-			options: {
-				duration: 1000,
-				position: Toasts.Position.TOP
-			}
-		});
-	}
+    function copyUserURL() {
+        Clipboard.copy(`<https://discord.com/users/${user.id}>`);
+        Toasts.show({
+            message: "Copied to Clipboard!",
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId(),
+            options: {
+                duration: 1000,
+                position: Toasts.Position.TOP
+            }
+        });
+    }
 
     children.push(
-		<Menu.MenuItem
-			id="copy-user-url"
-			label="Copy User URL"
-			action={copyUserURL}
-			icon={LinkIcon}
-		/>
-    )
+        <Menu.MenuItem
+            id="copy-user-url"
+            label="Copy User URL"
+            action={copyUserURL}
+            icon={LinkIcon}
+        />
+    );
 };
 
 export default definePlugin({
