@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ShowTimeouts",
-    description: "Shows timed out members without perms.",
+    description: "Shows timed out members without permission.",
     authors: [Devs.Dolfies],
     patches: [
         {
