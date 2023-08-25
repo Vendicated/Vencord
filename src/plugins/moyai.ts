@@ -54,6 +54,8 @@ interface IVoiceChannelEffectSendEvent {
 const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
+const MOYAI_URL_HD =
+    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai_hd.wav";
 
 const settings = definePluginSettings({
     volume: {
@@ -62,6 +64,14 @@ const settings = definePluginSettings({
         markers: makeRange(0, 1, 0.1),
         default: 0.5,
         stickToMarkers: false
+    },
+    quality: {
+        description: "Quality of the 🗿🗿🗿",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Normal", value: "Normal", default: true },
+            { label: "HD", value: "HD" }
+        ],
     },
     triggerWhenUnfocused: {
         description: "Trigger the 🗿 even when the window is unfocused",
@@ -157,7 +167,11 @@ function getMoyaiCount(message: string) {
 function boom() {
     if (!settings.store.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
-    audioElement.src = MOYAI_URL;
+
+    audioElement.src = settings.store.quality === "HD"
+        ? MOYAI_URL_HD
+        : MOYAI_URL;
+
     audioElement.volume = settings.store.volume;
     audioElement.play();
 }
