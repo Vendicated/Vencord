@@ -249,4 +249,4 @@ function Updater() {
     );
 }
 
-export default IS_WEB ? null : wrapTab(Updater, "Updater");
+export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");
