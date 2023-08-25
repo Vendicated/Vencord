@@ -47,9 +47,6 @@ async function getRepo() {
 }
 
 async function calculateGitChanges() {
-    if (UPDATER_DISABLED)
-        return [];
-
     await git("fetch");
 
     const res = await git("log", "HEAD...origin/main", "--pretty=format:%an/%h/%s");
@@ -64,17 +61,11 @@ async function calculateGitChanges() {
 }
 
 async function pull() {
-    if (UPDATER_DISABLED)
-        return false;
-
     const res = await git("pull");
     return res.stdout.includes("Fast-forward");
 }
 
 async function build() {
-    if (UPDATER_DISABLED)
-        return false;
-
     const opts = { cwd: VENCORD_SRC_DIR };
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
