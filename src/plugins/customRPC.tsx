@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
@@ -86,8 +86,7 @@ const settings = definePluginSettings({
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (!value) return "Application ID is required.";
             if (value && !/^\d+$/.test(value)) return "Application ID must be a number.";
@@ -97,8 +96,7 @@ const settings = definePluginSettings({
     appName: {
         type: OptionType.STRING,
         description: "Application name (required)",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (!value) return "Application name is required.";
             if (value.length > 128) return "Application name must be not longer than 128 characters.";
@@ -108,8 +106,7 @@ const settings = definePluginSettings({
     details: {
         type: OptionType.STRING,
         description: "Details (line 1)",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 128) return "Details (line 1) must be not longer than 128 characters.";
             return true;
@@ -118,8 +115,7 @@ const settings = definePluginSettings({
     state: {
         type: OptionType.STRING,
         description: "State (line 2)",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 128) return "State (line 2) must be not longer than 128 characters.";
             return true;
@@ -128,8 +124,7 @@ const settings = definePluginSettings({
     type: {
         type: OptionType.SELECT,
         description: "Activity type",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         options: [
             {
                 label: "Playing",
@@ -157,16 +152,14 @@ const settings = definePluginSettings({
     streamLink: {
         type: OptionType.STRING,
         description: "Twitch.tv or Youtube.com link (only for Streaming activity type)",
-        restartNeeded: true,
-        onChange: setRpc,
-        isDisabled: isStreamLinkDisabled,
+        onChange: onChange,
+        disabled: isStreamLinkDisabled,
         isValid: isStreamLinkValid
     },
     timestampMode: {
         type: OptionType.SELECT,
         description: "Timestamp mode",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         options: [
             {
                 label: "None",
@@ -190,9 +183,8 @@ const settings = definePluginSettings({
     startTime: {
         type: OptionType.NUMBER,
         description: "Start timestamp (only for custom timestamp mode)",
-        restartNeeded: true,
-        onChange: setRpc,
-        isDisabled: isTimestampDisabled,
+        onChange: onChange,
+        disabled: isTimestampDisabled,
         isValid: (value: number) => {
             if (value && value < 0) return "Start timestamp must be greater than 0.";
             return true;
@@ -201,9 +193,8 @@ const settings = definePluginSettings({
     endTime: {
         type: OptionType.NUMBER,
         description: "End timestamp (only for custom timestamp mode)",
-        restartNeeded: true,
-        onChange: setRpc,
-        isDisabled: isTimestampDisabled,
+        onChange: onChange,
+        disabled: isTimestampDisabled,
         isValid: (value: number) => {
             if (value && value < 0) return "End timestamp must be greater than 0.";
             return true;
@@ -211,16 +202,14 @@ const settings = definePluginSettings({
     },
     imageBig: {
         type: OptionType.STRING,
-        description: "Big image key",
-        restartNeeded: true,
-        onChange: setRpc,
+        description: "Big image key/link",
+        onChange: onChange,
         isValid: isImageKeyValid
     },
     imageBigTooltip: {
         type: OptionType.STRING,
         description: "Big image tooltip",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 128) return "Big image tooltip must be not longer than 128 characters.";
             return true;
@@ -228,16 +217,14 @@ const settings = definePluginSettings({
     },
     imageSmall: {
         type: OptionType.STRING,
-        description: "Small image key",
-        restartNeeded: true,
-        onChange: setRpc,
+        description: "Small image key/link",
+        onChange: onChange,
         isValid: isImageKeyValid
     },
     imageSmallTooltip: {
         type: OptionType.STRING,
         description: "Small image tooltip",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 128) return "Small image tooltip must be not longer than 128 characters.";
             return true;
@@ -246,8 +233,7 @@ const settings = definePluginSettings({
     buttonOneText: {
         type: OptionType.STRING,
         description: "Button 1 text",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 31) return "Button 1 text must be not longer than 31 characters.";
             return true;
@@ -256,14 +242,12 @@ const settings = definePluginSettings({
     buttonOneURL: {
         type: OptionType.STRING,
         description: "Button 1 URL",
-        restartNeeded: true,
-        onChange: setRpc
+        onChange: onChange
     },
     buttonTwoText: {
         type: OptionType.STRING,
         description: "Button 2 text",
-        restartNeeded: true,
-        onChange: setRpc,
+        onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 31) return "Button 2 text must be not longer than 31 characters.";
             return true;
@@ -272,26 +256,29 @@ const settings = definePluginSettings({
     buttonTwoURL: {
         type: OptionType.STRING,
         description: "Button 2 URL",
-        restartNeeded: true,
-        onChange: setRpc
+        onChange: onChange
     }
 });
 
-function isStreamLinkDisabled(): boolean {
+function onChange() {
+    setRpc(true);
+    if (Settings.plugins.CustomRPC.enabled) setRpc();
+}
+
+function isStreamLinkDisabled() {
     return settings.store.type !== ActivityType.STREAMING;
 }
 
-function isStreamLinkValid(): boolean | string {
-    if (settings.store.type === ActivityType.STREAMING && settings.store.streamLink && !/(https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+)/.test(settings.store.streamLink)) return "Streaming link must be a valid URL.";
+function isStreamLinkValid(value: string) {
+    if (!isStreamLinkDisabled() && !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
     return true;
 }
 
-function isTimestampDisabled(): boolean {
+function isTimestampDisabled() {
     return settings.store.timestampMode !== TimestampMode.CUSTOM;
 }
 
 function isImageKeyValid(value: string) {
-    if (!/https?:\/\//.test(value)) return true;
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
     return true;
@@ -342,13 +329,10 @@ async function createActivity(): Promise<Activity | undefined> {
             };
             break;
         case TimestampMode.CUSTOM:
-            if (startTime) {
-                activity.timestamps = {
-                    start: startTime,
-                };
-                if (endTime) {
-                    activity.timestamps.end = endTime;
-                }
+            if (startTime || endTime) {
+                activity.timestamps = {};
+                if (startTime) activity.timestamps.start = startTime;
+                if (endTime) activity.timestamps.end = endTime;
             }
             break;
         case TimestampMode.NONE:
