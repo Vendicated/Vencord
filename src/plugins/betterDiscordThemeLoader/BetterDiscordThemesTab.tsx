@@ -77,7 +77,7 @@ function BetterDiscordThemesTab() {
 
     function onSearch(input) {
         setSearchValue(input);
-        setFilteredThemes(themes.filter(e => e.name.toLowerCase.indexOf(input.toLowerCase()) !== -1));
+        setFilteredThemes(themes.filter(e => e.name.toLowerCase().indexOf(input.toLowerCase()) !== -1));
     }
 
     settings = useSettings(["themeLinks", "enabledThemes"]);
@@ -93,7 +93,7 @@ function BetterDiscordThemesTab() {
     return (
         <SettingsTab title="BetterDiscord Themes">
             <TextInput autoFocus value={searchValue.str} placeholder="Search for a theme..." onChange={onSearch} className={Margins.bottom20} />
-            {filteredThemes.length === 0 ? <Text></Text> : getThemesGrid(filteredThemes)}
+            {filteredThemes.length === 0 ? <Text>No themes here...</Text> : getThemesGrid(filteredThemes)}
         </SettingsTab>
     );
 }
