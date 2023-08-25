@@ -11,6 +11,14 @@ import settings from "plugins/_core/settings";
 
 import BetterDiscordThemesTab from "./BetterDiscordThemesTab";
 
+const tab = () => {
+    return {
+        section: "BetterDiscordThemes",
+        label: "BD Themes",
+        element: BetterDiscordThemesTab,
+        className: "vc-betterdiscordthemes-settings"
+    };
+};
 
 export default definePlugin({
     name: "BetterDiscord Themes",
@@ -24,15 +32,10 @@ export default definePlugin({
     ],
     // Delete these two below if you are only using code patches
     start() {
-        settings.customSections.push(() => {
-            return {
-                section: "BetterDiscordThemes",
-                label: "BD Themes",
-                element: BetterDiscordThemesTab,
-                className: "vc-betterdiscordthemes-settings"
-            };
-        });
+        settings.customSections.push(tab);
     },
 
-    stop() { },
+    stop() {
+        settings.customSections = settings.customSections.filter(section => section !== tab);
+    },
 });
