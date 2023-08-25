@@ -43,9 +43,6 @@ async function githubGet(endpoint: string) {
 }
 
 async function calculateGitChanges() {
-    if (UPDATER_DISABLED)
-        return [];
-
     const isOutdated = await fetchUpdates();
     if (!isOutdated) return [];
 
@@ -61,9 +58,6 @@ async function calculateGitChanges() {
 }
 
 async function fetchUpdates() {
-    if (UPDATER_DISABLED)
-        return false;
-
     const release = await githubGet("/releases/latest");
 
     const data = JSON.parse(release.toString());
@@ -80,9 +74,6 @@ async function fetchUpdates() {
 }
 
 async function applyUpdates() {
-    if (UPDATER_DISABLED)
-        return false;
-
     await Promise.all(PendingUpdates.map(
         async ([name, data]) => writeFile(
             join(__dirname, name),
