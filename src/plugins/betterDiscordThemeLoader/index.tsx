@@ -14,7 +14,7 @@ import BetterDiscordThemesTab from "./BetterDiscordThemesTab";
 
 export default definePlugin({
     name: "BetterDiscord Themes",
-    description: "This plugin allows you to change themes from BetterDiscord with one click\n(require to reopen settings)",
+    description: "This plugin allows you to change themes from BetterDiscord with one click. (require to reopen settings)",
 
     authors: [
         {
