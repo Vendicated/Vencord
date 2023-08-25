@@ -55,8 +55,6 @@ let AutoModEmbed: React.ComponentType<any> = () => null;
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
-const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")?.getSetting() || false;
-
 interface Attachment {
     height: number;
     width: number;
@@ -321,6 +319,8 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
     />;
 }
 
+const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact");
+
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
     const isDM = guildID === "@me";
@@ -338,7 +338,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={compactModeEnabled}
+        compact={compactModeEnabled?.getSetting() || false}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
