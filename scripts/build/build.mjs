@@ -24,7 +24,7 @@ import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, updaterDisabled
 const defines = {
     IS_STANDALONE: isStandalone,
     IS_DEV: JSON.stringify(watch),
-    UPDATER_DISABLED: updaterDisabled,
+    IS_UPDATER_DISABLED: updaterDisabled,
     VERSION: JSON.stringify(VERSION),
     BUILD_TIMESTAMP,
 };

@@ -103,7 +103,7 @@ export default definePlugin({
                 element: require("@components/VencordSettings/ThemesTab").default,
                 className: "vc-themes"
             },
-            !UPDATER_DISABLED && {
+            !IS_UPDATER_DISABLED && {
                 section: "VencordUpdater",
                 label: "Updater",
                 element: require("@components/VencordSettings/UpdaterTab").default,
