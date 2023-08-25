@@ -11,18 +11,10 @@ import settings from "plugins/_core/settings";
 
 import BetterDiscordThemesTab from "./BetterDiscordThemesTab";
 
-settings.customSections.push(() => {
-    return {
-        section: "BetterDiscordThemes",
-        label: "BD Themes",
-        element: BetterDiscordThemesTab,
-        className: "vc-betterdiscordthemes-settings"
-    };
-});
 
 export default definePlugin({
     name: "BetterDiscord Themes",
-    description: "This plugin allows you to change themes from BetterDiscord with one click",
+    description: "This plugin allows you to change themes from BetterDiscord with one click\n(require to reopen settings)",
 
     authors: [
         {
@@ -32,7 +24,14 @@ export default definePlugin({
     ],
     // Delete these two below if you are only using code patches
     start() {
-
+        settings.customSections.push(() => {
+            return {
+                section: "BetterDiscordThemes",
+                label: "BD Themes",
+                element: BetterDiscordThemesTab,
+                className: "vc-betterdiscordthemes-settings"
+            };
+        });
     },
 
     stop() { },
