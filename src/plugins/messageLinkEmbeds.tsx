@@ -319,7 +319,7 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
     />;
 }
 
-const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact");
+const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")!;
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
@@ -338,7 +338,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={compactModeEnabled?.getSetting() || false}
+        compact={compactModeEnabled.getSetting()}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
