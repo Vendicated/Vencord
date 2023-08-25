@@ -138,7 +138,7 @@ export const gitRemotePlugin = {
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
             let remote = process.env.VENCORD_REMOTE;
             if (!remote) {
-            const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+                const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
                 remote = res.stdout.trim()
                     .replace("https://github.com/", "")
                     .replace("git@github.com:", "")
