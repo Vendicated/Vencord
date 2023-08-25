@@ -48,7 +48,7 @@ export default {
         },
 
         addThemeChangeListener(cb: () => void) {
-            ipcRenderer.on(IpcEvents.THEME_UPDATE, cb);
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
         },
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
