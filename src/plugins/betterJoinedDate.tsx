@@ -15,11 +15,11 @@ export default definePlugin({
     patches: [{
         find: ".USER_PROFILE_MEMBER_SINCE",
         replacement: [{
-            match: /children:(\(.+?(\i\.\i\.extractTimestamp\(\i\)).+?)\}/,
-            replace: "children:$self.addTooltip($1, $2)}"
+            match: /\(0,\i.\i\)\((\i\.\i\.extractTimestamp\(\i\)),\i\)/,
+            replace: "$self.addTooltip($&, $1)"
         }, {
-            match: /children:(\(.+?(\i\.joinedAt).+?)\}/,
-            replace: "children:$self.addTooltip($1, $2)}"
+            match: /\(0,\i.\i\)\((\i\.joinedAt),\i\)/,
+            replace: "$self.addTooltip($&, $1)"
         }]
     }],
     addTooltip(str: string, timestamp: number) {
