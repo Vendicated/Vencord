@@ -196,7 +196,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
-    const favButtonProps = pluginSettings.favorite ? { color: "#e8e541" } : {};
+    const favButtonProps = pluginSettings.favorite ? { color: "var(--yellow-300)" } : {};
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
