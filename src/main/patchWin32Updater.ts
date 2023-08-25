@@ -20,18 +20,6 @@ import { app } from "electron";
 import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "fs";
 import { basename, dirname, join } from "path";
 
-const { setAppUserModelId } = app;
-
-// Apparently requiring Discords updater too early leads into issues,
-// copied this workaround from powerCord
-app.setAppUserModelId = function (id: string) {
-    app.setAppUserModelId = setAppUserModelId;
-
-    setAppUserModelId.call(this, id);
-
-    patchUpdater();
-};
-
 function isNewer($new: string, old: string) {
     const newParts = $new.slice(4).split(".").map(Number);
     const oldParts = old.slice(4).split(".").map(Number);
@@ -77,25 +65,6 @@ function patchLatest() {
     }
 }
 
-// Windows Host Updates install to a new folder app-{HOST_VERSION}, so we
-// need to reinject
-function patchUpdater() {
-    // Array of autoStart paths to try
-    const autoStartPaths = [
-        join(require.main!.filename, "..", "autoStart", "win32.js"), // Vanilla
-        join(require.main!.filename, "..", "autoStart.js") // OpenAsar
-    ];
-
-    for (const path of autoStartPaths) {
-        try {
-            const { update } = require(path);
-
-            require.cache[path]!.exports.update = function () {
-                update.apply(this, arguments);
-                patchLatest();
-            };
-        } catch {
-            // Ignore as non-critical
-        }
-    }
-}
+// Try to patch latest on before-quit
+// Discord's Win32 updater will call app.quit() on restart and open new version on will-quit
+app.on("before-quit", patchLatest);
