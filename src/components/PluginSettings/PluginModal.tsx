@@ -47,6 +47,9 @@ const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "sho
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
+const FavIcon = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489 21.404 8.00089 21 8.00089H15.618L12.894"));
+const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
+
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
     onRestartNeeded(): void;
@@ -193,10 +196,15 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
+    const favButtonProps = pluginSettings.favorite ? { color: "#e8e541" } : {};
+
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
+                <button role="switch" onClick={() => pluginSettings.favorite = !pluginSettings.favorite} className={classes(ButtonClasses.button, "vc-plugins-info-button")}>
+                    <FavIcon width="24" height="24" {...favButtonProps} />
+                </button>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent>

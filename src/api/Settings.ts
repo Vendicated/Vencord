@@ -44,6 +44,7 @@ export interface Settings {
     plugins: {
         [plugin: string]: {
             enabled: boolean;
+            favorite: boolean;
             [setting: string]: any;
         };
     };
@@ -125,7 +126,8 @@ function makeProxy(settings: any, root = settings, path = ""): Settings {
                 // Return empty for plugins with no settings
                 if (path === "plugins" && p in plugins)
                     return target[p] = makeProxy({
-                        enabled: plugins[p].required ?? plugins[p].enabledByDefault ?? false
+                        enabled: plugins[p].required ?? plugins[p].enabledByDefault ?? false,
+                        favorite: false,
                     }, root, `plugins.${p}`);
 
                 // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
