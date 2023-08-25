@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Clipboard, Menu, Toasts } from "@webpack/common";
+import { Clipboard, Menu } from "@webpack/common";
 import type { Channel, User } from "discord-types/general";
 
 interface UserContextProps {
@@ -30,24 +30,11 @@ interface UserContextProps {
 }
 
 const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => () => {
-    function copyUserURL() {
-        Clipboard.copy(`<https://discord.com/users/${user.id}>`);
-        Toasts.show({
-            message: "Copied to Clipboard!",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.TOP
-            }
-        });
-    }
-
     children.push(
         <Menu.MenuItem
             id="copy-user-url"
             label="Copy User URL"
-            action={copyUserURL}
+            action={() => Clipboard.copy(`<https://discord.com/users/${user.id}>`)}
             icon={LinkIcon}
         />
     );
