@@ -24,6 +24,8 @@ export default definePlugin({
                 replace: "$&,'data-tab-id':this.props.id"
             }
         },
+
+        // Add data-author-id and data-is-self to all messages
         {
             find: ".messageListItem",
             replacement: {
