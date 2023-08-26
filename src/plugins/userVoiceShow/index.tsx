@@ -41,12 +41,17 @@ const settings = definePluginSettings({
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
     },
-    showVoiceActivity: {
+    showVoiceActivityIcons: {
         type: OptionType.BOOLEAN,
         description: "Show a user's voice activity in dm list and member list",
         default: true,
-        restartNeeded: true
-    }
+    },
+    showUsersInVoiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show a list of users connected to a channel",
+        default: true,
+        disabled: () => !settings.store.showVoiceActivityIcons
+    },
 });
 
 interface UserProps {
@@ -104,21 +109,22 @@ export default definePlugin({
     },
 
     patchMemberList: ({ user }: UserProps) => {
-        if (!settings.store.showVoiceActivity) return null;
+        if (!settings.use(["showVoiceActivityIcons"]).showVoiceActivityIcons) return null;
 
         return (
             <ErrorBoundary noop>
-                {settings.store.showVoiceActivity && <VoiceActivityIcon user={user} />}
+                <VoiceActivityIcon user={user} showUsers={settings.store.showUsersInVoiceActivity} />
             </ErrorBoundary>
 
         );
     },
     patchDmList: ({ user }: UserProps) => {
-        if (!settings.store.showVoiceActivity) return null;
+        if (!settings.use(["showVoiceActivityIcons"]).showVoiceActivityIcons) return null;
+
         return (
             <ErrorBoundary noop >
                 <div className={vaCl("iconContainer")}>
-                    <VoiceActivityIcon user={user} />
+                    <VoiceActivityIcon user={user} showUsers={settings.store.showUsersInVoiceActivity} />
                 </div>
             </ErrorBoundary >
         );
