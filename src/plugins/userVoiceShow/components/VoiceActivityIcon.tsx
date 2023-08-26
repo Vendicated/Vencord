@@ -26,6 +26,8 @@ import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@web
 import { ChannelStore, GuildStore, PermissionStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import { settings } from "..";
+
 const CONNECT = 1n << 20n;
 
 const Icons = {
@@ -45,7 +47,6 @@ const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer"
 
 interface VoiceActivityIconProps {
     user: User;
-    showUsers: boolean;
 }
 interface VoiceState {
     userId: string;
@@ -92,7 +93,7 @@ function makeRenderMoreUsers(users: User[], count = 5) {
 const cl = classNameFactory("vc-uvs-");
 export const VoiceActivityClassFactory = cl;
 
-export default ({ user, showUsers }: VoiceActivityIconProps) => {
+export default ({ user }: VoiceActivityIconProps) => {
     let channelPath: string;
     let text: string;
     let subtext: string;
@@ -111,7 +112,7 @@ export default ({ user, showUsers }: VoiceActivityIconProps) => {
     if (!channel) return null;
     const guild = GuildStore.getGuild(channel.guild_id);
 
-    if (showUsers) {
+    if (settings.store.showUsersInVoiceActivity) {
         voiceChannelUsers = (Object.values(VoiceStateStore.getVoiceStatesForChannel(channel?.id)) as VoiceState[]).map(vs => UserStore.getUser(vs.userId));
     }
 

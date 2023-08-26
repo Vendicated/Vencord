@@ -30,7 +30,7 @@ import { VoiceChannelSection } from "./components/VoiceChannelSection";
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's voice channel in their profile modal",
@@ -45,6 +45,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show a user's voice activity in dm list and member list",
         default: true,
+        restartNeeded: true,
     },
     showUsersInVoiceActivity: {
         type: OptionType.BOOLEAN,
@@ -109,22 +110,22 @@ export default definePlugin({
     },
 
     patchMemberList: ({ user }: UserProps) => {
-        if (!settings.use(["showVoiceActivityIcons"]).showVoiceActivityIcons) return null;
+        if (!settings.store.showVoiceActivityIcons) return null;
 
         return (
             <ErrorBoundary noop>
-                <VoiceActivityIcon user={user} showUsers={settings.store.showUsersInVoiceActivity} />
+                <VoiceActivityIcon user={user} />
             </ErrorBoundary>
 
         );
     },
     patchDmList: ({ user }: UserProps) => {
-        if (!settings.use(["showVoiceActivityIcons"]).showVoiceActivityIcons) return null;
+        if (!settings.store.showVoiceActivityIcons) return null;
 
         return (
             <ErrorBoundary noop >
                 <div className={vaCl("iconContainer")}>
-                    <VoiceActivityIcon user={user} showUsers={settings.store.showUsersInVoiceActivity} />
+                    <VoiceActivityIcon user={user} />
                 </div>
             </ErrorBoundary >
         );
