@@ -21,7 +21,8 @@
 import "./VoiceActivityIcon.css";
 
 import { classNameFactory } from "@api/Styles";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { LazyComponent } from "@utils/react";
+import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, PermissionStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -39,6 +40,22 @@ const Icons = {
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const transitionTo: (path: string) => null = findByCodeLazy("transitionTo -");
+const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+
+interface VoiceActivityIconProps {
+    user: User;
+    showUsers: boolean;
+}
+interface VoiceState {
+    userId: string;
+    channelId?: string;
+    oldChannelId?: string;
+    deaf: boolean;
+    mute: boolean;
+    selfDeaf: boolean;
+    selfMute: boolean;
+}
 
 function groupDMName(members: any[]): string {
     if (members.length === 1) {
@@ -54,20 +71,34 @@ function groupDMName(members: any[]): string {
     return "Unnamed";
 }
 
-const cl = classNameFactory("vc-uvs-");
-
-export const VoiceActivityClassFactory = cl;
-
-interface VoiceActivityIconProps {
-    user: User;
+function makeRenderMoreUsers(users: User[], count = 5) {
+    return function renderMoreUsers(_label: string, _count: number) {
+        return (
+            <Tooltip text={users.slice(count).map(u => u.username).join(", ")} >
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <div
+                        className={AvatarStyles.moreUsers}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                    >
+                        +{users.length - count + 1}
+                    </div>
+                )}
+            </Tooltip >
+        );
+    };
 }
 
-export default ({ user }: VoiceActivityIconProps) => {
+const cl = classNameFactory("vc-uvs-");
+export const VoiceActivityClassFactory = cl;
+
+export default ({ user, showUsers }: VoiceActivityIconProps) => {
     let channelPath: string;
     let text: string;
     let subtext: string;
     let TooltipIcon: React.FunctionComponent<{ width: string; height: string; className: string; }>;
     let className = cl("icon");
+    let voiceChannelUsers: User[] | undefined;
 
     if (!user?.id) return null;
 
@@ -79,6 +110,10 @@ export default ({ user }: VoiceActivityIconProps) => {
     const channel = ChannelStore.getChannel(voiceState.channelId);
     if (!channel) return null;
     const guild = GuildStore.getGuild(channel.guild_id);
+
+    if (showUsers) {
+        voiceChannelUsers = (Object.values(VoiceStateStore.getVoiceStatesForChannel(channel?.id)) as VoiceState[]).map(vs => UserStore.getUser(vs.userId));
+    }
 
     if (channel.id === currentUserVoiceState?.channelId)
         className = `${cl("icon")} ${cl("iconCurrentCall")}`;
@@ -130,11 +165,22 @@ export default ({ user }: VoiceActivityIconProps) => {
                         {text}
                     </div>
                     <div className={cl("subtext")}>
-                        <TooltipIcon className={cl("tooltipIcon")} width="16" height="16" />
                         <div style={{ fontWeight: "400" }}>{subtext}</div>
+                        {voiceChannelUsers && <div style={{ width: "fit-content", marginTop: 6, display: "flex", alignItems: "center" }}>
+                            <TooltipIcon className={cl("tooltipIcon")} width="18" height="18" />
+                            <UserSummaryItem
+                                users={voiceChannelUsers}
+                                guildId={guild.id}
+                                renderIcon={false}
+                                max={5}
+                                size={24}
+                                renderMoreUsers={makeRenderMoreUsers(voiceChannelUsers, 5)}
+                            />
+                        </div>}
                     </div>
                 </div>
             }>
+
                 {tooltipProps => !voiceState.selfStream ? <Icon {...tooltipProps} width="14" height="14" /> : <div {...tooltipProps}>Live</div>}
             </Tooltip>
         </div>
