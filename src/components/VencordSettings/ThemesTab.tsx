@@ -231,7 +231,7 @@ function ThemesTab() {
                                             ref={fileInputRef}
                                             onChange={onFileUpload}
                                             multiple={true}
-                                            filters={[{ extensions: ["*.css"] }]}
+                                            filters={[{ extensions: ["css"] }]}
                                         />
                                     </Button>
                                 ) : (
