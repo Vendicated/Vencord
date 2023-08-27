@@ -46,20 +46,26 @@ export function SettingListComponent({ option, pluginSettings, definedSettings, 
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{option.description}</Forms.FormTitle>
-            <div style={{ display: "grid", gap: "10px", gridTemplateRows: "40px" }}>
-                {state.map((value, index)=>(<div style={{ display: "grid", height: "40px", gap: "10px", gridTemplateColumns: "1fr 40px" }}>
+            <div className="vc-settings-list-wrapper">
+                {state.map((value, index)=>(<div className="vc-settings-list-row">
                     <TextInput
                         key={"list-entry-" + index}
                         type="text"
                         value={value}
-                        onChange={newValue => { state[index]=newValue;handleChange(state); }}
+                        onChange={newValue => {
+                            state[index] = newValue;
+                            handleChange(state);
+                        }}
                         placeholder={option.placeholder ?? "Enter a value"}
                         disabled={option.disabled?.call(definedSettings) ?? false}
                     />
                     <Button
                         color={Button.Colors.RED}
                         size={Button.Sizes.ICON}
-                        onClick={()=>{ state.splice(index, 1);handleChange(state); }}
+                        onClick={() => {
+                            state.splice(index, 1);
+                            handleChange(state);
+                        }}
                         disabled={option.disabled?.call(definedSettings) ?? false}
                     >
                         <IconClose color="currentColor" />
@@ -67,7 +73,10 @@ export function SettingListComponent({ option, pluginSettings, definedSettings, 
                 </div>))}
                 <Button
                     color={Button.Colors.GREEN}
-                    onClick={()=>{ state.push("");handleChange(state); }}
+                    onClick={() => {
+                        state.push("");
+                        handleChange(state);
+                    }}
                     disabled={option.disabled?.call(definedSettings) ?? false}
                 >
                     Add new entry

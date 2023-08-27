@@ -136,13 +136,13 @@ export default definePlugin({
             "highlight",
             rules => ({
                 order: rules.text.order - 1,
-                match: function (text, state) {
+                match(text, state) {
                     const words = self.getKeywordsForRegex();
                     if (state.vc_highlight || words === "") return null;
 
                     return new RegExp(`^(${words})((?:\\W|$))`, "i").exec(text);
                 },
-                parse: function (capture, parse, state) {
+                parse(capture, parse, state) {
                     state.vc_highlight = true;
                     const node = [
                         {
@@ -159,7 +159,7 @@ export default definePlugin({
                     delete state.vc_highlight;
                     return node;
                 },
-                react: function (node, recurseOutput, state) {
+                react(node, recurseOutput, state) {
                     return (
                         <span className="highlight">
                             {recurseOutput(node.content, state)}

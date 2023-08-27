@@ -125,7 +125,7 @@ const parserMap = [
         ruleset: "CHANNEL_TOPIC_RULES",
         react: "parseTopic",
         ast: "parseTopicToAST",
-        reactOptions: { ...Parser.defaultReactRuleOptions, emojiTooltipPosition: "bottom" },
+        reactOptions: { emojiTooltipPosition: "bottom" },
         overrides: { codeBlock: "text" },
     },
     {
@@ -150,7 +150,7 @@ const parserMap = [
     {
         ruleset: "INLINE_REPLY_RULES",
         react: "parseForumPostMostRecentMessage",
-        reactOptions: { ...Parser.defaultReactRuleOptions, emoji: { height: 14, width: 14, lineHeight: 18 } },
+        reactOptions: { emoji: { height: 14, width: 14, lineHeight: 18 } },
     },
     {
         ruleset: "AUTO_MODERATION_SYSTEM_MESSAGE_RULES",
@@ -161,7 +161,7 @@ const parserMap = [
         ruleset: "RULES",
         key: "notifCenterV2MessagePreviewRules",
         react: "parseNotifCenterMessagePreview",
-        reactOptions: { ...Parser.defaultReactRuleOptions, emoji: { height: 14, width: 14, lineHeight: 18 } },
+        reactOptions: { emoji: { height: 14, width: 14, lineHeight: 18 } },
         omit: ["paragraph", "newline", "strong", "codeBlock", "inlineCode", "u", "link", "url", "autolink", "list", "heading"],
     },
 ];
@@ -169,7 +169,7 @@ function __rebuildParsers() {
     for (const props of parserMap) {
         const customRules = __getCustomRules(props.ruleset);
 
-        const reactOptions = props.reactOptions ?? Parser.defaultReactRuleOptions;
+        const reactOptions = props.reactOptions ? {...Parser.defaultReactRuleOptions, ...props.reactOptions} : Parser.defaultReactRuleOptions;
         const overrides = {};
         if (props.overrides) {
             for (const [rule, override] of Object.entries(props.overrides)) {
