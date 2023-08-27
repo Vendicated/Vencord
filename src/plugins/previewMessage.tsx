@@ -28,10 +28,12 @@ interface Props {
     };
 }
 
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
+
 export function PreviewButton(chatBoxProps: Props) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
     const channelId = SelectedChannelStore.getChannelId();
-    const draft = useStateFromStores([DraftStore], () => DraftStore.getDraft(channelId, DraftType.ChannelMessage));
+    const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
     if (!draft) return null;
 
@@ -44,7 +46,7 @@ export function PreviewButton(chatBoxProps: Props) {
                         sendBotMessage(
                             channelId,
                             {
-                                content: draft,
+                                content: getDraft(channelId),
                                 author: UserStore.getCurrentUser()
                             }
                         )}
