@@ -310,3 +310,122 @@
 .colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has(.editPencilIcon-22tRaH>path[fill="var(--primary-530)"])::before {
     color: var(--primary-530);
 }
+
+.colorwaySelector-noDisplay {
+    display: none;
+}
+
+.colorwayInfo-wrapper {
+    display: flex;
+    flex-direction: column;
+    color: var(--header-primary);
+}
+
+.colorwayInfo-colorSwatches {
+    width: 100%;
+    height: 46px;
+    display: flex;
+    flex-direction: row;
+    margin: 12px 0;
+    gap: 8px;
+}
+
+.colorwayInfo-colorSwatch {
+    display: flex;
+    width: 100%;
+    height: 46px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.colorwayInfo-row {
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--header-secondary);
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    padding: 8px 12px;
+}
+
+.colorwayInfo-css {
+    flex-direction: column;
+    align-items: start;
+}
+
+.colorwayInfo-cssCodeblock {
+    border-radius: 4px;
+    border: 1px solid var(--background-accent);
+    padding: 3px 6px;
+    white-space: pre;
+    max-height: 400px;
+    overflow: auto;
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-auto-thumb);
+    min-height: 40px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 8px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+    margin-bottom: 8px;
+}
+
+.colorwaysCreator-settingCat {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 5px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    max-height: 250px;
+    overflow: hidden overlay;
+}
+
+.colorwaysCreator-settingItm {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 8px;
+    justify-content: space-between;
+}
+
+.colorwaysCreator-settingItm:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingItm:not(.colorwaysCreator-settingHeader) {
+    display: none;
+}
