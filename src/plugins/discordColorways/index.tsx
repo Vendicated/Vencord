@@ -22,7 +22,7 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Text, TextInput, useState } from "@webpack/common";
+import { Button, SettingsRouter, Text, TextInput, useState } from "@webpack/common";
 import { CSSProperties } from "react";
 
 import style from "./style.css?managed";
@@ -88,6 +88,7 @@ const ColorwaysButton = () => (
                             colorways.push(color);
                         });
                         if (i + 1 === Settings.plugins.DiscordColorways.colorwaySourceFiles.length) {
+                            SettingsRouter.open("Appearance");
                             openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} />);
                         }
                     })
