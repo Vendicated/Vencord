@@ -434,7 +434,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                     });
                     closeModal(CreatorModalID);
                 }}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
-                    function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d"), { fillStyle: str }).fillStyle; }
+                    function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
                     setPrimaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")).split("#")[1]);
                     setSecondaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")).split("#")[1]);
                     setTertiaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")).split("#")[1]);
