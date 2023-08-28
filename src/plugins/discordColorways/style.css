@@ -1,3 +1,4 @@
+/* stylelint-disable value-keyword-case */
 /* stylelint-disable declaration-block-no-redundant-longhand-properties */
 /* stylelint-disable no-descending-specificity */
 /* stylelint-disable property-no-vendor-prefix */
@@ -215,4 +216,97 @@
 #colorway-createcolorway:hover,
 #colorway-settings:hover {
     background-color: var(--interactive-hover);
+}
+
+.colorwayCreator-swatch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    position: relative;
+    color: #fff;
+}
+
+.colorwayCreator-swatchName {
+    color: currentColor;
+    pointer-events: none;
+}
+
+.colorwayCreator-colorPreviews {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    position: relative;
+}
+
+.colorwayCreator-colorInput {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.colorwayCreator-menuWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 16px !important;
+    overflow: visible !important;
+}
+
+.colorwayCreator-modal {
+    width: 620px;
+    max-width: 620px;
+}
+
+.colorways-creator-module-warning~.colorways-creator-module-warning {
+    display: none;
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG,
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG>.swatch-efj8wq {
+    width: 100%;
+    border: none;
+    position: relative;
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG::before {
+    content: "";
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: +1;
+    color: var(--white-500);
+    pointer-events: none;
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(1)::before {
+    content: "Primary";
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(2)::before {
+    content: "Secondary";
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(3)::before {
+    content: "Tertiary";
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(4)::before {
+    content: "Accent";
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has(.editPencilIcon-22tRaH>path[fill="var(--primary-530)"])::before {
+    color: var(--primary-530);
 }
