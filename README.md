@@ -4,8 +4,7 @@
 
 The cutest Discord client mod
 
-![](https://user-images.githubusercontent.com/45497981/235015332-0453d3eb-1da6-4601-963e-ef5e454123a1.png)
-*A screenshot of Vencord featuring the [ClearVision-v6 theme](https://github.com/ClearVision/ClearVision-v6) (Vencord does not come with it pre-installed, it is only an example)*
+![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334)
 
 ## Features
 
