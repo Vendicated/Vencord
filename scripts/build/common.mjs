@@ -30,15 +30,18 @@ import PackageJSON from "../../package.json" assert { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
 
 export const VERSION = PackageJSON.version;
-export const BUILD_TIMESTAMP = Date.now();
+// https://reproducible-builds.org/docs/source-date-epoch/
+export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
-export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
+export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 export const banner = {
     js: `
 // Vencord ${gitHash}
 // Standalone: ${isStandalone}
 // Platform: ${isStandalone === "false" ? process.platform : "Universal"}
+// Updater disabled: ${updaterDisabled}
 `.trim()
 };
 
@@ -133,11 +136,14 @@ export const gitRemotePlugin = {
             namespace: "git-remote", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
-            const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
-            const remote = res.stdout.trim()
-                .replace("https://github.com/", "")
-                .replace("git@github.com:", "")
-                .replace(/.git$/, "");
+            let remote = process.env.VENCORD_REMOTE;
+            if (!remote) {
+                const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+                remote = res.stdout.trim()
+                    .replace("https://github.com/", "")
+                    .replace("git@github.com:", "")
+                    .replace(/.git$/, "");
+            }
 
             return { contents: `export default "${remote}"` };
         });
