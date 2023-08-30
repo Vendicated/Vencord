@@ -18,9 +18,10 @@
  */
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { find } from "@webpack";
 import { ComponentDispatch, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
@@ -46,9 +47,9 @@ export default definePlugin({ // TODO - add setting to reverse ctrl usage
             find: ".handleEditLastMessage",
             replacement: { // intercept up arrow functionality and add down arrow functionality
                 match: /(?<start>.handleKeyDown=function\((?<param>.+?)\).{1,200}(?<keyboardModeEnabled>.{1,2})=.+?\.keyboardModeEnabled.{1,100}(?<modifierKey>.{1,2})=.+?\..{3,5}Key.{1,100}(?<nonEmpty>.{1,2})=0!=.{1,200}case (?<keyType>.{1,10})\.ARROW_UP:.{0,100})if\(\k<modifierKey>\)return;(?<betweenreturns>.{0,100}?)if\(\k<nonEmpty>\)return;(?<afterreturns>.{1,100}?if\(\k<keyboardModeEnabled>\))(?<keyboardModeBlock>.{1,300}?)else{(?<originalBlock>.{1,600}?=(?<context>.{1,5}).getLastCommandMessage.{1,600}?)}return;case/,
-                replace: "$<start>if($<param>.shiftKey||$<param>.altKey||$<param>.metaKey||($<param>.ctrlKey&&$<nonEmpty>))return;$<betweenreturns>$<afterreturns>{if($<param>.ctrlKey)return;$<keyboardModeBlock>}else{if($<param>.ctrlKey){$<param>.ctrlKey=false;$<originalBlock>}else{" +
+                replace: "$<start>var normal_functionality=$<param>.ctrlKey!=$self.settings.store.invertCtrlUsage;if($<param>.shiftKey||$<param>.altKey||$<param>.metaKey||(normal_functionality&&$<nonEmpty>))return;$<betweenreturns>$<afterreturns>{if(normal_functionality)return;$<keyboardModeBlock>}else{if(normal_functionality){$<param>.ctrlKey=false;$<originalBlock>}else{" +
                     "$self.press_up();" +
-                    "}}return;case $<keyType>.ARROW_DOWN:if($<modifierKey>)return;" +
+                    "}}return;case $<keyType>.ARROW_DOWN:var normal_functionality=$<param>.ctrlKey!==$self.settings.store.invertCtrlUsage;if($<param>.shiftKey||$<param>.altKey||$<param>.metaKey||normal_functionality)return;" +
                     "$self.press_down();" +
                     "return;case"
             }
@@ -96,4 +97,12 @@ export default definePlugin({ // TODO - add setting to reverse ctrl usage
         if (current >= 0)
             insertTextIntoChatInputBox(messages[current].content);
     },
+
+    settings: definePluginSettings({
+        invertCtrlUsage: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to use Ctrl-Up/Down to cycle through message history instead, leaving normal functionality intact",
+            default: false
+        },
+    }),
 });
