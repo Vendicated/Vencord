@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,5 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-if (!IS_UPDATER_DISABLED)
-    import(IS_STANDALONE ? "./http" : "./git");
+/**
+ * @param {string} filePath
+ * @returns {string | null}
+ */
+export function getPluginTarget(filePath) {
+    const pathParts = filePath.split(/[/\\]/);
+    if (/^index\.tsx?$/.test(pathParts.at(-1))) pathParts.pop();
+
+    const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
+    const identiferBits = identifier.split(".");
+    return identiferBits.length === 1 ? null : identiferBits.at(-1);
+}

@@ -53,10 +53,12 @@ async function listThemes(): Promise<UserThemeHeader[]> {
     const themeInfo: UserThemeHeader[] = [];
 
     for (const fileName of files) {
+        if (!fileName.endsWith(".css")) continue;
+
         const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
-        if (!data) continue;
-        const parsed = getThemeInfo(data, fileName);
-        themeInfo.push(parsed);
+        if (data == null) continue;
+
+        themeInfo.push(getThemeInfo(data, fileName));
     }
 
     return themeInfo;

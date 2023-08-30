@@ -17,7 +17,7 @@
 */
 
 import type { Moment } from "moment";
-import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
+import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
@@ -338,16 +338,16 @@ export type Popout = ComponentType<{
         thing: {
             "aria-controls": string;
             "aria-expanded": boolean;
-            onClick(event: MouseEvent): void;
-            onKeyDown(event: KeyboardEvent): void;
-            onMouseDown(event: MouseEvent): void;
+            onClick(event: MouseEvent<HTMLElement>): void;
+            onKeyDown(event: KeyboardEvent<HTMLElement>): void;
+            onMouseDown(event: MouseEvent<HTMLElement>): void;
         },
         data: {
             isShown: boolean;
             position: string;
         }
     ): ReactNode;
-    shouldShow: boolean;
+    shouldShow?: boolean;
     renderPopout(args: {
         closePopout(): void;
         isPositioned: boolean;
