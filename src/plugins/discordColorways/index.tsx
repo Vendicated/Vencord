@@ -166,6 +166,8 @@ const ColorwaysButton = () => (
     </div >
 );
 
+
+
 function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
     var initialSwatchVars = { "--brand-500-hsl": "235 calc(var(--saturation-factor, 1)*85.6%) 64.7%", "--primary-600-hsl": "223 calc(var(--saturation-factor, 1)*6.7%) 20.6%", "--primary-630-hsl": "220 calc(var(--saturation-factor, 1)*6.5%) 18%", "--primary-700-hsl": "225 calc(var(--saturation-factor, 1)*6.3%) 12.5%" } as CSSProperties;
     const [accentColor, setAccentColor] = useState<string>("5865f2");
@@ -437,9 +439,10 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                         DataStore.set("customColorways", customColorwaysArray);
                     });
                     closeModal(CreatorModalID);
+                    closeModal(SelectorModalID);
                     var colorways = new Array<Colorway>;
                     DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
-                        colorwaySourceFiles.forEach((colorwayList: string, i: number) => {
+                        colorwaySourceFiles.forEach((colorwayList, i) => {
                             fetch(colorwayList)
                                 .then(response => response.json())
                                 .then(data => {
@@ -520,44 +523,27 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                     });
                 }}>Enter Colorway ID</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
                     closeModal(CreatorModalID);
-                    var colorways = new Array<Colorway>;
-                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
-                        colorwaySourceFiles.forEach((colorwayList, i) => {
-                            fetch(colorwayList)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (!data) return;
-                                    if (!data.colorways?.length) return;
-                                    data.colorways.map((color: Colorway) => {
-                                        colorways.push(color);
-                                    });
-                                    if (i + 1 === colorwaySourceFiles.length) {
-                                        DataStore.get("customColorways").then(customColorways => {
-                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                if (LazySwatchLoaded === false) {
-                                                    SettingsRouter.open("Appearance");
-                                                }
-                                                SelectorModalID = openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
-                                            });
-                                        });
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log(err);
-                                    return null;
-                                });
-                        });
-                    });
                 }}>Cancel</Button>
             </ModalFooter>
         </ModalRoot >
     );
 }
 
-function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeColorwayProps }: { modalProps: ModalProps, colorwayProps: Colorway[], customColorwayProps: Colorway[], activeColorwayProps: string; }) {
+function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeColorwayProps, doRefresh }: { modalProps: ModalProps, colorwayProps: Colorway[], customColorwayProps: Colorway[], activeColorwayProps: string, doRefresh?: boolean; }) {
     const [currentColorway, setCurrentColorway] = useState<string>(activeColorwayProps);
     const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
     const [customColorways, setCustomColorways] = useState<Colorway[]>(customColorwayProps);
+    const [refreshState, changeRefreshState] = useState<boolean>(false);
+    function refreshView() {
+        if (refreshState === false) {
+            changeRefreshState(true);
+        } else {
+            changeRefreshState(false);
+        }
+    }
+    if (doRefresh) {
+        refreshView();
+    }
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
             <ModalContent className="colorwaySelectorModalContent">
@@ -586,7 +572,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                             });
                         });
                     }}><div className="colorwayRefreshIcon"></div></div>
-                    <div className="discordColorway" id="colorway-createcolorway" onClick={() => { CreatorModalID = openModal(props => <CreatorModal modalProps={props} />); closeModal(SelectorModalID); }}><div className="colorwayCreateIcon">
+                    <div className="discordColorway" id="colorway-createcolorway" onClick={() => { CreatorModalID = openModal(props => <CreatorModal modalProps={props} />); }}><div className="colorwayCreateIcon">
                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
                     </div></div>
                     {colorways.map((color, ind) => {
@@ -636,7 +622,6 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                                 </div>
                             </div>
                             <div className="colorwayInfoIconContainer" onClick={() => {
-                                closeModal(SelectorModalID);
                                 InfoModalID = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} colorwayIndexProp={ind} />; });
                             }}>
                                 <div className="colorwayInfoIcon">
@@ -715,6 +700,7 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                             }
                         });
                         closeModal(InfoModalID);
+                        closeModal(SelectorModalID);
                         var colorways = new Array<Colorway>;
                         DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
                             colorwaySourceFiles.forEach((colorwayList, i) => {
