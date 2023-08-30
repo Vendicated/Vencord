@@ -239,7 +239,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
             </ModalContent>
             <ModalFooter>
                 <Button style={{ marginLeft: 8 }} color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
-                    const customColorwayCSS = `/*Automatically Generated - Colorway Creator V1.14*/
+                    const customColorwayCSS = `/*Automatically Generated - Colorway Creator V${DiscordColorways.creatorVersion}*/
 :root {
     --brand-100-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.min(Math.round(HexToHSL("#" + accentColor)[2] + (3.6 * 13)), 100)}%;
     --brand-130-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.min(Math.round(HexToHSL("#" + accentColor)[2] + (3.6 * 12)), 100)}%;
@@ -677,7 +677,10 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
             <div className="colorwayInfo-wrapper">
                 <div className="colorwayInfo-colorSwatches">
                     {colors.map(color => {
-                        return <div className="colorwayInfo-colorSwatch" style={{ backgroundColor: colorwayProps[color] }}></div>;
+                        return <div className="colorwayInfo-colorSwatch" style={{ backgroundColor: colorwayProps[color] }} onClick={() => {
+                            Clipboard.copy(colorwayProps[color]);
+                            Toasts.show({ message: "Copied color successfully", type: 1, id: "copy-colorway-color-notify" });
+                        }}></div>;
                     })}
                 </div>
                 <div className="colorwayInfo-row colorwayInfo-author">
@@ -759,15 +762,20 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                 Clipboard.copy(colorwayID);
                 Toasts.show({ message: "Copied Colorway ID Successfully", type: 1, id: "copy-colorway-id-notify" });
             }}>Copy Colorway ID</Button>
+            <Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                Clipboard.copy(colorwayProps.import);
+                Toasts.show({ message: "Copied CSS to Clipboard", type: 1, id: "copy-colorway-css-notify" });
+            }}>Copy CSS</Button>
         </ModalFooter> : <div className="colorwaySelector-noDisplay"></div>}
     </ModalRoot>);
 }
 
-export default definePlugin({
+const DiscordColorways = definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord (Official Colorways only for now).",
     authors: [Devs.DaBluLite],
     dependencies: ["ServerListAPI"],
+    creatorVersion: "1.14",
     patches: [
         {
             find: ".colorPickerFooter",
@@ -795,3 +803,5 @@ export default definePlugin({
         ColorwayCSS.remove();
     }
 });
+
+export default DiscordColorways;
