@@ -28,7 +28,7 @@ import { CSSProperties } from "react";
 
 import style from "./style.css?managed";
 
-interface Colorway {
+export interface Colorway {
     name: string,
     import: string,
     accent: string,
@@ -44,22 +44,6 @@ interface Colorway {
 }
 
 let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>;
-
-const placeholderColorway: Colorway = {
-    name: "Colorway",
-    import: "",
-    accent: "",
-    primary: "",
-    secondary: "",
-    tertiary: "",
-    author: "",
-    authorID: "",
-    hidden: true
-};
-
-const colorPresets = [
-    "#313338", "#2b2d31", "#1e1f22", "#5865f2"
-];
 
 let LazySwatchLoaded: boolean = false;
 
@@ -79,7 +63,7 @@ let CreatorModalID: string;
 let InfoModalID: string;
 let SelectorModalID: string;
 
-const ColorwayCSS = {
+export const ColorwayCSS = {
     get: () => {
         return document.getElementById("activeColorwayCSS")?.textContent || "";
     },
@@ -195,7 +179,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                             setPrimaryColor(hexColor);
                         }}
                         showEyeDropper={true}
-                        suggestedColors={colorPresets}
+                        suggestedColors={["#313338", "#2b2d31", "#1e1f22", "#5865f2"]}
                     />
                     <ColorPicker
                         color={parseInt(secondaryColor, 16)}
@@ -207,7 +191,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                             setSecondaryColor(hexColor);
                         }}
                         showEyeDropper={true}
-                        suggestedColors={colorPresets}
+                        suggestedColors={["#313338", "#2b2d31", "#1e1f22", "#5865f2"]}
                     />
                     <ColorPicker
                         color={parseInt(tertiaryColor, 16)}
@@ -219,7 +203,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                             setTertiaryColor(hexColor);
                         }}
                         showEyeDropper={true}
-                        suggestedColors={colorPresets}
+                        suggestedColors={["#313338", "#2b2d31", "#1e1f22", "#5865f2"]}
                     />
                     <ColorPicker
                         color={parseInt(accentColor, 16)}
@@ -231,13 +215,14 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                             setAccentColor(hexColor);
                         }}
                         showEyeDropper={true}
-                        suggestedColors={colorPresets}
+                        suggestedColors={["#313338", "#2b2d31", "#1e1f22", "#5865f2"]}
                     />
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div className="colorwaysCreator-settingItm colorwaysCreator-settingHeader" onClick={() => collapsedSettings === true ? setCollapsedSettings(false) : setCollapsedSettings(true)}><Forms.FormTitle style={{ marginBottom: 0 }}>Settings</Forms.FormTitle><svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true"></path></svg></div>
                     <div className="colorwaysCreator-settingItm"><Text variant="eyebrow" tag="h5">Use colored text</Text><Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }}></Switch></div>
                 </div>
+                <ThemePreviewCategory isCollapsed={false} accent={"#" + accentColor} primary={"#" + primaryColor} secondary={"#" + secondaryColor} tertiary={"#" + tertiaryColor}></ThemePreviewCategory>
             </ModalContent>
             <ModalFooter>
                 <Button style={{ marginLeft: 8 }} color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
@@ -269,10 +254,10 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
     --brand-830-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.max(Math.round(HexToHSL("#" + accentColor)[2] - (3.6 * 10)), 0)}%;
     --brand-860-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.max(Math.round(HexToHSL("#" + accentColor)[2] - (3.6 * 11)), 0)}%;
     --brand-900-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.max(Math.round(HexToHSL("#" + accentColor)[2] - (3.6 * 12)), 0)}%;
-    --primary-800-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + 10.8, 100)}%;
-    --primary-730-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${HexToHSL("#" + tertiaryColor)[2]}%;
+    --primary-800-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%;
+    --primary-730-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + 3.6, 100)}%;
     --primary-700-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${HexToHSL("#" + tertiaryColor)[2]}%;
-    --primary-660-hsl: ${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 2.6, 100)}%;
+    --primary-660-hsl: ${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 3.6, 100)}%;
     --primary-645-hsl: ${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${Math.max(HexToHSL("#" + primaryColor)[2] - 5, 0)}%;
     --primary-630-hsl: ${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${HexToHSL("#" + secondaryColor)[2]}%;
     --primary-600-hsl: ${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%;
@@ -676,6 +661,7 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                     <Forms.FormTitle style={{ marginBottom: 0 }}>CSS:</Forms.FormTitle>
                     <Text variant="code" selectable={true} className="colorwayInfo-cssCodeblock">{colorwayProps.import}</Text>
                 </div>
+                <ThemePreviewCategory isCollapsed={true} className="colorwayInfo-lastCat" accent={colorwayProps.accent} primary={colorwayProps.primary} secondary={colorwayProps.secondary} tertiary={colorwayProps.tertiary}></ThemePreviewCategory>
             </div>
         </ModalContent>
         {discrimProps === true ? <ModalFooter>
@@ -752,8 +738,75 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                 Clipboard.copy(colorwayProps.import);
                 Toasts.show({ message: "Copied CSS to Clipboard", type: 1, id: "copy-colorway-css-notify" });
             }}>Copy CSS</Button>
+            <Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                closeModal(InfoModalID);
+            }}>Cancel</Button>
         </ModalFooter> : <div className="colorwaySelector-noDisplay"></div>}
     </ModalRoot>);
+}
+
+export function ThemePreviewCategory({ accent, primary, secondary, tertiary, className, isCollapsed, previewCSS }: { accent: string, primary: string, secondary: string, tertiary: string, className?: string, isCollapsed: boolean, previewCSS?: string; }) {
+    const [collapsed, setCollapsed] = useState<boolean>(isCollapsed);
+    return (<div className={`colorwaysPreview${collapsed === true ? " colorwaysPreview-collapsed" : ""} ${className}`}>
+        <div className="colorwaysCreator-settingItm colorwaysCreator-settingHeader" onClick={() => collapsed === true ? setCollapsed(false) : setCollapsed(true)}><Forms.FormTitle style={{ marginBottom: 0 }}>Preview</Forms.FormTitle><svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true"></path></svg></div>
+        <style>{previewCSS}</style>
+        <div className="colorwaysPreview-wrapper" style={{ backgroundColor: tertiary }} onClick={() => { openModal(props => <ModalRoot {...props} className="colorwaysPreview-modal"><ThemePreview accent={accent} primary={primary} secondary={secondary} tertiary={tertiary} /></ModalRoot>); }}>
+            <div className="colorwaysPreview-titlebar"></div>
+            <div className="colorwaysPreview-body">
+                <div className="colorwayPreview-guilds">
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}></div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildSeparator" style={{ backgroundColor: primary }}></div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}></div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}></div>
+                    </div>
+                </div>
+                <div className="colorwayPreview-channels" style={{ backgroundColor: secondary }}>
+                    <div className="colorwayPreview-userArea" style={{ backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)" }}></div>
+                </div>
+                <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}></div>
+            </div>
+        </div>
+    </div>);
+}
+
+export function ThemePreview({ accent, primary, secondary, tertiary, previewCSS }: { accent: string, primary: string, secondary: string, tertiary: string, previewCSS?: string; }) {
+    return (<div className="colorwaysPreview-container">
+        <style>{previewCSS}</style>
+        <div className="colorwaysPreview-wrapper" style={{ backgroundColor: tertiary }}>
+            <div className="colorwaysPreview-titlebar"></div>
+            <div className="colorwaysPreview-body">
+                <div className="colorwayPreview-guilds">
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }} onClick={e => {
+                            e.currentTarget.parentElement?.parentElement?.parentElement?.parentElement?.requestFullscreen();
+                        }}>
+                            <svg className="controlIcon-10O-4h" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"></path><path fill="currentColor" d="M19,19H14v2h5a2,2,0,0,0,2-2V14H19Z"></path><path fill="currentColor" d="M3,5v5H5V5h5V3H5A2,2,0,0,0,3,5Z"></path><path fill="currentColor" d="M5,14H3v5a2,2,0,0,0,2,2h5V19H5Z"></path></svg>
+                        </div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildSeparator" style={{ backgroundColor: primary }}></div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}></div>
+                    </div>
+                    <div className="colorwayPreview-guild">
+                        <div className="colorwayPreview-guildItem" style={{ backgroundColor: primary }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}></div>
+                    </div>
+                </div>
+                <div className="colorwayPreview-channels" style={{ backgroundColor: secondary }}>
+                    <div className="colorwayPreview-userArea" style={{ backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)" }}></div>
+                </div>
+                <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}></div>
+            </div>
+        </div>
+    </div>);
 }
 
 const DiscordColorways = definePlugin({

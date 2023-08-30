@@ -266,6 +266,7 @@
 .colorwayCreator-modal {
     width: 620px;
     max-width: 620px;
+    max-height: unset !important;
 }
 
 .colorways-creator-module-warning~.colorways-creator-module-warning {
@@ -439,4 +440,131 @@
 .colorwaysCreator-noMinHeight {
     min-height: unset;
     height: fit-content;
+}
+
+.colorwaysPreview-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 270px;
+    flex: 1 0 auto;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.colorwaysPreview-container .colorwaysPreview-wrapper {
+    width: 900px;
+    height: 500px;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+.colorwaysPreview-container .colorwayPreview-channels {
+    width: 240px;
+}
+
+.colorwaysPreview-container .colorwayPreview-userArea {
+    height: 52px;
+}
+
+.colorwaysPreview-modal {
+    max-width: unset !important;
+    max-height: unset !important;
+    width: fit-content;
+    height: fit-content;
+}
+
+.colorwaysPreview-titlebar {
+    height: 22px;
+    width: 100%;
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.colorwaysPreview-body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.colorwayPreview-guilds {
+    width: 72px;
+    height: 100%;
+    display: flex;
+    flex: 1 0 auto;
+    padding-top: 4px;
+    flex-direction: column;
+}
+
+.colorwayPreview-channels {
+    width: 140px;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    border-top-left-radius: 8px;
+    flex: 1 0 auto;
+}
+
+.colorwayPreview-chat {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+
+.colorwayPreview-userArea {
+    width: 100%;
+    height: 40px;
+    display: flex;
+}
+
+.colorwaysPreview {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 5px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    overflow: hidden overlay;
+    margin-bottom: 4px;
+}
+
+.colorwaysPreview-collapsed>.colorwaysPreview-wrapper {
+    display: none;
+}
+
+.colorwayInfo-lastCat,
+.colorwaysCreator-lastCat {
+    margin-bottom: 12px;
+}
+
+.colorwayPreview-guild {
+    width: 100%;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.colorwayPreview-guildItem {
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50px;
+    transition: .2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.colorwayPreview-guildItem:hover {
+    border-radius: 16px;
+}
+
+.colorwayPreview-guildSeparator {
+    width: 32px;
+    height: 2px;
+    opacity: .48;
+    border-radius: 1px;
 }
