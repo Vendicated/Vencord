@@ -21,13 +21,14 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "discord-types/general";
+import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
     author: { nick: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
+    userOverride?: User;
 }
 
 const settings = definePluginSettings({
@@ -67,11 +68,12 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            let { username } = message.author;
+            const user = userOverride ?? message.author;
+            let { username } = user;
             if (settings.store.displayNames)
-                username = (message.author as any).globalName || username;
+                username = (user as any).globalName || username;
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
