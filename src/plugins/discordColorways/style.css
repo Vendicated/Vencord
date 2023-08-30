@@ -182,6 +182,7 @@
     height: 20px;
     width: 20px;
     color: var(--white-500);
+    padding: 2px;
 }
 
 #colorway-createcolorway>.colorwayCreateIcon {
@@ -428,4 +429,14 @@
 
 .colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingItm:not(.colorwaysCreator-settingHeader) {
     display: none;
+}
+
+.colorwaysCreator-noHeader {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.colorwaysCreator-noMinHeight {
+    min-height: unset;
+    height: fit-content;
 }

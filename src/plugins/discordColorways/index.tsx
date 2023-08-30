@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, SettingsRouter, Switch, Text, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, Clipboard, Forms, SettingsRouter, Switch, Text, TextInput, Toasts, UserStore, useState } from "@webpack/common";
 import { CSSProperties } from "react";
 
 import style from "./style.css?managed";
@@ -79,25 +79,23 @@ let CreatorModalID: string;
 let InfoModalID: string;
 let SelectorModalID: string;
 
-const createElement = (type, props, ...children) => {
-    if (typeof type === "function") return type({ ...props, children: [].concat() });
-
-    const node = document.createElement(type || "div");
-
-    for (const key of Object.keys(props)) {
-        if (key.indexOf("on") === 0) node.addEventListener(key.slice(2).toLowerCase(), props[key]);
-        else if (key === "children") {
-            node.append(...(Array.isArray(props[key]) ? props[key] : [].concat(props[key])));
-        } else if (key === "innertext") {
-            node.textContent = props[key];
+const ColorwayCSS = {
+    get: () => {
+        return document.getElementById("activeColorwayCSS")?.textContent || "";
+    },
+    set: (e: string) => {
+        if (!document.getElementById("activeColorwayCSS")) {
+            var activeColorwayCSS = document.createElement("style");
+            activeColorwayCSS.id = "activeColorwayCSS";
+            activeColorwayCSS.textContent = e;
+            document.head.append(activeColorwayCSS);
         } else {
-            node.setAttribute(key === "className" ? "class" : key, props[key]);
+            document.getElementById("activeColorwayCSS")!.textContent = e;
         }
+    },
+    remove: () => {
+        document.getElementById("activeColorwayCSS")!.remove();
     }
-
-    if (children.length) node.append(...children);
-
-    return node;
 };
 
 function HexToHSL(H) {
@@ -181,9 +179,9 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
             <ModalHeader><Text variant="heading-lg/semibold" tag="h1">Create Colorway</Text></ModalHeader>
             <ModalContent className="colorwayCreator-menuWrapper">
-                <Text variant="eyebrow" tag="h2">Name:</Text>
+                <Forms.FormTitle style={{ marginBottom: 0 }}>Name:</Forms.FormTitle>
                 <TextInput placeholder="Give your Colorway a name" value={colorwayName} onChange={setColorwayName}></TextInput>
-                <Text variant="eyebrow" tag="h2">Colors:</Text>
+                <Forms.FormTitle style={{ marginBottom: 0 }}>Colors:</Forms.FormTitle>
                 <div className="colorwayCreator-colorPreviews" style={initialSwatchVars}>
                     <ColorPicker
                         color={parseInt(primaryColor, 16)}
@@ -235,13 +233,12 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                     />
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
-                    <div className="colorwaysCreator-settingItm colorwaysCreator-settingHeader" onClick={() => collapsedSettings === true ? setCollapsedSettings(false) : setCollapsedSettings(true)}><Text variant="eyebrow" tag="h5">Settings</Text><svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true"></path></svg></div>
+                    <div className="colorwaysCreator-settingItm colorwaysCreator-settingHeader" onClick={() => collapsedSettings === true ? setCollapsedSettings(false) : setCollapsedSettings(true)}><Forms.FormTitle style={{ marginBottom: 0 }}>Settings</Forms.FormTitle><svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true"></path></svg></div>
                     <div className="colorwaysCreator-settingItm"><Text variant="eyebrow" tag="h5">Use colored text</Text><Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }}></Switch></div>
                 </div>
             </ModalContent>
             <ModalFooter>
                 <Button style={{ marginLeft: 8 }} color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
-                    console.log("#" + accentColor);
                     const customColorwayCSS = `/*Automatically Generated - Colorway Creator V1.14*/
 :root {
     --brand-100-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.min(Math.round(HexToHSL("#" + accentColor)[2] + (3.6 * 13)), 100)}%;
@@ -429,17 +426,129 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                         author: UserStore.getCurrentUser().username,
                         authorID: UserStore.getCurrentUser().id
                     };
-                    DataStore.get("customColorways").then(e => {
-                        DataStore.set("customColorways", [...e, customColorway]);
+                    const customColorwaysArray: Colorway[] = [customColorway];
+                    DataStore.get("customColorways").then(customColorways => {
+                        customColorways.forEach((color: Colorway, i: number) => {
+                            if (color.name !== customColorway.name) {
+                                customColorwaysArray.push(color);
+                            }
+                        });
+                        console.log(customColorwaysArray);
+                        DataStore.set("customColorways", customColorwaysArray);
                     });
                     closeModal(CreatorModalID);
+                    var colorways = new Array<Colorway>;
+                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
+                        colorwaySourceFiles.forEach((colorwayList: string, i: number) => {
+                            fetch(colorwayList)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (!data) return;
+                                    if (!data.colorways?.length) return;
+                                    data.colorways.map((color: Colorway) => {
+                                        colorways.push(color);
+                                    });
+                                    if (i + 1 === colorwaySourceFiles.length) {
+                                        DataStore.get("customColorways").then(customColorways => {
+                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                if (LazySwatchLoaded === false) {
+                                                    SettingsRouter.open("Appearance");
+                                                }
+                                                SelectorModalID = openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
+                                            });
+                                        });
+                                    }
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    return null;
+                                });
+                        });
+                    });
                 }}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
                     function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
                     setPrimaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")).split("#")[1]);
                     setSecondaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")).split("#")[1]);
                     setTertiaryColor(getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")).split("#")[1]);
                     setAccentColor(getHex(getComputedStyle(document.body).getPropertyValue("--brand-experiment")).split("#")[1]);
-                }}>Copy Current Colors</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED}>Enter Colorway ID</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => closeModal(CreatorModalID)}>Cancel</Button>
+                }}>Copy Current Colors</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                    let colorwayID: string;
+                    function setColorwayID(e: string) {
+                        colorwayID = e;
+                    }
+                    const hexToString = (hex: string) => {
+                        let str = "";
+                        for (let i = 0; i < hex.length; i += 2) {
+                            const hexValue = hex.substr(i, 2);
+                            const decimalValue = parseInt(hexValue, 16);
+                            str += String.fromCharCode(decimalValue);
+                        }
+                        return str;
+                    };
+                    const ColorwayIDModal = openModal(props => {
+                        return (
+                            <ModalRoot {...props} className="colorwaysCreator-noMinHeight">
+                                <ModalContent className="colorwaysCreator-noHeader colorwaysCreator-noMinHeight">
+                                    <Forms.FormTitle>Colorway ID:</Forms.FormTitle>
+                                    <TextInput placeholder="Enter Colorway ID" onInput={e => {
+                                        setColorwayID(e.currentTarget.value);
+                                    }}></TextInput>
+                                </ModalContent>
+                                <ModalFooter>
+                                    <Button style={{ marginLeft: 8 }} color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                                        const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
+                                        if (!colorwayID) {
+                                            throw new Error("Please enter a Colorway ID");
+                                        } else if (colorwayID.length < 62) {
+                                            throw new Error("Invalid Colorway ID");
+                                        } else if (!hexToString(colorwayID).includes(",")) {
+                                            throw new Error("Invalid Colorway ID");
+                                        } else if (!allEqual(hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)) && hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)[0] !== 1) {
+                                            throw new Error("Invalid Colorway ID");
+                                        } else {
+                                            const colorArray: string[] = hexToString(colorwayID).split(",");
+                                            setAccentColor(colorArray[0].split("#")[1]);
+                                            setPrimaryColor(colorArray[1].split("#")[1]);
+                                            setSecondaryColor(colorArray[2].split("#")[1]);
+                                            setTertiaryColor(colorArray[3].split("#")[1]);
+                                            closeModal(ColorwayIDModal);
+                                        }
+                                    }}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => { closeModal(ColorwayIDModal); }}>Cancel</Button>
+                                </ModalFooter>
+                            </ModalRoot>
+                        );
+                    });
+                }}>Enter Colorway ID</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                    closeModal(CreatorModalID);
+                    var colorways = new Array<Colorway>;
+                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
+                        colorwaySourceFiles.forEach((colorwayList, i) => {
+                            fetch(colorwayList)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (!data) return;
+                                    if (!data.colorways?.length) return;
+                                    data.colorways.map((color: Colorway) => {
+                                        colorways.push(color);
+                                    });
+                                    if (i + 1 === colorwaySourceFiles.length) {
+                                        DataStore.get("customColorways").then(customColorways => {
+                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                if (LazySwatchLoaded === false) {
+                                                    SettingsRouter.open("Appearance");
+                                                }
+                                                SelectorModalID = openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
+                                            });
+                                        });
+                                    }
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    return null;
+                                });
+                        });
+                    });
+                }}>Cancel</Button>
             </ModalFooter>
         </ModalRoot >
     );
@@ -452,7 +561,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
             <ModalContent className="colorwaySelectorModalContent">
-                <Text variant="eyebrow" tag="h2">Colorways</Text>
+                <Forms.FormTitle style={{ marginBottom: 0 }}>Colorways</Forms.FormTitle>
                 <div className="ColorwaySelectorWrapper">
                     <div className="discordColorway" id="colorway-refreshcolorway" onClick={() => {
                         var colorwaysArr = new Array<Colorway>;
@@ -477,7 +586,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                             });
                         });
                     }}><div className="colorwayRefreshIcon"></div></div>
-                    <div className="discordColorway" id="colorway-createcolorway" onClick={() => { CreatorModalID = openModal(props => <CreatorModal modalProps={props} />); }}><div className="colorwayCreateIcon">
+                    <div className="discordColorway" id="colorway-createcolorway" onClick={() => { CreatorModalID = openModal(props => <CreatorModal modalProps={props} />); closeModal(SelectorModalID); }}><div className="colorwayCreateIcon">
                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
                     </div></div>
                     {colorways.map((color, ind) => {
@@ -498,15 +607,11 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                                 if (currentColorway === color.name) {
                                     DataStore.set("actveColorwayID", null);
                                     DataStore.set("actveColorway", null);
-                                    if (document.getElementById("activeColorwayCSS")) {
-                                        document.getElementById("activeColorwayCSS")!.remove();
-                                    }
+                                    ColorwayCSS.remove();
                                 } else {
                                     DataStore.set("actveColorwayID", color.name);
                                     DataStore.set("actveColorway", color.import);
-                                    document.getElementById("activeColorwayCSS") ?
-                                        document.getElementById("activeColorwayCSS")!.textContent = color.import :
-                                        document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: color.import }));
+                                    ColorwayCSS.set(color.import);
                                 }
                                 DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
                                     setCurrentColorway(actveColorwayID);
@@ -519,7 +624,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                         </div>;
                     })}
                 </div>
-                {customColorways.length > 0 ? <Text variant="eyebrow" tag="h2">Custom Colorways</Text> : <div className="colorwaySelector-noDisplay"></div>}
+                {customColorways.length > 0 ? <Forms.FormTitle style={{ marginBottom: 0 }}>Custom Colorways</Forms.FormTitle> : <div className="colorwaySelector-noDisplay"></div>}
                 {customColorways.length > 0 ? <div className="ColorwaySelectorWrapper">
                     {customColorways.map((color, ind) => {
                         var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
@@ -542,15 +647,11 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                                 if (currentColorway === color.name) {
                                     DataStore.set("actveColorwayID", null);
                                     DataStore.set("actveColorway", null);
-                                    if (document.getElementById("activeColorwayCSS")) {
-                                        document.getElementById("activeColorwayCSS")!.remove();
-                                    }
+                                    ColorwayCSS.remove();
                                 } else {
                                     DataStore.set("actveColorwayID", color.name);
                                     DataStore.set("actveColorway", color.import);
-                                    document.getElementById("activeColorwayCSS") ?
-                                        document.getElementById("activeColorwayCSS")!.textContent = color.import :
-                                        document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: color.import }));
+                                    ColorwayCSS.set(color.import);
                                 }
                                 DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
                                     setCurrentColorway(actveColorwayID);
@@ -580,11 +681,11 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                     })}
                 </div>
                 <div className="colorwayInfo-row colorwayInfo-author">
-                    <Text variant="heading-lg/semibold" tag="h5">Author:</Text>
+                    <Forms.FormTitle style={{ marginBottom: 0 }}>Author:</Forms.FormTitle>
                     <Button color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => { openUserProfile(colorwayProps.authorID); }}>{colorwayProps.author}</Button>
                 </div>
                 <div className="colorwayInfo-row colorwayInfo-css">
-                    <Text variant="heading-lg/semibold" tag="h5">CSS:</Text>
+                    <Forms.FormTitle style={{ marginBottom: 0 }}>CSS:</Forms.FormTitle>
                     <Text variant="code" selectable={true} className="colorwayInfo-cssCodeblock">{colorwayProps.import}</Text>
                 </div>
             </div>
@@ -593,9 +694,23 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
             <Button style={{ marginLeft: 8 }} color={Button.Colors.RED} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
                 DataStore.get("customColorways").then((customColorways: Colorway[]) => {
                     if (customColorways.length > 0) {
-                        const customColorwaysArray: Colorway[] = customColorways.splice(colorwayIndexProp + 1, 1);
-                        DataStore.set("customColorways", customColorwaysArray);
-                        console.log(customColorways, customColorwaysArray);
+                        const customColorwaysArray: Colorway[] = [];
+                        DataStore.get("customColorways").then(customColorways => {
+                            customColorways.forEach((color: Colorway, i: number) => {
+                                if (color.name !== colorwayProps.name) {
+                                    customColorwaysArray.push(color);
+                                }
+                                if (i + 1 === customColorways.length) {
+                                    DataStore.set("customColorways", customColorwaysArray);
+                                }
+                            });
+                        });
+                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                            if (actveColorwayID === colorwayProps.name) {
+                                DataStore.set("actveColorway", null);
+                                DataStore.set("actveColorwayID", null);
+                            }
+                        });
                         closeModal(InfoModalID);
                         var colorways = new Array<Colorway>;
                         DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
@@ -627,7 +742,23 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
                         });
                     }
                 });
-            }}>Delete Colorway</Button>
+            }}>Delete Colorway</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => {
+                const stringToHex = (str: string) => {
+                    let hex = "";
+                    for (let i = 0; i < str.length; i++) {
+                        const charCode = str.charCodeAt(i);
+                        const hexValue = charCode.toString(16);
+
+                        // Pad with zeros to ensure two-digit representation
+                        hex += hexValue.padStart(2, "0");
+                    }
+                    return hex;
+                };
+                const colorwayIDArray = `${colorwayProps.accent},${colorwayProps.primary},${colorwayProps.secondary},${colorwayProps.tertiary}`;
+                const colorwayID = stringToHex(colorwayIDArray);
+                Clipboard.copy(colorwayID);
+                Toasts.show({ message: "Copied Colorway ID Successfully", type: 1, id: "copy-colorway-id-notify" });
+            }}>Copy Colorway ID</Button>
         </ModalFooter> : <div className="colorwaySelector-noDisplay"></div>}
     </ModalRoot>);
 }
@@ -655,16 +786,12 @@ export default definePlugin({
         addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
 
         DataStore.get("actveColorway").then(activeColorway => {
-            document.getElementById("activeColorwayCSS") ?
-                document.getElementById("activeColorwayCSS")!.textContent = activeColorway :
-                document.head.append(createElement("style", { id: "activeColorwayCSS", innertext: activeColorway }));
+            ColorwayCSS.set(activeColorway);
         });
     },
     stop: () => {
         disableStyle(style);
         removeServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
-        document.getElementById("activeColorwayCSS") ?
-            document.getElementById("activeColorwayCSS")?.remove() :
-            console.log("No Active Colorway.");
+        ColorwayCSS.remove();
     }
 });
