@@ -48,7 +48,7 @@ As an alternative to the Discord Desktop app, Vencord also has its own standalon
 
 </details>
 
-## Join our Support/Community Server
+## Join Vencord's Support/Community Server
 
 https://discord.gg/D9uwnFnqmd
 
