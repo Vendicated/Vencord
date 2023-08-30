@@ -32,12 +32,18 @@ function makeIcon(showCurrentGame?: boolean) {
     return function () {
         return (
             <svg
-                width="24"
-                height="24"
-                viewBox="0 96 960 960"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
             >
-                <path fill="currentColor" d="M182 856q-51 0-79-35.5T82 734l42-300q9-60 53.5-99T282 296h396q60 0 104.5 39t53.5 99l42 300q7 51-21 86.5T778 856q-21 0-39-7.5T706 826l-90-90H344l-90 90q-15 15-33 22.5t-39 7.5Zm498-240q17 0 28.5-11.5T720 576q0-17-11.5-28.5T680 536q-17 0-28.5 11.5T640 576q0 17 11.5 28.5T680 616Zm-80-120q17 0 28.5-11.5T640 456q0-17-11.5-28.5T600 416q-17 0-28.5 11.5T560 456q0 17 11.5 28.5T600 496ZM310 616h60v-70h70v-60h-70v-70h-60v70h-70v60h70v70Z" />
-                {!showCurrentGame && <line x1="920" y1="280" x2="40" y2="880" stroke="var(--status-danger)" stroke-width="80" />}
+                <path fill="currentColor" mask="url(#gameActivityMask)" d="M3.06 20.4q-1.53 0-2.37-1.065T.06 16.74l1.26-9q.27-1.8 1.605-2.97T6.06 3.6h11.88q1.8 0 3.135 1.17t1.605 2.97l1.26 9q.21 1.53-.63 2.595T20.94 20.4q-.63 0-1.17-.225T18.78 19.5l-2.7-2.7H7.92l-2.7 2.7q-.45.45-.99.675t-1.17.225Zm14.94-7.2q.51 0 .855-.345T19.2 12q0-.51-.345-.855T18 10.8q-.51 0-.855.345T16.8 12q0 .51.345 .855T18 13.2Zm-2.4-3.6q.51 0 .855-.345T16.8 8.4q0-.51-.345-.855T15.6 7.2q-.51 0-.855.345T14.4 8.4q0 .51.345 .855T15.6 9.6ZM6.9 13.2h1.8v-2.1h2.1v-1.8h-2.1v-2.1h-1.8v2.1h-2.1v1.8h2.1v2.1Z" />
+                {!showCurrentGame && <>
+                    <mask id="gameActivityMask" >
+                        <rect fill="white" x="0" y="0" width="24" height="24" />
+                        <path fill="black" d="M23.27 4.54 19.46.73 .73 19.46 4.54 23.27 23.27 4.54Z"/>
+                    </mask>
+                    <path fill="var(--status-danger)" d="M23 2.27 21.73 1 1 21.73 2.27 23 23 2.27Z" />
+                </>}
             </svg>
         );
     };
@@ -60,7 +66,7 @@ function GameActivityToggleButton() {
 export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.RuukuLada],
     dependencies: ["SettingsStoreAPI"],
 
     patches: [
