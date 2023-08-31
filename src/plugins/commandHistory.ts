@@ -46,7 +46,7 @@ var commandHistoryPositions: Map<string, number> = new Map();
 
 export default definePlugin({
     name: "Command History",
-    description: "Changes up/down arrow functionality to cycle through previously sent messages like in a terminal instead of editing the previous message\nbear in mind this means you cannot use up and down arrows to move through multiline messages",
+    description: "Changes Up/Down arrow functionality to cycle through previously sent messages like in a terminal instead of editing the previous message\nCtrl-Up/Down returns to normal behaviour (this can be swapped)",
     authors: [Devs.Hexo],
     patches: [
         {
