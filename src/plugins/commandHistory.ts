@@ -20,9 +20,7 @@
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { find } from "@webpack";
 import { ComponentDispatch, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 function getUserMessages() {
@@ -35,6 +33,14 @@ function getUserMessages() {
     });
     console.log("user's messages currently loaded: " + messages.length);
     return messages;
+}
+function replaceTextInChatInputBox(text) {
+    ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
+    setTimeout(function () {
+        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
+            rawText: text
+        }); // NOTE: this function has to wait because the dispatching fails occasionally when done immediately in succession ... idk why (but it seems to be a discord issue)
+    }, 1); // however this does mean that there is a slight flicker when the command changes which is unfortunate :/
 }
 var commandHistoryPositions: Map<string, number> = new Map();
 
@@ -76,13 +82,7 @@ export default definePlugin({
             current = Math.min(current + 1, messages.length - 1);
         commandHistoryPositions.set(channelId, current);
 
-        const NewComponentDispatch = find(m => m.emitter?._events?.CLEAR_TEXT);
-        NewComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
-        // ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
-        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-            rawText: messages[current].content
-        });
-        // insertTextIntoChatInputBox(messages[current].content);
+        replaceTextInChatInputBox(messages[current].content);
     },
     press_down: function () {
         const channelId = SelectedChannelStore.getChannelId();
@@ -93,9 +93,10 @@ export default definePlugin({
         current = Math.min(Math.max(current - 1, -1), messages.length - 1);
         commandHistoryPositions.set(channelId, current);
 
-        ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
         if (current >= 0)
-            insertTextIntoChatInputBox(messages[current].content);
+            replaceTextInChatInputBox(messages[current].content);
+        else
+            ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
     },
 
     settings: definePluginSettings({
