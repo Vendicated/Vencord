@@ -29,7 +29,7 @@ export default definePlugin({
             onClick={e => { // @ts-ignore it thinks parentNode doesn't exist
                 e.target.parentNode.parentNode.querySelector("video").requestPictureInPicture();
             }}
-            style={{ paddingTop: "3px", paddingLeft: "3px", paddingRight: "3px" }}
+            style={{ paddingTop: "4px", paddingLeft: "3px", paddingRight: "3px" }}
         >
             <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ pointerEvents: "none" }}>
                 <g>
