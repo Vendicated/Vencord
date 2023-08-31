@@ -63,7 +63,7 @@ export async function update() {
 export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
-    if (IS_WEB) return;
+    if (IS_WEB || IS_UPDATER_DISABLED) return;
     if (checkForDev && IS_DEV) return;
 
     try {
