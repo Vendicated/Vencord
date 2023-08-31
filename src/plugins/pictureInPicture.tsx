@@ -20,13 +20,12 @@ export default definePlugin({
         }
     }],
     renderPiPButton() {
-        return <Tooltip text={"Enable Picture in Picture"}>
+        return <Tooltip text="Enable Picture in Picture">
             {({ onMouseLeave, onMouseEnter }) => (
                 <div
                     onMouseLeave={onMouseLeave}
                     onMouseEnter={onMouseEnter}
                     role="button"
-                    aria-disabled={false}
                     style={{
                         cursor: "pointer",
                         paddingTop: "4px",
