@@ -452,21 +452,6 @@
     overflow: hidden;
 }
 
-.colorwaysPreview-container .colorwaysPreview-wrapper {
-    width: 900px;
-    height: 500px;
-    max-width: 100vw;
-    max-height: 100vh;
-}
-
-.colorwaysPreview-container .colorwayPreview-channels {
-    width: 240px;
-}
-
-.colorwaysPreview-container .colorwayPreview-userArea {
-    height: 52px;
-}
-
 .colorwaysPreview-modal {
     max-width: unset !important;
     max-height: unset !important;
