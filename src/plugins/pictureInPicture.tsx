@@ -32,11 +32,7 @@ export default definePlugin({
                         paddingRight: "4px",
                     }}
                     onClick={e => {
-                        try {
-                            e.currentTarget.parentNode!.parentNode!.querySelector("video")!.requestPictureInPicture();
-                        } catch {
-                            // this only triggers if the video hasn't finished loading, the best thing to do is simply ignore any potential error
-                        }
+                        e.currentTarget.parentNode!.parentNode!.querySelector("video")!.requestPictureInPicture();
                     }}
                 >
                     <svg width="24px" height="24px" viewBox="0 0 24 24">
