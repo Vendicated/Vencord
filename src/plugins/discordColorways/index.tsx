@@ -756,7 +756,7 @@ function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIn
 
 export function ThemePreviewCategory({ accent, primary, secondary, tertiary, className, isCollapsed, previewCSS }: { accent: string, primary: string, secondary: string, tertiary: string, className?: string, isCollapsed: boolean, previewCSS?: string; }) {
     const [collapsed, setCollapsed] = useState<boolean>(isCollapsed);
-    return (<div className={`colorwaysPreview${collapsed === true ? " colorwaysPreview-collapsed" : ""} ${className}`}>
+    return (<div className={`${collapsed === true ? "colorwaysPreview colorwaysPreview-collapsed" : "colorwaysPreview"} ${className}`}>
         <div className="colorwaysCreator-settingItm colorwaysCreator-settingHeader" onClick={() => collapsed === true ? setCollapsed(false) : setCollapsed(true)}><Forms.FormTitle style={{ marginBottom: 0 }}>Preview</Forms.FormTitle><svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true"></path></svg></div>
         <style>{previewCSS}</style>
         <ThemePreview accent={accent} primary={primary} secondary={secondary} tertiary={tertiary} />

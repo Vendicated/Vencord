@@ -525,7 +525,7 @@
     margin-bottom: 4px;
 }
 
-.colorwaysPreview-collapsed>.colorwaysPreview-wrapper {
+.colorwaysPreview-collapsed .colorwaysPreview-container {
     display: none;
 }
 
