@@ -20,7 +20,7 @@ export default definePlugin({
         }
     }],
     renderPiPButton() {
-        return <Tooltip text="Enable Picture in Picture">
+        return <Tooltip text="Toggle Picture in Picture">
             {tooltipProps => (
                 <div
                     {...tooltipProps}
@@ -32,7 +32,15 @@ export default definePlugin({
                         paddingRight: "4px",
                     }}
                     onClick={e => {
-                        e.currentTarget.parentNode!.parentNode!.querySelector("video")!.requestPictureInPicture();
+                        const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
+                        if (video.readyState === 4) {
+                            video.requestPictureInPicture();
+                        } else {
+                            if (video.onloadedmetadata) return;
+                            video.onloadedmetadata = () => {
+                                video.requestPictureInPicture();
+                            };
+                        }
                     }}
                 >
                     <svg width="24px" height="24px" viewBox="0 0 24 24">
@@ -40,6 +48,6 @@ export default definePlugin({
                     </svg>
                 </div>
             )}
-        </Tooltip>;
+        </Tooltip >;
     }
 });
