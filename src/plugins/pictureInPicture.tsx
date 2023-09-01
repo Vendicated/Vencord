@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, Tooltip } from "@webpack/common";
+import { React, Tooltip, useEffect } from "@webpack/common";
 
 export default definePlugin({
     name: "PitureInPicture",
@@ -20,6 +20,13 @@ export default definePlugin({
         }
     }],
     renderPiPButton() {
+        useEffect(() => {
+            return () => {
+                if (document.pictureInPictureElement !== null) {
+                    document.exitPictureInPicture();
+                }
+            };
+        }, []);
         return <Tooltip text="Toggle Picture in Picture">
             {tooltipProps => (
                 <div
