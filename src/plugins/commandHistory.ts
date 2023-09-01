@@ -46,7 +46,7 @@ var commandHistoryPositions: Map<string, number> = new Map();
 
 export default definePlugin({
     name: "CommandHistory",
-    description: "Changes Up/Down arrow functionality to cycle through previously sent messages like in a terminal instead of editing the previous message\nCtrl-Up/Down returns to normal behaviour (this can be swapped)",
+    description: "Use Ctrl+Up/Down to cycle through previously sent messages like in a terminal instead of editing the previous message",
     authors: [Devs.Hexo],
     patches: [
         {
@@ -100,7 +100,7 @@ export default definePlugin({
     },
     normal_functionality: function (ctrlKey, shiftKey) {
         return Settings.plugins.CommandHistory.invertModifierUsage
-            !== (
+            === (
                 Settings.plugins.CommandHistory.modifierKey === "shift" ? shiftKey :
                     Settings.plugins.CommandHistory.modifierKey === "ctrl" ? ctrlKey :
                         Settings.plugins.CommandHistory.invertModifierUsage // so always uses normal functionality should the setting be wrong somehow
@@ -114,7 +114,7 @@ export default definePlugin({
     settings: definePluginSettings({
         invertModifierUsage: {
             type: OptionType.BOOLEAN,
-            description: "Whether to use [modifierKey]-Up/Down to cycle through message history instead, leaving normal functionality intact",
+            description: "Whether to use Up/Down to cycle through message history instead, leaving [modifierKey]-Up/Down for normal functionality",
             default: false
         },
         modifierKey: {
