@@ -659,3 +659,8 @@
     margin: 16px;
     margin-bottom: 24px;
 }
+
+.customColorways-title:has(+.customColorways-wrapper:empty),
+.customColorways-wrapper:empty {
+    display: none;
+}
