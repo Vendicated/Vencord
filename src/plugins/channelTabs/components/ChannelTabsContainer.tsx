@@ -27,8 +27,8 @@ import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
 
 const {
-    closeTab, createTab, handleChannelSwitch, handleKeybinds, isTabSelected,
-    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction, useBookmarks
+    closeTab, createTab, handleChannelSwitch, isTabSelected,
+    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
 } = ChannelTabsUtils;
 
 const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
@@ -47,6 +47,16 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         _update();
         if (save) saveTabs(userId);
     }, [userId]);
+
+    useEffect(() => {
+        // the first render is really early so the user isnt loaded and the id shouldn't exist
+        // so if it's there it means stuff is already ready and the component got destroyed (ex. by app directory)
+        // TODO: see if its possible to do this in a less scuffed way
+        if (props.userId) {
+            setReady(true);
+            update(false);
+        }
+    }, []);
 
     const ref = useRef<HTMLDivElement>(null);
 

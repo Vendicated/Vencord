@@ -20,10 +20,9 @@ import "./style.css";
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Forms, Menu, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general/index.js";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
