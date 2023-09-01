@@ -1,7 +1,3 @@
-/* stylelint-disable value-keyword-case */
-/* stylelint-disable declaration-block-no-redundant-longhand-properties */
-/* stylelint-disable no-descending-specificity */
-/* stylelint-disable property-no-vendor-prefix */
 /* stylelint-disable selector-class-pattern */
 .colorwaySelectorIcon {
     height: 24px;
@@ -33,8 +29,8 @@
     border-radius: 50%;
     cursor: pointer;
     display: flex;
+    flex-flow: wrap;
     flex-direction: row;
-    flex-wrap: wrap;
     position: relative;
     align-items: center;
     justify-content: center;
@@ -48,8 +44,8 @@
 
 .discordColorwayPreviewColorContainer {
     display: flex;
+    flex-flow: wrap;
     flex-direction: row;
-    flex-wrap: wrap;
     overflow: hidden;
     border-radius: 50%;
     width: 56px;
@@ -65,19 +61,6 @@
     height: 52px;
 }
 
-.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
-    width: 100%;
-}
-
-.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
-    height: 100%;
-}
-
-.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
-    height: 100%;
-    width: 100%;
-}
-
 .discordColorwayPreviewColor {
     width: 50%;
     height: 50%;
@@ -86,6 +69,19 @@
 .discordColorway.active>.discordColorwayPreviewColor {
     width: 30px;
     height: 30px;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
+    height: 100%;
+    width: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
+    height: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
+    width: 100%;
 }
 
 .ColorwaySelectorWrapper {
@@ -197,12 +193,10 @@
 #colorway-refreshcolorway>.colorwayRefreshIcon {
     height: 60px;
     width: 60px;
-    background-color: var(--modal-background);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='24' height='24' viewBox='0 0 24 24' fill='var(--white-500)'%3E%3Cg id='Frame_-_24px'%3E%3Crect y='0' fill='none' width='24' height='24'%3E%3C/rect%3E%3C/g%3E%3Cg id='Filled_Icons'%3E%3Cg%3E%3Cpath fill='var(--white-500)' d='M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z'%3E%3C/path%3E%3Cpath fill='var(--white-500)' d='M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    -webkit-mask-size: 24px;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    pointer-events: none;
+    color: var(--modal-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #colorway-refreshcolorway,
@@ -233,7 +227,7 @@
 }
 
 .colorwayCreator-swatchName {
-    color: currentColor;
+    color: currentcolor;
     pointer-events: none;
 }
 
@@ -639,6 +633,20 @@
     height: 32px;
     flex: 1 0 auto;
     transition: background-color .1s linear;
+    font-family: var(--font-display);
+    font-weight: 500;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    align-items: center;
+    display: flex;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow {
+    border-top-left-radius: 8px;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow:hover {
+    background-color: hsl(var(--primary-500-hsl)/30%);
 }
 
 .colorwaysPreview-wrapper:fullscreen .colorwayPreview-topShadow {
@@ -650,12 +658,4 @@
     border-radius: 8px;
     margin: 16px;
     margin-bottom: 24px;
-}
-
-.colorwayPreview-channels>.colorwayPreview-topShadow {
-    border-top-left-radius: 8px;
-}
-
-.colorwayPreview-channels>.colorwayPreview-topShadow:hover {
-    background-color: hsl(var(--primary-500-hsl)/30%);
 }
