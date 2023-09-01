@@ -18,7 +18,7 @@
  */
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ComponentDispatch, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
@@ -45,7 +45,7 @@ function replaceTextInChatInputBox(text) {
 var commandHistoryPositions: Map<string, number> = new Map();
 
 export default definePlugin({
-    name: "Command History",
+    name: "CommandHistory",
     description: "Changes Up/Down arrow functionality to cycle through previously sent messages like in a terminal instead of editing the previous message\nCtrl-Up/Down returns to normal behaviour (this can be swapped)",
     authors: [Devs.Hexo],
     patches: [
@@ -53,9 +53,9 @@ export default definePlugin({
             find: ".handleEditLastMessage",
             replacement: { // intercept up arrow functionality and add down arrow functionality
                 match: /(?<start>.handleKeyDown=function\((?<param>\i)\).{1,200}(?<keyboardModeEnabled>\i)=.+?\.keyboardModeEnabled.{1,100}(?<modifierKey>\i)=\i\..{3,5}Key.{1,100}(?<nonEmpty>\i)=0!=.{1,200}case (?<keyType>\i.\i)\.ARROW_UP:.{0,100})if\(\k<modifierKey>\)return;(?<betweenreturns>.{0,100}?)if\(\k<nonEmpty>\)return;(?<afterreturns>.{1,100}?if\(\k<keyboardModeEnabled>\))(?<keyboardModeBlock>.{1,300}?)else{(?<originalBlock>.{1,600}?=(?<context>\i.\i).getLastCommandMessage.{1,600}?)}return;case/,
-                replace: "$<start>var normal_functionality=$<param>.ctrlKey!=$self.settings.store.invertCtrlUsage;if($<param>.shiftKey||$<param>.altKey||$<param>.metaKey||(normal_functionality&&$<nonEmpty>))return;$<betweenreturns>$<afterreturns>{if(normal_functionality)return;$<keyboardModeBlock>}else{if(normal_functionality){$<param>.ctrlKey=false;$<originalBlock>}else{" +
+                replace: "$<start>var normal_functionality=$self.normal_functionality($<param>.ctrlKey, $<param>.shiftKey);if($<param>.altKey||$<param>.metaKey||$self.return_early($<param>.ctrlKey, $<param>.shiftKey)||(normal_functionality&&$<nonEmpty>))return;$<betweenreturns>$<afterreturns>{if(normal_functionality)return;$<keyboardModeBlock>}else{if(normal_functionality){$<param>.ctrlKey=false;$<param>.shiftKey=false;$<originalBlock>}else{" +
                     "$self.press_up();" +
-                    "}}return;case $<keyType>.ARROW_DOWN:var normal_functionality=$<param>.ctrlKey!==$self.settings.store.invertCtrlUsage;if($<param>.shiftKey||$<param>.altKey||$<param>.metaKey||normal_functionality)return;" +
+                    "}}return;case $<keyType>.ARROW_DOWN:var normal_functionality=$self.normal_functionality($<param>.ctrlKey, $<param>.shiftKey);if($<param>.altKey||$<param>.metaKey||$self.return_early($<param>.ctrlKey, $<param>.shiftKey)||normal_functionality)return;" +
                     "$self.press_down();" +
                     "return;case"
             }
@@ -98,12 +98,34 @@ export default definePlugin({
         else
             ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
     },
+    normal_functionality: function (ctrlKey, shiftKey) {
+        return Settings.plugins.CommandHistory.invertModifierUsage
+            !== (
+                Settings.plugins.CommandHistory.modifierKey === "shift" ? shiftKey :
+                    Settings.plugins.CommandHistory.modifierKey === "ctrl" ? ctrlKey :
+                        Settings.plugins.CommandHistory.invertModifierUsage // so always uses normal functionality should the setting be wrong somehow
+            );
+    },
+    return_early: function (ctrlKey, shiftKey) {
+        return (Settings.plugins.CommandHistory.modifierKey === "shift" && ctrlKey)
+            || (Settings.plugins.CommandHistory.modifierKey === "ctrl" && shiftKey);
+    },
 
     settings: definePluginSettings({
-        invertCtrlUsage: {
+        invertModifierUsage: {
             type: OptionType.BOOLEAN,
-            description: "Whether to use Ctrl-Up/Down to cycle through message history instead, leaving normal functionality intact",
+            description: "Whether to use [modifierKey]-Up/Down to cycle through message history instead, leaving normal functionality intact",
             default: false
+        },
+        modifierKey: {
+            type: OptionType.SELECT,
+            description: "Which modifier key is used",
+            default: "shift",
+            options: [
+                { label: "Shift", value: "shift", default: true },
+                { label: "Control", value: "ctrl" }
+            ],
+            restartNeeded: true
         },
     }),
 });
