@@ -117,7 +117,7 @@ const ColorwaysButton = () => (
     <div className="ColorwaySelectorBtnContainer">
         <Tooltip text="Colorways" position="right">
             {({ onMouseEnter, onMouseLeave }) => {
-                return <div className="ColorwaySelectorBtn" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
+                return <div onContextMenu={() => openModal(props => <ToolboxModal modalProps={props} />)} className="ColorwaySelectorBtn" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
                     var colorways = new Array<Colorway>;
                     DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
                         colorwaySourceFiles.forEach((colorwayList, i) => {
@@ -645,118 +645,6 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
     );
 }
 
-function SelectorUI({ colorwayProps, customColorwayProps, activeColorwayProps }: { colorwayProps: Colorway[], customColorwayProps: Colorway[], activeColorwayProps: string; }) {
-    const [currentColorway, setCurrentColorway] = useState<string>(activeColorwayProps);
-    const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
-    const [customColorways, setCustomColorways] = useState<Colorway[]>(customColorwayProps);
-    return (
-        <div className="colorwaySelectorModalContent">
-            <Forms.FormTitle style={{ marginBottom: 0 }}>Colorways</Forms.FormTitle>
-            <div className="ColorwaySelectorWrapper">
-                <div className="discordColorway" id="colorway-refreshcolorway" onClick={() => {
-                    var colorwaysArr = new Array<Colorway>;
-                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
-                        colorwaySourceFiles.forEach((colorwayList, i) => {
-                            fetch(colorwayList)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (!data) return;
-                                    if (!data.colorways?.length) return;
-                                    data.colorways.map((color: Colorway) => {
-                                        colorwaysArr.push(color);
-                                    });
-                                    if (i + 1 === colorwaySourceFiles.length) {
-                                        setColorways(colorwaysArr);
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log(err);
-                                    return null;
-                                });
-                        });
-                    });
-                }}><div className="colorwayRefreshIcon"></div></div>
-                <div className="discordColorway" id="colorway-createcolorway" onClick={() => { CreatorModalID = openModal(props => <CreatorModal modalProps={props} />); }}><div className="colorwayCreateIcon">
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
-                </div></div>
-                {colorways.map((color, ind) => {
-                    var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
-                    // eslint-disable-next-line no-unneeded-ternary
-                    return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false}>
-                        <div className="colorwayCheckIconContainer">
-                            <div className="colorwayCheckIcon">
-                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
-                            </div>
-                        </div>
-                        <div className="colorwayInfoIconContainer" onClick={() => { openModal(props => <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={false} />); }}>
-                            <div className="colorwayInfoIcon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
-                            </div>
-                        </div>
-                        <div className="discordColorwayPreviewColorContainer" onClick={() => {
-                            if (currentColorway === color.name) {
-                                DataStore.set("actveColorwayID", null);
-                                DataStore.set("actveColorway", null);
-                                ColorwayCSS.remove();
-                            } else {
-                                DataStore.set("actveColorwayID", color.name);
-                                DataStore.set("actveColorway", color.import);
-                                ColorwayCSS.set(color.import);
-                            }
-                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                setCurrentColorway(actveColorwayID);
-                            });
-                        }}>
-                            {colors.map(colorItm => {
-                                return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
-                            })}
-                        </div>
-                    </div>;
-                })}
-            </div>
-            {customColorways.length > 0 ? <Forms.FormTitle style={{ marginBottom: 0 }}>Custom Colorways</Forms.FormTitle> : <div className="colorwaySelector-noDisplay"></div>}
-            {customColorways.length > 0 ? <div className="ColorwaySelectorWrapper">
-                {customColorways.map((color, ind) => {
-                    var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
-                    // eslint-disable-next-line no-unneeded-ternary
-                    return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length ? true : false}>
-                        <div className="colorwayCheckIconContainer">
-                            <div className="colorwayCheckIcon">
-                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
-                            </div>
-                        </div>
-                        <div className="colorwayInfoIconContainer" onClick={() => {
-                            InfoModalID = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} colorwayIndexProp={ind} />; });
-                        }}>
-                            <div className="colorwayInfoIcon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
-                            </div>
-                        </div>
-                        <div className="discordColorwayPreviewColorContainer" onClick={() => {
-                            if (currentColorway === color.name) {
-                                DataStore.set("actveColorwayID", null);
-                                DataStore.set("actveColorway", null);
-                                ColorwayCSS.remove();
-                            } else {
-                                DataStore.set("actveColorwayID", color.name);
-                                DataStore.set("actveColorway", color.import);
-                                ColorwayCSS.set(color.import);
-                            }
-                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                setCurrentColorway(actveColorwayID);
-                            });
-                        }}>
-                            {colors.map(colorItm => {
-                                return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
-                            })}
-                        </div>
-                    </div>;
-                })}
-            </div> : <div className="colorwaySelector-noDisplay"></div>}
-        </div>
-    );
-}
-
 function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, colorwayIndexProp }: { modalProps: ModalProps, colorwayProps: Colorway, discrimProps: boolean, colorwayIndexProp?; }) {
     const colors: string[] = colorwayProps.colors || ["accent", "primary", "secondary", "tertiary"];
     return (<ModalRoot {...modalProps} className="colorwayCreator-modal">
@@ -898,8 +786,14 @@ export function ThemePreview({ accent, primary, secondary, tertiary, previewCSS 
                 </div>
                 <div className="colorwayPreview-channels" style={{ backgroundColor: secondary }}>
                     <div className="colorwayPreview-userArea" style={{ backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)" }}></div>
+                    <div className="colorwayPreview-filler"></div>
+                    <div className="colorwayPreview-topShadow" style={{ "--primary-900-hsl": `${HexToHSL(tertiary)[0]} ${HexToHSL(tertiary)[1]}% ${Math.max(HexToHSL(tertiary)[2] - (3.6 * 6), 0)}%`, "--primary-500-hsl": `${HexToHSL(primary)[0]} ${HexToHSL(primary)[1]}% ${Math.min(HexToHSL(primary)[2] + (3.6 * 3), 100)}%` } as React.CSSProperties}></div>
                 </div>
-                <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}></div>
+                <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}>
+                    <div className="colorwayPreview-chatBox" style={{ backgroundColor: "hsl(" + HexToHSL(primary)[0] + " " + HexToHSL(primary)[1] + "% " + Math.min(HexToHSL(primary)[2] + 3.6, 100) + "%)" }}></div>
+                    <div className="colorwayPreview-filler"></div>
+                    <div className="colorwayPreview-topShadow" style={{ "--primary-900-hsl": `${HexToHSL(tertiary)[0]} ${HexToHSL(tertiary)[1]}% ${Math.max(HexToHSL(tertiary)[2] - (3.6 * 6), 0)}%` } as React.CSSProperties}></div>
+                </div>
             </div>
         </div>
     </div>);
@@ -1041,6 +935,375 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
     </ModalRoot>);
 }
 
+interface ToolboxItem {
+    title: string,
+    onClick: () => void,
+    id?: string;
+}
+
+const colorVariables: string[] = [
+    "brand-100",
+    "brand-130",
+    "brand-160",
+    "brand-200",
+    "brand-230",
+    "brand-260",
+    "brand-300",
+    "brand-330",
+    "brand-345",
+    "brand-360",
+    "brand-400",
+    "brand-430",
+    "brand-460",
+    "brand-500",
+    "brand-530",
+    "brand-560",
+    "brand-600",
+    "brand-630",
+    "brand-660",
+    "brand-700",
+    "brand-730",
+    "brand-760",
+    "brand-800",
+    "brand-830",
+    "brand-860",
+    "brand-900",
+    "primary-900",
+    "primary-860",
+    "primary-830",
+    "primary-800",
+    "primary-760",
+    "primary-730",
+    "primary-700",
+    "primary-660",
+    "primary-645",
+    "primary-630",
+    "primary-600",
+    "primary-560",
+    "primary-530",
+    "primary-500",
+    "primary-460",
+    "primary-430",
+    "primary-400",
+    "primary-360",
+    "primary-330",
+    "primary-300",
+    "primary-260",
+    "primary-230",
+    "primary-200",
+    "primary-160",
+    "primary-130",
+    "primary-100",
+    "white-900",
+    "white-860",
+    "white-830",
+    "white-800",
+    "white-760",
+    "white-730",
+    "white-700",
+    "white-660",
+    "white-630",
+    "white-600",
+    "white-560",
+    "white-530",
+    "white-500",
+    "white-460",
+    "white-430",
+    "white-400",
+    "white-360",
+    "white-330",
+    "white-300",
+    "white-260",
+    "white-230",
+    "white-200",
+    "white-160",
+    "white-130",
+    "white-100",
+    "teal-900",
+    "teal-860",
+    "teal-830",
+    "teal-800",
+    "teal-760",
+    "teal-730",
+    "teal-700",
+    "teal-660",
+    "teal-630",
+    "teal-600",
+    "teal-560",
+    "teal-530",
+    "teal-500",
+    "teal-460",
+    "teal-430",
+    "teal-400",
+    "teal-360",
+    "teal-330",
+    "teal-300",
+    "teal-260",
+    "teal-230",
+    "teal-200",
+    "teal-160",
+    "teal-130",
+    "teal-100",
+    "black-900",
+    "black-860",
+    "black-830",
+    "black-800",
+    "black-760",
+    "black-730",
+    "black-700",
+    "black-660",
+    "black-630",
+    "black-600",
+    "black-560",
+    "black-530",
+    "black-500",
+    "black-460",
+    "black-430",
+    "black-400",
+    "black-360",
+    "black-330",
+    "black-300",
+    "black-260",
+    "black-230",
+    "black-200",
+    "black-160",
+    "black-130",
+    "black-100",
+    "red-900",
+    "red-860",
+    "red-830",
+    "red-800",
+    "red-760",
+    "red-730",
+    "red-700",
+    "red-660",
+    "red-630",
+    "red-600",
+    "red-560",
+    "red-530",
+    "red-500",
+    "red-460",
+    "red-430",
+    "red-400",
+    "red-360",
+    "red-330",
+    "red-300",
+    "red-260",
+    "red-230",
+    "red-200",
+    "red-160",
+    "red-130",
+    "red-100",
+    "yellow-900",
+    "yellow-860",
+    "yellow-830",
+    "yellow-800",
+    "yellow-760",
+    "yellow-730",
+    "yellow-700",
+    "yellow-660",
+    "yellow-630",
+    "yellow-600",
+    "yellow-560",
+    "yellow-530",
+    "yellow-500",
+    "yellow-460",
+    "yellow-430",
+    "yellow-400",
+    "yellow-360",
+    "yellow-330",
+    "yellow-300",
+    "yellow-260",
+    "yellow-230",
+    "yellow-200",
+    "yellow-160",
+    "yellow-130",
+    "yellow-100",
+    "green-900",
+    "green-860",
+    "green-830",
+    "green-800",
+    "green-760",
+    "green-730",
+    "green-700",
+    "green-660",
+    "green-630",
+    "green-600",
+    "green-560",
+    "green-530",
+    "green-500",
+    "green-460",
+    "green-430",
+    "green-400",
+    "green-360",
+    "green-330",
+    "green-300",
+    "green-260",
+    "green-230",
+    "green-200",
+    "green-160",
+    "green-130",
+    "green-100",
+];
+
+const ColorVarItems: ToolboxItem[] = colorVariables.map((colorVariable: string) => {
+    return {
+        title: "Copy " + colorVariable,
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--" + colorVariable)));
+            Toasts.show({ message: "Color " + colorVariable + " copied to clipboard", id: "toolbox-color-var-copied", type: 1 });
+        },
+        id: colorVariable
+    };
+});
+
+const ToolboxItems: ToolboxItem[] = [
+    {
+        title: "Colorway Selector",
+        onClick: () => {
+            var colorways = new Array<Colorway>;
+            DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
+                colorwaySourceFiles.forEach((colorwayList, i) => {
+                    fetch(colorwayList)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data) return;
+                            if (!data.colorways?.length) return;
+                            data.colorways.map((color: Colorway) => {
+                                colorways.push(color);
+                            });
+                            if (i + 1 === colorwaySourceFiles.length) {
+                                DataStore.get("customColorways").then(customColorways => {
+                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                        if (LazySwatchLoaded === false) {
+                                            SettingsRouter.open("Appearance");
+                                        }
+                                        SelectorModalID = openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
+                                    });
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            return null;
+                        });
+                });
+            });
+        },
+        id: "colorways-toolbox_colorways-selector"
+    },
+    {
+        title: "Colorway Creator",
+        onClick: () => {
+            if (LazySwatchLoaded === false) {
+                SettingsRouter.open("Appearance");
+            }
+            CreatorModalID = openModal(props => <CreatorModal modalProps={props} />);
+        },
+        id: "colorways-toolbox_colorways-creator"
+    },
+    {
+        title: "Color Picker",
+        onClick: () => {
+            if (LazySwatchLoaded === false) {
+                SettingsRouter.open("Appearance");
+            }
+            ColorpickerModalID = openModal(props => <ColorPickerModal modalProps={props} />);
+        },
+        id: "colorways-toolbox_colorpicker"
+    },
+    {
+        title: "Copy Accent Color",
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--brand-experiment")));
+            Toasts.show({ message: "Accent color copied to clipboard", id: "toolbox-accent-color-copied", type: 1 });
+        },
+        id: "colorways-toolbox_copy-accent"
+    },
+    {
+        title: "Copy Primary Color",
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")));
+            Toasts.show({ message: "Primary color copied to clipboard", id: "toolbox-primary-color-copied", type: 1 });
+        },
+        id: "colorways-toolbox_copy-primary"
+    },
+    {
+        title: "Copy Secondary Color",
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")));
+            Toasts.show({ message: "Secondary color copied to clipboard", id: "toolbox-secondary-color-copied", type: 1 });
+        },
+        id: "colorways-toolbox_copy-secondary"
+    },
+    {
+        title: "Copy Tertiary Color",
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")));
+            Toasts.show({ message: "Tertiary color copied to clipboard", id: "toolbox-tertiary-color-copied", type: 1 });
+        },
+        id: "colorways-toolbox_copy-tertiary"
+    },
+    {
+        title: "Copy Other Colors",
+        onClick: () => openModal(props => <ColorStealerModal modalProps={props} />),
+        id: "colorways-toolbox_copy-other"
+    }
+];
+
+function ToolboxModal({ modalProps }: { modalProps: ModalProps; }) {
+    const [toolboxItems, setToolboxItems] = useState<ToolboxItem[]>(ToolboxItems);
+    let results: ToolboxItem[];
+    function searchToolboxItems(e: string) {
+        results = [];
+        ToolboxItems.find((ToolboxItem: ToolboxItem) => {
+            if (ToolboxItem.title.toLowerCase().includes(e.toLowerCase())) {
+                results.push(ToolboxItem);
+            }
+        });
+        setToolboxItems(results);
+    }
+    return (<ModalRoot {...modalProps}>
+        <div className="colorwayToolbox-list">
+            <TextInput placeholder="Search for an action:" onChange={searchToolboxItems} className="colorwayToolbox-search"></TextInput>
+            <div className="colorwayToolbox-itemList">
+                {toolboxItems.map((toolboxItem: ToolboxItem, i: number) => {
+                    return <div id={toolboxItem.id || "colorways-toolbox_item-" + i} className="colorwayToolbox-listItem" onClick={toolboxItem.onClick}>{toolboxItem.title}</div>;
+                })}
+            </div>
+        </div>
+    </ModalRoot>);
+}
+
+function ColorStealerModal({ modalProps }: { modalProps: ModalProps; }) {
+    const [colorVarItems, setColorVarItems] = useState<ToolboxItem[]>(ColorVarItems);
+    let results: ToolboxItem[];
+    function searchToolboxItems(e: string) {
+        results = [];
+        ColorVarItems.find((ToolboxItem: ToolboxItem) => {
+            if (ToolboxItem.title.toLowerCase().includes(e.toLowerCase())) {
+                results.push(ToolboxItem);
+            }
+        });
+        setColorVarItems(results);
+    }
+    return (<ModalRoot {...modalProps}>
+        <div className="colorwayToolbox-list">
+            <TextInput placeholder="Search for a color:" onChange={searchToolboxItems} className="colorwayToolbox-search"></TextInput>
+            <div className="colorwayToolbox-itemList">
+                {colorVarItems.map((toolboxItem: ToolboxItem) => {
+                    return <div id={"colorways-colorstealer-item_" + toolboxItem.id} className="colorwayToolbox-listItem" onClick={toolboxItem.onClick} style={{ "--brand-experiment": "var(--" + toolboxItem.id + ")" } as React.CSSProperties}>{toolboxItem.title}</div>;
+                })}
+            </div>
+        </div>
+    </ModalRoot>);
+}
+
 const DiscordColorways = definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord.",
@@ -1048,18 +1311,7 @@ const DiscordColorways = definePlugin({
     dependencies: ["ServerListAPI"],
     creatorVersion: "1.14",
     toolboxActions: {
-        "Create Colorway": () => {
-            if (LazySwatchLoaded === false) {
-                SettingsRouter.open("Appearance");
-            }
-            CreatorModalID = openModal(props => <CreatorModal modalProps={props} />);
-        },
-        "Open Colorpicker": () => {
-            if (LazySwatchLoaded === false) {
-                SettingsRouter.open("Appearance");
-            }
-            ColorpickerModalID = openModal(props => <ColorPickerModal modalProps={props} />);
-        }
+        "Open Toolbox": () => openModal(props => <ToolboxModal modalProps={props} />)
     },
     patches: [
         {

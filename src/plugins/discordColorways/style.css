@@ -374,28 +374,34 @@
     box-sizing: border-box;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar,
+.colorwayToolbox-itemList::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner,
+.colorwayToolbox-itemList::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
+.colorwayToolbox-itemList::-webkit-scrollbar-thumb {
     background-color: var(--scrollbar-auto-thumb);
     min-height: 40px;
 }
 
 .colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track,
+.colorwayToolbox-itemList::-webkit-scrollbar-thumb,
+.colorwayToolbox-itemList::-webkit-scrollbar-track {
     border: 2px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track,
+.colorwayToolbox-itemList::-webkit-scrollbar-track {
     margin-bottom: 8px;
 }
 
@@ -490,17 +496,26 @@
     flex: 1 0 auto;
 }
 
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-channels {
+    width: 240px;
+}
+
 .colorwayPreview-chat {
     width: 100%;
     height: 100%;
     display: flex;
     position: relative;
+    flex-direction: column-reverse;
 }
 
 .colorwayPreview-userArea {
     width: 100%;
     height: 40px;
     display: flex;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-userArea {
+    height: 52px;
 }
 
 .colorwaysPreview {
@@ -552,4 +567,95 @@
     height: 2px;
     opacity: .48;
     border-radius: 1px;
+}
+
+.colorwayToolbox-listItem {
+    align-items: center;
+    display: flex;
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    padding: 8px;
+    margin: 0 -4px;
+}
+
+.colorwayToolbox-listItem:hover {
+    background-color: var(--brand-experiment);
+    color: var(--white-500);
+    cursor: pointer;
+}
+
+.colorwayToolbox-title {
+    align-items: center;
+    display: flex;
+    text-transform: uppercase;
+    margin-top: 2px;
+    padding-bottom: 8px;
+    margin-bottom: 0;
+}
+
+.colorwayToolbox-list {
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.colorwayToolbox-itemList {
+    overflow: hidden auto;
+    height: 100%;
+    padding: 12px;
+    padding-top: 0;
+}
+
+.colorwayToolbox-search {
+    margin: 12px;
+    margin-bottom: 0;
+}
+
+.colorwayToolbox-itemList::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.colorwayPreview-chatBox {
+    height: 32px;
+    border-radius: 6px;
+    margin: 8px;
+    margin-bottom: 12px;
+    margin-top: 0;
+    flex: 1 0 auto;
+}
+
+.colorwayPreview-filler {
+    width: 100%;
+    height: 100%;
+}
+
+.colorwayPreview-topShadow {
+    box-shadow: 0 1px 0 hsl(var(--primary-900-hsl)/20%), 0 1.5px 0 hsl(var(--primary-860-hsl)/5%), 0 2px 0 hsl(var(--primary-900-hsl)/5%);
+    width: 100%;
+    height: 32px;
+    flex: 1 0 auto;
+    transition: background-color .1s linear;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-topShadow {
+    height: 48px;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-chatBox {
+    height: 44px;
+    border-radius: 8px;
+    margin: 16px;
+    margin-bottom: 24px;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow {
+    border-top-left-radius: 8px;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow:hover {
+    background-color: hsl(var(--primary-500-hsl)/30%);
 }
