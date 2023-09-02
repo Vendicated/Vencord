@@ -79,7 +79,7 @@ async function initThemes() {
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
-    themesStyle.textContent += `:root{${cssVars.join("\n")}}`;
+    if (cssVars.length > 0) themesStyle.textContent += `:root{${cssVars.join("\n")}}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
