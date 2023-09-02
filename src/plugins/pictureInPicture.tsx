@@ -25,7 +25,7 @@ export default definePlugin({
         {
             find: ".onRemoveAttachment,",
             replacement: {
-                match: /\.nonMediaAttachment.{0,10}children:\[(\i),/gm,
+                match: /\.nonMediaAttachment.{0,10}children:\[(\i),/,
                 replace: "$&$1&&$self.renderPiPButton(),"
             },
         },
