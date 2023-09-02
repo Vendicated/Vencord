@@ -4,21 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { React, Tooltip } from "@webpack/common";
 
 export default definePlugin({
-    name: "PitureInPicture",
+    name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
     authors: [Devs.Lumap],
-    patches: [{
-        find: ".onRemoveAttachment,",
-        replacement: {
-            match: /\.nonMediaAttachment.{0,10}children:\[(\i),/gm,
-            replace: "$&$1&&$self.renderPiPButton(),"
+    options: {
+        loop: {
+            description: "Whether to make the PiP video loop or not",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false
         }
-    }],
+    },
+    patches: [
+        {
+            find: ".onRemoveAttachment,",
+            replacement: {
+                match: /\.nonMediaAttachment.{0,10}children:\[(\i),/gm,
+                replace: "$&$1&&$self.renderPiPButton(),"
+            },
+        },
+    ],
     renderPiPButton() {
         return <Tooltip text="Toggle Picture in Picture">
             {tooltipProps => (
@@ -34,7 +45,8 @@ export default definePlugin({
                     onClick={e => {
                         const PiPVideo = e.currentTarget.parentNode!.parentNode!.querySelector("video")!.cloneNode(true);
                         const newVid = document.body.appendChild(PiPVideo) as HTMLVideoElement;
-                        newVid.style.display = "none";
+                        if (Settings.plugins.PictureInPicture.loop) newVid.style.display = "none";
+                        newVid.loop = true;
                         newVid.onleavepictureinpicture = () => {
                             newVid.remove();
                         };
