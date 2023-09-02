@@ -23,7 +23,7 @@ import monacoHtml from "~fileContent/../src/components/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { getTheme, Theme } from "../src/utils/discord";
-import { getThemeInfo } from "../src/main/themes";
+import { getThemeInfo } from "../src/utils/themes/bd";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;

@@ -17,7 +17,7 @@
 */
 
 import { addSettingsListener, Settings } from "@api/Settings";
-
+import { parse as usercssParse } from "@utils/themes/usercss";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -62,7 +62,24 @@ async function initThemes() {
         links.push(...localThemes);
     }
 
+    const cssVars: string[] = [];
+
+    // for UserCSS, we need to inject the variables
+    for (const theme of enabledThemes) {
+        if (!theme.endsWith(".user.css")) continue;
+
+        const themeData = await VencordNative.themes.getThemeData(theme);
+        if (!themeData) continue;
+
+        const { vars } = usercssParse(themeData, theme);
+
+        for (const [id, meta] of Object.entries(vars)) {
+            cssVars.push(`--${id}: ${meta.default};`);
+        }
+    }
+
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    themesStyle.textContent += `:root{${cssVars.join("\n")}}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

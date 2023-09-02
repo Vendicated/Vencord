@@ -22,6 +22,9 @@ import "./ipcPlugins";
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
+import type { ThemeHeader } from "@utils/themes";
+import { getThemeInfo, stripBOM } from "@utils/themes/bd";
+import { parse as usercssParse } from "@utils/themes/usercss";
 import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
@@ -29,9 +32,6 @@ import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import type { ThemeHeader } from "./themes";
-import { getThemeInfo, stripBOM } from "./themes/bd";
-import { parse as usercssParse } from "./themes/usercss";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
