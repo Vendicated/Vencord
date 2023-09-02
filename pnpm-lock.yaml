@@ -27,6 +27,9 @@ dependencies:
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
+  usercss-meta:
+    specifier: ^0.12.0
+    version: 0.12.0
   virtual-merge:
     specifier: ^1.0.1
     version: 1.0.1
@@ -3245,6 +3248,11 @@ packages:
     resolution: {integrity: sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /usercss-meta@0.12.0:
+    resolution: {integrity: sha512-zKrXCKdpeIwtVe87omxGo9URf+7mbozduMZEg79dmT4KB3XJwfIkEi/Uk0PcTwR/nZLtAK1+k7isgbGB/g6E7Q==}
+    engines: {node: '>=8.3'}
+    dev: false
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}

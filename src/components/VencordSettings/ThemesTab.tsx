@@ -26,9 +26,11 @@ import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import { UserThemeHeader } from "main/themes";
+import { UserThemeHeader } from "main/themes/bd";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
+import { UserstyleHeader } from "usercss-meta";
 
+import type { ThemeHeader } from "../../main/themes";
 import { AddonCard } from "./AddonCard";
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -41,6 +43,7 @@ type FileInput = ComponentType<{
 
 const InviteActions = findByPropsLazy("resolveInvite");
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
+const CogWheel = findByCodeLazy("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
@@ -94,14 +97,52 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
     );
 }
 
-interface ThemeCardProps {
+interface BDThemeCardProps {
     theme: UserThemeHeader;
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
 }
 
-function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
+interface UserCSSCardProps {
+    theme: UserstyleHeader;
+    enabled: boolean;
+    onChange: (enabled: boolean) => void;
+    onDelete: () => void;
+}
+
+function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardProps) {
+    return (
+        <AddonCard
+            name={theme.name}
+            description={theme.description}
+            author={theme.author ?? "Unknown"}
+            enabled={enabled}
+            setEnabled={onChange}
+            infoButton={
+                <>
+                    <div style={{ cursor: "pointer" }}>
+                        <CogWheel />
+                    </div>
+                    {IS_WEB && (
+                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
+                            <TrashIcon />
+                        </div>
+                    )}
+                </>
+            }
+            footer={
+                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
+                    {!!theme.homepageURL && <Link href={theme.homepageURL}>Homepage</Link>}
+                    {!!(theme.homepageURL && theme.supportURL) && " • "}
+                    {!!theme.supportURL && <Link href={theme.supportURL}>Support</Link>}
+                </Flex>
+            }
+        />
+    );
+}
+
+function BDThemeCard({ theme, enabled, onChange, onDelete }: BDThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -156,7 +197,7 @@ function ThemesTab() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
-    const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
+    const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
@@ -259,19 +300,32 @@ function ThemesTab() {
                     </Card>
 
                     <div className={cl("grid")}>
-                        {userThemes?.map(theme => (
-                            <ThemeCard
-                                key={theme.fileName}
-                                enabled={settings.enabledThemes.includes(theme.fileName)}
-                                onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
-                                onDelete={async () => {
-                                    onLocalThemeChange(theme.fileName, false);
-                                    await VencordNative.themes.deleteTheme(theme.fileName);
-                                    refreshLocalThemes();
-                                }}
-                                theme={theme}
-                            />
-                        ))}
+                        {userThemes?.map(({ type, header: theme }: ThemeHeader) => (
+                            type === "bd" ? (
+                                <BDThemeCard
+                                    key={theme.fileName}
+                                    enabled={settings.enabledThemes.includes(theme.fileName)}
+                                    onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
+                                    onDelete={async () => {
+                                        onLocalThemeChange(theme.fileName, false);
+                                        await VencordNative.themes.deleteTheme(theme.fileName);
+                                        refreshLocalThemes();
+                                    }}
+                                    theme={theme as UserThemeHeader}
+                                />
+                            ) : (
+                                <UserCSSThemeCard
+                                    key={theme.fileName}
+                                    enabled={settings.enabledThemes.includes(theme.fileName)}
+                                    onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
+                                    onDelete={async () => {
+                                        onLocalThemeChange(theme.fileName, false);
+                                        await VencordNative.themes.deleteTheme(theme.fileName);
+                                        refreshLocalThemes();
+                                    }}
+                                    theme={theme as UserstyleHeader}
+                                />
+                            )))}
                     </div>
                 </Forms.FormSection>
             </>

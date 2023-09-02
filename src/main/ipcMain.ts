@@ -29,7 +29,9 @@ import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
+import type { ThemeHeader } from "./themes";
+import { getThemeInfo, stripBOM } from "./themes/bd";
+import { parse as usercssParse } from "./themes/usercss";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
@@ -47,10 +49,10 @@ function readCss() {
     return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
 }
 
-async function listThemes(): Promise<UserThemeHeader[]> {
+async function listThemes(): Promise<ThemeHeader[]> {
     const files = await readdir(THEMES_DIR).catch(() => []);
 
-    const themeInfo: UserThemeHeader[] = [];
+    const themeInfo: ThemeHeader[] = [];
 
     for (const fileName of files) {
         if (!fileName.endsWith(".css")) continue;
@@ -58,7 +60,19 @@ async function listThemes(): Promise<UserThemeHeader[]> {
         const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
         if (data == null) continue;
 
-        themeInfo.push(getThemeInfo(data, fileName));
+        if (fileName.endsWith(".user.css")) {
+            // handle it as usercss
+            themeInfo.push({
+                type: "usercss",
+                header: usercssParse(data, fileName)
+            });
+        } else {
+            // presumably BD but could also be plain css
+            themeInfo.push({
+                type: "bd",
+                header: getThemeInfo(data, fileName)
+            });
+        }
     }
 
     return themeInfo;
