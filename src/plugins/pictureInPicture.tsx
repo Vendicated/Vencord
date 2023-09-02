@@ -33,14 +33,12 @@ export default definePlugin({
                     }}
                     onClick={e => {
                         const PiPVideo = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
-                        let newVid = document.createElement("video");
-                        newVid.appendChild(PiPVideo.cloneNode(true));
+                        let newVid = document.createElement("video"); // blame typescript, i have to make it a video tag that wraps another video tag
+                        newVid.appendChild(PiPVideo.cloneNode(true)); // cloning nodes just in case it breaks something, even tho it's probably useless
                         newVid = newVid.firstElementChild as HTMLVideoElement;
                         newVid.onleavepictureinpicture = () => {
                             newVid.remove();
                         };
-                        if (newVid.onloadedmetadata) return;
-                        console.log(newVid);
                         newVid.onloadedmetadata = () => {
                             newVid.requestPictureInPicture();
                             newVid.play();
