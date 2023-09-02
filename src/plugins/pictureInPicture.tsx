@@ -47,8 +47,8 @@ export default definePlugin({
                             paddingRight: "4px",
                         }}
                         onClick={e => {
-                            const PiPVideo = e.currentTarget.parentNode!.parentNode!.querySelector("video")!.cloneNode(true);
-                            const newVid = document.body.appendChild(PiPVideo) as HTMLVideoElement;
+                            const oldVid = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
+                            const newVid = document.body.appendChild(oldVid.cloneNode(true)) as HTMLVideoElement;
                             if (Settings.plugins.PictureInPicture.loop) newVid.style.display = "none";
                             newVid.loop = true;
                             newVid.onleavepictureinpicture = () => {
@@ -56,6 +56,8 @@ export default definePlugin({
                             };
                             newVid.onloadedmetadata = () => {
                                 newVid.requestPictureInPicture();
+                                newVid.currentTime = oldVid.currentTime;
+                                oldVid.pause();
                                 newVid.play();
                             };
                         }}
