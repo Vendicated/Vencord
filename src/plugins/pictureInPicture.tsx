@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, Tooltip, useEffect } from "@webpack/common";
+import { React, Tooltip } from "@webpack/common";
 
 export default definePlugin({
     name: "PitureInPicture",
@@ -20,13 +20,6 @@ export default definePlugin({
         }
     }],
     renderPiPButton() {
-        useEffect(() => {
-            return () => {
-                if (document.pictureInPictureElement !== null) {
-                    document.exitPictureInPicture();
-                }
-            };
-        }, []);
         return <Tooltip text="Toggle Picture in Picture">
             {tooltipProps => (
                 <div
@@ -39,15 +32,19 @@ export default definePlugin({
                         paddingRight: "4px",
                     }}
                     onClick={e => {
-                        const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
-                        if (video.readyState === 4) {
-                            video.requestPictureInPicture();
-                        } else {
-                            if (video.onloadedmetadata) return;
-                            video.onloadedmetadata = () => {
-                                video.requestPictureInPicture();
-                            };
-                        }
+                        const PiPVideo = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
+                        let newVid = document.createElement("video");
+                        newVid.appendChild(PiPVideo.cloneNode(true));
+                        newVid = newVid.firstElementChild as HTMLVideoElement;
+                        newVid.onleavepictureinpicture = () => {
+                            newVid.remove();
+                        };
+                        if (newVid.onloadedmetadata) return;
+                        console.log(newVid);
+                        newVid.onloadedmetadata = () => {
+                            newVid.requestPictureInPicture();
+                            newVid.play();
+                        };
                     }}
                 >
                     <svg width="24px" height="24px" viewBox="0 0 24 24">
