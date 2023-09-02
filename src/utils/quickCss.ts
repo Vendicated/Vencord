@@ -46,7 +46,7 @@ async function initThemes() {
         document.documentElement.appendChild(themesStyle);
     }
 
-    const { themeLinks, enabledThemes } = Settings;
+    const { themeLinks, enabledThemes, userCssVars } = Settings;
 
     const links: string[] = [...themeLinks];
 
@@ -74,7 +74,13 @@ async function initThemes() {
         const { vars } = usercssParse(themeData, theme);
 
         for (const [id, meta] of Object.entries(vars)) {
-            cssVars.push(`--${id}: ${meta.default};`);
+            let normalizedValue: string = userCssVars[id] ?? meta.default;
+
+            if (meta.type === "range") {
+                normalizedValue = `${normalizedValue}${meta.units ?? ""}`;
+            }
+
+            cssVars.push(`--${id}: ${normalizedValue};`);
         }
     }
 
