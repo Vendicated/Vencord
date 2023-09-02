@@ -25,11 +25,11 @@ import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
-import { UserThemeHeader } from "@utils/themes/bd";
+import type { UserThemeHeader } from "@utils/themes/bd";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
-import { UserstyleHeader } from "usercss-meta";
+import type { UserstyleHeader } from "usercss-meta";
 
 import { AddonCard } from "./AddonCard";
 import { SettingsTab, wrapTab } from "./shared";
