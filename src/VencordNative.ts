@@ -7,8 +7,7 @@
 import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
-
-import type { ThemeHeader } from "./main/themes";
+import type { ThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
