@@ -65,9 +65,7 @@ async function initThemes() {
     const cssVars: string[] = [];
 
     // for UserCSS, we need to inject the variables
-    for (const theme of enabledThemes) {
-        if (!theme.endsWith(".user.css")) continue;
-
+    for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
         const themeData = await VencordNative.themes.getThemeData(theme);
         if (!themeData) continue;
 
