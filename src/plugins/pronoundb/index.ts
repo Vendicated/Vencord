@@ -21,10 +21,12 @@ import "./styles.css";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./components/PronounsChatComponent";
 import { useProfilePronouns } from "./pronoundbUtils";
 import { settings } from "./settings";
+import { UserContextMenuPatch } from "./components/ContextMenu";
 
 const PRONOUN_TOOLTIP_PATCH = {
     match: /text:(.{0,10}.Messages\.USER_PROFILE_PRONOUNS)(?=,)/,
@@ -84,5 +86,13 @@ export default definePlugin({
     // Re-export the components on the plugin object so it is easily accessible in patches
     PronounsChatComponentWrapper,
     CompactPronounsChatComponentWrapper,
-    useProfilePronouns
+    useProfilePronouns,
+
+    start() {
+        addContextMenuPatch("user-context", UserContextMenuPatch);
+    },
+
+    stop() {
+        removeContextMenuPatch("user-context", UserContextMenuPatch);
+    },
 });
