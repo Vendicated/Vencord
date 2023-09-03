@@ -52,6 +52,11 @@ export const settings = definePluginSettings({
             }
         ]
     },
+    ignoreUsers: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of user IDs to hide pronounds in messages",
+        default: ""
+    },
     showSelf: {
         type: OptionType.BOOLEAN,
         description: "Enable or disable showing pronouns for the current user",
