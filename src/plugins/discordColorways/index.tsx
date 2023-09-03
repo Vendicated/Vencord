@@ -25,9 +25,9 @@ import { openUserProfile } from "@utils/discord";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Clipboard, Forms, SettingsRouter, Switch, Text, TextInput, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
+import { CSSProperties } from "react";
 
 import style from "./style.css?managed";
-
 export interface Colorway {
     name: string,
     import: string,
@@ -43,7 +43,7 @@ export interface Colorway {
     hidden?: boolean;
 }
 
-let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, LazySwatchLoaded: boolean = false;
+let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, ListItem: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, LazySwatchLoaded: boolean = false;
 DataStore.get("colorwaySourceFiles").then(e => { if (!e) DataStore.set("colorwaySourceFiles", ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"]); });
 DataStore.get("customColorways").then(e => { if (!e) DataStore.set("customColorways", []); });
 
@@ -99,44 +99,46 @@ function HexToHSL(H) {
     return [Math.round(h), Math.round(s), Math.round(l)];
 }
 
-const ColorwaysButton = () => (
-    <div className="ColorwaySelectorBtnContainer">
-        <Tooltip text="Colorways" position="right">
-            {({ onMouseEnter, onMouseLeave }) => {
-                return <div onContextMenu={() => openModal(props => <ToolboxModal modalProps={props} />)} className="ColorwaySelectorBtn" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
-                    var colorways = new Array<Colorway>;
-                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
-                        colorwaySourceFiles.forEach((colorwayList, i) => {
-                            fetch(colorwayList)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (!data) return;
-                                    if (!data.colorways?.length) return;
-                                    data.colorways.map((color: Colorway) => {
-                                        colorways.push(color);
-                                    });
-                                    if (i + 1 === colorwaySourceFiles.length) {
-                                        DataStore.get("customColorways").then(customColorways => {
-                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                if (LazySwatchLoaded === false) {
-                                                    SettingsRouter.open("Appearance");
-                                                }
-                                                openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
-                                            });
-                                        });
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log(err);
-                                    return null;
+function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnContainer", listItemWrapperClass = "", listItemTooltipClass = "colorwaysBtn-tooltipContent" }: { listItemClass?: string, listItemWrapperClass?: string, listItemTooltipClass?: string; }) {
+    const [activeColorway, setActiveColorway] = useState<string>("None");
+    return (<Tooltip text={[<span>Colorways</span>, <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>]} position="right" tooltipContentClassName={listItemTooltipClass}>
+        {({ onMouseEnter, onMouseLeave }) => {
+            return <div className={listItemClass}><div onContextMenu={() => openModal(props => <ToolboxModal modalProps={props} />)} className={listItemWrapperClass + " ColorwaySelectorBtn"} onMouseEnter={e => {
+                onMouseEnter();
+                DataStore.get("actveColorwayID").then((actveColorwayID: string) => setActiveColorway(actveColorwayID || "None"));
+            }} onMouseLeave={onMouseLeave} onClick={() => {
+                var colorways = new Array<Colorway>;
+                DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
+                    colorwaySourceFiles.forEach((colorwayList, i) => {
+                        fetch(colorwayList)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data) return;
+                                if (!data.colorways?.length) return;
+                                data.colorways.map((color: Colorway) => {
+                                    colorways.push(color);
                                 });
-                        });
+                                if (i + 1 === colorwaySourceFiles.length) {
+                                    DataStore.get("customColorways").then(customColorways => {
+                                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                            if (LazySwatchLoaded === false) {
+                                                SettingsRouter.open("Appearance");
+                                            }
+                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
+                                        });
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                return null;
+                            });
                     });
-                }}><div className="colorwaySelectorIcon"></div></div>;
-            }}
-        </Tooltip>
-    </div >
-);
+                });
+            }}><div className="colorwaySelectorIcon"></div></div></div >;
+        }}
+    </Tooltip>);
+}
 
 
 
@@ -472,14 +474,79 @@ function CreatorModal({ modalProps, modalID }: { modalProps: ModalProps, modalID
     );
 }
 
+/**
+ * Discord's search icon, as seen in the GIF search bar
+ */
+export function SearchIcon({ height = 24, width = 24, className, style }: { height?: number, width?: number, className?: string, style?: CSSProperties; }) {
+    return (
+        <svg
+            className={className}
+            aria-label="Search"
+            aria-hidden="false"
+            role="img"
+            width={width}
+            height={height}
+            viewBox={`0 0 ${width} ${height}`}
+            style={style}
+        >
+            <path
+                fill="currentColor"
+                d="M21.707 20.293L16.314 14.9C17.403 13.504 18 11.799 18 10C18 7.863 17.167 5.854 15.656 4.344C14.146 2.832 12.137 2 10 2C7.863 2 5.854 2.832 4.344 4.344C2.833 5.854 2 7.863 2 10C2 12.137 2.833 14.146 4.344 15.656C5.854 17.168 7.863 18 10 18C11.799 18 13.504 17.404 14.9 16.314L20.293 21.706L21.707 20.293ZM10 16C8.397 16 6.891 15.376 5.758 14.243C4.624 13.11 4 11.603 4 10C4 8.398 4.624 6.891 5.758 5.758C6.891 4.624 8.397 4 10 4C11.603 4 13.109 4.624 14.242 5.758C15.376 6.891 16 8.398 16 10C16 11.603 15.376 13.11 14.242 14.243C13.109 15.376 11.603 16 10 16Z"
+            />
+        </svg>
+    );
+}
+
+export function CloseIcon({ height = 24, width = 24, className, style }: { height?: number, width?: number, className?: string, style?: CSSProperties; }) {
+    return (
+        <svg
+            aria-label="Clear"
+            aria-hidden="false"
+            role="img"
+            className={className}
+            width={width}
+            height={height}
+            viewBox={`0 0 ${width} ${height}`}
+            style={style}>
+            <path
+                fill="currentColor"
+                d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+        </svg>
+    );
+}
+
 function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeColorwayProps }: { modalProps: ModalProps, colorwayProps: Colorway[], customColorwayProps: Colorway[], activeColorwayProps: string; }): JSX.Element | any {
+    let results: Colorway[];
     const [currentColorway, setCurrentColorway] = useState<string>(activeColorwayProps);
     const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
     const [customColorways, setCustomColorways] = useState<Colorway[]>(customColorwayProps);
+    const [searchBarVisibility, setSearchBarVisibility] = useState<boolean>(false);
+    function searchColorways(e: string) {
+        results = [];
+        colorwayProps.find((Colorway: Colorway) => {
+            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) {
+                results.push(Colorway);
+            }
+        });
+        setColorways(results);
+        results = [];
+        customColorwayProps.find((Colorway: Colorway) => {
+            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) {
+                results.push(Colorway);
+            }
+        });
+        setCustomColorways(results);
+    }
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
+            {/* searchBarVisibility === false ? <ModalHeader className="colorwaySelector-header"><Text variant="heading-lg/semibold" tag="h1" style={{ lineHeight: "40px", paddingLeft: "8px" }}>Discord Colorways</Text><Button size={Button.Sizes.ICON} look={Button.Looks.BLANK} onClick={() => setSearchBarVisibility(true)}><SearchIcon className="colorwaySelector-headerIcon" style={{ marginLeft: "auto" }} /></Button></ModalHeader> : <ModalHeader className="colorwaySelector-header"><TextInput className="colorwaySelector-search" placeholder="Search for Colorways..." onChange={searchColorways}></TextInput><Button size={Button.Sizes.ICON} look={Button.Looks.BLANK} onClick={() => { setSearchBarVisibility(false); searchColorways(""); }}><CloseIcon className="colorwaySelector-headerIcon" style={{ marginLeft: "auto" }} /></Button></ModalHeader>*/}
             <ModalContent className="colorwaySelectorModalContent">
-                <Forms.FormTitle style={{ marginBottom: 0 }}>Colorways</Forms.FormTitle>
+                <TextInput className="colorwaySelector-search" placeholder="Search for Colorways..." onChange={searchColorways} />
+                <div className="customColorways-titleWrapper">
+                    <hr className="colorwaySelector-hr" />
+                    <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-title">Colorways</Forms.FormTitle>
+                    <hr className="colorwaySelector-hr" />
+                </div>
                 <div className="ColorwaySelectorWrapper">
                     <Tooltip text="Refresh Colorways...">
                         {({ onMouseEnter, onMouseLeave }) => {
@@ -564,7 +631,11 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                         </Tooltip>;
                     })}
                 </div>
-                <Forms.FormTitle style={{ marginBottom: 0 }} className="customColorways-title">Custom Colorways</Forms.FormTitle>
+                <div className="customColorways-titleWrapper">
+                    <hr className="colorwaySelector-hr" />
+                    <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-title">Custom Colorways</Forms.FormTitle>
+                    <hr className="colorwaySelector-hr" />
+                </div>
                 <div className="ColorwaySelectorWrapper customColorways-wrapper">
                     {customColorways.map((color, ind) => {
                         var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
@@ -1283,13 +1354,18 @@ const DiscordColorways = definePlugin({
         ColorPicker = e;
         LazySwatchLoaded = true;
     },
+    set ListItem(e: any) {
+        ListItem = e;
+        console.log(ListItem);
+    },
     start: () => {
         enableStyle(style);
-        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
+
 
         DataStore.get("actveColorway").then(activeColorway => {
             ColorwayCSS.set(activeColorway);
         });
+        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
     },
     stop: () => {
         disableStyle(style);
