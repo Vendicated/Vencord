@@ -550,7 +550,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
                     <div className="colorwaySelector-pillWrapper">
                         <Tooltip text="Refresh Colorways...">
                             {({ onMouseEnter, onMouseLeave }) => {
-                                return <div className="colorwaySelector-pill" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
+                                return <div className="colorwaySelector-pill" id="colorway-refreshcolorway" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
                                     var colorwaysArr = new Array<Colorway>;
                                     DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
                                         colorwaySourceFiles.forEach((colorwayList, i) => {

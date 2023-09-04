@@ -170,38 +170,6 @@
     padding: 2px;
 }
 
-#colorway-createcolorway>.colorwayCreateIcon {
-    height: 60px;
-    width: 60px;
-    color: var(--modal-background);
-    justify-content: center;
-    align-items: center;
-    display: flex;
-}
-
-#colorway-refreshcolorway>.colorwayRefreshIcon {
-    height: 60px;
-    width: 60px;
-    color: var(--modal-background);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#colorway-refreshcolorway,
-#colorway-createcolorway,
-#colorway-settings {
-    background-color: var(--interactive-normal);
-    box-shadow: none;
-    transition: .1s;
-}
-
-#colorway-refreshcolorway:hover,
-#colorway-createcolorway:hover,
-#colorway-settings:hover {
-    background-color: var(--interactive-hover);
-}
-
 .colorwayCreator-swatch {
     display: flex;
     align-items: center;
@@ -648,30 +616,6 @@
     border-radius: 8px;
     margin: 16px;
     margin-bottom: 24px;
-}
-
-.colorwaysSelector-title {
-    flex: 1 0 auto;
-}
-
-.customColorways-titleWrapper {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.colorwaySelector-hr {
-    width: 100%;
-    height: 1px;
-    border: none;
-    background-color: var(--interactive-muted);
-    margin: 0;
-}
-
-.customColorways-titleWrapper:has(+.customColorways-wrapper:empty),
-.customColorways-wrapper:empty {
-    display: none;
 }
 
 .colorwaysBtn-tooltipContent {
