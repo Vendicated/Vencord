@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, Tooltip } from "@webpack/common";
 
-const pluginSettings = definePluginSettings({
+const settings = definePluginSettings({
     loop: {
         description: "Whether to make the PiP video loop or not",
         type: OptionType.BOOLEAN,
@@ -23,7 +23,7 @@ export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
     authors: [Devs.Lumap],
-    settings: pluginSettings,
+    settings: settings,
     patches: [
         {
             find: ".onRemoveAttachment,",
@@ -50,7 +50,7 @@ export default definePlugin({
                             const oldVid = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
                             const newVid = document.body.appendChild(oldVid.cloneNode(true)) as HTMLVideoElement;
                             if (Settings.plugins.PictureInPicture.loop) newVid.style.display = "none";
-                            newVid.loop = true;
+                            newVid.loop = settings.store.loop;
                             newVid.onleavepictureinpicture = () => {
                                 newVid.remove();
                             };
