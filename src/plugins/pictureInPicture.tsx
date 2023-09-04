@@ -54,11 +54,18 @@ export default definePlugin({
                             newVid.onleavepictureinpicture = () => {
                                 newVid.remove();
                             };
-                            newVid.onloadedmetadata = () => {
+                            function launchPiP() {
                                 newVid.requestPictureInPicture();
                                 newVid.currentTime = oldVid.currentTime;
                                 oldVid.pause();
                                 newVid.play();
+                            }
+                            if (newVid.readyState === 4) {
+                                launchPiP();
+                                return;
+                            }
+                            newVid.onloadedmetadata = () => {
+                                launchPiP();
                             };
                         }}
                     >
