@@ -64,7 +64,7 @@ Also pay attention to the following:
     -   Match 1 or 2 of any character: `.{1,2}`, for example to match the variable name in `var a=b`, `var (.{1,2})=`
     -   Match any but a guaranteed terminating character: `[^;]+`, for example to match the entire assigned value in `var a=b||c||func();`,
         `var .{1,2}=([^;]+);`
-    -   If you don't care about that part, just match a bunch of chars: `.{0,50}`, for example to extract the variable "b" in `createElement("div",{a:"foo",c:"bar"},b)`, `createElement\("div".{0,30},(.{1,2})\),`. Note the `.{0,30}`, this is essentially the same as `.+`, but safer as you can't end up accidentally eating thousands of characters
+    -   If you don't care about that part, just match a bunch of chars: `.{0,50}`, for example to extract the variable "b" in `createElement("div",{a:"foo",c:"bar"},b)`, `createElement\("div".{0,30},(.{1,2})\),`. Note the `.{0,30}`, this is essentially the same as `.+`, but safer as you can't end up accidently eating thousands of characters
 -   Additionally, as you might have noticed, all of the above approaches use regex groups (`(...)`) to capture the variable name. You can then use those groups in your replacement to access those variables dynamically
 
 #### "replace"
