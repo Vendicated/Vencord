@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ShowTimeouts",
-    description: "Shows member timeout chat badges without permission.",
+    description: "Display member timeout icons in chat regardless of permissions.",
     authors: [Devs.Dolfies],
     patches: [
         {
