@@ -39,11 +39,10 @@ export interface Colorway {
     author: string,
     authorID: string,
     colors?: string[],
-    isGradient?: boolean,
-    hidden?: boolean;
+    isGradient?: boolean;
 }
 
-let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, ListItem: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, LazySwatchLoaded: boolean = false;
+let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, LazySwatchLoaded: boolean = false;
 DataStore.get("colorwaySourceFiles").then(e => { if (!e) DataStore.set("colorwaySourceFiles", ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"]); });
 DataStore.get("customColorways").then(e => { if (!e) DataStore.set("customColorways", []); });
 
@@ -477,7 +476,7 @@ function CreatorModal({ modalProps, modalID }: { modalProps: ModalProps, modalID
 /**
  * Discord's search icon, as seen in the GIF search bar
  */
-export function SearchIcon({ height = 24, width = 24, className, style }: { height?: number, width?: number, className?: string, style?: CSSProperties; }) {
+export function SearchIcon({ height = 24, width = 24, viewboxX = width, viewboxY = height, className, style }: { height?: number, width?: number, viewboxX?: number, viewboxY?: number, className?: string, style?: CSSProperties; }) {
     return (
         <svg
             className={className}
@@ -486,7 +485,7 @@ export function SearchIcon({ height = 24, width = 24, className, style }: { heig
             role="img"
             width={width}
             height={height}
-            viewBox={`0 0 ${width} ${height}`}
+            viewBox={`0 0 ${viewboxX} ${viewboxY}`}
             style={style}
         >
             <path
@@ -497,7 +496,7 @@ export function SearchIcon({ height = 24, width = 24, className, style }: { heig
     );
 }
 
-export function CloseIcon({ height = 24, width = 24, className, style }: { height?: number, width?: number, className?: string, style?: CSSProperties; }) {
+export function CloseIcon({ height = 24, width = 24, viewboxX = width, viewboxY = height, className, style }: { height?: number, width?: number, viewboxX?: number, viewboxY?: number, className?: string, style?: CSSProperties; }) {
     return (
         <svg
             aria-label="Clear"
@@ -506,7 +505,7 @@ export function CloseIcon({ height = 24, width = 24, className, style }: { heigh
             className={className}
             width={width}
             height={height}
-            viewBox={`0 0 ${width} ${height}`}
+            viewBox={`0 0 ${viewboxX} ${viewboxY}`}
             style={style}>
             <path
                 fill="currentColor"
@@ -521,6 +520,8 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
     const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
     const [customColorways, setCustomColorways] = useState<Colorway[]>(customColorwayProps);
     const [searchBarVisibility, setSearchBarVisibility] = useState<boolean>(false);
+    const [searchString, setSearchString] = useState<string>("");
+    const [visibility, setVisibility] = useState<string>("all");
     function searchColorways(e: string) {
         results = [];
         colorwayProps.find((Colorway: Colorway) => {
@@ -539,143 +540,298 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
     }
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
-            {/* searchBarVisibility === false ? <ModalHeader className="colorwaySelector-header"><Text variant="heading-lg/semibold" tag="h1" style={{ lineHeight: "40px", paddingLeft: "8px" }}>Discord Colorways</Text><Button size={Button.Sizes.ICON} look={Button.Looks.BLANK} onClick={() => setSearchBarVisibility(true)}><SearchIcon className="colorwaySelector-headerIcon" style={{ marginLeft: "auto" }} /></Button></ModalHeader> : <ModalHeader className="colorwaySelector-header"><TextInput className="colorwaySelector-search" placeholder="Search for Colorways..." onChange={searchColorways}></TextInput><Button size={Button.Sizes.ICON} look={Button.Looks.BLANK} onClick={() => { setSearchBarVisibility(false); searchColorways(""); }}><CloseIcon className="colorwaySelector-headerIcon" style={{ marginLeft: "auto" }} /></Button></ModalHeader>*/}
             <ModalContent className="colorwaySelectorModalContent">
-                <TextInput className="colorwaySelector-search" placeholder="Search for Colorways..." onChange={searchColorways} />
-                <div className="customColorways-titleWrapper">
-                    <hr className="colorwaySelector-hr" />
-                    <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-title">Colorways</Forms.FormTitle>
-                    <hr className="colorwaySelector-hr" />
-                </div>
-                <div className="ColorwaySelectorWrapper">
-                    <Tooltip text="Refresh Colorways...">
-                        {({ onMouseEnter, onMouseLeave }) => {
-                            return <div className="discordColorway" id="colorway-refreshcolorway" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
-                                var colorwaysArr = new Array<Colorway>;
-                                DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
-                                    colorwaySourceFiles.forEach((colorwayList, i) => {
-                                        fetch(colorwayList)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (!data) return;
-                                                if (!data.colorways?.length) return;
-                                                data.colorways.map((color: Colorway) => {
-                                                    colorwaysArr.push(color);
-                                                });
-                                                if (i + 1 === colorwaySourceFiles.length) {
-                                                    DataStore.get("customColorways").then(customColorways => {
-                                                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                            setColorways(colorwaysArr);
-                                                            setCustomColorways(customColorways);
-                                                            setCurrentColorway(actveColorwayID);
-                                                        });
+                <div className="colorwaySelector-doublePillBar">
+                    <div className="colorwaySelector-pillWrapper">
+                        <div className={`colorwaySelector-pill${visibility === "all" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => setVisibility("all")}>All</div>
+                        <div className={`colorwaySelector-pill${visibility === "official" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => setVisibility("official")}>Official</div>
+                        <div className={`colorwaySelector-pill${visibility === "custom" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => setVisibility("custom")}>Custom</div>
+                    </div>
+                    <div className="colorwaySelector-pillWrapper">
+                        <Tooltip text="Refresh Colorways...">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return <div className="colorwaySelector-pill" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => {
+                                    var colorwaysArr = new Array<Colorway>;
+                                    DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
+                                        colorwaySourceFiles.forEach((colorwayList, i) => {
+                                            fetch(colorwayList)
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (!data) return;
+                                                    if (!data.colorways?.length) return;
+                                                    data.colorways.map((color: Colorway) => {
+                                                        colorwaysArr.push(color);
                                                     });
-                                                }
-                                            })
-                                            .catch(err => {
-                                                console.log(err);
-                                                return null;
-                                            });
+                                                    if (i + 1 === colorwaySourceFiles.length) {
+                                                        DataStore.get("customColorways").then(customColorways => {
+                                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                                setColorways(colorwaysArr);
+                                                                setCustomColorways(customColorways);
+                                                                setCurrentColorway(actveColorwayID);
+                                                            });
+                                                        });
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    console.log(err);
+                                                    return null;
+                                                });
+                                        });
                                     });
-                                });
-                            }}>
-                                <div className="colorwayRefreshIcon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><g id="Frame_-_24px"><rect y="0" fill="none" width="24" height="24"></rect></g><g id="Filled_Icons"><g><path d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"></path><path d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"></path></g></g></svg>
-                                </div>
-                            </div>;
-                        }}
-                    </Tooltip>
-                    <Tooltip text="Create Colorway...">
-                        {({ onMouseEnter, onMouseLeave }) => {
-                            return <div className="discordColorway" id="colorway-createcolorway" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => { const modal = openModal(props => <CreatorModal modalProps={props} modalID={modal} />); }}><div className="colorwayCreateIcon">
-                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
-                            </div></div>;
-                        }}
-                    </Tooltip>
+                                }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><g id="Frame_-_24px"><rect y="0" fill="none" width="24" height="24"></rect></g><g id="Filled_Icons"><g><path d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"></path><path d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"></path></g></g></svg>
+                                </div>;
+                            }}
+                        </Tooltip>
+                        <Tooltip text="Create Colorway...">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return <div className="colorwaySelector-pill" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => { const modal = openModal(props => <CreatorModal modalProps={props} modalID={modal} />); }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" /></svg>
+                                </div>;
+                            }}
+                        </Tooltip>
+                        <Tooltip text="Search...">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return <div className="colorwaySelector-pill" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => setSearchBarVisibility(true)}>
+                                    <SearchIcon width={14} height={14} viewboxX={24} viewboxY={24} />
+                                </div>;
+                            }}
+                        </Tooltip>
+                    </div>
+                </div>
+                {searchBarVisibility === true ? [<TextInput className="colorwaySelector-search" placeholder="Search for Colorways..." value={searchString} onChange={(e: string) => { searchColorways(e); setSearchString(e); }} />, <Button className="colorwaySelector-headerBtn" size={Button.Sizes.ICON} look={Button.Looks.BLANK} onClick={() => { searchColorways(""); setSearchString(""); setSearchBarVisibility(false); }}><CloseIcon className="colorwaySelector-headerIcon" style={{ marginLeft: "auto" }} /></Button>] : []}
+                <div className="ColorwaySelectorWrapper">
                     {colorways.map((color, ind) => {
                         var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
                         // eslint-disable-next-line no-unneeded-ternary
-                        return <Tooltip text={color.name}>
-                            {({ onMouseEnter, onMouseLeave }) => {
-                                return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                                    <div className="colorwayCheckIconContainer">
-                                        <div className="colorwayCheckIcon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
-                                        </div>
-                                    </div>
-                                    <div className="colorwayInfoIconContainer" onClick={() => { const modal = openModal(props => <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={false} modalID={modal} />); }}>
-                                        <div className="colorwayInfoIcon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
-                                        </div>
-                                    </div>
-                                    <div className="discordColorwayPreviewColorContainer" onClick={() => {
-                                        if (currentColorway === color.name) {
-                                            DataStore.set("actveColorwayID", null);
-                                            DataStore.set("actveColorway", null);
-                                            ColorwayCSS.remove();
-                                        } else {
-                                            DataStore.set("actveColorwayID", color.name);
-                                            DataStore.set("actveColorway", color.import);
-                                            ColorwayCSS.set(color.import);
-                                        }
-                                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                            setCurrentColorway(actveColorwayID);
-                                        });
-                                    }}>
-                                        {colors.map(colorItm => {
-                                            return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
-                                        })}
-                                    </div>
-                                </div>;
-                            }}
-                        </Tooltip>;
+                        switch (visibility) {
+                            case "all":
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => { const modal = openModal(props => <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={false} modalID={modal} />); }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                            case "official":
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => { const modal = openModal(props => <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={false} modalID={modal} />); }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                            case "custom":
+                                return;
+                            default:
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => { const modal = openModal(props => <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={false} modalID={modal} />); }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                        }
                     })}
-                </div>
-                <div className="customColorways-titleWrapper">
-                    <hr className="colorwaySelector-hr" />
-                    <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-title">Custom Colorways</Forms.FormTitle>
-                    <hr className="colorwaySelector-hr" />
-                </div>
-                <div className="ColorwaySelectorWrapper customColorways-wrapper">
                     {customColorways.map((color, ind) => {
                         var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
                         // eslint-disable-next-line no-unneeded-ternary
-                        return <Tooltip text={color.name}>
-                            {({ onMouseEnter, onMouseLeave }) => {
-                                return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                                    <div className="colorwayCheckIconContainer">
-                                        <div className="colorwayCheckIcon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
-                                        </div>
-                                    </div>
-                                    <div className="colorwayInfoIconContainer" onClick={() => {
-                                        const modal = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} modalID={modal} />; });
-                                    }}>
-                                        <div className="colorwayInfoIcon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
-                                        </div>
-                                    </div>
-                                    <div className="discordColorwayPreviewColorContainer" onClick={() => {
-                                        if (currentColorway === color.name) {
-                                            DataStore.set("actveColorwayID", null);
-                                            DataStore.set("actveColorway", null);
-                                            ColorwayCSS.remove();
-                                        } else {
-                                            DataStore.set("actveColorwayID", color.name);
-                                            DataStore.set("actveColorway", color.import);
-                                            ColorwayCSS.set(color.import);
-                                        }
-                                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                            setCurrentColorway(actveColorwayID);
-                                        });
-                                    }}>
-                                        {colors.map(colorItm => {
-                                            return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
-                                        })}
-                                    </div>
-                                </div>;
-                            }}
-                        </Tooltip>;
+                        switch (visibility) {
+                            case "all":
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => {
+                                                const modal = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} modalID={modal} />; });
+                                            }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                            case "custom":
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => {
+                                                const modal = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} modalID={modal} />; });
+                                            }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                            case "official":
+                                break;
+                            default:
+                                return <Tooltip text={color.name}>
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return <div className={`discordColorway${currentColorway === color.name ? " active" : ""}`} id={"colorway-" + color.name} data-last-official={ind + 1 === colorways.length} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17Z"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayInfoIconContainer" onClick={() => {
+                                                const modal = openModal(props => { return <ColorwayInfoModal modalProps={props} colorwayProps={color} discrimProps={true} modalID={modal} />; });
+                                            }}>
+                                                <div className="colorwayInfoIcon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="discordColorwayPreviewColorContainer" onClick={() => {
+                                                if (currentColorway === color.name) {
+                                                    DataStore.set("actveColorwayID", null);
+                                                    DataStore.set("actveColorway", null);
+                                                    ColorwayCSS.remove();
+                                                } else {
+                                                    DataStore.set("actveColorwayID", color.name);
+                                                    DataStore.set("actveColorway", color.import);
+                                                    ColorwayCSS.set(color.import);
+                                                }
+                                                DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                    setCurrentColorway(actveColorwayID);
+                                                });
+                                            }}>
+                                                {colors.map(colorItm => {
+                                                    return <div className="discordColorwayPreviewColor" style={{ backgroundColor: color[colorItm] }}></div>;
+                                                })}
+                                            </div>
+                                        </div>;
+                                    }}
+                                </Tooltip>;
+                        }
                     })}
                 </div>
             </ModalContent>
@@ -683,7 +839,7 @@ function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeC
     );
 }
 
-function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps, modalID }: { modalProps: ModalProps, colorwayProps: Colorway, discrimProps: boolean, modalID: string; }) {
+function ColorwayInfoModal({ modalProps, colorwayProps, discrimProps = false, modalID }: { modalProps: ModalProps, colorwayProps: Colorway, discrimProps?: boolean, modalID: string; }) {
     const colors: string[] = colorwayProps.colors || ["accent", "primary", "secondary", "tertiary"];
     return (<ModalRoot {...modalProps} className="colorwayCreator-modal">
         <ModalHeader><Text variant="heading-lg/semibold" tag="h1">Colorway Details: {colorwayProps.name}</Text></ModalHeader>
@@ -798,7 +954,7 @@ export function ThemePreview({ accent, primary, secondary, tertiary, previewCSS 
                     <div className="colorwayPreview-userArea" style={{ backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)" }}></div>
                     <div className="colorwayPreview-filler"></div>
                     <div className="colorwayPreview-topShadow" style={{ "--primary-900-hsl": `${HexToHSL(tertiary)[0]} ${HexToHSL(tertiary)[1]}% ${Math.max(HexToHSL(tertiary)[2] - (3.6 * 6), 0)}%`, "--primary-500-hsl": `${HexToHSL(primary)[0]} ${HexToHSL(primary)[1]}% ${Math.min(HexToHSL(primary)[2] + (3.6 * 3), 100)}%` } as React.CSSProperties}>
-                        <Text tag="div" variant="text-md/semibold" lineClamp={1}>Discord Colorways</Text>
+                        <Text tag="div" variant="text-md/semibold" lineClamp={1} selectable={false}>Preview</Text>
                     </div>
                 </div>
                 <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}>
@@ -1353,10 +1509,6 @@ const DiscordColorways = definePlugin({
     set ColorPicker(e: any) {
         ColorPicker = e;
         LazySwatchLoaded = true;
-    },
-    set ListItem(e: any) {
-        ListItem = e;
-        console.log(ListItem);
     },
     start: () => {
         enableStyle(style);
