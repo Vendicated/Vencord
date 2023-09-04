@@ -42,9 +42,9 @@ export default definePlugin({
 
     start() {
         const nekoEl = document.createElement("o-neko");
-        nekoEl.setAttribute("speed", settings.store.speed);
-        nekoEl.setAttribute("x", Math.random() * window.innerWidth);
-        nekoEl.setAttribute("y", Math.random() * window.innerHeight);
+        nekoEl.setAttribute("speed", settings.store.speed.toString());
+        nekoEl.setAttribute("x", String(Math.random() * window.innerWidth));
+        nekoEl.setAttribute("y", String(Math.random() * window.innerHeight));
         document.body.appendChild(nekoEl);
     },
 
