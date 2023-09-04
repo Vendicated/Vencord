@@ -1,0 +1,38 @@
+.vc-gp-root {
+    height: 100%;
+}
+
+.vc-gp-tab-bar {
+    border-bottom: 2px solid var(--background-modifier-accent);
+    margin: 20px 12px 0;
+    display: flex;
+    gap: 40px;
+    align-items: stretch;
+    flex-direction: row;
+}
+
+.vc-gp-tab {
+    border-bottom: 2px solid transparent;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    height: 39px;
+    line-height: 14px;
+}
+
+.vc-gp-tab-content {
+    margin: 1em;
+}
+
+.vc-gp-tab:where(.vc-gp-selected, :hover, :focus) {
+    border-bottom-color: var(--interactive-active);
+}
+
+.vc-gp-server-info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1em;
+}
+
+.vc-gp-server-info-pair {
+    color: var(--text-normal);
+}
