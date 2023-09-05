@@ -29,7 +29,7 @@ export function openGuildProfileModal(guild: Guild) {
     );
 }
 
-const enum TabsE {
+const enum Tabs {
     ServerInfo,
     Friends,
     BlockedUsers
@@ -48,6 +48,11 @@ const fetched = {
     blocked: false
 };
 
+const dateFormat = new Intl.DateTimeFormat(void 0, { timeStyle: "short", dateStyle: "medium" });
+function renderTimestampFromId(id: string) {
+    return dateFormat.format(SnowflakeUtils.extractTimestamp(id));
+}
+
 function GuildProfileModal({ guild }: GuildProps) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
@@ -57,7 +62,7 @@ function GuildProfileModal({ guild }: GuildProps) {
         fetched.blocked = false;
     }, []);
 
-    const [currentTab, setCurrentTab] = useState(TabsE.ServerInfo);
+    const [currentTab, setCurrentTab] = useState(Tabs.ServerInfo);
 
     const bannerUrl = guild.banner && IconUtils.getGuildBannerURL({
         id: guild.id,
@@ -73,7 +78,7 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     return (
         <div className={cl("root")}>
-            {bannerUrl && currentTab === TabsE.ServerInfo && (
+            {bannerUrl && currentTab === Tabs.ServerInfo && (
                 <img
                     className={cl("banner")}
                     src={bannerUrl}
@@ -106,39 +111,34 @@ function GuildProfileModal({ guild }: GuildProps) {
                 onItemSelect={setCurrentTab}
             >
                 <TabBar.Item
-                    className={cl("tab", { selected: currentTab === TabsE.ServerInfo })}
-                    id={TabsE.ServerInfo}
+                    className={cl("tab", { selected: currentTab === Tabs.ServerInfo })}
+                    id={Tabs.ServerInfo}
                 >
                     Server Info
                 </TabBar.Item>
                 <TabBar.Item
-                    className={cl("tab", { selected: currentTab === TabsE.Friends })}
-                    id={TabsE.Friends}
+                    className={cl("tab", { selected: currentTab === Tabs.Friends })}
+                    id={Tabs.Friends}
                 >
                     Friends{friendCount !== undefined ? ` (${friendCount})` : ""}
                 </TabBar.Item>
                 <TabBar.Item
-                    className={cl("tab", { selected: currentTab === TabsE.BlockedUsers })}
-                    id={TabsE.BlockedUsers}
+                    className={cl("tab", { selected: currentTab === Tabs.BlockedUsers })}
+                    id={Tabs.BlockedUsers}
                 >
                     Blocked Users{blockedCount !== undefined ? ` (${blockedCount})` : ""}
                 </TabBar.Item>
             </TabBar>
 
             <div className={cl("tab-content")}>
-                {currentTab === TabsE.ServerInfo && <ServerInfoTab guild={guild} />}
-                {currentTab === TabsE.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
-                {currentTab === TabsE.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
+                {currentTab === Tabs.ServerInfo && <ServerInfoTab guild={guild} />}
+                {currentTab === Tabs.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
+                {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
             </div>
         </div>
     );
 }
 
-
-const dateFormat = new Intl.DateTimeFormat(void 0, { timeStyle: "short", dateStyle: "medium" });
-function renderTimestampFromId(id: string) {
-    return dateFormat.format(SnowflakeUtils.extractTimestamp(id));
-}
 
 function Owner(guildId: string, owner: User) {
     const guildAvatar = GuildMemberStore.getMember(guildId, owner.id)?.avatar;
