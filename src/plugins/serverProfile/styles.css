@@ -66,3 +66,14 @@
 .vc-gp-server-info-pair {
     color: var(--text-normal);
 }
+
+.vc-gp-owner {
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+}
+
+.vc-gp-owner img {
+    height: 20px;
+    border-radius: 50%;
+}

@@ -12,10 +12,10 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { Forms, GuildMemberStore, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
+import { Guild, User } from "discord-types/general";
 
-const GuildIconStore = findByPropsLazy("getGuildBannerURL");
+const IconUtils = findByPropsLazy("getGuildBannerURL");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 
 const cl = classNameFactory("vc-gp-");
@@ -54,12 +54,12 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     const Tab = Tabs[currentTab].component;
 
-    const bannerUrl = guild.banner && GuildIconStore.getGuildBannerURL({
+    const bannerUrl = guild.banner && IconUtils.getGuildBannerURL({
         id: guild.id,
         banner: guild.banner
     }, true).replace(/\?size=\d+$/, "?size=1024");
 
-    const iconUrl = guild.icon && GuildIconStore.getGuildIconURL({
+    const iconUrl = guild.icon && IconUtils.getGuildIconURL({
         id: guild.id,
         icon: guild.icon,
         canAnimate: true,
@@ -124,15 +124,35 @@ function renderTimestampFromId(id: string) {
     return dateFormat.format(SnowflakeUtils.extractTimestamp(id));
 }
 
+function Owner(guildId: string, owner: User) {
+    const guildAvatar = GuildMemberStore.getMember(guildId, owner.id)?.avatar;
+    const ownerAvatarUrl =
+        guildAvatar
+            ? IconUtils.getGuildMemberAvatarURLSimple({
+                userId: owner!.id,
+                avatar: guildAvatar,
+                guildId,
+                canAnimate: true
+            }, true)
+            : IconUtils.getUserAvatarURL(owner, true);
+
+    return (
+        <div className={cl("owner")}>
+            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            {Parser.parse(`<@${owner.id}>`)}
+        </div>
+    );
+}
+
 function ServerInfoTab({ guild }: GuildProps) {
     // FIXME: This doesn't rerender the mention correctly
-    useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
+    const [owner] = useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
         deps: [guild.ownerId],
         fallbackValue: null
     });
 
     const Fields = {
-        "Server Owner": Parser.parse(`<@${guild.ownerId}>`),
+        "Server Owner": owner ? Owner(guild.id, owner) : "Loading...",
         "Created At": renderTimestampFromId(guild.id),
         "Joined At": dateFormat.format(guild.joinedAt),
         "Vanity Link": guild.vanityURLCode ? `discord.gg/${guild.vanityURLCode}` : "-",
