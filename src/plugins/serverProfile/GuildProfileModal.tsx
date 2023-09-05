@@ -12,7 +12,7 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Forms, GuildMemberStore, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
+import { Forms, GuildChannelStore, GuildMemberStore, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconUtils = findByPropsLazy("getGuildBannerURL");
@@ -145,7 +145,6 @@ function Owner(guildId: string, owner: User) {
 }
 
 function ServerInfoTab({ guild }: GuildProps) {
-    // FIXME: This doesn't rerender the mention correctly
     const [owner] = useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
         deps: [guild.ownerId],
         fallbackValue: null
@@ -158,12 +157,13 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Vanity Link": guild.vanityURLCode ? `discord.gg/${guild.vanityURLCode}` : "-",
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
-        "Nitro Boosts": guild.premiumSubscriberCount ?? 0,
-        "Nitro Boost Level": guild.premiumTier ?? 0,
+        "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
+        "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 ?? "?", // - null category
+        "Roles": Object.keys(guild.roles).length - 1, // - @everyone
     };
 
     return (
-        <div className={cl("server-info")}>
+        <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
                     <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>

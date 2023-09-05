@@ -57,7 +57,7 @@
     border-bottom-color: var(--interactive-active);
 }
 
-.vc-gp-server-info {
+.vc-gp-info {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1em;
@@ -76,4 +76,5 @@
 .vc-gp-owner img {
     height: 20px;
     border-radius: 50%;
+    cursor: pointer;
 }
