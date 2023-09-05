@@ -122,6 +122,14 @@ export default definePlugin({
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
                 replace: ".concat($self.getSnapshot()).concat($2.filter(c=>!$self.isPinned(c)))"
             }
-        }
+        },
+        // fix alt+shift+up/down
+        {
+            find: '"alt+shift+down"',
+            replacement: {
+                match: /(?<=return \i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
+                replace: "$self.getSnapshot().concat($&.filter(c=>!$self.isPinned(c)))"
+            }
+        },
     ]
 });
