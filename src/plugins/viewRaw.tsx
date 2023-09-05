@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -25,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, Parser, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, Menu, Parser, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -67,10 +68,7 @@ function CodeBlock(props: { content: string, lang: string; }) {
     );
 }
 
-function openViewRawModal(msg: Message) {
-    msg = cleanMessage(msg);
-    const msgJson = JSON.stringify(msg, null, 4);
-
+function openViewRawModal(json: string, type: string, msgContent?: string) {
     const key = openModal(props => (
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
@@ -80,31 +78,40 @@ function openViewRawModal(msg: Message) {
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
-                        {!!msg.content && (
+                        {!!msgContent && (
                             <>
                                 <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
-                                <CodeBlock content={msg.content} lang="" />
+                                <CodeBlock content={msgContent} lang="" />
                                 <Forms.FormDivider className={Margins.bottom20} />
                             </>
                         )}
 
-                        <Forms.FormTitle tag="h5">Message Data</Forms.FormTitle>
-                        <CodeBlock content={msgJson} lang="json" />
+                        <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                        <CodeBlock content={json} lang="json" />
                     </div>
                 </ModalContent >
                 <ModalFooter>
                     <Flex cellSpacing={10}>
-                        <Button onClick={() => copyWithToast(msgJson, "Message data copied to clipboard!")}>
-                            Copy Message JSON
+                        <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
+                            Copy {type} JSON
                         </Button>
-                        <Button onClick={() => copyWithToast(msg.content, "Content copied to clipboard!")}>
-                            Copy Raw Content
-                        </Button>
+                        {!!msgContent && (
+                            <Button onClick={() => copyWithToast(msgContent, "Content copied to clipboard!")}>
+                                Copy Raw Content
+                            </Button>
+                        )}
                     </Flex>
                 </ModalFooter>
             </ModalRoot >
         </ErrorBoundary >
     ));
+}
+
+function openViewRawModalMessage(msg: Message) {
+    msg = cleanMessage(msg);
+    const msgJson = JSON.stringify(msg, null, 4);
+
+    return openViewRawModal(msgJson, "Message", msg.content);
 }
 
 const settings = definePluginSettings({
@@ -118,10 +125,25 @@ const settings = definePluginSettings({
     }
 });
 
+function MakeContextCallback(name: string) {
+    const callback: NavContextMenuPatchCallback = (children, props) => () => {
+        children.push(
+            <Menu.MenuItem
+                id={`vc-view-${name.toLowerCase()}-raw`}
+                label="View Raw"
+                action={() => openViewRawModal(JSON.stringify(props[name.toLowerCase()], null, 4), name)}
+                icon={CopyIcon}
+            />
+        );
+    };
+    return callback;
+}
+
+
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message.",
-    authors: [Devs.KingFish, Devs.Ven, Devs.rad],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     dependencies: ["MessagePopoverAPI"],
     settings,
 
@@ -131,7 +153,7 @@ export default definePlugin({
                 if (settings.store.clickMethod === "Right") {
                     copyWithToast(msg.content);
                 } else {
-                    openViewRawModal(msg);
+                    openViewRawModalMessage(msg);
                 }
             };
 
@@ -143,7 +165,7 @@ export default definePlugin({
                 } else {
                     e.preventDefault();
                     e.stopPropagation();
-                    openViewRawModal(msg);
+                    openViewRawModalMessage(msg);
                 }
             };
 
@@ -160,9 +182,16 @@ export default definePlugin({
                 onContextMenu: handleContextMenu
             };
         });
+
+        addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
+        addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
+        addContextMenuPatch("user-context", MakeContextCallback("User"));
     },
 
     stop() {
         removeButton("CopyRawMessage");
+        removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
+        removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
+        removeContextMenuPatch("user-context", MakeContextCallback("User"));
     }
 });
