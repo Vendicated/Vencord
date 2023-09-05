@@ -169,21 +169,14 @@ export default definePlugin({
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
-            const myId = UserStore.getCurrentUser().id;
-
-            function mutate(id: string) {
+            const mutate = (id: string) => {
                 const msg = cache.get(id);
                 if (!msg) return;
 
                 const EPHEMERAL = 64;
                 const shouldIgnore = data.mlDeleted ||
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
-                    ignoreBots && msg.author?.bot ||
-                    ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.includes(msg.author?.id) ||
-                    ignoreChannels.includes(msg.channel_id) ||
-                    ignoreGuilds.includes(ChannelStore.getChannel(msg.channel_id)?.guild_id);
+                    this.shouldIgnore(msg);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
@@ -192,7 +185,7 @@ export default definePlugin({
                         .set("deleted", true)
                         .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
                 }
-            }
+            };
 
             if (isBulk) {
                 data.ids.forEach(mutate);
@@ -205,7 +198,7 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnoreEdited({ message }: { message: any; }) {
+    shouldIgnore(message: any) {
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
@@ -248,7 +241,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnoreEdited($2)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
