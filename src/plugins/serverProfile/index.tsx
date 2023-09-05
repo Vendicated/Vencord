@@ -25,7 +25,7 @@ const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild;
 export default definePlugin({
     name: "ServerProfile",
     description: "Allows you to view info about a server by right clicking it in the server list",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Nuckyz],
     tags: ["guild", "info"],
 
     start() {

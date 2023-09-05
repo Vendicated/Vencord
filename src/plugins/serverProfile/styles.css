@@ -1,6 +1,3 @@
-.vc-gp-content {
-}
-
 .vc-gp-root {
     height: 100%;
     user-select: text;
@@ -87,6 +84,6 @@
     max-height: 500px;
 }
 
-.vc-gp-scroller [class^=listRow]:hover {
+.vc-gp-scroller [class^="listRow"]:hover {
     background-color: var(--background-modifier-hover);
 }
