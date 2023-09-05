@@ -28,7 +28,7 @@ import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
@@ -161,7 +161,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
             onMouseLeave={onMouseLeave}
             infoButton={
                 <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
-                    {plugin.options
+                    {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel />
                         : <InfoIcon width="24" height="24" />}
                 </button>
