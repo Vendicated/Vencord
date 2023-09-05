@@ -151,7 +151,7 @@ function MakeContextCallback(name: string) {
 
 export default definePlugin({
     name: "ViewRaw",
-    description: "Copy and view the raw content/data of any message.",
+    description: "Copy and view the raw content/data of any message, channel or guild",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     dependencies: ["MessagePopoverAPI"],
     settings,
