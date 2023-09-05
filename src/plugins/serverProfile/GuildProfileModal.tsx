@@ -7,16 +7,22 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
+import { openImageModal } from "@utils/discord";
+import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
+import { findByPropsLazy } from "@webpack";
 import { Forms, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
 import { Guild } from "discord-types/general";
+
+const GuildIconStore = findByPropsLazy("getGuildBannerURL");
+const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 
 const cl = classNameFactory("vc-gp-");
 
 export function openGuildProfileModal(guild: Guild) {
     openModal(props =>
-        <ModalRoot {...props} size={ModalSize.LARGE}>
+        <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <GuildProfileModal guild={guild} />
         </ModalRoot>
     );
@@ -48,8 +54,45 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     const Tab = Tabs[currentTab].component;
 
+    const bannerUrl = guild.banner && GuildIconStore.getGuildBannerURL({
+        id: guild.id,
+        banner: guild.banner
+    }, true).replace(/\?size=\d+$/, "?size=1024");
+
+    const iconUrl = guild.icon && GuildIconStore.getGuildIconURL({
+        id: guild.id,
+        icon: guild.icon,
+        canAnimate: true,
+        size: 512
+    });
+
     return (
         <div className={cl("root")}>
+            {bannerUrl && currentTab === "ServerInfo" && (
+                <img
+                    className={cl("banner")}
+                    src={bannerUrl}
+                    alt=""
+                    onClick={() => openImageModal(bannerUrl)}
+                />
+            )}
+
+            <div className={cl("header")}>
+                {guild.icon
+                    ? <img
+                        src={iconUrl}
+                        alt=""
+                        onClick={() => openImageModal(iconUrl)}
+                    />
+                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
+                }
+
+                <div className={cl("name-and-description")}>
+                    <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
+                    {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
+                </div>
+            </div>
+
             <TabBar
                 type="top"
                 look="brand"
@@ -82,6 +125,7 @@ function renderTimestampFromId(id: string) {
 }
 
 function ServerInfoTab({ guild }: GuildProps) {
+    // FIXME: This doesn't rerender the mention correctly
     useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
         deps: [guild.ownerId],
         fallbackValue: null
@@ -91,9 +135,11 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Server Owner": Parser.parse(`<@${guild.ownerId}>`),
         "Created At": renderTimestampFromId(guild.id),
         "Joined At": dateFormat.format(guild.joinedAt),
-        "Vanity Link": guild.vanityURLCode ? Parser.parse(`https://discord.gg/${guild.vanityURLCode}`) : "-",
+        "Vanity Link": guild.vanityURLCode ? `discord.gg/${guild.vanityURLCode}` : "-",
         "Preferred Locale": guild.preferredLocale || "-",
-        "Verification Level": ["Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?"
+        "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
+        "Nitro Boosts": guild.premiumSubscriberCount ?? 0,
+        "Nitro Boost Level": guild.premiumTier ?? 0,
     };
 
     return (

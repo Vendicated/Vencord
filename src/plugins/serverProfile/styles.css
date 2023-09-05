@@ -1,5 +1,35 @@
 .vc-gp-root {
     height: 100%;
+    user-select: text;
+}
+
+.vc-gp-banner {
+    width: 100%;
+    cursor: pointer;
+}
+
+.vc-gp-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.5em;
+}
+
+.vc-gp-header img {
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+}
+
+.vc-gp-name-and-description {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.vc-gp-name {
+    margin: 0;
 }
 
 .vc-gp-tab-bar {
