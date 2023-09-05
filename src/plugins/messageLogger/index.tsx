@@ -205,6 +205,17 @@ export default definePlugin({
         return cache;
     },
 
+    shouldIgnoreEdited({ message }: { message: any; }) {
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
+        const myId = UserStore.getCurrentUser().id;
+
+        return ignoreBots && message.author?.bot ||
+            ignoreSelf && message.author?.id === myId ||
+            ignoreUsers.includes(message.author?.id) ||
+            ignoreChannels.includes(message.channel_id) ||
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+    },
+
     // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
     patches: [
         {
@@ -237,7 +248,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnoreEdited($2)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
