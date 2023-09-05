@@ -47,9 +47,9 @@ export default definePlugin({
                             paddingRight: "4px",
                         }}
                         onClick={e => {
-                            const oldVid = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
+                            const oldVid = e.currentTarget.parentNode!.parentNode!.querySelector("video")!; // Get the video corresponding to the download/pip/remove attachment buttons
                             const newVid = document.body.appendChild(oldVid.cloneNode(true)) as HTMLVideoElement;
-                            if (Settings.plugins.PictureInPicture.loop) newVid.style.display = "none";
+                            if (Settings.plugins.PictureInPicture.loop) newVid.style.display = "none"; // The two lines above create a video element on the body. This allows videos to still be played in PiP even when you switch channels. A display none is required here for the newly created video element to not be visible outside of PiP (from my tests, they'd stretch and cover the entire document)
                             newVid.loop = settings.store.loop;
                             newVid.onleavepictureinpicture = () => {
                                 newVid.remove();
@@ -60,11 +60,11 @@ export default definePlugin({
                                 oldVid.pause();
                                 newVid.play();
                             }
-                            if (newVid.readyState === 4) {
+                            if (newVid.readyState === 4) { // If the newly created video is instantly considered as loaded, enable PiP
                                 launchPiP();
                                 return;
                             }
-                            newVid.onloadedmetadata = () => {
+                            newVid.onloadedmetadata = () => { // If the newly created video isn't instantly loaded, wait until it is to launch PiP
                                 launchPiP();
                             };
                         }}
