@@ -12,7 +12,7 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, moment, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconUtils = findByPropsLazy("getGuildBannerURL");
@@ -48,9 +48,10 @@ const fetched = {
     blocked: false
 };
 
-const dateFormat = new Intl.DateTimeFormat(void 0, { timeStyle: "short", dateStyle: "medium" });
-function renderTimestampFromId(id: string) {
-    return dateFormat.format(SnowflakeUtils.extractTimestamp(id));
+function renderTimestamp(timestamp: number) {
+    return (
+        <Timestamp timestamp={moment(timestamp)} />
+    );
 }
 
 function GuildProfileModal({ guild }: GuildProps) {
@@ -168,9 +169,9 @@ function ServerInfoTab({ guild }: GuildProps) {
 
     const Fields = {
         "Server Owner": owner ? Owner(guild.id, owner) : "Loading...",
-        "Created At": renderTimestampFromId(guild.id),
-        "Joined At": dateFormat.format(guild.joinedAt),
-        "Vanity Link": guild.vanityURLCode ? `discord.gg/${guild.vanityURLCode}` : "-",
+        "Created At": renderTimestamp(SnowflakeUtils.extractTimestamp(guild.id)),
+        "Joined At": renderTimestamp(guild.joinedAt.getTime()),
+        "Vanity Link": guild.vanityURLCode ? (<a>{`discord.gg/${guild.vanityURLCode}`}</a>) : "-", // Making the anchor href valid would cause Discord to reload
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
