@@ -7,16 +7,17 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { openImageModal } from "@utils/discord";
+import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { useAwaiter } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
-import { Forms, GuildChannelStore, GuildMemberStore, Parser, SnowflakeUtils, TabBar, UserUtils, useState } from "@webpack/common";
+import { LazyComponent, useAwaiter } from "@utils/react";
+import { findByCode, findByPropsLazy } from "@webpack";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconUtils = findByPropsLazy("getGuildBannerURL");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
+const UserRow = LazyComponent(() => findByCode(".listDiscriminator"));
 
 const cl = classNameFactory("vc-gp-");
 
@@ -49,7 +50,17 @@ interface GuildProps {
     guild: Guild;
 }
 
+const fetched = {
+    friends: false,
+    blocked: false
+};
+
 function GuildProfileModal({ guild }: GuildProps) {
+    useEffect(() => {
+        fetched.friends = false;
+        fetched.blocked = false;
+    }, []);
+
     const [currentTab, setCurrentTab] = useState<TabKeys>("ServerInfo");
 
     const Tab = Tabs[currentTab].component;
@@ -175,9 +186,54 @@ function ServerInfoTab({ guild }: GuildProps) {
 }
 
 function FriendsTab({ guild }: GuildProps) {
-    return null;
+    return UserList("friends", guild, RelationshipStore.getFriendIDs());
 }
 
 function BlockedUsersTab({ guild }: GuildProps) {
-    return null;
+    const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
+    return UserList("blocked", guild, blockedIds);
+}
+
+function UserList(type: "friends" | "blocked", guild: Guild, ids: string[]) {
+    const missing = [] as string[];
+    const members = [] as string[];
+
+    for (const id of ids) {
+        if (GuildMemberStore.isMember(guild.id, id))
+            members.push(id);
+        else
+            missing.push(id);
+    }
+
+    // Used for side effects (rerender on member request success)
+    useStateFromStores(
+        [GuildMemberStore],
+        () => GuildMemberStore.getMemberIds(guild.id),
+        null,
+        (old, curr) => old.length === curr.length
+    );
+
+    useEffect(() => {
+        if (!fetched[type] && missing.length) {
+            fetched[type] = true;
+            FluxDispatcher.dispatch({
+                type: "GUILD_MEMBERS_REQUEST",
+                guildIds: [guild.id],
+                userIds: missing
+            });
+        }
+    }, []);
+
+    return (
+        <ScrollerThin fade className={cl("scroller")}>
+            {members.map(id =>
+                <UserRow
+                    user={UserStore.getUser(id)}
+                    status={PresenceStore.getStatus(id) || "offline"}
+                    onSelect={() => openUserProfile(id)}
+                    onContextMenu={() => { }}
+                />
+            )}
+        </ScrollerThin>
+    );
 }
