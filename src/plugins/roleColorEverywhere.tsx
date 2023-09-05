@@ -101,12 +101,10 @@ export default definePlugin({
         // Chat messages
         {
             find: "Messages.SOURCE_MESSAGE_DELETED",
-            replacement: [
-                {
-                    match: /function \i\((\i)\).{5,20}className.{5,10}message.{40,80}isEdited.{250,300}jsxs.{20,35}ref:\i/,
-                    replace: "$&,...$self.getInlineStyle({user:$1.message.author,channelId:$1.message.channel_id})"
-                }
-            ],
+            replacement: {
+                match: /ref:\i,className:.{0,20}markup/,
+                replace: "...$self.getInlineStyle({user:arguments[0].message.author,channelId:arguments[0].message.channel_id}),$&"
+            },
             predicate: () => settings.store.chatMessages,
         }
     ],
