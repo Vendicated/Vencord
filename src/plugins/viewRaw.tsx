@@ -26,9 +26,11 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, Menu, Parser, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 
 const CopyIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="22" height="22">
@@ -61,8 +63,7 @@ function cleanMessage(msg: Message) {
 
 function CodeBlock(props: { content: string, lang: string; }) {
     return (
-        // make text selectable
-        <div style={{ userSelect: "text" }}>
+        <div className={CodeContainerClasses.markup}>
             {Parser.defaultRules.codeBlock.react(props, null, {})}
         </div>
     );
@@ -127,7 +128,15 @@ const settings = definePluginSettings({
 
 function MakeContextCallback(name: string) {
     const callback: NavContextMenuPatchCallback = (children, props) => () => {
-        children.push(
+        const lastChild = children.at(-1);
+        if (lastChild?.key === "developer-actions") {
+            const p = lastChild.props;
+            if (!Array.isArray(p.children))
+                p.children = [p.children];
+            ({ children } = p);
+        }
+
+        children.splice(-1, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
