@@ -19,6 +19,7 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
+import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -26,11 +27,9 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, Menu, Parser, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 
 const CopyIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="22" height="22">
@@ -59,14 +58,6 @@ function cleanMessage(msg: Message) {
     cloneAny.attachments?.forEach(a => delete a.deleted);
 
     return clone;
-}
-
-function CodeBlock(props: { content: string, lang: string; }) {
-    return (
-        <div className={CodeContainerClasses.markup}>
-            {Parser.defaultRules.codeBlock.react(props, null, {})}
-        </div>
-    );
 }
 
 function openViewRawModal(json: string, type: string, msgContent?: string) {
