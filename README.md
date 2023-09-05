@@ -4,8 +4,7 @@
 
 The cutest Discord client mod
 
-![](https://user-images.githubusercontent.com/45497981/235015332-0453d3eb-1da6-4601-963e-ef5e454123a1.png)
-*A screenshot of Vencord featuring the [ClearVision-v6 theme](https://github.com/ClearVision/ClearVision-v6) (Vencord does not come with it pre-installed, it is only an example)*
+![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334)
 
 ## Features
 
@@ -50,6 +49,16 @@ As an alternative to the Discord Desktop app, Vencord also has its own standalon
 ## Join our Support/Community Server
 
 https://discord.gg/D9uwnFnqmd
+
+## Star History
+
+<a href="https://star-history.com/#Vendicated/Vencord&Timeline">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
+  </picture>
+</a>
 
 ## Disclaimer
 

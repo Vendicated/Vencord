@@ -71,7 +71,7 @@ export default definePlugin({
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
             replacement: {
-                match: /(?<=href:\i,onClick:function\(\)\{)(?=return \i=(\i)\.type,.{0,50}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=href:\i,onClick:function\(\i\)\{)(?=\i=(\i)\.type,.{0,50}CONNECTED_ACCOUNT_VIEWED)/,
                 replace: "$self.handleAccountView(arguments[0],$1.type,$1.id);"
             }
         }

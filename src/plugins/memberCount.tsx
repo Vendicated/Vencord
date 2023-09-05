@@ -52,7 +52,6 @@ function MemberCount() {
     return (
         <Flex id="vc-membercount" style={{
             marginTop: "1em",
-            marginBottom: "-.5em",
             paddingInline: "1em",
             justifyContent: "center",
             alignContent: "center",
@@ -106,7 +105,7 @@ export default definePlugin({
         find: ".isSidebarVisible,",
         replacement: {
             match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: "$1:[$2.startsWith('members')?$self.render():null,$3"
+            replace: "$1:[$2?.startsWith('members')?$self.render():null,$3"
         }
     }],
 

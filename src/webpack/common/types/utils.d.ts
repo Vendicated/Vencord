@@ -96,6 +96,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "MANAGE_ROLES"
     | "MANAGE_WEBHOOKS"
     | "MANAGE_GUILD_EXPRESSIONS"
+    | "CREATE_GUILD_EXPRESSIONS"
     | "VIEW_AUDIT_LOG"
     | "VIEW_CHANNEL"
     | "VIEW_GUILD_ANALYTICS"
@@ -116,6 +117,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "CREATE_PRIVATE_THREADS"
     | "USE_EXTERNAL_STICKERS"
     | "SEND_MESSAGES_IN_THREADS"
+    | "SEND_VOICE_MESSAGES"
     | "CONNECT"
     | "SPEAK"
     | "MUTE_MEMBERS"
@@ -125,8 +127,11 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "PRIORITY_SPEAKER"
     | "STREAM"
     | "USE_EMBEDDED_ACTIVITIES"
+    | "USE_SOUNDBOARD"
+    | "USE_EXTERNAL_SOUNDS"
     | "REQUEST_TO_SPEAK"
-    | "MANAGE_EVENTS";
+    | "MANAGE_EVENTS"
+    | "CREATE_EVENTS";
 
 export type PermissionsBits = Record<Permissions, bigint>;
 

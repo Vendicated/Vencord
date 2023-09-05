@@ -17,8 +17,32 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
+import { readFile } from "fs/promises";
 import { request } from "https";
+import { basename, normalize } from "path";
+
+import { getSettings } from "./ipcMain";
+
+// FixSpotifyEmbeds
+app.on("browser-window-created", (_, win) => {
+    win.webContents.on("frame-created", (_, { frame }) => {
+        frame.once("dom-ready", () => {
+            if (frame.url.startsWith("https://open.spotify.com/embed/")) {
+                const settings = getSettings().plugins?.FixSpotifyEmbeds;
+                if (!settings?.enabled) return;
+
+                frame.executeJavaScript(`
+                    const original = Audio.prototype.play;
+                    Audio.prototype.play = function() {
+                        this.volume = ${(settings.volume / 100) || 0.1};
+                        return original.apply(this, arguments);
+                    }
+                `);
+            }
+        });
+    });
+});
 
 // #region OpenInApp
 // These links don't support CORS, so this has to be native
@@ -43,4 +67,23 @@ ipcMain.handle(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, async (_, url: string) =
 
     return getRedirect(url);
 });
+// #endregion
+
+
+// #region VoiceMessages
+ipcMain.handle(IpcEvents.VOICE_MESSAGES_READ_RECORDING, async (_, filePath: string) => {
+    filePath = normalize(filePath);
+    const filename = basename(filePath);
+    const discordBaseDirWithTrailingSlash = normalize(app.getPath("userData") + "/");
+    console.log(filename, discordBaseDirWithTrailingSlash, filePath);
+    if (filename !== "recording.ogg" || !filePath.startsWith(discordBaseDirWithTrailingSlash)) return null;
+
+    try {
+        const buf = await readFile(filePath);
+        return new Uint8Array(buf.buffer);
+    } catch {
+        return null;
+    }
+});
+
 // #endregion
