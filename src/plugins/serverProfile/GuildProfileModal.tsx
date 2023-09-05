@@ -29,25 +29,18 @@ export function openGuildProfileModal(guild: Guild) {
     );
 }
 
-const Tabs = {
-    ServerInfo: {
-        label: "Server Info",
-        component: ServerInfoTab
-    },
-    Friends: {
-        label: "Friends",
-        component: FriendsTab
-    },
-    BlockedUsers: {
-        label: "Blocked Users",
-        component: BlockedUsersTab
-    }
-} as const;
-
-type TabKeys = keyof typeof Tabs;
+const enum TabsE {
+    ServerInfo,
+    Friends,
+    BlockedUsers
+}
 
 interface GuildProps {
     guild: Guild;
+}
+
+interface RelationshipProps extends GuildProps {
+    setCount(count: number): void;
 }
 
 const fetched = {
@@ -56,14 +49,15 @@ const fetched = {
 };
 
 function GuildProfileModal({ guild }: GuildProps) {
+    const [friendCount, setFriendCount] = useState<number>();
+    const [blockedCount, setBlockedCount] = useState<number>();
+
     useEffect(() => {
         fetched.friends = false;
         fetched.blocked = false;
     }, []);
 
-    const [currentTab, setCurrentTab] = useState<TabKeys>("ServerInfo");
-
-    const Tab = Tabs[currentTab].component;
+    const [currentTab, setCurrentTab] = useState(TabsE.ServerInfo);
 
     const bannerUrl = guild.banner && IconUtils.getGuildBannerURL({
         id: guild.id,
@@ -79,7 +73,7 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     return (
         <div className={cl("root")}>
-            {bannerUrl && currentTab === "ServerInfo" && (
+            {bannerUrl && currentTab === TabsE.ServerInfo && (
                 <img
                     className={cl("banner")}
                     src={bannerUrl}
@@ -111,19 +105,30 @@ function GuildProfileModal({ guild }: GuildProps) {
                 selectedItem={currentTab}
                 onItemSelect={setCurrentTab}
             >
-                {Object.entries(Tabs).map(([id, { label }]) =>
-                    <TabBar.Item
-                        className={cl("tab", { selected: currentTab === id })}
-                        id={id}
-                        key={id}
-                    >
-                        {label}
-                    </TabBar.Item>
-                )}
+                <TabBar.Item
+                    className={cl("tab", { selected: currentTab === TabsE.ServerInfo })}
+                    id={TabsE.ServerInfo}
+                >
+                    Server Info
+                </TabBar.Item>
+                <TabBar.Item
+                    className={cl("tab", { selected: currentTab === TabsE.Friends })}
+                    id={TabsE.Friends}
+                >
+                    Friends{friendCount !== undefined ? ` (${friendCount})` : ""}
+                </TabBar.Item>
+                <TabBar.Item
+                    className={cl("tab", { selected: currentTab === TabsE.BlockedUsers })}
+                    id={TabsE.BlockedUsers}
+                >
+                    Blocked Users{blockedCount !== undefined ? ` (${blockedCount})` : ""}
+                </TabBar.Item>
             </TabBar>
 
             <div className={cl("tab-content")}>
-                <Tab guild={guild} />
+                {currentTab === TabsE.ServerInfo && <ServerInfoTab guild={guild} />}
+                {currentTab === TabsE.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
+                {currentTab === TabsE.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
             </div>
         </div>
     );
@@ -185,16 +190,16 @@ function ServerInfoTab({ guild }: GuildProps) {
     );
 }
 
-function FriendsTab({ guild }: GuildProps) {
-    return UserList("friends", guild, RelationshipStore.getFriendIDs());
+function FriendsTab({ guild, setCount }: RelationshipProps) {
+    return UserList("friends", guild, RelationshipStore.getFriendIDs(), setCount);
 }
 
-function BlockedUsersTab({ guild }: GuildProps) {
+function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
     const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
-    return UserList("blocked", guild, blockedIds);
+    return UserList("blocked", guild, blockedIds, setCount);
 }
 
-function UserList(type: "friends" | "blocked", guild: Guild, ids: string[]) {
+function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setCount: (count: number) => void) {
     const missing = [] as string[];
     const members = [] as string[];
 
@@ -223,6 +228,8 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[]) {
             });
         }
     }, []);
+
+    useEffect(() => setCount(members.length), [members.length]);
 
     return (
         <ScrollerThin fade className={cl("scroller")}>
