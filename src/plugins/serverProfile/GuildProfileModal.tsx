@@ -169,7 +169,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
-        "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 ?? "?", // - null category
+        "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
         "Roles": Object.keys(guild.roles).length - 1, // - @everyone
     };
 
