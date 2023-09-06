@@ -19,7 +19,6 @@
 import "./styles.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -39,6 +38,7 @@ import { VoiceRecorderWeb } from "./WebRecorder";
 const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
 const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
+const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
@@ -226,12 +226,10 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
         <Menu.MenuItem
             id="vc-send-vmsg"
             label={
-                <>
-                    <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
-                        <Microphone height={24} width={24} />
-                        Send voice message
-                    </Flex>
-                </>
+                <div className={OptionClasses.optionLabel}>
+                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
+                    <div className={OptionClasses.optionName}>Send voice message</div>
+                </div>
             }
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />
