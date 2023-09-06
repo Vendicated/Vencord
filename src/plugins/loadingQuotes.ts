@@ -56,7 +56,8 @@ const quotes = [
     "hd{b${",
     "<;vqkijbq33271:56<3799?24944:",
     "Thof$lu'ofdn,!qsefc'az*bnrcma+&Om{o+iu\"`khct$)bnrd\"bcdoi&",
-    "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno"
+    "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno",
+    "Wdn`khc'|f*eghl{%"
 ];
 
 export default definePlugin({
